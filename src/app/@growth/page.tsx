@@ -1,33 +1,3 @@
-// import UserGrowthChart from "@/components/dashboard/UserGrowthChart";
-// import { getDashboardData } from "@/lib/getDashboardData";
-
-// import UserGrowthChart from "../../components/dashboard/UserGrowthChart";
-// import { getDashboardData } from "../../lib/getDashboardData";
-
-// export default async function GrowthSlot() {
-//   const data = await getDashboardData();
-//   return <UserGrowthChart data={data.userGrowth} />;
-// }
-
-
-
-// import UserGrowthChart from "../../components/dashboard/UserGrowthChart";
-// import { getDashboardData } from "../../lib/getDashboardData";
-
-// export default async function GrowthSlot() {
-//   const data = await getDashboardData();
-//   return <UserGrowthChart data={data.userGrowth} />;
-// }
-
-
-
-
-
-
-
-
-
-
 "use client";
 
 import UserGrowthChart from "../../components/dashboard/UserGrowthChart";

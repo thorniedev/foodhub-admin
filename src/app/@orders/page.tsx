@@ -1,23 +1,3 @@
-// import OrdersChart from "@/components/dashboard/OrdersChart";
-// import { getDashboardData } from "@/lib/getDashboardData";
-
-// import OrdersChart from "../../components/dashboard/OrdersChart";
-// import { getDashboardData } from "../../lib/getDashboardData";
-
-// export default async function OrdersSlot() {
-//   const data = await getDashboardData();
-//   return <OrdersChart data={data.ordersOverTime} />;
-// }
-
-
-
-// import OrdersChart from "../../components/dashboard/OrdersChart";
-// import { getDashboardData } from "../../lib/getDashboardData";
-
-// export default async function OrdersSlot() {
-//   const data = await getDashboardData();
-//   return <OrdersChart data={data.ordersOverTime} />;
-// }
 "use client";
 
 import OrdersChart from "../../components/dashboard/OrdersChart";

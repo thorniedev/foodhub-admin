@@ -42,7 +42,7 @@ export default function RootLayout({
     >
       <body className="h-full overflow-hidden antialiased">
         <Providers>
-          <div className="h-screen w-full overflow-hidden bg-gray-50 flex">
+          <div className="h-screen w-full  overflow-hidden bg-gray-50 flex">
             <div className="h-screen shrink-0">
               <Sidebar />
             </div>
@@ -50,12 +50,13 @@ export default function RootLayout({
             <div className="flex-1 h-screen flex flex-col overflow-hidden">
               <Topbar />
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                {stats}
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                  <div className="lg:col-span-2">{growth}</div>
-                  {status}
+              <div className="flex-1 overflow-y-auto p-5 ">
+                <div className="p">{status}</div>
+                <div className="grid grid-cols-1 gap-5 py-5 lg:grid-cols-3 ">
+                  <div className="lg:col-span-2 place-content-center">
+                    {growth}
+                  </div>
+                  {stats}
                 </div>
 
                 {orders}

@@ -1,35 +1,3 @@
-// import UserStatusChart from "@/components/dashboard/UserStatusChart";
-// import { getDashboardData } from "@/lib/getDashboardData";
-
-// import UserStatusChart from "../../components/dashboard/UserStatusChart";
-// import { getDashboardData } from "../../lib/getDashboardData";
-
-// export default async function StatusSlot() {
-//   const data = await getDashboardData();
-//   return <UserStatusChart data={data.userStatus} />;
-// }
-
-
-
-// import { redirect } from "next/navigation";
-
-// export default function RootPage() {
-//   redirect("/dashboard");
-// }
-
-
-
-
-// import UserStatusChart from "../../components/dashboard/UserStatusChart";
-// import { getDashboardData } from "../../lib/getDashboardData";
-
-// export default async function StatusSlot() {
-//   const data = await getDashboardData();
-//   return <UserStatusChart data={data.userStatus} />;
-// }
-
-
-
 "use client";
 
 import StatCard from "../../components/dashboard/StatCard";
