@@ -1,0 +1,78 @@
+[
+  {
+    "id": 1,
+    "name": "សុខា វណ្ណះ",
+    "phone": "012111222",
+    "email": "sokha@gmail.com",
+    "role": "customer",
+    "joinDate": "១២ មករា ២០២៦",
+    "status": "active"
+  },
+  {
+    "id": 2,
+    "name": "ចាន់ធី សុភា",
+    "phone": "096222333",
+    "email": "chanthy@gmail.com",
+    "role": "customer",
+    "joinDate": "០៣ កុម្ភៈ ២០២៦",
+    "status": "pending"
+  },
+  {
+    "id": 3,
+    "name": "សុវណ្ណារ៉ា គង់",
+    "phone": "017333444",
+    "email": "sovannara@gmail.com",
+    "role": "customer",
+    "joinDate": "២០ មីនា ២០២៦",
+    "status": "active"
+  },
+  {
+    "id": 4,
+    "name": "ដារា ហេង",
+    "phone": "070444555",
+    "email": "dara@gmail.com",
+    "role": "customer",
+    "joinDate": "១៥ មេសា ២០២៦",
+    "status": "suspended"
+  },
+  {
+    "id": 5,
+    "name": "លីម សុវណ្ណដារា",
+    "phone": "089555666",
+    "email": "limsovann@gmail.com",
+    "role": "seller",
+    "shopName": "ភោជនីយដ្ឋាន ម្លប់ស្វាយ",
+    "joinDate": "០៥ មករា ២០២៦",
+    "status": "active"
+  },
+  {
+    "id": 6,
+    "name": "ពៅ សុខលី",
+    "phone": "015666777",
+    "email": "pauv@gmail.com",
+    "role": "seller",
+    "shopName": "ភោជនីយដ្ឋាន ឡាកគី",
+    "joinDate": "២៨ កុម្ភៈ ២០២៦",
+    "status": "active"
+  },
+  {
+    "id": 7,
+    "name": "សុផល រតនា",
+    "phone": "092777888",
+    "email": "sophal@gmail.com",
+    "role": "seller",
+    "shopName": "កាហ្វេ ប្រាំបួន",
+    "joinDate": "១០ មីនា ២០២៦",
+    "status": "pending"
+  },
+  {
+    "id": 8,
+    "name": "ម៉េង វិចិត្រ",
+    "phone": "011888999",
+    "email": "meng@gmail.com",
+    "role": "seller",
+    "shopName": "ភោជនីយដ្ឋាន ទន្លេបាសាក់",
+    "joinDate": "២២ មេសា ២០២៦",
+    "status": "suspended"
+  }
+]
