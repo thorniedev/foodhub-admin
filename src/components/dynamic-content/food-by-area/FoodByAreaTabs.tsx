@@ -1,7 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { Area, FoodByAreaImage } from "@/types/foodByArea";
+import { Area, FoodByAreaImage } from "@/src/types/foodByArea";
 
 interface FoodByAreaTabsProps {
   data: FoodByAreaImage[];

@@ -1,5 +1,5 @@
+import { Feedback, FeedbackStatus } from "@/src/types/feedback";
 import { baseApi } from "./baseApi";
-import { Feedback, FeedbackStatus } from "@/types/feedback";
 
 // In-memory mock store seeded from /public/data/feedbacks.json.
 // Swap the queryFns below for real HTTP calls once a backend endpoint exists;
@@ -27,28 +27,22 @@ export const feedbackApi = baseApi.injectEndpoints({
         const data = await ensureStore();
         return { data: [...data] };
       },
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ id }) => ({ type: "Feedback" as const, id })),
-              { type: "Feedback" as const, id: "LIST" },
-            ]
-          : [{ type: "Feedback" as const, id: "LIST" }],
     }),
 
-    addFeedback: builder.mutation<Feedback, Omit<Feedback, "id" | "createdAt">>({
-      queryFn: async (newItem) => {
-        const data = await ensureStore();
-        const item: Feedback = {
-          ...newItem,
-          id: `FB${String(data.length + 1).padStart(3, "0")}`,
-          createdAt: new Date().toISOString(),
-        };
-        memoryStore = [item, ...data];
-        return { data: item };
+    addFeedback: builder.mutation<Feedback, Omit<Feedback, "id" | "createdAt">>(
+      {
+        queryFn: async (newItem) => {
+          const data = await ensureStore();
+          const item: Feedback = {
+            ...newItem,
+            id: `FB${String(data.length + 1).padStart(3, "0")}`,
+            createdAt: new Date().toISOString(),
+          };
+          memoryStore = [item, ...data];
+          return { data: item };
+        },
       },
-      invalidatesTags: [{ type: "Feedback", id: "LIST" }],
-    }),
+    ),
 
     updateFeedback: builder.mutation<
       Feedback,
@@ -68,10 +62,6 @@ export const feedbackApi = baseApi.injectEndpoints({
         ];
         return { data: updated };
       },
-      invalidatesTags: (result, error, { id }) => [
-        { type: "Feedback", id },
-        { type: "Feedback", id: "LIST" },
-      ],
     }),
 
     deleteFeedback: builder.mutation<{ id: string }, string>({
@@ -80,10 +70,6 @@ export const feedbackApi = baseApi.injectEndpoints({
         memoryStore = data.filter((o) => o.id !== id);
         return { data: { id } };
       },
-      invalidatesTags: (result, error, id) => [
-        { type: "Feedback", id },
-        { type: "Feedback", id: "LIST" },
-      ],
     }),
 
     // Cycles new -> reviewed -> resolved -> new
@@ -106,10 +92,6 @@ export const feedbackApi = baseApi.injectEndpoints({
         ];
         return { data: updated };
       },
-      invalidatesTags: (result, error, id) => [
-        { type: "Feedback", id },
-        { type: "Feedback", id: "LIST" },
-      ],
     }),
   }),
   overrideExisting: false,

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { Area, FoodByAreaImage, FoodByAreaStatus } from "@/types/foodByArea";
+import { Area, FoodByAreaImage, FoodByAreaStatus } from "@/src/types/foodByArea";
 
 interface FoodByAreaFormModalProps {
   open: boolean;

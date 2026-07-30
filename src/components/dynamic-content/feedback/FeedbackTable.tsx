@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Pencil, RefreshCcw, Star, Trash2, User } from "lucide-react";
-import { Feedback } from "@/types/feedback";
+import { Feedback } from "@/src/types/feedback";
 
 interface FeedbackTableProps {
   data: Feedback[];

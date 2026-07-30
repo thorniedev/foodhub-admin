@@ -24,7 +24,11 @@ const emptyForm: BannerFormData = {
   status: "active",
 };
 
-export default function BannerFormModal({ isOpen, onClose, editing }: BannerFormModalProps) {
+export default function BannerFormModal({
+  isOpen,
+  onClose,
+  editing,
+}: BannerFormModalProps) {
   const [form, setForm] = useState<BannerFormData>(emptyForm);
   const [addBanner, { isLoading: isAdding }] = useAddBannerMutation();
   const [updateBanner, { isLoading: isUpdating }] = useUpdateBannerMutation();
@@ -40,7 +44,10 @@ export default function BannerFormModal({ isOpen, onClose, editing }: BannerForm
 
   if (!isOpen) return null;
 
-  const handleChange = (field: keyof BannerFormData, value: string | number) => {
+  const handleChange = (
+    field: keyof BannerFormData,
+    value: string | number,
+  ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -75,7 +82,9 @@ export default function BannerFormModal({ isOpen, onClose, editing }: BannerForm
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-gray-600">URL រូបភាព</label>
+            <label className="mb-1 block text-sm text-gray-600">
+              URL រូបភាព
+            </label>
             <input
               required
               value={form.imageUrl}
@@ -86,7 +95,9 @@ export default function BannerFormModal({ isOpen, onClose, editing }: BannerForm
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-gray-600">តំណភ្ជាប់ (ស្រេចចិត្ត)</label>
+            <label className="mb-1 block text-sm text-gray-600">
+              តំណភ្ជាប់ (ស្រេចចិត្ត)
+            </label>
             <input
               value={form.link}
               onChange={(e) => handleChange("link", e.target.value)}
@@ -106,7 +117,9 @@ export default function BannerFormModal({ isOpen, onClose, editing }: BannerForm
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm text-gray-600">សកម្មភាព</label>
+              <label className="mb-1 block text-sm text-gray-600">
+                សកម្មភាព
+              </label>
               <select
                 value={form.status}
                 onChange={(e) => handleChange("status", e.target.value)}

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Ban, Pencil, Trash2 } from "lucide-react";
-import { FoodByAreaImage } from "@/types/foodByArea";
+import { FoodByAreaImage } from "@/src/types/foodByArea";
 
 interface FoodByAreaTableProps {
   data: FoodByAreaImage[];

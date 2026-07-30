@@ -1,7 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { Feedback, FeedbackCategory, FeedbackStatus } from "@/types/feedback";
+import { Feedback, FeedbackCategory, FeedbackStatus } from "@/src/types/feedback";
 
 interface FeedbackTabsProps {
   data: Feedback[];

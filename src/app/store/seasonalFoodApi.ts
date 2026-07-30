@@ -1,5 +1,6 @@
+import { SeasonalFoodImage } from "@/src/types/seasonalFood";
 import { baseApi } from "./baseApi";
-import type { SeasonalFoodImage } from "@/types/seasonalFood";
+
 
 let memoryStore: SeasonalFoodImage[] | null = null;
 

@@ -18,6 +18,8 @@ export const baseApi = createApi({
     "Banner",
     "SeasonalFood",
     "FoodByArea",
+    "Dashboard",
+    "result",
   ],
 
   endpoints: () => ({}),

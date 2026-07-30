@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Star, X } from "lucide-react";
-import { Feedback, FeedbackCategory, FeedbackStatus } from "@/types/feedback";
+import { Feedback, FeedbackCategory, FeedbackStatus } from "@/src/types/feedback";
 
 interface FeedbackFormModalProps {
   open: boolean;

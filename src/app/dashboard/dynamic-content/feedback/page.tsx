@@ -1,19 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  useAddFeedbackMutation,
-  useDeleteFeedbackMutation,
-  useGetFeedbacksQuery,
-  useToggleFeedbackStatusMutation,
-  useUpdateFeedbackMutation,
-} from "@/store/feedbackApi";
-import { Feedback, FeedbackCategory, FeedbackStatus } from "@/types/feedback";
-import FeedbackBanner from "@/components/feedback/FeedbackBanner";
-import FeedbackTabs from "@/components/feedback/FeedbackTabs";
-import FeedbackTable from "@/components/feedback/FeedbackTable";
-import FeedbackPagination from "@/components/feedback/FeedbackPagination";
-import FeedbackFormModal from "@/components/feedback/FeedbackFormModal";
+
+
+import FeedbackFormModal from "@/src/components/FeedbackFormModal";
+import { Feedback, FeedbackCategory, FeedbackStatus } from "@/src/types/feedback";
+import FeedbackBanner from "@/src/components/FeedbackBanner";
+import FeedbackTabs from "@/src/components/FeedbackTabs";
+import FeedbackTable from "@/src/components/FeedbackTable";
+import FeedbackPagination from "@/src/components/FeedbackPagination";
+import { useAddFeedbackMutation, useDeleteFeedbackMutation, useGetFeedbacksQuery, useToggleFeedbackStatusMutation, useUpdateFeedbackMutation } from "@/src/app/store/feedbackApi";
 
 const PAGE_SIZE = 8;
 
@@ -25,7 +21,9 @@ export default function FeedbackPage() {
   const [cycleStatus] = useToggleFeedbackStatusMutation();
 
   const [activeTab, setActiveTab] = useState<FeedbackCategory | "all">("all");
-  const [statusFilter, setStatusFilter] = useState<FeedbackStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<FeedbackStatus | "all">(
+    "all",
+  );
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
@@ -36,7 +34,8 @@ export default function FeedbackPage() {
   const filtered = useMemo(() => {
     return allData.filter((item) => {
       const matchesTab = activeTab === "all" || item.category === activeTab;
-      const matchesStatus = statusFilter === "all" || item.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || item.status === statusFilter;
       const query = search.trim().toLowerCase();
       const matchesSearch =
         query === "" ||

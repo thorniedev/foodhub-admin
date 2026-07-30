@@ -1,5 +1,5 @@
+import { FoodByAreaImage } from "@/src/types/foodByArea";
 import { baseApi } from "./baseApi";
-import { FoodByAreaImage } from "@/types/foodByArea";
 
 // In-memory mock store seeded from /public/data/foodByAreaImages.json.
 // Swap the queryFns below for real HTTP calls once a backend endpoint exists;
@@ -30,7 +30,10 @@ export const foodByAreaApi = baseApi.injectEndpoints({
           : [{ type: "FoodByArea" as const, id: "LIST" }],
     }),
 
-    addFoodByArea: builder.mutation<FoodByAreaImage, Omit<FoodByAreaImage, "id">>({
+    addFoodByArea: builder.mutation<
+      FoodByAreaImage,
+      Omit<FoodByAreaImage, "id">
+    >({
       queryFn: async (newItem) => {
         const data = await ensureStore();
         const item: FoodByAreaImage = {
