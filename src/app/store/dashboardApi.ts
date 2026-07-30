@@ -1,4 +1,3 @@
-// import { DashboardData } from "../types/dashboard";
 import { DashboardData } from "../../types/dashboard";
 import { baseApi } from "./baseApi";
 

@@ -1,6 +1,5 @@
 import { Drink } from "../../types/drink";
 import { baseApi } from "./baseApi";
-// import { Drink } from "@/types/drink";
 
 export const drinkApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

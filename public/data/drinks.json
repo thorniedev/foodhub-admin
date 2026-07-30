@@ -16,7 +16,7 @@
   {
     "id": "DR002",
     "name": "កាហ្វេក្តៅ",
-    "image": "/Image/drinks/dr002.jpg",
+    "image": "",
     "shopName": "ហាងកាហ្វេព្រលឹម",
     "rating": 4.5,
     "drinkType": "hot",
@@ -30,7 +30,7 @@
   {
     "id": "DR003",
     "name": "តែទឹកដោះគោ",
-    "image": "/Image/drinks/dr003.jpg",
+    "image": "",
     "shopName": "ហាងតែឆាយ",
     "rating": 4.6,
     "drinkType": "hot",
@@ -44,7 +44,7 @@
   {
     "id": "DR004",
     "name": "ទឹកក្រូចឆ្មារ",
-    "image": "/Image/drinks/dr004.jpg",
+    "image": "",
     "shopName": "ហាងទឹកផ្លែឈើស្រស់",
     "rating": 4.8,
     "drinkType": "juice",
@@ -58,7 +58,7 @@
   {
     "id": "DR005",
     "name": "ទឹក�ម្នាស់",
-    "image": "/Image/drinks/dr005.jpg",
+    "image": "",
     "shopName": "ហាងទឹកផ្លែឈើស្រស់",
     "rating": 4.2,
     "drinkType": "juice",
@@ -72,7 +72,7 @@
   {
     "id": "DR006",
     "name": "ស្ពៃឆាយទឹកកក",
-    "image": "/Image/drinks/dr006.jpg",
+    "image": "",
     "shopName": "ហាងភេសជ្ជៈត្រជាក់",
     "rating": 4.1,
     "drinkType": "cold",
@@ -86,7 +86,7 @@
   {
     "id": "DR007",
     "name": "សូដាម៉្សៅក្រូច",
-    "image": "/Image/drinks/dr007.jpg",
+    "image": "",
     "shopName": "ហាងភេសជ្ជៈផ្សេងៗ",
     "rating": 4.0,
     "drinkType": "other",
@@ -100,7 +100,7 @@
   {
     "id": "DR008",
     "name": "តែប�ល់ទឹកដោះគោ",
-    "image": "/Image/drinks/dr008.jpg",
+    "image": "",
     "shopName": "ហាងតែឆាយ",
     "rating": 4.3,
     "drinkType": "cold",
@@ -114,7 +114,7 @@
   {
     "id": "DR009",
     "name": "ទឹកសម្រកទម្ងន់",
-    "image": "/Image/drinks/dr009.jpg",
+    "image": "",
     "shopName": "ហាងភេសជ្ជៈសុខភាព",
     "rating": 4.0,
     "drinkType": "other",
@@ -128,7 +128,7 @@
   {
     "id": "DR010",
     "name": "ទឹកម្រះទឹកឃ្មុំ",
-    "image": "/Image/drinks/dr010.jpg",
+    "image": "",
     "shopName": "ហាងភេសជ្ជៈសុខភាព",
     "rating": 4.7,
     "drinkType": "juice",

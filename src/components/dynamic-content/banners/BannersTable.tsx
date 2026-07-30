@@ -14,9 +14,9 @@ interface BannersTableProps {
 export default function BannersTable({ banners, isLoading, onEdit }: BannersTableProps) {
   const [deleteBanner] = useDeleteBannerMutation();
   const [updateBanner] = useUpdateBannerMutation();
-
+ 
   const handleDelete = async (id: string) => {
-    if (confirm("តើអ្នកចង់លុបរូបបែនណីនេះមែនទេ?")) {
+    if (confirm("តើអ្នកចង់លុបរូបបែនណឺនេះមែនទេ?")) {
       await deleteBanner(id);
     }
   };
@@ -32,9 +32,9 @@ export default function BannersTable({ banners, isLoading, onEdit }: BannersTabl
     return <p className="py-10 text-center text-sm text-gray-500">កំពុងផ្ទុក...</p>;
   }
 
-  if (banners.length === 0) {
-    return <p className="py-10 text-center text-sm text-gray-500">មិនមានទិន្នន័យទេ</p>;
-  }
+  // if (banners.length === 0) {
+  //   return <p className="py-10 text-center text-sm text-gray-500">មិនមានទិន្នន័យទេ</p>;
+  // }
 
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-100">

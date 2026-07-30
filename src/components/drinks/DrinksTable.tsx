@@ -30,11 +30,9 @@ export default function DrinksTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-100 text-left text-gray-500">
-            <th className="py-3 px-4 font-medium">
-              លេខសម្គាល់និងឈ្មោះភេសជ្ជៈ
-            </th>
+            <th className="py-3 px-4 font-medium">លេខសម្គាល់និងឈ្មោះភេសជ្ជៈ</th>
             <th className="py-3 px-4 font-medium">ឈ្មោះហាង</th>
-            <th className="py-3 px-4 font-medium">ការវាយតម្លៃ</th>
+            {/* <th className="py-3 px-4 font-medium">ការវាយតម្លៃ</th> */}
             <th className="py-3 px-4 font-medium">ប្រភេទ</th>
             <th className="py-3 px-4 font-medium">កម្រិតជាតិស្ករ</th>
             <th className="py-3 px-4 font-medium">ចម្ងាយ</th>
@@ -53,11 +51,13 @@ export default function DrinksTable({
                 <div className="flex items-center gap-3">
                   <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-gray-100 shrink-0">
                     <Image
-                      src={item.image}
+                      src={item.image || "/Image/fallback.png"}
                       alt={item.name}
-                      fill
+                      // fill
                       className="object-cover"
-                      sizes="44px"
+                      // sizes="44px"
+                      width={44}
+                      height={44}
                     />
                   </div>
                   <div>
@@ -67,12 +67,12 @@ export default function DrinksTable({
                 </div>
               </td>
               <td className="py-3 px-4 text-gray-600">{item.shopName}</td>
-              <td className="py-3 px-4">
+              {/* <td className="py-3 px-4">
                 <span className="flex items-center gap-1 text-amber-500 font-medium">
                   <Star size={14} className="fill-amber-500" />
                   {item.rating}
                 </span>
-              </td>
+              </td> */}
               <td className="py-3 px-4">
                 <span className="bg-emerald-50 text-emerald-600 text-xs font-medium px-2.5 py-1 rounded-full">
                   {TYPE_LABEL[item.drinkType]}
