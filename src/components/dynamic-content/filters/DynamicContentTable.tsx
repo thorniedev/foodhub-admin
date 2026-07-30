@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDown, ArrowUp, Pencil, Trash2 } from "lucide-react";
-import { FilterOption } from "../../types/dynamicContent";
+import { FilterOption } from "../../../types/dynamicContent";
 // import { FilterOption } from "@/types/dynamicContent";
 
 interface DynamicContentTableProps {
@@ -55,10 +55,14 @@ export default function DynamicContentTable({
                   >
                     <ArrowDown size={14} />
                   </button>
-                  <span className="text-gray-400 text-xs ml-1">{item.order}</span>
+                  <span className="text-gray-400 text-xs ml-1">
+                    {item.order}
+                  </span>
                 </div>
               </td>
-              <td className="py-3 px-4 font-medium text-gray-800">{item.label}</td>
+              <td className="py-3 px-4 font-medium text-gray-800">
+                {item.label}
+              </td>
               <td className="py-3 px-4 text-gray-500 font-mono text-xs">
                 {item.value}
               </td>

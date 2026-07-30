@@ -7,7 +7,18 @@ export const baseApi = createApi({
     baseUrl: "",
   }),
 
-  tagTypes: ["Shop", "User", "Order", "Category", "FoodType", "Drink", "DynamicContent"],
+  tagTypes: [
+    "Shop",
+    "User",
+    "Order",
+    "Category",
+    "FoodType",
+    "Drink",
+    "DynamicContent",
+    "Banner",
+    "FoodBySeason",
+    "FoodByArea",
+  ],
 
   endpoints: () => ({}),
 });

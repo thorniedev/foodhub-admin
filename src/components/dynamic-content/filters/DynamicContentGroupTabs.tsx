@@ -1,6 +1,10 @@
 "use client";
 
-import { FILTER_GROUPS, FilterGroupKey, FilterOption } from "../../types/dynamicContent";
+import {
+  FILTER_GROUPS,
+  FilterGroupKey,
+  FilterOption,
+} from "../../../types/dynamicContent";
 
 // import { FILTER_GROUPS, FilterGroupKey, FilterOption } from "@/types/dynamicContent";
 

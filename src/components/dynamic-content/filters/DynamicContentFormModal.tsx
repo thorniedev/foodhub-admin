@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { FILTER_GROUPS, FilterGroupKey, FilterOption } from "../../types/dynamicContent";
+import {
+  FILTER_GROUPS,
+  FilterGroupKey,
+  FilterOption,
+} from "../../../types/dynamicContent";
 // import { FILTER_GROUPS, FilterGroupKey, FilterOption } from "@/types/dynamicContent";
 
 interface DynamicContentFormModalProps {
@@ -59,14 +63,19 @@ export default function DynamicContentFormModal({
           <h2 className="text-lg font-bold text-gray-800">
             {initialData ? "កែសម្រួលជម្រើស" : "បន្ថែមជម្រើសថ្មី"}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
             <X size={20} />
           </button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">ក្រុមជម្រើស</label>
+            <label className="text-sm text-gray-600 mb-1 block">
+              ក្រុមជម្រើស
+            </label>
             <select
               value={form.groupKey}
               onChange={(e) =>
@@ -83,7 +92,9 @@ export default function DynamicContentFormModal({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">ឈ្មោះបង្ហាញ (Khmer)</label>
+            <label className="text-sm text-gray-600 mb-1 block">
+              ឈ្មោះបង្ហាញ (Khmer)
+            </label>
             <input
               type="text"
               value={form.label}

@@ -16,11 +16,11 @@ import {
 // import DynamicContentPreview from "@/components/dynamic-content/DynamicContentPreview";
 import { Eye } from "lucide-react";
 import { FilterGroupKey, FilterOption } from "../../../../types/dynamicContent";
-import DynamicContentBanner from "../../../../components/dynamic-content/DynamicContentBanner";
-import DynamicContentGroupTabs from "../../../../components/dynamic-content/DynamicContentGroupTabs";
-import DynamicContentTable from "../../../../components/dynamic-content/DynamicContentTable";
-import DynamicContentFormModal from "../../../../components/dynamic-content/DynamicContentFormModal";
-import DynamicContentPreview from "../../../../components/dynamic-content/DynamicContentPreview";
+import DynamicContentBanner from "../../../../components/dynamic-content/filters/DynamicContentBanner";
+import DynamicContentGroupTabs from "../../../../components/dynamic-content/filters/DynamicContentGroupTabs";
+import DynamicContentTable from "../../../../components/dynamic-content/filters/DynamicContentTable";
+import DynamicContentFormModal from "../../../../components/dynamic-content/filters/DynamicContentFormModal";
+import DynamicContentPreview from "../../../../components/dynamic-content/filters/DynamicContentPreview";
 
 export default function DynamicContentPage() {
   const { data, isLoading, isError } = useGetFilterOptionsQuery();

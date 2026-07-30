@@ -1,6 +1,6 @@
 "use client";
 
-import { FILTER_GROUPS, FilterOption } from "../../types/dynamicContent";
+import { FILTER_GROUPS, FilterOption } from "../../../types/dynamicContent";
 
 // import { FILTER_GROUPS, FilterOption } from "@/types/dynamicContent";
 
@@ -26,7 +26,10 @@ export default function DynamicContentPreview({
           <h3 className="font-semibold text-gray-800 text-sm">
             ការមើលជាមុននៃកម្មវិធីអតិថិជន
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xs">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 text-xs"
+          >
             បិទ
           </button>
         </div>
@@ -40,7 +43,9 @@ export default function DynamicContentPreview({
 
           return (
             <div key={group.key} className="mb-4">
-              <p className="text-xs font-medium text-gray-500 mb-2">{group.label}</p>
+              <p className="text-xs font-medium text-gray-500 mb-2">
+                {group.label}
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 {items.map((item) => (
                   <span
