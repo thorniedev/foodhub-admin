@@ -1,0 +1,296 @@
+[
+  {
+    "id": "sort-1",
+    "groupKey": "sort",
+    "label": "មួយចេញថ្មី",
+    "value": "newest",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "sort-2",
+    "groupKey": "sort",
+    "label": "ណែនាំចំណាត់ថ្នាក់ខ្ពស់បំផុត",
+    "value": "mostRecommended",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "sort-3",
+    "groupKey": "sort",
+    "label": "ចំណាត់ថ្នាក់ខ្ពស់បំផុត",
+    "value": "highestRated",
+    "order": 3,
+    "active": true
+  },
+
+  {
+    "id": "time-1",
+    "groupKey": "time",
+    "label": "ព្រឹក",
+    "value": "morning",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "time-2",
+    "groupKey": "time",
+    "label": "ថ្ងៃ",
+    "value": "noon",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "time-3",
+    "groupKey": "time",
+    "label": "ល្ងាច",
+    "value": "evening",
+    "order": 3,
+    "active": true
+  },
+  {
+    "id": "time-4",
+    "groupKey": "time",
+    "label": "ព្រឹករសៀល",
+    "value": "afternoon",
+    "order": 4,
+    "active": true
+  },
+  {
+    "id": "time-5",
+    "groupKey": "time",
+    "label": "យប់",
+    "value": "night",
+    "order": 5,
+    "active": true
+  },
+
+  {
+    "id": "distance-1",
+    "groupKey": "distance",
+    "label": "ទាំងអស់",
+    "value": "all",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "distance-2",
+    "groupKey": "distance",
+    "label": "៥០០ម",
+    "value": "500m",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "distance-3",
+    "groupKey": "distance",
+    "label": "១គម",
+    "value": "1km",
+    "order": 3,
+    "active": true
+  },
+  {
+    "id": "distance-4",
+    "groupKey": "distance",
+    "label": "២គម",
+    "value": "2km",
+    "order": 4,
+    "active": true
+  },
+  {
+    "id": "distance-5",
+    "groupKey": "distance",
+    "label": "៥គម",
+    "value": "5km",
+    "order": 5,
+    "active": true
+  },
+
+  {
+    "id": "category-1",
+    "groupKey": "category",
+    "label": "ចិន",
+    "value": "chinese",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "category-2",
+    "groupKey": "category",
+    "label": "វៀតណាម",
+    "value": "vietnamese",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "category-3",
+    "groupKey": "category",
+    "label": "ជប៉ុន",
+    "value": "japanese",
+    "order": 3,
+    "active": true
+  },
+  {
+    "id": "category-4",
+    "groupKey": "category",
+    "label": "គុយទាវ",
+    "value": "noodle",
+    "order": 4,
+    "active": true
+  },
+  {
+    "id": "category-5",
+    "groupKey": "category",
+    "label": "គ្រឿងសមុទ្រ",
+    "value": "seafood",
+    "order": 5,
+    "active": true
+  },
+  {
+    "id": "category-6",
+    "groupKey": "category",
+    "label": "ទឹកក្រឡុក",
+    "value": "smoothie",
+    "order": 6,
+    "active": true
+  },
+  {
+    "id": "category-7",
+    "groupKey": "category",
+    "label": "នំខេក និងនំបុ័ង",
+    "value": "bakery",
+    "order": 7,
+    "active": true
+  },
+  {
+    "id": "category-8",
+    "groupKey": "category",
+    "label": "ម្ហូបបំពង",
+    "value": "fastfood",
+    "order": 8,
+    "active": false
+  },
+
+  {
+    "id": "diet-1",
+    "groupKey": "diet",
+    "label": "អាហារបួស",
+    "value": "vegetarian",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "diet-2",
+    "groupKey": "diet",
+    "label": "អាហារសុខភាព",
+    "value": "healthy",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "diet-3",
+    "groupKey": "diet",
+    "label": "អាហារប្រូតេអ៊ីនខ្ពស់",
+    "value": "highProtein",
+    "order": 3,
+    "active": true
+  },
+  {
+    "id": "diet-4",
+    "groupKey": "diet",
+    "label": "អាហារគ្មានជាតិស្ករ",
+    "value": "sugarFree",
+    "order": 4,
+    "active": true
+  },
+  {
+    "id": "diet-5",
+    "groupKey": "diet",
+    "label": "អាហារគ្មានសាច់ជ្រូក",
+    "value": "porkFree",
+    "order": 5,
+    "active": true
+  },
+  {
+    "id": "diet-6",
+    "groupKey": "diet",
+    "label": "អាហារជាតិខ្លាញ់ទាប",
+    "value": "lowFat",
+    "order": 6,
+    "active": true
+  },
+  {
+    "id": "diet-7",
+    "groupKey": "diet",
+    "label": "អាហារសម្រាប់ស្ត្រីមានផ្ទៃពោះ",
+    "value": "pregnancy",
+    "order": 7,
+    "active": true
+  },
+  {
+    "id": "diet-8",
+    "groupKey": "diet",
+    "label": "អាហារសម្រាប់សម្រកទម្ងន់",
+    "value": "weightLoss",
+    "order": 8,
+    "active": true
+  },
+  {
+    "id": "diet-9",
+    "groupKey": "diet",
+    "label": "អាហារសម្រាប់បង្កើនទម្ងន់",
+    "value": "weightGain",
+    "order": 9,
+    "active": true
+  },
+
+  {
+    "id": "price-1",
+    "groupKey": "price",
+    "label": "$",
+    "value": "low",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "price-2",
+    "groupKey": "price",
+    "label": "$$",
+    "value": "mid",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "price-3",
+    "groupKey": "price",
+    "label": "$$$",
+    "value": "high",
+    "order": 3,
+    "active": true
+  },
+
+  {
+    "id": "age-1",
+    "groupKey": "age",
+    "label": "អាហារសម្រាប់កុមារ",
+    "value": "children",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "age-2",
+    "groupKey": "age",
+    "label": "អាហារសម្រាប់ក្មេងជំទង់",
+    "value": "teen",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "age-3",
+    "groupKey": "age",
+    "label": "អាហារសម្រាប់មនុស្សចាស់",
+    "value": "elderly",
+    "order": 3,
+    "active": true
+  }
+]

@@ -249,7 +249,7 @@ export const dashboardNav: NavItem[] = [
 export const dashboardFooterNav: NavItem[] = [
   {
     label: "មតិកែលម្អផ្សព្វផ្សាយទីផ្សារ",
-    href: "/dashboard/feedback",
+    href: "/dashboard/dynamic-content",
     icon: Globe,
   },
 ];
