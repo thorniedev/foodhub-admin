@@ -1,0 +1,82 @@
+[
+  {
+    "id": "FB001",
+    "customerName": "សុខា វណ្ណា",
+    "avatar": "/Image/users/user-1.jpg",
+    "message": "កម្មវិធីប្រើងាយស្រួល តែពេលខ្លះការទូទាត់លុយយឺតបន្តិច",
+    "rating": 4,
+    "category": "app",
+    "status": "new",
+    "createdAt": "2026-07-20T09:12:00.000Z"
+  },
+  {
+    "id": "FB002",
+    "customerName": "ចាន់ ដារា",
+    "avatar": "/Image/users/user-2.jpg",
+    "message": "អាហារឆ្ងាញ់ណាស់ ជូនដល់ផ្ទះទាន់ពេលវេលា",
+    "rating": 5,
+    "category": "food_quality",
+    "status": "reviewed",
+    "createdAt": "2026-07-21T14:40:00.000Z"
+  },
+  {
+    "id": "FB003",
+    "customerName": "លី សុភា",
+    "avatar": "/Image/users/user-3.jpg",
+    "message": "អ្នកដឹកជញ្ជូនយឺតជាងម៉ោងកំណត់ប្រហែលមួយម៉ោង",
+    "rating": 2,
+    "category": "delivery",
+    "status": "new",
+    "createdAt": "2026-07-22T18:05:00.000Z"
+  },
+  {
+    "id": "FB004",
+    "customerName": "គង់ សុវណ្ណារិទ្ធ",
+    "avatar": "/Image/users/user-4.jpg",
+    "message": "បុគ្គលិកសេវាកម្មអតិថិជនអត់ធ្មត់ និងរួសរាយណាស់",
+    "rating": 5,
+    "category": "service",
+    "status": "resolved",
+    "createdAt": "2026-07-18T11:22:00.000Z"
+  },
+  {
+    "id": "FB005",
+    "customerName": "នួន សុជាតិ",
+    "avatar": "/Image/users/user-5.jpg",
+    "message": "កម្មវិធីគាំងញឹកញាប់ពេលបញ្ជាទិញច្រើនមុខម្ហូបក្នុងពេលតែមួយ",
+    "rating": 2,
+    "category": "app",
+    "status": "new",
+    "createdAt": "2026-07-24T08:15:00.000Z"
+  },
+  {
+    "id": "FB006",
+    "customerName": "ពៅ សុភាព",
+    "avatar": "/Image/users/user-6.jpg",
+    "message": "ម្ហូបមកដល់ត្រជាក់ ព្រោះចម្ងាយឆ្ងាយពីហាង",
+    "rating": 3,
+    "category": "food_quality",
+    "status": "reviewed",
+    "createdAt": "2026-07-19T20:30:00.000Z"
+  },
+  {
+    "id": "FB007",
+    "customerName": "ហេង សុខលី",
+    "avatar": "/Image/users/user-7.jpg",
+    "message": "ចង់ឱ្យបន្ថែមជម្រើសទូទាត់តាមធនាគារបន្ថែមទៀត",
+    "rating": 4,
+    "category": "app",
+    "status": "new",
+    "createdAt": "2026-07-25T10:02:00.000Z"
+  },
+  {
+    "id": "FB008",
+    "customerName": "សាន់ ចន្ថា",
+    "avatar": "/Image/users/user-8.jpg",
+    "message": "អ្នកដឹកជញ្ជូនរកផ្ទះមិនឃើញ ត្រូវទូរស័ព្ទសួរច្រើនដង",
+    "rating": 3,
+    "category": "delivery",
+    "status": "reviewed",
+    "createdAt": "2026-07-23T16:48:00.000Z"
+  }
+]

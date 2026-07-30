@@ -1,0 +1,82 @@
+[
+  {
+    "id": "FA001",
+    "image": "/Image/area/phnom-penh-1.jpg",
+    "title": "នំបញ្ចុកភ្នំពេញ",
+    "description": "នំបញ្ចុកជាមួយទឹកគ្រឿងសម្លម្ជូរ ជាមុខម្ហូបល្បីល្បាញនៅរាជធានីភ្នំពេញ",
+    "area": "phnom_penh",
+    "status": "active"
+  },
+  {
+    "id": "FA002",
+    "image": "/Image/area/phnom-penh-2.jpg",
+    "title": "បាយសាច់ជ្រូកអាំងភ្នំពេញ",
+    "description": "បាយសាច់ជ្រូកអាំងក្រអូប បរិភោគជាមួយត្រសក់ដម និងស៊ុបស្ពៃ",
+    "area": "phnom_penh",
+    "status": "active"
+  },
+  {
+    "id": "FA003",
+    "image": "/Image/area/siem-reap-1.jpg",
+    "title": "អាម៉ុកត្រីសៀមរាប",
+    "description": "អាម៉ុកត្រីក្រអូបខ្លាញ់កាត់ជាមួយសាច់ត្រកួន ជាមុខម្ហូបប្រពៃណីខ្មែរនៅសៀមរាប",
+    "area": "siem_reap",
+    "status": "active"
+  },
+  {
+    "id": "FA004",
+    "image": "/Image/area/siem-reap-2.jpg",
+    "title": "គុយទាវសៀមរាប",
+    "description": "គុយទាវទឹកសម្លរជូរផ្អែម ជាមួយសាច់មាន់ និងបន្លែស្រស់",
+    "area": "siem_reap",
+    "status": "pending"
+  },
+  {
+    "id": "FA005",
+    "image": "/Image/area/battambang-1.jpg",
+    "title": "ត្រីអំបិលបាត់ដំបង",
+    "description": "ត្រីទឹកសាបអំបិលហាលថ្ងៃ ជាមុខម្ហូបប្រពៃណីនៃខេត្តបាត់ដំបង",
+    "area": "battambang",
+    "status": "active"
+  },
+  {
+    "id": "FA006",
+    "image": "/Image/area/battambang-2.jpg",
+    "title": "អន្សមស្រូវថ្មីបាត់ដំបង",
+    "description": "អន្សមធ្វើពីស្រូវថ្មីច្របាច់ជាមួយសណ្តែក និងសាច់ជ្រូក",
+    "area": "battambang",
+    "status": "disabled"
+  },
+  {
+    "id": "FA007",
+    "image": "/Image/area/kampot-1.jpg",
+    "title": "ត្រីអាំងម្រេចខ្ចីកំពត",
+    "description": "ត្រីអាំងជាមួយម្រេចខ្ចីកំពត ដែលមានក្លិនក្រអូបពិសេស",
+    "area": "kampot",
+    "status": "active"
+  },
+  {
+    "id": "FA008",
+    "image": "/Image/area/kampot-2.jpg",
+    "title": "គ្រឿងសមុទ្រឆាម្រេចខ្ចីកំពត",
+    "description": "គ្រឿងសមុទ្រស្រស់ឆាជាមួយម្រេចខ្ចីខៀវពីខេត្តកំពត",
+    "area": "kampot",
+    "status": "active"
+  },
+  {
+    "id": "FA009",
+    "image": "/Image/area/kratie-1.jpg",
+    "title": "សម្លម្ជូរដំរីក្រចេះ",
+    "description": "សម្លម្ជូរធ្វើពីត្រីទន្លេស្រស់ ជាមួយស្លឹកអំពិលទន្លេមេគង្គ",
+    "area": "kratie",
+    "status": "pending"
+  },
+  {
+    "id": "FA010",
+    "image": "/Image/area/kratie-2.jpg",
+    "title": "ត្រីដុតទន្លេមេគង្គក្រចេះ",
+    "description": "ត្រីទន្លេស្រស់ដុតទាំងមូល ញ៉ាំជាមួយទឹកជ្រលក់ប្រហិត",
+    "area": "kratie",
+    "status": "active"
+  }
+]
