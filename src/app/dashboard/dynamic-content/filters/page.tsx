@@ -7,7 +7,7 @@ import {
   useGetFilterOptionsQuery,
   useReorderFilterOptionMutation,
   useUpdateFilterOptionMutation,
-} from "../../store/dynamicContentApi";
+} from "../../../store/dynamicContentApi";
 // import { FilterGroupKey, FilterOption } from "@/types/dynamicContent";
 // import DynamicContentBanner from "@/components/dynamic-content/DynamicContentBanner";
 // import DynamicContentGroupTabs from "@/components/dynamic-content/DynamicContentGroupTabs";
@@ -15,12 +15,12 @@ import {
 // import DynamicContentFormModal from "@/components/dynamic-content/DynamicContentFormModal";
 // import DynamicContentPreview from "@/components/dynamic-content/DynamicContentPreview";
 import { Eye } from "lucide-react";
-import { FilterGroupKey, FilterOption } from "../../../types/dynamicContent";
-import DynamicContentBanner from "../../../components/dynamic-content/DynamicContentBanner";
-import DynamicContentGroupTabs from "../../../components/dynamic-content/DynamicContentGroupTabs";
-import DynamicContentTable from "../../../components/dynamic-content/DynamicContentTable";
-import DynamicContentFormModal from "../../../components/dynamic-content/DynamicContentFormModal";
-import DynamicContentPreview from "../../../components/dynamic-content/DynamicContentPreview";
+import { FilterGroupKey, FilterOption } from "../../../../types/dynamicContent";
+import DynamicContentBanner from "../../../../components/dynamic-content/DynamicContentBanner";
+import DynamicContentGroupTabs from "../../../../components/dynamic-content/DynamicContentGroupTabs";
+import DynamicContentTable from "../../../../components/dynamic-content/DynamicContentTable";
+import DynamicContentFormModal from "../../../../components/dynamic-content/DynamicContentFormModal";
+import DynamicContentPreview from "../../../../components/dynamic-content/DynamicContentPreview";
 
 export default function DynamicContentPage() {
   const { data, isLoading, isError } = useGetFilterOptionsQuery();
@@ -38,13 +38,11 @@ export default function DynamicContentPage() {
 
   const groupItems = useMemo(
     () => allData.filter((o) => o.groupKey === activeGroup),
-    [allData, activeGroup]
+    [allData, activeGroup],
   );
 
   const nextOrder =
-    groupItems.length > 0
-      ? Math.max(...groupItems.map((o) => o.order)) + 1
-      : 1;
+    groupItems.length > 0 ? Math.max(...groupItems.map((o) => o.order)) + 1 : 1;
 
   const handleAddNew = () => {
     setEditingItem(null);
