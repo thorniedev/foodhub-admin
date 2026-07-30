@@ -16,7 +16,7 @@ export const baseApi = createApi({
     "Drink",
     "DynamicContent",
     "Banner",
-    "FoodBySeason",
+    "SeasonalFood",
     "FoodByArea",
   ],
 

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "SF001",
+    "image": "/Image/seasonal/rainy-1.jpg",
+    "title": "សម្លរដូវវស្សា",
+    "description": "សម្លរដូវវស្សាធ្វើពីត្រកួន និងគល់ អំពិល សមស្របសម្រាប់រដូវវស្សា",
+    "season": "rainy",
+    "status": "active"
+  },
+  {
+    "id": "SF002",
+    "image": "/Image/seasonal/rainy-2.jpg",
+    "title": "ស៊ុបផ្សិតរដូវវស្សា",
+    "description": "ស៊ុបផ្សិតស្រស់ៗពីព្រៃ ក្រអូបជាមួយស្លឹកគ្រៃ",
+    "season": "rainy",
+    "status": "active"
+  },
+  {
+    "id": "SF003",
+    "image": "/Image/seasonal/dry-1.jpg",
+    "title": "ត្រីឆ្អើរខ្ចប់ស្លឹកចេក",
+    "description": "ម្ហូបប្រពៃណីរដូវប្រាំង ធ្វើពីត្រីស្រស់ខ្ចប់ជាមួយស្លឹកចេក",
+    "season": "dry",
+    "status": "active"
+  },
+  {
+    "id": "SF004",
+    "image": "/Image/seasonal/dry-2.jpg",
+    "title": "សាឡាត់ស្វាយបង្កង",
+    "description": "សាឡាត់ស្រស់ ជូរផ្អែម ជាមួយបង្កងឆ្អិន សមស្របនឹងអាកាសធាតុប្រាំង",
+    "season": "dry",
+    "status": "pending"
+  },
+  {
+    "id": "SF005",
+    "image": "/Image/seasonal/hot-1.jpg",
+    "title": "ទឹកកកបារាំងផ្លែឈើ",
+    "description": "ភេសជ្ជៈត្រជាក់សម្រាប់រដូវក្តៅ លាយផ្លែឈើតាមរដូវ",
+    "season": "hot",
+    "status": "active"
+  },
+  {
+    "id": "SF006",
+    "image": "/Image/seasonal/hot-2.jpg",
+    "title": "សម្លម្ជូរត្រីរដូវក្តៅ",
+    "description": "សម្លម្ជូរស្រាលៗ ជួយបំបាត់ក្តៅក្នុងខ្លួនកំឡុងរដូវក្តៅ",
+    "season": "hot",
+    "status": "active"
+  },
+  {
+    "id": "SF007",
+    "image": "/Image/seasonal/festival-1.jpg",
+    "title": "នំអន្សមបុណ្យភ្ជុំបិណ្ឌ",
+    "description": "នំអន្សមប្រពៃណីធ្វើសម្រាប់ថ្ងៃបុណ្យភ្ជុំបិណ្ឌ",
+    "season": "festival",
+    "status": "active"
+  },
+  {
+    "id": "SF008",
+    "image": "/Image/seasonal/festival-2.jpg",
+    "title": "បាយសពិសេសបុណ្យភូមិ",
+    "description": "ម្ហូបពិសេសរៀបចំសម្រាប់ពិធីបុណ្យប្រពៃណីភូមិ",
+    "season": "festival",
+    "status": "pending"
+  },
+  {
+    "id": "SF009",
+    "image": "/Image/seasonal/rainy-3.jpg",
+    "title": "គុយទាវខ្មែរក្តៅរដូវវស្សា",
+    "description": "គុយទាវក្តៅៗ សមស្របសម្រាប់អាកាសធាតុត្រជាក់ក្នុងរដូវវស្សា",
+    "season": "rainy",
+    "status": "disabled"
+  },
+  {
+    "id": "SF010",
+    "image": "/Image/seasonal/dry-3.jpg",
+    "title": "អាំងសាច់គោរដូវប្រាំង",
+    "description": "សាច់គោអាំងក្រអូប ញ៉ាំជាមួយបន្លែស្រស់ក្នុងអំឡុងរដូវប្រាំង",
+    "season": "dry",
+    "status": "active"
+  }
+]
