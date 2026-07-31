@@ -1,4 +1,5 @@
 import { Plus } from "lucide-react";
+import Link from "next/link";
 
 export default function ShopsHeader({ total }: { total: number }) {
   return (
@@ -9,10 +10,12 @@ export default function ShopsHeader({ total }: { total: number }) {
           កំពុងបង្ហាញហាង {total} ហាង ក្នុងចំណោម {total} ហាង
         </p>
       </div>
-      <button className="flex items-center gap-2 bg-emerald-800 hover:bg-emerald-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg">
-        <Plus size={16} />
-        បន្ថែមហាងថ្មី
-      </button>
+      <Link href="/dashboard/shops/create">
+        <button className="flex items-center gap-2 bg-emerald-800 hover:bg-emerald-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg">
+          <Plus size={16} />
+          បន្ថែមហាងថ្មី
+        </button>
+      </Link>
     </div>
   );
 }
