@@ -15,7 +15,7 @@ export default function UserGrowthChart({ data }: { data: UserGrowthPoint[] }) {
   return (
     <div className="bg-white rounded-2xl lg:min-h-93.75 border border-gray-100 p-6">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm font-semibold text-gray-800">
+        <p className="text-xl font-semibold text-gray-800">
           ទិន្នន័យអភិវឌ្ឍនៃអ្នកប្រើប្រាស់
         </p>
         <select className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-500">

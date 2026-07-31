@@ -2,25 +2,57 @@
   {
     "id": "sort-1",
     "groupKey": "sort",
-    "label": "មួយចេញថ្មី",
-    "value": "newest",
+    "label": "ការណែនាំល្អបំផុត",
+    "value": "mostRecommended",
     "order": 1,
     "active": true
   },
   {
     "id": "sort-2",
     "groupKey": "sort",
-    "label": "ណែនាំចំណាត់ថ្នាក់ខ្ពស់បំផុត",
-    "value": "mostRecommended",
+    "label": "ពេញនិយមបំផុត",
+    "value": "mostPopular",
     "order": 2,
     "active": true
   },
   {
     "id": "sort-3",
     "groupKey": "sort",
-    "label": "ចំណាត់ថ្នាក់ខ្ពស់បំផុត",
+    "label": "ចំណាត់ថ្នាក់ខ្ពស់",
     "value": "highestRated",
     "order": 3,
+    "active": true
+  },
+  {
+    "id": "sort-4",
+    "groupKey": "sort",
+    "label": "រៀបចំលឿនបំផុត",
+    "value": "fastestPrep",
+    "order": 4,
+    "active": true
+  },
+  {
+    "id": "sort-5",
+    "groupKey": "sort",
+    "label": "នៅជិតបំផុត",
+    "value": "nearest",
+    "order": 5,
+    "active": true
+  },
+  {
+    "id": "sort-6",
+    "groupKey": "sort",
+    "label": "តម្លៃទាបទៅខ្ពស់",
+    "value": "priceLowToHigh",
+    "order": 6,
+    "active": true
+  },
+  {
+    "id": "sort-7",
+    "groupKey": "sort",
+    "label": "តម្លៃខ្ពស់ទៅទាប",
+    "value": "priceHighToLow",
+    "order": 7,
     "active": true
   },
 
@@ -291,6 +323,279 @@
     "label": "អាហារសម្រាប់មនុស្សចាស់",
     "value": "elderly",
     "order": 3,
+    "active": true
+  },
+
+  {
+    "id": "cuisine-1",
+    "groupKey": "cuisine",
+    "label": "ខ្មែរ",
+    "value": "khmer",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "cuisine-2",
+    "groupKey": "cuisine",
+    "label": "ថៃ",
+    "value": "thai",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "cuisine-3",
+    "groupKey": "cuisine",
+    "label": "កូរ៉េ",
+    "value": "korean",
+    "order": 3,
+    "active": true
+  },
+  {
+    "id": "cuisine-4",
+    "groupKey": "cuisine",
+    "label": "បារាំង",
+    "value": "french",
+    "order": 4,
+    "active": true
+  },
+
+  {
+    "id": "allergen-1",
+    "groupKey": "allergen",
+    "label": "ស៊ុត",
+    "value": "egg",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "allergen-2",
+    "groupKey": "allergen",
+    "label": "គ្រឿងសមុទ្រ",
+    "value": "seafood",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "allergen-3",
+    "groupKey": "allergen",
+    "label": "សណ្ដែកដី",
+    "value": "peanut",
+    "order": 3,
+    "active": true
+  },
+  {
+    "id": "allergen-4",
+    "groupKey": "allergen",
+    "label": "គ្រាប់ធញ្ញជាតិ (ស្រូវសាលី)",
+    "value": "gluten",
+    "order": 4,
+    "active": true
+  },
+  {
+    "id": "allergen-5",
+    "groupKey": "allergen",
+    "label": "ទឹកដោះគោ",
+    "value": "dairy",
+    "order": 5,
+    "active": true
+  },
+
+  {
+    "id": "spice-1",
+    "groupKey": "spice",
+    "label": "មិនហឹរ",
+    "value": "none",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "spice-2",
+    "groupKey": "spice",
+    "label": "ហឹរបន្តិច",
+    "value": "mild",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "spice-3",
+    "groupKey": "spice",
+    "label": "ហឹរមធ្យម",
+    "value": "medium",
+    "order": 3,
+    "active": true
+  },
+  {
+    "id": "spice-4",
+    "groupKey": "spice",
+    "label": "ហឹរខ្លាំង",
+    "value": "hot",
+    "order": 4,
+    "active": true
+  },
+
+  {
+    "id": "prepTime-1",
+    "groupKey": "prepTime",
+    "label": "លឿន (តិចជាង១៥នាទី)",
+    "value": "fast",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "prepTime-2",
+    "groupKey": "prepTime",
+    "label": "មធ្យម (១៥-៣០នាទី)",
+    "value": "medium",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "prepTime-3",
+    "groupKey": "prepTime",
+    "label": "យូរ (លើសពី៣០នាទី)",
+    "value": "slow",
+    "order": 3,
+    "active": true
+  },
+
+  {
+    "id": "season-1",
+    "groupKey": "season",
+    "label": "រដូវវស្សា",
+    "value": "rainySeason",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "season-2",
+    "groupKey": "season",
+    "label": "រដូវប្រាំង",
+    "value": "drySeason",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "season-3",
+    "groupKey": "season",
+    "label": "រដូវត្រជាក់",
+    "value": "coldSeason",
+    "order": 3,
+    "active": true
+  },
+
+  {
+    "id": "festival-1",
+    "groupKey": "festival",
+    "label": "បុណ្យចូលឆ្នាំខ្មែរ",
+    "value": "khmerNewYear",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "festival-2",
+    "groupKey": "festival",
+    "label": "បុណ្យភ្ជុំបិណ្ឌ",
+    "value": "pchumBen",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "festival-3",
+    "groupKey": "festival",
+    "label": "បុណ្យអុំទូក",
+    "value": "waterFestival",
+    "order": 3,
+    "active": true
+  },
+
+  {
+    "id": "popularProvince-1",
+    "groupKey": "popularProvince",
+    "label": "ភ្នំពេញ",
+    "value": "phnomPenh",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "popularProvince-2",
+    "groupKey": "popularProvince",
+    "label": "សៀមរាប",
+    "value": "siemReap",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "popularProvince-3",
+    "groupKey": "popularProvince",
+    "label": "កំពត",
+    "value": "kampot",
+    "order": 3,
+    "active": true
+  },
+  {
+    "id": "popularProvince-4",
+    "groupKey": "popularProvince",
+    "label": "បាត់ដំបង",
+    "value": "battambang",
+    "order": 4,
+    "active": true
+  },
+
+  {
+    "id": "weather-1",
+    "groupKey": "weather",
+    "label": "ថ្ងៃក្តៅ",
+    "value": "hot",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "weather-2",
+    "groupKey": "weather",
+    "label": "ថ្ងៃត្រជាក់",
+    "value": "cold",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "weather-3",
+    "groupKey": "weather",
+    "label": "ថ្ងៃភ្លៀង",
+    "value": "rainy",
+    "order": 3,
+    "active": true
+  },
+
+  {
+    "id": "originProvince-1",
+    "groupKey": "originProvince",
+    "label": "ខេត្តកំពត",
+    "value": "kampot",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "originProvince-2",
+    "groupKey": "originProvince",
+    "label": "ខេត្តសៀមរាប",
+    "value": "siemReap",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "originProvince-3",
+    "groupKey": "originProvince",
+    "label": "ខេត្តព្រះសីហនុ",
+    "value": "sihanoukville",
+    "order": 3,
+    "active": true
+  },
+  {
+    "id": "originProvince-4",
+    "groupKey": "originProvince",
+    "label": "ខេត្តបាត់ដំបង",
+    "value": "battambang",
+    "order": 4,
     "active": true
   }
 ]

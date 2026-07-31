@@ -20,6 +20,7 @@ export const baseApi = createApi({
     "FoodByArea",
     "Dashboard",
     "result",
+    "Restaurant",
   ],
 
   endpoints: () => ({}),
