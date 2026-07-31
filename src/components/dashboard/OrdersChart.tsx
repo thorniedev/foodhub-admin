@@ -16,7 +16,7 @@ export default function OrdersChart({ data }: { data: OrdersPoint[] }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-6">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-xl font-semibold text-gray-800">
+        <p className="text-2xl font-semibold text-[#136C34]">
           កំណើនអ្នកប្រើប្រាស់
         </p>
         <span className="text-xs text-gray-400">រយៈពេល ៦ ខែចុងក្រោយ</span>

@@ -10,7 +10,7 @@ export default function UserStatusChart({ data }: { data: UserStatusSegment[] })
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-6">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-xl font-semibold text-gray-800">ស្ថានភាពអ្នកប្រើប្រាស់</p>
+        <p className="text-2xl font-semibold text-[#136C34]">ស្ថានភាពអ្នកប្រើប្រាស់</p>
         <select className="text-base border border-gray-200 rounded-lg px-3 py-1.5 text-gray-500">
           <option>ខែនេះ</option>
         </select>
