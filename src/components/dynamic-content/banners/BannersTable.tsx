@@ -39,14 +39,14 @@ export default function BannersTable({ banners, isLoading, onEdit }: BannersTabl
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-100">
       <table className="w-full text-left text-sm">
-        <thead className="bg-gray-50 text-gray-500">
+        <thead className="bg-gray-50 text-[#136C34]">
           <tr>
-            <th className="px-4 py-3 font-medium">រូបភាព</th>
-            <th className="px-4 py-3 font-medium">ចំណងជើង</th>
-            <th className="px-4 py-3 font-medium">តំណភ្ជាប់</th>
-            <th className="px-4 py-3 font-medium">លំដាប់</th>
-            <th className="px-4 py-3 font-medium">សកម្មភាព</th>
-            <th className="px-4 py-3 font-medium text-right">សកម្មភាព</th>
+            <th className="px-4 py-3 font-medium text-lg">រូបភាព</th>
+            <th className="px-4 py-3 font-medium text-lg">ចំណងជើង</th>
+            <th className="px-4 py-3 font-medium text-lg">តំណភ្ជាប់</th>
+            <th className="px-4 py-3 font-medium text-lg">លំដាប់</th>
+            <th className="px-4 py-3 font-medium text-lg">សកម្មភាព</th>
+            <th className="px-4 py-3 font-medium text-right text-lg">សកម្មភាព</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">

@@ -16,14 +16,14 @@ export default function FoodByAreaBanner({
   onAddNew,
 }: FoodByAreaBannerProps) {
   return (
-    <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-2xl p-6 mb-6 text-white">
+    <div className="bg-gradient-to-r bg-[#136C34] rounded-4xl p-6 mb-6 text-white">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div className="flex items-start gap-3">
           <div className="bg-white/15 rounded-xl p-3">
             <MapPin size={24} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">រូបភាពអាហារតាមតំបន់</h1>
+            <p className="text-4xl font-bold">រូបភាពអាហារតាមតំបន់</p>
             <p className="text-emerald-50 text-sm mt-1 max-w-md">
               គ្រប់គ្រងរូបភាព និងខ្លឹមសារអាហារពិសេសប្រចាំខេត្ត/តំបន់ ដែលបង្ហាញនៅលើកម្មវិធីអតិថិជន
             </p>
@@ -31,7 +31,7 @@ export default function FoodByAreaBanner({
         </div>
         <button
           onClick={onAddNew}
-          className="flex items-center gap-2 bg-white text-emerald-600 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-emerald-50 transition-colors"
+          className="flex items-center gap-2 bg-white text-[#136C34] text-base font-medium px-4 py-2.5 rounded-full hover:bg-emerald-50 transition-colors"
         >
           <Plus size={18} />
           បន្ថែមរូបភាពថ្មី

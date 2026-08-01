@@ -37,15 +37,15 @@ export default function SeasonalFoodTabs({
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               activeTab === tab.key
-                ? "bg-emerald-600 text-white"
+                ? "bg-[#136C34] text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             {tab.label}
             <span
-              className={`text-xs rounded-full px-1.5 py-0.5 ${
+              className={`text-base rounded-full px-1.5 py-0.5 ${
                 activeTab === tab.key
                   ? "bg-white/20 text-white"
                   : "bg-white text-gray-500"
@@ -67,7 +67,7 @@ export default function SeasonalFoodTabs({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="ស្វែងរករូបភាពអាហារ..."
-          className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 w-64"
+          className="pl-9 pr-3 py-2 text-base border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 w-64"
         />
       </div>
     </div>

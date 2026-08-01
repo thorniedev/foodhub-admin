@@ -25,12 +25,12 @@ export default function DynamicContentTable({
     <div className="bg-white border border-gray-100 rounded-xl overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-100 text-left text-gray-500">
-            <th className="py-3 px-4 font-medium">លំដាប់</th>
-            <th className="py-3 px-4 font-medium">ឈ្មោះបង្ហាញ</th>
-            <th className="py-3 px-4 font-medium">តម្លៃខាងក្នុង (value)</th>
-            <th className="py-3 px-4 font-medium">ស្ថានភាព</th>
-            <th className="py-3 px-4 font-medium text-right">សកម្មភាព</th>
+          <tr className="border-b border-gray-100 text-left text-[#136C34] text-lg">
+            <th className="py-3 px-4 font-medium text-lg">លំដាប់</th>
+            <th className="py-3 px-4 font-medium text-lg">ឈ្មោះបង្ហាញ</th>
+            <th className="py-3 px-4 font-medium text-lg">តម្លៃខាងក្នុង (value)</th>
+            <th className="py-3 px-4 font-medium text-lg">ស្ថានភាព</th>
+            <th className="py-3 px-4 font-medium text-right text-lg">សកម្មភាព</th>
           </tr>
         </thead>
         <tbody>

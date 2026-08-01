@@ -52,7 +52,7 @@ export default function RootLayout({
 
               <div className="flex-1 overflow-y-auto p-5 ">
                 <div className="p">{status}</div>
-                <div className="grid grid-cols-1 gap-5 py-5 lg:grid-cols-3 ">
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 ">
                   <div className="lg:col-span-2 place-content-center">
                     {growth}
                   </div>

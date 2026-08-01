@@ -29,16 +29,16 @@ export default function DrinksTable({
     <div className="bg-white border border-gray-100 rounded-xl overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-100 text-left text-gray-500">
+          <tr className="border-b border-gray-100 text-left text-lg text-[#136C34]">
             <th className="py-3 px-4 font-medium">លេខសម្គាល់និងឈ្មោះភេសជ្ជៈ</th>
             <th className="py-3 px-4 font-medium">ឈ្មោះហាង</th>
             {/* <th className="py-3 px-4 font-medium">ការវាយតម្លៃ</th> */}
-            <th className="py-3 px-4 font-medium">ប្រភេទ</th>
-            <th className="py-3 px-4 font-medium">កម្រិតជាតិស្ករ</th>
-            <th className="py-3 px-4 font-medium">ចម្ងាយ</th>
-            <th className="py-3 px-4 font-medium">ពេលវេលា</th>
-            <th className="py-3 px-4 font-medium">ការពិពណ៌នា</th>
-            <th className="py-3 px-4 font-medium text-right">សកម្មភាព</th>
+            <th className="py-3 px-4 font-medium text-lg">ប្រភេទ</th>
+            <th className="py-3 px-4 font-medium text-lg">កម្រិតជាតិស្ករ</th>
+            <th className="py-3 px-4 font-medium text-lg">ចម្ងាយ</th>
+            <th className="py-3 px-4 font-medium text-lg">ពេលវេលា</th>
+            <th className="py-3 px-4 font-medium text-lg">ការពិពណ៌នា</th>
+            <th className="py-3 px-4 font-medium text-right text-lg">សកម្មភាព</th>
           </tr>
         </thead>
         <tbody>

@@ -18,7 +18,7 @@ export default function ShopImageUploadGrid({
 
   return (
     <div>
-      <label className="text-sm text-gray-600 mb-2 block">
+      <label className="text-lg text-gray-600 mb-2 block">
         ជ្រើសរើសរូបភាពរបស់អ្នក <span className="text-red-500">*</span>
       </label>
 

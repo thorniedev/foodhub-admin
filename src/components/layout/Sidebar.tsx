@@ -46,7 +46,7 @@ export default function Sidebar() {
                   href={child.href}
                   className={`block px-3 py-2 rounded-lg text-sm transition ${
                     pathname === child.href
-                      ? "text-emerald-700 font-medium"
+                      ? "text-[#136C34] font-medium"
                       : "text-gray-500 hover:bg-gray-50"
                   }`}
                 >
@@ -64,9 +64,9 @@ export default function Sidebar() {
       <Link
         key={item.label}
         href={item.href ?? "#"}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-lg font-medium transition ${
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-full text-lg font-medium transition ${
           isActive
-            ? "bg-yellow-400 text-gray-900"
+            ? "bg-[#136C34] text-white"
             : "text-gray-700 hover:bg-gray-50"
         }`}
       >

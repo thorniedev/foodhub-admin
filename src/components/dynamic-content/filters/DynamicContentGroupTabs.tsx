@@ -28,9 +28,9 @@ export default function DynamicContentGroupTabs({
         <button
           key={group.key}
           onClick={() => onGroupChange(group.key)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-base font-medium transition-colors ${
             activeGroup === group.key
-              ? "bg-emerald-600 text-white"
+              ? "bg-[#136C34] text-white"
               : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}
         >

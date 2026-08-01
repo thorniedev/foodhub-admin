@@ -103,7 +103,7 @@ export default function DynamicContentPage() {
 
         <button
           onClick={() => setPreviewOpen(true)}
-          className="flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 px-3 py-2 rounded-lg hover:bg-emerald-50 shrink-0"
+          className="flex items-center gap-2 text-base font-medium text-[#136C34] hover:text-emerald-700 px-3 py-2 rounded-lg hover:bg-emerald-50 shrink-0"
         >
           <Eye size={16} />
           មើលការបង្ហាញជាមុន

@@ -33,7 +33,7 @@ export default function FoodByAreaTable({
     <div className="bg-white border border-gray-100 rounded-xl overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-100 text-left text-gray-500">
+          <tr className="border-b border-gray-100 text-left text-[#136C34] text-lg">
             <th className="py-3 px-4 font-medium">រូបភាព</th>
             <th className="py-3 px-4 font-medium">ចំណងជើង</th>
             <th className="py-3 px-4 font-medium">ការពិពណ៌នា</th>

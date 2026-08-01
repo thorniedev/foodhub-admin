@@ -17,16 +17,16 @@ export default function BannersHeader({
     <div className="mb-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-gray-800">រូបបែនណី</h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-5xl font-bold text-[#136C34]">រូបបែនណឺ</p>
+          <p className="text-lg text-[#F97316] mt-3">
             កំពុងបង្ហាញរូបបែនណី: {total} សរុប
           </p>
         </div>
         <button
           onClick={onAddNew}
-          className="flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800"
+          className="flex items-center gap-2 rounded-full bg-green-700 px-4 py-2 text-base font-medium text-white hover:bg-green-800"
         >
-          <span className="text-lg leading-none">+</span>
+          <span className="text-base leading-none">+</span>
           បន្ថែមរូបបែនណីថ្មី
         </button>
       </div>
@@ -37,7 +37,7 @@ export default function BannersHeader({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="ស្វែងរករូបបែនណី..."
-          className="w-full max-w-sm rounded-lg border border-gray-200 px-4 py-2 text-sm outline-none focus:border-green-600 sm:w-72"
+          className="w-full max-w-sm rounded-full border border-gray-200 px-4 py-2 text-base outline-none focus:border-green-600 sm:w-72"
         />
       </div>
     </div>

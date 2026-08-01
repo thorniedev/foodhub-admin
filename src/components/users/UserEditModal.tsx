@@ -58,7 +58,7 @@ export default function UserEditModal({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">ឈ្មោះហាង (បើមាន)</label>
+            <label className="text-base text-gray-600 mb-1 block">ឈ្មោះហាង (បើមាន)</label>
             <input
               type="text"
               value={form.shopName ?? ""}

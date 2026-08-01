@@ -35,9 +35,9 @@ export default function ShopsTabs({
           <button
             key={tab.key}
             onClick={() => onChange(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-base font-medium transition ${
               active === tab.key
-                ? "bg-emerald-800 text-white"
+                ? "bg-[#136C34] text-white"
                 : "text-gray-500 hover:bg-gray-100"
             }`}
           >
@@ -61,8 +61,8 @@ export default function ShopsTabs({
         <input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="ស្វែងរកឈ្មោះហាង, លេខទូរស័ព្ទ..."
-          className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+          placeholder="ស្វែងរក, លេខទូរស័ព្ទ..."
+          className="w-full pl-9 pr-3 py-2 rounded-full border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
         />
       </div>
     </div>

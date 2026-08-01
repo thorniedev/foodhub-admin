@@ -60,9 +60,9 @@ export default function CreateShopForm() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">
+      <p className="text-4xl font-bold text-gray-800 mb-6">
         បន្ថែមភោជនីយដ្ឋានថ្មី
-      </h1>
+      </p>
 
       <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-8">
         <ShopImageUploadGrid

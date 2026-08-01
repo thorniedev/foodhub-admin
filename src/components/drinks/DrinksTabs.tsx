@@ -37,9 +37,9 @@ export default function DrinksTabs({
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-base font-medium transition-colors ${
               activeTab === tab.key
-                ? "bg-emerald-600 text-white"
+                ? "bg-[#136C34] text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
@@ -67,7 +67,7 @@ export default function DrinksTabs({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="ស្វែងរកប្រភេទចំណីអាហារ..."
-          className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 w-64"
+          className="pl-9 pr-3 py-2 text-base border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 w-64"
         />
       </div>
     </div>
