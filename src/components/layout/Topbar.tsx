@@ -1,11 +1,24 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { Search, Bell } from "lucide-react";
+import { getPageTitle } from "../../config/pageTitles";
 
 export default function Topbar() {
+  const pathname = usePathname();
+  const { title, parent } = getPageTitle(pathname);
+
   return (
     <header className="h-20 flex items-center justify-between px-8 border-b border-gray-100 bg-white">
-      <p className="text-lg font-semibold text-gray-800">ផ្ទាំងគ្រប់គ្រង</p>
+      <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+        {parent && (
+          <>
+            <span className="text-gray-400">{parent}</span>
+            <span className="text-gray-300">›</span>
+          </>
+        )}
+        <span>{title}</span>
+      </div>
 
       <div className="flex-1 max-w-xl mx-8">
         <div className="relative">
