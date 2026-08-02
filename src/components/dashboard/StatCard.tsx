@@ -18,10 +18,10 @@ export default function StatCard({ data }: { data: StatCardData }) {
         <Icon size={20} />
       </div>
       <div>
-        <p className="text-xs text-gray-500">{data.label}</p>
-        <p className="text-2xl font-bold text-gray-900 mt-1">{data.value}</p>
+        <p className="text-lg text-[#136C34]">{data.label}</p>
+        <p className="text-2xl font-bold text-[#0E5327] mt-1">{data.value}</p>
         {data.subLabel && (
-          <p className="text-xs text-gray-400 mt-1">{data.subLabel}</p>
+          <p className="text-base text-[#0E5327] mt-1">{data.subLabel}</p>
         )}
       </div>
     </div>

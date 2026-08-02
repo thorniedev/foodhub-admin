@@ -28,35 +28,35 @@ export const dashboardNav: NavItem[] = [
   },
   {
     label: "ហាង",
-    href: "/dashboard/shops",
+    href: "/shops",
     icon: Store,
   },
   {
     label: "អ្នកប្រើប្រាស់",
-    href: "/dashboard/users",
+    href: "/users",
     icon: Users,
   },
   {
     label: "ប្រភេទអាហារ",
     icon: UtensilsCrossed,
     children: [
-      { label: "ចំណីអាហារ", href: "/dashboard/food-types/dishes" },
-      { label: "ភេសជ្ជៈ", href: "/dashboard/food-types/drinks" },
+      { label: "ចំណីអាហារ", href: "/food-types/dishes" },
+      { label: "ភេសជ្ជៈ", href: "/food-types/drinks" },
     ],
   },
   {
     label: "មាតិកាដែលប្រែប្រួល  ",
     icon: Globe,
     children: [
-      { label: "រូបបេនណឺ", href: "/dashboard/dynamic-content/banners" },
-      { label: "ស្លាកត្រង", href: "/dashboard/dynamic-content/filters" },
+      { label: "រូបបេនណឺ", href: "/dynamic-content/banners" },
+      { label: "ស្លាកត្រង", href: "/dynamic-content/filters" },
       {
         label: "រូបអាហារតាមរដូវកាល",
-        href: "/dashboard/dynamic-content/food-by-season",
+        href: "/dynamic-content/food-by-season",
       },
       {
         label: "រូបអាហារតាមតំបន់",
-        href: "/dashboard/dynamic-content/food-by-area",
+        href: "/dynamic-content/food-by-area",
       },
     ],
   },
@@ -65,7 +65,7 @@ export const dashboardNav: NavItem[] = [
 export const dashboardBottomNav: NavItem[] = [
   {
     label: "ការកំណត់",
-    href: "/dashboard/settings",
+    href: "/settings",
     icon: Settings,
   },
 ];
