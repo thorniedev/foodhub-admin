@@ -14,25 +14,29 @@ export const PAGE_TITLES: Record<string, PageTitleEntry> = {
   "/users": { title: "អ្នកប្រើប្រាស់" },
 
   "/food-types/dishes": { title: "អាហារ", parent: "ប្រភេទអាហារ" },
-  "/food-types/drinks": { title: "ភេសជ្ជៈ:", parent: "ប្រភេទអាហារ" },
+  "/food-types/drinks": { title: "ភេសជ្ជៈ", parent: "ប្រភេទអាហារ" },
   "/food-types/create": { title: "បន្ថែមអាហារថ្មី", parent: "ប្រភេទអាហារ" },
   "/food-types/drinks/create": {
     title: "បន្ថែមភេសជ្ជៈថ្មី",
     parent: "ប្រភេទអាហារ",
   },
 
-  "/dynamic-content": { title: "មាតិកាថាមវន្ត" },
+  "/dynamic-content": { title: "មាតិកាដែលប្រែប្រួល" },
   "/dynamic-content/banners": {
-    title: "រូបភេណី",
-    parent: "មាតិកាថាមវន្ត",
+    title: "រូបបេណឺ",
+    parent: "មាតិកាដែលប្រែប្រួល",
   },
   "/dynamic-content/food-by-season": {
     title: "រូបអាហារតាមរដូវកាល",
-    parent: "មាតិកាថាមវន្ត",
+    parent: "មាតិកាដែលប្រែប្រួល",
   },
   "/dynamic-content/food-by-area": {
     title: "រូបអាហារតាមតំបន់",
-    parent: "មាតិកាថាមវន្ត",
+    parent: "មាតិកាដែលប្រែប្រួល",
+  },
+  "/dynamic-content/filters": {
+    title: "ស្លាកត្រង",
+    parent: "មាតិកាដែលប្រែប្រួល",
   },
 };
 

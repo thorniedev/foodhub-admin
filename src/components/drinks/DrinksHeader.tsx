@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import Link from "next/link";
 
 interface DrinksHeaderProps {
   total: number;
@@ -22,13 +23,12 @@ export default function DrinksHeader({
         </p>
       </div>
 
-      <button
-        onClick={onAddNew}
-        className="flex items-center gap-2 bg-[#136C34] hover:bg-emerald-700 text-white text-base font-medium px-4 py-2.5 rounded-full transition-colors"
-      >
-        <Plus size={18} />
-        បន្ថែមប្រភេទភេសជ្ជៈថ្មី
-      </button>
+      <Link href={"/food-types/drinks/create"}>
+        <button className="flex items-center gap-2 bg-[#136C34] hover:bg-emerald-700 text-white text-base font-medium px-4 py-2.5 rounded-full transition-colors">
+          <Plus size={18} />
+          បន្ថែមប្រភេទភេសជ្ជៈថ្មី
+        </button>
+      </Link>
     </div>
   );
 }

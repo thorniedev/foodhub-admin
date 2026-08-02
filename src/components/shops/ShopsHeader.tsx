@@ -20,7 +20,7 @@ export default function ShopsHeader({ total, filteredCount }: ShopsHeaderProps) 
         </p>
       </div>
       <button
-        onClick={() => router.push("/dashboard/shops/create")}
+        onClick={() => router.push("/shops/create")}
         className="flex items-center gap-2 bg-[#136C34] hover:bg-[#136C34] text-white text-base font-medium px-4 py-2.5 rounded-full  transition-colors"
       >
         <Plus size={16} />

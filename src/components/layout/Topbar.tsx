@@ -28,8 +28,8 @@ export default function Topbar() {
           />
           <input
             type="text"
-            placeholder="ស្វែងរកម្ហូបអាហារ និង ភៅជនីយដ្ឋាន..."
-            className="w-full pl-11 pr-4 py-2.5 rounded-full border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+            placeholder="ស្វែងរកម្ហូបអាហារ និង ភោជនីយដ្ឋាន..."
+            className="w-full pl-11 pr-4 py-2.5 rounded-full border border-gray-200 text-base focus:outline-none focus:ring-2 focus:ring-emerald-600"
           />
         </div>
       </div>

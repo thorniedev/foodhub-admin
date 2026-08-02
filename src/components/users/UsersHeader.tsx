@@ -22,13 +22,13 @@ export default function UsersHeader({
         </p>
       </div>
 
-      <button
+      {/* <button
         onClick={onAddNew}
         className="flex items-center gap-2 bg-[#136C34] hover:bg-[#136C34] text-white text-base font-medium px-4 py-2.5 rounded-full transition-colors"
       >
         <Plus size={18} />
         បន្ថែមអ្នកប្រើប្រាស់ថ្មី
-      </button>
+      </button> */}
     </div>
   );
 }
