@@ -1,7 +1,8 @@
 "use client";
 
-import StatCard from "../../components/dashboard/StatCard";
-import { useGetDashboardDataQuery } from "../store/dashboardApi";
+import { useGetDashboardDataQuery } from "@/src/app/store/dashboardApi";
+import StatCard from "@/src/components/dashboard/StatCard";
+
 // import { useGetDashboardDataQuery } from "../../store/dashboardApi";
 
 export default function StatsSlot() {

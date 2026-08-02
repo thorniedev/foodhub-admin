@@ -54,7 +54,7 @@ export default function CreateShopForm() {
     if (!name.trim() || !address.trim() || !openTime.trim() || !closeTime.trim()) {
       return;
     }
-    await createShop(buildPayload("published"));
+    // await createShop(buildPayload("published"));
     router.push("/dashboard/shops");
   };
 

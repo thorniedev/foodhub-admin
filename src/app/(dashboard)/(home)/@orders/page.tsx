@@ -1,7 +1,8 @@
 "use client";
 
-import OrdersChart from "../../components/dashboard/OrdersChart";
-import { useGetDashboardDataQuery } from "../store/dashboardApi";
+import { useGetDashboardDataQuery } from "@/src/app/store/dashboardApi";
+import OrdersChart from "@/src/components/dashboard/OrdersChart";
+
 // import { useGetDashboardDataQuery } from "../../store/dashboardApi";
 
 export default function OrdersSlot() {

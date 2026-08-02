@@ -1,7 +1,9 @@
 "use client";
 
-import UserStatusChart from "../../components/dashboard/UserStatusChart";
-import { useGetDashboardDataQuery } from "../store/dashboardApi";
+import { useGetDashboardDataQuery } from "@/src/app/store/dashboardApi";
+import UserStatusChart from "@/src/components/dashboard/UserStatusChart";
+
+
 // import { useGetDashboardDataQuery } from "../../store/dashboardApi";
 
 export default function StatusSlot() {

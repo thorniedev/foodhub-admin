@@ -65,7 +65,7 @@ export const dashboardNav: NavItem[] = [
 export const dashboardBottomNav: NavItem[] = [
   {
     label: "ការកំណត់",
-    href: "/settings",
+    href: "/dashboard/settings",
     icon: Settings,
   },
 ];
