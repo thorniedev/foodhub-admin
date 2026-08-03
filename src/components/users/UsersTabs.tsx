@@ -1,12 +1,12 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { User, UserStatus } from "../../types/user";
+import { UserProfile } from "../../types/userProfile";
 
-export type UserFilter = "all" | UserStatus;
+export type UserFilter = "all" | "active" | "inactive";
 
 interface UsersTabsProps {
-  data: User[];
+  data: UserProfile[];
   activeTab: UserFilter;
   onTabChange: (tab: UserFilter) => void;
   search: string;
@@ -15,9 +15,8 @@ interface UsersTabsProps {
 
 const TABS: { key: UserFilter; label: string }[] = [
   { key: "all", label: "ទាំងអស់" },
-  { key: "active", label: "កំពុងដំណើរការ" },
-  { key: "pending", label: "កំពុងរង់ចាំ" },
-  { key: "banned", label: "បានផ្អាក" },
+  { key: "active", label: "សកម្ម" },
+  { key: "inactive", label: "អសកម្ម" },
 ];
 
 export default function UsersTabs({
@@ -27,8 +26,10 @@ export default function UsersTabs({
   search,
   onSearchChange,
 }: UsersTabsProps) {
-  const countFor = (key: UserFilter) =>
-    key === "all" ? data.length : data.filter((u) => u.status === key).length;
+  const countFor = (key: UserFilter) => {
+    if (key === "all") return data.length;
+    return data.filter((p) => (key === "active" ? p.isActive : !p.isActive)).length;
+  };
 
   return (
     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
@@ -66,7 +67,7 @@ export default function UsersTabs({
           type="text"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="ស្វែងរកឈ្មោះ, លេខទូរស័ព្ទ..."
+          placeholder="ស្វែងរកឈ្មោះ..."
           className="w-full pl-9 pr-3 py-2 text-sm sm:text-base border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#136C34]"
         />
       </div>

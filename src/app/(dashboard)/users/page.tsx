@@ -1,13 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
-  useDeleteUserMutation,
-  useGetUsersQuery,
-  useToggleUserStatusMutation,
-  useUpdateUserMutation,
-} from "../../store/userApi";
-import { User } from "../../../types/user";
+  useGetUserProfilesQuery,
+  useDeleteUserProfileMutation,
+  useToggleProfileActiveMutation,
+  useUpdateUserProfileMutation,
+} from "../../store/userProfileApi";
+import { UserProfile } from "../../../types/userProfile";
+
 import UsersHeader from "../../../components/users/UsersHeader";
 import UsersTabs, { UserFilter } from "../../../components/users/UsersTabs";
 import UsersTable from "../../../components/users/UsersTable";
@@ -15,130 +16,67 @@ import UsersPagination from "../../../components/users/UsersPagination";
 import UserEditModal from "../../../components/users/UserEditModal";
 import DeleteUserConfirmModal from "../../../components/users/DeleteUserConfirmModal";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 8;
 
 export default function UsersPage() {
-  const { data, isLoading } = useGetUsersQuery();
-  const [updateUser] = useUpdateUserMutation();
-  const [deleteUser] = useDeleteUserMutation();
-  const [toggleStatus] = useToggleUserStatusMutation();
+  const { data: profiles = [] } = useGetUserProfilesQuery();
+  const [updateUserProfile] = useUpdateUserProfileMutation();
+  const [deleteUserProfile] = useDeleteUserProfileMutation();
+  const [toggleActive] = useToggleProfileActiveMutation();
 
-  const [activeTab, setActiveTab] = useState<UserFilter>("all");
+  const [tab, setTab] = useState<UserFilter>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [editProfile, setEditProfile] = useState<UserProfile | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<UserProfile | null>(null);
 
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deletingUser, setDeletingUser] = useState<User | null>(null);
-
-  const allData: User[] = data ?? [];
-
-  const filtered = useMemo(() => {
-    return allData.filter((user) => {
-      const matchesTab = activeTab === "all" || user.status === activeTab;
-      const query = search.trim().toLowerCase();
-      const matchesSearch =
-        query === "" ||
-        user.name.toLowerCase().includes(query) ||
-        user.phone.includes(query) ||
-        user.email.toLowerCase().includes(query);
-      return matchesTab && matchesSearch;
-    });
-  }, [allData, activeTab, search]);
+  const filtered = profiles.filter((p) => {
+    if (tab === "active" && !p.isActive) return false;
+    if (tab === "inactive" && p.isActive) return false;
+    return p.profileName.toLowerCase().includes(search.toLowerCase());
+  });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const handleAddNew = () => {
-    console.log("add new user");
-  };
-
-  const handleEdit = (user: User) => {
-    setEditingUser(user);
-    setEditModalOpen(true);
-  };
-
-  const handleEditSubmit = async (id: string, changes: Partial<User>) => {
-    await updateUser({ id, changes });
-    setEditModalOpen(false);
-    setEditingUser(null);
-  };
-
-  const handleDelete = (user: User) => {
-    setDeletingUser(user);
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!deletingUser) return;
-    await deleteUser(deletingUser.id);
-    setDeleteModalOpen(false);
-    setDeletingUser(null);
-  };
-
-  const handleToggleStatus = async (user: User) => {
-    await toggleStatus(user.id);
-  };
-
-  if (isLoading || !data) return null;
+  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div className="w-full p-3 sm:p-6">
-      <UsersHeader
-        total={allData.length}
-        filteredCount={filtered.length}
-        onAddNew={handleAddNew}
-      />
-
+    <div>
+      <UsersHeader total={profiles.length} filteredCount={filtered.length} onAddNew={() => {}} />
       <UsersTabs
-        data={allData}
-        activeTab={activeTab}
-        onTabChange={(tab) => {
-          setActiveTab(tab);
-          setPage(1);
-        }}
+        data={profiles}
+        activeTab={tab}
+        onTabChange={(t) => { setTab(t); setPage(1); }}
         search={search}
-        onSearchChange={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
+        onSearchChange={(v) => { setSearch(v); setPage(1); }}
       />
-
       <UsersTable
-        users={paginated}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onToggleStatus={handleToggleStatus}
+        profiles={paged}
+        onEdit={setEditProfile}
+        onDelete={setDeleteTarget}
+        onToggleStatus={(p) => toggleActive(p.uuid)}
       />
-
       <UsersPagination
         total={filtered.length}
-        shown={paginated.length}
+        shown={paged.length}
         page={page}
         totalPages={totalPages}
         onPageChange={setPage}
       />
 
       <UserEditModal
-        open={editModalOpen}
-        initialData={editingUser}
-        onClose={() => {
-          setEditModalOpen(false);
-          setEditingUser(null);
-        }}
-        onSubmit={handleEditSubmit}
+        open={!!editProfile}
+        initialData={editProfile}
+        onClose={() => setEditProfile(null)}
+        onSubmit={(uuid, changes) => { updateUserProfile({ uuid, changes }); setEditProfile(null); }}
       />
-
       <DeleteUserConfirmModal
-        open={deleteModalOpen}
-        userName={deletingUser?.name ?? ""}
-        onCancel={() => {
-          setDeleteModalOpen(false);
-          setDeletingUser(null);
+        open={!!deleteTarget}
+        profileName={deleteTarget?.profileName ?? ""}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) deleteUserProfile(deleteTarget.uuid);
+          setDeleteTarget(null);
         }}
-        onConfirm={handleDeleteConfirm}
       />
     </div>
   );

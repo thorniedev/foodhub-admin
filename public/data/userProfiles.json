@@ -1,0 +1,185 @@
+{
+  "userProfiles": [
+    {
+      "uuid": "2c0baa0f-bbc4-4a8e-a28f-a78cc398789f",
+      "profileName": "Leng Saroth",
+      "relationship": "SELF",
+      "gender": "MALE",
+      "dateOfBirth": "2003-09-18",
+      "preferredLanguage": "en",
+      "avatarMediaUuid": null,
+      "ageGroup": {
+        "uuid": "7dcb9491-6d9f-4d3c-8b59-a53905d2a809",
+        "code": "ADULT",
+        "name": "Adult",
+        "minAge": 18,
+        "maxAge": 59
+      },
+      "isDefault": true,
+      "isActive": true,
+      "allergies": [
+        {
+          "uuid": "d8a1c52e-b0d6-45dd-9086-611d25b2d1cc",
+          "code": "PEANUT",
+          "name": "Peanut",
+          "severity": "SEVERE",
+          "reactionNotes": "Avoid peanuts and peanut-derived ingredients",
+          "avoidCrossContact": true,
+          "medicallyDiagnosed": true
+        },
+        {
+          "uuid": "34f64314-a24a-49b5-92cb-348938218d36",
+          "code": "EGG",
+          "name": "Egg",
+          "severity": "MODERATE",
+          "reactionNotes": "Avoid raw and partially cooked eggs",
+          "avoidCrossContact": false,
+          "medicallyDiagnosed": false
+        }
+      ],
+      "dietaryTypes": [
+        {
+          "uuid": "fd9fce08-fa19-4c9c-9456-471b0072ef7d",
+          "code": "HALAL",
+          "name": "Halal",
+          "category": "RELIGIOUS",
+          "enforcementLevel": "REQUIRED",
+          "priority": 1,
+          "notes": "All meals must be halal"
+        }
+      ],
+      "medicalConditions": [
+        {
+          "uuid": "b4009300-b38c-4418-b752-26c2a6168846",
+          "code": "DIABETES",
+          "name": "Diabetes",
+          "severity": "MODERATE",
+          "notes": "Prefer meals with lower sugar"
+        }
+      ],
+      "ingredientAvoids": [
+        {
+          "uuid": "85e6cfbb-8c8e-4fb1-b42b-0cef7a6e62f4",
+          "code": "MSG",
+          "name": "Monosodium Glutamate",
+          "avoidLevel": "STRICT_BLOCK",
+          "reasonCode": "PERSONAL_PREFERENCE",
+          "notes": "Avoid food containing MSG"
+        }
+      ],
+      "createdAt": "2026-08-02T01:39:12.22443",
+      "updatedAt": "2026-08-02T17:30:12.22443"
+    },
+    {
+      "uuid": "4a7813a1-9dba-49c1-bdad-07ef2df7c800",
+      "profileName": "Sokha",
+      "relationship": "CHILD",
+      "gender": "MALE",
+      "dateOfBirth": "2015-05-14",
+      "preferredLanguage": "km",
+      "avatarMediaUuid": null,
+      "ageGroup": {
+        "uuid": "a204ebe7-4390-48ae-920d-05394c1de12f",
+        "code": "CHILD",
+        "name": "Child",
+        "minAge": 6,
+        "maxAge": 12
+      },
+      "isDefault": false,
+      "isActive": true,
+      "allergies": [
+        {
+          "uuid": "6bbff975-c586-46b2-a840-b97d639a2338",
+          "code": "FISH",
+          "name": "Fish",
+          "severity": "SEVERE",
+          "reactionNotes": "Avoid fish completely",
+          "avoidCrossContact": true,
+          "medicallyDiagnosed": true
+        }
+      ],
+      "dietaryTypes": [
+        {
+          "uuid": "fd9fce08-fa19-4c9c-9456-471b0072ef7d",
+          "code": "HALAL",
+          "name": "Halal",
+          "category": "RELIGIOUS",
+          "enforcementLevel": "REQUIRED",
+          "priority": 1,
+          "notes": "Must be halal"
+        }
+      ],
+      "medicalConditions": [],
+      "ingredientAvoids": [
+        {
+          "uuid": "85e6cfbb-8c8e-4fb1-b42b-0cef7a6e62f4",
+          "code": "MSG",
+          "name": "Monosodium Glutamate",
+          "avoidLevel": "PREFERRED_AVOID",
+          "reasonCode": "PARENT_PREFERENCE",
+          "notes": "Prefer food without MSG"
+        }
+      ],
+      "createdAt": "2026-08-02T15:56:25.626265",
+      "updatedAt": "2026-08-02T15:56:25.626265"
+    },
+    {
+      "uuid": "ab21fc63-d4d3-4bfd-846c-295b5cb62888",
+      "profileName": "Sophea",
+      "relationship": "PARENT",
+      "gender": "FEMALE",
+      "dateOfBirth": "1972-11-25",
+      "preferredLanguage": "km",
+      "avatarMediaUuid": "8bfbe14a-2945-4cd8-a67d-0480ec2fde12",
+      "ageGroup": {
+        "uuid": "8663a17f-e51f-4fc4-a54b-034aa7c17978",
+        "code": "SENIOR",
+        "name": "Senior",
+
+        "minAge": 60,
+        "maxAge": 120
+      },
+      "isDefault": false,
+      "isActive": true,
+      "allergies": [],
+      "dietaryTypes": [
+        {
+          "uuid": "12b26978-676b-445b-9e72-745aa98d2988",
+          "code": "LOW_SODIUM",
+          "name": "Low Sodium",
+          "category": "MEDICAL",
+          "enforcementLevel": "REQUIRED",
+          "priority": 1,
+          "notes": "Meals should contain less salt"
+        }
+      ],
+      "medicalConditions": [
+        {
+          "uuid": "9173528d-049b-4937-9523-8888f4513fc6",
+          "code": "HYPERTENSION",
+          "name": "Hypertension",
+          "severity": "MODERATE",
+          "notes": "Avoid meals with high sodium"
+        }
+      ],
+      "ingredientAvoids": [
+        {
+          "uuid": "a434a257-b287-49b2-9560-f61e6f570c4b",
+          "code": "SALT",
+          "name": "Salt",
+          "avoidLevel": "PREFERRED_AVOID",
+          "reasonCode": "MEDICAL_GUIDANCE",
+          "notes": "Limit additional salt"
+        }
+      ],
+      "createdAt": "2026-08-02T16:25:11.115620",
+      "updatedAt": "2026-08-02T16:25:11.115620"
+    }
+  ],
+  "pageNumber": 0,
+  "pageSize": 20,
+  "totalElements": 3,
+  "totalPages": 1,
+  "first": true,
+  "last": true
+}

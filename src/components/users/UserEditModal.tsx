@@ -2,19 +2,32 @@
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { User, UserStatus } from "../../types/user";
+import { UserProfile, Gender, Relationship } from "../../types/userProfile";
 
 interface UserEditModalProps {
   open: boolean;
-  initialData: User | null;
+  initialData: UserProfile | null;
   onClose: () => void;
-  onSubmit: (id: string, changes: Partial<User>) => void;
+  onSubmit: (uuid: string, changes: Partial<UserProfile>) => void;
 }
 
-const STATUS_OPTIONS: { value: UserStatus; label: string }[] = [
-  { value: "active", label: "កំពុងដំណើរការ" },
-  { value: "pending", label: "កំពុងរង់ចាំ" },
-  { value: "banned", label: "បានផ្អាក" },
+const GENDER_OPTIONS: { value: Gender; label: string }[] = [
+  { value: "MALE", label: "ប្រុស" },
+  { value: "FEMALE", label: "ស្រី" },
+  { value: "OTHER", label: "ផ្សេងៗ" },
+];
+
+const RELATIONSHIP_OPTIONS: { value: Relationship; label: string }[] = [
+  { value: "SELF", label: "ខ្លួនឯង" },
+  { value: "CHILD", label: "កូន" },
+  { value: "PARENT", label: "ឪពុកម្តាយ" },
+  { value: "SPOUSE", label: "ប្តី/ប្រពន្ធ" },
+  { value: "OTHER", label: "ផ្សេងៗ" },
+];
+
+const LANGUAGE_OPTIONS = [
+  { value: "km", label: "ខ្មែរ" },
+  { value: "en", label: "English" },
 ];
 
 export default function UserEditModal({
@@ -23,7 +36,7 @@ export default function UserEditModal({
   onClose,
   onSubmit,
 }: UserEditModalProps) {
-  const [form, setForm] = useState<Partial<User>>({});
+  const [form, setForm] = useState<Partial<UserProfile>>({});
 
   useEffect(() => {
     if (initialData) setForm(initialData);
@@ -32,8 +45,8 @@ export default function UserEditModal({
   if (!open || !initialData) return null;
 
   const handleSubmit = () => {
-    if (!form.name?.trim() || !form.email?.trim()) return;
-    onSubmit(initialData.id, form);
+    if (!form.profileName?.trim() || !form.dateOfBirth) return;
+    onSubmit(initialData.uuid, form);
   };
 
   return (
@@ -41,7 +54,7 @@ export default function UserEditModal({
       <div className="bg-white rounded-2xl w-full max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base sm:text-lg font-bold text-gray-800">
-            កែសម្រួលអ្នកប្រើប្រាស់
+            កែសម្រួលប្រវត្តិរូប
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X size={20} />
@@ -53,59 +66,82 @@ export default function UserEditModal({
             <label className="text-sm text-gray-600 mb-1 block">ឈ្មោះ</label>
             <input
               type="text"
-              value={form.name ?? ""}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              value={form.profileName ?? ""}
+              onChange={(e) => setForm({ ...form, profileName: e.target.value })}
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
           <div>
-            <label className="text-sm sm:text-base text-gray-600 mb-1 block">
-              ឈ្មោះហាង (បើមាន)
-            </label>
-            <input
-              type="text"
-              value={form.shopName ?? ""}
-              onChange={(e) => setForm({ ...form, shopName: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">លេខទូរស័ព្ទ</label>
-            <input
-              type="text"
-              value={form.phone ?? ""}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">អ៊ីម៉ែល</label>
-            <input
-              type="email"
-              value={form.email ?? ""}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">ស្ថានភាព</label>
+            <label className="text-sm text-gray-600 mb-1 block">ទំនាក់ទំនង</label>
             <select
-              value={form.status ?? "active"}
+              value={form.relationship ?? "SELF"}
               onChange={(e) =>
-                setForm({ ...form, status: e.target.value as UserStatus })
+                setForm({ ...form, relationship: e.target.value as Relationship })
               }
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
-              {STATUS_OPTIONS.map((opt) => (
+              {RELATIONSHIP_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-600 mb-1 block">ភេទ</label>
+            <select
+              value={form.gender ?? "MALE"}
+              onChange={(e) => setForm({ ...form, gender: e.target.value as Gender })}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              {GENDER_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-600 mb-1 block">ថ្ងៃខែឆ្នាំកំណើត</label>
+            <input
+              type="date"
+              value={form.dateOfBirth ?? ""}
+              onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-600 mb-1 block">ភាសាដែលចូលចិត្ត</label>
+            <select
+              value={form.preferredLanguage ?? "km"}
+              onChange={(e) =>
+                setForm({ ...form, preferredLanguage: e.target.value })
+              }
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              {LANGUAGE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              id="isActive"
+              type="checkbox"
+              checked={form.isActive ?? true}
+              onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+              className="w-4 h-4"
+            />
+            <label htmlFor="isActive" className="text-sm text-gray-600">
+              សកម្ម (Active)
+            </label>
           </div>
         </div>
 

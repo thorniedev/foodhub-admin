@@ -4,14 +4,14 @@ import { AlertTriangle } from "lucide-react";
 
 interface DeleteUserConfirmModalProps {
   open: boolean;
-  userName: string;
+  profileName: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
 export default function DeleteUserConfirmModal({
   open,
-  userName,
+  profileName,
   onCancel,
   onConfirm,
 }: DeleteUserConfirmModalProps) {
@@ -25,13 +25,13 @@ export default function DeleteUserConfirmModal({
             <AlertTriangle size={20} className="text-red-500" />
           </div>
           <h2 className="text-base sm:text-lg font-bold text-gray-800">
-            លុបអ្នកប្រើប្រាស់
+            លុបប្រវត្តិរូប
           </h2>
         </div>
 
         <p className="text-sm text-gray-500 mb-6">
           តើអ្នកប្រាកដទេថាចង់លុប{" "}
-          <span className="font-medium text-gray-700">{userName}</span>? សកម្មភាពនេះមិន
+          <span className="font-medium text-gray-700">{profileName}</span>? សកម្មភាពនេះមិន
           អាចត្រឡប់វិញបានទេ។
         </p>
 
