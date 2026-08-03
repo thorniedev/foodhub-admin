@@ -10,7 +10,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { OrdersPoint } from "../../types/dashboard";
-// import { OrdersPoint } from "@/types/dashboard";
 
 export default function OrdersChart({ data }: { data: OrdersPoint[] }) {
   return (

@@ -1,4 +1,4 @@
-
+import { SidebarProvider } from "../../context/SidebarContext";
 import Sidebar from "../../components/layout/Sidebar";
 import Topbar from "../../components/layout/Topbar";
 
@@ -8,16 +8,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <SidebarProvider>
       <div className="h-screen w-full overflow-hidden bg-gray-50 flex">
-        <div className="h-screen shrink-0">
-          <Sidebar />
-        </div>
-        <div className="flex-1 h-screen flex flex-col overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 h-screen flex flex-col overflow-hidden min-w-0">
           <Topbar />
-          <main className="flex-1 overflow-y-auto p-5">{children}</main>
+          <main className="flex-1 overflow-y-auto p-4 md:p-5">{children}</main>
         </div>
       </div>
-    </>
+    </SidebarProvider>
   );
 }

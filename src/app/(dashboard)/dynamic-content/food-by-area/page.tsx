@@ -14,12 +14,6 @@ import FoodByAreaTabs from "../../../../components/FoodByAreaTabs";
 import FoodByAreaTable from "../../../../components/FoodByAreaTable";
 import FoodByAreaPagination from "../../../../components/FoodByAreaPagination";
 import FoodByAreaFormModal from "../../../../components/FoodByAreaFormModal";
-// import { Area, FoodByAreaImage } from "@/types/foodByArea";
-// import FoodByAreaBanner from "@/components/food-by-area/FoodByAreaBanner";
-// import FoodByAreaTabs from "@/components/food-by-area/FoodByAreaTabs";
-// import FoodByAreaTable from "@/components/food-by-area/FoodByAreaTable";
-// import FoodByAreaPagination from "@/components/food-by-area/FoodByAreaPagination";
-// import FoodByAreaFormModal from "@/components/food-by-area/FoodByAreaFormModal";
 
 const PAGE_SIZE = 8;
 

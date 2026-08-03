@@ -8,7 +8,6 @@ import DrinkImageUploadGrid from "./DrinkImageUploadGrid";
 import DrinkClassificationSection from "./DrinkClassificationSection";
 import DrinkDetailsSection from "./DrinkDetailsSection";
 import DrinkShopSection from "./DrinkShopSection";
-// import DrinkLocationSection from "./DrinkLocationSection";
 
 export default function CreateDrinkForm() {
   const router = useRouter();

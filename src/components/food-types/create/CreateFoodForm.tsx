@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-// import { useCreateFoodTypeMutation } from "@/store/foodTypeApi";
-// import { AgeGroupKey, DietSuitabilityKey } from "@/types/createFood";
 import ImageUploadGrid from "./ImageUploadGrid";
 import ClassificationSection from "./ClassificationSection";
-// import FoodDetailsSection from "./FoodDetailsSection";
 import RestaurantSection from "./RestaurantSection";
 import LocationSection from "./LocationSection";
 import { useCreateFoodTypeMutation } from "@/src/app/store/foodTypeApi";

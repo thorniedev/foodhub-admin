@@ -1,9 +1,6 @@
 import { Feedback, FeedbackStatus } from "@/src/types/feedback";
 import { baseApi } from "./baseApi";
 
-// In-memory mock store seeded from /public/data/feedbacks.json.
-// Swap the queryFns below for real HTTP calls once a backend endpoint exists;
-// hooks and component code stay the same.
 let memoryStore: Feedback[] | null = null;
 
 async function ensureStore(): Promise<Feedback[]> {

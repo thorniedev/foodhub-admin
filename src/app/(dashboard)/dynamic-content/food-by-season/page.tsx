@@ -14,12 +14,6 @@ import SeasonalFoodTabs from "../../../../components/seasonal-food/SeasonalFoodT
 import SeasonalFoodTable from "../../../../components/seasonal-food/SeasonalFoodTable";
 import SeasonalFoodPagination from "../../../../components/seasonal-food/SeasonalFoodPagination";
 import SeasonalFoodFormModal from "../../../../components/seasonal-food/SeasonalFoodFormModal";
-// import { Season, SeasonalFoodImage } from "@/types/seasonalFood";
-// import SeasonalFoodBanner from "@/components/seasonal-food/SeasonalFoodBanner";
-// import SeasonalFoodTabs from "@/components/seasonal-food/SeasonalFoodTabs";
-// import SeasonalFoodTable from "@/components/seasonal-food/SeasonalFoodTable";
-// import SeasonalFoodPagination from "@/components/seasonal-food/SeasonalFoodPagination";
-// import SeasonalFoodFormModal from "@/components/seasonal-food/SeasonalFoodFormModal";
 
 const PAGE_SIZE = 8;
 

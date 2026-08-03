@@ -32,10 +32,6 @@ export default function BannersTable({ banners, isLoading, onEdit }: BannersTabl
     return <p className="py-10 text-center text-sm text-gray-500">កំពុងផ្ទុក...</p>;
   }
 
-  // if (banners.length === 0) {
-  //   return <p className="py-10 text-center text-sm text-gray-500">មិនមានទិន្នន័យទេ</p>;
-  // }
-
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-100">
       <table className="w-full text-left text-sm">

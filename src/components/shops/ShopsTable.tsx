@@ -18,17 +18,19 @@ export default function ShopsTable({
   onToggleStatus,
 }: ShopsTableProps) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-      <table className="w-full text-sm">
+    <div className="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
+      <table className="w-full text-sm min-w-[900px]">
         <thead>
           <tr className="text-left text-[#136C34] border-b border-gray-100">
-            <th className="py-3 px-5 font-medium text-lg text-lg">ហាង</th>
-            <th className="py-3 px-5 font-medium text-lg">ការវាយតម្លៃ</th>
-            <th className="py-3 px-5 font-medium text-lg">ម៉ោងបើក/បិទ</th>
-            <th className="py-3 px-5 font-medium text-lg">ខេត្ត/ក្រុង</th>
-            <th className="py-3 px-5 font-medium text-lg">អាសយដ្ឋាន</th>
-            <th className="py-3 px-5 font-medium text-lg">លេខទូរស័ព្ទ</th>
-            <th className="py-3 px-5 font-medium text-lg text-right">សកម្មភាព</th>
+            <th className="py-3 px-5 font-medium text-base lg:text-lg">ហាង</th>
+            <th className="py-3 px-5 font-medium text-base lg:text-lg">ការវាយតម្លៃ</th>
+            <th className="py-3 px-5 font-medium text-base lg:text-lg">ម៉ោងបើក/បិទ</th>
+            <th className="py-3 px-5 font-medium text-base lg:text-lg">ខេត្ត/ក្រុង</th>
+            <th className="py-3 px-5 font-medium text-base lg:text-lg">អាសយដ្ឋាន</th>
+            <th className="py-3 px-5 font-medium text-base lg:text-lg">លេខទូរស័ព្ទ</th>
+            <th className="py-3 px-5 font-medium text-base lg:text-lg text-right">
+              សកម្មភាព
+            </th>
           </tr>
         </thead>
         <tbody>

@@ -2,7 +2,6 @@
 
 import { Search } from "lucide-react";
 import { ShopStatus } from "../../types/shop";
-// import { ShopStatus } from "../../types/shop";
 
 export type ShopFilter = "all" | ShopStatus;
 
@@ -29,13 +28,13 @@ export default function ShopsTabs({
   onSearchChange,
 }: ShopsTabsProps) {
   return (
-    <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 -mx-1 px-1 lg:mx-0 lg:px-0">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => onChange(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-base font-medium transition ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm sm:text-base font-medium transition whitespace-nowrap shrink-0 ${
               active === tab.key
                 ? "bg-[#136C34] text-white"
                 : "text-gray-500 hover:bg-gray-100"
@@ -53,7 +52,7 @@ export default function ShopsTabs({
         ))}
       </div>
 
-      <div className="relative w-72">
+      <div className="relative w-full lg:w-72">
         <Search
           size={16}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"

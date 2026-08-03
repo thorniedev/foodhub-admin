@@ -1,18 +1,3 @@
-// import { Drink } from "../../types/drink";
-// import { baseApi } from "./baseApi";
-
-// export const drinkApi = baseApi.injectEndpoints({
-//   endpoints: (builder) => ({
-//     getDrinks: builder.query<Drink[], void>({
-//       query: () => ({ url: "/data/drinks.json" }),
-//       providesTags: ["Drink"],
-//     }),
-//   }),
-//   overrideExisting: false,
-// });
-
-// export const { useGetDrinksQuery } = drinkApi;
-
 import { baseApi } from "./baseApi";
 import { Drink } from "@/src/types/drink";
 import { CreateDrinkPayload } from "@/src/types/createDrink";

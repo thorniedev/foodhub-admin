@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-// import { Banner, BannerFormData } from "../../../types/banner";
-// import { useAddBannerMutation, useUpdateBannerMutation } from "../../../app/store/bannerApi";
 import { Banner, BannerFormData } from "../../../types/banner";
 
 import {
