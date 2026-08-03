@@ -37,10 +37,12 @@ export default function UserEditModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md p-6">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white rounded-2xl w-full max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-gray-800">កែសម្រួលអ្នកប្រើប្រាស់</h2>
+          <h2 className="text-base sm:text-lg font-bold text-gray-800">
+            កែសម្រួលអ្នកប្រើប្រាស់
+          </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X size={20} />
           </button>
@@ -58,7 +60,9 @@ export default function UserEditModal({
           </div>
 
           <div>
-            <label className="text-base text-gray-600 mb-1 block">ឈ្មោះហាង (បើមាន)</label>
+            <label className="text-sm sm:text-base text-gray-600 mb-1 block">
+              ឈ្មោះហាង (បើមាន)
+            </label>
             <input
               type="text"
               value={form.shopName ?? ""}
@@ -105,7 +109,7 @@ export default function UserEditModal({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 mt-6">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 mt-6">
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"

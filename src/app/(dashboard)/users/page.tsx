@@ -52,8 +52,6 @@ export default function UsersPage() {
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleAddNew = () => {
-    // Wire this to a create form/route once you have one, similar to
-    // /dashboard/shops/create — tell me if you want that scaffolded too.
     console.log("add new user");
   };
 
@@ -87,7 +85,7 @@ export default function UsersPage() {
   if (isLoading || !data) return null;
 
   return (
-    <div className="p-6">
+    <div className="w-full p-3 sm:p-6">
       <UsersHeader
         total={allData.length}
         filteredCount={filtered.length}
