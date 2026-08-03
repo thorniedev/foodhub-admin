@@ -7,7 +7,6 @@ import {
   FilterGroupKey,
   FilterOption,
 } from "../../../types/dynamicContent";
-// import { FILTER_GROUPS, FilterGroupKey, FilterOption } from "@/types/dynamicContent";
 
 interface DynamicContentFormModalProps {
   open: boolean;
@@ -57,10 +56,10 @@ export default function DynamicContentFormModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md p-6">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white rounded-2xl w-full max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-gray-800">
+          <h2 className="text-base sm:text-lg font-bold text-gray-800">
             {initialData ? "កែសម្រួលជម្រើស" : "បន្ថែមជម្រើសថ្មី"}
           </h2>
           <button
@@ -131,7 +130,7 @@ export default function DynamicContentFormModal({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 mt-6">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 mt-6">
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"

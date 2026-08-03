@@ -2,8 +2,6 @@
 
 import { FILTER_GROUPS, FilterOption } from "../../../types/dynamicContent";
 
-// import { FILTER_GROUPS, FilterOption } from "@/types/dynamicContent";
-
 interface DynamicContentPreviewProps {
   data: FilterOption[];
   open: boolean;
@@ -20,8 +18,8 @@ export default function DynamicContentPreview({
   const activeOnly = data.filter((o) => o.active);
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-xs p-5 max-h-[85vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white rounded-2xl w-full max-w-xs p-4 sm:p-5 max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-gray-800 text-sm">
             ការមើលជាមុននៃកម្មវិធីអតិថិជន

@@ -6,8 +6,6 @@ import {
   FilterOption,
 } from "../../../types/dynamicContent";
 
-// import { FILTER_GROUPS, FilterGroupKey, FilterOption } from "@/types/dynamicContent";
-
 interface DynamicContentGroupTabsProps {
   data: FilterOption[];
   activeGroup: FilterGroupKey;
@@ -23,12 +21,12 @@ export default function DynamicContentGroupTabs({
     data.filter((o) => o.groupKey === key).length;
 
   return (
-    <div className="flex items-center gap-2 flex-wrap mb-4">
+    <div className="flex items-center gap-2 overflow-x-auto pb-1 mb-4 -mx-1 px-1">
       {FILTER_GROUPS.map((group) => (
         <button
           key={group.key}
           onClick={() => onGroupChange(group.key)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-base font-medium transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm sm:text-base font-medium transition-colors whitespace-nowrap shrink-0 ${
             activeGroup === group.key
               ? "bg-[#136C34] text-white"
               : "bg-gray-100 text-gray-600 hover:bg-gray-200"

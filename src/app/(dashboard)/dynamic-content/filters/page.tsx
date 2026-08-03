@@ -71,12 +71,12 @@ export default function DynamicContentPage() {
   };
 
   if (isLoading) {
-    return <div className="p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
+    return <div className="p-3 sm:p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
   }
 
   if (isError) {
     return (
-      <div className="p-6 text-red-500">
+      <div className="p-3 sm:p-6 text-red-500">
         មានបញ្ហាក្នុងការទាញយកទិន្នន័យ សូមព្យាយាមម្តងទៀត
       </div>
     );
@@ -86,7 +86,7 @@ export default function DynamicContentPage() {
   const totalGroups = new Set(allData.map((o) => o.groupKey)).size;
 
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-6">
       <DynamicContentBanner
         totalOptions={allData.length}
         totalGroups={totalGroups}
@@ -94,7 +94,7 @@ export default function DynamicContentPage() {
         onAddNew={handleAddNew}
       />
 
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
         <DynamicContentGroupTabs
           data={allData}
           activeGroup={activeGroup}
@@ -103,7 +103,7 @@ export default function DynamicContentPage() {
 
         <button
           onClick={() => setPreviewOpen(true)}
-          className="flex items-center gap-2 text-base font-medium text-[#136C34] hover:text-emerald-700 px-3 py-2 rounded-lg hover:bg-emerald-50 shrink-0"
+          className="flex items-center justify-center gap-2 text-sm sm:text-base font-medium text-[#136C34] hover:text-emerald-700 px-3 py-2 rounded-lg hover:bg-emerald-50 shrink-0 w-full lg:w-auto"
         >
           <Eye size={16} />
           មើលការបង្ហាញជាមុន
