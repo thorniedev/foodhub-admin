@@ -1,20 +1,225 @@
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import { X } from "lucide-react";
+// import { Shop, ShopStatus } from "../../types/shop";
+
+// interface ShopEditModalProps {
+//   open: boolean;
+//   initialData: Shop | null;
+//   onClose: () => void;
+//   onSubmit: (id: string, changes: Partial<Shop>) => void;
+// }
+
+// const STATUS_OPTIONS: { value: ShopStatus; label: string }[] = [
+//   { value: "active", label: "កំពុងដំណើរការ" },
+//   { value: "stopped", label: "បានបញ្ឈប់" },
+//   { value: "banned", label: "ត្រូវបានហាមឃាត់" },
+// ];
+
+// export default function ShopEditModal({
+//   open,
+//   initialData,
+//   onClose,
+//   onSubmit,
+// }: ShopEditModalProps) {
+//   const [form, setForm] = useState<Partial<Shop>>({});
+
+//   useEffect(() => {
+//     if (initialData) setForm(initialData);
+//   }, [initialData, open]);
+
+//   if (!open || !initialData) return null;
+
+//   const handleSubmit = () => {
+//     if (!form.name?.trim()) return;
+//     onSubmit(initialData.id, form);
+//   };
+
+//   return (
+//     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
+//       <div className="bg-white rounded-2xl w-full max-w-lg p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+//         <div className="flex items-center justify-between mb-5">
+//           <h2 className="text-base sm:text-lg font-bold text-gray-800">
+//             កែសម្រួលហាង
+//           </h2>
+//           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+//             <X size={20} />
+//           </button>
+//         </div>
+
+//         <div className="space-y-4">
+//           <div>
+//             <label className="text-sm text-gray-600 mb-1 block">ឈ្មោះហាង</label>
+//             <input
+//               type="text"
+//               value={form.name ?? ""}
+//               onChange={(e) => setForm({ ...form, name: e.target.value })}
+//               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+//             />
+//           </div>
+
+//           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//             <div>
+//               <label className="text-sm text-gray-600 mb-1 block">
+//                 ការវាយតម្លៃ (0-5)
+//               </label>
+//               <input
+//                 type="number"
+//                 min={0}
+//                 max={5}
+//                 step={0.1}
+//                 value={form.rating ?? 0}
+//                 onChange={(e) =>
+//                   setForm({ ...form, rating: Number(e.target.value) })
+//                 }
+//                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+//               />
+//             </div>
+//             <div>
+//               <label className="text-sm text-gray-600 mb-1 block">ស្ថានភាព</label>
+//               <select
+//                 value={form.status ?? "active"}
+//                 onChange={(e) =>
+//                   setForm({ ...form, status: e.target.value as ShopStatus })
+//                 }
+//                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+//               >
+//                 {STATUS_OPTIONS.map((opt) => (
+//                   <option key={opt.value} value={opt.value}>
+//                     {opt.label}
+//                   </option>
+//                 ))}
+//               </select>
+//             </div>
+//           </div>
+
+//           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//             <div>
+//               <label className="text-sm text-gray-600 mb-1 block">ម៉ោងបើក</label>
+//               <input
+//                 type="text"
+//                 value={form.openingHours ?? ""}
+//                 onChange={(e) =>
+//                   setForm({ ...form, openingHours: e.target.value })
+//                 }
+//                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+//               />
+//             </div>
+//             <div>
+//               <label className="text-sm text-gray-600 mb-1 block">ម៉ោងបិទ</label>
+//               <input
+//                 type="text"
+//                 value={form.closingHours ?? ""}
+//                 onChange={(e) =>
+//                   setForm({ ...form, closingHours: e.target.value })
+//                 }
+//                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+//               />
+//             </div>
+//           </div>
+
+//           <div>
+//             <label className="text-sm text-gray-600 mb-1 block">ខេត្ត/ក្រុង</label>
+//             <input
+//               type="text"
+//               value={form.province ?? ""}
+//               onChange={(e) => setForm({ ...form, province: e.target.value })}
+//               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+//             />
+//           </div>
+
+//           <div>
+//             <label className="text-sm text-gray-600 mb-1 block">អាសយដ្ឋាន</label>
+//             <textarea
+//               value={form.address ?? ""}
+//               onChange={(e) => setForm({ ...form, address: e.target.value })}
+//               rows={2}
+//               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+//             />
+//           </div>
+
+//           <div>
+//             <label className="text-sm text-gray-600 mb-1 block">លេខទូរស័ព្ទ</label>
+//             <input
+//               type="text"
+//               value={form.phone ?? ""}
+//               onChange={(e) => setForm({ ...form, phone: e.target.value })}
+//               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+//             />
+//           </div>
+//         </div>
+
+//         <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 mt-6">
+//           <button
+//             onClick={onClose}
+//             className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"
+//           >
+//             បោះបង់
+//           </button>
+//           <button
+//             onClick={handleSubmit}
+//             className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg"
+//           >
+//             រក្សាទុក
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { Shop, ShopStatus } from "../../types/shop";
+import {
+  AccountStatus,
+  OperatingStatus,
+  PriceLevel,
+  ReviewStatus,
+  Shop,
+} from "../../types/shop";
 
 interface ShopEditModalProps {
   open: boolean;
   initialData: Shop | null;
   onClose: () => void;
-  onSubmit: (id: string, changes: Partial<Shop>) => void;
+  onSubmit: (uuid: string, changes: Partial<Shop>) => void;
 }
 
-const STATUS_OPTIONS: { value: ShopStatus; label: string }[] = [
-  { value: "active", label: "កំពុងដំណើរការ" },
-  { value: "stopped", label: "បានបញ្ឈប់" },
-  { value: "banned", label: "ត្រូវបានហាមឃាត់" },
+const PRICE_OPTIONS: { value: PriceLevel; label: string }[] = [
+  { value: null, label: "មិនកំណត់" },
+  { value: "LOW", label: "$" },
+  { value: "MEDIUM", label: "$$" },
+  { value: "HIGH", label: "$$$" },
+];
+
+const REVIEW_OPTIONS: { value: ReviewStatus; label: string }[] = [
+  { value: "PENDING", label: "កំពុងរង់ចាំ" },
+  { value: "APPROVED", label: "បានអនុម័ត" },
+  { value: "REJECTED", label: "បានបដិសេធ" },
+];
+
+const OPERATING_OPTIONS: { value: OperatingStatus; label: string }[] = [
+  { value: "OPEN", label: "កំពុងបើក" },
+  { value: "CLOSED", label: "បិទ" },
+  { value: "TEMPORARILY_CLOSED", label: "បិទបណ្ដោះអាសន្ន" },
+  { value: "UNKNOWN", label: "មិនស្គាល់" },
+];
+
+const ACCOUNT_OPTIONS: { value: AccountStatus; label: string }[] = [
+  { value: "ACTIVE", label: "កំពុងដំណើរការ" },
+  { value: "SUSPENDED", label: "បានផ្អាក" },
+  { value: "BANNED", label: "ត្រូវបានហាមឃាត់" },
+  { value: "PENDING", label: "កំពុងរង់ចាំ" },
 ];
 
 export default function ShopEditModal({
@@ -32,8 +237,8 @@ export default function ShopEditModal({
   if (!open || !initialData) return null;
 
   const handleSubmit = () => {
-    if (!form.name?.trim()) return;
-    onSubmit(initialData.id, form);
+    if (!form.storeName?.trim()) return;
+    onSubmit(initialData.uuid, form);
   };
 
   return (
@@ -53,39 +258,109 @@ export default function ShopEditModal({
             <label className="text-sm text-gray-600 mb-1 block">ឈ្មោះហាង</label>
             <input
               type="text"
-              value={form.name ?? ""}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              value={form.storeName ?? ""}
+              onChange={(e) => setForm({ ...form, storeName: e.target.value })}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-600 mb-1 block">ការពិពណ៌នា</label>
+            <textarea
+              value={form.description ?? ""}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              rows={2}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-600 mb-1 block">អាសយដ្ឋាន</label>
+            <textarea
+              value={form.addressLine ?? ""}
+              onChange={(e) => setForm({ ...form, addressLine: e.target.value })}
+              rows={2}
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm text-gray-600 mb-1 block">
-                ការវាយតម្លៃ (0-5)
-              </label>
+              <label className="text-sm text-gray-600 mb-1 block">ស្រុក/ខណ្ឌ</label>
               <input
-                type="number"
-                min={0}
-                max={5}
-                step={0.1}
-                value={form.rating ?? 0}
-                onChange={(e) =>
-                  setForm({ ...form, rating: Number(e.target.value) })
-                }
+                type="text"
+                value={form.district ?? ""}
+                onChange={(e) => setForm({ ...form, district: e.target.value })}
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
-              <label className="text-sm text-gray-600 mb-1 block">ស្ថានភាព</label>
+              <label className="text-sm text-gray-600 mb-1 block">ខេត្ត/ក្រុង</label>
+              <input
+                type="text"
+                value={form.city ?? ""}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">លេខទូរស័ព្ទ</label>
+              <input
+                type="text"
+                value={form.phoneNumber ?? ""}
+                onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">អ៊ីមែល</label>
+              <input
+                type="email"
+                value={form.email ?? ""}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">តម្លៃ</label>
               <select
-                value={form.status ?? "active"}
+                value={form.priceLevel ?? ""}
                 onChange={(e) =>
-                  setForm({ ...form, status: e.target.value as ShopStatus })
+                  setForm({
+                    ...form,
+                    priceLevel: (e.target.value || null) as PriceLevel,
+                  })
                 }
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
-                {STATUS_OPTIONS.map((opt) => (
+                {PRICE_OPTIONS.map((opt) => (
+                  <option key={opt.label} value={opt.value ?? ""}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">
+                ស្ថានភាពពិនិត្យ
+              </label>
+              <select
+                value={form.reviewStatus ?? "PENDING"}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    reviewStatus: e.target.value as ReviewStatus,
+                  })
+                }
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                {REVIEW_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
@@ -96,57 +371,47 @@ export default function ShopEditModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm text-gray-600 mb-1 block">ម៉ោងបើក</label>
-              <input
-                type="text"
-                value={form.openingHours ?? ""}
+              <label className="text-sm text-gray-600 mb-1 block">
+                ស្ថានភាពដំណើរការ
+              </label>
+              <select
+                value={form.operatingStatus ?? "UNKNOWN"}
                 onChange={(e) =>
-                  setForm({ ...form, openingHours: e.target.value })
+                  setForm({
+                    ...form,
+                    operatingStatus: e.target.value as OperatingStatus,
+                  })
                 }
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
+              >
+                {OPERATING_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
-              <label className="text-sm text-gray-600 mb-1 block">ម៉ោងបិទ</label>
-              <input
-                type="text"
-                value={form.closingHours ?? ""}
+              <label className="text-sm text-gray-600 mb-1 block">
+                ស្ថានភាពគណនី
+              </label>
+              <select
+                value={form.accountStatus ?? "ACTIVE"}
                 onChange={(e) =>
-                  setForm({ ...form, closingHours: e.target.value })
+                  setForm({
+                    ...form,
+                    accountStatus: e.target.value as AccountStatus,
+                  })
                 }
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
+              >
+                {ACCOUNT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             </div>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">ខេត្ត/ក្រុង</label>
-            <input
-              type="text"
-              value={form.province ?? ""}
-              onChange={(e) => setForm({ ...form, province: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">អាសយដ្ឋាន</label>
-            <textarea
-              value={form.address ?? ""}
-              onChange={(e) => setForm({ ...form, address: e.target.value })}
-              rows={2}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">លេខទូរស័ព្ទ</label>
-            <input
-              type="text"
-              value={form.phone ?? ""}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
           </div>
         </div>
 

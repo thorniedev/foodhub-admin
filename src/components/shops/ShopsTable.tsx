@@ -1,7 +1,121 @@
+// "use client";
+
+// import Image from "next/image";
+// import { Ban, Pencil, Trash2, Star } from "lucide-react";
+// import { Shop } from "../../types/shop";
+
+// interface ShopsTableProps {
+//   shops: Shop[];
+//   onEdit: (shop: Shop) => void;
+//   onDelete: (shop: Shop) => void;
+//   onToggleStatus: (shop: Shop) => void;
+// }
+
+// export default function ShopsTable({
+//   shops,
+//   onEdit,
+//   onDelete,
+//   onToggleStatus,
+// }: ShopsTableProps) {
+//   return (
+//     <div className="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
+//       <table className="w-full text-sm min-w-[900px]">
+//         <thead>
+//           <tr className="text-left text-[#136C34] border-b border-gray-100">
+//             <th className="py-3 px-5 font-medium text-base lg:text-lg">ហាង</th>
+//             <th className="py-3 px-5 font-medium text-base lg:text-lg">ការវាយតម្លៃ</th>
+//             <th className="py-3 px-5 font-medium text-base lg:text-lg">ម៉ោងបើក/បិទ</th>
+//             <th className="py-3 px-5 font-medium text-base lg:text-lg">ខេត្ត/ក្រុង</th>
+//             <th className="py-3 px-5 font-medium text-base lg:text-lg">អាសយដ្ឋាន</th>
+//             <th className="py-3 px-5 font-medium text-base lg:text-lg">លេខទូរស័ព្ទ</th>
+//             <th className="py-3 px-5 font-medium text-base lg:text-lg text-right">
+//               សកម្មភាព
+//             </th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {shops.map((shop) => (
+//             <tr key={shop.id} className="border-b border-gray-50 last:border-0">
+//               <td className="py-3 px-5">
+//                 <div className="flex items-center gap-3">
+//                   <div className="w-9 h-9 rounded-lg overflow-hidden bg-gray-100 shrink-0 relative">
+//                     <Image
+//                       src={shop.logo}
+//                       alt={shop.name}
+//                       fill
+//                       className="object-cover"
+//                     />
+//                   </div>
+//                   <span className="text-gray-700">{shop.name}</span>
+//                 </div>
+//               </td>
+//               <td className="py-3 px-5">
+//                 <span className="flex items-center gap-1 text-gray-700">
+//                   <Star size={14} className="fill-yellow-400 text-yellow-400" />
+//                   {shop.rating}
+//                 </span>
+//               </td>
+//               <td className="py-3 px-5 text-gray-500">
+//                 {shop.openingHours} - {shop.closingHours}
+//               </td>
+//               <td className="py-3 px-5 text-gray-500">{shop.province}</td>
+//               <td className="py-3 px-5 text-gray-500 max-w-xs truncate">
+//                 {shop.address}
+//               </td>
+//               <td className="py-3 px-5 text-gray-500">{shop.phone}</td>
+//               <td className="py-3 px-5">
+//                 <div className="flex items-center justify-end gap-3">
+//                   <button
+//                     onClick={() => onToggleStatus(shop)}
+//                     title={shop.status === "banned" ? "ដកហាមឃាត់" : "ហាមឃាត់"}
+//                     className="text-red-400 hover:text-red-600"
+//                   >
+//                     <Ban size={16} />
+//                   </button>
+//                   <button
+//                     onClick={() => onEdit(shop)}
+//                     title="កែសម្រួល"
+//                     className="text-blue-400 hover:text-blue-600"
+//                   >
+//                     <Pencil size={16} />
+//                   </button>
+//                   <button
+//                     onClick={() => onDelete(shop)}
+//                     title="លុប"
+//                     className="text-red-400 hover:text-red-600"
+//                   >
+//                     <Trash2 size={16} />
+//                   </button>
+//                 </div>
+//               </td>
+//             </tr>
+//           ))}
+
+//           {shops.length === 0 && (
+//             <tr>
+//               <td colSpan={7} className="py-10 text-center text-gray-400">
+//                 មិនមានទិន្នន័យ
+//               </td>
+//             </tr>
+//           )}
+//         </tbody>
+//       </table>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
+
 "use client";
 
 import Image from "next/image";
-import { Ban, Pencil, Trash2, Star } from "lucide-react";
+import { Ban, Pencil, Star, Trash2 } from "lucide-react";
 import { Shop } from "../../types/shop";
 
 interface ShopsTableProps {
@@ -10,6 +124,26 @@ interface ShopsTableProps {
   onDelete: (shop: Shop) => void;
   onToggleStatus: (shop: Shop) => void;
 }
+
+const PRICE_LABEL: Record<string, string> = {
+  LOW: "$",
+  MEDIUM: "$$",
+  HIGH: "$$$",
+};
+
+const OPERATING_BADGE: Record<string, string> = {
+  OPEN: "bg-emerald-50 text-emerald-600",
+  CLOSED: "bg-gray-100 text-gray-500",
+  TEMPORARILY_CLOSED: "bg-amber-50 text-amber-600",
+  UNKNOWN: "bg-gray-100 text-gray-400",
+};
+
+const ACCOUNT_BADGE: Record<string, string> = {
+  ACTIVE: "bg-emerald-50 text-emerald-600",
+  SUSPENDED: "bg-amber-50 text-amber-600",
+  BANNED: "bg-red-50 text-red-500",
+  PENDING: "bg-gray-100 text-gray-500",
+};
 
 export default function ShopsTable({
   shops,
@@ -24,50 +158,74 @@ export default function ShopsTable({
           <tr className="text-left text-[#136C34] border-b border-gray-100">
             <th className="py-3 px-5 font-medium text-base lg:text-lg">ហាង</th>
             <th className="py-3 px-5 font-medium text-base lg:text-lg">ការវាយតម្លៃ</th>
-            <th className="py-3 px-5 font-medium text-base lg:text-lg">ម៉ោងបើក/បិទ</th>
-            <th className="py-3 px-5 font-medium text-base lg:text-lg">ខេត្ត/ក្រុង</th>
-            <th className="py-3 px-5 font-medium text-base lg:text-lg">អាសយដ្ឋាន</th>
+            <th className="py-3 px-5 font-medium text-base lg:text-lg">តម្លៃ</th>
+            <th className="py-3 px-5 font-medium text-base lg:text-lg">ដំណើរការ</th>
+            <th className="py-3 px-5 font-medium text-base lg:text-lg">ស្ថានភាពគណនី</th>
             <th className="py-3 px-5 font-medium text-base lg:text-lg">លេខទូរស័ព្ទ</th>
-            <th className="py-3 px-5 font-medium text-base lg:text-lg text-right">
+            <th className="py-3 px-5 font-medium text-right text-base lg:text-lg">
               សកម្មភាព
             </th>
           </tr>
         </thead>
         <tbody>
           {shops.map((shop) => (
-            <tr key={shop.id} className="border-b border-gray-50 last:border-0">
+            <tr key={shop.uuid} className="border-b border-gray-50 last:border-0">
               <td className="py-3 px-5">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg overflow-hidden bg-gray-100 shrink-0 relative">
                     <Image
-                      src={shop.logo}
-                      alt={shop.name}
+                      src={shop.logoUrl || "/Image/fallback.png"}
+                      alt={shop.storeName}
                       fill
                       className="object-cover"
                     />
                   </div>
-                  <span className="text-gray-700">{shop.name}</span>
+                  <div>
+                    <p className="text-gray-700 font-medium">{shop.storeName}</p>
+                    <p className="text-xs text-gray-400">
+                      {shop.district}, {shop.city}
+                    </p>
+                  </div>
                 </div>
               </td>
               <td className="py-3 px-5">
                 <span className="flex items-center gap-1 text-gray-700">
                   <Star size={14} className="fill-yellow-400 text-yellow-400" />
-                  {shop.rating}
+                  {shop.averageRating}
+                  <span className="text-xs text-gray-400">
+                    ({shop.totalReviews})
+                  </span>
                 </span>
               </td>
               <td className="py-3 px-5 text-gray-500">
-                {shop.openingHours} - {shop.closingHours}
+                {shop.priceLevel ? PRICE_LABEL[shop.priceLevel] : "-"}
               </td>
-              <td className="py-3 px-5 text-gray-500">{shop.province}</td>
-              <td className="py-3 px-5 text-gray-500 max-w-xs truncate">
-                {shop.address}
+              <td className="py-3 px-5">
+                <span
+                  className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                    OPERATING_BADGE[shop.operatingStatus]
+                  }`}
+                >
+                  {shop.operatingStatus}
+                </span>
               </td>
-              <td className="py-3 px-5 text-gray-500">{shop.phone}</td>
+              <td className="py-3 px-5">
+                <span
+                  className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                    ACCOUNT_BADGE[shop.accountStatus]
+                  }`}
+                >
+                  {shop.accountStatus}
+                </span>
+              </td>
+              <td className="py-3 px-5 text-gray-500">{shop.phoneNumber}</td>
               <td className="py-3 px-5">
                 <div className="flex items-center justify-end gap-3">
                   <button
                     onClick={() => onToggleStatus(shop)}
-                    title={shop.status === "banned" ? "ដកហាមឃាត់" : "ហាមឃាត់"}
+                    title={
+                      shop.accountStatus === "BANNED" ? "ដកហាមឃាត់" : "ហាមឃាត់"
+                    }
                     className="text-red-400 hover:text-red-600"
                   >
                     <Ban size={16} />
