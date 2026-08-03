@@ -58,10 +58,10 @@ export default function FoodByAreaFormModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white rounded-2xl w-full max-w-lg p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-gray-800">
+          <h2 className="text-base sm:text-lg font-bold text-gray-800">
             {initialData ? "កែសម្រួលរូបភាព" : "បន្ថែមរូបភាពថ្មី"}
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -91,7 +91,7 @@ export default function FoodByAreaFormModal({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm text-gray-600 mb-1 block">តំបន់/ខេត្ត</label>
               <select
@@ -137,7 +137,7 @@ export default function FoodByAreaFormModal({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 mt-6">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 mt-6">
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"

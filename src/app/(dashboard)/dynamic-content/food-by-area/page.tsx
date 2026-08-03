@@ -78,19 +78,19 @@ export default function FoodByAreaPage() {
   };
 
   if (isLoading) {
-    return <div className="p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
+    return <div className="p-3 sm:p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
   }
 
   if (isError) {
     return (
-      <div className="p-6 text-red-500">
+      <div className="p-3 sm:p-6 text-red-500">
         មានបញ្ហាក្នុងការទាញយកទិន្នន័យ សូមព្យាយាមម្តងទៀត
       </div>
     );
   }
 
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-6">
       <FoodByAreaBanner
         total={allData.length}
         activeCount={activeCount}

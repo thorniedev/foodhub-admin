@@ -31,14 +31,14 @@ export default function FoodByAreaTable({
 }: FoodByAreaTableProps) {
   return (
     <div className="bg-white border border-gray-100 rounded-xl overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="w-full text-sm min-w-[700px]">
         <thead>
-          <tr className="border-b border-gray-100 text-left text-[#136C34] text-lg">
-            <th className="py-3 px-4 font-medium">រូបភាព</th>
-            <th className="py-3 px-4 font-medium">ចំណងជើង</th>
-            <th className="py-3 px-4 font-medium">ការពិពណ៌នា</th>
-            <th className="py-3 px-4 font-medium">ស្ថានភាព</th>
-            <th className="py-3 px-4 font-medium text-right">សកម្មភាព</th>
+          <tr className="border-b border-gray-100 text-left text-[#136C34]">
+            <th className="py-3 px-4 font-medium text-base lg:text-lg">រូបភាព</th>
+            <th className="py-3 px-4 font-medium text-base lg:text-lg">ចំណងជើង</th>
+            <th className="py-3 px-4 font-medium text-base lg:text-lg">ការពិពណ៌នា</th>
+            <th className="py-3 px-4 font-medium text-base lg:text-lg">ស្ថានភាព</th>
+            <th className="py-3 px-4 font-medium text-right text-base lg:text-lg">សកម្មភាព</th>
           </tr>
         </thead>
         <tbody>
