@@ -2,7 +2,6 @@
 
 import { Search } from "lucide-react";
 import { FoodCategory, FoodType } from "../../types/foodType";
-// import { FoodCategory, FoodType } from "@/types/foodType";
 
 interface FoodTypesTabsProps {
   data: FoodType[];
@@ -31,13 +30,13 @@ export default function FoodTypesTabs({
     key === "all" ? data.length : data.filter((d) => d.category === key).length;
 
   return (
-    <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-      <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 -mx-1 px-1 lg:mx-0 lg:px-0">
         {TAB_LABELS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-base font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm sm:text-base font-medium transition-colors whitespace-nowrap shrink-0 ${
               activeTab === tab.key
                 ? "bg-[#136C34] text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -57,7 +56,7 @@ export default function FoodTypesTabs({
         ))}
       </div>
 
-      <div className="relative">
+      <div className="relative w-full lg:w-64">
         <Search
           size={16}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -67,7 +66,7 @@ export default function FoodTypesTabs({
           value={tabSearch}
           onChange={(e) => onTabSearchChange(e.target.value)}
           placeholder="ស្វែងរកប្រភេទចំណីអាហារ..."
-          className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 w-64"
+          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
       </div>
     </div>
