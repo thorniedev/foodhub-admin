@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Ban, Pencil, Trash2 } from "lucide-react";
-import { SeasonalFoodImage } from "../../types/seasonalFood";
+import { SeasonalFoodImage } from "../../../types/seasonalFood";
 // import { SeasonalFoodImage } from "@/types/seasonalFood";
 
 interface SeasonalFoodTableProps {

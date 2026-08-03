@@ -14,7 +14,7 @@ export default function BannersPagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="mt-4 flex items-center justify-end gap-2">
+    <div className="mt-4 flex flex-wrap items-center justify-center sm:justify-end gap-2">
       <button
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}

@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useGetBannersQuery } from "../../../store/bannerApi";
-// import { Banner } from "../../../../types/banner";
 import BannersHeader from "../../../../components/dynamic-content/banners/BannersHeader";
 import BannersTable from "../../../../components/dynamic-content/banners/BannersTable";
 import BannersPagination from "../../../../components/dynamic-content/banners/BannersPagination";
@@ -39,7 +38,7 @@ export default function BannersPage() {
   };
 
   return (
-    <div>
+    <div className="p-3 sm:p-6">
       <BannersHeader
         total={filtered.length}
         search={search}

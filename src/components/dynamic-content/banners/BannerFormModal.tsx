@@ -62,9 +62,9 @@ export default function BannerFormModal({
   const isSaving = isAdding || isUpdating;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg">
-        <h2 className="mb-4 text-lg font-semibold text-gray-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 sm:px-4">
+      <div className="w-full max-w-md rounded-xl bg-white p-4 sm:p-6 shadow-lg max-h-[90vh] overflow-y-auto">
+        <h2 className="mb-4 text-base sm:text-lg font-semibold text-gray-800">
           {editing ? "កែសម្រួលរូបបែនណី" : "បន្ថែមរូបបែនណីថ្មី"}
         </h2>
 
@@ -103,7 +103,7 @@ export default function BannerFormModal({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="mb-1 block text-sm text-gray-600">លំដាប់</label>
               <input
@@ -129,7 +129,7 @@ export default function BannerFormModal({
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end gap-3">
+          <div className="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-3">
             <button
               type="button"
               onClick={onClose}

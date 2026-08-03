@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-// import { Banner } from "../../../types/banner";
 import { useDeleteBannerMutation, useUpdateBannerMutation } from "../../../app/store/bannerApi";
 import { Banner } from "../../../types/banner";
 
@@ -14,7 +13,7 @@ interface BannersTableProps {
 export default function BannersTable({ banners, isLoading, onEdit }: BannersTableProps) {
   const [deleteBanner] = useDeleteBannerMutation();
   const [updateBanner] = useUpdateBannerMutation();
- 
+
   const handleDelete = async (id: string) => {
     if (confirm("តើអ្នកចង់លុបរូបបែនណឺនេះមែនទេ?")) {
       await deleteBanner(id);
@@ -34,15 +33,15 @@ export default function BannersTable({ banners, isLoading, onEdit }: BannersTabl
 
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-100">
-      <table className="w-full text-left text-sm">
+      <table className="w-full text-left text-sm min-w-[700px]">
         <thead className="bg-gray-50 text-[#136C34]">
           <tr>
-            <th className="px-4 py-3 font-medium text-lg">រូបភាព</th>
-            <th className="px-4 py-3 font-medium text-lg">ចំណងជើង</th>
-            <th className="px-4 py-3 font-medium text-lg">តំណភ្ជាប់</th>
-            <th className="px-4 py-3 font-medium text-lg">លំដាប់</th>
-            <th className="px-4 py-3 font-medium text-lg">សកម្មភាព</th>
-            <th className="px-4 py-3 font-medium text-right text-lg">សកម្មភាព</th>
+            <th className="px-4 py-3 font-medium text-base lg:text-lg">រូបភាព</th>
+            <th className="px-4 py-3 font-medium text-base lg:text-lg">ចំណងជើង</th>
+            <th className="px-4 py-3 font-medium text-base lg:text-lg">តំណភ្ជាប់</th>
+            <th className="px-4 py-3 font-medium text-base lg:text-lg">លំដាប់</th>
+            <th className="px-4 py-3 font-medium text-base lg:text-lg">សកម្មភាព</th>
+            <th className="px-4 py-3 font-medium text-right text-base lg:text-lg">សកម្មភាព</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
