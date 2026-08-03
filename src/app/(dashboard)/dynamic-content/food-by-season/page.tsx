@@ -8,12 +8,12 @@ import {
   useToggleSeasonalFoodStatusMutation,
   useUpdateSeasonalFoodMutation,
 } from "../../../store/seasonalFoodApi";
-import { Season, SeasonalFoodImage } from "../../../../types/seasonalFood";
-import SeasonalFoodBanner from "../../../../components/dynamic-content/seasonal-food/SeasonalFoodBanner";
-import SeasonalFoodTabs from "../../../../components/dynamic-content/seasonal-food/SeasonalFoodTabs";
-import SeasonalFoodTable from "../../../../components/dynamic-content/seasonal-food/SeasonalFoodTable";
-import SeasonalFoodPagination from "../../../../components/dynamic-content/seasonal-food/SeasonalFoodPagination";
-import SeasonalFoodFormModal from "../../../../components/dynamic-content/seasonal-food/SeasonalFoodFormModal";
+import { Season, SeasonalFoodImage } from "@/src/types/seasonalFood";
+import SeasonalFoodBanner from "@/src/components/dynamic-content/seasonal-food/SeasonalFoodBanner";
+import SeasonalFoodTabs from "@/src/components/dynamic-content/seasonal-food/SeasonalFoodTabs";
+import SeasonalFoodPagination from "@/src/components/dynamic-content/seasonal-food/SeasonalFoodPagination";
+import SeasonalFoodFormModal from "@/src/components/dynamic-content/seasonal-food/SeasonalFoodFormModal";
+import SeasonalFoodTable from "@/src/components/dynamic-content/seasonal-food/SeasonalFoodTable";
 
 const PAGE_SIZE = 8;
 
@@ -28,9 +28,7 @@ export default function FoodBySeasonPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<SeasonalFoodImage | null>(
-    null,
-  );
+  const [editingItem, setEditingItem] = useState<SeasonalFoodImage | null>(null);
 
   const allData: SeasonalFoodImage[] = data ?? [];
 
@@ -80,19 +78,19 @@ export default function FoodBySeasonPage() {
   };
 
   if (isLoading) {
-    return <div className="p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
+    return <div className="p-3 sm:p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
   }
 
   if (isError) {
     return (
-      <div className="p-6 text-red-500">
+      <div className="p-3 sm:p-6 text-red-500">
         មានបញ្ហាក្នុងការទាញយកទិន្នន័យ សូមព្យាយាមម្តងទៀត
       </div>
     );
   }
 
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-6">
       <SeasonalFoodBanner
         total={allData.length}
         activeCount={activeCount}
