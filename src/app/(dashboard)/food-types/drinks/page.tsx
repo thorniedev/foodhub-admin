@@ -15,7 +15,6 @@ import DrinksTable from "@/src/components/drinks/DrinksTable";
 import DrinksPagination from "@/src/components/drinks/DrinksPagination";
 import DrinkEditModal from "@/src/components/drinks/DrinkEditModal";
 import DeleteDrinkConfirmModal from "@/src/components/drinks/DeleteDrinkConfirmModal";
-// import DeleteDrinkConfirmModal from "@src/components/drinks/DeleteDrinkConfirmModal";
 
 const PAGE_SIZE = 10;
 
@@ -81,23 +80,23 @@ export default function DrinksPage() {
   };
 
   const handleAddNew = () => {
-    router.push("/dashboard/food-types/drinks/create");
+    router.push("/food-types/drinks/create");
   };
 
   if (isLoading) {
-    return <div className="p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
+    return <div className="p-3 sm:p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
   }
 
   if (isError) {
     return (
-      <div className="p-6 text-red-500">
+      <div className="p-3 sm:p-6 text-red-500">
         មានបញ្ហាក្នុងការទាញយកទិន្នន័យ សូមព្យាយាមម្តងទៀត
       </div>
     );
   }
 
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-6">
       <DrinksHeader
         total={allData.length}
         filteredCount={filtered.length}

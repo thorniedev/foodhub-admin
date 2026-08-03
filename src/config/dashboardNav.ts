@@ -23,15 +23,15 @@ export const dashboardNav: NavItem[] = [
     icon: Layers,
     children: [
       { label: "ចំណីអាហារ", href: "/food-types/dishes" },
-      { label: "ភេសជ្ជៈ:", href: "/food-types/drinks" },
+      { label: "ភេសជ្ជៈ", href: "/food-types/drinks" },
     ],
   },
   {
-    label: "មាតិកាថាមវន្ត",
+    label: "មាតិកាដែលប្រែប្រួល",
     icon: Globe,
     children: [
-      { label: "រូបភេណី", href: "/dynamic-content/banners" },
-      { label: "ស្តង់ដារកម្រង", href: "/dynamic-content/filters" },
+      { label: "រូបបេណឺ", href: "/dynamic-content/banners" },
+      { label: "ស្លាកត្រង", href: "/dynamic-content/filters" },
       { label: "រូបអាហារតាមរដូវកាល", href: "/dynamic-content/food-by-season" },
       { label: "រូបអាហារតាមតំបន់", href: "/dynamic-content/food-by-area" },
     ],

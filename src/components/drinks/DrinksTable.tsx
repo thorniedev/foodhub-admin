@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { Ban, Pencil, Star, Trash2 } from "lucide-react";
+import { Ban, Pencil, Trash2 } from "lucide-react";
 import { Drink } from "../../types/drink";
-// import { Drink } from "@/types/drink";
 
 interface DrinksTableProps {
   data: Drink[];
@@ -27,18 +26,17 @@ export default function DrinksTable({
 }: DrinksTableProps) {
   return (
     <div className="bg-white border border-gray-100 rounded-xl overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="w-full text-sm min-w-[900px]">
         <thead>
-          <tr className="border-b border-gray-100 text-left text-lg text-[#136C34]">
+          <tr className="border-b border-gray-100 text-left text-base lg:text-lg text-[#136C34]">
             <th className="py-3 px-4 font-medium">លេខសម្គាល់និងឈ្មោះភេសជ្ជៈ</th>
             <th className="py-3 px-4 font-medium">ឈ្មោះហាង</th>
-            {/* <th className="py-3 px-4 font-medium">ការវាយតម្លៃ</th> */}
-            <th className="py-3 px-4 font-medium text-lg">ប្រភេទ</th>
-            <th className="py-3 px-4 font-medium text-lg">កម្រិតជាតិស្ករ</th>
-            <th className="py-3 px-4 font-medium text-lg">ចម្ងាយ</th>
-            <th className="py-3 px-4 font-medium text-lg">ពេលវេលា</th>
-            <th className="py-3 px-4 font-medium text-lg">ការពិពណ៌នា</th>
-            <th className="py-3 px-4 font-medium text-right text-lg">សកម្មភាព</th>
+            <th className="py-3 px-4 font-medium">ប្រភេទ</th>
+            <th className="py-3 px-4 font-medium">កម្រិតជាតិស្ករ</th>
+            <th className="py-3 px-4 font-medium">ចម្ងាយ</th>
+            <th className="py-3 px-4 font-medium">ពេលវេលា</th>
+            <th className="py-3 px-4 font-medium">ការពិពណ៌នា</th>
+            <th className="py-3 px-4 font-medium text-right">សកម្មភាព</th>
           </tr>
         </thead>
         <tbody>
@@ -53,9 +51,7 @@ export default function DrinksTable({
                     <Image
                       src={item.image || "/Image/fallback.png"}
                       alt={item.name}
-                      // fill
                       className="object-cover"
-                      // sizes="44px"
                       width={44}
                       height={44}
                     />
@@ -67,12 +63,6 @@ export default function DrinksTable({
                 </div>
               </td>
               <td className="py-3 px-4 text-gray-600">{item.shopName}</td>
-              {/* <td className="py-3 px-4">
-                <span className="flex items-center gap-1 text-amber-500 font-medium">
-                  <Star size={14} className="fill-amber-500" />
-                  {item.rating}
-                </span>
-              </td> */}
               <td className="py-3 px-4">
                 <span className="bg-emerald-50 text-emerald-600 text-xs font-medium px-2.5 py-1 rounded-full">
                   {TYPE_LABEL[item.drinkType]}
@@ -114,7 +104,7 @@ export default function DrinksTable({
 
           {data.length === 0 && (
             <tr>
-              <td colSpan={9} className="py-10 text-center text-gray-400">
+              <td colSpan={8} className="py-10 text-center text-gray-400">
                 មិនមានទិន្នន័យ
               </td>
             </tr>
