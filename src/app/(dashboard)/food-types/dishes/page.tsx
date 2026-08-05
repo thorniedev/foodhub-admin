@@ -1,144 +1,271 @@
+// "use client";
+
+// import { useMemo, useState } from "react";
+// import { useRouter } from "next/navigation";
+// import {
+//   useDeleteFoodTypeMutation,
+//   useGetFoodTypesQuery,
+//   useToggleFoodTypeStatusMutation,
+//   useUpdateFoodTypeMutation,
+// } from "../../../store/foodTypeApi";
+// import { FoodCategory, FoodType } from "../../../../types/foodType";
+// import FoodTypesHeader from "../../../../components/food-types/FoodTypesHeader";
+// import FoodTypesTabs from "../../../../components/food-types/FoodTypesTabs";
+// import FoodTypesTable from "../../../../components/food-types/FoodTypesTable";
+// import FoodTypesPagination from "../../../../components/food-types/FoodTypesPagination";
+// import FoodTypeEditModal from "../../../../components/food-types/FoodTypeEditModal";
+// import DeleteConfirmModal from "../../../../components/food-types/DeleteConfirmModal";
+
+// const PAGE_SIZE = 10;
+
+// export default function FoodTypesDishesPage() {
+//   const router = useRouter();
+//   const { data, isLoading, isError } = useGetFoodTypesQuery();
+//   const [updateFoodType] = useUpdateFoodTypeMutation();
+//   const [deleteFoodType] = useDeleteFoodTypeMutation();
+//   const [toggleStatus] = useToggleFoodTypeStatusMutation();
+
+//   const [activeTab, setActiveTab] = useState<FoodCategory | "all">("all");
+//   const [tabSearch, setTabSearch] = useState("");
+//   const [headerSearch, setHeaderSearch] = useState("");
+//   const [page, setPage] = useState(1);
+
+//   const [editModalOpen, setEditModalOpen] = useState(false);
+//   const [editingItem, setEditingItem] = useState<FoodType | null>(null);
+
+//   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+//   const [deletingItem, setDeletingItem] = useState<FoodType | null>(null);
+
+//   const allData: FoodType[] = data ?? [];
+
+//   const filtered = useMemo(() => {
+//     return allData.filter((item) => {
+//       const matchesTab = activeTab === "all" || item.category === activeTab;
+//       const query = (tabSearch || headerSearch).trim().toLowerCase();
+//       const matchesSearch =
+//         query === "" ||
+//         item.name.toLowerCase().includes(query) ||
+//         item.shopName.toLowerCase().includes(query);
+//       return matchesTab && matchesSearch;
+//     });
+//   }, [allData, activeTab, tabSearch, headerSearch]);
+
+//   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+//   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+//   const handleEdit = (item: FoodType) => {
+//     setEditingItem(item);
+//     setEditModalOpen(true);
+//   };
+
+//   const handleEditSubmit = async (id: string, changes: Partial<FoodType>) => {
+//     await updateFoodType({ id, changes });
+//     setEditModalOpen(false);
+//     setEditingItem(null);
+//   };
+
+//   const handleDelete = (item: FoodType) => {
+//     setDeletingItem(item);
+//     setDeleteModalOpen(true);
+//   };
+
+//   const handleDeleteConfirm = async () => {
+//     if (!deletingItem) return;
+//     await deleteFoodType(deletingItem.id);
+//     setDeleteModalOpen(false);
+//     setDeletingItem(null);
+//   };
+
+//   const handleToggleStatus = async (item: FoodType) => {
+//     await toggleStatus(item.id);
+//   };
+
+//   const handleAddNew = () => {
+//     router.push("/food-types/foods/create");
+//   };
+
+//   if (isLoading) {
+//     return <div className="p-3 sm:p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
+//   }
+
+//   if (isError) {
+//     return (
+//       <div className="p-3 sm:p-6 text-red-500">
+//         មានបញ្ហាក្នុងការទាញយកទិន្នន័យ សូមព្យាយាមម្តងទៀត
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="p-3 sm:p-6">
+//       <FoodTypesHeader
+//         total={allData.length}
+//         filteredCount={filtered.length}
+//         search={headerSearch}
+//         onSearchChange={(value) => {
+//           setHeaderSearch(value);
+//           setPage(1);
+//         }}
+//         onAddNew={handleAddNew}
+//       />
+
+//       <FoodTypesTabs
+//         data={allData}
+//         activeTab={activeTab}
+//         onTabChange={(tab) => {
+//           setActiveTab(tab);
+//           setPage(1);
+//         }}
+//         tabSearch={tabSearch}
+//         onTabSearchChange={(value) => {
+//           setTabSearch(value);
+//           setPage(1);
+//         }}
+//       />
+
+//       <FoodTypesTable
+//         data={paginated}
+//         onEdit={handleEdit}
+//         onDelete={handleDelete}
+//         onToggleStatus={handleToggleStatus}
+//       />
+
+//       <FoodTypesPagination
+//         total={filtered.length}
+//         shown={paginated.length}
+//         page={page}
+//         totalPages={totalPages}
+//         onPageChange={setPage}
+//       />
+
+//       <FoodTypeEditModal
+//         open={editModalOpen}
+//         initialData={editingItem}
+//         onClose={() => {
+//           setEditModalOpen(false);
+//           setEditingItem(null);
+//         }}
+//         onSubmit={handleEditSubmit}
+//       />
+
+//       <DeleteConfirmModal
+//         open={deleteModalOpen}
+//         itemName={deletingItem?.name ?? ""}
+//         onCancel={() => {
+//           setDeleteModalOpen(false);
+//           setDeletingItem(null);
+//         }}
+//         onConfirm={handleDeleteConfirm}
+//       />
+//     </div>
+//   );
+// }
+
+
+
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
-  useDeleteFoodTypeMutation,
-  useGetFoodTypesQuery,
-  useToggleFoodTypeStatusMutation,
-  useUpdateFoodTypeMutation,
-} from "../../../store/foodTypeApi";
-import { FoodCategory, FoodType } from "../../../../types/foodType";
-import FoodTypesHeader from "../../../../components/food-types/FoodTypesHeader";
-import FoodTypesTabs from "../../../../components/food-types/FoodTypesTabs";
-import FoodTypesTable from "../../../../components/food-types/FoodTypesTable";
-import FoodTypesPagination from "../../../../components/food-types/FoodTypesPagination";
-import FoodTypeEditModal from "../../../../components/food-types/FoodTypeEditModal";
-import DeleteConfirmModal from "../../../../components/food-types/DeleteConfirmModal";
+  useDeleteMenuItemMutation,
+  useGetMenuItemsQuery,
+  useToggleMenuItemAvailabilityMutation,
+  useUpdateMenuItemMutation,
+} from "../../../store/menuItemApi";
+import { isFoodItem } from "../../../../lib/menuItemKind";
+import { MenuItem } from "../../../../types/menuItem";
+import MenuItemsHeader from "../../../../components/menu-items/MenuItemsHeader";
+import MenuItemsTabs from "../../../../components/menu-items/MenuItemsTabs";
+import MenuItemsTable from "../../../../components/menu-items/MenuItemsTable";
+import MenuItemsPagination from "../../../../components/menu-items/MenuItemsPagination";
+import MenuItemEditModal from "../../../../components/menu-items/MenuItemEditModal";
+import DeleteMenuItemConfirmModal from "../../../../components/menu-items/DeleteMenuItemConfirmModal";
 
 const PAGE_SIZE = 10;
 
 export default function FoodTypesDishesPage() {
-  const router = useRouter();
-  const { data, isLoading, isError } = useGetFoodTypesQuery();
-  const [updateFoodType] = useUpdateFoodTypeMutation();
-  const [deleteFoodType] = useDeleteFoodTypeMutation();
-  const [toggleStatus] = useToggleFoodTypeStatusMutation();
+  const { data, isLoading, isError } = useGetMenuItemsQuery();
+  const [updateMenuItem] = useUpdateMenuItemMutation();
+  const [deleteMenuItem] = useDeleteMenuItemMutation();
+  const [toggleStatus] = useToggleMenuItemAvailabilityMutation();
 
-  const [activeTab, setActiveTab] = useState<FoodCategory | "all">("all");
-  const [tabSearch, setTabSearch] = useState("");
-  const [headerSearch, setHeaderSearch] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<FoodType | null>(null);
-
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deletingItem, setDeletingItem] = useState<FoodType | null>(null);
+  const [deletingItem, setDeletingItem] = useState<MenuItem | null>(null);
 
-  const allData: FoodType[] = data ?? [];
+  const foodItems = useMemo(() => (data ?? []).filter(isFoodItem), [data]);
 
   const filtered = useMemo(() => {
-    return allData.filter((item) => {
-      const matchesTab = activeTab === "all" || item.category === activeTab;
-      const query = (tabSearch || headerSearch).trim().toLowerCase();
+    return foodItems.filter((item) => {
+      const matchesTab = activeTab === "all" || item.food.category.name === activeTab;
+      const query = search.trim().toLowerCase();
       const matchesSearch =
         query === "" ||
-        item.name.toLowerCase().includes(query) ||
-        item.shopName.toLowerCase().includes(query);
+        item.localName.toLowerCase().includes(query) ||
+        item.name.toLowerCase().includes(query);
       return matchesTab && matchesSearch;
     });
-  }, [allData, activeTab, tabSearch, headerSearch]);
+  }, [foodItems, activeTab, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const handleEdit = (item: FoodType) => {
+  const handleEdit = (item: MenuItem) => {
     setEditingItem(item);
     setEditModalOpen(true);
   };
-
-  const handleEditSubmit = async (id: string, changes: Partial<FoodType>) => {
-    await updateFoodType({ id, changes });
+  const handleEditSubmit = async (uuid: string, changes: Partial<MenuItem>) => {
+    await updateMenuItem({ uuid, changes });
     setEditModalOpen(false);
     setEditingItem(null);
   };
-
-  const handleDelete = (item: FoodType) => {
+  const handleDelete = (item: MenuItem) => {
     setDeletingItem(item);
     setDeleteModalOpen(true);
   };
-
   const handleDeleteConfirm = async () => {
     if (!deletingItem) return;
-    await deleteFoodType(deletingItem.id);
+    await deleteMenuItem(deletingItem.uuid);
     setDeleteModalOpen(false);
     setDeletingItem(null);
   };
-
-  const handleToggleStatus = async (item: FoodType) => {
-    await toggleStatus(item.id);
+  const handleToggleStatus = async (item: MenuItem) => {
+    await toggleStatus(item.uuid);
   };
 
-  const handleAddNew = () => {
-    router.push("/food-types/foods/create");
-  };
-
-  if (isLoading) {
-    return <div className="p-3 sm:p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
-  }
-
-  if (isError) {
-    return (
-      <div className="p-3 sm:p-6 text-red-500">
-        មានបញ្ហាក្នុងការទាញយកទិន្នន័យ សូមព្យាយាមម្តងទៀត
-      </div>
-    );
-  }
+  if (isLoading) return <div className="p-3 sm:p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
+  if (isError) return <div className="p-3 sm:p-6 text-red-500">មានបញ្ហាក្នុងការទាញយកទិន្នន័យ</div>;
 
   return (
     <div className="p-3 sm:p-6">
-      <FoodTypesHeader
-        total={allData.length}
+      <MenuItemsHeader
+        title="ប្រភេទចំណីអាហារ"
+        total={foodItems.length}
         filteredCount={filtered.length}
-        search={headerSearch}
-        onSearchChange={(value) => {
-          setHeaderSearch(value);
-          setPage(1);
-        }}
-        onAddNew={handleAddNew}
+        addHref="/food-types/foods/create"
+        addLabel="បន្ថែមម្ហូបថ្មី"
       />
-
-      <FoodTypesTabs
-        data={allData}
+      <MenuItemsTabs
+        data={foodItems}
         activeTab={activeTab}
-        onTabChange={(tab) => {
-          setActiveTab(tab);
+        onTabChange={(t) => {
+          setActiveTab(t);
           setPage(1);
         }}
-        tabSearch={tabSearch}
-        onTabSearchChange={(value) => {
-          setTabSearch(value);
+        search={search}
+        onSearchChange={(v) => {
+          setSearch(v);
           setPage(1);
         }}
       />
-
-      <FoodTypesTable
-        data={paginated}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onToggleStatus={handleToggleStatus}
-      />
-
-      <FoodTypesPagination
-        total={filtered.length}
-        shown={paginated.length}
-        page={page}
-        totalPages={totalPages}
-        onPageChange={setPage}
-      />
-
-      <FoodTypeEditModal
+      <MenuItemsTable data={paginated} onEdit={handleEdit} onDelete={handleDelete} onToggleStatus={handleToggleStatus} />
+      <MenuItemsPagination total={filtered.length} shown={paginated.length} page={page} totalPages={totalPages} onPageChange={setPage} />
+      <MenuItemEditModal
         open={editModalOpen}
         initialData={editingItem}
         onClose={() => {
@@ -147,10 +274,9 @@ export default function FoodTypesDishesPage() {
         }}
         onSubmit={handleEditSubmit}
       />
-
-      <DeleteConfirmModal
+      <DeleteMenuItemConfirmModal
         open={deleteModalOpen}
-        itemName={deletingItem?.name ?? ""}
+        itemName={deletingItem?.localName ?? ""}
         onCancel={() => {
           setDeleteModalOpen(false);
           setDeletingItem(null);

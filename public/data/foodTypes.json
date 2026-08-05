@@ -1,142 +1,121 @@
 [
-  {
-    "id": "FD001",
-    "name": "អាម៉ុីក្រី",
-    "image": "/Image/foods/fd001.jpg",
-    "shopName": "ផ្ទះបាយអុីម៉ាប់",
-    "rating": 4.3,
-    "dietType": "halal",
-    "mealTime": "evening",
-    "distance": "ភូគ",
-    "portionSize": "១០ នាទី",
-    "description": "មួយម៉ឺនុយចំហុយជាមួយបន្លែ និងគ្រឿងក្រអូបៗ",
-    "category": "general",
-    "status": "active"
-  },
-  {
-    "id": "FD002",
-    "name": "បបរសាច់មាន់",
-    "image": "/Image/foods/fd002.jpg",
-    "shopName": "ហាងបបរម្សៅមាស",
-    "rating": 4.5,
-    "dietType": "normal",
-    "mealTime": "breakfast",
-    "distance": "ជិត",
-    "portionSize": "១៥ នាទី",
-    "description": "បបរក្តៅៗជាមួយសាច់មាន់ដួសនិងខ្ញីស្រស់",
-    "category": "breakfast",
-    "status": "active"
-  },
-  {
-    "id": "FD003",
-    "name": "នំបញ្ចុកខ្មែរ",
-    "image": "/Image/foods/fd003.jpg",
-    "shopName": "ហាងនំបញ្ចុកអាំង",
-    "rating": 4.6,
-    "dietType": "halal",
-    "mealTime": "breakfast",
-    "distance": "ជិត",
-    "portionSize": "២០ នាទី",
-    "description": "នំបញ្ចុកគ្រឿងក្រហមជាមួយបន្លែស្រស់ៗ",
-    "category": "breakfast",
-    "status": "active"
-  },
-  {
-    "id": "FD004",
-    "name": "អាម៉ុកត្រីខ្មែរ",
-    "image": "/Image/foods/fd004.jpg",
-    "shopName": "ភោជនីយដ្ឋានទន្លេសាប",
-    "rating": 4.8,
-    "dietType": "normal",
-    "mealTime": "lunch",
-    "distance": "ឆ្ងាយ",
-    "portionSize": "៣០ នាទី",
-    "description": "អាម៉ុកត្រីជាមួយក្រូចខ្មៅ និងគ្រឿងទេសតំបន់បាត់ដំបង",
-    "category": "regional",
-    "status": "active"
-  },
-  {
-    "id": "FD005",
-    "name": "ភ្លាសាច់អែម ព្រៃវែង",
-    "image": "/Image/foods/fd005.jpg",
-    "shopName": "ភោជនីយដ្ឋានស្រែចម្ការ",
-    "rating": 4.2,
-    "dietType": "normal",
-    "mealTime": "lunch",
-    "distance": "ឆ្ងាយ",
-    "portionSize": "២៥ នាទី",
-    "description": "ម្ហូបប្រពៃណីតំបន់ព្រៃវែងជាមួយត្រីស្រស់",
-    "category": "regional",
-    "status": "active"
-  },
-  {
-    "id": "FD006",
-    "name": "សម្លម្ជូរអំពិលទឹកកូឡា",
-    "image": "/Image/foods/fd006.jpg",
-    "shopName": "ភោជនីយដ្ឋានរដូវវស្សា",
-    "rating": 4.1,
-    "dietType": "vegetarian",
-    "mealTime": "lunch",
-    "distance": "ភូគ",
-    "portionSize": "២០ នាទី",
-    "description": "សម្លរដូវវស្សាធ្វើពីត្រកួន និងគល្ អំពិល",
-    "category": "seasonal",
-    "status": "active"
-  },
-  {
-    "id": "FD007",
-    "name": "បបរសម្រាប់មនុស្សចាស់",
-    "image": "/Image/foods/fd007.jpg",
-    "shopName": "ហាងបបរសុខភាព",
-    "rating": 4.4,
-    "dietType": "vegetarian",
-    "mealTime": "breakfast",
-    "distance": "ជិត",
-    "portionSize": "១៥ នាទី",
-    "description": "បបរទន់ សម្រាប់មនុស្សចាស់ និងកុមារតូច",
-    "category": "age",
-    "status": "active"
-  },
-  {
-    "id": "FD008",
-    "name": "គុយទាវសាច់គោ",
-    "image": "/Image/foods/fd008.jpg",
-    "shopName": "ហាងគុយទាវព្រលឹម",
-    "rating": 4.3,
-    "dietType": "halal",
-    "mealTime": "evening",
-    "distance": "ជិត",
-    "portionSize": "១៥ នាទី",
-    "description": "គុយទាវទឹកជូរជាមួយសាច់គោដុំធំៗ",
-    "category": "general",
-    "status": "active"
-  },
-  {
-    "id": "FD009",
-    "name": "នំបុ័ងបារាំង",
-    "image": "/Image/foods/fd009.jpg",
-    "shopName": "ហាងនំបុ័ងព្រឹកស្រស់",
-    "rating": 4.0,
-    "dietType": "vegan",
-    "mealTime": "breakfast",
-    "distance": "ជិត",
-    "portionSize": "១០ នាទី",
-    "description": "នំបុ័ងបារាំងក្រូបខាងក្រៅ ទន់ខាងក្នុង",
-    "category": "general",
-    "status": "disabled"
-  },
-  {
-    "id": "FD010",
-    "name": "ស៊ុបបន្លែសម្រាប់អ្នកជំងឺ",
-    "image": "/Image/foods/fd010.jpg",
-    "shopName": "ភោជនីយដ្ឋានសុខភាព",
-    "rating": 4.7,
-    "dietType": "vegan",
-    "mealTime": "lunch",
-    "distance": "ភូគ",
-    "portionSize": "២០ នាទី",
-    "description": "ស៊ុបបន្លែស្រាល ល្អសម្រាប់អ្នកជាសះស្បើយ",
-    "category": "age",
-    "status": "active"
+{
+  "uuid": "20000000-0000-4000-8000-000000000001",
+  "canonicalName": "Fish Amok",
+  "localName": "អាម៉ុកត្រី",
+  "description": "A classic Khmer steamed fish curry with coconut milk, kroeung, and noni leaf aroma.",
+  "categoryUuid": "10000000-0000-4000-8000-000000000032",
+  "categoryCode": "STEAMED_FISH_DISHES",
+  "categoryName": "ត្រីចំហុយ",
+  "cuisineUuid": "50000000-0000-4000-8000-000000000001",
+  "cuisineCode": "KHMER",
+  "cuisineName": "ម្ហូបខ្មែរ",
+  "primaryMediaUuid": null,
+  "defaultSpiceLevel": 2,
+  "typicalIngredientsKh": [
+    "ត្រីរ៉ស់",
+    "ខ្ទិះដូង",
+    "គ្រឿងអាម៉ុក",
+    "ស្លឹកញ",
+    "ពងមាន់",
+    "ទឹកត្រី",
+    "ស្ករត្នោត"
+  ],
+  "nutritionData": {},
+  "imageUrl": null,
+  "isActive": true,
+  "relationships": {
+    "category": {
+      "uuid": "10000000-0000-4000-8000-000000000032",
+      "code": "STEAMED_FISH_DISHES",
+      "name": "ត្រីចំហុយ",
+      "parentCategoryUuid": "10000000-0000-4000-8000-000000000031",
+      "parentCategoryCode": "STEAMED_FOODS",
+      "parentCategoryName": "ម្ហូបចំហុយ"
+    },
+    "cuisine": {
+      "uuid": "50000000-0000-4000-8000-000000000001",
+      "code": "KHMER",
+      "name": "ម្ហូបខ្មែរ"
+    },
+    "primaryMedia": null,
+    "mealTypes": [
+      {
+        "uuid": "51000000-0000-4000-8000-000000000002",
+        "code": "LUNCH",
+        "name": "អាហារថ្ងៃត្រង់",
+        "suitabilityScore": 1
+      },
+      {
+        "uuid": "51000000-0000-4000-8000-000000000003",
+        "code": "DINNER",
+        "name": "អាហារពេលល្ងាច",
+        "suitabilityScore": 0.95
+      }
+    ]
   }
+},
+{
+  "uuid": "20000000-0000-4000-8000-000000000002",
+  "canonicalName": "Prahok Ktis",
+  "localName": "ប្រហុកខ្ទិះ",
+  "description": "A rich dip of fermented fish, minced pork, coconut milk, and crisp raw vegetables.",
+  "categoryUuid": "10000000-0000-4000-8000-000000000074",
+  "categoryCode": "PRAHOK_DIPS",
+  "categoryName": "ប្រហុកខ្ទិះ",
+  "cuisineUuid": "50000000-0000-4000-8000-000000000001",
+  "cuisineCode": "KHMER",
+  "cuisineName": "ម្ហូបខ្មែរ",
+  "primaryMediaUuid": null,
+  "defaultSpiceLevel": 3,
+  "typicalIngredientsKh": [
+    "ប្រហុក",
+    "សាច់ជ្រូកចិញ្ច្រាំ",
+    "ខ្ទិះដូង",
+    "ត្រប់ពុត",
+    "ស្លឹកគ្រៃ",
+    "ខ្ទឹមស",
+    "ម្ទេស",
+    "បន្លែស្រស់"
+  ],
+  "nutritionData": {},
+  "imageUrl": null,
+  "isActive": true,
+  "relationships": {
+    "category": {
+      "uuid": "10000000-0000-4000-8000-000000000074",
+      "code": "PRAHOK_DIPS",
+      "name": "ប្រហុកខ្ទិះ",
+      "parentCategoryUuid": "10000000-0000-4000-8000-000000000073",
+      "parentCategoryCode": "DIPS_AND_SAUCES",
+      "parentCategoryName": "ទឹកជ្រលក់ និងគ្រឿងជ្រលក់"
+    },
+    "cuisine": {
+      "uuid": "50000000-0000-4000-8000-000000000001",
+      "code": "KHMER",
+      "name": "ម្ហូបខ្មែរ"
+    },
+    "primaryMedia": null,
+    "mealTypes": [
+      {
+        "uuid": "51000000-0000-4000-8000-000000000002",
+        "code": "LUNCH",
+        "name": "អាហារថ្ងៃត្រង់",
+        "suitabilityScore": 0.9
+      },
+      {
+        "uuid": "51000000-0000-4000-8000-000000000003",
+        "code": "DINNER",
+        "name": "អាហារពេលល្ងាច",
+        "suitabilityScore": 0.9
+      },
+      {
+        "uuid": "51000000-0000-4000-8000-000000000004",
+        "code": "SNACK",
+        "name": "អាហារសម្រន់",
+        "suitabilityScore": 0.35
+      }
+    ]
+  }
+}
 ]

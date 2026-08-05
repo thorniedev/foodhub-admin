@@ -109,14 +109,6 @@
 //   useToggleShopStatusMutation,
 // } = shopApi;
 
-
-
-
-
-
-
-
-
 import { baseApi } from "./baseApi";
 import { AccountStatus, CreateShopPayload, Shop } from "../../types/shop";
 
@@ -140,7 +132,10 @@ export const shopApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ uuid }) => ({ type: "Shop" as const, id: uuid })),
+              ...result.map(({ uuid }) => ({
+                type: "Shop" as const,
+                id: uuid,
+              })),
               { type: "Shop" as const, id: "LIST" },
             ]
           : [{ type: "Shop" as const, id: "LIST" }],
@@ -164,7 +159,10 @@ export const shopApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "Shop", id: "LIST" }],
     }),
 
-    updateShop: builder.mutation<Shop, { uuid: string; changes: Partial<Shop> }>({
+    updateShop: builder.mutation<
+      Shop,
+      { uuid: string; changes: Partial<Shop> }
+    >({
       queryFn: async ({ uuid, changes }) => {
         const data = await ensureStore();
         const index = data.findIndex((s) => s.uuid === uuid);
