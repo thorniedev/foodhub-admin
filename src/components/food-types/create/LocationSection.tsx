@@ -1,3 +1,37 @@
+// "use client";
+
+// import { MapPin } from "lucide-react";
+
+// interface LocationSectionProps {
+//   location: string;
+//   onLocationChange: (value: string) => void;
+// }
+
+// export default function LocationSection({
+//   location,
+//   onLocationChange,
+// }: LocationSectionProps) {
+//   return (
+//     <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 space-y-3">
+//       <div className="flex items-center gap-2">
+//         <MapPin size={20} className="text-[#136C34]" />
+//         <h2 className="text-lg sm:text-xl font-bold text-gray-800">ទីតាំង</h2>
+//       </div>
+//       <p className="text-sm text-gray-400">
+//         ជាជម្រើស — ជួយឱ្យអ្នកប្រើប្រាស់នៅក្បែរនោះស្គាល់មុខមួយនេះ
+//       </p>
+//       <input
+//         type="text"
+//         value={location}
+//         onChange={(e) => onLocationChange(e.target.value)}
+//         placeholder="ឧទាហរណ៍: រាជធានីភ្នំពេញ"
+//         className="w-full px-4 py-3 text-sm bg-[#F7F3EC] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500"
+//       />
+//     </div>
+//   );
+// }
+
+
 "use client";
 
 import { MapPin } from "lucide-react";
@@ -12,21 +46,25 @@ export default function LocationSection({
   onAddressChange,
 }: LocationSectionProps) {
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl p-6">
-      <h2 className="flex items-center gap-2 text-lg font-bold text-gray-800 mb-1">
-        <MapPin size={18} className="text-emerald-600" />
-        ទីតាំង
-      </h2>
-      <p className="text-xs text-gray-400 mb-3">
-        ជាជម្រើស — ជួយឱ្យអ្នកប្រើប្រាស់នៅក្បែរនោះស្គាល់មុខម្ហូបនេះ
+    <section className="space-y-3 rounded-2xl border border-gray-100 bg-white p-6 sm:p-8">
+      <div className="flex items-center gap-2">
+        <MapPin size={20} className="text-[#136C34]" />
+        <h2 className="text-lg font-bold text-gray-800 sm:text-xl">
+          ទីតាំង
+        </h2>
+      </div>
+
+      <p className="text-sm text-gray-400">
+        ទីតាំងនឹងត្រូវបានបំពេញដោយស្វ័យប្រវត្តិពីហាងដែលបានជ្រើសរើស។
       </p>
+
       <input
         type="text"
         value={address}
-        onChange={(e) => onAddressChange(e.target.value)}
-        placeholder="ឧទាហរណ៍: រាជធានីភ្នំពេញ"
-        className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        onChange={(event) => onAddressChange(event.target.value)}
+        placeholder="ឧទាហរណ៍៖ រាជធានីភ្នំពេញ"
+        className="w-full rounded-xl bg-[#F7F3EC] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
       />
-    </div>
+    </section>
   );
 }
