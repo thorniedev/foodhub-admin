@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Settings, X } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import { dashboardNav } from "../../config/dashboardNav";
 import type { NavItem } from "../../config/dashboardNav";
 import { useSidebar } from "../../context/SidebarContext";
@@ -116,14 +116,14 @@ export default function Sidebar() {
         </div>
 
         <div className="px-3 pb-4 space-y-1">
-          <Link
+          {/* <Link
             href="/settings"
             onClick={close}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
           >
             <Settings size={18} />
             ការកំណត់
-          </Link>
+          </Link> */}
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50">
             <div className="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center text-sm font-semibold">
               A

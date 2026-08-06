@@ -24,6 +24,7 @@ export const dashboardNav: NavItem[] = [
     children: [
       { label: "ចំណីអាហារ", href: "/food-types/dishes" },
       { label: "ភេសជ្ជៈ", href: "/food-types/drinks" },
+      { label: "អាហាររូបត្ថម្ភ", href: "/food-types/nutritions" },
     ],
   },
   {
@@ -31,9 +32,10 @@ export const dashboardNav: NavItem[] = [
     icon: Globe,
     children: [
       { label: "រូបបេណឺ", href: "/dynamic-content/banners" },
-      { label: "ស្លាកត្រង", href: "/dynamic-content/filters" },
       { label: "រូបអាហារតាមរដូវកាល", href: "/dynamic-content/food-by-season" },
       { label: "រូបអាហារតាមតំបន់", href: "/dynamic-content/food-by-area" },
+      { label: "មតិកែលម្អ", href: "/dynamic-content/feedback" },
+      { label: "ស្លាកត្រង", href: "/dynamic-content/filters" },
     ],
   },
 ];

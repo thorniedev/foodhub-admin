@@ -1,18 +1,3 @@
-// export type ShopStatus = "active" | "stopped" | "banned";
-
-// export interface Shop {
-//   id: string;
-//   logo: string;
-//   name: string;
-//   rating: number;
-//   openingHours: string;
-//   closingHours: string;
-//   province: string;
-//   address: string;
-//   phone: string;
-//   status: ShopStatus;
-// }
-
 export type ReviewStatus = "PENDING" | "APPROVED" | "REJECTED";
 export type OperatingStatus = "OPEN" | "CLOSED" | "TEMPORARILY_CLOSED" | "UNKNOWN";
 export type AccountStatus = "ACTIVE" | "SUSPENDED" | "BANNED" | "PENDING";
@@ -70,6 +55,8 @@ export interface Shop {
   socialLinks: SocialLink[];
   openingHours: OpeningHourEntry[];
   externalSource: string | null;
+   googleMapUrl?: string | null;
+  galleryImages?: string[];
 }
 
 export type CreateShopPayload = Omit
