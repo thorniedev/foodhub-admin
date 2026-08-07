@@ -1,4 +1,4 @@
-export type FilterGroupKey =
+export type   FilterGroupKey =
   | "sort"
   | "time"
   | "distance"
@@ -18,12 +18,20 @@ export type FilterGroupKey =
 
 export interface FilterOption {
   id: string;
-  groupKey: FilterGroupKey;
+  groupKey: string;
   label: string;
   value: string;
   order: number;
   active: boolean;
 }
+
+export interface FilterGroup {
+  key: string;
+  label: string;
+  order: number;
+}
+
+
 
 export interface FilterGroupMeta {
   key: FilterGroupKey;
@@ -46,7 +54,7 @@ export const FILTER_GROUPS: FilterGroupMeta[] = [
   },
   {
     key: "allergen",
-    label: "មិនរួមបញ្ចូលអាឡែស៊ី",
+    label: "អាហារអាឡែស៊ី",
     description: "ស្លាកសម្រាប់ច្រោះអាឡែស៊ី",
   },
   { key: "spice", label: "កម្រិតហឹរ", description: "កម្រិតហឹរនៃម្ហូប" },
@@ -81,3 +89,6 @@ export const FILTER_GROUPS: FilterGroupMeta[] = [
     description: "ប្រភពដើមចម្ការ/ខេត្តរបស់ម្ហូប",
   },
 ];
+
+
+export type SortDirection = "asc" | "desc";
