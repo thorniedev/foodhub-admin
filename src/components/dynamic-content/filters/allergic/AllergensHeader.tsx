@@ -1,0 +1,69 @@
+import { Plus, ShieldAlert } from "lucide-react";
+
+type AllergensHeaderProps = {
+  total: number;
+  activeCount: number;
+  inactiveCount: number;
+  onAdd: () => void;
+};
+
+export default function AllergensHeader({
+  total,
+  activeCount,
+  inactiveCount,
+  onAdd,
+}: AllergensHeaderProps) {
+  return (
+    <section className="relative overflow-hidden rounded-[28px] bg-[#137838] px-5 py-6 text-white shadow-sm sm:px-7 sm:py-7 lg:px-10 lg:py-8">
+      <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/5" />
+      <div className="absolute -bottom-20 right-32 h-52 w-52 rounded-full bg-white/5" />
+
+      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+              <ShieldAlert size={25} />
+            </div>
+
+            <div>
+              <h1 className="text-2xl font-bold sm:text-3xl lg:text-[34px]">
+                គ្រប់គ្រងអាឡែស៊ី
+              </h1>
+
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-white/85 sm:text-base">
+                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារប្រភេទអាឡែស៊ី
+                ដែលប្រើប្រាស់ក្នុងប្រព័ន្ធ FoodHub។
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl bg-white/10 px-5 py-4">
+              <p className="text-sm text-white/75">សរុប</p>
+              <p className="mt-1 text-2xl font-bold">{total}</p>
+            </div>
+
+            <div className="rounded-2xl bg-white/10 px-5 py-4">
+              <p className="text-sm text-white/75">សកម្មក្នុងទំព័រ</p>
+              <p className="mt-1 text-2xl font-bold">{activeCount}</p>
+            </div>
+
+            <div className="rounded-2xl bg-white/10 px-5 py-4">
+              <p className="text-sm text-white/75">អសកម្មក្នុងទំព័រ</p>
+              <p className="mt-1 text-2xl font-bold">{inactiveCount}</p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onAdd}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
+        >
+          <Plus size={18} />
+          បន្ថែមអាឡែស៊ី
+        </button>
+      </div>
+    </section>
+  );
+}

@@ -4,38 +4,92 @@ import {
   Users,
   Layers,
   Globe,
+  SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
 
 export interface NavItem {
   label: string;
   href?: string;
-  icon: LucideIcon;
-  children?: { label: string; href: string }[];
+  icon?: LucideIcon;
+  children?: NavItem[];
 }
 
 export const dashboardNav: NavItem[] = [
-  { label: "ផ្ទាំងគ្រប់គ្រង", icon: LayoutGrid, href: "/" },
-  { label: "ហាង", icon: Store, href: "/shops" },
-  { label: "អ្នកប្រើប្រាស់", icon: Users, href: "/users" },
+  {
+    label: "ផ្ទាំងគ្រប់គ្រង",
+    icon: LayoutGrid,
+    href: "/",
+  },
+  {
+    label: "ហាង",
+    icon: Store,
+    href: "/shops",
+  },
+  {
+    label: "អ្នកប្រើប្រាស់",
+    icon: Users,
+    href: "/users",
+  },
+
   {
     label: "ប្រភេទអាហារ",
     icon: Layers,
     children: [
-      { label: "ចំណីអាហារ", href: "/food-types/dishes" },
-      { label: "ភេសជ្ជៈ", href: "/food-types/drinks" },
-      { label: "អាហាររូបត្ថម្ភ", href: "/food-types/nutritions" },
+      {
+        label: "ចំណីអាហារ",
+        href: "/food-types/dishes",
+      },
+      {
+        label: "ភេសជ្ជៈ",
+        href: "/food-types/drinks",
+      },
+      {
+        label: "អាហាររូបត្ថម្ភ",
+        href: "/food-types/nutritions",
+      },
     ],
   },
+
   {
     label: "មាតិកាដែលប្រែប្រួល",
     icon: Globe,
     children: [
-      { label: "រូបបេណឺ", href: "/dynamic-content/banners" },
-      { label: "រូបអាហារតាមរដូវកាល", href: "/dynamic-content/food-by-season" },
-      { label: "រូបអាហារតាមតំបន់", href: "/dynamic-content/food-by-area" },
-      { label: "មតិកែលម្អ", href: "/dynamic-content/feedback" },
-      { label: "ស្លាកត្រង", href: "/dynamic-content/filters" },
+      {
+        label: "រូបបេណឺ",
+        href: "/dynamic-content/banners",
+      },
+      {
+        label: "រូបអាហារតាមរដូវកាល",
+        href: "/dynamic-content/food-by-season",
+      },
+      {
+        label: "រូបអាហារតាមតំបន់",
+        href: "/dynamic-content/food-by-area",
+      },
+      {
+        label: "មតិកែលម្អ",
+        href: "/dynamic-content/feedback",
+      },
+
     ],
   },
+   {
+        label: "ស្លាកត្រង",
+        icon: SlidersHorizontal,
+        children: [
+          {
+            label: "អាឡែស៊ី",
+            href: "/filter/allergic",
+          },
+          {
+            label: "របបអាហារ",
+            href: "/filter/dietary-type",
+          },
+          {
+            label: "ស្ថានភាពសុខភាព",
+            href: "/filter/medical-conditions",
+          },
+        ],
+      },
 ];

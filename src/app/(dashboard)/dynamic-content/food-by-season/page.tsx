@@ -28,7 +28,9 @@ export default function FoodBySeasonPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<SeasonalFoodImage | null>(null);
+  const [editingItem, setEditingItem] = useState<SeasonalFoodImage | null>(
+    null,
+  );
 
   const allData: SeasonalFoodImage[] = data ?? [];
 
@@ -78,7 +80,9 @@ export default function FoodBySeasonPage() {
   };
 
   if (isLoading) {
-    return <div className="p-3 sm:p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
+    return (
+      <div className="p-3 sm:p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>
+    );
   }
 
   if (isError) {

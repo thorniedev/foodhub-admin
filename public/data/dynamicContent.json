@@ -7,14 +7,7 @@
     "order": 1,
     "active": true
   },
-  {
-    "id": "sort-2",
-    "groupKey": "sort",
-    "label": "ពេញនិយមបំផុត",
-    "value": "mostPopular",
-    "order": 2,
-    "active": true
-  },
+ 
   {
     "id": "sort-3",
     "groupKey": "sort",
@@ -29,6 +22,16 @@
     "label": "រៀបចំលឿនបំផុត",
     "value": "fastestPrep",
     "order": 4,
+    "active": true
+  },
+  {
+    "id": "sort-2",
+    "groupKey": "sort",
+    "label": "ពេញនិយមបំផុត",
+    "value": "mostPopular",
+    "order": 2,
+    "active": true
+  },: 4,
     "active": true
   },
   {

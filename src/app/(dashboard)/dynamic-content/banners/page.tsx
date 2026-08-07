@@ -49,9 +49,17 @@ export default function BannersPage() {
         onAddNew={openAddModal}
       />
 
-      <BannersTable banners={paginated} isLoading={isLoading} onEdit={openEditModal} />
+      <BannersTable
+        banners={paginated}
+        isLoading={isLoading}
+        onEdit={openEditModal}
+      />
 
-      <BannersPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      <BannersPagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
 
       <BannerFormModal
         isOpen={isModalOpen}

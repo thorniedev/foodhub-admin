@@ -1,0 +1,182 @@
+[
+  {
+    "uuid": "39011e1d-bdac-4218-83c5-1132d0bd61a8",
+    "code": "EGG",
+    "name": "Egg",
+    "description": "Updated allergen description from PostmanV3",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:33:01.983974"
+  },
+  {
+    "uuid": "0cccecf2-624c-4c55-9894-9c3fd9630f23",
+    "code": "MILK",
+    "name": "Milk",
+    "description": "Milk and dairy-derived ingredients",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-04T18:47:53.186156"
+  },
+  {
+    "uuid": "e026d5e5-b6dc-432e-a6d2-11b2e474acf8",
+    "code": "OCEAN_LOBSTER1",
+    "name": "Ocean Lobster1",
+    "description": "Ocean Lobster allergen",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-04T14:50:16.058359"
+  },
+  {
+    "uuid": "0823331b-f6aa-49b7-90cc-c7bdf079b49b",
+    "code": "PEANUT",
+    "name": "Peanut",
+    "description": "Peanut and peanut-derived ingredients",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-04T14:50:47.189629"
+  },
+  {
+    "uuid": "7df4edf2-b64f-42be-a31b-1bfd32181e77",
+    "code": "SESAME_TEST",
+    "name": "Sesame Test UpdatedV3",
+    "description": "Updated allergen description from PostmanV3",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-05T20:24:22.712079"
+  },
+  {
+    "uuid": "98da5e2e-ef3a-4efb-93f2-99957923c3b3",
+    "code": "MINGYEAK",
+    "name": "sugar",
+    "description": "sugar",
+    "iconMediaUuid": null,
+    "active": false,
+    "updatedAt": "2026-08-06T18:35:50.766654"
+  },
+  {
+    "uuid": "2bb40ee1-538c-4acb-9269-8bbe19eb0122",
+    "code": "ក្តាម",
+    "name": "ក្តាម",
+    "description": "អាឡែស៊ីពីក្តាម និងផលិតផលដែលមានក្តាម",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:51:16.270608"
+  },
+  {
+    "uuid": "84e0dc1a-9e6f-48dc-8f7e-a2fdb4b963d6",
+    "code": "ខ្យង",
+    "name": "ខ្យង",
+    "description": "អាឡែស៊ីពីខ្យង និងសត្វសមុទ្រប្រភេទទន់",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:54:10.967026"
+  },
+  {
+    "uuid": "fafe1efe-be2f-4c67-80c1-4ac7286d1a35",
+    "code": "គ្រាប់ស្វាយចន្ទី",
+    "name": "គ្រាប់ស្វាយចន្ទី",
+    "description": "អាឡែស៊ីពីគ្រាប់ស្វាយចន្ទី និងផលិតផលដែលមានគ្រាប់ស្វាយចន្ទី",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:52:49.427749"
+  },
+  {
+    "uuid": "ef4e26c5-2fba-4e46-ad6d-0cf36c70c1c1",
+    "code": "គ្រាប់អាល់ម៉ុន",
+    "name": "គ្រាប់អាល់ម៉ុន",
+    "description": "អាឡែស៊ីពីគ្រាប់អាល់ម៉ុន និងផលិតផលដែលមានគ្រាប់អាល់ម៉ុន",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:53:17.803067"
+  },
+  {
+    "uuid": "44c7e973-20f8-4a0f-8c6e-82a3602dee06",
+    "code": "ដូង",
+    "name": "ដូង",
+    "description": "អាឡែស៊ីពីដូង និងផលិតផលធ្វើពីដូង",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:54:37.330774"
+  },
+  {
+    "uuid": "26af43a7-2571-4e6c-9cef-e2086ef8db54",
+    "code": "ត្រី",
+    "name": "ត្រី",
+    "description": "អាឡែស៊ីពីត្រី និងផលិតផលធ្វើពីត្រី",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:50:28.549555"
+  },
+  {
+    "uuid": "d5a59e46-18fd-4650-b14b-52be19e63e95",
+    "code": "ទឹកដោះគោ",
+    "name": "ទឹកដោះគោ",
+    "description": "អាឡែស៊ីពីទឹកដោះគោ និងផលិតផលធ្វើពីទឹកដោះគោ",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:50:03.359207"
+  },
+  {
+    "uuid": "4460646b-87ad-4b3a-83e2-5805c139599e",
+    "code": "បង្គា",
+    "name": "បង្គា",
+    "description": "អាឡែស៊ីពីបង្គា និងផលិតផលដែលមានបង្គា",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:50:54.40413"
+  },
+  {
+    "uuid": "029bdfe3-b081-4cf6-a8fd-f0502f2ce6e9",
+    "code": "ពោត",
+    "name": "ពោត",
+    "description": "Updated allergen description from PostmanV3",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:26:29.128591"
+  },
+  {
+    "uuid": "af2d1fd4-81c3-4f50-815b-61eca43ebe79",
+    "code": "មឹក",
+    "name": "មឹក",
+    "description": "អាឡែស៊ីពីមឹក និងផលិតផលដែលមានមឹក",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:51:37.567507"
+  },
+  {
+    "uuid": "6a1c688e-ba4f-405c-b430-91faa063a25f",
+    "code": "ល្ង",
+    "name": "ល្ង",
+    "description": "អាឡែស៊ីពីគ្រាប់ល្ង និងផលិតផលធ្វើពីល្ង",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:53:39.443589"
+  },
+  {
+    "uuid": "a1f57333-7b7a-4408-9c8e-0994d7829c44",
+    "code": "សណ្ដែកដី",
+    "name": "សណ្ដែកដី",
+    "description": "អាឡែស៊ីពីសណ្ដែកដី និងផលិតផលដែលមានសណ្ដែកដី",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:49:29.174923"
+  },
+  {
+    "uuid": "faeaebdc-afe7-4a3b-b0ea-c9a2cdbe39f4",
+    "code": "សណ្ដែកបារាំង",
+    "name": "សណ្ដែកបារាំង",
+    "description": "សណ្ដែកបារាំង",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T18:46:45.936204"
+  },
+  {
+    "uuid": "8f0f2c03-d016-4390-9a67-ca683a599ac8",
+    "code": "សណ្ដែកសៀង",
+    "name": "សណ្ដែកសៀង",
+    "description": "អាឡែស៊ីពីសណ្ដែកសៀង និងផលិតផលធ្វើពីសណ្ដែកសៀង",
+    "iconMediaUuid": null,
+    "active": true,
+    "updatedAt": "2026-08-06T19:51:56.891552"
+  }
+]

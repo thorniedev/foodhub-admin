@@ -78,7 +78,9 @@ export default function FoodByAreaPage() {
   };
 
   if (isLoading) {
-    return <div className="p-3 sm:p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
+    return (
+      <div className="p-3 sm:p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>
+    );
   }
 
   if (isError) {
