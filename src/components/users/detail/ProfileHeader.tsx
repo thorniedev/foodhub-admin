@@ -39,7 +39,7 @@ export default function ProfileHeader({
           {profile.avatarMediaUuid ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={`/media/${profile.avatarMediaUuid}`}
+              src={`/api/media/${profile.avatarMediaUuid}`}
               alt={profile.profileName}
               className="w-full h-full object-cover"
             />

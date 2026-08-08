@@ -50,11 +50,10 @@
 //   );
 // }
 
-
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Search, Bell, Menu } from "lucide-react";
+import { Search, Bell, Menu, LogOut } from "lucide-react";
 import { getPageTitle } from "../../config/pageTitles";
 import { useSidebar } from "../../context/SidebarContext";
 
@@ -85,7 +84,7 @@ export default function Topbar() {
       </div>
 
       <div className="flex items-center gap-3 md:gap-5 justify-between md:justify-end">
-        <div className="flex-1 md:max-w-xl md:mx-8 order-3 md:order-none w-full md:w-auto">
+        <div className="flex-1 md:max-w-xl md:mx-8 order-3 md:order-0 w-full md:w-auto">
           <div className="relative">
             <Search
               size={18}
@@ -110,6 +109,17 @@ export default function Topbar() {
           </div>
           <span className="text-sm font-medium text-gray-700">Admin</span>
         </div>
+
+        <form action="/api/auth/logout" method="post">
+          <button
+            type="submit"
+            title="Log out"
+            className="inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-gray-500 transition hover:bg-red-50 hover:text-red-600"
+          >
+            <LogOut size={18} />
+            <span className="hidden md:inline">Log out</span>
+          </button>
+        </form>
       </div>
     </header>
   );

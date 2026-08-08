@@ -1,8 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, LoaderCircle, ShieldAlert } from "lucide-react";
-
 import {
   useCreateAllergenMutation,
   useDeleteAllergenMutation,
@@ -41,15 +39,17 @@ export default function AllergenManager() {
   const [deleting, setDeleting] = useState<Allergen | null>(null);
   const [message, setMessage] = useState<ApiMessage | null>(null);
 
-  const { data, isLoading, isFetching, error, refetch } =
-    useGetAllergensQuery({ page, size });
-
+  const { data, isLoading, isFetching, error, refetch } = useGetAllergensQuery({
+    page,
+    size,
+  });
   const [createItem, { isLoading: isCreating }] = useCreateAllergenMutation();
   const [updateItem, { isLoading: isUpdating }] = useUpdateAllergenMutation();
   const [deleteItem, { isLoading: isDeleting }] = useDeleteAllergenMutation();
-  const [restoreItem, { isLoading: isRestoring }] = useRestoreAllergenMutation();
+  const [restoreItem, { isLoading: isRestoring }] =
+    useRestoreAllergenMutation();
 
-  const items = data?.contents ?? [];
+  const items = useMemo(() => data?.contents ?? [], [data?.contents]);
   const activeCount = items.filter((item) => item.active).length;
   const inactiveCount = items.length - activeCount;
 
@@ -173,17 +173,25 @@ export default function AllergenManager() {
       </div>
 
       {message && (
-        <div className={`rounded-2xl border px-4 py-3 text-sm ${
-          message.type === "success"
-            ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-            : "border-red-100 bg-red-50 text-red-600"
-        }`}>
+        <div
+          className={`rounded-2xl border px-4 py-3 text-sm ${
+            message.type === "success"
+              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+              : "border-red-100 bg-red-50 text-red-600"
+          }`}
+        >
           {message.text}
         </div>
       )}
 
+      {error && (
+        <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {getApiErrorMessage(error)}
+        </div>
+      )}
+
       <section className="overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
-        {isLoading ? (
+        {/* {isLoading ? (
           <div className="flex min-h-[320px] items-center justify-center">
             <LoaderCircle size={30} className="animate-spin text-[#136C34]" />
           </div>
@@ -207,18 +215,18 @@ export default function AllergenManager() {
             <ShieldAlert size={38} className="text-gray-300" />
             <p className="mt-3 font-semibold text-gray-600">មិនមានទិន្នន័យ</p>
           </div>
-        ) : (
-          <AllergensTable
-            allergens={filtered}
-            disabled={busy}
-            onEdit={(item) => {
-              setEditing(item);
-              setFormOpen(true);
-            }}
-            onDelete={setDeleting}
-            onRestore={(item) => void handleRestore(item)}
-          />
-        )}
+        ) : ( */}
+        <AllergensTable
+          allergens={filtered}
+          disabled={busy}
+          onEdit={(item) => {
+            setEditing(item);
+            setFormOpen(true);
+          }}
+          onDelete={setDeleting}
+          onRestore={(item) => void handleRestore(item)}
+        />
+        {/* )} */}
 
         {!isLoading && !error && (
           <AllergensPagination
