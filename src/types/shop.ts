@@ -59,7 +59,12 @@ export interface Shop {
   galleryImages?: string[];
 }
 
-export type CreateShopPayload = Omit
+export type CreateShopPayload = Omit<
   Shop,
-  "uuid" | "logoMediaUuid" | "coverMediaUuid" | "averageRating" | "totalReviews" | "isOpenNow"
+  | "uuid"
+  | "logoMediaUuid"
+  | "coverMediaUuid"
+  | "averageRating"
+  | "totalReviews"
+  | "isOpenNow"
 >;

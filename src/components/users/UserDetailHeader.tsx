@@ -1,7 +1,6 @@
 "use client";
 
 import { Ban, Pencil, Trash2, ArrowLeft } from "lucide-react";
-import { User } from "../../types/userProfile";
 import { UserProfile } from "../../types/userProfile";
 
 interface UserDetailHeaderProps {
@@ -33,14 +32,14 @@ export default function UserDetailHeader({
         </button>
 
         <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold shrink-0">
-          {user.name.charAt(0)}
+          {user.profileName.charAt(0)}
         </div>
 
         <div>
-          <h2 className="text-lg sm:text-xl font-bold text-gray-800">{user.name}</h2>
-          <p className="text-sm text-gray-400">User ID: {user.id}</p>
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800">{user.profileName}</h2>
+          <p className="text-sm text-gray-400">User ID: {user.uuid}</p>
           <p className="text-sm text-gray-500 mt-1">
-            ថ្ងៃចូលរួម: {user.joinedDate}
+            ថ្ងៃចូលរួម: {user.createdAt}
             {activeProfile && ` • ភេទ: ${activeProfile.gender === "MALE" ? "ប្រុស" : "ស្រី"}`}
           </p>
         </div>

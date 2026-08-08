@@ -1,7 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { Season, SeasonalFoodImage } from "../../types/seasonalFood";
+import { Season, SeasonalFoodImage } from "../../../types/seasonalFood";
 
 interface SeasonalFoodTabsProps {
   data: SeasonalFoodImage[];

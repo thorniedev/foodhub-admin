@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
-import { Season, SeasonalFoodImage, SeasonalFoodStatus } from "../../types/seasonalFood";
+import { Season, SeasonalFoodImage, SeasonalFoodStatus } from "../../../types/seasonalFood";
 
 interface SeasonalFoodFormModalProps {
   open: boolean;
@@ -24,7 +24,9 @@ const STATUS_OPTIONS: { value: SeasonalFoodStatus; label: string }[] = [
   { value: "disabled", label: "បានបិទ" },
 ];
 
-const emptyForm: Omit<SeasonalFoodImage, "id"> = {
+type SeasonalFoodFormValues = Omit<SeasonalFoodImage, "id">;
+
+const emptyForm: SeasonalFoodFormValues = {
   image: "/Image/seasonal/placeholder.jpg",
   title: "",
   description: "",
@@ -32,24 +34,44 @@ const emptyForm: Omit<SeasonalFoodImage, "id"> = {
   status: "pending",
 };
 
+function getInitialForm(initialData?: SeasonalFoodImage | null): SeasonalFoodFormValues {
+  if (!initialData) {
+    return emptyForm;
+  }
+
+  return {
+    image: initialData.image,
+    title: initialData.title,
+    description: initialData.description,
+    season: initialData.season,
+    status: initialData.status,
+  };
+}
+
 export default function SeasonalFoodFormModal({
   open,
   initialData,
   onClose,
   onSubmit,
 }: SeasonalFoodFormModalProps) {
-  const [form, setForm] = useState(emptyForm);
-
-  useEffect(() => {
-    if (initialData) {
-      const { id, ...rest } = initialData;
-      setForm(rest);
-    } else {
-      setForm(emptyForm);
-    }
-  }, [initialData, open]);
-
   if (!open) return null;
+
+  return (
+    <SeasonalFoodFormContent
+      key={initialData?.id ?? "new-seasonal-food"}
+      initialData={initialData}
+      onClose={onClose}
+      onSubmit={onSubmit}
+    />
+  );
+}
+
+function SeasonalFoodFormContent({
+  initialData,
+  onClose,
+  onSubmit,
+}: Omit<SeasonalFoodFormModalProps, "open">) {
+  const [form, setForm] = useState(() => getInitialForm(initialData));
 
   const handleSubmit = () => {
     if (!form.title.trim()) return;
