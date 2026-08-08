@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import MedicalConditionManager from "@/src/components/filters/medical-conditions/MedicalConditionManager";
 
-export default function FilterPage() {
-  redirect("/filter/allergic");
+export default function MedecialConditionPage() {
+    return <MedicalConditionManager />
 }

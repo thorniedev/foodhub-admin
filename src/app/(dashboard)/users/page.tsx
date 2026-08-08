@@ -41,13 +41,23 @@ export default function UsersPage() {
 
   return (
     <div>
-      <UsersHeader total={profiles.length} filteredCount={filtered.length} onAddNew={() => {}} />
+      <UsersHeader
+        total={profiles.length}
+        filteredCount={filtered.length}
+        onAddNew={() => {}}
+      />
       <UsersTabs
         data={profiles}
         activeTab={tab}
-        onTabChange={(t) => { setTab(t); setPage(1); }}
+        onTabChange={(t) => {
+          setTab(t);
+          setPage(1);
+        }}
         search={search}
-        onSearchChange={(v) => { setSearch(v); setPage(1); }}
+        onSearchChange={(v) => {
+          setSearch(v);
+          setPage(1);
+        }}
       />
       <UsersTable
         profiles={paged}
@@ -67,7 +77,10 @@ export default function UsersPage() {
         open={!!editProfile}
         initialData={editProfile}
         onClose={() => setEditProfile(null)}
-        onSubmit={(uuid, changes) => { updateUserProfile({ uuid, changes }); setEditProfile(null); }}
+        onSubmit={(uuid, changes) => {
+          updateUserProfile({ uuid, changes });
+          setEditProfile(null);
+        }}
       />
       <DeleteUserConfirmModal
         open={!!deleteTarget}

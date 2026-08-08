@@ -31,7 +31,8 @@ function healthSummary(p: UserProfile): string {
   const parts: string[] = [];
   if (p.allergies.length) parts.push(`អាឡែហ្ស៊ី ${p.allergies.length}`);
   if (p.dietaryTypes.length) parts.push(`របបអាហារ ${p.dietaryTypes.length}`);
-  if (p.medicalConditions.length) parts.push(`ជំងឺ ${p.medicalConditions.length}`);
+  if (p.medicalConditions.length)
+    parts.push(`ជំងឺ ${p.medicalConditions.length}`);
   return parts.length ? parts.join(", ") : "-";
 }
 
@@ -43,21 +44,27 @@ export default function UsersTable({
 }: UsersTableProps) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
-      <table className="w-full text-sm min-w-[1200px]">
+      <table className="w-full min-w-300 text-sm">
         <thead>
           <tr className="text-left text-[#136C34] border-b border-gray-100">
             <th className="py-3 px-4 font-medium text-base">ប្រវត្តិរូប</th>
             <th className="py-3 px-4 font-medium text-base">ទំនាក់ទំនង</th>
             <th className="py-3 px-4 font-medium text-base">ភេទ</th>
-            <th className="py-3 px-4 font-medium text-base">ថ្ងៃខែឆ្នាំកំណើត</th>
+            <th className="py-3 px-4 font-medium text-base">
+              ថ្ងៃខែឆ្នាំកំណើត
+            </th>
             <th className="py-3 px-4 font-medium text-base">អាយុ</th>
             <th className="py-3 px-4 font-medium text-base">ក្រុមអាយុ</th>
             <th className="py-3 px-4 font-medium text-base">ភាសា</th>
-            <th className="py-3 px-4 font-medium text-base">ចំណូលចិត្តសុខភាព</th>
+            <th className="py-3 px-4 font-medium text-base">
+              ចំណូលចិត្តសុខភាព
+            </th>
             <th className="py-3 px-4 font-medium text-base">លំនាំដើម</th>
             <th className="py-3 px-4 font-medium text-base">ស្ថានភាព</th>
             <th className="py-3 px-4 font-medium text-base">កែប្រែចុងក្រោយ</th>
-            <th className="py-3 px-4 font-medium text-right text-base">សកម្មភាព</th>
+            <th className="py-3 px-4 font-medium text-right text-base">
+              សកម្មភាព
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -72,7 +79,7 @@ export default function UsersTable({
                     {p.avatarMediaUuid ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={`/media/${p.avatarMediaUuid}`}
+                        src={`/api/media/${p.avatarMediaUuid}`}
                         alt={p.profileName}
                         className="w-full h-full object-cover"
                       />
@@ -80,7 +87,9 @@ export default function UsersTable({
                       p.profileName.charAt(0)
                     )}
                   </div>
-                  <span className="font-medium text-gray-700">{p.profileName}</span>
+                  <span className="font-medium text-gray-700">
+                    {p.profileName}
+                  </span>
                 </Link>
               </td>
               <td className="py-3 px-4 text-gray-500">
@@ -90,9 +99,13 @@ export default function UsersTable({
                 {GENDER_LABEL[p.gender] ?? p.gender}
               </td>
               <td className="py-3 px-4 text-gray-500">{p.dateOfBirth}</td>
-              <td className="py-3 px-4 text-gray-500">{calculateAge(p.dateOfBirth)}</td>
+              <td className="py-3 px-4 text-gray-500">
+                {calculateAge(p.dateOfBirth)}
+              </td>
               <td className="py-3 px-4 text-gray-500">{p.ageGroup.name}</td>
-              <td className="py-3 px-4 text-gray-500 uppercase">{p.preferredLanguage}</td>
+              <td className="py-3 px-4 text-gray-500 uppercase">
+                {p.preferredLanguage}
+              </td>
               <td className="py-3 px-4 text-gray-500">{healthSummary(p)}</td>
               <td className="py-3 px-4">
                 {p.isDefault ? (
@@ -114,7 +127,9 @@ export default function UsersTable({
                   {p.isActive ? "សកម្ម" : "អសកម្ម"}
                 </span>
               </td>
-              <td className="py-3 px-4 text-gray-500">{formatShortDate(p.updatedAt)}</td>
+              <td className="py-3 px-4 text-gray-500">
+                {formatShortDate(p.updatedAt)}
+              </td>
               <td className="py-3 px-4">
                 <div className="flex items-center justify-end gap-3">
                   <Link
