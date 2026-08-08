@@ -40,9 +40,13 @@ export function getKeycloakClient() {
   return keycloak;
 }
 
-export function initKeycloak() {
+export function initKeycloak(): Promise<boolean> {
   if (!initPromise) {
     const client = getKeycloakClient();
+
+    client.onAuthSuccess = () => {
+      setAuthAccessToken(client.token ?? null);
+    };
 
     client.onAuthRefreshSuccess = () => {
       setAuthAccessToken(client.token ?? null);
@@ -52,6 +56,20 @@ export function initKeycloak() {
       clearAuthSession();
     };
 
+    client.onAuthError = () => {
+      clearAuthSession();
+    };
+
+    client.onTokenExpired = async () => {
+      try {
+        await refreshKeycloakToken();
+      } catch (error) {
+        console.error("[KEYCLOAK TOKEN REFRESH ERROR]", error);
+      }
+    };
+
+    setAuthRefreshHandler(refreshKeycloakToken);
+
     initPromise = client
       .init({
         onLoad: "login-required",
@@ -60,36 +78,69 @@ export function initKeycloak() {
         checkLoginIframe: false,
       })
       .then((authenticated) => {
-        setAuthAccessToken(client.token ?? null);
-        setAuthRefreshHandler(refreshKeycloakToken);
+        if (authenticated && client.token) {
+          setAuthAccessToken(client.token);
+        } else {
+          clearAuthSession();
+        }
+
+        console.log("[KEYCLOAK INIT]", {
+          authenticated,
+          hasToken: Boolean(client.token),
+          tokenParsed: client.tokenParsed,
+        });
+
         return authenticated;
+      })
+      .catch((error) => {
+        console.error("[KEYCLOAK INIT ERROR]", error);
+
+        clearAuthSession();
+        initPromise = null;
+
+        throw error;
       });
   }
 
   return initPromise;
 }
 
-export async function refreshKeycloakToken() {
+export async function refreshKeycloakToken(): Promise<boolean> {
   const client = getKeycloakClient();
 
   if (!client.authenticated) {
+    clearAuthSession();
     return false;
   }
 
   try {
     await client.updateToken(30);
-    setAuthAccessToken(client.token ?? null);
-    return Boolean(client.token);
-  } catch {
+
+    if (!client.token) {
+      clearAuthSession();
+      return false;
+    }
+
+    setAuthAccessToken(client.token);
+
+    return true;
+  } catch (error) {
+    console.error("[KEYCLOAK REFRESH ERROR]", error);
+
     clearAuthSession();
+
     await client.login();
+
     return false;
   }
 }
 
 export async function logoutKeycloak() {
+  const client = getKeycloakClient();
+
   clearAuthSession();
-  await getKeycloakClient().logout({
+
+  await client.logout({
     redirectUri: window.location.origin,
   });
 }
