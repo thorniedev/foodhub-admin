@@ -1,45 +1,31 @@
-"use client";
-
-interface ShopBasicInfoSectionProps {
-  name: string;
-  onNameChange: (value: string) => void;
-  address: string;
-  onAddressChange: (value: string) => void;
-}
+import type { StoreOperatingStatus } from "@/src/types/shop";
 
 export default function ShopBasicInfoSection({
-  name,
-  onNameChange,
-  address,
-  onAddressChange,
-}: ShopBasicInfoSectionProps) {
-  return (
-    <div className="space-y-5">
-      <div>
-        <label className="text-sm text-gray-600 mb-1 block">
-          ឈ្មោះភោជនីយដ្ឋាន <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => onNameChange(e.target.value)}
-          placeholder="ឧទាហរណ៍: ភោជនីយដ្ឋានរំដេង (Romdeng Restaurant)"
-          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        />
-      </div>
-
-      <div>
-        <label className="text-sm text-gray-600 mb-1 block">
-          អាសយដ្ឋាន <span className="text-red-500">*</span>
-        </label>
-        <textarea
-          value={address}
-          onChange={(e) => onAddressChange(e.target.value)}
-          rows={3}
-          placeholder="ឧទាហរណ៍: 35, Preah Ang Phanavong St.(240 Corner 55, Phnom Penh 120207 Cambodia,..."
-          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
-        />
-      </div>
+  values,onChange,
+}:{
+  values:{storeName:string;description:string;countryCode:string;timezone:string;priceLevel:string;hygieneRating:string;operatingStatus:StoreOperatingStatus};
+  onChange:(key:"storeName"|"description"|"countryCode"|"timezone"|"priceLevel"|"hygieneRating"|"operatingStatus",value:string)=>void;
+}) {
+  return <section className="rounded-[24px] border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+    <h2 className="text-lg font-black text-gray-900">ព័ត៌មានមូលដ្ឋាន</h2>
+    <p className="mt-1 text-sm text-gray-500">Fields ត្រូវតាម POST /admin/stores payload។</p>
+    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+      <Field label="Store name" value={values.storeName} onChange={v=>onChange("storeName",v)} required/>
+      <Field label="Country code" value={values.countryCode} onChange={v=>onChange("countryCode",v)} required/>
+      <Field label="Timezone" value={values.timezone} onChange={v=>onChange("timezone",v)} required/>
+      <label><span className="mb-2 block text-sm font-bold">Operating status</span>
+        <select value={values.operatingStatus} onChange={e=>onChange("operatingStatus",e.target.value)} className="h-12 w-full rounded-2xl border px-4">
+          {["OPEN","CLOSED","TEMPORARILY_CLOSED","UNKNOWN"].map(x=><option key={x}>{x}</option>)}
+        </select>
+      </label>
+      <Field label="Price level" type="number" value={values.priceLevel} onChange={v=>onChange("priceLevel",v)}/>
+      <Field label="Hygiene rating" type="number" step="0.1" value={values.hygieneRating} onChange={v=>onChange("hygieneRating",v)}/>
+      <label className="sm:col-span-2"><span className="mb-2 block text-sm font-bold">Description</span>
+        <textarea rows={4} value={values.description} onChange={e=>onChange("description",e.target.value)} className="w-full rounded-2xl border px-4 py-3 text-sm"/>
+      </label>
     </div>
-  );
+  </section>;
+}
+function Field({label,value,onChange,type="text",required=false,step}:{label:string;value:string;onChange:(v:string)=>void;type?:string;required?:boolean;step?:string}) {
+  return <label><span className="mb-2 block text-sm font-bold">{label}</span><input type={type} step={step} required={required} value={value} onChange={e=>onChange(e.target.value)} className="h-12 w-full rounded-2xl border px-4 text-sm"/></label>;
 }

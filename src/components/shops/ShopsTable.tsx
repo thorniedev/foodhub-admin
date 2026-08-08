@@ -1,263 +1,97 @@
-// "use client";
-
-// import Image from "next/image";
-// import { Ban, Pencil, Trash2, Star } from "lucide-react";
-// import { Shop } from "../../types/shop";
-
-// interface ShopsTableProps {
-//   shops: Shop[];
-//   onEdit: (shop: Shop) => void;
-//   onDelete: (shop: Shop) => void;
-//   onToggleStatus: (shop: Shop) => void;
-// }
-
-// export default function ShopsTable({
-//   shops,
-//   onEdit,
-//   onDelete,
-//   onToggleStatus,
-// }: ShopsTableProps) {
-//   return (
-//     <div className="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
-//       <table className="w-full text-sm min-w-[900px]">
-//         <thead>
-//           <tr className="text-left text-[#136C34] border-b border-gray-100">
-//             <th className="py-3 px-5 font-medium text-base lg:text-lg">ហាង</th>
-//             <th className="py-3 px-5 font-medium text-base lg:text-lg">ការវាយតម្លៃ</th>
-//             <th className="py-3 px-5 font-medium text-base lg:text-lg">ម៉ោងបើក/បិទ</th>
-//             <th className="py-3 px-5 font-medium text-base lg:text-lg">ខេត្ត/ក្រុង</th>
-//             <th className="py-3 px-5 font-medium text-base lg:text-lg">អាសយដ្ឋាន</th>
-//             <th className="py-3 px-5 font-medium text-base lg:text-lg">លេខទូរស័ព្ទ</th>
-//             <th className="py-3 px-5 font-medium text-base lg:text-lg text-right">
-//               សកម្មភាព
-//             </th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {shops.map((shop) => (
-//             <tr key={shop.id} className="border-b border-gray-50 last:border-0">
-//               <td className="py-3 px-5">
-//                 <div className="flex items-center gap-3">
-//                   <div className="w-9 h-9 rounded-lg overflow-hidden bg-gray-100 shrink-0 relative">
-//                     <Image
-//                       src={shop.logo}
-//                       alt={shop.name}
-//                       fill
-//                       className="object-cover"
-//                     />
-//                   </div>
-//                   <span className="text-gray-700">{shop.name}</span>
-//                 </div>
-//               </td>
-//               <td className="py-3 px-5">
-//                 <span className="flex items-center gap-1 text-gray-700">
-//                   <Star size={14} className="fill-yellow-400 text-yellow-400" />
-//                   {shop.rating}
-//                 </span>
-//               </td>
-//               <td className="py-3 px-5 text-gray-500">
-//                 {shop.openingHours} - {shop.closingHours}
-//               </td>
-//               <td className="py-3 px-5 text-gray-500">{shop.province}</td>
-//               <td className="py-3 px-5 text-gray-500 max-w-xs truncate">
-//                 {shop.address}
-//               </td>
-//               <td className="py-3 px-5 text-gray-500">{shop.phone}</td>
-//               <td className="py-3 px-5">
-//                 <div className="flex items-center justify-end gap-3">
-//                   <button
-//                     onClick={() => onToggleStatus(shop)}
-//                     title={shop.status === "banned" ? "ដកហាមឃាត់" : "ហាមឃាត់"}
-//                     className="text-red-400 hover:text-red-600"
-//                   >
-//                     <Ban size={16} />
-//                   </button>
-//                   <button
-//                     onClick={() => onEdit(shop)}
-//                     title="កែសម្រួល"
-//                     className="text-blue-400 hover:text-blue-600"
-//                   >
-//                     <Pencil size={16} />
-//                   </button>
-//                   <button
-//                     onClick={() => onDelete(shop)}
-//                     title="លុប"
-//                     className="text-red-400 hover:text-red-600"
-//                   >
-//                     <Trash2 size={16} />
-//                   </button>
-//                 </div>
-//               </td>
-//             </tr>
-//           ))}
-
-//           {shops.length === 0 && (
-//             <tr>
-//               <td colSpan={7} className="py-10 text-center text-gray-400">
-//                 មិនមានទិន្នន័យ
-//               </td>
-//             </tr>
-//           )}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-"use client";
-
-import Image from "next/image";
-import { Ban, Pencil, Star, Trash2 } from "lucide-react";
-import { Shop } from "../../types/shop";
-
-interface ShopsTableProps {
-  shops: Shop[];
-  onEdit: (shop: Shop) => void;
-  onDelete: (shop: Shop) => void;
-  onToggleStatus: (shop: Shop) => void;
-}
-
-const PRICE_LABEL: Record<string, string> = {
-  LOW: "$",
-  MEDIUM: "$$",
-  HIGH: "$$$",
-};
-
-const OPERATING_BADGE: Record<string, string> = {
-  OPEN: "bg-emerald-50 text-emerald-600",
-  CLOSED: "bg-gray-100 text-gray-500",
-  TEMPORARILY_CLOSED: "bg-amber-50 text-amber-600",
-  UNKNOWN: "bg-gray-100 text-gray-400",
-};
-
-const ACCOUNT_BADGE: Record<string, string> = {
-  ACTIVE: "bg-emerald-50 text-emerald-600",
-  SUSPENDED: "bg-amber-50 text-amber-600",
-  BANNED: "bg-red-50 text-red-500",
-  PENDING: "bg-gray-100 text-gray-500",
-};
+import Link from "next/link";
+import { Eye, MapPin, Pencil, Settings2, Star } from "lucide-react";
+import type { Store, StoreStatusAction } from "@/src/types/shop";
+import { displayStoreLocation, formatPriceLevel, imageUrlOrNull, storeInitials } from "@/src/lib/shopFormat";
 
 export default function ShopsTable({
-  shops,
+  stores,
+  disabled = false,
   onEdit,
-  onDelete,
-  onToggleStatus,
-}: ShopsTableProps) {
+  onStatus,
+}: {
+  stores: Store[];
+  disabled?: boolean;
+  onEdit: (store: Store) => void;
+  onStatus: (store: Store, action: StoreStatusAction) => void;
+}) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
-      <table className="w-full text-sm min-w-[900px]">
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[1180px] border-collapse text-left">
         <thead>
-          <tr className="text-left text-[#136C34] border-b border-gray-100">
-            <th className="py-3 px-5 font-medium text-base lg:text-lg">ហាង</th>
-            <th className="py-3 px-5 font-medium text-base lg:text-lg">ការវាយតម្លៃ</th>
-            <th className="py-3 px-5 font-medium text-base lg:text-lg">តម្លៃ</th>
-            <th className="py-3 px-5 font-medium text-base lg:text-lg">ដំណើរការ</th>
-            <th className="py-3 px-5 font-medium text-base lg:text-lg">ស្ថានភាពគណនី</th>
-            <th className="py-3 px-5 font-medium text-base lg:text-lg">លេខទូរស័ព្ទ</th>
-            <th className="py-3 px-5 font-medium text-right text-base lg:text-lg">
-              សកម្មភាព
-            </th>
+          <tr className="border-b border-gray-100 bg-gray-50/70 text-[12px] font-black uppercase tracking-wide text-gray-500">
+            <th className="px-5 py-4">Store</th><th className="px-5 py-4">Location</th>
+            <th className="px-5 py-4">Rating</th><th className="px-5 py-4">Review</th>
+            <th className="px-5 py-4">Account</th><th className="px-5 py-4">Operating</th>
+            <th className="px-5 py-4">Open now</th><th className="px-5 py-4 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody>
-          {shops.map((shop) => (
-            <tr key={shop.uuid} className="border-b border-gray-50 last:border-0">
-              <td className="py-3 px-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg overflow-hidden bg-gray-100 shrink-0 relative">
-                    <Image
-                      src={shop.logoUrl || "/Image/fallback.png"}
-                      alt={shop.storeName}
-                      fill
-                      className="object-cover"
-                    />
+        <tbody className="divide-y divide-gray-100">
+          {stores.map((store) => {
+            const logo = imageUrlOrNull(store.logoUrl);
+            return (
+              <tr key={store.uuid} className="bg-white text-sm text-gray-600 transition hover:bg-emerald-50/30">
+                <td className="px-5 py-4">
+                  <div className="flex min-w-[250px] items-center gap-3">
+                    <div className="flex h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-emerald-100">
+                      {logo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={logo} alt={store.storeName} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center font-black text-[#137A3D]">{storeInitials(store.storeName)}</div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-black text-gray-900">{store.storeName}</p>
+                      <p className="mt-1 text-xs text-gray-400">{formatPriceLevel(store.priceLevel)} · {store.countryCode}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-gray-700 font-medium">{shop.storeName}</p>
-                    <p className="text-xs text-gray-400">
-                      {shop.district}, {shop.city}
-                    </p>
+                </td>
+                <td className="px-5 py-4">
+                  <div className="flex max-w-[270px] items-start gap-2">
+                    <MapPin size={15} className="mt-0.5 shrink-0 text-emerald-600" />
+                    <span className="line-clamp-2">{displayStoreLocation(store) || "—"}</span>
                   </div>
-                </div>
-              </td>
-              <td className="py-3 px-5">
-                <span className="flex items-center gap-1 text-gray-700">
-                  <Star size={14} className="fill-yellow-400 text-yellow-400" />
-                  {shop.averageRating}
-                  <span className="text-xs text-gray-400">
-                    ({shop.totalReviews})
+                </td>
+                <td className="px-5 py-4">
+                  <span className="inline-flex items-center gap-1.5 font-bold text-gray-700">
+                    <Star size={15} className="fill-amber-400 text-amber-400" />
+                    {Number(store.averageRating || 0).toFixed(1)}
+                    <span className="font-medium text-gray-400">({store.totalReviews ?? 0})</span>
                   </span>
-                </span>
-              </td>
-              <td className="py-3 px-5 text-gray-500">
-                {shop.priceLevel ? PRICE_LABEL[shop.priceLevel] : "-"}
-              </td>
-              <td className="py-3 px-5">
-                <span
-                  className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                    OPERATING_BADGE[shop.operatingStatus]
-                  }`}
-                >
-                  {shop.operatingStatus}
-                </span>
-              </td>
-              <td className="py-3 px-5">
-                <span
-                  className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                    ACCOUNT_BADGE[shop.accountStatus]
-                  }`}
-                >
-                  {shop.accountStatus}
-                </span>
-              </td>
-              <td className="py-3 px-5 text-gray-500">{shop.phoneNumber}</td>
-              <td className="py-3 px-5">
-                <div className="flex items-center justify-end gap-3">
-                  <button
-                    onClick={() => onToggleStatus(shop)}
-                    title={
-                      shop.accountStatus === "BANNED" ? "ដកហាមឃាត់" : "ហាមឃាត់"
-                    }
-                    className="text-red-400 hover:text-red-600"
-                  >
-                    <Ban size={16} />
-                  </button>
-                  <button
-                    onClick={() => onEdit(shop)}
-                    title="កែសម្រួល"
-                    className="text-blue-400 hover:text-blue-600"
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    onClick={() => onDelete(shop)}
-                    title="លុប"
-                    className="text-red-400 hover:text-red-600"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-
-          {shops.length === 0 && (
-            <tr>
-              <td colSpan={7} className="py-10 text-center text-gray-400">
-                មិនមានទិន្នន័យ
-              </td>
-            </tr>
-          )}
+                </td>
+                <td className="px-5 py-4"><button disabled={disabled} onClick={() => onStatus(store, "REVIEW")}><StatusBadge value={store.reviewStatus} kind="review" /></button></td>
+                <td className="px-5 py-4"><button disabled={disabled} onClick={() => onStatus(store, "ACCOUNT")}><StatusBadge value={store.accountStatus} kind="account" /></button></td>
+                <td className="px-5 py-4"><button disabled={disabled} onClick={() => onStatus(store, "OPERATING")}><StatusBadge value={store.operatingStatus} kind="operating" /></button></td>
+                <td className="px-5 py-4">
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-black ${
+                    store.isOpenNow === true ? "bg-emerald-50 text-emerald-700" :
+                    store.isOpenNow === false ? "bg-gray-100 text-gray-600" : "bg-slate-50 text-slate-400"
+                  }`}>
+                    {store.isOpenNow === true ? "OPEN" : store.isOpenNow === false ? "CLOSED" : "—"}
+                  </span>
+                </td>
+                <td className="px-5 py-4">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Link href={`/shops/${store.uuid}`} className="flex h-9 w-9 items-center justify-center rounded-xl text-emerald-600 hover:bg-emerald-50"><Eye size={18} /></Link>
+                    <button disabled={disabled} onClick={() => onEdit(store)} className="flex h-9 w-9 items-center justify-center rounded-xl text-blue-500 hover:bg-blue-50 disabled:opacity-40"><Pencil size={17} /></button>
+                    <button disabled={disabled} onClick={() => onStatus(store, "ACCOUNT")} className="flex h-9 w-9 items-center justify-center rounded-xl text-violet-500 hover:bg-violet-50 disabled:opacity-40"><Settings2 size={17} /></button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
   );
+}
+
+export function StatusBadge({ value, kind }: { value: string; kind: "review" | "account" | "operating" }) {
+  const v = String(value || "UNKNOWN").toUpperCase();
+  const cls =
+    ["APPROVED", "ACTIVE", "OPEN"].includes(v) ? "bg-emerald-50 text-emerald-700" :
+    ["PENDING", "TEMPORARILY_CLOSED"].includes(v) ? "bg-amber-50 text-amber-700" :
+    ["REJECTED", "SUSPENDED"].includes(v) ? "bg-red-50 text-red-700" :
+    kind === "operating" ? "bg-slate-100 text-slate-600" : "bg-gray-100 text-gray-600";
+  return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-black ${cls}`}>{v}</span>;
 }

@@ -1,118 +1,22 @@
-// "use client";
-
-// import { AlertTriangle } from "lucide-react";
-
-// interface DeleteShopConfirmModalProps {
-//   open: boolean;
-//   shopName: string;
-//   onCancel: () => void;
-//   onConfirm: () => void;
-// }
-
-// export default function DeleteShopConfirmModal({
-//   open,
-//   shopName,
-//   onCancel,
-//   onConfirm,
-// }: DeleteShopConfirmModalProps) {
-//   if (!open) return null;
-
-//   return (
-//     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
-//       <div className="bg-white rounded-2xl w-full max-w-sm p-5 sm:p-6">
-//         <div className="flex items-center gap-3 mb-3">
-//           <div className="bg-red-50 rounded-full p-2">
-//             <AlertTriangle size={20} className="text-red-500" />
-//           </div>
-//           <h2 className="text-base sm:text-lg font-bold text-gray-800">
-//             លុបហាង
-//           </h2>
-//         </div>
-
-//         <p className="text-sm text-gray-500 mb-6">
-//           តើអ្នកប្រាកដទេថាចង់លុប{" "}
-//           <span className="font-medium text-gray-700">{shopName}</span>? សកម្មភាពនេះមិន
-//           អាចត្រឡប់វិញបានទេ។
-//         </p>
-
-//         <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3">
-//           <button
-//             onClick={onCancel}
-//             className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"
-//           >
-//             បោះបង់
-//           </button>
-//           <button
-//             onClick={onConfirm}
-//             className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg"
-//           >
-//             លុប
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
 "use client";
+import { Info, X } from "lucide-react";
 
-import { AlertTriangle } from "lucide-react";
-
-interface DeleteShopConfirmModalProps {
-  open: boolean;
-  storeName: string;
-  onCancel: () => void;
-  onConfirm: () => void;
-}
-
-export default function DeleteShopConfirmModal({
-  open,
-  storeName,
-  onCancel,
-  onConfirm,
-}: DeleteShopConfirmModalProps) {
+export default function DeleteShopConfirmModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
-      <div className="bg-white rounded-2xl w-full max-w-sm p-5 sm:p-6">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="bg-red-50 rounded-full p-2">
-            <AlertTriangle size={20} className="text-red-500" />
-          </div>
-          <h2 className="text-base sm:text-lg font-bold text-gray-800">
-            លុបហាង
-          </h2>
+    <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/45 p-4">
+      <div className="w-full max-w-md rounded-[26px] bg-white p-6 shadow-2xl">
+        <div className="flex items-start justify-between">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600"><Info size={22} /></div>
+          <button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 text-gray-500"><X size={18} /></button>
         </div>
-
-        <p className="text-sm text-gray-500 mb-6">
-          តើអ្នកប្រាកដទេថាចង់លុប{" "}
-          <span className="font-medium text-gray-700">{storeName}</span>?
-          សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។
+        <h2 className="mt-5 text-xl font-black text-gray-900">Store delete endpoint មិនមាន</h2>
+        <p className="mt-2 text-sm leading-6 text-gray-500">
+          Supplied backend contract មិនមាន DELETE /api/v1/admin/stores/{"{uuid}"} ទេ។
+          ប្រើ account status (INACTIVE/SUSPENDED) ឬបន្ថែម Spring Boot delete endpoint ជាមុន។
         </p>
-
-        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"
-          >
-            បោះបង់
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg"
-          >
-            លុប
-          </button>
+        <div className="mt-6 flex justify-end">
+          <button onClick={onClose} className="rounded-xl bg-[#137A3D] px-4 py-2.5 font-black text-white">យល់ហើយ</button>
         </div>
       </div>
     </div>

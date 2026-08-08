@@ -1,70 +1,148 @@
-export type ReviewStatus = "PENDING" | "APPROVED" | "REJECTED";
-export type OperatingStatus = "OPEN" | "CLOSED" | "TEMPORARILY_CLOSED" | "UNKNOWN";
-export type AccountStatus = "ACTIVE" | "SUSPENDED" | "BANNED" | "PENDING";
-export type PriceLevel = "LOW" | "MEDIUM" | "HIGH" | null;
+// export type StoreReviewStatus = "PENDING" | "APPROVED" | "REJECTED" | string;
+export type StoreOperatingStatus =
+  | "OPEN"
+  | "CLOSED"
+  | "TEMPORARILY_CLOSED"
+  | "UNKNOWN"
+  | string;
+export type StoreAccountStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED" | string;
 
-export type DayOfWeek =
-  | "MONDAY"
-  | "TUESDAY"
-  | "WEDNESDAY"
-  | "THURSDAY"
-  | "FRIDAY"
-  | "SATURDAY"
-  | "SUNDAY";
-
-export interface OpeningHourEntry {
-  dayOfWeek: DayOfWeek;
-  openTime: string;
-  closeTime: string;
-  isClosed?: boolean;
-}
-
-export interface SocialLink {
+export interface StoreSocialLink {
   platform: string;
-  url: string;
+  profileUrl: string;
+  displayOrder: number;
 }
 
-export interface Shop {
+export interface StoreHour {
+  scheduleType: "WEEKLY" | "SPECIAL_DATE";
+  dayOfWeek?: number | null;
+  businessDate?: string | null;
+  openingTime?: string | null;
+  closingTime?: string | null;
+  intervalOrder: number;
+  isClosed: boolean;
+  reason?: string | null;
+}
+
+export interface Store {
   uuid: string;
   storeName: string;
-  description: string;
+  description: string | null;
   addressLine: string;
   commune: string | null;
-  district: string;
-  city: string;
-  province: string;
+  district: string | null;
+  city: string | null;
+  province: string | null;
   countryCode: string;
   postalCode: string | null;
   timezone: string;
-  latitude: number | null;
-  longitude: number | null;
-  phoneNumber: string;
-  email: string;
+  latitude: number;
+  longitude: number;
+  phoneNumber: string | null;
+  email: string | null;
   logoMediaUuid: string | null;
   coverMediaUuid: string | null;
   logoUrl: string | null;
   coverImageUrl: string | null;
-  priceLevel: PriceLevel;
+  priceLevel: number | string | null;
   hygieneRating: number | null;
   averageRating: number;
   totalReviews: number;
-  reviewStatus: ReviewStatus;
-  operatingStatus: OperatingStatus;
-  accountStatus: AccountStatus;
+  reviewStatus: StoreReviewStatus;
+  operatingStatus: StoreOperatingStatus;
+  accountStatus: StoreAccountStatus;
   isOpenNow: boolean | null;
-  socialLinks: SocialLink[];
-  openingHours: OpeningHourEntry[];
-  externalSource: string | null;
-   googleMapUrl?: string | null;
-  galleryImages?: string[];
+  socialLinks: StoreSocialLink[];
+  openingHours: StoreHour[];
+  externalSource: unknown | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
-export type CreateShopPayload = Omit<
-  Shop,
-  | "uuid"
-  | "logoMediaUuid"
-  | "coverMediaUuid"
-  | "averageRating"
-  | "totalReviews"
-  | "isOpenNow"
->;
+export interface StorePage {
+  contents: Store[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface GetAdminStoresParams {
+  query?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface CreateStorePayload {
+  storeName: string;
+  description?: string | null;
+  addressLine: string;
+  commune?: string | null;
+  district?: string | null;
+  city?: string | null;
+  province?: string | null;
+  countryCode: string;
+  postalCode?: string | null;
+  timezone: string;
+  latitude: number;
+  longitude: number;
+  phoneNumber?: string | null;
+  email?: string | null;
+  logoMediaUuid?: string | null;
+  coverMediaUuid?: string | null;
+  priceLevel?: number | null;
+  hygieneRating?: number | null;
+  operatingStatus?: StoreOperatingStatus;
+  socialLinks?: StoreSocialLink[];
+}
+
+/** Fields demonstrated by the supplied PUT request. */
+export interface UpdateStorePayload {
+  storeName: string;
+  description?: string | null;
+  addressLine: string;
+  city?: string | null;
+  province?: string | null;
+  countryCode: string;
+  timezone: string;
+  latitude: number;
+  longitude: number;
+  phoneNumber?: string | null;
+  email?: string | null;
+  logoMediaUuid?: string | null;
+  coverMediaUuid?: string | null;
+  priceLevel?: number | null;
+  hygieneRating?: number | null;
+  operatingStatus?: StoreOperatingStatus;
+}
+
+export interface UpdateStoreReviewStatusPayload {
+  reviewStatus: "APPROVED" | "REJECTED";
+  notes: string;
+}
+export interface UpdateStoreAccountStatusPayload {
+  accountStatus: StoreAccountStatus;
+}
+export interface UpdateStoreOperatingStatusPayload {
+  operatingStatus: StoreOperatingStatus;
+}
+export interface ReplaceStoreHoursPayload {
+  hours: StoreHour[];
+}
+export interface CreateStoreFromGooglePayload {
+  placeId: string;
+  overrides: {
+    timezone: string;
+    logoMediaUuid?: string | null;
+    coverMediaUuid?: string | null;
+  };
+}
+
+export type GooglePlaceResult = Record<string, unknown>;
+export type GooglePlacePreview = Record<string, unknown>;
+export type StoreExternalSourceMetadata = Record<string, unknown>;
+
+export type StoreReviewFilter = "ALL" | "PENDING" | "APPROVED" | "REJECTED";
+export type StoreStatusAction = "REVIEW" | "ACCOUNT" | "OPERATING";
