@@ -1,163 +1,102 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
-import { UserProfile, Gender, Relationship } from "../../types/userProfile";
+import { Loader2, UserCog, X } from "lucide-react";
+
+import type {
+  AdminUser,
+  MutableAdminUserStatus,
+} from "@/src/types/userProfile";
 
 interface UserEditModalProps {
-  open: boolean;
-  initialData: UserProfile | null;
+  user: AdminUser | null;
+  saving: boolean;
   onClose: () => void;
-  onSubmit: (uuid: string, changes: Partial<UserProfile>) => void;
+  onSubmit: (status: MutableAdminUserStatus) => Promise<void>;
 }
 
-const GENDER_OPTIONS: { value: Gender; label: string }[] = [
-  { value: "MALE", label: "ប្រុស" },
-  { value: "FEMALE", label: "ស្រី" },
-  { value: "OTHER", label: "ផ្សេងៗ" },
-];
-
-const RELATIONSHIP_OPTIONS: { value: Relationship; label: string }[] = [
-  { value: "SELF", label: "ខ្លួនឯង" },
-  { value: "CHILD", label: "កូន" },
-  { value: "PARENT", label: "ឪពុកម្តាយ" },
-  { value: "SPOUSE", label: "ប្តី/ប្រពន្ធ" },
-  { value: "OTHER", label: "ផ្សេងៗ" },
-];
-
-const LANGUAGE_OPTIONS = [
-  { value: "km", label: "ខ្មែរ" },
-  { value: "en", label: "English" },
-];
-
 export default function UserEditModal({
-  open,
-  initialData,
+  user,
+  saving,
   onClose,
   onSubmit,
 }: UserEditModalProps) {
-  const [form, setForm] = useState<Partial<UserProfile>>({});
+  const [status, setStatus] = useState<MutableAdminUserStatus>("ACTIVE");
 
   useEffect(() => {
-    if (initialData) setForm(initialData);
-  }, [initialData, open]);
+    if (!user) return;
+    setStatus(user.status === "SUSPENDED" ? "SUSPENDED" : "ACTIVE");
+  }, [user]);
 
-  if (!open || !initialData) return null;
-
-  const handleSubmit = () => {
-    if (!form.profileName?.trim() || !form.dateOfBirth) return;
-    onSubmit(initialData.uuid, form);
-  };
+  if (!user) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base sm:text-lg font-bold text-gray-800">
-            កែសម្រួលប្រវត្តិរូប
-          </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="space-y-4">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px]">
+      <div className="w-full max-w-md rounded-[26px] bg-white shadow-2xl">
+        <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">ឈ្មោះ</label>
-            <input
-              type="text"
-              value={form.profileName ?? ""}
-              onChange={(e) => setForm({ ...form, profileName: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
+            <h2 className="flex items-center gap-2 text-xl font-black text-gray-900">
+              <UserCog size={21} className="text-[#137A3D]" />
+              កែប្រែស្ថានភាព User
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">@{user.username}</p>
           </div>
 
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">ទំនាក់ទំនង</label>
-            <select
-              value={form.relationship ?? "SELF"}
-              onChange={(e) =>
-                setForm({ ...form, relationship: e.target.value as Relationship })
-              }
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            >
-              {RELATIONSHIP_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">ភេទ</label>
-            <select
-              value={form.gender ?? "MALE"}
-              onChange={(e) => setForm({ ...form, gender: e.target.value as Gender })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            >
-              {GENDER_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">ថ្ងៃខែឆ្នាំកំណើត</label>
-            <input
-              type="date"
-              value={form.dateOfBirth ?? ""}
-              onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">ភាសាដែលចូលចិត្ត</label>
-            <select
-              value={form.preferredLanguage ?? "km"}
-              onChange={(e) =>
-                setForm({ ...form, preferredLanguage: e.target.value })
-              }
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            >
-              {LANGUAGE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              id="isActive"
-              type="checkbox"
-              checked={form.isActive ?? true}
-              onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-              className="w-4 h-4"
-            />
-            <label htmlFor="isActive" className="text-sm text-gray-600">
-              សកម្ម (Active)
-            </label>
-          </div>
-        </div>
-
-        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 mt-6">
           <button
+            type="button"
+            disabled={saving}
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 text-gray-500"
           >
-            បោះបង់
+            <X size={18} />
           </button>
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg"
-          >
-            រក្សាទុក
-          </button>
+        </div>
+
+        <div className="space-y-4 p-6">
+          <p className="text-sm leading-6 text-gray-500">
+            Backend contract អនុញ្ញាតឱ្យ Admin កែតែ account status តាម endpoint
+            <span className="mx-1 font-mono text-xs text-gray-700">
+              PATCH /admin/users/{"{uuid}"}/status
+            </span>
+            ។
+          </p>
+
+          <div className="grid grid-cols-2 gap-3">
+            {(["ACTIVE", "SUSPENDED"] as const).map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setStatus(option)}
+                className={`rounded-2xl border px-4 py-4 text-sm font-black transition ${
+                  status === option
+                    ? "border-[#137A3D] bg-emerald-50 text-[#137A3D]"
+                    : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              disabled={saving}
+              onClick={onClose}
+              className="rounded-xl border border-gray-200 px-4 py-2.5 font-bold text-gray-600"
+            >
+              បោះបង់
+            </button>
+            <button
+              type="button"
+              disabled={saving || status === user.status}
+              onClick={() => void onSubmit(status)}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#137A3D] px-4 py-2.5 font-bold text-white disabled:opacity-50"
+            >
+              {saving && <Loader2 size={17} className="animate-spin" />}
+              រក្សាទុក
+            </button>
+          </div>
         </div>
       </div>
     </div>

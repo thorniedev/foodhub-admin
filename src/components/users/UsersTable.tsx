@@ -1,179 +1,164 @@
-"use client";
-
 import Link from "next/link";
-import { Ban, Eye, Pencil, Trash2 } from "lucide-react";
-import { UserProfile } from "../../types/userProfile";
-import { calculateAge } from "../../lib/age";
-import { formatShortDate } from "../../lib/formatDate";
+import {
+  CheckCircle,
+  Eye,
+  Pencil,
+  Trash2,
+  XCircle,
+} from "lucide-react";
+
+import type { AdminUser } from "@/src/types/userProfile";
+import {
+  displayName,
+  formatDateTime,
+  initials,
+} from "@/src/lib/userProfileFormat";
 
 interface UsersTableProps {
-  profiles: UserProfile[];
-  onEdit: (profile: UserProfile) => void;
-  onDelete: (profile: UserProfile) => void;
-  onToggleStatus: (profile: UserProfile) => void;
-}
-
-const RELATIONSHIP_LABEL: Record<string, string> = {
-  SELF: "ខ្លួនឯង",
-  CHILD: "កូន",
-  PARENT: "ឪពុកម្តាយ",
-  SPOUSE: "ប្តី/ប្រពន្ធ",
-  OTHER: "ផ្សេងៗ",
-};
-
-const GENDER_LABEL: Record<string, string> = {
-  MALE: "ប្រុស",
-  FEMALE: "ស្រី",
-  OTHER: "ផ្សេងៗ",
-};
-
-function healthSummary(p: UserProfile): string {
-  const parts: string[] = [];
-  if (p.allergies.length) parts.push(`អាឡែហ្ស៊ី ${p.allergies.length}`);
-  if (p.dietaryTypes.length) parts.push(`របបអាហារ ${p.dietaryTypes.length}`);
-  if (p.medicalConditions.length)
-    parts.push(`ជំងឺ ${p.medicalConditions.length}`);
-  return parts.length ? parts.join(", ") : "-";
+  users: AdminUser[];
+  disabled?: boolean;
+  onStatusEdit: (user: AdminUser) => void;
+  onDelete: (user: AdminUser) => void;
 }
 
 export default function UsersTable({
-  profiles,
-  onEdit,
+  users,
+  disabled = false,
+  onStatusEdit,
   onDelete,
-  onToggleStatus,
 }: UsersTableProps) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
-      <table className="w-full min-w-300 text-sm">
+    <div className="overflow-x-auto">
+      <table className="min-w-[1080px] w-full border-collapse text-left">
         <thead>
-          <tr className="text-left text-[#136C34] border-b border-gray-100">
-            <th className="py-3 px-4 font-medium text-base">ប្រវត្តិរូប</th>
-            <th className="py-3 px-4 font-medium text-base">ទំនាក់ទំនង</th>
-            <th className="py-3 px-4 font-medium text-base">ភេទ</th>
-            <th className="py-3 px-4 font-medium text-base">
-              ថ្ងៃខែឆ្នាំកំណើត
-            </th>
-            <th className="py-3 px-4 font-medium text-base">អាយុ</th>
-            <th className="py-3 px-4 font-medium text-base">ក្រុមអាយុ</th>
-            <th className="py-3 px-4 font-medium text-base">ភាសា</th>
-            <th className="py-3 px-4 font-medium text-base">
-              ចំណូលចិត្តសុខភាព
-            </th>
-            <th className="py-3 px-4 font-medium text-base">លំនាំដើម</th>
-            <th className="py-3 px-4 font-medium text-base">ស្ថានភាព</th>
-            <th className="py-3 px-4 font-medium text-base">កែប្រែចុងក្រោយ</th>
-            <th className="py-3 px-4 font-medium text-right text-base">
-              សកម្មភាព
-            </th>
+          <tr className="border-b border-gray-100 bg-gray-50/70 text-[13px] font-bold uppercase tracking-wide text-gray-500">
+            <th className="px-5 py-4">អ្នកប្រើ</th>
+            <th className="px-5 py-4">Username</th>
+            <th className="px-5 py-4">Email</th>
+            <th className="px-5 py-4">Verified</th>
+            <th className="px-5 py-4">ស្ថានភាព</th>
+            <th className="px-5 py-4">ចូលចុងក្រោយ</th>
+            <th className="px-5 py-4">បង្កើតនៅ</th>
+            <th className="px-5 py-4 text-right">សកម្មភាព</th>
           </tr>
         </thead>
-        <tbody>
-          {profiles.map((p) => (
-            <tr key={p.uuid} className="border-b border-gray-50 last:border-0">
-              <td className="py-3 px-4">
-                <Link
-                  href={`/users/${p.uuid}`}
-                  className="flex items-center gap-3 hover:text-emerald-600"
-                >
-                  <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-semibold overflow-hidden shrink-0">
-                    {p.avatarMediaUuid ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={`/api/media/${p.avatarMediaUuid}`}
-                        alt={p.profileName}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      p.profileName.charAt(0)
-                    )}
-                  </div>
-                  <span className="font-medium text-gray-700">
-                    {p.profileName}
-                  </span>
-                </Link>
-              </td>
-              <td className="py-3 px-4 text-gray-500">
-                {RELATIONSHIP_LABEL[p.relationship] ?? p.relationship}
-              </td>
-              <td className="py-3 px-4 text-gray-500">
-                {GENDER_LABEL[p.gender] ?? p.gender}
-              </td>
-              <td className="py-3 px-4 text-gray-500">{p.dateOfBirth}</td>
-              <td className="py-3 px-4 text-gray-500">
-                {calculateAge(p.dateOfBirth)}
-              </td>
-              <td className="py-3 px-4 text-gray-500">{p.ageGroup.name}</td>
-              <td className="py-3 px-4 text-gray-500 uppercase">
-                {p.preferredLanguage}
-              </td>
-              <td className="py-3 px-4 text-gray-500">{healthSummary(p)}</td>
-              <td className="py-3 px-4">
-                {p.isDefault ? (
-                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-50 text-blue-600">
-                    លំនាំដើម
-                  </span>
-                ) : (
-                  <span className="text-gray-300">-</span>
-                )}
-              </td>
-              <td className="py-3 px-4">
-                <span
-                  className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                    p.isActive
-                      ? "bg-emerald-50 text-emerald-600"
-                      : "bg-red-50 text-red-500"
-                  }`}
-                >
-                  {p.isActive ? "សកម្ម" : "អសកម្ម"}
-                </span>
-              </td>
-              <td className="py-3 px-4 text-gray-500">
-                {formatShortDate(p.updatedAt)}
-              </td>
-              <td className="py-3 px-4">
-                <div className="flex items-center justify-end gap-3">
-                  <Link
-                    href={`/users/${p.uuid}`}
-                    title="មើលព័ត៌មានលម្អិត"
-                    className="text-emerald-500 hover:text-emerald-700"
-                  >
-                    <Eye size={16} />
-                  </Link>
-                  <button
-                    onClick={() => onToggleStatus(p)}
-                    title={p.isActive ? "ធ្វើអសកម្ម" : "ធ្វើសកម្ម"}
-                    className="text-red-400 hover:text-red-600"
-                  >
-                    <Ban size={16} />
-                  </button>
-                  <button
-                    onClick={() => onEdit(p)}
-                    title="កែសម្រួល"
-                    className="text-blue-400 hover:text-blue-600"
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    onClick={() => onDelete(p)}
-                    title="លុប"
-                    className="text-red-400 hover:text-red-600"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
 
-          {profiles.length === 0 && (
-            <tr>
-              <td colSpan={12} className="py-10 text-center text-gray-400">
-                មិនមានទិន្នន័យ
-              </td>
-            </tr>
-          )}
+        <tbody className="divide-y divide-gray-100">
+          {users.map((user) => {
+            const name = displayName(
+              user.firstName,
+              user.lastName,
+              user.username,
+            );
+
+            return (
+              <tr
+                key={user.uuid}
+                className="bg-white text-sm text-gray-600 transition hover:bg-emerald-50/30"
+              >
+                <td className="px-5 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-black text-[#137A3D]">
+                      {initials(name)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-bold text-gray-900">{name}</p>
+                      <p className="mt-0.5 max-w-[210px] truncate text-xs text-gray-400">
+                        {user.uuid}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+
+                <td className="px-5 py-4 font-medium text-gray-700">
+                  {user.username}
+                </td>
+
+                <td className="px-5 py-4">
+                  {user.primaryEmail ?? "—"}
+                </td>
+
+                <td className="px-5 py-4">
+                  {user.emailVerified ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                      <CheckCircle size={14} />
+                      Yes
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
+                      <XCircle size={14} />
+                      No
+                    </span>
+                  )}
+                </td>
+
+                <td className="px-5 py-4">
+                  <StatusBadge status={user.status} />
+                </td>
+
+                <td className="px-5 py-4">
+                  {formatDateTime(user.lastLoginAt)}
+                </td>
+
+                <td className="px-5 py-4">
+                  {formatDateTime(user.createdAt)}
+                </td>
+
+                <td className="px-5 py-4">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Link
+                      href={`/users/${user.uuid}`}
+                      title="View user profiles"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50"
+                    >
+                      <Eye size={18} />
+                    </Link>
+
+                    <button
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => onStatusEdit(user)}
+                      title="Change status"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 disabled:opacity-40"
+                    >
+                      <Pencil size={17} />
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => onDelete(user)}
+                      title="Soft delete"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 disabled:opacity-40"
+                    >
+                      <Trash2 size={17} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
+  );
+}
+
+export function StatusBadge({ status }: { status: string }) {
+  const normalized = status?.toUpperCase();
+
+  const className =
+    normalized === "ACTIVE"
+      ? "bg-emerald-50 text-emerald-700"
+      : normalized === "SUSPENDED"
+        ? "bg-amber-50 text-amber-700"
+        : normalized === "DELETED"
+          ? "bg-red-50 text-red-700"
+          : "bg-gray-100 text-gray-600";
+
+  return (
+    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${className}`}>
+      {status || "UNKNOWN"}
+    </span>
   );
 }

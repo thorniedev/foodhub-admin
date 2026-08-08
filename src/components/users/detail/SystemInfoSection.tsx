@@ -1,17 +1,41 @@
-import { UserProfile } from "../../../types/userProfile";
-import { formatDateTime } from "../../../lib/formatDate";
+import { Info } from "lucide-react";
 
-interface SystemInfoSectionProps {
-  profile: UserProfile;
+import type { AdminProfile } from "@/src/types/userProfile";
+import { formatDateTime } from "@/src/lib/userProfileFormat";
+import { Section } from "./BasicInfoSection";
+
+export default function SystemInfoSection({
+  profile,
+}: {
+  profile: AdminProfile;
+}) {
+  return (
+    <Section title="System information" icon={<Info size={18} />}>
+      <div className="space-y-3 text-sm">
+        <Row label="Profile UUID" value={profile.uuid} mono />
+        <Row label="Avatar media UUID" value={profile.avatarMediaUuid ?? "—"} mono />
+        <Row label="Created at" value={formatDateTime(profile.createdAt)} />
+        <Row label="Updated at" value={formatDateTime(profile.updatedAt)} />
+      </div>
+    </Section>
+  );
 }
 
-export default function SystemInfoSection({ profile }: SystemInfoSectionProps) {
+function Row({
+  label,
+  value,
+  mono = false,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
   return (
-    <div className="border-t border-gray-100 pt-4 mt-2 space-y-1.5 text-xs text-gray-400">
-      <p>បង្កើតនៅ: {formatDateTime(profile.createdAt)}</p>
-      <p>កែប្រែចុងក្រោយ: {formatDateTime(profile.updatedAt)}</p>
-      <p>លេខសម្គាល់រូបភាព: {profile.avatarMediaUuid ?? "មិនមាន"}</p>
-      <p>លេខសម្គាល់ប្រវត្តិរូប: {profile.uuid}</p>
+    <div className="grid gap-1 rounded-2xl bg-gray-50 px-4 py-3 sm:grid-cols-[150px_1fr]">
+      <span className="font-bold text-gray-400">{label}</span>
+      <span className={`break-all font-medium text-gray-700 ${mono ? "font-mono text-xs" : ""}`}>
+        {value}
+      </span>
     </div>
   );
 }

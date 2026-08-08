@@ -1,69 +1,123 @@
-import { UserProfile } from "../../types/userProfile";
-import { calculateAge } from "../../lib/age";
+import { ChevronLeft, ChevronRight, Loader2, Users } from "lucide-react";
 
-const RELATIONSHIP_LABEL: Record<string, string> = {
-  SELF: "ខ្លួនឯង",
-  CHILD: "កូន",
-  PARENT: "ឪពុកម្តាយ",
-  SPOUSE: "ប្តី/ប្រពន្ធ",
-  OTHER: "ផ្សេងៗ",
-};
+import type {
+  AdminPage,
+  AdminProfile,
+  ProfileStatusFilter,
+} from "@/src/types/userProfile";
+
+import ProfileTagCard from "./ProfileTagCard";
 
 interface RelatedProfilesPanelProps {
-  profiles: UserProfile[];
-  activeUuid: string;
-  onSelect: (profile: UserProfile) => void;
+  data: AdminPage<AdminProfile> | undefined;
+  loading: boolean;
+  fetching: boolean;
+  filter: ProfileStatusFilter;
+  selectedProfileUuid: string | null;
+  onFilterChange: (filter: ProfileStatusFilter) => void;
+  onSelectProfile: (profileUuid: string) => void;
+  onPageChange: (page: number) => void;
 }
 
 export default function RelatedProfilesPanel({
-  profiles,
-  activeUuid,
-  onSelect,
+  data,
+  loading,
+  fetching,
+  filter,
+  selectedProfileUuid,
+  onFilterChange,
+  onSelectProfile,
+  onPageChange,
 }: RelatedProfilesPanelProps) {
-  const others = profiles.filter((p) => p.uuid !== activeUuid);
+  const profiles = data?.contents ?? [];
+  const page = data?.pageNumber ?? 0;
+  const totalPages = Math.max(data?.totalPages ?? 0, 1);
 
   return (
-    <div>
-      <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-3">
-        {profiles.length} ប្រវត្តិរូប
-      </h3>
-      <div className="space-y-3">
-        {others.map((p) => (
-          <button
-            key={p.uuid}
-            onClick={() => onSelect(p)}
-            className="w-full text-left bg-white border border-gray-100 rounded-xl p-3 flex gap-3 items-center hover:border-emerald-200 transition-colors"
-          >
-            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-semibold shrink-0">
-              {p.profileName.charAt(0)}
-            </div>
-            <div className="min-w-0">
-              <p className="font-medium text-gray-800 truncate">{p.profileName}</p>
-              <p className="text-xs text-gray-400">
-                អាយុ {calculateAge(p.dateOfBirth)} • {p.ageGroup.name}
-              </p>
-              <div className="flex flex-wrap gap-1 mt-1">
-                <span className="text-[10px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                  {RELATIONSHIP_LABEL[p.relationship] ?? p.relationship}
-                </span>
-                {p.dietaryTypes[0] && (
-                  <span className="text-[10px] font-medium bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">
-                    {p.dietaryTypes[0].name}
-                  </span>
-                )}
-                {p.allergies[0] && (
-                  <span className="text-[10px] font-medium bg-red-50 text-red-500 px-2 py-0.5 rounded-full">
-                    {p.allergies[0].name}
-                  </span>
-                )}
-              </div>
-            </div>
-          </button>
-        ))}
-        {others.length === 0 && (
-          <p className="text-sm text-gray-400">មិនមានប្រវត្តិរូបផ្សេងទៀត</p>
+    <section className="rounded-[26px] border border-gray-100 bg-white shadow-[0_12px_35px_rgba(15,23,42,0.05)]">
+      <div className="border-b border-gray-100 p-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-[#137A3D]">
+            <Users size={20} />
+          </div>
+          <div>
+            <h2 className="font-black text-gray-900">Profiles របស់អ្នកប្រើ</h2>
+            <p className="text-xs text-gray-500">
+              {data?.totalElements ?? 0} profile(s)
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {[
+            { value: "ALL" as const, label: "ទាំងអស់" },
+            { value: "ACTIVE" as const, label: "សកម្ម" },
+            { value: "INACTIVE" as const, label: "Deleted" },
+          ].map((item) => (
+            <button
+              key={item.value}
+              type="button"
+              onClick={() => onFilterChange(item.value)}
+              className={`rounded-xl px-3 py-2 text-xs font-bold transition ${
+                filter === item.value
+                  ? "bg-[#137A3D] text-white"
+                  : "bg-gray-50 text-gray-500 hover:bg-emerald-50"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="max-h-[640px] space-y-3 overflow-y-auto p-4">
+        {loading ? (
+          <div className="flex min-h-48 items-center justify-center">
+            <Loader2 size={26} className="animate-spin text-[#137A3D]" />
+          </div>
+        ) : profiles.length === 0 ? (
+          <div className="flex min-h-48 flex-col items-center justify-center text-center text-gray-400">
+            <Users size={34} />
+            <p className="mt-2 text-sm font-bold">មិនមាន Profile</p>
+          </div>
+        ) : (
+          profiles.map((profile) => (
+            <ProfileTagCard
+              key={profile.uuid}
+              profile={profile}
+              selected={selectedProfileUuid === profile.uuid}
+              onSelect={() => onSelectProfile(profile.uuid)}
+            />
+          ))
         )}
       </div>
-    </div>
+
+      {!loading && (
+        <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 text-xs text-gray-500">
+          <span>
+            Page {page + 1} / {totalPages}
+          </span>
+
+          <div className="flex gap-1.5">
+            <button
+              type="button"
+              disabled={fetching || page <= 0}
+              onClick={() => onPageChange(page - 1)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 disabled:opacity-40"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              type="button"
+              disabled={fetching || page >= totalPages - 1}
+              onClick={() => onPageChange(page + 1)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 disabled:opacity-40"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }

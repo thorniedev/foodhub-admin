@@ -1,38 +1,42 @@
-"use client";
+import { Users } from "lucide-react";
 
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
-import { AgeGroup } from "../../../types/userProfile";
+import type { AdminProfile } from "@/src/types/userProfile";
+import { Section } from "./BasicInfoSection";
 
-interface AgeGroupSectionProps {
-  ageGroup: AgeGroup;
-}
-
-export default function AgeGroupSection({ ageGroup }: AgeGroupSectionProps) {
-  const [expanded, setExpanded] = useState(false);
+export default function AgeGroupSection({
+  profile,
+}: {
+  profile: AdminProfile;
+}) {
+  const ageGroup = profile.ageGroup;
 
   return (
-    <div>
-      <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-3">ក្រុមអាយុ</h3>
-      <div className="bg-gray-50 rounded-xl p-4 space-y-1.5 text-sm">
-        <p><span className="text-gray-500">ក្រុមអាយុ:</span> <span className="font-medium text-gray-800">{ageGroup.name}</span></p>
-        <p><span className="text-gray-500">អាយុអប្បបរមា:</span> <span className="font-medium text-gray-800">{ageGroup.minAge}</span></p>
-        <p><span className="text-gray-500">អាយុអតិបរមា:</span> <span className="font-medium text-gray-800">{ageGroup.maxAge}</span></p>
+    <Section title="Age group" icon={<Users size={18} />}>
+      {!ageGroup ? (
+        <Empty text="No age group assigned." />
+      ) : (
+        <div className="rounded-2xl bg-emerald-50 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="font-black text-[#137A3D]">{ageGroup.name}</p>
+              <p className="mt-1 text-xs font-bold text-emerald-600">
+                {ageGroup.code}
+              </p>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-emerald-700">
+              {ageGroup.minAge ?? "?"} – {ageGroup.maxAge ?? "∞"} years
+            </span>
+          </div>
+        </div>
+      )}
+    </Section>
+  );
+}
 
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-1 text-xs text-emerald-600 pt-2"
-        >
-          <ChevronDown size={14} className={expanded ? "rotate-180" : ""} />
-          ព័ត៌មានបច្ចេកទេស
-        </button>
-        {expanded && (
-          <p className="text-xs text-gray-400 pt-1">
-            <code className="bg-white px-2 py-1 rounded border border-gray-200">{ageGroup.code}</code>{" "}
-            <code className="bg-white px-2 py-1 rounded border border-gray-200">{ageGroup.uuid}</code>
-          </p>
-        )}
-      </div>
+function Empty({ text }: { text: string }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-center text-sm text-gray-400">
+      {text}
     </div>
   );
 }

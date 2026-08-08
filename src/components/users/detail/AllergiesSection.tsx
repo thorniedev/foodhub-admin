@@ -1,58 +1,51 @@
-"use client";
+import { Shield } from "lucide-react";
 
-import { useState } from "react";
-import { ChevronDown, Leaf } from "lucide-react";
-import { Allergy } from "../../../types/userProfile";
+import type { AllergyResponse } from "@/src/types/userProfile";
+// import { humanizeEnum } from "@/src/lib/userProfileFormat";
+import { Section } from "./BasicInfoSection";
+import { humanizeEnum } from "@/src/lib/userProfileFormat";
 
-const SEVERITY_BADGE: Record<string, string> = {
-  MILD: "bg-yellow-50 text-yellow-700",
-  MODERATE: "bg-amber-50 text-amber-700",
-  SEVERE: "bg-red-50 text-red-600",
-};
-
-interface AllergiesSectionProps {
-  allergies: Allergy[];
-}
-
-export default function AllergiesSection({ allergies }: AllergiesSectionProps) {
-  const [openUuid, setOpenUuid] = useState<string | null>(null);
-
+export default function AllergiesSection({
+  allergies,
+}: {
+  allergies: AllergyResponse[];
+}) {
   return (
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <Leaf size={16} className="text-gray-500" />
-        <h3 className="text-base sm:text-lg font-bold text-gray-800">អាឡែហ្ស៊ីអាហារ</h3>
-      </div>
-
+    <Section title={`Allergies (${allergies.length})`} icon={<Shield size={18} />}>
       {allergies.length === 0 ? (
-        <p className="text-sm text-gray-400">គ្មានអាឡែហ្ស៊ី</p>
+        <Empty />
       ) : (
-        <div className="space-y-2">
-          {allergies.map((a) => (
-            <div key={a.uuid} className="border border-gray-100 rounded-xl overflow-hidden">
-              <button
-                onClick={() => setOpenUuid(openUuid === a.uuid ? null : a.uuid)}
-                className="w-full flex items-center justify-between px-4 py-3 text-sm"
-              >
-                <span className="font-medium text-gray-800">{a.name}</span>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${SEVERITY_BADGE[a.severity]}`}>
-                    {a.severity}
-                  </span>
-                  <ChevronDown size={14} className={`text-gray-400 ${openUuid === a.uuid ? "rotate-180" : ""}`} />
+        <div className="space-y-3">
+          {allergies.map((item) => (
+            <div key={item.uuid} className="rounded-2xl border border-red-100 bg-red-50/50 p-4">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <p className="font-black text-gray-900">{item.name}</p>
+                  <p className="mt-0.5 text-xs font-bold text-gray-400">{item.code}</p>
                 </div>
-              </button>
-              {openUuid === a.uuid && (
-                <div className="px-4 pb-3 text-xs text-gray-500 space-y-1 bg-gray-50">
-                  <p>ជៀសវាងទំនាក់ទំនងឆ្លង: {a.avoidCrossContact ? "បាទ/ចាស" : "ទេ"}</p>
-                  <p>ធ្វើរោគវិនិច្ឆ័យផ្នែកវេជ្ជសាស្ត្រ: {a.medicallyDiagnosed ? "បាទ/ចាស" : "ទេ"}</p>
-                  <p>កំណត់ចំណាំ: {a.reactionNotes}</p>
-                </div>
-              )}
+                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-red-600">
+                  {humanizeEnum(item.severity)}
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-gray-600">
+                {item.reactionNotes || "No reaction notes."}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold">
+                <span className="rounded-full bg-white px-2.5 py-1 text-gray-600">
+                  Cross-contact: {item.avoidCrossContact ? "Avoid" : "No"}
+                </span>
+                <span className="rounded-full bg-white px-2.5 py-1 text-gray-600">
+                  Diagnosed: {item.medicallyDiagnosed ? "Yes" : "No"}
+                </span>
+              </div>
             </div>
           ))}
         </div>
       )}
-    </div>
+    </Section>
   );
+}
+
+function Empty() {
+  return <div className="rounded-2xl bg-gray-50 px-4 py-6 text-center text-sm text-gray-400">No allergies assigned.</div>;
 }

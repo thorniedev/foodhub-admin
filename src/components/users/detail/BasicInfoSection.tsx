@@ -1,54 +1,80 @@
-import { UserProfile } from "../../../types/userProfile";
-import { calculateAge } from "../../../lib/age";
-import { formatLongDate } from "../../../lib/formatDate";
+import type { ReactNode } from "react";
+import { Calendar, Globe2, User } from "lucide-react";
 
-const RELATIONSHIP_LABEL: Record<string, string> = {
-  SELF: "ខ្លួនឯង",
-  CHILD: "កូន",
-  PARENT: "ឪពុកម្តាយ",
-  SPOUSE: "ប្តី/ប្រពន្ធ",
-  OTHER: "ផ្សេងៗ",
-};
+import type { AdminProfile } from "@/src/types/userProfile";
+import {
+  calculateAge,
+  formatDateOnly,
+  humanizeEnum,
+} from "@/src/lib/userProfileFormat";
 
-const GENDER_LABEL: Record<string, string> = {
-  MALE: "ប្រុស",
-  FEMALE: "ស្រី",
-  OTHER: "ផ្សេងៗ",
-};
-
-const LANGUAGE_LABEL: Record<string, string> = {
-  km: "ខ្មែរ",
-  en: "English",
-};
-
-interface BasicInfoSectionProps {
-  profile: UserProfile;
-}
-
-export default function BasicInfoSection({ profile }: BasicInfoSectionProps) {
-  const rows: { label: string; value: React.ReactNode }[] = [
-    { label: "លេខសម្គាល់ប្រវត្តិរូប", value: <code className="text-xs bg-gray-100 px-2 py-1 rounded">{profile.uuid}</code> },
-    { label: "ឈ្មោះប្រវត្តិរូប", value: profile.profileName },
-    { label: "ទំនាក់ទំនង", value: RELATIONSHIP_LABEL[profile.relationship] ?? profile.relationship },
-    { label: "ភេទ", value: GENDER_LABEL[profile.gender] ?? profile.gender },
-    { label: "ថ្ងៃខែឆ្នាំកំណើត", value: formatLongDate(profile.dateOfBirth) },
-    { label: "អាយុបច្ចុប្បន្ន", value: `${calculateAge(profile.dateOfBirth)} ឆ្នាំ` },
-    { label: "ភាសាដែលចូលចិត្ត", value: LANGUAGE_LABEL[profile.preferredLanguage] ?? profile.preferredLanguage },
-    { label: "ប្រវត្តិរូបលំនាំដើម", value: profile.isDefault ? "បាទ/ចាស" : "ទេ" },
-    { label: "ស្ថានភាព", value: profile.isActive ? "សកម្ម" : "អសកម្ម" },
-  ];
+export default function BasicInfoSection({
+  profile,
+}: {
+  profile: AdminProfile;
+}) {
+  const age = calculateAge(profile.dateOfBirth);
 
   return (
-    <div>
-      <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-3">ព័ត៌មានមូលដ្ឋាន</h3>
-      <div className="divide-y divide-gray-50">
-        {rows.map((row) => (
-          <div key={row.label} className="flex justify-between py-2.5 text-sm gap-4">
-            <span className="text-gray-500">{row.label}</span>
-            <span className="text-gray-800 font-medium text-right">{row.value}</span>
-          </div>
-        ))}
+    <Section title="Basic information" icon={<User size={18} />}>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Item label="Profile name" value={profile.profileName} />
+        <Item label="Relationship" value={humanizeEnum(profile.relationship)} />
+        <Item label="Gender" value={humanizeEnum(profile.gender)} />
+        <Item
+          label="Date of birth"
+          value={`${formatDateOnly(profile.dateOfBirth)}${age !== null ? ` (${age} years)` : ""}`}
+          icon={<Calendar size={14} />}
+        />
+        <Item
+          label="Language"
+          value={(profile.preferredLanguage ?? "—").toUpperCase()}
+          icon={<Globe2 size={14} />}
+        />
+        <Item label="Default profile" value={profile.isDefault ? "Yes" : "No"} />
       </div>
+    </Section>
+  );
+}
+
+export function Section({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section className="rounded-[22px] border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-center gap-2 font-black text-gray-900">
+        <span className="text-[#137A3D]">{icon}</span>
+        {title}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Item({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl bg-gray-50 px-4 py-3">
+      <p className="text-xs font-bold uppercase tracking-wide text-gray-400">
+        {label}
+      </p>
+      <p className="mt-1 flex items-center gap-1.5 text-sm font-bold text-gray-700">
+        {icon}
+        {value}
+      </p>
     </div>
   );
 }

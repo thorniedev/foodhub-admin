@@ -1,40 +1,42 @@
 import { HeartPulse } from "lucide-react";
-import { MedicalCondition } from "../../../types/userProfile";
 
-interface MedicalConditionsSectionProps {
-  conditions: MedicalCondition[];
+import type { MedicalConditionResponse } from "@/src/types/userProfile";
+import { humanizeEnum } from "@/src/lib/userProfileFormat";
+import { Section } from "./BasicInfoSection";
+
+export default function MedicalConditionsSection({
+  items,
+}: {
+  items: MedicalConditionResponse[];
+}) {
+  return (
+    <Section title={`Medical conditions (${items.length})`} icon={<HeartPulse size={18} />}>
+      {items.length === 0 ? (
+        <Empty />
+      ) : (
+        <div className="space-y-3">
+          {items.map((item) => (
+            <div key={item.uuid} className="rounded-2xl border border-orange-100 bg-orange-50/50 p-4">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <p className="font-black text-gray-900">{item.name}</p>
+                  <p className="mt-0.5 text-xs font-bold text-gray-400">{item.code}</p>
+                </div>
+                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-orange-700">
+                  {humanizeEnum(item.severity)}
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-gray-600">
+                {item.notes || "No notes."}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </Section>
+  );
 }
 
-export default function MedicalConditionsSection({ conditions }: MedicalConditionsSectionProps) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <HeartPulse size={16} className="text-gray-500" />
-        <h3 className="text-base sm:text-lg font-bold text-gray-800">ស្ថានភាពសុខភាព</h3>
-      </div>
-
-      {conditions.length === 0 ? (
-        <p className="text-sm text-gray-400">គ្មានស្ថានភាពសុខភាពពិសេស</p>
-      ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-gray-400 border-b border-gray-100">
-              <th className="py-2 font-medium">ជំងឺ</th>
-              <th className="py-2 font-medium">កម្រិត</th>
-              <th className="py-2 font-medium">កំណត់ចំណាំ</th>
-            </tr>
-          </thead>
-          <tbody>
-            {conditions.map((c) => (
-              <tr key={c.uuid} className="border-b border-gray-50 last:border-0">
-                <td className="py-2 font-medium text-gray-800">{c.name}</td>
-                <td className="py-2 text-gray-500">{c.severity}</td>
-                <td className="py-2 text-gray-500">{c.notes}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
-  );
+function Empty() {
+  return <div className="rounded-2xl bg-gray-50 px-4 py-6 text-center text-sm text-gray-400">No medical conditions assigned.</div>;
 }

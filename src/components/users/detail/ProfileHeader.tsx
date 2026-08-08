@@ -1,110 +1,89 @@
-"use client";
+import { Info, RotateCcw, Shield, Trash2 } from "lucide-react";
 
-import { Pencil, Power, Star, Trash2, ArrowLeft } from "lucide-react";
-import { UserProfile } from "../../../types/userProfile";
-
-const RELATIONSHIP_LABEL: Record<string, string> = {
-  SELF: "ខ្លួនឯង",
-  CHILD: "កូន",
-  PARENT: "ឪពុកម្តាយ",
-  SPOUSE: "ប្តី/ប្រពន្ធ",
-  OTHER: "ផ្សេងៗ",
-};
+import type { AdminProfile } from "@/src/types/userProfile";
+import { humanizeEnum, initials } from "@/src/lib/userProfileFormat";
 
 interface ProfileHeaderProps {
-  profile: UserProfile;
-  onBack: () => void;
-  onEdit: () => void;
-  onToggleActive: () => void;
-  onSetDefault: () => void;
+  profile: AdminProfile;
+  busy?: boolean;
   onDelete: () => void;
+  onRestore: () => void;
 }
 
 export default function ProfileHeader({
   profile,
-  onBack,
-  onEdit,
-  onToggleActive,
-  onSetDefault,
+  busy = false,
   onDelete,
+  onRestore,
 }: ProfileHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-      <div className="flex items-center gap-4">
-        <button onClick={onBack} className="text-gray-400 hover:text-gray-600 mt-1" title="ត្រឡប់ក្រោយ">
-          <ArrowLeft size={20} />
-        </button>
+    <div className="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#137A3D] to-[#0E5E30] p-6 text-white">
+      <div className="absolute -right-14 -top-16 h-56 w-56 rounded-full bg-white/10" />
 
-        <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold overflow-hidden shrink-0">
-          {profile.avatarMediaUuid ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={`/api/media/${profile.avatarMediaUuid}`}
-              alt={profile.profileName}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            profile.profileName.charAt(0)
-          )}
+      <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 items-center gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-lg font-black text-[#137A3D]">
+            {initials(profile.profileName)}
+          </div>
+
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="truncate text-2xl font-black">{profile.profileName}</h2>
+
+              {profile.isDefault && (
+                <span className="rounded-full bg-amber-300/20 px-2.5 py-1 text-xs font-bold text-amber-100">
+                  DEFAULT
+                </span>
+              )}
+
+              <span
+                className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                  profile.isActive
+                    ? "bg-white/15 text-white"
+                    : "bg-red-400/20 text-red-100"
+                }`}
+              >
+                {profile.isActive ? "ACTIVE" : "DELETED"}
+              </span>
+            </div>
+
+            <p className="mt-1 text-sm text-emerald-100">
+              {humanizeEnum(profile.relationship)} · {humanizeEnum(profile.gender)}
+            </p>
+          </div>
         </div>
 
-        <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-800">
-              {profile.profileName}
-            </h2>
-            {profile.isDefault && (
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
-                លំនាំដើម
-              </span>
-            )}
-            <span
-              className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                profile.isActive
-                  ? "bg-emerald-50 text-emerald-600"
-                  : "bg-red-50 text-red-500"
-              }`}
+        <div className="flex shrink-0 gap-2">
+          {profile.isActive ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={onDelete}
+              className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-red-500/20 px-3 text-sm font-bold text-white ring-1 ring-red-200/20 disabled:opacity-50"
             >
-              {profile.isActive ? "សកម្ម" : "អសកម្ម"}
-            </span>
-          </div>
-          <p className="text-sm text-gray-500 mt-1">
-            {RELATIONSHIP_LABEL[profile.relationship] ?? profile.relationship}
-          </p>
+              <Trash2 size={16} />
+              Soft delete
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={onRestore}
+              className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-3 text-sm font-bold text-[#137A3D] disabled:opacity-50"
+            >
+              <RotateCcw size={16} />
+              Restore
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-2 self-start flex-wrap">
-        <button
-          onClick={onEdit}
-          title="កែសម្រួលប្រវត្តិរូប"
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg"
-        >
-          <Pencil size={14} /> កែសម្រួល
-        </button>
-        <button
-          onClick={onToggleActive}
-          title="ធ្វើសកម្ម / អសកម្ម"
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-amber-600 hover:bg-amber-50 rounded-lg"
-        >
-          <Power size={14} /> {profile.isActive ? "ធ្វើអសកម្ម" : "ធ្វើសកម្ម"}
-        </button>
-        {!profile.isDefault && (
-          <button
-            onClick={onSetDefault}
-            title="កំណត់ជាលំនាំដើម"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-emerald-600 hover:bg-emerald-50 rounded-lg"
-          >
-            <Star size={14} /> កំណត់ជាលំនាំដើម
-          </button>
-        )}
-        <button
-          onClick={onDelete}
-          title="លុប"
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-red-500 hover:bg-red-50 rounded-lg"
-        >
-          <Trash2 size={14} /> លុប
-        </button>
+      <div className="relative mt-5 flex items-start gap-2 rounded-2xl bg-white/10 px-4 py-3 text-xs leading-5 text-emerald-50">
+        <Info size={16} className="mt-0.5 shrink-0" />
+        <span>
+          Admin Profile API ដែលបានផ្តល់គឺ read-only សម្រាប់ personal/safety data។
+          Admin អាច View, Soft delete និង Restore ប៉ុណ្ណោះ។
+        </span>
       </div>
     </div>
   );
