@@ -1,6 +1,6 @@
 import { Plus, ShieldAlert } from "lucide-react";
 
-type AllergensHeaderProps = {
+type Props = {
   total: number;
   activeCount: number;
   inactiveCount: number;
@@ -12,27 +12,23 @@ export default function AllergensHeader({
   activeCount,
   inactiveCount,
   onAdd,
-}: AllergensHeaderProps) {
+}: Props) {
   return (
-    <section className="relative overflow-hidden rounded-[28px] bg-[#137838] px-5 py-6 text-white shadow-sm sm:px-7 sm:py-7 lg:px-10 lg:py-8">
+    <section className="relative overflow-hidden rounded-[28px] bg-[#147A38] px-6 py-6 text-white shadow-sm sm:px-8 lg:px-10 lg:py-8">
       <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/5" />
-      <div className="absolute -bottom-20 right-32 h-52 w-52 rounded-full bg-white/5" />
+      <div className="absolute -bottom-24 right-24 h-56 w-56 rounded-full bg-white/5" />
 
-      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div>
+      <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
               <ShieldAlert size={25} />
             </div>
 
             <div>
-              <h1 className="text-2xl font-bold sm:text-3xl lg:text-[34px]">
-                គ្រប់គ្រងអាឡែស៊ី
-              </h1>
-
+              <h1 className="text-2xl font-bold sm:text-3xl">គ្រប់គ្រងអាឡែស៊ី</h1>
               <p className="mt-2 max-w-2xl text-sm leading-7 text-white/85 sm:text-base">
-                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារប្រភេទអាឡែស៊ី
-                ដែលប្រើប្រាស់ក្នុងប្រព័ន្ធ FoodHub។
+                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារប្រភេទអាឡែស៊ីដែលប្រើក្នុងប្រព័ន្ធ FoodHub។
               </p>
             </div>
           </div>

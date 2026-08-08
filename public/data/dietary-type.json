@@ -1,0 +1,60 @@
+{
+    "contents": [
+        {
+            "uuid": "86e2c804-e2cb-41bf-99b5-c5f7ac6edc0b",
+            "code": "KETO",
+            "name": "Ketogenic",
+            "category": "NUTRITIONAL",
+            "description": "High-fat and low-carbohydrate dietary preference",
+            "iconMediaUuid": null,
+            "active": true,
+            "updatedAt": "2026-08-04T19:17:27.228075"
+        },
+        {
+            "uuid": "979d0811-b5ac-4d72-af93-6784e380d0ee",
+            "code": "LOW_SODIUM",
+            "name": "Low Sodium",
+            "category": "MEDICAL",
+            "description": "Limits foods that contain high levels of sodium",
+            "iconMediaUuid": null,
+            "active": true,
+            "updatedAt": "2026-08-04T19:17:27.228075"
+        },
+        {
+            "uuid": "155668e4-7390-4b00-9c24-f15481379122",
+            "code": "VEGAN",
+            "name": "Vegan",
+            "category": "LIFESTYLE",
+            "description": "Does not include meat, seafood, dairy, eggs, or animal products",
+            "iconMediaUuid": null,
+            "active": true,
+            "updatedAt": "2026-08-04T19:17:27.228075"
+        },
+        {
+            "uuid": "0e1c63b3-4e2b-456e-ac1f-534d7ae6ec68",
+            "code": "VEGETARIAN",
+            "name": "Vegetarian",
+            "category": "LIFESTYLE",
+            "description": "Does not include meat, poultry, or seafood",
+            "iconMediaUuid": null,
+            "active": true,
+            "updatedAt": "2026-08-04T19:17:27.228075"
+        },
+        {
+            "uuid": "60374180-34ba-473a-b46c-8004277c4864",
+            "code": "HALAL",
+            "name": "ទីង​ ទីង",
+            "category": "LIFESTYLE",
+            "description": "ទីង ទីង",
+            "iconMediaUuid": null,
+            "active": true,
+            "updatedAt": "2026-08-06T19:05:31.906504"
+        }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 5,
+    "totalPages": 1,
+    "first": true,
+    "last": true
+}
