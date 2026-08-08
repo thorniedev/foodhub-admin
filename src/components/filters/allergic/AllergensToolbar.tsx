@@ -1,6 +1,6 @@
 import { RefreshCw, Search } from "lucide-react";
 
-type AllergensToolbarProps = {
+type Props = {
   search: string;
   size: number;
   refreshing: boolean;
@@ -16,7 +16,7 @@ export default function AllergensToolbar({
   onSearchChange,
   onSizeChange,
   onRefresh,
-}: AllergensToolbarProps) {
+}: Props) {
   return (
     <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
       <div className="relative w-full sm:max-w-md">
@@ -33,27 +33,25 @@ export default function AllergensToolbar({
         />
       </div>
 
-      <div className="flex items-center gap-2">
-        <select
-          value={size}
-          onChange={(event) => onSizeChange(Number(event.target.value))}
-          className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-600 outline-none focus:border-[#136C34]"
-        >
-          <option value={10}>10 / ទំព័រ</option>
-          <option value={20}>20 / ទំព័រ</option>
-          <option value={50}>50 / ទំព័រ</option>
-        </select>
+      <select
+        value={size}
+        onChange={(event) => onSizeChange(Number(event.target.value))}
+        className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-600 outline-none focus:border-[#136C34]"
+      >
+        <option value={10}>10 / ទំព័រ</option>
+        <option value={20}>20 / ទំព័រ</option>
+        <option value={50}>50 / ទំព័រ</option>
+      </select>
 
-        <button
-          type="button"
-          onClick={onRefresh}
-          disabled={refreshing}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label="Refresh allergens"
-        >
-          <RefreshCw size={17} className={refreshing ? "animate-spin" : ""} />
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onRefresh}
+        disabled={refreshing}
+        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-[#136C34] disabled:opacity-50"
+        aria-label="Refresh"
+      >
+        <RefreshCw size={17} className={refreshing ? "animate-spin" : ""} />
+      </button>
     </div>
   );
 }

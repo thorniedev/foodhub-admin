@@ -1,23 +1,21 @@
 import { LoaderCircle, Trash2 } from "lucide-react";
 
-import type { Allergen } from "@/src/types/allergen";
+import type { MedicalCondition } from "@/src/types/medicalCondition";
 
-type DeleteAllergenConfirmModalProps = {
-  allergen: Allergen | null;
+type Props = {
+  item: MedicalCondition | null;
   deleting: boolean;
   onClose: () => void;
   onConfirm: () => Promise<void>;
 };
 
-export default function DeleteAllergenConfirmModal({
-  allergen,
+export default function DeleteMedicalConditionConfirmModal({
+  item,
   deleting,
   onClose,
   onConfirm,
-}: DeleteAllergenConfirmModalProps) {
-  if (!allergen) {
-    return null;
-  }
+}: Props) {
+  if (!item) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
@@ -27,16 +25,12 @@ export default function DeleteAllergenConfirmModal({
         </div>
 
         <div className="mt-4 text-center">
-          <h3 className="text-xl font-bold text-gray-900">
-            បិទអាឡែស៊ីនេះ?
-          </h3>
-
+          <h3 className="text-xl font-bold text-gray-900">បិទស្ថានភាពសុខភាពនេះ?</h3>
           <p className="mt-2 text-sm leading-6 text-gray-500">
-            អ្នកកំពុងបិទ{" "}
-            <span className="font-semibold text-gray-800">
-              {allergen.name}
-            </span>
-            ។ ទិន្នន័យមិនត្រូវបានលុបចេញពីប្រព័ន្ធទេ ហើយអាចស្ដារវិញបាន។
+            អ្នកកំពុងបិទ 
+            <span className="font-semibold text-gray-800">{item.name}</span>។
+            នេះជា Soft Delete ដូច្នេះទិន្នន័យមិនត្រូវបានលុបចេញពី Database ទេ
+            ហើយអាចស្ដារវិញបាន។
           </p>
         </div>
 

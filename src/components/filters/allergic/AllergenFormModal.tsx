@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { AlertTriangle, LoaderCircle, X } from "lucide-react";
 
 import type {
@@ -15,7 +15,7 @@ const EMPTY_FORM: AllergenFormValues = {
   active: true,
 };
 
-type AllergenFormModalProps = {
+type Props = {
   open: boolean;
   allergen: Allergen | null;
   saving: boolean;
@@ -29,34 +29,30 @@ export default function AllergenFormModal({
   saving,
   onClose,
   onSubmit,
-}: AllergenFormModalProps) {
+}: Props) {
   const [form, setForm] = useState<AllergenFormValues>(EMPTY_FORM);
   const [validationError, setValidationError] = useState("");
 
   useEffect(() => {
-    if (!open) {
-      return;
-    }
+    if (!open) return;
 
-    if (allergen) {
-      setForm({
-        code: allergen.code,
-        name: allergen.name,
-        description: allergen.description ?? "",
-        active: allergen.active,
-      });
-    } else {
-      setForm(EMPTY_FORM);
-    }
+    setForm(
+      allergen
+        ? {
+            code: allergen.code,
+            name: allergen.name,
+            description: allergen.description ?? "",
+            active: allergen.active,
+          }
+        : EMPTY_FORM,
+    );
 
     setValidationError("");
   }, [open, allergen]);
 
-  if (!open) {
-    return null;
-  }
+  if (!open) return null;
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const code = form.code.trim();
@@ -70,10 +66,10 @@ export default function AllergenFormModal({
     setValidationError("");
 
     await onSubmit({
+      ...form,
       code,
       name,
       description: form.description.trim(),
-      active: form.active,
     });
   };
 
@@ -85,9 +81,8 @@ export default function AllergenFormModal({
             <h2 className="text-xl font-bold text-[#136C34]">
               {allergen ? "កែប្រែអាឡែស៊ី" : "បន្ថែមអាឡែស៊ីថ្មី"}
             </h2>
-
             <p className="mt-1 text-sm text-gray-500">
-              បំពេញព័ត៌មានខាងក្រោម រួចរក្សាទុកការផ្លាស់ប្តូរ។
+              កូដ និងឈ្មោះជាទិន្នន័យតម្រូវដោយ Backend។
             </p>
           </div>
 
@@ -95,8 +90,7 @@ export default function AllergenFormModal({
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
-            aria-label="Close"
+            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 disabled:opacity-50"
           >
             <X size={20} />
           </button>
@@ -106,37 +100,29 @@ export default function AllergenFormModal({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-2 block text-sm font-semibold text-gray-700">
-                កូដអាឡែស៊ី
+                កូដ *
               </label>
-
               <input
                 value={form.code}
                 onChange={(event) =>
-                  setForm((previous) => ({
-                    ...previous,
-                    code: event.target.value,
-                  }))
+                  setForm((prev) => ({ ...prev, code: event.target.value }))
                 }
-                placeholder="ឧ. PEANUT ឬ សណ្ដែកដី"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+                placeholder="PEANUT"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[#136C34] focus:bg-white"
               />
             </div>
 
             <div>
               <label className="mb-2 block text-sm font-semibold text-gray-700">
-                ឈ្មោះអាឡែស៊ី
+                ឈ្មោះ *
               </label>
-
               <input
                 value={form.name}
                 onChange={(event) =>
-                  setForm((previous) => ({
-                    ...previous,
-                    name: event.target.value,
-                  }))
+                  setForm((prev) => ({ ...prev, name: event.target.value }))
                 }
-                placeholder="ឧ. សណ្ដែកដី"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+                placeholder="Peanut"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[#136C34] focus:bg-white"
               />
             </div>
           </div>
@@ -145,48 +131,39 @@ export default function AllergenFormModal({
             <label className="mb-2 block text-sm font-semibold text-gray-700">
               ការពិពណ៌នា
             </label>
-
             <textarea
               rows={4}
               value={form.description}
               onChange={(event) =>
-                setForm((previous) => ({
-                  ...previous,
+                setForm((prev) => ({
+                  ...prev,
                   description: event.target.value,
                 }))
               }
-              placeholder="សរសេរការពិពណ៌នាអំពីអាឡែស៊ី..."
-              className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+              className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[#136C34] focus:bg-white"
             />
           </div>
 
           <label className="flex cursor-pointer items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
             <div>
-              <p className="text-sm font-semibold text-gray-800">
-                ស្ថានភាពសកម្ម
-              </p>
-
+              <p className="text-sm font-semibold text-gray-800">សកម្ម</p>
               <p className="mt-0.5 text-xs text-gray-500">
-                ជ្រើសរើសស្ថានភាពដែលត្រូវរក្សាទុកជាមួយអាឡែស៊ីនេះ។
+                បើក ដើម្បីឱ្យកំណត់ត្រានេះសកម្ម។
               </p>
             </div>
-
             <input
               type="checkbox"
               checked={form.active}
               onChange={(event) =>
-                setForm((previous) => ({
-                  ...previous,
-                  active: event.target.checked,
-                }))
+                setForm((prev) => ({ ...prev, active: event.target.checked }))
               }
               className="h-5 w-5 accent-[#136C34]"
             />
           </label>
 
           {validationError && (
-            <div className="flex items-start gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-              <AlertTriangle size={18} className="mt-0.5 shrink-0" />
+            <div className="flex gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+              <AlertTriangle size={18} className="shrink-0" />
               {validationError}
             </div>
           )}
@@ -196,7 +173,7 @@ export default function AllergenFormModal({
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 disabled:opacity-50"
             >
               បោះបង់
             </button>
@@ -204,10 +181,10 @@ export default function AllergenFormModal({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#136C34] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0f592b] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#136C34] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
             >
               {saving && <LoaderCircle size={17} className="animate-spin" />}
-              {allergen ? "រក្សាទុកការកែប្រែ" : "បន្ថែមអាឡែស៊ី"}
+              {allergen ? "រក្សាទុកការកែប្រែ" : "បន្ថែម"}
             </button>
           </div>
         </form>

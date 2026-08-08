@@ -1,0 +1,58 @@
+{
+    "contents": [
+        {
+            "uuid": "7266d536-8028-4812-8350-8ca4f58db01c",
+            "code": "DIABETES",
+            "name": "Diabetes",
+            "description": "Requires sugar monitoring",
+            "active": true,
+            "updatedAt": "2026-08-04T15:51:13.18985"
+        },
+        {
+            "uuid": "1eb48daa-62ca-4c82-82db-3672afb628ad",
+            "code": "DIABETES1",
+            "name": "Diabetes1",
+            "description": "High blood sugar",
+            "active": true,
+            "updatedAt": "2026-08-04T15:17:09.321824"
+        },
+        {
+            "uuid": "ed2247ac-a452-41c9-a786-9575f04d26e2",
+            "code": "HIGH_CHOLESTEROL",
+            "name": "High Cholesterol",
+            "description": "A condition involving elevated cholesterol levels",
+            "active": true,
+            "updatedAt": "2026-08-04T19:28:06.652972"
+        },
+        {
+            "uuid": "0bafa68f-e98b-44ae-a0b8-9667273ad321",
+            "code": "HYPERTENSION",
+            "name": "Hypertension",
+            "description": "A condition involving persistently high blood pressure",
+            "active": true,
+            "updatedAt": "2026-08-04T19:28:06.652972"
+        },
+        {
+            "uuid": "99b4d26f-e513-496d-8269-3ab82fc98aa1",
+            "code": "KIDNEY_DISEASE",
+            "name": "Kidney Disease",
+            "description": "A condition that affects normal kidney function",
+            "active": true,
+            "updatedAt": "2026-08-04T19:28:06.652972"
+        },
+        {
+            "uuid": "4fd6fab0-3933-459f-86c9-a932d19ca1bf",
+            "code": "TEST",
+            "name": "testtttt",
+            "description": "Updated",
+            "active": true,
+            "updatedAt": "2026-08-06T19:23:39.345069"
+        }
+    ],
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 6,
+    "totalPages": 1,
+    "first": true,
+    "last": true
+}
