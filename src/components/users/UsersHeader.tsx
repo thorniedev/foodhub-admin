@@ -25,10 +25,10 @@ export default function UsersHeader({
           </div>
 
           <div>
-            <p className="text-4xl font-black tracking-tight ">
+            <p className="text-5xl font-black tracking-tight ">
               អ្នកប្រើប្រាស់
             </p>
-            <p className="mt-2 max-w-2xl text-base text-emerald-50 ">
+            <p className="mt-2 max-w-2xl text-xl text-emerald-50 ">
               គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ និងបើកមើល Profile របស់អ្នកប្រើនីមួយៗ
             </p>
           </div>
@@ -44,7 +44,7 @@ export default function UsersHeader({
         </button>
       </div>
 
-      <div className="relative mt-7 grid gap-3 sm:grid-cols-3 text-base">
+      <div className="relative mt-7 grid gap-3 sm:grid-cols-3 text-xl">
         <Stat label="អ្នកប្រើសរុប" value={total} />
         <Stat label="សកម្មក្នុងទំព័រនេះ" value={activeCount} />
         <Stat label="ផ្អាកក្នុងទំព័រនេះ" value={suspendedCount} />

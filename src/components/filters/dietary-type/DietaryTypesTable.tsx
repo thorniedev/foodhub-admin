@@ -23,13 +23,13 @@ export default function DietaryTypesTable({
       <table className="w-full min-w-[1050px] border-collapse">
         <thead>
           <tr className="border-b border-gray-100 bg-[#fbfcfb] text-left">
-            <th className="px-5 py-4 text-sm font-bold text-[#136C34]">របបអាហារ</th>
-            <th className="px-5 py-4 text-sm font-bold text-[#136C34]">កូដ</th>
-            <th className="px-5 py-4 text-sm font-bold text-[#136C34]">ប្រភេទ</th>
-            <th className="px-5 py-4 text-sm font-bold text-[#136C34]">ការពិពណ៌នា</th>
-            <th className="px-5 py-4 text-sm font-bold text-[#136C34]">ស្ថានភាព</th>
-            <th className="px-5 py-4 text-sm font-bold text-[#136C34]">កែប្រែចុងក្រោយ</th>
-            <th className="px-5 py-4 text-right text-sm font-bold text-[#136C34]">សកម្មភាព</th>
+            <th className="px-5 py-4 text-lg font-bold text-[#136C34]">របបអាហារ</th>
+            <th className="px-5 py-4 text-lg font-bold text-[#136C34]">កូដ</th>
+            <th className="px-5 py-4 text-lg font-bold text-[#136C34]">ប្រភេទ</th>
+            <th className="px-5 py-4 text-lg font-bold text-[#136C34]">ការពិពណ៌នា</th>
+            <th className="px-5 py-4 text-lg font-bold text-[#136C34]">ស្ថានភាព</th>
+            <th className="px-5 py-4 text-lg font-bold text-[#136C34]">កែប្រែចុងក្រោយ</th>
+            <th className="px-5 py-4 text-right text-lg font-bold text-[#136C34]">សកម្មភាព</th>
           </tr>
         </thead>
 

@@ -195,10 +195,6 @@ export default function ShopsManager() {
           />
         )}
       </section>
-      <p className="text-xs text-gray-400">
-        `query`, `page`, `size` គឺ server-side។ Review tabs filter page
-        បច្ចុប្បន្ន ព្រោះ collection មិនមាន reviewStatus query parameter។
-      </p>
       <ShopEditModal
         store={editing}
         saving={updating}

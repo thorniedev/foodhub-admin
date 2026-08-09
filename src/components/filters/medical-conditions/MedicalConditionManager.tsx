@@ -153,28 +153,33 @@ export default function MedicalConditionManager() {
         }}
       />
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <MedicalConditionsTabs
-          value={statusFilter}
-          allCount={items.length}
-          activeCount={activeCount}
-          inactiveCount={inactiveCount}
-          onChange={setStatusFilter}
-        />
+<div className="flex w-full flex-nowrap items-center justify-between gap-4 overflow-x-auto pb-1">
+  {/* LEFT - STATUS TABS */}
+  <div className="shrink-0">
+    <MedicalConditionsTabs
+      value={statusFilter}
+      allCount={items.length}
+      activeCount={activeCount}
+      inactiveCount={inactiveCount}
+      onChange={setStatusFilter}
+    />
+  </div>
 
-        <MedicalConditionsToolbar
-          search={search}
-          size={size}
-          refreshing={isFetching}
-          onSearchChange={setSearch}
-          onSizeChange={(value) => {
-            setSize(value);
-            setPage(0);
-          }}
-          onRefresh={() => void refetch()}
-        />
-      </div>
-
+  {/* RIGHT - SEARCH / SIZE / REFRESH */}
+  <div className="ml-auto shrink-0">
+    <MedicalConditionsToolbar
+      search={search}
+      size={size}
+      refreshing={isFetching}
+      onSearchChange={setSearch}
+      onSizeChange={(value) => {
+        setSize(value);
+        setPage(0);
+      }}
+      onRefresh={() => void refetch()}
+    />
+  </div>
+</div>
       {message && (
         <div className={`rounded-2xl border px-4 py-3 text-sm ${
           message.type === "success"

@@ -150,26 +150,32 @@ export default function AllergenManager() {
         }}
       />
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <AllergensTabs
-          value={statusFilter}
-          allCount={items.length}
-          activeCount={activeCount}
-          inactiveCount={inactiveCount}
-          onChange={setStatusFilter}
-        />
+      <div className="flex w-full flex-nowrap items-center justify-between gap-4">
 
-        <AllergensToolbar
-          search={search}
-          size={size}
-          refreshing={isFetching}
-          onSearchChange={setSearch}
-          onSizeChange={(value) => {
-            setSize(value);
-            setPage(0);
-          }}
-          onRefresh={() => void refetch()}
-        />
+        <div className="shrink-0">
+          <AllergensTabs
+            value={statusFilter}
+            allCount={items.length}
+            activeCount={activeCount}
+            inactiveCount={inactiveCount}
+            onChange={setStatusFilter}
+          />
+        </div>
+
+        {/* RIGHT - SEARCH / SIZE / REFRESH */}
+        <div className="ml-auto min-w-0">
+          <AllergensToolbar
+            search={search}
+            size={size}
+            refreshing={isFetching}
+            onSearchChange={setSearch}
+            onSizeChange={(value) => {
+              setSize(value);
+              setPage(0);
+            }}
+            onRefresh={() => void refetch()}
+          />
+        </div>
       </div>
 
       {message && (
@@ -191,31 +197,6 @@ export default function AllergenManager() {
       )}
 
       <section className="overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
-        {/* {isLoading ? (
-          <div className="flex min-h-[320px] items-center justify-center">
-            <LoaderCircle size={30} className="animate-spin text-[#136C34]" />
-          </div>
-        ) : error ? (
-          <div className="flex min-h-[320px] flex-col items-center justify-center px-6 text-center">
-            <AlertTriangle size={34} className="text-red-400" />
-            <h3 className="mt-3 font-bold text-gray-800">
-              មិនអាចទាញយកទិន្នន័យអាឡែស៊ីបានទេ
-            </h3>
-            <p className="mt-2 text-sm text-gray-500">{getApiErrorMessage(error)}</p>
-            <button
-              type="button"
-              onClick={() => void refetch()}
-              className="mt-4 rounded-xl bg-[#136C34] px-4 py-2 text-sm font-semibold text-white"
-            >
-              សាកល្បងម្តងទៀត
-            </button>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex min-h-[320px] flex-col items-center justify-center text-center">
-            <ShieldAlert size={38} className="text-gray-300" />
-            <p className="mt-3 font-semibold text-gray-600">មិនមានទិន្នន័យ</p>
-          </div>
-        ) : ( */}
         <AllergensTable
           allergens={filtered}
           disabled={busy}
@@ -226,7 +207,6 @@ export default function AllergenManager() {
           onDelete={setDeleting}
           onRestore={(item) => void handleRestore(item)}
         />
-        {/* )} */}
 
         {!isLoading && !error && (
           <AllergensPagination

@@ -327,10 +327,6 @@ export default function UsersManager() {
         )}
       </section>
 
-      <p className="text-xs leading-5 text-gray-400">
-        Search និង status tabs ខាងលើ filter លើទិន្នន័យក្នុង page បច្ចុប្បន្ន។
-      </p>
-
       <UserCreateModal
         open={createOpen}
         saving={creating}

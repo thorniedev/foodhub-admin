@@ -44,10 +44,14 @@ export default function DietaryTypeManager() {
   const { data, isLoading, isFetching, error, refetch } =
     useGetDietaryTypesQuery({ page, size });
 
-  const [createItem, { isLoading: isCreating }] = useCreateDietaryTypeMutation();
-  const [updateItem, { isLoading: isUpdating }] = useUpdateDietaryTypeMutation();
-  const [deleteItem, { isLoading: isDeleting }] = useDeleteDietaryTypeMutation();
-  const [restoreItem, { isLoading: isRestoring }] = useRestoreDietaryTypeMutation();
+  const [createItem, { isLoading: isCreating }] =
+    useCreateDietaryTypeMutation();
+  const [updateItem, { isLoading: isUpdating }] =
+    useUpdateDietaryTypeMutation();
+  const [deleteItem, { isLoading: isDeleting }] =
+    useDeleteDietaryTypeMutation();
+  const [restoreItem, { isLoading: isRestoring }] =
+    useRestoreDietaryTypeMutation();
 
   const items = data?.contents ?? [];
   const activeCount = items.filter((item) => item.active).length;
@@ -148,34 +152,42 @@ export default function DietaryTypeManager() {
         }}
       />
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <DietaryTypesTabs
-          value={statusFilter}
-          allCount={items.length}
-          activeCount={activeCount}
-          inactiveCount={inactiveCount}
-          onChange={setStatusFilter}
-        />
+      <div className="flex w-full flex-nowrap items-center justify-between gap-4 overflow-x-auto pb-1">
+        {/* LEFT - STATUS TABS */}
+        <div className="shrink-0">
+          <DietaryTypesTabs
+            value={statusFilter}
+            allCount={items.length}
+            activeCount={activeCount}
+            inactiveCount={inactiveCount}
+            onChange={setStatusFilter}
+          />
+        </div>
 
-        <DietaryTypesToolbar
-          search={search}
-          size={size}
-          refreshing={isFetching}
-          onSearchChange={setSearch}
-          onSizeChange={(value) => {
-            setSize(value);
-            setPage(0);
-          }}
-          onRefresh={() => void refetch()}
-        />
+        {/* RIGHT - SEARCH / SIZE / REFRESH */}
+        <div className="ml-auto shrink-0">
+          <DietaryTypesToolbar
+            search={search}
+            size={size}
+            refreshing={isFetching}
+            onSearchChange={setSearch}
+            onSizeChange={(value) => {
+              setSize(value);
+              setPage(0);
+            }}
+            onRefresh={() => void refetch()}
+          />
+        </div>
       </div>
 
       {message && (
-        <div className={`rounded-2xl border px-4 py-3 text-sm ${
-          message.type === "success"
-            ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-            : "border-red-100 bg-red-50 text-red-600"
-        }`}>
+        <div
+          className={`rounded-2xl border px-4 py-3 text-sm ${
+            message.type === "success"
+              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+              : "border-red-100 bg-red-50 text-red-600"
+          }`}
+        >
           {message.text}
         </div>
       )}
@@ -191,7 +203,9 @@ export default function DietaryTypeManager() {
             <h3 className="mt-3 font-bold text-gray-800">
               មិនអាចទាញយកទិន្នន័យរបបអាហារបានទេ
             </h3>
-            <p className="mt-2 text-sm text-gray-500">{getApiErrorMessage(error)}</p>
+            <p className="mt-2 text-sm text-gray-500">
+              {getApiErrorMessage(error)}
+            </p>
             <button
               type="button"
               onClick={() => void refetch()}

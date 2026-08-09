@@ -26,26 +26,26 @@ export default function AllergensHeader({
             </div>
 
             <div>
-              <h1 className="text-2xl font-bold sm:text-3xl">គ្រប់គ្រងអាឡែស៊ី</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-7 text-white/85 sm:text-base">
-                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារប្រភេទអាឡែស៊ីដែលប្រើក្នុងប្រព័ន្ធ FoodHub។
+              <p className="text-5xl font-bold">គ្រប់គ្រងអាឡែស៊ី</p>
+              <p className="mt-2 max-w-2xl text-xl leading-7 text-white/85">
+                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារប្រភេទអាឡែស៊ីដែលប្រើក្នុងប្រព័ន្ធ ម្ហូបអាហារ។
               </p>
             </div>
           </div>
 
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl bg-white/10 px-5 py-4">
-              <p className="text-sm text-white/75">សរុប</p>
+            <div className="rounded-3xl bg-white/10 px-5 py-4">
+              <p className="text-xl text-white/75">សរុប</p>
               <p className="mt-1 text-2xl font-bold">{total}</p>
             </div>
 
-            <div className="rounded-2xl bg-white/10 px-5 py-4">
-              <p className="text-sm text-white/75">សកម្មក្នុងទំព័រ</p>
+            <div className="rounded-3xl bg-white/10 px-5 py-4">
+              <p className="text-xl text-white/75">សកម្មក្នុងទំព័រ</p>
               <p className="mt-1 text-2xl font-bold">{activeCount}</p>
             </div>
 
-            <div className="rounded-2xl bg-white/10 px-5 py-4">
-              <p className="text-sm text-white/75">អសកម្មក្នុងទំព័រ</p>
+            <div className="rounded-3xl bg-white/10 px-5 py-4">
+              <p className="text-xl text-white/75">អសកម្មក្នុងទំព័រ</p>
               <p className="mt-1 text-2xl font-bold">{inactiveCount}</p>
             </div>
           </div>
@@ -54,7 +54,7 @@ export default function AllergensHeader({
         <button
           type="button"
           onClick={onAdd}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-base font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
         >
           <Plus size={18} />
           បន្ថែមអាឡែស៊ី

@@ -78,11 +78,8 @@ export default function AllergenFormModal({
       <div className="w-full max-w-xl overflow-hidden rounded-[28px] bg-white shadow-2xl">
         <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
           <div>
-            <h2 className="text-xl font-bold text-[#136C34]">
+            <p className="text-4xl font-bold text-[#136C34]">
               {allergen ? "កែប្រែអាឡែស៊ី" : "បន្ថែមអាឡែស៊ីថ្មី"}
-            </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              កូដ និងឈ្មោះជាទិន្នន័យតម្រូវដោយ Backend។
             </p>
           </div>
 
@@ -99,7 +96,7 @@ export default function AllergenFormModal({
         <form onSubmit={handleSubmit} className="space-y-5 p-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
+              <label className="mb-2 block text-lg font-semibold text-gray-700">
                 កូដ *
               </label>
               <input
@@ -113,7 +110,7 @@ export default function AllergenFormModal({
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
+              <label className="mb-2 block text-lg font-semibold text-gray-700">
                 ឈ្មោះ *
               </label>
               <input
@@ -128,7 +125,7 @@ export default function AllergenFormModal({
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-semibold text-gray-700">
+            <label className="mb-2 block text-lg font-semibold text-gray-700">
               ការពិពណ៌នា
             </label>
             <textarea
@@ -146,8 +143,8 @@ export default function AllergenFormModal({
 
           <label className="flex cursor-pointer items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
             <div>
-              <p className="text-sm font-semibold text-gray-800">សកម្ម</p>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <p className="text-lg font-semibold text-gray-800">សកម្ម</p>
+              <p className="mt-0.5 text-base text-gray-500">
                 បើក ដើម្បីឱ្យកំណត់ត្រានេះសកម្ម។
               </p>
             </div>
@@ -173,7 +170,7 @@ export default function AllergenFormModal({
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 disabled:opacity-50"
+              className="rounded-xl border border-gray-200 px-5 py-2.5 text-lg  text-gray-600 disabled:opacity-50"
             >
               បោះបង់
             </button>
@@ -181,7 +178,7 @@ export default function AllergenFormModal({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#136C34] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#136C34] px-5 py-2.5 text-lg  text-white disabled:opacity-60"
             >
               {saving && <LoaderCircle size={17} className="animate-spin" />}
               {allergen ? "រក្សាទុកការកែប្រែ" : "បន្ថែម"}

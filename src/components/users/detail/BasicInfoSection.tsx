@@ -31,7 +31,10 @@ export default function BasicInfoSection({
           value={(profile.preferredLanguage ?? "—").toUpperCase()}
           icon={<Globe2 size={14} />}
         />
-        <Item label="Default profile" value={profile.isDefault ? "Yes" : "No"} />
+        <Item
+          label="Default profile"
+          value={profile.isDefault ? "Yes" : "No"}
+        />
       </div>
     </Section>
   );

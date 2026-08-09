@@ -26,8 +26,8 @@ export default function MedicalConditionsHeader({
             </div>
 
             <div>
-              <h1 className="text-2xl font-bold sm:text-3xl">គ្រប់គ្រងស្ថានភាពសុខភាព</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-7 text-white/85 sm:text-base">
+              <p className="text-5xl font-bold ">គ្រប់គ្រងស្ថានភាពសុខភាព</p>
+              <p className="mt-2 max-w-2xl text-xl leading-7 text-white/85 ">
                 គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារស្ថានភាពសុខភាពដែលប្រើក្នុងប្រព័ន្ធ FoodHub។
               </p>
             </div>
@@ -35,17 +35,17 @@ export default function MedicalConditionsHeader({
 
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="rounded-2xl bg-white/10 px-5 py-4">
-              <p className="text-sm text-white/75">សរុប</p>
+              <p className="text-xl text-white/75">សរុប</p>
               <p className="mt-1 text-2xl font-bold">{total}</p>
             </div>
 
             <div className="rounded-2xl bg-white/10 px-5 py-4">
-              <p className="text-sm text-white/75">សកម្មក្នុងទំព័រ</p>
+              <p className="text-xl text-white/75">សកម្មក្នុងទំព័រ</p>
               <p className="mt-1 text-2xl font-bold">{activeCount}</p>
             </div>
 
             <div className="rounded-2xl bg-white/10 px-5 py-4">
-              <p className="text-sm text-white/75">អសកម្មក្នុងទំព័រ</p>
+              <p className="text-xl text-white/75">អសកម្មក្នុងទំព័រ</p>
               <p className="mt-1 text-2xl font-bold">{inactiveCount}</p>
             </div>
           </div>
@@ -54,7 +54,7 @@ export default function MedicalConditionsHeader({
         <button
           type="button"
           onClick={onAdd}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-base font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
         >
           <Plus size={18} />
           បន្ថែមស្ថានភាពសុខភាព
