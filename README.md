@@ -1,4 +1,15 @@
+#  Foodhub
+
+<p align="center">
+  <img
+    src="./public/thumnail.png"
+    alt="FoodHub Thumbnail"
+    width="100%"
+  />
+</p>
+
 # FoodHub Admin Overview
+
 
 FoodHub Admin is the management dashboard for the FoodHub platform.
 
