@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, MapPinned, Save, Store } from "lucide-react";
-import { useCreateShopMutation } from "@/src/app/store/shopApi";
+import { useCreateShopMutation } from "@/src/app/store/shop/shopApi";
 import type {
   CreateStorePayload,
   StoreOperatingStatus,

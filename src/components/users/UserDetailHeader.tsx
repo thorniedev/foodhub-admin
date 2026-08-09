@@ -52,7 +52,7 @@ export default function UserDetailHeader({
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="truncate text-2xl font-black sm:text-3xl">{name}</h1>
+                <p className="truncate text-3xl font-black sm:text-3xl">{name}</p>
                 <StatusBadge status={user.status} />
               </div>
 

@@ -3,8 +3,11 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Save, X } from "lucide-react";
-import { useCreateMenuItemMutation, useGetMenuItemsQuery } from "@/src/app/store/menuItemApi";
-import { useGetShopsQuery } from "@/src/app/store/shopApi";
+import {
+  useCreateMenuItemMutation,
+  useGetMenuItemsQuery,
+} from "@/src/app/store/menuItemApi";
+import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
 import {
   AllergenDeclaration,
   CodeName,
@@ -14,7 +17,11 @@ import {
 import MenuItemImageUploadGrid from "./MenuItemImageUploadGrid";
 
 function slugCode(name: string) {
-  return name.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  return name
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
 }
 
 function TagInput({
@@ -46,16 +53,26 @@ function TagInput({
           placeholder={placeholder}
           className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
-        <button type="button" onClick={add} className="bg-emerald-600 text-white rounded-lg px-3 hover:bg-emerald-700">
+        <button
+          type="button"
+          onClick={add}
+          className="bg-emerald-600 text-white rounded-lg px-3 hover:bg-emerald-700"
+        >
           <Plus size={16} />
         </button>
       </div>
       {values.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-2">
           {values.map((v) => (
-            <span key={v} className="flex items-center gap-1 bg-amber-50 text-amber-700 text-xs font-medium px-2.5 py-1 rounded-full">
+            <span
+              key={v}
+              className="flex items-center gap-1 bg-amber-50 text-amber-700 text-xs font-medium px-2.5 py-1 rounded-full"
+            >
               {v}
-              <button type="button" onClick={() => onChange(values.filter((x) => x !== v))}>
+              <button
+                type="button"
+                onClick={() => onChange(values.filter((x) => x !== v))}
+              >
                 <X size={11} />
               </button>
             </span>
@@ -71,7 +88,10 @@ interface CreateMenuItemFormProps {
   redirectTo: string;
 }
 
-export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemFormProps) {
+export default function CreateMenuItemForm({
+  kind,
+  redirectTo,
+}: CreateMenuItemFormProps) {
   const router = useRouter();
   const [createMenuItem, { isLoading }] = useCreateMenuItemMutation();
   const { data: menuItems = [] } = useGetMenuItemsQuery();
@@ -130,25 +150,39 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
   const [fat, setFat] = useState<number | "">("");
 
   const toggleAgeGroup = (code: string) => {
-    setAgeGroups((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]));
+    setAgeGroups((prev) =>
+      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
+    );
   };
 
   const toggleMealType = (mt: CodeName) => {
     setMealTypes((prev) =>
-      prev.some((m) => m.code === mt.code) ? prev.filter((m) => m.code !== mt.code) : [...prev, mt]
+      prev.some((m) => m.code === mt.code)
+        ? prev.filter((m) => m.code !== mt.code)
+        : [...prev, mt],
     );
   };
 
   const addCustomMealType = () => {
     const trimmed = newMealTypeName.trim();
     if (!trimmed) return;
-    setMealTypes((prev) => [...prev, { code: slugCode(trimmed), name: trimmed }]);
+    setMealTypes((prev) => [
+      ...prev,
+      { code: slugCode(trimmed), name: trimmed },
+    ]);
     setNewMealTypeName("");
   };
 
   const handleSubmit = async () => {
     const selectedStore = shops.find((s) => s.uuid === storeUuid);
-    if (!localName.trim() || !name.trim() || !category || !cuisine || !selectedStore) return;
+    if (
+      !localName.trim() ||
+      !name.trim() ||
+      !category ||
+      !cuisine ||
+      !selectedStore
+    )
+      return;
 
     const dietaryTypes: DietaryType[] = dietaryTypeNames.map((n) => ({
       code: slugCode(n),
@@ -156,13 +190,15 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
       verificationStatus: "UNVERIFIED",
     }));
 
-    const allergenDeclarations: AllergenDeclaration[] = allergenNames.map((n) => ({
-      code: slugCode(n),
-      name: n,
-      declarationType: "MAY_CONTAIN",
-      riskLevel: "MEDIUM",
-      verificationStatus: "UNVERIFIED",
-    }));
+    const allergenDeclarations: AllergenDeclaration[] = allergenNames.map(
+      (n) => ({
+        code: slugCode(n),
+        name: n,
+        declarationType: "MAY_CONTAIN",
+        riskLevel: "MEDIUM",
+        verificationStatus: "UNVERIFIED",
+      }),
+    );
 
     const payload: CreateMenuItemPayload = {
       name,
@@ -229,7 +265,9 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
         <MenuItemImageUploadGrid imageUrl={thumbnail} onChange={setThumbnail} />
 
         <div>
-          <label className="text-sm text-gray-600 mb-1 block">ឈ្មោះ (ខ្មែរ) *</label>
+          <label className="text-sm text-gray-600 mb-1 block">
+            ឈ្មោះ (ខ្មែរ) *
+          </label>
           <input
             value={localName}
             onChange={(e) => setLocalName(e.target.value)}
@@ -237,7 +275,9 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
           />
         </div>
         <div>
-          <label className="text-sm text-gray-600 mb-1 block">ឈ្មោះ (English) *</label>
+          <label className="text-sm text-gray-600 mb-1 block">
+            ឈ្មោះ (English) *
+          </label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -245,7 +285,9 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
           />
         </div>
         <div>
-          <label className="text-sm text-gray-600 mb-1 block">ការពិពណ៌នា (ខ្មែរ)</label>
+          <label className="text-sm text-gray-600 mb-1 block">
+            ការពិពណ៌នា (ខ្មែរ)
+          </label>
           <textarea
             value={localDescription}
             onChange={(e) => setLocalDescription(e.target.value)}
@@ -254,7 +296,9 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
           />
         </div>
         <div>
-          <label className="text-sm text-gray-600 mb-1 block">ការពិពណ៌នា (English)</label>
+          <label className="text-sm text-gray-600 mb-1 block">
+            ការពិពណ៌នា (English)
+          </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -265,7 +309,9 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">តម្លៃ (USD)</label>
+            <label className="text-sm text-gray-600 mb-1 block">
+              តម្លៃ (USD)
+            </label>
             <input
               type="number"
               step="0.01"
@@ -275,19 +321,30 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
             />
           </div>
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">ពេលវេលារៀបចំ (នាទី)</label>
+            <label className="text-sm text-gray-600 mb-1 block">
+              ពេលវេលារៀបចំ (នាទី)
+            </label>
             <input
               type="number"
               value={preparationTimeMinutes}
-              onChange={(e) => setPreparationTimeMinutes(Number(e.target.value))}
+              onChange={(e) =>
+                setPreparationTimeMinutes(Number(e.target.value))
+              }
               className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
         </div>
 
         <label className="flex items-center gap-2">
-          <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} className="accent-emerald-600" />
-          <span className="text-sm text-gray-600">ជាមុខម្ហូបលេចធ្លោ (Featured)</span>
+          <input
+            type="checkbox"
+            checked={isFeatured}
+            onChange={(e) => setIsFeatured(e.target.checked)}
+            className="accent-emerald-600"
+          />
+          <span className="text-sm text-gray-600">
+            ជាមុខម្ហូបលេចធ្លោ (Featured)
+          </span>
         </label>
       </div>
 
@@ -317,7 +374,12 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
           <div className="flex gap-2">
             <select
               value={category?.code ?? ""}
-              onChange={(e) => setCategory(existingCategories.find((c) => c.code === e.target.value) ?? null)}
+              onChange={(e) =>
+                setCategory(
+                  existingCategories.find((c) => c.code === e.target.value) ??
+                    null,
+                )
+              }
               className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="">ជ្រើសរើសប្រភេទ</option>
@@ -339,7 +401,10 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
               type="button"
               onClick={() => {
                 if (!newCategoryName.trim()) return;
-                setCategory({ code: slugCode(newCategoryName), name: newCategoryName.trim() });
+                setCategory({
+                  code: slugCode(newCategoryName),
+                  name: newCategoryName.trim(),
+                });
                 setNewCategoryName("");
               }}
               className="px-3 py-2 text-sm text-emerald-600 border border-emerald-200 rounded-lg hover:bg-emerald-50"
@@ -350,11 +415,18 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
         </div>
 
         <div>
-          <label className="text-sm text-gray-600 mb-1 block">ម្ហូបជាតិ *</label>
+          <label className="text-sm text-gray-600 mb-1 block">
+            ម្ហូបជាតិ *
+          </label>
           <div className="flex gap-2">
             <select
               value={cuisine?.code ?? ""}
-              onChange={(e) => setCuisine(existingCuisines.find((c) => c.code === e.target.value) ?? null)}
+              onChange={(e) =>
+                setCuisine(
+                  existingCuisines.find((c) => c.code === e.target.value) ??
+                    null,
+                )
+              }
               className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="">ជ្រើសរើសម្ហូបជាតិ</option>
@@ -376,7 +448,10 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
               type="button"
               onClick={() => {
                 if (!newCuisineName.trim()) return;
-                setCuisine({ code: slugCode(newCuisineName), name: newCuisineName.trim() });
+                setCuisine({
+                  code: slugCode(newCuisineName),
+                  name: newCuisineName.trim(),
+                });
                 setNewCuisineName("");
               }}
               className="px-3 py-2 text-sm text-emerald-600 border border-emerald-200 rounded-lg hover:bg-emerald-50"
@@ -387,7 +462,9 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
         </div>
 
         <div>
-          <label className="text-sm text-gray-600 mb-2 block">កម្រិតហឹរ (0-3)</label>
+          <label className="text-sm text-gray-600 mb-2 block">
+            កម្រិតហឹរ (0-3)
+          </label>
           <div className="flex gap-2">
             {[0, 1, 2, 3].map((lvl) => (
               <button
@@ -395,7 +472,9 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
                 type="button"
                 onClick={() => setSpiceLevel(lvl)}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium border ${
-                  spiceLevel === lvl ? "bg-red-500 text-white border-red-500" : "bg-white text-gray-600 border-gray-200"
+                  spiceLevel === lvl
+                    ? "bg-red-500 text-white border-red-500"
+                    : "bg-white text-gray-600 border-gray-200"
                 }`}
               >
                 {lvl}
@@ -424,10 +503,30 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
           </div>
         </div>
 
-        <TagInput label="គ្រឿងផ្សំ" values={ingredients} onChange={setIngredients} placeholder="បន្ថែមគ្រឿងផ្សំ..." />
-        <TagInput label="ភេសជ្ជៈដែលសមទៅនឹងម្ហូបនេះ" values={beveragePairings} onChange={setBeveragePairings} placeholder="ឧ. តែក្តៅ" />
-        <TagInput label="ប្រភេទរបបអាហារ (Dietary tags)" values={dietaryTypeNames} onChange={setDietaryTypeNames} placeholder="ឧ. ហាឡាល់" />
-        <TagInput label="សារធាតុអាលែហ្សី" values={allergenNames} onChange={setAllergenNames} placeholder="ឧ. Fish, Egg" />
+        <TagInput
+          label="គ្រឿងផ្សំ"
+          values={ingredients}
+          onChange={setIngredients}
+          placeholder="បន្ថែមគ្រឿងផ្សំ..."
+        />
+        <TagInput
+          label="ភេសជ្ជៈដែលសមទៅនឹងម្ហូបនេះ"
+          values={beveragePairings}
+          onChange={setBeveragePairings}
+          placeholder="ឧ. តែក្តៅ"
+        />
+        <TagInput
+          label="ប្រភេទរបបអាហារ (Dietary tags)"
+          values={dietaryTypeNames}
+          onChange={setDietaryTypeNames}
+          placeholder="ឧ. ហាឡាល់"
+        />
+        <TagInput
+          label="សារធាតុអាលែហ្សី"
+          values={allergenNames}
+          onChange={setAllergenNames}
+          placeholder="ឧ. Fish, Egg"
+        />
       </div>
 
       {/* Meal types */}
@@ -457,7 +556,11 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
             placeholder="បន្ថែមពេលវេលាថ្មី"
             className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
-          <button type="button" onClick={addCustomMealType} className="px-3 py-2 text-sm text-emerald-600 border border-emerald-200 rounded-lg hover:bg-emerald-50">
+          <button
+            type="button"
+            onClick={addCustomMealType}
+            className="px-3 py-2 text-sm text-emerald-600 border border-emerald-200 rounded-lg hover:bg-emerald-50"
+          >
             + ថ្មី
           </button>
         </div>
@@ -465,32 +568,46 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
 
       {/* Nutrition */}
       <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 space-y-4">
-        <h2 className="text-lg font-bold text-gray-800">ជីវជាតិ (ស្រេចចិត្ត)</h2>
+        <h2 className="text-lg font-bold text-gray-800">
+          ជីវជាតិ (ស្រេចចិត្ត)
+        </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div>
             <label className="text-xs text-gray-500 mb-1 block">Calories</label>
             <input
               type="number"
               value={calories}
-              onChange={(e) => setCalories(e.target.value === "" ? "" : Number(e.target.value))}
+              onChange={(e) =>
+                setCalories(e.target.value === "" ? "" : Number(e.target.value))
+              }
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Protein (g)</label>
+            <label className="text-xs text-gray-500 mb-1 block">
+              Protein (g)
+            </label>
             <input
               type="number"
               value={protein}
-              onChange={(e) => setProtein(e.target.value === "" ? "" : Number(e.target.value))}
+              onChange={(e) =>
+                setProtein(e.target.value === "" ? "" : Number(e.target.value))
+              }
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Carbs (g)</label>
+            <label className="text-xs text-gray-500 mb-1 block">
+              Carbs (g)
+            </label>
             <input
               type="number"
               value={carbohydrate}
-              onChange={(e) => setCarbohydrate(e.target.value === "" ? "" : Number(e.target.value))}
+              onChange={(e) =>
+                setCarbohydrate(
+                  e.target.value === "" ? "" : Number(e.target.value),
+                )
+              }
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
@@ -499,7 +616,9 @@ export default function CreateMenuItemForm({ kind, redirectTo }: CreateMenuItemF
             <input
               type="number"
               value={fat}
-              onChange={(e) => setFat(e.target.value === "" ? "" : Number(e.target.value))}
+              onChange={(e) =>
+                setFat(e.target.value === "" ? "" : Number(e.target.value))
+              }
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>

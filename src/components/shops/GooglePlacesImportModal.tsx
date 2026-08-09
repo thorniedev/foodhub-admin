@@ -6,7 +6,7 @@ import {
   useCreateStoreFromGoogleMutation,
   useLazyGetGooglePlacePreviewQuery,
   useLazySearchGooglePlacesQuery,
-} from "@/src/app/store/shopApi";
+} from "@/src/app/store/shop/shopApi";
 import type { GooglePlacePreview, GooglePlaceResult } from "@/src/types/shop";
 import { extractGooglePlaceId, googleResultTitle } from "@/src/lib/shopFormat";
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";

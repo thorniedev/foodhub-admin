@@ -35,10 +35,10 @@ export default function UserEditModal({
       <div className="w-full max-w-md rounded-[26px] bg-white shadow-2xl">
         <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
           <div>
-            <h2 className="flex items-center gap-2 text-xl font-black text-gray-900">
+            <p className="flex items-center gap-2 text-3xl font-black text-gray-900">
               <UserCog size={21} className="text-[#137A3D]" />
               កែប្រែស្ថានភាព User
-            </h2>
+            </p>
             <p className="mt-1 text-sm text-gray-500">@{user.username}</p>
           </div>
 
@@ -53,13 +53,13 @@ export default function UserEditModal({
         </div>
 
         <div className="space-y-4 p-6">
-          <p className="text-sm leading-6 text-gray-500">
+          {/* <p className="text-sm leading-6 text-gray-500">
             Backend contract អនុញ្ញាតឱ្យ Admin កែតែ account status តាម endpoint
             <span className="mx-1 font-mono text-xs text-gray-700">
               PATCH /admin/users/{"{uuid}"}/status
             </span>
             ។
-          </p>
+          </p> */}
 
           <div className="grid grid-cols-2 gap-3">
             {(["ACTIVE", "SUSPENDED"] as const).map((option) => (

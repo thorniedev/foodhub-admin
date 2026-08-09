@@ -329,7 +329,6 @@ export default function UsersManager() {
 
       <p className="text-xs leading-5 text-gray-400">
         Search និង status tabs ខាងលើ filter លើទិន្នន័យក្នុង page បច្ចុប្បន្ន។
-        Backend contract ដែលបានផ្តល់មិនមាន server-side search parameter ទេ។
       </p>
 
       <UserCreateModal
