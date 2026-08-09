@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, LogOut, X } from "lucide-react";
 
 import { dashboardNav } from "../../config/dashboardNav";
 import type { NavItem } from "../../config/dashboardNav";
@@ -198,7 +198,7 @@ export default function Sidebar() {
         </div>
 
         {/* ================= ADMIN PROFILE ================= */}
-        <div className="shrink-0 space-y-1 border-t border-gray-100 bg-white px-3 pb-4 pt-3">
+        {/* <div className="shrink-0 space-y-1 border-t border-gray-100 bg-white px-3 pb-4 pt-3">
           <div className="flex items-center gap-3 rounded-lg bg-gray-50 px-3 py-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-700 text-sm font-semibold text-white">
               A
@@ -210,8 +210,36 @@ export default function Sidebar() {
               <p className="text-xs text-gray-400">foodhub@gmail.com</p>
             </div>
           </div>
-        </div>
+        </div> */}
+
+        <div className="border-t border-gray-100 p-3">
+  <form
+    action="/api/auth/logout"
+    method="post"
+    className="w-full"
+  >
+    <button
+      type="submit"
+      className="group flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-gray-600 transition hover:bg-red-50 hover:text-red-600"
+    >
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-500 transition group-hover:bg-red-100 group-hover:text-red-600">
+        <LogOut size={19} />
+      </div>
+
+      <div className="min-w-0">
+        <p className="font-semibold">
+          Log out
+        </p>
+
+        <p className="mt-0.5 text-xs font-normal text-gray-400 group-hover:text-red-400">
+          ចាកចេញពីគណនី
+        </p>
+      </div>
+    </button>
+  </form>
+</div>
       </aside>
+
     </>
   );
 }
