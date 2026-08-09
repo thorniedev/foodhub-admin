@@ -27,10 +27,7 @@ export default function ShopBasicInfoSection({
 }) {
   return (
     <section className="rounded-[24px] border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-      <h2 className="text-lg font-black text-gray-900">ព័ត៌មានមូលដ្ឋាន</h2>
-      {/* <p className="mt-1 text-sm text-gray-500">
-        Fields ត្រូវតាម POST /admin/stores payload។
-      </p> */}
+      <p className="text-4xl font-black text-gray-900">ព័ត៌មានមូលដ្ឋាន</p>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <Field
           label="Store name"

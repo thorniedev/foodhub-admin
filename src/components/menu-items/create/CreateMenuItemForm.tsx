@@ -261,7 +261,7 @@ export default function CreateMenuItemForm({
 
       {/* Basic info */}
       <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 space-y-4">
-        <h2 className="text-lg font-bold text-gray-800">ព័ត៌មានមូលដ្ឋាន</h2>
+        <p className="text-lg font-bold text-gray-800">ព័ត៌មានមូលដ្ឋាន</p>
         <MenuItemImageUploadGrid imageUrl={thumbnail} onChange={setThumbnail} />
 
         <div>

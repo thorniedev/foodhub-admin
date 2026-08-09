@@ -130,10 +130,10 @@ export default function CreateShopForm() {
               <ArrowLeft size={17} />
               Back to stores
             </Link>
-            <h1 className="mt-5 flex items-center gap-3 text-3xl font-black">
+            <p className="mt-5 flex items-center gap-3 text-5xl font-black">
               <Store size={30} />
               បង្កើត Store ថ្មី
-            </h1>
+            </p>
             {/* <p className="mt-2 text-sm text-emerald-50">
               Manual POST /admin/stores ឬ Google Places import។
             </p> */}
