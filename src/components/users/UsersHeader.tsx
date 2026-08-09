@@ -62,7 +62,7 @@ function Stat({
 }) {
   return (
     <div className="rounded-2xl border border-white/15 bg-white/10 px-5 py-4 backdrop-blur-sm">
-      <p className="text-sm font-medium text-emerald-50">{label}</p>
+      <p className="text-lg font-medium text-emerald-50">{label}</p>
       <p className="mt-1 text-2xl font-black">{value}</p>
     </div>
   );

@@ -43,7 +43,7 @@ export default function DietaryTypesTable({
                   </div>
                   <div>
                     <p className="font-semibold text-gray-800">{item.name}</p>
-                    <p className="mt-0.5 max-w-[200px] truncate text-xs text-gray-400">{item.uuid}</p>
+
                   </div>
                 </div>
               </td>
