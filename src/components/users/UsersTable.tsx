@@ -37,8 +37,8 @@ export default function UsersTable({
             <th className="px-5 py-4">Email</th>
             <th className="px-5 py-4">Verified</th>
             <th className="px-5 py-4">ស្ថានភាព</th>
-            <th className="px-5 py-4">ចូលចុងក្រោយ</th>
-            <th className="px-5 py-4">បង្កើតនៅ</th>
+            {/* <th className="px-5 py-4">ចូលចុងក្រោយ</th>
+            <th className="px-5 py-4">បង្កើតនៅ</th> */}
             <th className="px-5 py-4 text-right">សកម្មភាព</th>
           </tr>
         </thead>
@@ -63,9 +63,9 @@ export default function UsersTable({
                     </div>
                     <div className="min-w-0">
                       <p className="truncate font-bold text-gray-900">{name}</p>
-                      <p className="mt-0.5 max-w-[210px] truncate text-xs text-gray-400">
+                      {/* <p className="mt-0.5 max-w-[210px] truncate text-xs text-gray-400">
                         {user.uuid}
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                 </td>
@@ -95,14 +95,14 @@ export default function UsersTable({
                 <td className="px-5 py-4">
                   <StatusBadge status={user.status} />
                 </td>
-
+{/* 
                 <td className="px-5 py-4">
                   {formatDateTime(user.lastLoginAt)}
                 </td>
 
                 <td className="px-5 py-4">
                   {formatDateTime(user.createdAt)}
-                </td>
+                </td> */}
 
                 <td className="px-5 py-4">
                   <div className="flex items-center justify-end gap-1.5">

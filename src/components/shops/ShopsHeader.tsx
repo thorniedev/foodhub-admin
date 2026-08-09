@@ -18,11 +18,11 @@ export default function ShopsHeader({
 
       <div className="relative flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
         <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
             <Store size={28} />
           </div>
           <div>
-            <h1 className="text-3xl font-black tracking-tight sm:text-4xl">គ្រប់គ្រងហាង</h1>
+            <p className="text-5xl font-black tracking-tight ">គ្រប់គ្រងហាង</p>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-emerald-50 sm:text-base">
               គ្រប់គ្រង Store ពិតពី FoodHub API — ព័ត៌មានហាង, approval,
               account status, operating status, ម៉ោងបើកបិទ និង Google Places។

@@ -1,37 +1,3 @@
-// "use client";
-
-// import { MapPin } from "lucide-react";
-
-// interface LocationSectionProps {
-//   location: string;
-//   onLocationChange: (value: string) => void;
-// }
-
-// export default function LocationSection({
-//   location,
-//   onLocationChange,
-// }: LocationSectionProps) {
-//   return (
-//     <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 space-y-3">
-//       <div className="flex items-center gap-2">
-//         <MapPin size={20} className="text-[#136C34]" />
-//         <h2 className="text-lg sm:text-xl font-bold text-gray-800">ទីតាំង</h2>
-//       </div>
-//       <p className="text-sm text-gray-400">
-//         ជាជម្រើស — ជួយឱ្យអ្នកប្រើប្រាស់នៅក្បែរនោះស្គាល់មុខមួយនេះ
-//       </p>
-//       <input
-//         type="text"
-//         value={location}
-//         onChange={(e) => onLocationChange(e.target.value)}
-//         placeholder="ឧទាហរណ៍: រាជធានីភ្នំពេញ"
-//         className="w-full px-4 py-3 text-sm bg-[#F7F3EC] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500"
-//       />
-//     </div>
-//   );
-// }
-
-
 "use client";
 
 import { MapPin } from "lucide-react";

@@ -3,8 +3,6 @@ export interface PageTitleEntry {
   parent?: string;
 }
 
-// Keyed by exact pathname (no /dashboard prefix, since routes now live
-// directly under the (dashboard) route group).
 export const PAGE_TITLES: Record<string, PageTitleEntry> = {
   "/": { title: "ផ្ទាំងគ្រប់គ្រង" },
 
@@ -45,9 +43,6 @@ const DEFAULT_TITLE: PageTitleEntry = { title: "ផ្ទាំងគ្រប�
 export function getPageTitle(pathname: string): PageTitleEntry {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
 
-  // Fallback: match the longest known prefix, so unlisted nested routes
-  // (e.g. a future /shops/edit/123) still get a sensible title instead
-  // of falling back to the dashboard default.
   const matches = Object.keys(PAGE_TITLES)
     .filter((path) => path !== "/" && pathname.startsWith(path))
     .sort((a, b) => b.length - a.length);

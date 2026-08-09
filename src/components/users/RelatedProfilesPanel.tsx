@@ -41,7 +41,7 @@ export default function RelatedProfilesPanel({
             <Users size={20} />
           </div>
           <div>
-            <h2 className="font-black text-gray-900">Profiles របស់អ្នកប្រើ</h2>
+            <p className="font-black text-gray-900 text-3xl">Profiles របស់អ្នកប្រើ</p>
             <p className="text-xs text-gray-500">
               {data?.totalElements ?? 0} profile(s)
             </p>

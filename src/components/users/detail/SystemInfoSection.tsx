@@ -12,7 +12,7 @@ export default function SystemInfoSection({
   return (
     <Section title="System information" icon={<Info size={18} />}>
       <div className="space-y-3 text-sm">
-        <Row label="Profile UUID" value={profile.uuid} mono />
+        {/* <Row label="Profile UUID" value={profile.uuid} mono /> */}
         <Row label="Avatar media UUID" value={profile.avatarMediaUuid ?? "—"} mono />
         <Row label="Created at" value={formatDateTime(profile.createdAt)} />
         <Row label="Updated at" value={formatDateTime(profile.updatedAt)} />

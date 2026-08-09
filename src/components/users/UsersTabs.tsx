@@ -37,7 +37,7 @@ export default function UsersTabs({
             key={tab.value}
             type="button"
             onClick={() => onChange(tab.value)}
-            className={`inline-flex min-h-10 items-center gap-2 rounded-full px-4 text-sm font-bold transition ${
+            className={`inline-flex min-h-10 items-center gap-2 rounded-full px-4 text-base font-bold transition ${
               active
                 ? "bg-[#137A3D] text-white shadow-sm"
                 : "border border-gray-100 bg-white text-gray-600 hover:border-emerald-100 hover:bg-emerald-50"

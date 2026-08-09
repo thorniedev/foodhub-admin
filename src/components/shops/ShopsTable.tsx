@@ -20,7 +20,7 @@ export default function ShopsTable({
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/70 text-[12px] font-black uppercase tracking-wide text-gray-500">
             <th className="px-5 py-4">Store</th><th className="px-5 py-4">Location</th>
-            <th className="px-5 py-4">Rating</th><th className="px-5 py-4">Review</th>
+            {/* <th className="px-5 py-4">Rating</th><th className="px-5 py-4">Review</th> */}
             <th className="px-5 py-4">Account</th><th className="px-5 py-4">Operating</th>
             <th className="px-5 py-4">Open now</th><th className="px-5 py-4 text-right">Actions</th>
           </tr>
@@ -42,7 +42,7 @@ export default function ShopsTable({
                     </div>
                     <div className="min-w-0">
                       <p className="truncate font-black text-gray-900">{store.storeName}</p>
-                      <p className="mt-1 text-xs text-gray-400">{formatPriceLevel(store.priceLevel)} · {store.countryCode}</p>
+                      {/* <p className="mt-1 text-xs text-gray-400">{formatPriceLevel(store.priceLevel)} · {store.countryCode}</p> */}
                     </div>
                   </div>
                 </td>
@@ -52,13 +52,13 @@ export default function ShopsTable({
                     <span className="line-clamp-2">{displayStoreLocation(store) || "—"}</span>
                   </div>
                 </td>
-                <td className="px-5 py-4">
+                {/* <td className="px-5 py-4">
                   <span className="inline-flex items-center gap-1.5 font-bold text-gray-700">
                     <Star size={15} className="fill-amber-400 text-amber-400" />
                     {Number(store.averageRating || 0).toFixed(1)}
                     <span className="font-medium text-gray-400">({store.totalReviews ?? 0})</span>
                   </span>
-                </td>
+                </td> */}
                 <td className="px-5 py-4"><button disabled={disabled} onClick={() => onStatus(store, "REVIEW")}><StatusBadge value={store.reviewStatus} kind="review" /></button></td>
                 <td className="px-5 py-4"><button disabled={disabled} onClick={() => onStatus(store, "ACCOUNT")}><StatusBadge value={store.accountStatus} kind="account" /></button></td>
                 <td className="px-5 py-4"><button disabled={disabled} onClick={() => onStatus(store, "OPERATING")}><StatusBadge value={store.operatingStatus} kind="operating" /></button></td>
