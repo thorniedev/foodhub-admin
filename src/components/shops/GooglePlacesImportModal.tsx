@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type ReactNode,
 } from "react";
 
 import { useRouter } from "next/navigation";
@@ -41,6 +42,8 @@ import {
 } from "@/src/lib/shopFormat";
 
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
+
+import StoreMediaUploader from "./StoreMediaUploader";
 
 interface GooglePlacesImportModalProps {
   open: boolean;
@@ -122,7 +125,6 @@ export default function GooglePlacesImportModal({
   const router = useRouter();
 
   const [query, setQuery] = useState("");
-
   const [results, setResults] = useState<
     GooglePlaceResult[]
   >([]);
@@ -151,11 +153,20 @@ export default function GooglePlacesImportModal({
   const [timezone, setTimezone] =
     useState("Asia/Phnom_Penh");
 
-  const [logo, setLogo] =
-    useState("");
+  /*
+   * These UUIDs stay hidden from the admin.
+   * StoreMediaUploader fills them automatically
+   * after the Media API upload succeeds.
+   */
+  const [
+    logoMediaUuid,
+    setLogoMediaUuid,
+  ] = useState("");
 
-  const [cover, setCover] =
-    useState("");
+  const [
+    coverMediaUuid,
+    setCoverMediaUuid,
+  ] = useState("");
 
   const [error, setError] = useState<
     string | null
@@ -178,7 +189,6 @@ export default function GooglePlacesImportModal({
     { isLoading: creating },
   ] = useCreateStoreFromGoogleMutation();
 
-
   useEffect(() => {
     if (!open) {
       return;
@@ -191,7 +201,6 @@ export default function GooglePlacesImportModal({
       setShowSuggestions(false);
       setHasSearched(false);
       setActiveIndex(-1);
-
       return;
     }
 
@@ -201,7 +210,7 @@ export default function GooglePlacesImportModal({
 
     const timer = window.setTimeout(
       async () => {
-        const currentRequestId =
+        const requestId =
           ++searchRequestId.current;
 
         try {
@@ -213,7 +222,7 @@ export default function GooglePlacesImportModal({
             ).unwrap();
 
           if (
-            currentRequestId !==
+            requestId !==
             searchRequestId.current
           ) {
             return;
@@ -225,7 +234,7 @@ export default function GooglePlacesImportModal({
           setActiveIndex(-1);
         } catch (requestError) {
           if (
-            currentRequestId !==
+            requestId !==
             searchRequestId.current
           ) {
             return;
@@ -244,9 +253,8 @@ export default function GooglePlacesImportModal({
       350,
     );
 
-    return () => {
+    return () =>
       window.clearTimeout(timer);
-    };
   }, [
     open,
     query,
@@ -254,9 +262,6 @@ export default function GooglePlacesImportModal({
     searchPlaces,
   ]);
 
-  /* =========================================================
-     RESET MODAL WHEN CLOSED
-  ========================================================= */
   useEffect(() => {
     if (open) {
       return;
@@ -272,8 +277,8 @@ export default function GooglePlacesImportModal({
     setPreview(null);
 
     setTimezone("Asia/Phnom_Penh");
-    setLogo("");
-    setCover("");
+    setLogoMediaUuid("");
+    setCoverMediaUuid("");
 
     setError(null);
   }, [open]);
@@ -282,9 +287,6 @@ export default function GooglePlacesImportModal({
     return null;
   }
 
-  /* =========================================================
-     MANUAL SEARCH BUTTON
-  ========================================================= */
   const runSearch = async () => {
     const cleanQuery = query.trim();
 
@@ -292,14 +294,13 @@ export default function GooglePlacesImportModal({
       setError(
         "Please enter at least 2 characters.",
       );
-
       return;
     }
 
     setSelectedPlaceId(null);
     setPreview(null);
 
-    const currentRequestId =
+    const requestId =
       ++searchRequestId.current;
 
     try {
@@ -311,7 +312,7 @@ export default function GooglePlacesImportModal({
         ).unwrap();
 
       if (
-        currentRequestId !==
+        requestId !==
         searchRequestId.current
       ) {
         return;
@@ -344,27 +345,19 @@ export default function GooglePlacesImportModal({
       setError(
         "Google result does not contain a valid placeId.",
       );
-
       return;
     }
 
-    const title =
+    setQuery(
       googleResultTitle(
         result,
         index,
-      );
-
-    /*
-     * Put selected business name
-     * into search input.
-     */
-    setQuery(title);
+      ),
+    );
 
     setSelectedPlaceId(id);
-
     setShowSuggestions(false);
     setActiveIndex(-1);
-
     setError(null);
 
     try {
@@ -392,10 +385,8 @@ export default function GooglePlacesImportModal({
     ) {
       if (event.key === "Enter") {
         event.preventDefault();
-
         void runSearch();
       }
-
       return;
     }
 
@@ -408,7 +399,6 @@ export default function GooglePlacesImportModal({
           results.length - 1,
         ),
       );
-
       return;
     }
 
@@ -416,12 +406,8 @@ export default function GooglePlacesImportModal({
       event.preventDefault();
 
       setActiveIndex((current) =>
-        Math.max(
-          current - 1,
-          0,
-        ),
+        Math.max(current - 1, 0),
       );
-
       return;
     }
 
@@ -440,7 +426,6 @@ export default function GooglePlacesImportModal({
           activeIndex,
         );
       }
-
       return;
     }
 
@@ -467,10 +452,10 @@ export default function GooglePlacesImportModal({
               timezone.trim(),
 
             logoMediaUuid:
-              logo.trim() || null,
+              logoMediaUuid || null,
 
             coverMediaUuid:
-              cover.trim() || null,
+              coverMediaUuid || null,
           },
         }).unwrap();
 
@@ -494,7 +479,7 @@ export default function GooglePlacesImportModal({
 
   return (
     <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]">
-      <div className="max-h-[94vh] w-full max-w-5xl overflow-y-auto rounded-[30px] bg-white shadow-2xl">
+      <div className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-[30px] bg-white shadow-2xl">
         <div className="sticky top-0 z-50 flex items-start justify-between border-b border-gray-100 bg-white px-6 py-5">
           <div>
             <h2 className="flex items-center gap-3 text-3xl font-black text-gray-950 md:text-4xl">
@@ -507,7 +492,8 @@ export default function GooglePlacesImportModal({
             </h2>
 
             <p className="mt-1 text-sm text-gray-500">
-              Search → Preview → Create
+              Search → Preview → Upload
+              media → Create
             </p>
           </div>
 
@@ -521,8 +507,7 @@ export default function GooglePlacesImportModal({
           </button>
         </div>
 
-        <div className="grid gap-6 p-6 lg:grid-cols-2">
-         
+        <div className="grid gap-6 p-6 lg:grid-cols-[0.95fr_1.05fr]">
           <section>
             <div className="relative z-40">
               <div className="flex">
@@ -540,17 +525,13 @@ export default function GooglePlacesImportModal({
                       setQuery(
                         event.target.value,
                       );
-
                       setSelectedPlaceId(
                         null,
                       );
-
                       setPreview(null);
-
                       setShowSuggestions(
                         true,
                       );
-
                       setError(null);
                     }}
                     onFocus={() => {
@@ -586,15 +567,14 @@ export default function GooglePlacesImportModal({
                   onClick={() =>
                     void runSearch()
                   }
-                  className="min-w-[100px] rounded-r-2xl bg-[#137A3D] px-5 text-sm font-black text-white transition hover:bg-[#0f6833] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="min-w-[100px] rounded-r-2xl bg-[#137A3D] px-5 text-sm font-black text-white transition hover:bg-[#0f6833] disabled:opacity-50"
                 >
                   Search
                 </button>
               </div>
 
               {showSuggestions &&
-                query.trim().length >=
-                  2 && (
+                query.trim().length >= 2 && (
                   <div className="absolute left-0 right-0 top-[58px] z-[100] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
                     {searching && (
                       <div className="flex items-center gap-3 px-5 py-5 text-sm text-gray-500">
@@ -602,15 +582,13 @@ export default function GooglePlacesImportModal({
                           size={18}
                           className="animate-spin text-[#137A3D]"
                         />
-
                         Searching Google
                         Places...
                       </div>
                     )}
 
                     {!searching &&
-                      results.length >
-                        0 && (
+                      results.length > 0 && (
                         <div className="max-h-[360px] overflow-y-auto py-2">
                           {results.map(
                             (
@@ -647,12 +625,7 @@ export default function GooglePlacesImportModal({
                                   onMouseDown={(
                                     event,
                                   ) => {
-                                    /*
-                                     * Prevent blur
-                                     * before click.
-                                     */
                                     event.preventDefault();
-
                                     void selectPlace(
                                       result,
                                       index,
@@ -726,15 +699,7 @@ export default function GooglePlacesImportModal({
                           />
 
                           <p className="mt-2 font-bold text-gray-600">
-                            No places
-                            found
-                          </p>
-
-                          <p className="mt-1 text-xs text-gray-400">
-                            Try another
-                            restaurant,
-                            cafe or store
-                            name.
+                            No places found
                           </p>
                         </div>
                       )}
@@ -744,14 +709,13 @@ export default function GooglePlacesImportModal({
           </section>
 
           <section className="space-y-4">
-
             <div className="rounded-[24px] bg-gray-50 p-5">
               <h3 className="text-2xl font-black text-gray-900">
                 Preview
               </h3>
 
               {previewing ? (
-                <div className="flex min-h-[260px] flex-col items-center justify-center">
+                <div className="flex min-h-[240px] flex-col items-center justify-center">
                   <Loader2
                     size={30}
                     className="animate-spin text-[#137A3D]"
@@ -767,7 +731,7 @@ export default function GooglePlacesImportModal({
                   preview={preview}
                 />
               ) : (
-                <div className="flex min-h-[260px] flex-col items-center justify-center text-center">
+                <div className="flex min-h-[240px] flex-col items-center justify-center text-center">
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-gray-300">
                     <MapPin size={28} />
                   </div>
@@ -786,38 +750,54 @@ export default function GooglePlacesImportModal({
               )}
             </div>
 
-            <Field
-              label="Timezone override"
-              value={timezone}
-              onChange={setTimezone}
-            />
+            <label className="block">
+              <span className="mb-2 block text-sm font-bold text-gray-800">
+                Timezone override
+              </span>
 
- 
-            <Field
-              label="Logo media UUID"
-              value={logo}
-              onChange={setLogo}
-            />
+              <input
+                value={timezone}
+                onChange={(event) =>
+                  setTimezone(
+                    event.target.value,
+                  )
+                }
+                className="h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50"
+              />
+            </label>
 
-     
-            <Field
-              label="Cover media UUID"
-              value={cover}
-              onChange={setCover}
-            />
+            <div className="grid gap-4 xl:grid-cols-2">
+              <StoreMediaUploader
+                label="Store logo"
+                purpose="STORE_LOGO"
+                mediaUuid={
+                  logoMediaUuid
+                }
+                onMediaUuidChange={
+                  setLogoMediaUuid
+                }
+                variant="logo"
+              />
 
-            {/* =============================================
-                ERROR
-            ============================================== */}
+              <StoreMediaUploader
+                label="Store cover"
+                purpose="STORE_COVER"
+                mediaUuid={
+                  coverMediaUuid
+                }
+                onMediaUuidChange={
+                  setCoverMediaUuid
+                }
+                variant="cover"
+              />
+            </div>
+
             {error && (
               <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm leading-6 text-red-600">
                 {error}
               </div>
             )}
 
-            {/* =============================================
-                CREATE
-            ============================================== */}
             <button
               type="button"
               disabled={
@@ -849,13 +829,6 @@ export default function GooglePlacesImportModal({
   );
 }
 
-/* =========================================================
-   GOOGLE PLACE PREVIEW CARD
-
-   IMPORTANT:
-   No JSON.stringify here.
-   It displays the backend data as a UI.
-========================================================= */
 function GooglePlacePreviewCard({
   preview,
 }: {
@@ -930,12 +903,7 @@ function GooglePlacePreviewCard({
 
   return (
     <div className="mt-4 overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
-      {/* =============================================
-          STORE TITLE
-      ============================================== */}
       <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-green-50 p-5">
-        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-100/60" />
-
         <div className="relative flex items-start gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#137A3D] text-white shadow-sm">
             <Store size={25} />
@@ -961,7 +929,6 @@ function GooglePlacePreviewCard({
           </div>
         </div>
 
-        {/* STATUS BADGES */}
         <div className="relative mt-4 flex flex-wrap gap-2">
           {businessStatus && (
             <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-black text-blue-700">
@@ -970,43 +937,22 @@ function GooglePlacePreviewCard({
           )}
 
           {operatingStatus && (
-            <span
-              className={`rounded-full px-3 py-1.5 text-[11px] font-black ${
-                operatingStatus
-                  .toUpperCase()
-                  .includes("OPEN")
-                  ? "bg-emerald-100 text-emerald-700"
-                  : operatingStatus
-                        .toUpperCase()
-                        .includes(
-                          "CLOSED",
-                        )
-                    ? "bg-red-50 text-red-600"
-                    : "bg-gray-100 text-gray-600"
-              }`}
-            >
+            <span className="rounded-full bg-emerald-100 px-3 py-1.5 text-[11px] font-black text-emerald-700">
               {operatingStatus}
             </span>
           )}
         </div>
       </div>
 
-      {/* =============================================
-          DETAILS
-      ============================================== */}
       <div className="space-y-3 p-4">
-        {/* PHONE */}
         {phone && (
           <PreviewInfoRow
-            icon={
-              <Phone size={16} />
-            }
+            icon={<Phone size={16} />}
             label="Phone"
             value={phone}
           />
         )}
 
-        {/* WEBSITE */}
         {website && (
           <div className="rounded-2xl bg-gray-50 px-4 py-3">
             <div className="flex items-start gap-3">
@@ -1026,7 +972,6 @@ function GooglePlacePreviewCard({
                   className="mt-1 flex items-center gap-1.5 break-all text-sm font-bold text-[#137A3D] hover:underline"
                 >
                   {website}
-
                   <ExternalLink
                     size={13}
                     className="shrink-0"
@@ -1037,7 +982,6 @@ function GooglePlacePreviewCard({
           </div>
         )}
 
-        {/* LOCATION */}
         {hasCoordinates && (
           <div className="rounded-2xl bg-gray-50 px-4 py-3">
             <div className="flex items-start gap-3">
@@ -1053,8 +997,7 @@ function GooglePlacePreviewCard({
                 </p>
 
                 <p className="mt-1 text-sm font-bold text-gray-700">
-                  {latitude},{" "}
-                  {longitude}
+                  {latitude}, {longitude}
                 </p>
 
                 {mapsUrl && (
@@ -1064,13 +1007,8 @@ function GooglePlacePreviewCard({
                     rel="noreferrer"
                     className="mt-2 inline-flex items-center gap-1.5 text-xs font-black text-[#137A3D] hover:underline"
                   >
-                    <MapPin
-                      size={13}
-                    />
-
-                    View on Google
-                    Maps
-
+                    <MapPin size={13} />
+                    View on Google Maps
                     <ExternalLink
                       size={12}
                     />
@@ -1082,27 +1020,20 @@ function GooglePlacePreviewCard({
         )}
       </div>
 
-      {/* =============================================
-          SELECTED STATUS
-      ============================================== */}
       <div className="flex items-center gap-2 border-t border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700">
         <CheckCircle2 size={18} />
-
         Location selected
       </div>
     </div>
   );
 }
 
-/* =========================================================
-   PREVIEW INFO ROW
-========================================================= */
 function PreviewInfoRow({
   icon,
   label,
   value,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
 }) {
@@ -1124,35 +1055,5 @@ function PreviewInfoRow({
         </div>
       </div>
     </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (
-    value: string,
-  ) => void;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-2 block text-sm font-bold text-gray-800">
-        {label}
-      </span>
-
-      <input
-        value={value}
-        onChange={(event) =>
-          onChange(
-            event.target.value,
-          )
-        }
-        className="h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50"
-      />
-    </label>
   );
 }
