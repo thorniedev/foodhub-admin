@@ -11,10 +11,16 @@ import { useRouter } from "next/navigation";
 
 import {
   Check,
+  CheckCircle2,
+  ExternalLink,
+  Globe2,
   Loader2,
   MapPin,
   MapPinned,
+  Navigation,
+  Phone,
   Search,
+  Store,
   X,
 } from "lucide-react";
 
@@ -65,6 +71,50 @@ function getPlaceAddress(
   return "";
 }
 
+function getPreviewString(
+  preview: GooglePlacePreview,
+  ...keys: string[]
+): string | null {
+  for (const key of keys) {
+    const value = preview[key];
+
+    if (
+      typeof value === "string" &&
+      value.trim()
+    ) {
+      return value.trim();
+    }
+  }
+
+  return null;
+}
+
+function getPreviewNumber(
+  preview: GooglePlacePreview,
+  ...keys: string[]
+): number | null {
+  for (const key of keys) {
+    const value = preview[key];
+
+    if (
+      typeof value === "number" &&
+      Number.isFinite(value)
+    ) {
+      return value;
+    }
+
+    if (
+      typeof value === "string" &&
+      value.trim() &&
+      Number.isFinite(Number(value))
+    ) {
+      return Number(value);
+    }
+  }
+
+  return null;
+}
+
 export default function GooglePlacesImportModal({
   open,
   onClose,
@@ -85,6 +135,9 @@ export default function GooglePlacesImportModal({
   const [activeIndex, setActiveIndex] =
     useState(-1);
 
+  const [hasSearched, setHasSearched] =
+    useState(false);
+
   const [
     selectedPlaceId,
     setSelectedPlaceId,
@@ -98,15 +151,15 @@ export default function GooglePlacesImportModal({
   const [timezone, setTimezone] =
     useState("Asia/Phnom_Penh");
 
-  const [logo, setLogo] = useState("");
-  const [cover, setCover] = useState("");
+  const [logo, setLogo] =
+    useState("");
+
+  const [cover, setCover] =
+    useState("");
 
   const [error, setError] = useState<
     string | null
   >(null);
-
-  const [hasSearched, setHasSearched] =
-    useState(false);
 
   const searchRequestId = useRef(0);
 
@@ -125,9 +178,7 @@ export default function GooglePlacesImportModal({
     { isLoading: creating },
   ] = useCreateStoreFromGoogleMutation();
 
-  // ===============================
-  // AUTO SEARCH / AUTOCOMPLETE
-  // ===============================
+
   useEffect(() => {
     if (!open) {
       return;
@@ -144,7 +195,6 @@ export default function GooglePlacesImportModal({
       return;
     }
 
-    // User already selected a suggestion.
     if (selectedPlaceId) {
       return;
     }
@@ -162,7 +212,6 @@ export default function GooglePlacesImportModal({
               cleanQuery,
             ).unwrap();
 
-          // Ignore older search requests.
           if (
             currentRequestId !==
             searchRequestId.current
@@ -205,9 +254,9 @@ export default function GooglePlacesImportModal({
     searchPlaces,
   ]);
 
-  // ===============================
-  // RESET WHEN MODAL CLOSES
-  // ===============================
+  /* =========================================================
+     RESET MODAL WHEN CLOSED
+  ========================================================= */
   useEffect(() => {
     if (open) {
       return;
@@ -216,10 +265,16 @@ export default function GooglePlacesImportModal({
     setQuery("");
     setResults([]);
     setShowSuggestions(false);
-    setSelectedPlaceId(null);
-    setPreview(null);
     setActiveIndex(-1);
     setHasSearched(false);
+
+    setSelectedPlaceId(null);
+    setPreview(null);
+
+    setTimezone("Asia/Phnom_Penh");
+    setLogo("");
+    setCover("");
+
     setError(null);
   }, [open]);
 
@@ -227,9 +282,9 @@ export default function GooglePlacesImportModal({
     return null;
   }
 
-  // ===============================
-  // MANUAL SEARCH BUTTON
-  // ===============================
+  /* =========================================================
+     MANUAL SEARCH BUTTON
+  ========================================================= */
   const runSearch = async () => {
     const cleanQuery = query.trim();
 
@@ -278,9 +333,6 @@ export default function GooglePlacesImportModal({
     }
   };
 
-  // ===============================
-  // SELECT SUGGESTION
-  // ===============================
   const selectPlace = async (
     result: GooglePlaceResult,
     index: number,
@@ -290,7 +342,7 @@ export default function GooglePlacesImportModal({
 
     if (!id) {
       setError(
-        "Result does not contain a valid placeId.",
+        "Google result does not contain a valid placeId.",
       );
 
       return;
@@ -302,11 +354,17 @@ export default function GooglePlacesImportModal({
         index,
       );
 
+    /*
+     * Put selected business name
+     * into search input.
+     */
     setQuery(title);
+
     setSelectedPlaceId(id);
 
     setShowSuggestions(false);
     setActiveIndex(-1);
+
     setError(null);
 
     try {
@@ -325,9 +383,6 @@ export default function GooglePlacesImportModal({
     }
   };
 
-  // ===============================
-  // KEYBOARD CONTROL
-  // ===============================
   const handleKeyDown = (
     event: KeyboardEvent<HTMLInputElement>,
   ) => {
@@ -361,7 +416,10 @@ export default function GooglePlacesImportModal({
       event.preventDefault();
 
       setActiveIndex((current) =>
-        Math.max(current - 1, 0),
+        Math.max(
+          current - 1,
+          0,
+        ),
       );
 
       return;
@@ -391,9 +449,6 @@ export default function GooglePlacesImportModal({
     }
   };
 
-  // ===============================
-  // CREATE STORE
-  // ===============================
   const submit = async () => {
     if (!selectedPlaceId) {
       return;
@@ -440,10 +495,9 @@ export default function GooglePlacesImportModal({
   return (
     <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]">
       <div className="max-h-[94vh] w-full max-w-5xl overflow-y-auto rounded-[30px] bg-white shadow-2xl">
-        {/* HEADER */}
         <div className="sticky top-0 z-50 flex items-start justify-between border-b border-gray-100 bg-white px-6 py-5">
           <div>
-            <h2 className="flex items-center gap-3 text-3xl font-black text-gray-950">
+            <h2 className="flex items-center gap-3 text-3xl font-black text-gray-950 md:text-4xl">
               <MapPinned
                 size={30}
                 className="text-[#137A3D]"
@@ -461,18 +515,16 @@ export default function GooglePlacesImportModal({
             type="button"
             disabled={creating}
             onClick={onClose}
-            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-gray-600 transition hover:bg-gray-200"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-600 transition hover:bg-gray-200"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* BODY */}
         <div className="grid gap-6 p-6 lg:grid-cols-2">
-          {/* LEFT */}
+         
           <section>
             <div className="relative z-40">
-              {/* SEARCH INPUT */}
               <div className="flex">
                 <div className="relative flex-1">
                   <Search
@@ -489,13 +541,12 @@ export default function GooglePlacesImportModal({
                         event.target.value,
                       );
 
-                      // If user types again,
-                      // clear old selection.
                       setSelectedPlaceId(
                         null,
                       );
 
                       setPreview(null);
+
                       setShowSuggestions(
                         true,
                       );
@@ -530,8 +581,7 @@ export default function GooglePlacesImportModal({
                   type="button"
                   disabled={
                     searching ||
-                    query.trim().length <
-                      2
+                    query.trim().length < 2
                   }
                   onClick={() =>
                     void runSearch()
@@ -542,7 +592,6 @@ export default function GooglePlacesImportModal({
                 </button>
               </div>
 
-              {/* AUTOCOMPLETE */}
               {showSuggestions &&
                 query.trim().length >=
                   2 && (
@@ -554,7 +603,8 @@ export default function GooglePlacesImportModal({
                           className="animate-spin text-[#137A3D]"
                         />
 
-                        Searching...
+                        Searching Google
+                        Places...
                       </div>
                     )}
 
@@ -597,6 +647,10 @@ export default function GooglePlacesImportModal({
                                   onMouseDown={(
                                     event,
                                   ) => {
+                                    /*
+                                     * Prevent blur
+                                     * before click.
+                                     */
                                     event.preventDefault();
 
                                     void selectPlace(
@@ -612,11 +666,11 @@ export default function GooglePlacesImportModal({
                                   className={`flex w-full items-start gap-3 px-4 py-3 text-left transition ${
                                     active
                                       ? "bg-emerald-50"
-                                      : "hover:bg-gray-50"
+                                      : "bg-white hover:bg-gray-50"
                                   }`}
                                 >
                                   <div
-                                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
                                       active
                                         ? "bg-[#137A3D] text-white"
                                         : "bg-emerald-50 text-[#137A3D]"
@@ -624,7 +678,7 @@ export default function GooglePlacesImportModal({
                                   >
                                     <MapPin
                                       size={
-                                        18
+                                        19
                                       }
                                     />
                                   </div>
@@ -651,7 +705,7 @@ export default function GooglePlacesImportModal({
                                       size={
                                         18
                                       }
-                                      className="mt-2 text-[#137A3D]"
+                                      className="mt-2 shrink-0 text-[#137A3D]"
                                     />
                                   )}
                                 </button>
@@ -672,55 +726,63 @@ export default function GooglePlacesImportModal({
                           />
 
                           <p className="mt-2 font-bold text-gray-600">
-                            No places found
+                            No places
+                            found
                           </p>
 
                           <p className="mt-1 text-xs text-gray-400">
                             Try another
-                            restaurant or
-                            store name.
+                            restaurant,
+                            cafe or store
+                            name.
                           </p>
                         </div>
                       )}
                   </div>
                 )}
-
-              {/* <p className="mt-2 text-xs text-gray-400">
-                Type at least 2 characters.
-                Suggestions appear
-                automatically.
-              </p> */}
             </div>
           </section>
 
-          {/* RIGHT */}
           <section className="space-y-4">
-            {/* PREVIEW */}
+
             <div className="rounded-[24px] bg-gray-50 p-5">
               <h3 className="text-2xl font-black text-gray-900">
                 Preview
               </h3>
 
               {previewing ? (
-                <div className="flex min-h-[150px] items-center justify-center">
+                <div className="flex min-h-[260px] flex-col items-center justify-center">
                   <Loader2
-                    size={28}
+                    size={30}
                     className="animate-spin text-[#137A3D]"
                   />
+
+                  <p className="mt-3 text-sm text-gray-400">
+                    Loading place
+                    information...
+                  </p>
                 </div>
               ) : preview ? (
-                <pre className="mt-4 max-h-[260px] overflow-auto whitespace-pre-wrap break-words rounded-2xl bg-slate-950 p-4 text-xs leading-5 text-white">
-                  {JSON.stringify(
-                    preview,
-                    null,
-                    2,
-                  )}
-                </pre>
+                <GooglePlacePreviewCard
+                  preview={preview}
+                />
               ) : (
-                <p className="mt-4 text-sm text-gray-400">
-                  Select a suggestion to
-                  preview the place.
-                </p>
+                <div className="flex min-h-[260px] flex-col items-center justify-center text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-gray-300">
+                    <MapPin size={28} />
+                  </div>
+
+                  <p className="mt-4 font-bold text-gray-600">
+                    Select a location
+                  </p>
+
+                  <p className="mt-1 max-w-[280px] text-xs leading-5 text-gray-400">
+                    Search for a
+                    restaurant or store,
+                    then select one from
+                    the suggestions.
+                  </p>
+                </div>
               )}
             </div>
 
@@ -730,24 +792,32 @@ export default function GooglePlacesImportModal({
               onChange={setTimezone}
             />
 
+ 
             <Field
               label="Logo media UUID"
               value={logo}
               onChange={setLogo}
             />
 
+     
             <Field
               label="Cover media UUID"
               value={cover}
               onChange={setCover}
             />
 
+            {/* =============================================
+                ERROR
+            ============================================== */}
             {error && (
               <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm leading-6 text-red-600">
                 {error}
               </div>
             )}
 
+            {/* =============================================
+                CREATE
+            ============================================== */}
             <button
               type="button"
               disabled={
@@ -757,13 +827,15 @@ export default function GooglePlacesImportModal({
               onClick={() =>
                 void submit()
               }
-              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#137A3D] font-black text-white transition hover:bg-[#0f6833] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#137A3D] font-black text-white transition hover:bg-[#0f6833] disabled:cursor-not-allowed disabled:bg-emerald-700/40"
             >
-              {creating && (
+              {creating ? (
                 <Loader2
                   size={18}
                   className="animate-spin"
                 />
+              ) : (
+                <Store size={18} />
               )}
 
               {creating
@@ -777,6 +849,284 @@ export default function GooglePlacesImportModal({
   );
 }
 
+/* =========================================================
+   GOOGLE PLACE PREVIEW CARD
+
+   IMPORTANT:
+   No JSON.stringify here.
+   It displays the backend data as a UI.
+========================================================= */
+function GooglePlacePreviewCard({
+  preview,
+}: {
+  preview: GooglePlacePreview;
+}) {
+  const displayName =
+    getPreviewString(
+      preview,
+      "displayName",
+      "name",
+    ) ?? "Google Place";
+
+  const address =
+    getPreviewString(
+      preview,
+      "formattedAddress",
+      "shortFormattedAddress",
+      "address",
+    );
+
+  const phone =
+    getPreviewString(
+      preview,
+      "phoneNumber",
+      "internationalPhoneNumber",
+      "nationalPhoneNumber",
+    );
+
+  const website =
+    getPreviewString(
+      preview,
+      "websiteUrl",
+      "websiteUri",
+      "website",
+    );
+
+  const businessStatus =
+    getPreviewString(
+      preview,
+      "businessStatus",
+    );
+
+  const operatingStatus =
+    getPreviewString(
+      preview,
+      "mappedOperatingStatus",
+      "operatingStatus",
+    );
+
+  const latitude =
+    getPreviewNumber(
+      preview,
+      "latitude",
+      "lat",
+    );
+
+  const longitude =
+    getPreviewNumber(
+      preview,
+      "longitude",
+      "lng",
+    );
+
+  const hasCoordinates =
+    latitude !== null &&
+    longitude !== null;
+
+  const mapsUrl =
+    hasCoordinates
+      ? `https://www.google.com/maps?q=${latitude},${longitude}`
+      : null;
+
+  return (
+    <div className="mt-4 overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
+      {/* =============================================
+          STORE TITLE
+      ============================================== */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-green-50 p-5">
+        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-100/60" />
+
+        <div className="relative flex items-start gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#137A3D] text-white shadow-sm">
+            <Store size={25} />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <h4 className="text-lg font-black leading-6 text-gray-900">
+              {displayName}
+            </h4>
+
+            {address && (
+              <div className="mt-2 flex items-start gap-2 text-sm leading-5 text-gray-500">
+                <MapPin
+                  size={15}
+                  className="mt-0.5 shrink-0 text-[#137A3D]"
+                />
+
+                <span>
+                  {address}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* STATUS BADGES */}
+        <div className="relative mt-4 flex flex-wrap gap-2">
+          {businessStatus && (
+            <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-black text-blue-700">
+              {businessStatus}
+            </span>
+          )}
+
+          {operatingStatus && (
+            <span
+              className={`rounded-full px-3 py-1.5 text-[11px] font-black ${
+                operatingStatus
+                  .toUpperCase()
+                  .includes("OPEN")
+                  ? "bg-emerald-100 text-emerald-700"
+                  : operatingStatus
+                        .toUpperCase()
+                        .includes(
+                          "CLOSED",
+                        )
+                    ? "bg-red-50 text-red-600"
+                    : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {operatingStatus}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* =============================================
+          DETAILS
+      ============================================== */}
+      <div className="space-y-3 p-4">
+        {/* PHONE */}
+        {phone && (
+          <PreviewInfoRow
+            icon={
+              <Phone size={16} />
+            }
+            label="Phone"
+            value={phone}
+          />
+        )}
+
+        {/* WEBSITE */}
+        {website && (
+          <div className="rounded-2xl bg-gray-50 px-4 py-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-[#137A3D]">
+                <Globe2 size={16} />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-black uppercase tracking-wide text-gray-400">
+                  Website
+                </p>
+
+                <a
+                  href={website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 flex items-center gap-1.5 break-all text-sm font-bold text-[#137A3D] hover:underline"
+                >
+                  {website}
+
+                  <ExternalLink
+                    size={13}
+                    className="shrink-0"
+                  />
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* LOCATION */}
+        {hasCoordinates && (
+          <div className="rounded-2xl bg-gray-50 px-4 py-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-[#137A3D]">
+                <Navigation
+                  size={16}
+                />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-black uppercase tracking-wide text-gray-400">
+                  Location
+                </p>
+
+                <p className="mt-1 text-sm font-bold text-gray-700">
+                  {latitude},{" "}
+                  {longitude}
+                </p>
+
+                {mapsUrl && (
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs font-black text-[#137A3D] hover:underline"
+                  >
+                    <MapPin
+                      size={13}
+                    />
+
+                    View on Google
+                    Maps
+
+                    <ExternalLink
+                      size={12}
+                    />
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* =============================================
+          SELECTED STATUS
+      ============================================== */}
+      <div className="flex items-center gap-2 border-t border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700">
+        <CheckCircle2 size={18} />
+
+        Location selected
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   PREVIEW INFO ROW
+========================================================= */
+function PreviewInfoRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl bg-gray-50 px-4 py-3">
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-[#137A3D]">
+          {icon}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-black uppercase tracking-wide text-gray-400">
+            {label}
+          </p>
+
+          <p className="mt-1 break-words text-sm font-bold text-gray-700">
+            {value}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Field({
   label,
   value,
@@ -784,7 +1134,9 @@ function Field({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string,
+  ) => void;
 }) {
   return (
     <label className="block">
@@ -795,7 +1147,9 @@ function Field({
       <input
         value={value}
         onChange={(event) =>
-          onChange(event.target.value)
+          onChange(
+            event.target.value,
+          )
         }
         className="h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50"
       />
