@@ -41,7 +41,7 @@ export default function ShopLocationSection({
               required={required}
               value={values[key]}
               onChange={(e) => onChange(key, e.target.value)}
-              className="h-12 w-full rounded-2xl border px-4 text-sm"
+              className="h-12 w-full rounded-2xl border px-4 text-base"
             />
           </label>
         ))}
