@@ -54,9 +54,9 @@ export default function AllergensHeader({
         <button
           type="button"
           onClick={onAdd}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-base font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
         >
-          <Plus size={18} />
+          <Plus size={20} />
           បន្ថែមអាឡែស៊ី
         </button>
       </div>
