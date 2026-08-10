@@ -26,12 +26,12 @@ export default function DeleteMedicalConditionConfirmModal({
 
         <div className="mt-4 text-center">
           <h3 className="text-xl font-bold text-gray-900">បិទស្ថានភាពសុខភាពនេះ?</h3>
-          <p className="mt-2 text-sm leading-6 text-gray-500">
+          {/* <p className="mt-2 text-sm leading-6 text-gray-500">
             អ្នកកំពុងបិទ 
             <span className="font-semibold text-gray-800">{item.name}</span>។
             នេះជា Soft Delete ដូច្នេះទិន្នន័យមិនត្រូវបានលុបចេញពី Database ទេ
             ហើយអាចស្ដារវិញបាន។
-          </p>
+          </p> */}
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3">
