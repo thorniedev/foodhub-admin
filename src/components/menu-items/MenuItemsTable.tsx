@@ -114,7 +114,7 @@ export default function MenuItemsTable({
 
           {data.length === 0 && (
             <tr>
-              <td colSpan={9} className="py-10 text-center text-gray-400">
+              <td colSpan={9} className="py-10 text-center text-[#F97316]">
                 មិនមានទិន្នន័យ
               </td>
             </tr>

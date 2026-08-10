@@ -228,7 +228,7 @@ export default function AllergensTable({
                   className="mx-auto text-gray-300"
                 />
 
-                <p className="mt-3 text-sm font-semibold text-gray-500">
+                <p className="mt-3 text-sm font-semibold text-[#F97316]">
                   មិនមានទិន្នន័យអាឡែស៊ី
                 </p>
               </td>
