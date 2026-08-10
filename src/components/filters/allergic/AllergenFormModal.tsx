@@ -21,17 +21,6 @@ type Props = {
   onSubmit: (values: AllergenFormValues) => Promise<void>;
 };
 
-/* =========================================================
-   GENERATE INTERNAL NAME
-
-   Admin does NOT see/use `name`.
-   Backend still requires it, so we create it automatically.
-
-   PEANUT       -> Peanut
-   TREE_NUT     -> Tree Nut
-   MILK         -> Milk
-========================================================= */
-
 function createInternalName(code: string): string {
   const cleanCode = code.trim().replace(/[_-]+/g, " ");
 
@@ -228,9 +217,6 @@ export default function AllergenFormModal({
             />
           </label>
 
-          {/* =============================================
-              VALIDATION ERROR
-          ============================================== */}
 
           {validationError && (
             <div className="flex gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
