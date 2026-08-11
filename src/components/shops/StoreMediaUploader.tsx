@@ -258,11 +258,11 @@ export default function StoreMediaUploader({
       <div className="border-b border-gray-100 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="font-black text-gray-900">
+            <p className="text-xl font-semibold text-[#F97316]">
               {label}
             </p>
 
-            <p className="mt-0.5 text-xs text-gray-400">
+            <p className="mt-1 text-sm text-gray-400">
               PNG, JPG, GIF or WebP · max 10 MB
             </p>
           </div>
@@ -370,7 +370,7 @@ export default function StoreMediaUploader({
               onClick={() =>
                 inputRef.current?.click()
               }
-              className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 text-sm font-black text-[#137A3D] transition hover:bg-emerald-100 disabled:opacity-50"
+              className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 text-base font-semibold text-[#137A3D] transition hover:bg-emerald-100 disabled:opacity-50"
             >
               <Upload size={17} />
 
@@ -398,7 +398,7 @@ export default function StoreMediaUploader({
                 }
               }}
               placeholder="https://example.com/image.jpg"
-              className="h-11 min-w-0 flex-1 rounded-l-xl border border-r-0 border-gray-200 px-3 text-sm outline-none focus:border-emerald-400"
+              className="h-11 min-w-0 flex-1 rounded-l-xl border border-r-0 border-gray-200 px-3 text-base outline-none focus:border-[#136C34]"
             />
 
             <button
@@ -410,7 +410,7 @@ export default function StoreMediaUploader({
               onClick={() =>
                 void handleImportUrl()
               }
-              className="rounded-r-xl bg-[#137A3D] px-4 text-sm font-black text-white disabled:opacity-50"
+              className="rounded-r-xl bg-[#136C34] px-4 text-base text-white disabled:opacity-50"
             >
               Import
             </button>

@@ -482,7 +482,7 @@ export default function GooglePlacesImportModal({
       <div className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-[30px] bg-white shadow-2xl">
         <div className="sticky top-0 z-50 flex items-start justify-between border-b border-gray-100 bg-white px-6 py-5">
           <div>
-            <h2 className="flex items-center gap-3 text-3xl font-black text-gray-950 md:text-4xl">
+            <h2 className="flex items-center gap-3 text-4xl font-bold text-[#136C34] md:text-5xl">
               <MapPinned
                 size={30}
                 className="text-[#137A3D]"
@@ -547,7 +547,7 @@ export default function GooglePlacesImportModal({
                     onKeyDown={
                       handleKeyDown
                     }
-                    className="h-12 w-full rounded-l-2xl border border-r-0 border-gray-200 bg-white pl-12 pr-11 text-sm font-medium text-gray-800 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50"
+                    className="h-12 w-full rounded-l-2xl border border-r-0 border-gray-200 bg-white pl-12 pr-11 text-lg text-gray-800 outline-none transition focus:border-[#136C34] focus:ring-2 focus:ring-[#136C34]/10"
                   />
 
                   {searching && (
@@ -567,7 +567,7 @@ export default function GooglePlacesImportModal({
                   onClick={() =>
                     void runSearch()
                   }
-                  className="min-w-[100px] rounded-r-2xl bg-[#137A3D] px-5 text-sm font-black text-white transition hover:bg-[#0f6833] disabled:opacity-50"
+                  className="min-w-[110px] rounded-r-2xl bg-[#136C34] px-5 text-lg text-white transition hover:bg-[#0f592b] disabled:opacity-50"
                 >
                   Search
                 </button>
@@ -710,7 +710,7 @@ export default function GooglePlacesImportModal({
 
           <section className="space-y-4">
             <div className="rounded-[24px] bg-gray-50 p-5">
-              <h3 className="text-2xl font-black text-gray-900">
+              <h3 className="text-3xl font-bold text-gray-900">
                 Preview
               </h3>
 
@@ -751,7 +751,7 @@ export default function GooglePlacesImportModal({
             </div>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-bold text-gray-800">
+              <span className="mb-2 block text-xl font-semibold text-[#F97316]">
                 Timezone override
               </span>
 
@@ -762,7 +762,7 @@ export default function GooglePlacesImportModal({
                     event.target.value,
                   )
                 }
-                className="h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50"
+                className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
               />
             </label>
 

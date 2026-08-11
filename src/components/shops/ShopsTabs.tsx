@@ -1,6 +1,10 @@
 import type { StoreReviewFilter } from "@/src/types/shop";
 
-const tabs: Array<{ value: StoreReviewFilter; label: string; key: "all" | "pending" | "approved" | "rejected" }> = [
+const tabs: Array<{
+  value: StoreReviewFilter;
+  label: string;
+  key: "all" | "pending" | "approved" | "rejected";
+}> = [
   { value: "ALL", label: "ទាំងអស់", key: "all" },
   { value: "PENDING", label: "Pending", key: "pending" },
   { value: "APPROVED", label: "Approved", key: "approved" },
@@ -17,22 +21,27 @@ export default function ShopsTabs({
   onChange: (value: StoreReviewFilter) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex items-center gap-2">
       {tabs.map((tab) => {
         const active = tab.value === value;
+
         return (
           <button
             key={tab.value}
             type="button"
             onClick={() => onChange(tab.value)}
-            className={`inline-flex min-h-10 items-center gap-2 rounded-full px-4 text-sm font-black transition ${
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-lg transition ${
               active
-                ? "bg-[#137A3D] text-white shadow-sm"
-                : "border border-gray-100 bg-white text-gray-600 hover:bg-emerald-50"
+                ? "bg-[#136C34] text-white"
+                : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
             }`}
           >
             {tab.label}
-            <span className={`rounded-full px-2 py-0.5 text-xs ${active ? "bg-white/20" : "bg-gray-100 text-gray-500"}`}>
+            <span
+              className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-sm ${
+                active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+              }`}
+            >
               {counts[tab.key]}
             </span>
           </button>
