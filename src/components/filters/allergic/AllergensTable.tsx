@@ -225,10 +225,10 @@ export default function AllergensTable({
               >
                 <ShieldAlert
                   size={36}
-                  className="mx-auto text-gray-300"
+                  className="mx-auto text-[#F97316]"
                 />
 
-                <p className="mt-3 text-sm font-semibold text-[#F97316]">
+                <p className="mt-3 text-xl font-semibold text-[#F97316]">
                   មិនមានទិន្នន័យអាឡែស៊ី
                 </p>
               </td>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   useParams,
   useRouter,
@@ -85,69 +85,20 @@ export default function ShopDetailManager({
   }>();
 
 
-  const resolvedStoreUuid =
-    useMemo(() => {
-      const fromProp =
-        typeof storeUuid === "string"
-          ? storeUuid.trim()
-          : "";
+  const fromProp = typeof storeUuid === "string" ? storeUuid.trim() : "";
+  const fromUuidParam =
+    typeof params?.uuid === "string" ? params.uuid.trim() : "";
+  const fromIdParam = typeof params?.id === "string" ? params.id.trim() : "";
 
-      const fromUuidParam =
-        typeof params?.uuid === "string"
-          ? params.uuid.trim()
-          : "";
+  const resolvedStoreUuid = isValidUuid(fromProp)
+    ? fromProp
+    : isValidUuid(fromUuidParam)
+      ? fromUuidParam
+      : isValidUuid(fromIdParam)
+        ? fromIdParam
+        : "";
 
-      const fromIdParam =
-        typeof params?.id === "string"
-          ? params.id.trim()
-          : "";
-
-      if (isValidUuid(fromProp)) {
-        return fromProp;
-      }
-
-      if (
-        isValidUuid(fromUuidParam)
-      ) {
-        return fromUuidParam;
-      }
-
-      if (
-        isValidUuid(fromIdParam)
-      ) {
-        return fromIdParam;
-      }
-
-      return "";
-    }, [
-      storeUuid,
-      params?.uuid,
-      params?.id,
-    ]);
-
-  const hasValidStoreUuid =
-    Boolean(resolvedStoreUuid);
-
-  /* =======================================================
-     DEBUG
-
-     You can remove this later.
-  ======================================================= */
-  console.log(
-    "[SHOP DETAIL UUID]",
-    {
-      storeUuidProp:
-        storeUuid,
-
-      routeUuid:
-        params?.uuid,
-
-      routeId:
-        params?.id,
-
-      resolvedStoreUuid,
-    },
-  );
+  const hasValidStoreUuid = Boolean(resolvedStoreUuid);
 
   /* =======================================================
      GET STORE DETAIL
@@ -497,7 +448,7 @@ export default function ShopDetailManager({
       ================================================== */}
       {notice && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${
+          className={`rounded-2xl border px-4 py-3 text-base ${
             notice.type ===
             "success"
               ? "border-emerald-100 bg-emerald-50 text-emerald-700"
@@ -512,7 +463,7 @@ export default function ShopDetailManager({
           HOURS ERROR
       ================================================== */}
       {hoursError && (
-        <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+        <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-base text-amber-700">
           Store loaded
           successfully, but opening
           hours could not be loaded.

@@ -213,33 +213,24 @@ export default function Sidebar() {
         </div> */}
 
         <div className="border-t border-gray-100 p-3">
-  <form
-    action="/api/auth/logout"
-    method="post"
-    className="w-full"
-  >
-    <button
-      type="submit"
-      className="group flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-gray-600 transition hover:bg-red-50 hover:text-red-600"
-    >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-500 transition group-hover:bg-red-100 group-hover:text-red-600">
-        <LogOut size={19} />
-      </div>
+          <form action="/api/auth/logout" method="post" className="w-full">
+            <button
+              type="submit"
+              className="group flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-gray-600 transition hover:bg-red-50 hover:text-red-600"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-500 transition group-hover:bg-red-100 group-hover:text-red-600">
+                <LogOut size={19} />
+              </div>
 
-      <div className="min-w-0">
-        <p className="font-semibold">
-          Log out
-        </p>
-
-        <p className="mt-0.5 text-xs font-normal text-gray-400 group-hover:text-red-400">
-          ចាកចេញពីគណនី
-        </p>
-      </div>
-    </button>
-  </form>
-</div>
+              <div className="min-w-0">
+                <p className="mt-0.5 text-lg font-normal text-gray-400 group-hover:text-red-400">
+                  ចាកចេញ
+                </p>
+              </div>
+            </button>
+          </form>
+        </div>
       </aside>
-
     </>
   );
 }

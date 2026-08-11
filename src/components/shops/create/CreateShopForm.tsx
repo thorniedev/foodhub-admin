@@ -1,9 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, MapPinned, Save, Store } from "lucide-react";
+
 import { useCreateShopMutation } from "@/src/app/store/shop/shopApi";
 import type {
   CreateStorePayload,
@@ -11,6 +12,7 @@ import type {
   StoreSocialLink,
 } from "@/src/types/shop";
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
+
 import GooglePlacesImportModal from "../GooglePlacesImportModal";
 import ShopBasicInfoSection from "./ShopBasicInfoSection";
 import ShopHoursSection from "./ShopHoursSection";
@@ -39,6 +41,7 @@ type FormState = {
   hygieneRating: string;
   operatingStatus: StoreOperatingStatus;
 };
+
 const initial: FormState = {
   storeName: "",
   description: "",
@@ -63,154 +66,181 @@ const initial: FormState = {
 
 export default function CreateShopForm() {
   const router = useRouter();
-  const [v, setV] = useState(initial);
-  const [social, setSocial] = useState<StoreSocialLink[]>([]);
-  const [googleOpen, setGoogleOpen] = useState(false),
-    [error, setError] = useState<string | null>(null);
-  const [create, { isLoading }] = useCreateShopMutation();
-  const set = (key: keyof FormState, value: string) =>
-    setV((c) => ({ ...c, [key]: value }));
+  const [values, setValues] = useState(initial);
+  const [socialLinks, setSocialLinks] = useState<StoreSocialLink[]>([]);
+  const [googleOpen, setGoogleOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [createShop, { isLoading }] = useCreateShopMutation();
 
-  const submit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const set = (key: keyof FormState, value: string) => {
+    setValues((current) => ({ ...current, [key]: value }));
+  };
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setError(null);
-    const latitude = Number(v.latitude),
-      longitude = Number(v.longitude);
-    if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90)
-      return setError("Latitude ត្រូវនៅ -90..90");
-    if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180)
-      return setError("Longitude ត្រូវនៅ -180..180");
+
+    const latitude = Number(values.latitude);
+    const longitude = Number(values.longitude);
+
+    if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
+      setError("Latitude ត្រូវនៅចន្លោះ -90 និង 90។");
+      return;
+    }
+
+    if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+      setError("Longitude ត្រូវនៅចន្លោះ -180 និង 180។");
+      return;
+    }
+
     const body: CreateStorePayload = {
-      storeName: v.storeName.trim(),
-      description: v.description.trim() || null,
-      addressLine: v.addressLine.trim(),
-      commune: v.commune.trim() || null,
-      district: v.district.trim() || null,
-      city: v.city.trim() || null,
-      province: v.province.trim() || null,
-      countryCode: v.countryCode.trim().toUpperCase(),
-      postalCode: v.postalCode.trim() || null,
-      timezone: v.timezone.trim(),
+      storeName: values.storeName.trim(),
+      description: values.description.trim() || null,
+      addressLine: values.addressLine.trim(),
+      commune: values.commune.trim() || null,
+      district: values.district.trim() || null,
+      city: values.city.trim() || null,
+      province: values.province.trim() || null,
+      countryCode: values.countryCode.trim().toUpperCase(),
+      postalCode: values.postalCode.trim() || null,
+      timezone: values.timezone.trim(),
       latitude,
       longitude,
-      phoneNumber: v.phoneNumber.trim() || null,
-      email: v.email.trim() || null,
-      logoMediaUuid: v.logoMediaUuid.trim() || null,
-      coverMediaUuid: v.coverMediaUuid.trim() || null,
-      priceLevel: v.priceLevel.trim() ? Number(v.priceLevel) : null,
-      hygieneRating: v.hygieneRating.trim() ? Number(v.hygieneRating) : null,
-      operatingStatus: v.operatingStatus,
-      socialLinks: social
-        .map((x, i) => ({
-          platform: x.platform.trim(),
-          profileUrl: x.profileUrl.trim(),
-          displayOrder: Number(x.displayOrder) || i + 1,
+      phoneNumber: values.phoneNumber.trim() || null,
+      email: values.email.trim() || null,
+      logoMediaUuid: values.logoMediaUuid.trim() || null,
+      coverMediaUuid: values.coverMediaUuid.trim() || null,
+      priceLevel: values.priceLevel.trim() ? Number(values.priceLevel) : null,
+      hygieneRating: values.hygieneRating.trim()
+        ? Number(values.hygieneRating)
+        : null,
+      operatingStatus: values.operatingStatus,
+      socialLinks: socialLinks
+        .map((link, index) => ({
+          platform: link.platform.trim(),
+          profileUrl: link.profileUrl.trim(),
+          displayOrder: Number(link.displayOrder) || index + 1,
         }))
-        .filter((x) => x.platform && x.profileUrl),
+        .filter((link) => link.platform && link.profileUrl),
     };
+
     try {
-      const s = await create(body).unwrap();
-      router.push(s?.uuid ? `/shops/${s.uuid}` : "/shops");
+      const store = await createShop(body).unwrap();
+      router.push(store?.uuid ? `/shops/${store.uuid}` : "/shops");
       router.refresh();
-    } catch (err) {
-      setError(getShopApiErrorMessage(err));
+    } catch (requestError) {
+      setError(getShopApiErrorMessage(requestError));
     }
   };
 
   return (
     <div className="space-y-5 p-4 sm:p-6 lg:p-7">
-      <section className="relative overflow-hidden rounded-[30px] bg-[#137A3D] px-6 py-7 text-white shadow-xl sm:px-8">
-        <div className="absolute -right-16 -top-24 h-72 w-72 rounded-full bg-white/10" />
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
+        <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute -bottom-24 right-20 h-64 w-64 rounded-full bg-white/5" />
+
+        <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <Link
               href="/shops"
-              className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-bold"
+              className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-lg transition hover:bg-white/15"
             >
-              <ArrowLeft size={17} />
-              Back to stores
+              <ArrowLeft size={18} />
+              ត្រឡប់ទៅហាង
             </Link>
-            <p className="mt-5 flex items-center gap-3 text-5xl font-black">
-              <Store size={30} />
-              បង្កើត Store ថ្មី
-            </p>
-            {/* <p className="mt-2 text-sm text-emerald-50">
-              Manual POST /admin/stores ឬ Google Places import។
-            </p> */}
+
+            <div className="mt-5 flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+                <Store size={25} />
+              </div>
+              <div>
+                <p className="text-5xl font-bold">បង្កើត Store ថ្មី</p>
+                <p className="mt-2 max-w-2xl text-xl leading-7 text-white/85">
+                  បំពេញព័ត៌មានហាងដោយដៃ ឬប្រើ Google Places ដើម្បីនាំចូលព័ត៌មានហាង។
+                </p>
+              </div>
+            </div>
           </div>
+
           <button
             type="button"
             onClick={() => setGoogleOpen(true)}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-5 font-black text-[#137A3D]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
           >
-            <MapPinned size={19} />
+            <MapPinned size={20} />
             Import from Google
           </button>
         </div>
       </section>
 
       <form onSubmit={submit} className="space-y-5">
-        <ShopBasicInfoSection values={v} onChange={set} />
-        <ShopLocationSection values={v} onChange={set} />
+        <ShopBasicInfoSection values={values} onChange={set} />
+        <ShopLocationSection values={values} onChange={set} />
+
         <section className="rounded-[24px] border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-          <h2 className="text-lg font-black">Contact</h2>
+          <p className="text-4xl font-bold text-gray-900">Contact</p>
+
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <label>
-              <span className="mb-2 block text-sm font-bold">Phone</span>
+              <span className="mb-2 block text-xl font-semibold text-[#F97316]">Phone</span>
               <input
-                value={v.phoneNumber}
-                onChange={(e) => set("phoneNumber", e.target.value)}
-                className="h-12 w-full rounded-2xl border px-4"
+                value={values.phoneNumber}
+                onChange={(event) => set("phoneNumber", event.target.value)}
+                className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
               />
             </label>
+
             <label>
-              <span className="mb-2 block text-sm font-bold">Email</span>
+              <span className="mb-2 block text-xl font-semibold text-[#F97316]">Email</span>
               <input
                 type="email"
-                value={v.email}
-                onChange={(e) => set("email", e.target.value)}
-                className="h-12 w-full rounded-2xl border px-4"
+                value={values.email}
+                onChange={(event) => set("email", event.target.value)}
+                className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
               />
             </label>
           </div>
         </section>
+
         <ShopImageUploadGrid
-          logoMediaUuid={v.logoMediaUuid}
-          coverMediaUuid={v.coverMediaUuid}
+          logoMediaUuid={values.logoMediaUuid}
+          coverMediaUuid={values.coverMediaUuid}
           onChange={set}
         />
-        <ShopSocialSection links={social} onChange={setSocial} />
+
+        <ShopSocialSection links={socialLinks} onChange={setSocialLinks} />
         <ShopHoursSection />
+
         {error && (
-          <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-base text-red-600">
             {error}
           </div>
         )}
-        <div className="sticky bottom-4 flex justify-end gap-3 rounded-2xl border bg-white/95 p-4 shadow-xl backdrop-blur">
+
+        <div className="sticky bottom-4 z-40 flex justify-end gap-3 rounded-2xl border border-gray-100 bg-white/95 p-4 shadow-xl backdrop-blur">
           <Link
             href="/shops"
-            className="rounded-xl border px-5 py-3 font-black"
+            className="rounded-xl border border-gray-200 px-5 py-2.5 text-lg text-gray-600 transition hover:bg-gray-50"
           >
-            Cancel
+            បោះបង់
           </Link>
+
           <button
             type="submit"
             disabled={isLoading}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#137A3D] px-5 py-3 font-black text-white disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#136C34] px-5 py-2.5 text-lg text-white transition hover:bg-[#0f592b] disabled:opacity-60"
           >
             {isLoading ? (
               <Loader2 size={18} className="animate-spin" />
             ) : (
               <Save size={18} />
-            )}{" "}
-            {isLoading ? "Creating..." : "Create Store"}
+            )}
+            {isLoading ? "កំពុងបង្កើត..." : "បង្កើត Store"}
           </button>
         </div>
       </form>
-      <GooglePlacesImportModal
-        open={googleOpen}
-        onClose={() => setGoogleOpen(false)}
-      />
+
+      <GooglePlacesImportModal open={googleOpen} onClose={() => setGoogleOpen(false)} />
     </div>
   );
 }

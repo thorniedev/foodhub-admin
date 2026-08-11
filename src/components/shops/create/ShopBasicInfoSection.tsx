@@ -1,4 +1,5 @@
 import type { StoreOperatingStatus } from "@/src/types/shop";
+import StoreSelect from "../StoreSelect";
 
 export default function ShopBasicInfoSection({
   values,
@@ -27,64 +28,79 @@ export default function ShopBasicInfoSection({
 }) {
   return (
     <section className="rounded-[24px] border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-      <p className="text-4xl font-black text-gray-900">ព័ត៌មានមូលដ្ឋាន</p>
+      <p className="text-4xl font-bold text-gray-900">ព័ត៌មានមូលដ្ឋាន</p>
+
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <Field
-          label="Store name"
+          label="ឈ្មោះហាង"
           value={values.storeName}
-          onChange={(v) => onChange("storeName", v)}
+          onChange={(value) => onChange("storeName", value)}
           required
         />
+
         <Field
           label="Country code"
           value={values.countryCode}
-          onChange={(v) => onChange("countryCode", v)}
+          onChange={(value) => onChange("countryCode", value)}
           required
         />
+
         <Field
           label="Timezone"
           value={values.timezone}
-          onChange={(v) => onChange("timezone", v)}
+          onChange={(value) => onChange("timezone", value)}
           required
         />
+
         <label>
-          <span className="mb-2 block text-sm font-bold">Operating status</span>
-          <select
+          <span className="mb-2 block text-xl font-semibold text-[#F97316]">
+            Operating status
+          </span>
+          <StoreSelect
             value={values.operatingStatus}
-            onChange={(e) => onChange("operatingStatus", e.target.value)}
-            className="h-12 w-full rounded-2xl border px-4"
-          >
-            {["OPEN", "CLOSED", "TEMPORARILY_CLOSED", "UNKNOWN"].map((x) => (
-              <option key={x}>{x}</option>
-            ))}
-          </select>
+            onChange={(value) => onChange("operatingStatus", value)}
+            options={[
+              { value: "OPEN", label: "OPEN" },
+              { value: "CLOSED", label: "CLOSED" },
+              { value: "TEMPORARILY_CLOSED", label: "TEMPORARILY_CLOSED" },
+              { value: "UNKNOWN", label: "UNKNOWN" },
+            ]}
+            ariaLabel="Operating status"
+          />
         </label>
+
         <Field
           label="Price level"
           type="number"
           value={values.priceLevel}
-          onChange={(v) => onChange("priceLevel", v)}
+          onChange={(value) => onChange("priceLevel", value)}
         />
+
         <Field
           label="Hygiene rating"
           type="number"
           step="0.1"
           value={values.hygieneRating}
-          onChange={(v) => onChange("hygieneRating", v)}
+          onChange={(value) => onChange("hygieneRating", value)}
         />
+
         <label className="sm:col-span-2">
-          <span className="mb-2 block text-sm font-bold">Description</span>
+          <span className="mb-2 block text-xl font-semibold text-[#F97316]">
+            ការពិពណ៌នា
+          </span>
           <textarea
             rows={4}
             value={values.description}
-            onChange={(e) => onChange("description", e.target.value)}
-            className="w-full rounded-2xl border px-4 py-3 text-sm"
+            onChange={(event) => onChange("description", event.target.value)}
+            placeholder="សរសេរការពិពណ៌នាអំពីហាង..."
+            className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
           />
         </label>
       </div>
     </section>
   );
 }
+
 function Field({
   label,
   value,
@@ -95,21 +111,21 @@ function Field({
 }: {
   label: string;
   value: string;
-  onChange: (v: string) => void;
+  onChange: (value: string) => void;
   type?: string;
   required?: boolean;
   step?: string;
 }) {
   return (
     <label>
-      <span className="mb-2 block text-sm font-bold">{label}</span>
+      <span className="mb-2 block text-xl font-semibold text-[#F97316]">{label}</span>
       <input
         type={type}
         step={step}
         required={required}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-12 w-full rounded-2xl border px-4 text-sm"
+        onChange={(event) => onChange(event.target.value)}
+        className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
       />
     </label>
   );
