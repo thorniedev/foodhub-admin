@@ -25,7 +25,7 @@ export default function DeleteUserConfirmModal({
   const name = displayName(user.firstName, user.lastName, user.username);
 
   return (
-    <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-130 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
       <div className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-500">
