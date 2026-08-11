@@ -11,19 +11,23 @@ export default function AgeGroupSection({
   const ageGroup = profile.ageGroup;
 
   return (
-    <Section title="Age group" icon={<Users size={18} />}>
+    <Section title="Age group" icon={<Users size={20} />}>
       {!ageGroup ? (
         <Empty text="No age group assigned." />
       ) : (
-        <div className="rounded-2xl bg-emerald-50 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="font-black text-[#137A3D]">{ageGroup.name}</p>
-              <p className="mt-1 text-xs font-bold text-emerald-600">
+              <p className="text-lg font-semibold text-[#137A3D]">
+                {ageGroup.name}
+              </p>
+
+              <p className="mt-1 text-base text-emerald-600">
                 {ageGroup.code}
               </p>
             </div>
-            <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-emerald-700">
+
+            <span className="rounded-full bg-white px-3 py-1.5 text-base text-emerald-700">
               {ageGroup.minAge ?? "?"} – {ageGroup.maxAge ?? "∞"} years
             </span>
           </div>
@@ -35,7 +39,7 @@ export default function AgeGroupSection({
 
 function Empty({ text }: { text: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-center text-sm text-gray-400">
+    <div className="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-center text-base text-gray-400">
       {text}
     </div>
   );

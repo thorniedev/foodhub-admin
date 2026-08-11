@@ -1,4 +1,8 @@
-import { AlertTriangle, Loader2, User } from "lucide-react";
+import {
+  AlertTriangle,
+  Loader2,
+  User,
+} from "lucide-react";
 
 import type { AdminProfile } from "@/src/types/userProfile";
 import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
@@ -32,7 +36,7 @@ export default function ProfileDetailPanel({
 }: ProfileDetailPanelProps) {
   if (loading) {
     return (
-      <section className="flex min-h-[520px] items-center justify-center rounded-[26px] border border-gray-100 bg-white">
+      <section className="flex min-h-[520px] items-center justify-center rounded-[24px] border border-gray-100 bg-white">
         <Loader2 size={30} className="animate-spin text-[#137A3D]" />
       </section>
     );
@@ -40,10 +44,14 @@ export default function ProfileDetailPanel({
 
   if (error) {
     return (
-      <section className="flex min-h-[520px] flex-col items-center justify-center rounded-[26px] border border-gray-100 bg-white px-6 text-center">
+      <section className="flex min-h-[520px] flex-col items-center justify-center rounded-[24px] border border-red-100 bg-white px-6 text-center">
         <AlertTriangle size={38} className="text-red-400" />
-        <h3 className="mt-3 font-black text-gray-800">មិនអាចផ្ទុក Profile detail</h3>
-        <p className="mt-2 max-w-md text-sm leading-6 text-gray-500">
+
+        <h3 className="mt-3 text-xl font-bold text-gray-800">
+          មិនអាចផ្ទុក Profile detail
+        </h3>
+
+        <p className="mt-2 max-w-md text-base leading-7 text-gray-500">
           {getAdminApiErrorMessage(error)}
         </p>
       </section>
@@ -52,10 +60,14 @@ export default function ProfileDetailPanel({
 
   if (!profile) {
     return (
-      <section className="flex min-h-[520px] flex-col items-center justify-center rounded-[26px] border border-dashed border-gray-200 bg-white px-6 text-center">
+      <section className="flex min-h-[520px] flex-col items-center justify-center rounded-[24px] border border-dashed border-gray-200 bg-white px-6 text-center">
         <User size={42} className="text-gray-300" />
-        <h3 className="mt-3 font-black text-gray-700">ជ្រើសរើស Profile មួយ</h3>
-        <p className="mt-1 text-sm text-gray-400">
+
+        <h3 className="mt-3 text-xl font-bold text-gray-700">
+          ជ្រើសរើស Profile មួយ
+        </h3>
+
+        <p className="mt-2 text-base text-gray-400">
           ចុច Profile ខាងឆ្វេង ដើម្បីទាញយក safety detail ពី API ពិត។
         </p>
       </section>

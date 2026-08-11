@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import {
   AlertTriangle,
   Loader2,
-  RotateCcw,
 } from "lucide-react";
+
 import { useRouter } from "next/navigation";
 
 import {
@@ -15,15 +19,16 @@ import {
   useGetAdminUserProfilesQuery,
   useGetAdminUserQuery,
   useRestoreAdminProfileMutation,
-  useRestoreAdminUserMutation,
   useUpdateAdminUserStatusMutation,
 } from "@/src/app/store/userProfileApi";
+
 import type {
   AdminProfile,
   AdminUser,
   MutableAdminUserStatus,
   ProfileStatusFilter,
 } from "@/src/types/userProfile";
+
 import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
 
 import DeleteUserConfirmModal from "./DeleteUserConfirmModal";
@@ -47,16 +52,23 @@ export default function UserDetailManager({
 
   const [profileFilter, setProfileFilter] =
     useState<ProfileStatusFilter>("ALL");
+
   const [profilePage, setProfilePage] = useState(0);
+
   const [selectedProfileUuid, setSelectedProfileUuid] =
     useState<string | null>(null);
 
-  const [statusUser, setStatusUser] = useState<AdminUser | null>(null);
-  const [deleteUser, setDeleteUser] = useState<AdminUser | null>(null);
+  const [statusUser, setStatusUser] =
+    useState<AdminUser | null>(null);
+
+  const [deleteUser, setDeleteUser] =
+    useState<AdminUser | null>(null);
+
   const [profileAction, setProfileAction] = useState<{
     action: "DELETE" | "RESTORE";
     profile: AdminProfile;
   } | null>(null);
+
   const [notice, setNotice] = useState<Notice>(null);
 
   const {
@@ -115,17 +127,22 @@ export default function UserDetailManager({
 
   const [updateStatus, { isLoading: updatingStatus }] =
     useUpdateAdminUserStatusMutation();
+
   const [deleteAdminUser, { isLoading: deletingUser }] =
     useDeleteAdminUserMutation();
-  const [restoreAdminUser, { isLoading: restoringUser }] =
-    useRestoreAdminUserMutation();
+
   const [deleteAdminProfile, { isLoading: deletingProfile }] =
     useDeleteAdminProfileMutation();
+
   const [restoreAdminProfile, { isLoading: restoringProfile }] =
     useRestoreAdminProfileMutation();
 
-  const handleStatusUpdate = async (status: MutableAdminUserStatus) => {
-    if (!statusUser) return;
+  const handleStatusUpdate = async (
+    status: MutableAdminUserStatus,
+  ) => {
+    if (!statusUser) {
+      return;
+    }
 
     try {
       await updateStatus({
@@ -134,10 +151,12 @@ export default function UserDetailManager({
       }).unwrap();
 
       setStatusUser(null);
+
       setNotice({
         type: "success",
         text: `បានប្តូរ User status ទៅ ${status}។`,
       });
+
       await refetchUser();
     } catch (requestError) {
       setNotice({
@@ -148,12 +167,15 @@ export default function UserDetailManager({
   };
 
   const handleDeleteUser = async () => {
-    if (!deleteUser) return;
+    if (!deleteUser) {
+      return;
+    }
 
     const target = deleteUser;
 
     try {
       await deleteAdminUser(target.uuid).unwrap();
+
       setDeleteUser(null);
 
       setNotice({
@@ -172,17 +194,21 @@ export default function UserDetailManager({
   };
 
   const handleProfileAction = async () => {
-    if (!profileAction) return;
+    if (!profileAction) {
+      return;
+    }
 
     try {
       if (profileAction.action === "DELETE") {
         await deleteAdminProfile(profileAction.profile.uuid).unwrap();
+
         setNotice({
           type: "success",
           text: "Profile ត្រូវបាន soft-delete ដោយជោគជ័យ។",
         });
       } else {
         await restoreAdminProfile(profileAction.profile.uuid).unwrap();
+
         setNotice({
           type: "success",
           text: "Profile ត្រូវបាន Restore ដោយជោគជ័យ។",
@@ -216,10 +242,12 @@ export default function UserDetailManager({
       <div className="p-5 sm:p-7">
         <div className="flex min-h-[420px] flex-col items-center justify-center rounded-[28px] border border-red-100 bg-white px-6 text-center">
           <AlertTriangle size={42} className="text-red-400" />
-          <h1 className="mt-4 text-xl font-black text-gray-800">
+
+          <h1 className="mt-4 text-xl font-bold text-gray-800">
             មិនអាចទាញយក User detail
           </h1>
-          <p className="mt-2 max-w-lg text-sm leading-6 text-gray-500">
+
+          <p className="mt-2 max-w-lg text-base leading-7 text-gray-500">
             {getAdminApiErrorMessage(userError)}
           </p>
         </div>
@@ -228,8 +256,7 @@ export default function UserDetailManager({
   }
 
   const profileBusy = deletingProfile || restoringProfile;
-  const userBusy =
-    updatingStatus || deletingUser || restoringUser;
+  const userBusy = updatingStatus || deletingUser;
 
   return (
     <div className="space-y-5 p-4 sm:p-6 lg:p-7">
@@ -242,7 +269,7 @@ export default function UserDetailManager({
 
       {notice && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm font-medium ${
+          className={`rounded-2xl border px-4 py-3 text-base ${
             notice.type === "success"
               ? "border-emerald-100 bg-emerald-50 text-emerald-700"
               : "border-red-100 bg-red-50 text-red-600"
@@ -253,12 +280,12 @@ export default function UserDetailManager({
       )}
 
       {profilesError && (
-        <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-base text-red-600">
           {getAdminApiErrorMessage(profilesError)}
         </div>
       )}
 
-      <div className="grid items-start gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
+      <div className="grid items-start gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
         <div className="xl:sticky xl:top-5">
           <RelatedProfilesPanel
             data={profilePageData}
@@ -304,7 +331,9 @@ export default function UserDetailManager({
         user={statusUser}
         saving={updatingStatus}
         onClose={() => {
-          if (!updatingStatus) setStatusUser(null);
+          if (!updatingStatus) {
+            setStatusUser(null);
+          }
         }}
         onSubmit={handleStatusUpdate}
       />
@@ -313,7 +342,9 @@ export default function UserDetailManager({
         user={deleteUser}
         deleting={deletingUser}
         onClose={() => {
-          if (!deletingUser) setDeleteUser(null);
+          if (!deletingUser) {
+            setDeleteUser(null);
+          }
         }}
         onConfirm={handleDeleteUser}
       />
@@ -324,7 +355,9 @@ export default function UserDetailManager({
         profileName={profileAction?.profile.profileName ?? ""}
         loading={profileBusy}
         onClose={() => {
-          if (!profileBusy) setProfileAction(null);
+          if (!profileBusy) {
+            setProfileAction(null);
+          }
         }}
         onConfirm={handleProfileAction}
       />

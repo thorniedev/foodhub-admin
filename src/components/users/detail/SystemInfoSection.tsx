@@ -10,12 +10,23 @@ export default function SystemInfoSection({
   profile: AdminProfile;
 }) {
   return (
-    <Section title="System information" icon={<Info size={18} />}>
-      <div className="space-y-3 text-sm">
-        {/* <Row label="Profile UUID" value={profile.uuid} mono /> */}
-        <Row label="Avatar media UUID" value={profile.avatarMediaUuid ?? "—"} mono />
-        <Row label="Created at" value={formatDateTime(profile.createdAt)} />
-        <Row label="Updated at" value={formatDateTime(profile.updatedAt)} />
+    <Section title="System information" icon={<Info size={20} />}>
+      <div className="space-y-3">
+        <Row
+          label="Avatar media UUID"
+          value={profile.avatarMediaUuid ?? "—"}
+          mono
+        />
+
+        <Row
+          label="Created at"
+          value={formatDateTime(profile.createdAt)}
+        />
+
+        <Row
+          label="Updated at"
+          value={formatDateTime(profile.updatedAt)}
+        />
       </div>
     </Section>
   );
@@ -31,9 +42,16 @@ function Row({
   mono?: boolean;
 }) {
   return (
-    <div className="grid gap-1 rounded-2xl bg-gray-50 px-4 py-3 sm:grid-cols-[150px_1fr]">
-      <span className="font-bold text-gray-400">{label}</span>
-      <span className={`break-all font-medium text-gray-700 ${mono ? "font-mono text-xs" : ""}`}>
+    <div className="grid gap-1 rounded-2xl bg-gray-50 px-4 py-3 sm:grid-cols-[170px_1fr]">
+      <span className="text-base font-semibold text-[#F97316]">
+        {label}
+      </span>
+
+      <span
+        className={`break-all text-base text-gray-700 ${
+          mono ? "font-mono text-sm" : ""
+        }`}
+      >
         {value}
       </span>
     </div>
