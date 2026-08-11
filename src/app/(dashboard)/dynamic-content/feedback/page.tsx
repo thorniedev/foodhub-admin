@@ -2,14 +2,23 @@
 
 import { useMemo, useState } from "react";
 
-
-import FeedbackFormModal from "@/src/components/FeedbackFormModal";
-import { Feedback, FeedbackCategory, FeedbackStatus } from "@/src/types/feedback";
-import FeedbackBanner from "@/src/components/FeedbackBanner";
-import FeedbackTabs from "@/src/components/FeedbackTabs";
-import FeedbackTable from "@/src/components/FeedbackTable";
-import FeedbackPagination from "@/src/components/FeedbackPagination";
-import { useAddFeedbackMutation, useDeleteFeedbackMutation, useGetFeedbacksQuery, useToggleFeedbackStatusMutation, useUpdateFeedbackMutation } from "@/src/app/store/feedbackApi";
+import FeedbackFormModal from "@/src/components/feedback/FeedbackFormModal";
+import {
+  Feedback,
+  FeedbackCategory,
+  FeedbackStatus,
+} from "@/src/types/feedback";
+import FeedbackBanner from "@/src/components/feedback/FeedbackBanner";
+import FeedbackTabs from "@/src/components/feedback/FeedbackTabs";
+import FeedbackTable from "@/src/components/feedback/FeedbackTable";
+import FeedbackPagination from "@/src/components/feedback/FeedbackPagination";
+import {
+  useAddFeedbackMutation,
+  useDeleteFeedbackMutation,
+  useGetFeedbacksQuery,
+  useToggleFeedbackStatusMutation,
+  useUpdateFeedbackMutation,
+} from "@/src/app/store/feedbackApi";
 
 const PAGE_SIZE = 8;
 

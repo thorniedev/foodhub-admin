@@ -10,10 +10,10 @@ import {
 } from "../../../store/foodByAreaApi";
 import { Area, FoodByAreaImage } from "../../../../types/foodByArea";
 import FoodByAreaBanner from "../../../../components/dynamic-content/food-by-area/FoodByAreaBanner";
-import FoodByAreaTabs from "../../../../components/FoodByAreaTabs";
-import FoodByAreaTable from "../../../../components/FoodByAreaTable";
-import FoodByAreaPagination from "../../../../components/FoodByAreaPagination";
-import FoodByAreaFormModal from "../../../../components/FoodByAreaFormModal";
+import FoodByAreaTabs from "../../../../components/feedback/FoodByAreaTabs";
+import FoodByAreaTable from "../../../../components/feedback/FoodByAreaTable";
+import FoodByAreaPagination from "../../../../components/feedback/FoodByAreaPagination";
+import FoodByAreaFormModal from "../../../../components/feedback/FoodByAreaFormModal";
 
 const PAGE_SIZE = 8;
 
