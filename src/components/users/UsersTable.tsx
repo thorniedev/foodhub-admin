@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import {
   CheckCircle,
   Eye,
@@ -8,9 +9,9 @@ import {
 } from "lucide-react";
 
 import type { AdminUser } from "@/src/types/userProfile";
+
 import {
   displayName,
-  formatDateTime,
   initials,
 } from "@/src/lib/userProfileFormat";
 
@@ -31,19 +32,17 @@ export default function UsersTable({
     <div className="overflow-x-auto">
       <table className="min-w-[1080px] w-full border-collapse text-left">
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/70 text-[13px] font-bold uppercase tracking-wide text-gray-500">
-            <th className="px-5 py-4">អ្នកប្រើ</th>
-            <th className="px-5 py-4">Username</th>
-            <th className="px-5 py-4">Email</th>
-            <th className="px-5 py-4">Verified</th>
-            <th className="px-5 py-4">ស្ថានភាព</th>
-            {/* <th className="px-5 py-4">ចូលចុងក្រោយ</th>
-            <th className="px-5 py-4">បង្កើតនៅ</th> */}
-            <th className="px-5 py-4 text-right">សកម្មភាព</th>
+          <tr className="border-b border-gray-100 bg-gray-50/50">
+            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">អ្នកប្រើ</th>
+            {/* <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Username</th> */}
+            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Email</th>
+            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Verified</th>
+            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">ស្ថានភាព</th>
+            <th className="px-5 py-4 text-right text-xl font-bold text-[#136C34]">សកម្មភាព</th>
           </tr>
         </thead>
 
-        <tbody className="divide-y divide-gray-100">
+        <tbody>
           {users.map((user) => {
             const name = displayName(
               user.firstName,
@@ -54,39 +53,35 @@ export default function UsersTable({
             return (
               <tr
                 key={user.uuid}
-                className="bg-white text-sm text-gray-600 transition hover:bg-emerald-50/30"
+                className="border-b border-gray-100 bg-white transition last:border-0 hover:bg-gray-50/60"
               >
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-black text-[#137A3D]">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-lg font-bold text-[#136C34]">
                       {initials(name)}
                     </div>
-                    <div className="min-w-0">
-                      <p className="truncate font-bold text-gray-900">{name}</p>
-                      {/* <p className="mt-0.5 max-w-[210px] truncate text-xs text-gray-400">
-                        {user.uuid}
-                      </p> */}
-                    </div>
+
+                    <p className="truncate text-lg text-gray-800">{name}</p>
                   </div>
                 </td>
-
-                <td className="px-5 py-4 font-medium text-gray-700">
+{/* 
+                <td className="px-5 py-4 text-base text-gray-700">
                   {user.username}
-                </td>
+                </td> */}
 
-                <td className="px-5 py-4">
-                  {user.primaryEmail ?? "—"}
+                <td className="max-w-[300px] px-5 py-4 text-base text-gray-500">
+                  <p className="truncate">{user.primaryEmail ?? "—"}</p>
                 </td>
 
                 <td className="px-5 py-4">
                   {user.emailVerified ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
-                      <CheckCircle size={14} />
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-base text-emerald-700">
+                      <CheckCircle size={15} />
                       Yes
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
-                      <XCircle size={14} />
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-base text-amber-700">
+                      <XCircle size={15} />
                       No
                     </span>
                   )}
@@ -95,21 +90,13 @@ export default function UsersTable({
                 <td className="px-5 py-4">
                   <StatusBadge status={user.status} />
                 </td>
-{/* 
-                <td className="px-5 py-4">
-                  {formatDateTime(user.lastLoginAt)}
-                </td>
 
                 <td className="px-5 py-4">
-                  {formatDateTime(user.createdAt)}
-                </td> */}
-
-                <td className="px-5 py-4">
-                  <div className="flex items-center justify-end gap-1.5">
+                  <div className="flex items-center justify-end gap-1">
                     <Link
                       href={`/users/${user.uuid}`}
                       title="View user profiles"
-                      className="flex h-9 w-9 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-emerald-600 transition hover:bg-emerald-50"
                     >
                       <Eye size={18} />
                     </Link>
@@ -119,9 +106,9 @@ export default function UsersTable({
                       disabled={disabled}
                       onClick={() => onStatusEdit(user)}
                       title="Change status"
-                      className="flex h-9 w-9 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 disabled:opacity-40"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-blue-500 transition hover:bg-blue-50 disabled:opacity-40"
                     >
-                      <Pencil size={17} />
+                      <Pencil size={18} />
                     </button>
 
                     <button
@@ -129,22 +116,34 @@ export default function UsersTable({
                       disabled={disabled}
                       onClick={() => onDelete(user)}
                       title="Soft delete"
-                      className="flex h-9 w-9 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 disabled:opacity-40"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-red-400 transition hover:bg-red-50 disabled:opacity-40"
                     >
-                      <Trash2 size={17} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </td>
               </tr>
             );
           })}
+
+          {users.length === 0 && (
+            <tr>
+              <td colSpan={6} className="px-5 py-16 text-center text-lg text-gray-400">
+                មិនមានអ្នកប្រើប្រាស់
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
   );
 }
 
-export function StatusBadge({ status }: { status: string }) {
+export function StatusBadge({
+  status,
+}: {
+  status: string;
+}) {
   const normalized = status?.toUpperCase();
 
   const className =
@@ -157,7 +156,7 @@ export function StatusBadge({ status }: { status: string }) {
           : "bg-gray-100 text-gray-600";
 
   return (
-    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${className}`}>
+    <span className={`inline-flex rounded-full px-3 py-1 text-lg ${className}`}>
       {status || "UNKNOWN"}
     </span>
   );

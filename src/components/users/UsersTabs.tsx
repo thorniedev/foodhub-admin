@@ -28,7 +28,7 @@ export default function UsersTabs({
   onChange,
 }: UsersTabsProps) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex items-center gap-2">
       {tabs.map((tab) => {
         const active = tab.value === value;
 
@@ -37,16 +37,19 @@ export default function UsersTabs({
             key={tab.value}
             type="button"
             onClick={() => onChange(tab.value)}
-            className={`inline-flex min-h-10 items-center gap-2 rounded-full px-4 text-xl transition ${
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-lg transition ${
               active
-                ? "bg-[#137A3D] text-white shadow-sm"
-                : "border border-gray-100 bg-white text-gray-600 hover:border-emerald-100 hover:bg-emerald-50"
+                ? "bg-[#136C34] text-white"
+                : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
             }`}
           >
             {tab.label}
+
             <span
-              className={`rounded-full px-2 py-0.5 text-xs ${
-                active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+              className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-sm ${
+                active
+                  ? "bg-white/20 text-white"
+                  : "bg-gray-100 text-gray-500"
               }`}
             >
               {counts[tab.countKey]}

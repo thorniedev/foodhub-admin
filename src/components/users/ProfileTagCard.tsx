@@ -1,6 +1,12 @@
-import { Calendar, Globe2, Star, User } from "lucide-react";
+import {
+  Calendar,
+  Globe2,
+  Star,
+  User,
+} from "lucide-react";
 
 import type { AdminProfile } from "@/src/types/userProfile";
+
 import {
   calculateAge,
   formatDateOnly,
@@ -32,25 +38,25 @@ export default function ProfileTagCard({
       }`}
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#137A3D] font-black text-white">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#137A3D] text-base font-bold text-white">
           {initials(profile.profileName)}
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate font-black text-gray-900">
+            <p className="truncate text-lg text-gray-900">
               {profile.profileName}
             </p>
 
             {profile.isDefault && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-700">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
                 <Star size={11} />
                 Default
               </span>
             )}
 
             <span
-              className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+              className={`rounded-full px-2 py-0.5 text-xs ${
                 profile.isActive
                   ? "bg-emerald-100 text-emerald-700"
                   : "bg-red-50 text-red-600"
@@ -60,22 +66,26 @@ export default function ProfileTagCard({
             </span>
           </div>
 
-          <div className="mt-3 grid gap-2 text-xs text-gray-500 sm:grid-cols-2">
+          <div className="mt-3 grid gap-2 text-sm text-gray-500 sm:grid-cols-2">
             <span className="inline-flex items-center gap-1.5">
               <User size={13} />
               {humanizeEnum(profile.relationship)}
             </span>
+
             <span className="inline-flex items-center gap-1.5">
               <Calendar size={13} />
               {formatDateOnly(profile.dateOfBirth)}
               {age !== null ? ` · ${age}y` : ""}
             </span>
+
             <span className="inline-flex items-center gap-1.5">
               <Globe2 size={13} />
               {(profile.preferredLanguage ?? "—").toUpperCase()}
             </span>
+
             <span>
-              {profile.ageGroup?.name ?? humanizeEnum(profile.ageGroup?.code)}
+              {profile.ageGroup?.name ??
+                humanizeEnum(profile.ageGroup?.code)}
             </span>
           </div>
         </div>

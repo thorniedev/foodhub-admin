@@ -11,8 +11,11 @@ export default function PreferencesSection({
 }) {
   if (!preferences) {
     return (
-      <Section title="Preferences" icon={<Star size={18} />}>
-        <div className="rounded-2xl bg-gray-50 px-4 py-6 text-center text-sm text-gray-400">
+      <Section
+        title="Preferences"
+        icon={<Star size={20} />}
+      >
+        <div className="rounded-2xl bg-gray-50 px-4 py-6 text-center text-base text-gray-400">
           No preference data returned.
         </div>
       </Section>
@@ -20,22 +23,39 @@ export default function PreferencesSection({
   }
 
   return (
-    <Section title="Preferences" icon={<Star size={18} />}>
+    <Section title="Preferences" icon={<Star size={20} />}>
       <div className="space-y-4">
-        <Tags label="Cuisines" values={preferences.cuisineCodes ?? []} />
-        <Tags label="Tastes" values={preferences.tasteCodes ?? []} />
-        <Tags label="Textures" values={preferences.textureCodes ?? []} />
+        <Tags
+          label="Cuisines"
+          values={preferences.cuisineCodes ?? []}
+        />
+
+        <Tags
+          label="Tastes"
+          values={preferences.tasteCodes ?? []}
+        />
+
+        <Tags
+          label="Textures"
+          values={preferences.textureCodes ?? []}
+        />
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <Info label="Spice level" value={humanizeEnum(preferences.spiceLevel)} />
+          <Info
+            label="Spice level"
+            value={humanizeEnum(preferences.spiceLevel)}
+          />
+
           <Info
             label="Budget"
             value={
-              preferences.minimumBudget !== null || preferences.maximumBudget !== null
+              preferences.minimumBudget !== null ||
+              preferences.maximumBudget !== null
                 ? `${preferences.minimumBudget ?? "?"} – ${preferences.maximumBudget ?? "?"}`
                 : "—"
             }
           />
+
           <Info
             label="Radius"
             value={
@@ -50,16 +70,28 @@ export default function PreferencesSection({
   );
 }
 
-function Tags({ label, values }: { label: string; values: string[] }) {
+function Tags({
+  label,
+  values,
+}: {
+  label: string;
+  values: string[];
+}) {
   return (
     <div>
-      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">{label}</p>
+      <p className="mb-2 text-base font-semibold text-[#F97316]">
+        {label}
+      </p>
+
       <div className="flex flex-wrap gap-2">
         {values.length === 0 ? (
-          <span className="text-sm text-gray-400">—</span>
+          <span className="text-base text-gray-400">—</span>
         ) : (
           values.map((value) => (
-            <span key={value} className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-[#137A3D]">
+            <span
+              key={value}
+              className="rounded-full bg-emerald-50 px-3 py-1.5 text-base text-[#137A3D]"
+            >
               {humanizeEnum(value)}
             </span>
           ))
@@ -69,11 +101,22 @@ function Tags({ label, values }: { label: string; values: string[] }) {
   );
 }
 
-function Info({ label, value }: { label: string; value: string }) {
+function Info({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
     <div className="rounded-2xl bg-gray-50 px-4 py-3">
-      <p className="text-xs font-bold uppercase tracking-wide text-gray-400">{label}</p>
-      <p className="mt-1 text-sm font-bold text-gray-700">{value}</p>
+      <p className="text-base font-semibold text-[#F97316]">
+        {label}
+      </p>
+
+      <p className="mt-1 text-base text-gray-700">
+        {value}
+      </p>
     </div>
   );
 }

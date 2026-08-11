@@ -1,13 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
+
 import {
   AlertTriangle,
+  ArrowUpDown,
+  Check,
+  ChevronDown,
   Loader2,
-  RefreshCw,
   RotateCcw,
   Search,
+  UserRound,
   Users,
+  X,
 } from "lucide-react";
 
 import {
@@ -17,6 +22,7 @@ import {
   useRestoreAdminUserMutation,
   useUpdateAdminUserStatusMutation,
 } from "@/src/app/store/userProfileApi";
+
 import type {
   AdminUser,
   CreateAdminUserPayload,
@@ -24,7 +30,8 @@ import type {
   UserStatusFilter,
 } from "@/src/types/userProfile";
 
-// import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
+import { displayName } from "@/src/lib/userProfileFormat";
+import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
 
 import DeleteUserConfirmModal from "./DeleteUserConfirmModal";
 import UserCreateModal from "./UserCreateModal";
@@ -33,84 +40,314 @@ import UsersHeader from "./UsersHeader";
 import UsersPagination from "./UsersPagination";
 import UsersTable from "./UsersTable";
 import UsersTabs from "./UsersTabs";
-import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
 
 type Notice =
-  | { type: "success"; text: string }
-  | { type: "error"; text: string }
+  | {
+      type: "success";
+      text: string;
+    }
+  | {
+      type: "error";
+      text: string;
+    }
   | null;
 
+type UserSort = "A_Z" | "Z_A" | "NEWEST" | "OLDEST";
+
 export default function UsersManager() {
+  /* =======================================================
+     PAGINATION
+  ======================================================= */
+
   const [page, setPage] = useState(0);
+
   const [size, setSize] = useState(20);
+
+  const [sizeOpen, setSizeOpen] = useState(false);
+
+  /* =======================================================
+     SEARCH
+  ======================================================= */
+
   const [search, setSearch] = useState("");
+
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  /* =======================================================
+     FILTER
+  ======================================================= */
+
   const [statusFilter, setStatusFilter] = useState<UserStatusFilter>("ALL");
 
+  /* =======================================================
+     SORT
+  ======================================================= */
+
+  const [sortBy, setSortBy] = useState<UserSort>("NEWEST");
+
+  const [sortOpen, setSortOpen] = useState(false);
+
+  /* =======================================================
+     MODALS / NOTICE
+  ======================================================= */
+
   const [createOpen, setCreateOpen] = useState(false);
+
   const [statusUser, setStatusUser] = useState<AdminUser | null>(null);
+
   const [deleteUser, setDeleteUser] = useState<AdminUser | null>(null);
-  const [recentlyDeleted, setRecentlyDeleted] = useState<AdminUser | null>(null);
+
+  const [recentlyDeleted, setRecentlyDeleted] = useState<AdminUser | null>(
+    null,
+  );
+
   const [notice, setNotice] = useState<Notice>(null);
 
-  const { data, error, isLoading, isFetching, refetch } =
-    useGetAdminUsersQuery({
+  /* =======================================================
+     MAIN QUERY
+  ======================================================= */
+
+  const { data, error, isLoading, isFetching, refetch } = useGetAdminUsersQuery(
+    {
       page,
       size,
       sort: "createdAt,desc",
-    });
+    },
+  );
+
+  /* =======================================================
+     SUGGESTION DATA
+
+     Current API usage has no search query argument here,
+     so this keeps the existing backend contract unchanged
+     and uses a larger client-side dataset for suggestions.
+  ======================================================= */
+
+  const { data: suggestionData } = useGetAdminUsersQuery({
+    page: 0,
+    size: 100,
+    sort: "createdAt,desc",
+  });
+
+  /* =======================================================
+     MUTATIONS
+  ======================================================= */
 
   const [createAdminUser, { isLoading: creating }] =
     useCreateAdminUserMutation();
+
   const [updateStatus, { isLoading: updatingStatus }] =
     useUpdateAdminUserStatusMutation();
+
   const [deleteAdminUser, { isLoading: deleting }] =
     useDeleteAdminUserMutation();
+
   const [restoreAdminUser, { isLoading: restoring }] =
     useRestoreAdminUserMutation();
 
+  /* =======================================================
+     DATA
+  ======================================================= */
+
   const users = data?.contents ?? [];
+
+  const suggestionUsers = suggestionData?.contents ?? [];
+
+  /* =======================================================
+     COUNTS
+  ======================================================= */
 
   const counts = useMemo(
     () => ({
       all: users.length,
+
       active: users.filter((user) => user.status === "ACTIVE").length,
+
       suspended: users.filter((user) => user.status === "SUSPENDED").length,
+
       disabled: users.filter((user) => user.status === "DISABLED").length,
     }),
     [users],
   );
 
-  const filteredUsers = useMemo(() => {
-    const query = search.trim().toLowerCase();
+  /* =======================================================
+     SEARCH
+  ======================================================= */
 
-    return users.filter((user) => {
+  const normalizedSearch = search.trim().toLowerCase();
+
+  // const matchesSearch = (
+  //   user: AdminUser,
+  //   query: string,
+  // ) => {
+  //   const name =
+  //     displayName(
+  //       user.firstName,
+  //       user.lastName,
+  //       user.username,
+  //     );
+
+  //   return [
+  //     name,
+  //     user.username,
+  //     user.primaryEmail ??
+  //       "",
+  //     user.firstName ??
+  //       "",
+  //     user.lastName ??
+  //       "",
+  //   ].some((value) =>
+  //     value
+  //       .toLowerCase()
+  //       .includes(query),
+  //   );
+  // };
+
+  const matchesSearch = (user: AdminUser, query: string) => {
+    const name =
+      displayName(user.firstName, user.lastName, user.username) ?? "";
+
+    return [
+      name,
+      user.username,
+      user.primaryEmail,
+      user.firstName,
+      user.lastName,
+    ].some((value) =>
+      String(value ?? "")
+        .toLowerCase()
+        .includes(query),
+    );
+  };
+
+  const suggestions = useMemo(() => {
+    if (!normalizedSearch) {
+      return [];
+    }
+
+    return suggestionUsers
+      .filter((user) => matchesSearch(user, normalizedSearch))
+      .slice(0, 8);
+  }, [normalizedSearch, suggestionUsers]);
+
+  /*
+   * When there is a search, use the larger
+   * suggestion dataset instead of only the
+   * current paginated page.
+   */
+  const searchSource = normalizedSearch ? suggestionUsers : users;
+
+  const filteredUsers = useMemo(() => {
+    return searchSource.filter((user) => {
       const statusMatches =
         statusFilter === "ALL" || user.status === statusFilter;
 
-      if (!statusMatches) return false;
-      if (!query) return true;
+      if (!statusMatches) {
+        return false;
+      }
 
-      return [
-        user.username,
-        user.primaryEmail ?? "",
-        user.firstName ?? "",
-        user.lastName ?? "",
-        user.uuid,
-      ].some((value) => value.toLowerCase().includes(query));
+      if (!normalizedSearch) {
+        return true;
+      }
+
+      return matchesSearch(user, normalizedSearch);
     });
-  }, [search, statusFilter, users]);
+  }, [normalizedSearch, searchSource, statusFilter]);
+
+  /* =======================================================
+     SORT
+  ======================================================= */
+
+  const sortedUsers = useMemo(() => {
+    return [...filteredUsers].sort((first, second) => {
+      const firstName =
+        displayName(first.firstName, first.lastName, first.username) ?? "";
+
+      const secondName =
+        displayName(second.firstName, second.lastName, second.username) ?? "";
+
+      switch (sortBy) {
+        case "A_Z":
+          return firstName.localeCompare(secondName, undefined, {
+            sensitivity: "base",
+          });
+
+        case "Z_A":
+          return secondName.localeCompare(firstName, undefined, {
+            sensitivity: "base",
+          });
+
+        case "NEWEST": {
+          const firstTime = first.createdAt
+            ? new Date(first.createdAt).getTime()
+            : 0;
+
+          const secondTime = second.createdAt
+            ? new Date(second.createdAt).getTime()
+            : 0;
+
+          return secondTime - firstTime;
+        }
+
+        case "OLDEST": {
+          const firstTime = first.createdAt
+            ? new Date(first.createdAt).getTime()
+            : 0;
+
+          const secondTime = second.createdAt
+            ? new Date(second.createdAt).getTime()
+            : 0;
+
+          return firstTime - secondTime;
+        }
+
+        default:
+          return 0;
+      }
+    });
+  }, [filteredUsers, sortBy]);
+
+  const sortOptions: Array<{
+    value: UserSort;
+    label: string;
+  }> = [
+    {
+      value: "A_Z",
+      label: "A → Z",
+    },
+    {
+      value: "Z_A",
+      label: "Z → A",
+    },
+    {
+      value: "NEWEST",
+      label: "ថ្មីបំផុត",
+    },
+    {
+      value: "OLDEST",
+      label: "ចាស់បំផុត",
+    },
+  ];
+
+  /* =======================================================
+     CREATE
+  ======================================================= */
 
   const handleCreate = async (values: CreateAdminUserPayload) => {
     setNotice(null);
 
     try {
       await createAdminUser(values).unwrap();
+
       setCreateOpen(false);
+
       setPage(0);
+
       setNotice({
         type: "success",
         text: "បានបង្កើតអ្នកប្រើថ្មីដោយជោគជ័យ។",
       });
+
       await refetch();
     } catch (requestError) {
       setNotice({
@@ -120,8 +357,14 @@ export default function UsersManager() {
     }
   };
 
+  /* =======================================================
+     STATUS
+  ======================================================= */
+
   const handleStatusUpdate = async (status: MutableAdminUserStatus) => {
-    if (!statusUser) return;
+    if (!statusUser) {
+      return;
+    }
 
     setNotice(null);
 
@@ -132,10 +375,12 @@ export default function UsersManager() {
       }).unwrap();
 
       setStatusUser(null);
+
       setNotice({
         type: "success",
         text: `បានប្តូរស្ថានភាពទៅ ${status} ដោយជោគជ័យ។`,
       });
+
       await refetch();
     } catch (requestError) {
       setNotice({
@@ -145,17 +390,26 @@ export default function UsersManager() {
     }
   };
 
+  /* =======================================================
+     DELETE
+  ======================================================= */
+
   const handleDelete = async () => {
-    if (!deleteUser) return;
+    if (!deleteUser) {
+      return;
+    }
 
     const target = deleteUser;
+
     setNotice(null);
 
     try {
       await deleteAdminUser(target.uuid).unwrap();
 
       setDeleteUser(null);
+
       setRecentlyDeleted(target);
+
       setNotice({
         type: "success",
         text: "បាន soft-delete អ្នកប្រើ។ អ្នកអាច Undo មុនពេលចាកចេញពីទំព័រនេះ។",
@@ -170,16 +424,25 @@ export default function UsersManager() {
     }
   };
 
+  /* =======================================================
+     RESTORE
+  ======================================================= */
+
   const handleUndoDelete = async () => {
-    if (!recentlyDeleted) return;
+    if (!recentlyDeleted) {
+      return;
+    }
 
     try {
       await restoreAdminUser(recentlyDeleted.uuid).unwrap();
+
       setRecentlyDeleted(null);
+
       setNotice({
         type: "success",
         text: "បាន Restore អ្នកប្រើដោយជោគជ័យ។",
       });
+
       await refetch();
     } catch (requestError) {
       setNotice({
@@ -190,6 +453,10 @@ export default function UsersManager() {
   };
 
   const busy = creating || updatingStatus || deleting || restoring;
+
+  /* =======================================================
+     UI
+  ======================================================= */
 
   return (
     <div className="space-y-5 p-4 sm:p-6 lg:p-7">
@@ -203,71 +470,306 @@ export default function UsersManager() {
         }}
       />
 
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <UsersTabs
-          value={statusFilter}
-          counts={counts}
-          onChange={(value) => {
-            setStatusFilter(value);
-          }}
-        />
+      {/* =================================================
+          TABS + TOOLBAR
+      ================================================== */}
 
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <label className="relative block min-w-0 sm:w-[320px]">
-            <Search
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="ស្វែងរកឈ្មោះ, username, email..."
-              className="h-11 w-full rounded-2xl border border-gray-200 bg-white pl-11 pr-4 text-sm outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50"
-            />
-          </label>
+      <div className="flex w-full flex-nowrap items-center justify-between gap-4">
+        <div className="shrink-0">
+          <UsersTabs
+            value={statusFilter}
+            counts={counts}
+            onChange={(value) => {
+              setStatusFilter(value);
 
-          <select
-            value={size}
-            onChange={(event) => {
-              setSize(Number(event.target.value));
               setPage(0);
             }}
-            className="h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-600 outline-none"
-          >
-            {[10, 20, 50].map((value) => (
-              <option key={value} value={value}>
-                {value} / ទំព័រ
-              </option>
-            ))}
-          </select>
+          />
+        </div>
 
-          <button
-            type="button"
-            disabled={isFetching}
-            onClick={() => void refetch()}
-            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-          >
-            <RefreshCw size={18} className={isFetching ? "animate-spin" : ""} />
-          </button>
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          {/* SEARCH */}
+
+          <div className="relative">
+            <Search
+              size={18}
+              className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
+            />
+
+            <input
+              value={search}
+              onChange={(event) => {
+                const value = event.target.value;
+
+                setSearch(value);
+
+                setPage(0);
+
+                setShowSuggestions(value.trim().length > 0);
+              }}
+              onFocus={() => {
+                if (search.trim().length > 0) {
+                  setShowSuggestions(true);
+                }
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  setShowSuggestions(false);
+                }
+
+                if (event.key === "Enter") {
+                  setShowSuggestions(false);
+                }
+              }}
+              placeholder="ស្វែងរកឈ្មោះ, username ឬ email..."
+              className="h-11 w-[430px] rounded-2xl border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-[#137A3D]/10"
+            />
+
+            {search && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+
+                  setShowSuggestions(false);
+
+                  setPage(0);
+                }}
+                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
+                aria-label="Clear search"
+              >
+                <X size={16} />
+              </button>
+            )}
+
+            {showSuggestions && normalizedSearch && (
+              <div className="absolute left-0 top-[52px] z-[100] w-[430px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
+                {suggestions.length === 0 ? (
+                  <div className="px-5 py-6 text-center">
+                    <Users size={32} className="mx-auto text-[#F97316]" />
+
+                    <p className="mt-2 text-lg text-[#F97316]">
+                      មិនមានអ្នកប្រើដែលត្រូវគ្នា
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="border-b border-gray-100 px-5 py-3">
+                      <p className="text-lg text-[#F97316]">លទ្ធផលស្វែងរក</p>
+                    </div>
+
+                    <div className="max-h-[340px] overflow-y-auto p-2">
+                      {suggestions.map((user) => {
+                        const name = displayName(
+                          user.firstName,
+                          user.lastName,
+                          user.username,
+                        );
+
+                        return (
+                          <button
+                            key={user.uuid}
+                            type="button"
+                            onMouseDown={(event) => {
+                              event.preventDefault();
+                            }}
+                            onClick={() => {
+                              setSearch(name);
+
+                              setShowSuggestions(false);
+
+                              setPage(0);
+                            }}
+                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-emerald-50"
+                          >
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[#137A3D]">
+                              <UserRound size={20} />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-base font-semibold text-gray-800">
+                                {name}
+                              </p>
+
+                              <p className="mt-0.5 truncate text-sm text-gray-400">
+                                @{user.username}
+                              </p>
+
+                              {user.primaryEmail && (
+                                <p className="mt-0.5 truncate text-sm text-gray-400">
+                                  {user.primaryEmail}
+                                </p>
+                              )}
+                            </div>
+
+                            <span
+                              className={`shrink-0 rounded-full px-2.5 py-1 text-sm ${
+                                user.status === "ACTIVE"
+                                  ? "bg-emerald-50 text-emerald-700"
+                                  : user.status === "SUSPENDED"
+                                    ? "bg-amber-50 text-amber-700"
+                                    : user.status === "DELETED"
+                                      ? "bg-red-50 text-red-700"
+                                      : "bg-gray-100 text-gray-500"
+                              }`}
+                            >
+                              {user.status}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* PAGE SIZE */}
+
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                setSizeOpen((current) => !current);
+
+                setSortOpen(false);
+
+                setShowSuggestions(false);
+              }}
+              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${
+                sizeOpen
+                  ? "border-[#137A3D] ring-2 ring-[#137A3D]/10"
+                  : "border-gray-200 hover:border-[#137A3D]/50"
+              }`}
+            >
+              <span className="text-gray-700">{size} / ទំព័រ</span>
+
+              <ChevronDown
+                size={17}
+                className={`text-gray-400 transition-transform duration-200 ${
+                  sizeOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {sizeOpen && (
+              <div className="absolute right-0 top-[52px] z-[100] w-[170px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+                <p className="px-3 pb-2 pt-1 text-lg text-[#F97316]">
+                  ចំនួនក្នុងទំព័រ
+                </p>
+
+                {[10, 20, 50].map((value) => {
+                  const selected = size === value;
+
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => {
+                        setSize(value);
+
+                        setPage(0);
+
+                        setSizeOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
+                        selected
+                          ? "bg-emerald-50 text-[#137A3D]"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
+                      }`}
+                    >
+                      <span>{value} / ទំព័រ</span>
+
+                      {selected && (
+                        <Check size={16} className="text-[#137A3D]" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* SORT */}
+
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                setSortOpen((current) => !current);
+
+                setSizeOpen(false);
+
+                setShowSuggestions(false);
+              }}
+              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
+                sortOpen
+                  ? "border-[#137A3D] bg-emerald-50 text-[#137A3D]"
+                  : "border-gray-200 bg-white text-gray-600 hover:border-[#137A3D] hover:bg-emerald-50 hover:text-[#137A3D]"
+              }`}
+              aria-label="Sort users"
+              title="Sort users"
+            >
+              <ArrowUpDown size={18} />
+            </button>
+
+            {sortOpen && (
+              <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+                <p className="px-3 pb-2 pt-1 text-lg text-[#F97316]">តម្រៀប</p>
+
+                {sortOptions.map((option) => {
+                  const selected = sortBy === option.value;
+
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setSortBy(option.value);
+
+                        setSortOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
+                        selected
+                          ? "bg-emerald-50 text-[#137A3D]"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
+                      }`}
+                    >
+                      <span>{option.label}</span>
+
+                      {selected && (
+                        <Check size={16} className="text-[#137A3D]" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
+      {/* =================================================
+          NOTICE
+      ================================================== */}
+
       {notice && (
         <div
-          className={`flex flex-col gap-3 rounded-2xl border px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between ${
+          className={`flex flex-col gap-3 rounded-2xl border px-4 py-3 text-base sm:flex-row sm:items-center sm:justify-between ${
             notice.type === "success"
               ? "border-emerald-100 bg-emerald-50 text-emerald-700"
               : "border-red-100 bg-red-50 text-red-600"
           }`}
         >
-          <span className="font-medium">{notice.text}</span>
+          <span>{notice.text}</span>
 
           {notice.type === "success" && recentlyDeleted && (
             <button
               type="button"
               disabled={restoring}
               onClick={() => void handleUndoDelete()}
-              className="inline-flex items-center gap-2 self-start rounded-xl bg-white px-3 py-2 font-bold text-[#137A3D] shadow-sm disabled:opacity-50"
+              className="inline-flex items-center gap-2 self-start rounded-xl bg-white px-3 py-2 font-semibold text-[#137A3D] shadow-sm disabled:opacity-50"
             >
               {restoring ? (
                 <Loader2 size={16} className="animate-spin" />
@@ -280,43 +782,53 @@ export default function UsersManager() {
         </div>
       )}
 
-      <section className="overflow-hidden rounded-[26px] border border-gray-100 bg-white shadow-[0_12px_35px_rgba(15,23,42,0.05)]">
+      {/* =================================================
+          TABLE
+      ================================================== */}
+
+      <section className="overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
         {isLoading ? (
           <div className="flex min-h-[360px] items-center justify-center">
-            <Loader2 size={30} className="animate-spin text-[#137A3D]" />
+            <Loader2 size={30} className="animate-spin text-[#136C34]" />
           </div>
         ) : error ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
             <AlertTriangle size={38} className="text-red-400" />
-            <h3 className="mt-4 text-xl font-black text-gray-800">
+
+            <h3 className="mt-4 text-xl font-bold text-gray-800">
               មិនអាចទាញយកអ្នកប្រើប្រាស់បានទេ
             </h3>
-            <p className="mt-2 max-w-lg text-sm leading-6 text-gray-500">
+
+            <p className="mt-2 max-w-lg text-base leading-7 text-gray-500">
               {getAdminApiErrorMessage(error)}
             </p>
+
             <button
               type="button"
               onClick={() => void refetch()}
-              className="mt-5 rounded-xl bg-[#137A3D] px-4 py-2.5 font-bold text-white"
+              className="mt-5 rounded-xl bg-[#136C34] px-4 py-2.5 text-lg text-white"
             >
               សាកល្បងម្តងទៀត
             </button>
           </div>
-        ) : filteredUsers.length === 0 ? (
+        ) : sortedUsers.length === 0 ? (
           <div className="flex min-h-[340px] flex-col items-center justify-center text-center">
-            <Users size={42} className="text-gray-300" />
-            <p className="mt-3 font-bold text-gray-600">មិនមានអ្នកប្រើត្រូវនឹង filter</p>
+            <Users size={42} className="text-[#F97316]" />
+
+            <p className="mt-3 text-lg text-[#F97316]">
+              មិនមានអ្នកប្រើត្រូវនឹង filter
+            </p>
           </div>
         ) : (
           <UsersTable
-            users={filteredUsers}
+            users={sortedUsers}
             disabled={busy}
             onStatusEdit={setStatusUser}
             onDelete={setDeleteUser}
           />
         )}
 
-        {!isLoading && !error && (
+        {!isLoading && !error && !normalizedSearch && (
           <UsersPagination
             page={data?.pageNumber ?? page}
             totalPages={data?.totalPages ?? 0}
@@ -327,11 +839,17 @@ export default function UsersManager() {
         )}
       </section>
 
+      {/* =================================================
+          MODALS
+      ================================================== */}
+
       <UserCreateModal
         open={createOpen}
         saving={creating}
         onClose={() => {
-          if (!creating) setCreateOpen(false);
+          if (!creating) {
+            setCreateOpen(false);
+          }
         }}
         onSubmit={handleCreate}
       />
@@ -340,7 +858,9 @@ export default function UsersManager() {
         user={statusUser}
         saving={updatingStatus}
         onClose={() => {
-          if (!updatingStatus) setStatusUser(null);
+          if (!updatingStatus) {
+            setStatusUser(null);
+          }
         }}
         onSubmit={handleStatusUpdate}
       />
@@ -349,7 +869,9 @@ export default function UsersManager() {
         user={deleteUser}
         deleting={deleting}
         onClose={() => {
-          if (!deleting) setDeleteUser(null);
+          if (!deleting) {
+            setDeleteUser(null);
+          }
         }}
         onConfirm={handleDelete}
       />
