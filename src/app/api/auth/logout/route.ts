@@ -1,6 +1,13 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+function normalizeBaseUrl(value: string): string {
+  return value.trim().replace(/\/+$/, "");
+}
+
 export async function GET(request: NextRequest) {
   const keycloakUrl =
     process.env.KEYCLOAK_URL ?? process.env.NEXT_PUBLIC_KEYCLOAK_URL;
@@ -10,12 +17,16 @@ export async function GET(request: NextRequest) {
     process.env.KEYCLOAK_CLIENT_ID ??
     process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID;
 
+  const configuredAppUrl = process.env.ADMIN_APP_URL ?? request.nextUrl.origin;
   const appUrl =
-    process.env.ADMIN_APP_URL ?? process.env.APP_URL ?? request.nextUrl.origin;
+    process.env.NODE_ENV === "development"
+      ? request.nextUrl.origin
+      : configuredAppUrl;
 
   const idToken = request.cookies.get("foodhub_id_token")?.value;
 
-  const postLogoutRedirectUri = `${appUrl}/login?loggedOut=true`;
+  const normalizedAppUrl = normalizeBaseUrl(appUrl);
+  const postLogoutRedirectUri = `${normalizedAppUrl}/login?loggedOut=true`;
 
   let redirectUrl = new URL(postLogoutRedirectUri);
 
@@ -24,8 +35,8 @@ export async function GET(request: NextRequest) {
    */
   if (keycloakUrl && realm && clientId) {
     redirectUrl = new URL(
-      `${keycloakUrl.replace(/\/$/, "")}` +
-        `/realms/${realm}` +
+      `${normalizeBaseUrl(keycloakUrl)}` +
+        `/realms/${encodeURIComponent(realm)}` +
         `/protocol/openid-connect/logout`,
     );
 
@@ -45,7 +56,12 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const response = NextResponse.redirect(redirectUrl);
+  // The dashboard submits logout with POST. A 303 makes the browser follow
+  // Keycloak's end-session URL with GET instead of replaying that POST.
+  const response = NextResponse.redirect(
+    redirectUrl,
+    request.method === "POST" ? 303 : 307,
+  );
 
   const expiredCookieOptions = {
     httpOnly: true,
@@ -66,6 +82,8 @@ export async function GET(request: NextRequest) {
   response.cookies.set("foodhub_code_verifier", "", expiredCookieOptions);
 
   response.cookies.set("foodhub_return_to", "", expiredCookieOptions);
+
+  response.headers.set("Cache-Control", "no-store");
 
   return response;
 }

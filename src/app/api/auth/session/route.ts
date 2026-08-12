@@ -1,6 +1,9 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 interface KeycloakUser {
   sub: string;
   name?: string;
@@ -20,9 +23,9 @@ function clearAuthCookies(response: NextResponse) {
     maxAge: 0,
   };
 
-  response.cookies.set("access_token", "", options);
-  response.cookies.set("refresh_token", "", options);
-  response.cookies.set("id_token", "", options);
+  response.cookies.set("foodhub_access_token", "", options);
+  response.cookies.set("foodhub_refresh_token", "", options);
+  response.cookies.set("foodhub_id_token", "", options);
 }
 
 export async function GET(request: NextRequest) {
@@ -43,7 +46,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const accessToken = request.cookies.get("access_token")?.value;
+  const accessToken = request.cookies.get("foodhub_access_token")?.value;
 
   if (!accessToken) {
     return NextResponse.json({
@@ -52,10 +55,24 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const userInfoUrl = new URL(
-    `/realms/${realm}/protocol/openid-connect/userinfo`,
-    keycloakUrl,
-  );
+  let userInfoUrl: URL;
+
+  try {
+    userInfoUrl = new URL(
+      `${keycloakUrl.trim().replace(/\/+$/, "")}` +
+        `/realms/${encodeURIComponent(realm)}` +
+        "/protocol/openid-connect/userinfo",
+    );
+  } catch {
+    return NextResponse.json(
+      {
+        authenticated: false,
+        user: null,
+        message: "Keycloak configuration is invalid",
+      },
+      { status: 500 },
+    );
+  }
 
   try {
     const userResponse = await fetch(userInfoUrl, {

@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { getSafeAuthReturnPath } from "@/src/lib/authRedirect";
 
 type LoginPageProps = {
   searchParams: Promise<{
     error?: string;
     error_description?: string;
-    loggedOut?: string;
+    returnTo?: string;
   }>;
 };
 
@@ -13,6 +16,16 @@ export default async function LoginPage({
 }: LoginPageProps) {
   const params = await searchParams;
   const errorMessage = params.error_description ?? params.error;
+  const returnTo = getSafeAuthReturnPath(params.returnTo);
+
+  if (!errorMessage) {
+    const loginParams = new URLSearchParams({
+      returnTo,
+      prompt: "login",
+    });
+
+    redirect(`/api/auth/login?${loginParams.toString()}`);
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
@@ -29,12 +42,6 @@ export default async function LoginPage({
           </p>
         </div>
 
-        {params.loggedOut === "true" && (
-          <p className="mt-6 rounded-lg bg-emerald-50 px-4 py-3 text-center text-sm text-[#136C34]">
-            You have been logged out successfully.
-          </p>
-        )}
-
         {errorMessage && (
           <p className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-center text-sm text-red-600">
             {errorMessage}
@@ -42,12 +49,15 @@ export default async function LoginPage({
         )}
 
         <form action="/api/auth/login" method="get" className="mt-8">
-          <input type="hidden" name="returnTo" value="/" />
+          <input type="hidden" name="returnTo" value={returnTo} />
+          {errorMessage && (
+            <input type="hidden" name="prompt" value="login" />
+          )}
           <button
             type="submit"
             className="w-full rounded-xl bg-[#136C34] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#0f592b]"
           >
-            Continue with Keycloak
+            {errorMessage ? "Try another account" : "Continue with Keycloak"}
           </button>
         </form>
 

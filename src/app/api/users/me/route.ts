@@ -12,9 +12,15 @@ function getAccessToken(request: NextRequest): string | null {
   return request.cookies.get("foodhub_access_token")?.value ?? null;
 }
 
+function clearAuthCookies(response: NextResponse): void {
+  response.cookies.delete("foodhub_access_token");
+  response.cookies.delete("foodhub_refresh_token");
+  response.cookies.delete("foodhub_id_token");
+}
+
 async function forwardBackendResponse(
   backendResponse: Response,
-): Promise<Response> {
+): Promise<NextResponse> {
   const responseBody = await backendResponse.arrayBuffer();
 
   const headers = new Headers();
@@ -25,10 +31,19 @@ async function forwardBackendResponse(
     headers.set("Content-Type", contentType);
   }
 
-  return new Response(responseBody.byteLength > 0 ? responseBody : null, {
-    status: backendResponse.status,
-    headers,
-  });
+  const response = new NextResponse(
+    responseBody.byteLength > 0 ? responseBody : null,
+    {
+      status: backendResponse.status,
+      headers,
+    },
+  );
+
+  if (backendResponse.status === 401) {
+    clearAuthCookies(response);
+  }
+
+  return response;
 }
 
 export async function GET(request: NextRequest): Promise<Response> {

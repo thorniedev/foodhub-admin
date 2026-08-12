@@ -7,6 +7,7 @@ import {
 } from "react";
 
 import type { CurrentAdmin } from "@/src/types/currentAdmin";
+import { redirectToAdminLogin } from "@/src/lib/redirectToAdminLogin";
 
 interface UseCurrentAdminResult {
   admin: CurrentAdmin | null;
@@ -47,6 +48,8 @@ export function useCurrentAdmin(): UseCurrentAdminResult {
 
         if (!response.ok) {
           if (response.status === 401) {
+            redirectToAdminLogin();
+
             throw new Error(
               "Admin session has expired.",
             );
