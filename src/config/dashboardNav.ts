@@ -5,6 +5,7 @@ import {
   Layers,
   Globe,
   SlidersHorizontal,
+  Utensils,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,6 +26,11 @@ export const dashboardNav: NavItem[] = [
     label: "ហាង",
     icon: Store,
     href: "/shops",
+  },
+    {
+    label: "ប្រភេទអាហារ",
+    icon: Utensils,
+    href: "/menu-items",
   },
   {
     label: "អ្នកប្រើប្រាស់",
