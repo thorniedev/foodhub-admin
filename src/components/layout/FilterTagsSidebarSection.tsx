@@ -21,6 +21,7 @@ const API_ROUTE_OVERRIDES: Record<string, string> = {
   ALLERGEN: "/filter/allergic",
   DIETARY_TYPE: "/filter/dietary-type",
   MEDICAL_CONDITION: "/filter/medical-conditions",
+  MEAL_TIME: "/filter/meal-type",
 };
 
 export default function FilterTagsSidebarSection() {

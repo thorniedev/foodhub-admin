@@ -11,7 +11,7 @@ export const FILTER_GROUPS: FilterGroupDefinition[] = [
     labelEn: "Food categories",
     descriptionKm: "គ្រប់គ្រងប្រភេទម្ហូបដែលអាចជ្រើសពេលបង្កើតម្ហូបថ្មី។",
     selectionMode: "SINGLE",
-    source: "LOCAL",
+    source: "FOOD_CATEGORY_API",
   },
   {
     slug: "cuisines",
@@ -20,16 +20,16 @@ export const FILTER_GROUPS: FilterGroupDefinition[] = [
     labelEn: "Cuisines",
     descriptionKm: "គ្រប់គ្រងប្រភេទម្ហូបតាមប្រទេស ឬវប្បធម៌។",
     selectionMode: "SINGLE",
-    source: "LOCAL",
+    source: "CUISINE_API",
   },
   {
     slug: "meal-times",
     code: "MEAL_TIME",
-    labelKm: "ពេលទទួលទាន",
-    labelEn: "Meal times",
+    labelKm: "ប្រភេទអាហារ",
+    labelEn: "Meal types",
     descriptionKm: "Breakfast, Lunch, Dinner និងពេលទទួលទានផ្សេងៗ។",
     selectionMode: "MULTIPLE",
-    source: "LOCAL",
+    source: "MEAL_TYPE_API",
   },
   {
     slug: "dietary-types",
@@ -47,7 +47,7 @@ export const FILTER_GROUPS: FilterGroupDefinition[] = [
     labelEn: "Age groups",
     descriptionKm: "ក្រុមអាយុដែលសាកសមសម្រាប់ម្ហូប។",
     selectionMode: "MULTIPLE",
-    source: "AGE_GROUP_API",
+    source: "LOCAL",
   },
   {
     slug: "allergens",

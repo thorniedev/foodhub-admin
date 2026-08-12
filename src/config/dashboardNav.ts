@@ -22,6 +22,7 @@ export const dashboardNav: NavItem[] = [
     icon: LayoutGrid,
     href: "/",
   },
+
   {
     label: "ហាង",
     icon: Store,

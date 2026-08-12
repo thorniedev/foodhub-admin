@@ -64,6 +64,9 @@ export const baseApi = createApi({
     "Restaurant",
     "MenuItem",
     "Allergen",
+    "Cuisine",
+    "FoodCategory",
+    "MealType",
   ],
 
   endpoints: () => ({}),

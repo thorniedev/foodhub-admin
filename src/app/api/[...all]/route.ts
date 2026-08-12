@@ -76,6 +76,8 @@ const allowedRoutes: Record<string, ReadonlySet<string>> = {
 
   admin: new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]),
 
+  catalog: new Set(["GET", "POST", "PATCH", "DELETE"]),
+
   media: new Set(["GET"]),
 };
 
