@@ -287,9 +287,13 @@ async function proxyAdminRequest(
       }
     }
 
-    const response = await copyResponse(backendResponse, refreshedTokens);
+    const unauthorized = backendResponse.status === 401;
+    const response = await copyResponse(
+      backendResponse,
+      unauthorized ? null : refreshedTokens,
+    );
 
-    if (backendResponse.status === 401 && !refreshedTokens) {
+    if (unauthorized) {
       clearAuthCookies(response);
     }
 

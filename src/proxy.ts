@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { getSafeAuthReturnPath } from "./lib/authRedirect";
+
 const SESSION_COOKIE = "foodhub_access_token";
 
 export function proxy(request: NextRequest) {
@@ -11,12 +13,13 @@ export function proxy(request: NextRequest) {
   }
 
   if (!request.cookies.has(SESSION_COOKIE)) {
-    const loginUrl = new URL("/login", request.url);
-    const returnTo = `${pathname}${request.nextUrl.search}`;
+    const loginUrl = new URL("/api/auth/login", request.url);
+    const returnTo = getSafeAuthReturnPath(
+      `${pathname}${request.nextUrl.search}`,
+    );
 
-    if (returnTo.startsWith("/") && !returnTo.startsWith("//")) {
-      loginUrl.searchParams.set("returnTo", returnTo);
-    }
+    loginUrl.searchParams.set("returnTo", returnTo);
+    loginUrl.searchParams.set("prompt", "login");
 
     return NextResponse.redirect(loginUrl);
   }
