@@ -109,8 +109,8 @@ export const dashboardNav: NavItem[] = [
       // MEAL TIME
       // -----------------------------------------------------
       {
-        label: "ពេលទទួលទាន",
-        href: "/filter-tags/meal-times",
+        label: "ប្រភេទអាហារ",
+        href: "/filter/meal-type",
       },
 
       // -----------------------------------------------------

@@ -22,8 +22,11 @@ const EMPTY_FORM: FilterCatalogOptionFormValues = {
   localName: "",
   name: "",
   description: "",
+  parentUuid: "",
   numericValue: "",
   unit: "",
+  startTime: "",
+  endTime: "",
   active: true,
 };
 
@@ -32,6 +35,7 @@ export default function FilterOptionFormModal({
   group,
   item,
   saving,
+  options,
   onClose,
   onSubmit,
 }: {
@@ -39,6 +43,7 @@ export default function FilterOptionFormModal({
   group: FilterGroupDefinition;
   item: FilterCatalogOption | null;
   saving: boolean;
+  options?: FilterCatalogOption[];
   onClose: () => void;
   onSubmit: (
     values: FilterCatalogOptionFormValues,
@@ -68,6 +73,8 @@ export default function FilterOptionFormModal({
             description:
               item.description ??
               "",
+            parentUuid:
+              item.parentUuid ?? "",
             numericValue:
               item.numericValue ===
               null
@@ -77,6 +84,10 @@ export default function FilterOptionFormModal({
                   ),
             unit:
               item.unit ?? "",
+            startTime:
+              item.startTime ?? "",
+            endTime:
+              item.endTime ?? "",
             active:
               item.active,
           }
@@ -121,6 +132,17 @@ export default function FilterOptionFormModal({
         );
 
         return;
+      }
+
+      if (group.source === "MEAL_TYPE_API") {
+        if (!form.startTime?.trim()) {
+          setValidationError("សូមបញ្ចូលម៉ោងចាប់ផ្តើម។ (Start time is required)");
+          return;
+        }
+        if (!form.endTime?.trim()) {
+          setValidationError("សូមបញ្ចូលម៉ោងបញ្ចប់។ (End time is required)");
+          return;
+        }
       }
 
       setValidationError("");
@@ -173,7 +195,7 @@ export default function FilterOptionFormModal({
                   }),
                 )
               }
-              placeholder="ឧ. ម្ហូបថៃ"
+              placeholder={`ឧ. បញ្ចូលឈ្មោះ${group.labelKm}`}
             />
 
             <Field
@@ -187,9 +209,72 @@ export default function FilterOptionFormModal({
                   }),
                 )
               }
-              placeholder="e.g. Thai Food"
+              placeholder={`e.g. Enter ${group.labelEn}`}
             />
           </div>
+
+          {group.source === "FOOD_CATEGORY_API" && (
+            <div>
+              <label className="mb-2 block text-xl font-semibold text-[#F97316]">
+                ប្រភេទមេ (Parent Category)
+              </label>
+
+              <select
+                value={form.parentUuid || ""}
+                onChange={(event) =>
+                  setForm((previous) => ({
+                    ...previous,
+                    parentUuid: event.target.value,
+                  }))
+                }
+                className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+              >
+                <option value="">គ្មាន (Top Level)</option>
+                {options
+                  ?.filter(
+                    (opt) =>
+                      opt.active &&
+                      opt.uuid !== item?.uuid &&
+                      !opt.parentUuid
+                  )
+                  .map((opt) => (
+                    <option key={opt.uuid} value={opt.uuid}>
+                      {opt.localName || opt.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
+
+          {group.source === "MEAL_TYPE_API" && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                label="ម៉ោងចាប់ផ្តើម *"
+                type="time"
+                step="1"
+                value={form.startTime || ""}
+                onChange={(value) =>
+                  setForm((previous) => ({
+                    ...previous,
+                    startTime: value,
+                  }))
+                }
+              />
+
+              <Field
+                label="ម៉ោងបញ្ចប់ *"
+                type="time"
+                step="1"
+                value={form.endTime || ""}
+                onChange={(value) =>
+                  setForm((previous) => ({
+                    ...previous,
+                    endTime: value,
+                  }))
+                }
+              />
+            </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field

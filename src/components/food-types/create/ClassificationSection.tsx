@@ -270,6 +270,10 @@ import {
 } from "@/src/app/store/dietaryTypeApi";
 
 import {
+  useGetCuisinesQuery,
+} from "@/src/app/store/cuisineApi";
+
+import {
   useGetMedicalConditionsQuery,
 } from "@/src/app/store/medicalConditionApi";
 
@@ -317,6 +321,14 @@ export default function ClassificationSection({
   });
 
   const {
+    data: cuisineData,
+    isFetching: cuisineLoading,
+  } = useGetCuisinesQuery({
+    page: 0,
+    size: 100,
+  });
+
+  const {
     data: medicalData,
     isFetching: medicalLoading,
   } = useGetMedicalConditionsQuery({
@@ -355,6 +367,36 @@ export default function ClassificationSection({
                     item.description,
                   active:
                     item.active,
+                }),
+              );
+
+          continue;
+        }
+
+        if (
+          group.source ===
+          "CUISINE_API"
+        ) {
+          map[group.code] =
+            (
+              cuisineData?.contents ??
+              []
+            )
+              .filter(
+                (item) =>
+                  item.isActive,
+              )
+              .map(
+                (item) => ({
+                  uuid: item.uuid,
+                  code: item.code,
+                  label:
+                    item.name ||
+                    item.code,
+                  description:
+                    item.description,
+                  active:
+                    item.isActive,
                 }),
               );
 
@@ -453,6 +495,7 @@ export default function ClassificationSection({
       return map;
     }, [
       localOptions,
+      cuisineData,
       allergenData,
       dietaryData,
       medicalData,
@@ -497,6 +540,7 @@ export default function ClassificationSection({
   };
 
   const loading =
+    cuisineLoading ||
     allergensLoading ||
     dietaryLoading ||
     medicalLoading;

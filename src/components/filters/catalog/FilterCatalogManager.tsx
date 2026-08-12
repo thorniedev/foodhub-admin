@@ -24,6 +24,18 @@ import {
 } from "@/src/config/filterCatalog";
 
 import {
+  useCuisineCatalog,
+} from "@/src/hooks/useCuisineCatalog";
+
+import {
+  useFoodCategoryCatalog,
+} from "@/src/hooks/useFoodCategoryCatalog";
+
+import {
+  useMealTypeCatalog,
+} from "@/src/hooks/useMealTypeCatalog";
+
+import {
   useFilterCatalog,
 } from "@/src/hooks/useFilterCatalog";
 
@@ -68,7 +80,13 @@ export default function FilterCatalogManager({
 
   if (
     group.source !==
-    "LOCAL"
+      "LOCAL" &&
+    group.source !==
+      "CUISINE_API" &&
+    group.source !==
+      "FOOD_CATEGORY_API" &&
+    group.source !==
+      "MEAL_TYPE_API"
   ) {
     return (
       <div className="p-6">
@@ -104,15 +122,36 @@ function LocalCatalogManager({
       groupSlug,
     )!;
 
+  const localCatalog =
+    useFilterCatalog(
+      group.code,
+    );
+
+  const cuisineCatalog =
+    useCuisineCatalog();
+
+  const foodCategoryCatalog =
+    useFoodCategoryCatalog();
+
+  const mealTypeCatalog =
+    useMealTypeCatalog();
+
   const {
     groupOptions,
     createOption,
     updateOption,
     setActive,
   } =
-    useFilterCatalog(
-      group.code,
-    );
+    group.source ===
+    "CUISINE_API"
+      ? cuisineCatalog
+      : group.source ===
+        "FOOD_CATEGORY_API"
+      ? foodCategoryCatalog
+      : group.source ===
+        "MEAL_TYPE_API"
+      ? mealTypeCatalog
+      : localCatalog;
 
   const [search, setSearch] =
     useState("");
@@ -1046,6 +1085,7 @@ function LocalCatalogManager({
         group={group}
         item={editing}
         saving={saving}
+        options={groupOptions}
         onClose={() => {
           if (
             saving
