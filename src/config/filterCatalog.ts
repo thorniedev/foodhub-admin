@@ -47,7 +47,7 @@ export const FILTER_GROUPS: FilterGroupDefinition[] = [
     labelEn: "Age groups",
     descriptionKm: "ក្រុមអាយុដែលសាកសមសម្រាប់ម្ហូប។",
     selectionMode: "MULTIPLE",
-    source: "LOCAL",
+    source: "AGE_GROUP_API",
   },
   {
     slug: "allergens",

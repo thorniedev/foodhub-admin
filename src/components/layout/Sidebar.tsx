@@ -314,7 +314,7 @@ export default function Sidebar() {
           ${
             level === 0
               ? "rounded-full text-lg font-medium"
-              : "rounded-lg text-sm"
+              : "rounded-lg text-lg"
           }
 
           ${

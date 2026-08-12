@@ -1,9 +1,7 @@
-import FilterCatalogManager from "@/src/components/filters/catalog/FilterCatalogManager";
+import AgeGroupManager from "@/src/components/filters/age-groups/AgeGroupManager";
 
-export default function Page() {
+export default function AgeGroupsPage() {
   return (
-    <FilterCatalogManager
-      groupSlug="age-groups"
-    />
+    <AgeGroupManager />
   );
 }

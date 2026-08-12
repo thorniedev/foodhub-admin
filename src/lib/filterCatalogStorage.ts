@@ -1,10 +1,7 @@
-import {
-  INITIAL_FILTER_OPTIONS,
-} from "@/src/config/filterCatalog";
-
 import type {
   FilterCatalogOption,
 } from "@/src/types/filterCatalog";
+import { INITIAL_FILTER_OPTIONS } from "../config/filterCatalog";
 
 export const FILTER_CATALOG_STORAGE_KEY =
   "foodhub-admin-filter-catalog-v1";
