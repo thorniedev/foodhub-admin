@@ -38,24 +38,24 @@ export const dashboardNav: NavItem[] = [
     icon: Users,
     href: "/users",
   },
-  {
-    label: "ប្រភេទអាហារ",
-    icon: Layers,
-    children: [
-      {
-        label: "ចំណីអាហារ",
-        href: "/food-types/dishes",
-      },
-      {
-        label: "ភេសជ្ជៈ",
-        href: "/food-types/drinks",
-      },
-      {
-        label: "អាហាររូបត្ថម្ភ",
-        href: "/food-types/nutritions",
-      },
-    ],
-  },
+  // {
+  //   label: "ប្រភេទអាហារ",
+  //   icon: Layers,
+  //   children: [
+  //     {
+  //       label: "ចំណីអាហារ",
+  //       href: "/food-types/dishes",
+  //     },
+  //     {
+  //       label: "ភេសជ្ជៈ",
+  //       href: "/food-types/drinks",
+  //     },
+  //     {
+  //       label: "អាហាររូបត្ថម្ភ",
+  //       href: "/food-types/nutritions",
+  //     },
+  //   ],
+  // },
   {
     label: "មាតិកាដែលប្រែប្រួល",
     icon: Globe,

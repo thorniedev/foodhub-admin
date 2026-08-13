@@ -1,64 +1,64 @@
 "use client";
 
-import { Search } from "lucide-react";
-import { MenuItem } from "../../types/menuItem";
+import { Globe2, LibraryBig } from "lucide-react";
 
-interface MenuItemsTabsProps {
-  data: MenuItem[];
-  activeTab: string;
-  onTabChange: (tab: string) => void;
-  search: string;
-  onSearchChange: (value: string) => void;
-}
+import type { MenuItemsPageTab } from "@/src/types/menuItem";
 
 export default function MenuItemsTabs({
-  data,
-  activeTab,
-  onTabChange,
-  search,
-  onSearchChange,
-}: MenuItemsTabsProps) {
-  const categoryNames = Array.from(new Set(data.map((d) => d.food.category.name)));
-  const tabs = [{ key: "all", label: "ទាំងអស់" }, ...categoryNames.map((name) => ({ key: name, label: name }))];
-
-  const countFor = (key: string) =>
-    key === "all" ? data.length : data.filter((d) => d.food.category.name === key).length;
+  value,
+  foodCount,
+  menuItemCount,
+  onChange,
+}: {
+  value: MenuItemsPageTab;
+  foodCount: number;
+  menuItemCount: number;
+  onChange: (value: MenuItemsPageTab) => void;
+}) {
+  const tabs = [
+    {
+      value: "CATALOG" as const,
+      label: "Food Catalog សម្រាប់ Store",
+      count: foodCount,
+      icon: LibraryBig,
+    },
+    {
+      value: "PUBLISHED" as const,
+      label: "Published on Website",
+      count: menuItemCount,
+      icon: Globe2,
+    },
+  ];
 
   return (
-    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 -mx-1 px-1">
-        {tabs.map((tab) => (
+    <div className="flex min-w-max items-center gap-2 rounded-2xl bg-gray-100 p-1.5">
+      {tabs.map((tab) => {
+        const active = tab.value === value;
+        const Icon = tab.icon;
+
+        return (
           <button
-            key={tab.key}
-            onClick={() => onTabChange(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm sm:text-base font-medium transition-colors whitespace-nowrap shrink-0 ${
-              activeTab === tab.key
-                ? "bg-[#136C34] text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            key={tab.value}
+            type="button"
+            onClick={() => onChange(tab.value)}
+            className={`inline-flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-black transition ${
+              active
+                ? "bg-[#137A3D] text-white shadow-sm"
+                : "text-gray-500 hover:bg-white hover:text-gray-800"
             }`}
           >
+            <Icon size={17} />
             {tab.label}
             <span
-              className={`text-xs rounded-full px-1.5 py-0.5 ${
-                activeTab === tab.key ? "bg-white/20 text-white" : "bg-white text-gray-500"
+              className={`rounded-full px-2 py-0.5 text-xs ${
+                active ? "bg-white/20 text-white" : "bg-white text-gray-500"
               }`}
             >
-              {countFor(tab.key)}
+              {tab.count}
             </span>
           </button>
-        ))}
-      </div>
-
-      <div className="relative w-full lg:w-64">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="ស្វែងរក..."
-          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        />
-      </div>
+        );
+      })}
     </div>
   );
 }

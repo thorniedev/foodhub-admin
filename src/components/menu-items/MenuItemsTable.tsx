@@ -1,124 +1,113 @@
 "use client";
 
-import Image from "next/image";
-import { Ban, Flame, Pencil, Trash2 } from "lucide-react";
-import { MenuItem } from "../../types/menuItem";
+import { ImageIcon, Star } from "lucide-react";
 
-interface MenuItemsTableProps {
-  data: MenuItem[];
-  onEdit: (item: MenuItem) => void;
-  onDelete: (item: MenuItem) => void;
-  onToggleStatus: (item: MenuItem) => void;
+import { normalizeCatalogAssetUrl } from "@/src/lib/menuItemMediaClient";
+import type { CatalogMenuItem } from "@/src/types/menuItem";
+
+function money(price?: number | null, currencyCode?: string | null) {
+  if (typeof price !== "number") return "—";
+  return `${currencyCode || "USD"} ${price.toFixed(2)}`;
 }
 
-const STATUS_BADGE: Record<MenuItem["availabilityStatus"], string> = {
-  AVAILABLE: "bg-emerald-50 text-emerald-600",
-  UNAVAILABLE: "bg-gray-100 text-gray-400",
-  OUT_OF_STOCK: "bg-red-50 text-red-500",
-};
+export default function MenuItemsTable({ items }: { items: CatalogMenuItem[] }) {
+  if (items.length === 0) {
+    return (
+      <div className="flex min-h-[320px] flex-col items-center justify-center px-5 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-[#F97316]">
+          <ImageIcon size={28} />
+        </div>
+        <h3 className="mt-4 text-xl font-black text-gray-800">មិនទាន់មាន Published Menu Item</h3>
+        <p className="mt-2 max-w-md text-sm leading-6 text-gray-500">
+          ជ្រើស Food Catalog + Store + តម្លៃ + រូបភាព ហើយ Publish។ Item នោះនឹងចូល public Menu Item feed។
+        </p>
+      </div>
+    );
+  }
 
-export default function MenuItemsTable({
-  data,
-  onEdit,
-  onDelete,
-  onToggleStatus,
-}: MenuItemsTableProps) {
   return (
-    <div className="bg-white border border-gray-100 rounded-xl overflow-x-auto">
-      <table className="w-full text-sm min-w-[1100px]">
-        <thead>
-          <tr className="border-b border-gray-100 text-left text-[#136C34]">
-            <th className="py-3 px-4 font-medium text-base lg:text-lg">ម្ហូប</th>
-            <th className="py-3 px-4 font-medium text-base lg:text-lg">ហាង</th>
-            <th className="py-3 px-4 font-medium text-base lg:text-lg">ប្រភេទ</th>
-            <th className="py-3 px-4 font-medium text-base lg:text-lg">ម្ហូបជាតិ</th>
-            <th className="py-3 px-4 font-medium text-base lg:text-lg">ហឹរ</th>
-            <th className="py-3 px-4 font-medium text-base lg:text-lg">តម្លៃ</th>
-            <th className="py-3 px-4 font-medium text-base lg:text-lg">ពេលវេលា</th>
-            <th className="py-3 px-4 font-medium text-base lg:text-lg">ស្ថានភាព</th>
-            <th className="py-3 px-4 font-medium text-right text-base lg:text-lg">សកម្មភាព</th>
+    <div className="overflow-x-auto">
+      <table className="min-w-[1150px] w-full">
+        <thead className="bg-gray-50 text-left text-xs font-black uppercase tracking-wide text-gray-500">
+          <tr>
+            <th className="px-5 py-4">Menu Item</th>
+            <th className="px-5 py-4">Store</th>
+            <th className="px-5 py-4">Food master</th>
+            <th className="px-5 py-4">Price</th>
+            <th className="px-5 py-4">Availability</th>
+            <th className="px-5 py-4">Prep time</th>
+            <th className="px-5 py-4">Source</th>
+            <th className="px-5 py-4">Published</th>
           </tr>
         </thead>
-        <tbody>
-          {data.map((item) => (
-            <tr key={item.uuid} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-              <td className="py-3 px-4">
-                <div className="flex items-center gap-3">
-                  <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                    <Image
-                      src={item.thumbnail || "/Image/fallback.png"}
-                      alt={item.localName}
-                      fill
-                      className="object-cover"
-                      sizes="44px"
-                    />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-800">{item.localName}</p>
-                    <p className="text-xs text-gray-400">{item.name}</p>
-                  </div>
-                </div>
-              </td>
-              <td className="py-3 px-4 text-gray-600">{item.store.localName || item.store.name}</td>
-              <td className="py-3 px-4 text-gray-600">{item.food.category.name}</td>
-              <td className="py-3 px-4 text-gray-600">{item.food.cuisine.name}</td>
-              <td className="py-3 px-4">
-                <div className="flex items-center gap-0.5">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <Flame
-                      key={i}
-                      size={14}
-                      className={i < item.food.spiceLevel ? "fill-red-500 text-red-500" : "text-gray-200"}
-                    />
-                  ))}
-                </div>
-              </td>
-              <td className="py-3 px-4 text-gray-600">
-                {item.price.toFixed(2)} {item.currencyCode}
-              </td>
-              <td className="py-3 px-4 text-gray-600">{item.preparationTimeMinutes} នាទី</td>
-              <td className="py-3 px-4">
-                <span
-                  className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_BADGE[item.availabilityStatus]}`}
-                >
-                  {item.availabilityStatus}
-                </span>
-              </td>
-              <td className="py-3 px-4">
-                <div className="flex items-center justify-end gap-2">
-                  <button
-                    onClick={() => onToggleStatus(item)}
-                    title={item.availabilityStatus === "AVAILABLE" ? "បិទ" : "បើក"}
-                    className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50"
-                  >
-                    <Ban size={16} />
-                  </button>
-                  <button
-                    onClick={() => onEdit(item)}
-                    title="កែសម្រួល"
-                    className="p-1.5 rounded-md text-gray-400 hover:text-emerald-600 hover:bg-emerald-50"
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    onClick={() => onDelete(item)}
-                    title="លុប"
-                    className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
 
-          {data.length === 0 && (
-            <tr>
-              <td colSpan={9} className="py-10 text-center text-[#F97316]">
-                មិនមានទិន្នន័យ
-              </td>
-            </tr>
-          )}
+        <tbody className="divide-y divide-gray-100 bg-white">
+          {items.map((item) => {
+            const image = normalizeCatalogAssetUrl(item.thumbnail ?? item.gallery?.[0]);
+            const available = item.availabilityStatus === "AVAILABLE";
+
+            return (
+              <tr key={item.uuid} className="transition hover:bg-emerald-50/20">
+                <td className="px-5 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 text-gray-300">
+                      {image ? (
+                        <img src={image} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <ImageIcon size={22} />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-black text-gray-900">{item.localName || item.name}</p>
+                        {item.isFeatured && <Star size={14} className="fill-amber-400 text-amber-400" />}
+                      </div>
+                      {item.localName && (
+                        <p className="mt-0.5 text-sm text-gray-500">{item.name}</p>
+                      )}
+                      <p className="mt-1 max-w-[260px] truncate text-xs text-gray-400">
+                        {item.description || item.uuid}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-5 py-4">
+                  <p className="text-sm font-black text-gray-700">
+                    {item.store?.storeName || item.store?.name || "—"}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-400">{item.store?.city || ""}</p>
+                </td>
+                <td className="px-5 py-4 text-sm font-semibold text-gray-600">
+                  {item.food?.localName || item.food?.canonicalName || "—"}
+                </td>
+                <td className="px-5 py-4 text-sm font-black text-[#137A3D]">
+                  {money(item.price, item.currencyCode)}
+                </td>
+                <td className="px-5 py-4">
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-black ${
+                      available
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-orange-50 text-orange-600"
+                    }`}
+                  >
+                    {item.availabilityStatus || "UNKNOWN"}
+                  </span>
+                </td>
+                <td className="px-5 py-4 text-sm font-semibold text-gray-600">
+                  {item.preparationTimeMinutes ?? "—"} min
+                </td>
+                <td className="px-5 py-4 text-sm font-semibold text-gray-500">
+                  {item.source || "—"}
+                </td>
+                <td className="px-5 py-4">
+                  <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-600">
+                    WEBSITE
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
