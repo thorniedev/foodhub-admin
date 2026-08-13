@@ -28,7 +28,7 @@ export default function FoodByAreaTabs({
   onSearchChange,
 }: FoodByAreaTabsProps) {
   const countFor = (key: Area | "all") =>
-    key === "all" ? data.length : data.filter((d) => d.area === key).length;
+    key === "all" ? data.length : data.filter((d) => d.location === key).length;
 
   return (
     <div className="flex items-center justify-between mb-4 flex-wrap gap-3">

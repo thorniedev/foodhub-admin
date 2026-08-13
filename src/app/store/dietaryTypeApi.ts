@@ -68,7 +68,7 @@ export const dietaryTypeApi = adminBaseApi.injectEndpoints({
     }),
   }),
 
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const {

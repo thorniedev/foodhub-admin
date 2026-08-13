@@ -62,7 +62,7 @@ export const allergenApi = adminBaseApi.injectEndpoints({
     }),
   }),
 
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const {

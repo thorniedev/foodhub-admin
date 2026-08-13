@@ -302,7 +302,7 @@ reorderFilterOption: builder.mutation<
   ],
 }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const {

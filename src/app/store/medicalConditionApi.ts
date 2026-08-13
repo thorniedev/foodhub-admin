@@ -74,7 +74,7 @@ export const medicalConditionApi = adminBaseApi.injectEndpoints({
     }),
   }),
 
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const {

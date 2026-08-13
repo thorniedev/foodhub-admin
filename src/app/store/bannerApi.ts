@@ -4,7 +4,7 @@ import { baseApi } from "./baseApi";
 export const bannerApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getBanners: builder.query<Banner[], void>({
-      query: () => ({ url: " /data/banners.json" }),
+      query: () => ({ url: "/api/banners" }),
       providesTags: (result) =>
         result
           ? [
@@ -14,11 +14,15 @@ export const bannerApi = baseApi.injectEndpoints({
           : [{ type: "Banner" as const, id: "LIST" }],
     }),
     getBanner: builder.query<Banner, string>({
-      query: (id) => ({ url: ` /data/banners.json/${id}` }),
+      query: (id) => ({ url: `/api/banners/${id}` }),
       providesTags: (_r, _e, id) => [{ type: "Banner", id }],
     }),
     addBanner: builder.mutation<Banner, BannerFormData>({
-      query: (body) => ({ url: " /data/banners.json", method: "POST", body }),
+      query: (body) => ({
+        url: "/api/banners/standard",
+        method: "POST",
+        body: { id: crypto.randomUUID(), ...body },
+      }),
       invalidatesTags: [{ type: "Banner", id: "LIST" }],
     }),
     updateBanner: builder.mutation<
@@ -26,7 +30,7 @@ export const bannerApi = baseApi.injectEndpoints({
       { id: string; data: Partial<BannerFormData> }
     >({
       query: ({ id, data }) => ({
-        url: ` /data/banners.json/${id}`,
+        url: `/api/banners/standard/${id}`,
         method: "PUT",
         body: data,
       }),
@@ -36,11 +40,11 @@ export const bannerApi = baseApi.injectEndpoints({
       ],
     }),
     deleteBanner: builder.mutation<{ id: string }, string>({
-      query: (id) => ({ url: ` /data/banners.json/${id}`, method: "DELETE" }),
+      query: (id) => ({ url: `/api/banners/${id}`, method: "DELETE" }),
       invalidatesTags: [{ type: "Banner", id: "LIST" }],
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const {

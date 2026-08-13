@@ -1,13 +1,12 @@
 export type Area = "phnom_penh" | "siem_reap" | "battambang" | "kampot" | "kratie";
-export type FoodByAreaStatus = "active" | "pending" | "disabled";
 
 export interface FoodByAreaImage {
   id: string;
-  image: string;
-  title: string;
+  location: string; // The area key
+  name: string;
   description: string;
-  area: Area;
-  status: FoodByAreaStatus;
+  isdisplay?: boolean;
+  image_url: string;
 }
 
 export interface AreaTabConfig {

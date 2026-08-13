@@ -1,13 +1,12 @@
 export type Season = "rainy" | "dry" | "hot" | "festival";
-export type SeasonalFoodStatus = "active" | "pending" | "disabled";
 
 export interface SeasonalFoodImage {
   id: string;
-  image: string;
-  title: string;
-  description: string;
+  name: string;
+  image_url: string;
   season: Season;
-  status: SeasonalFoodStatus;
+  order: number;
+  isdisplay?: boolean;
 }
 
 export interface SeasonTabConfig {

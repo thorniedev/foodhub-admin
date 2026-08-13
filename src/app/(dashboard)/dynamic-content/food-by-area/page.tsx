@@ -1,138 +1,115 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import {
-  useAddFoodByAreaMutation,
-  useDeleteFoodByAreaMutation,
-  useGetFoodByAreasQuery,
-  useToggleFoodByAreaStatusMutation,
-  useUpdateFoodByAreaMutation,
-} from "../../../store/foodByAreaApi";
-import { Area, FoodByAreaImage } from "../../../../types/foodByArea";
-import FoodByAreaBanner from "../../../../components/dynamic-content/food-by-area/FoodByAreaBanner";
-import FoodByAreaTabs from "../../../../components/feedback/FoodByAreaTabs";
+import { useState } from "react";
+import { Search } from "lucide-react";
+import { useGetFoodByAreasQuery, useDeleteFoodByAreaMutation, useAddFoodByAreaMutation, useUpdateFoodByAreaMutation } from "../../../store/foodByAreaApi";
 import FoodByAreaTable from "../../../../components/feedback/FoodByAreaTable";
-import FoodByAreaPagination from "../../../../components/feedback/FoodByAreaPagination";
 import FoodByAreaFormModal from "../../../../components/feedback/FoodByAreaFormModal";
+import FoodByAreaBanner from "../../../../components/feedback/FoodByAreaBanner";
+import { FoodByAreaImage, Area } from "../../../../types/foodByArea";
 
-const PAGE_SIZE = 8;
+const AREA_LABELS: Record<Area, string> = {
+  phnom_penh: "ភ្នំពេញ",
+  siem_reap: "សៀមរាប",
+  battambang: "បាត់ដំបង",
+  kampot: "កំពត",
+  kratie: "ក្រចេះ",
+};
 
 export default function FoodByAreaPage() {
-  const { data, isLoading, isError } = useGetFoodByAreasQuery();
-  const [addItem] = useAddFoodByAreaMutation();
-  const [updateItem] = useUpdateFoodByAreaMutation();
-  const [deleteItem] = useDeleteFoodByAreaMutation();
-  const [toggleStatus] = useToggleFoodByAreaStatusMutation();
+  const { data: areas = [] } = useGetFoodByAreasQuery();
+  const [deleteArea] = useDeleteFoodByAreaMutation();
+  const [addArea] = useAddFoodByAreaMutation();
+  const [updateArea] = useUpdateFoodByAreaMutation();
 
-  const [activeTab, setActiveTab] = useState<Area | "all">("all");
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<FoodByAreaImage | null>(null);
+  const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState<Area | "all">("all");
 
-  const allData: FoodByAreaImage[] = data ?? [];
+  const activeCount = areas.filter((a) => a.isdisplay).length;
+  const pendingCount = areas.length - activeCount;
 
-  const filtered = useMemo(() => {
-    return allData.filter((item) => {
-      const matchesTab = activeTab === "all" || item.area === activeTab;
-      const query = search.trim().toLowerCase();
-      const matchesSearch =
-        query === "" ||
-        item.title.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query);
-      return matchesTab && matchesSearch;
-    });
-  }, [allData, activeTab, search]);
+  // Extract unique areas from actual data
+  const availableAreas = Array.from(new Set(areas.map((a) => a.location)));
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const activeCount = allData.filter((f) => f.status === "active").length;
-  const pendingCount = allData.filter((f) => f.status === "pending").length;
-
-  const handleAddNew = () => {
-    setEditingItem(null);
-    setModalOpen(true);
-  };
-
-  const handleEdit = (item: FoodByAreaImage) => {
-    setEditingItem(item);
-    setModalOpen(true);
-  };
-
-  const handleDelete = async (item: FoodByAreaImage) => {
-    await deleteItem(item.id);
-  };
-
-  const handleToggleStatus = async (item: FoodByAreaImage) => {
-    await toggleStatus(item.id);
-  };
+  // Filter data based on search and active tab
+  const filteredData = areas.filter((a) => {
+    const matchesSearch = a.name.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter = activeFilter === "all" || a.location === activeFilter;
+    return matchesSearch && matchesFilter;
+  });
 
   const handleSubmit = async (values: Omit<FoodByAreaImage, "id">) => {
-    if (editingItem) {
-      await updateItem({ id: editingItem.id, changes: values });
-    } else {
-      await addItem(values);
-    }
-    setModalOpen(false);
+    if (editingItem) await updateArea({ id: editingItem.id, changes: values });
+    else await addArea(values);
+    setIsModalOpen(false);
   };
 
-  if (isLoading) {
-    return (
-      <div className="p-3 sm:p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="p-3 sm:p-6 text-red-500">
-        មានបញ្ហាក្នុងការទាញយកទិន្នន័យ សូមព្យាយាមម្តងទៀត
-      </div>
-    );
-  }
-
   return (
-    <div className="p-3 sm:p-6">
+    <div className="p-3 sm:p-6 space-y-8">
       <FoodByAreaBanner
-        total={allData.length}
+        total={areas.length}
         activeCount={activeCount}
         pendingCount={pendingCount}
-        onAddNew={handleAddNew}
+        onAddNew={() => {
+          setEditingItem(null);
+          setIsModalOpen(true);
+        }}
       />
 
-      <FoodByAreaTabs
-        data={allData}
-        activeTab={activeTab}
-        onTabChange={(tab) => {
-          setActiveTab(tab);
-          setPage(1);
-        }}
-        search={search}
-        onSearchChange={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
-      />
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* Dynamic Filter Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 -mx-1 px-1">
+          <button
+            onClick={() => setActiveFilter("all")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeFilter === "all"
+              ? "bg-[#136C34] text-white"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+          >
+            ទាំងអស់ (All)
+          </button>
+
+          {availableAreas.map((area) => (
+            <button
+              key={area}
+              onClick={() => setActiveFilter(area as Area)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeFilter === area
+                ? "bg-[#136C34] text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+            >
+              {AREA_LABELS[area as Area] || area}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative w-full lg:w-72 shrink-0">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="ស្វែងរកតាមចំណងជើង..."
+            className="w-full pl-9 pr-3 py-2 text-sm sm:text-base border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+          />
+        </div>
+      </div>
 
       <FoodByAreaTable
-        data={paginated}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onToggleStatus={handleToggleStatus}
-      />
-
-      <FoodByAreaPagination
-        total={filtered.length}
-        shown={paginated.length}
-        page={page}
-        totalPages={totalPages}
-        onPageChange={setPage}
+        data={filteredData}
+        onEdit={(item) => {
+          setEditingItem(item);
+          setIsModalOpen(true);
+        }}
+        onDelete={(item) => deleteArea(item.id)}
       />
 
       <FoodByAreaFormModal
-        open={modalOpen}
+        open={isModalOpen}
         initialData={editingItem}
-        onClose={() => setModalOpen(false)}
+        onClose={() => setIsModalOpen(false)}
         onSubmit={handleSubmit}
       />
     </div>

@@ -1,12 +1,10 @@
 export interface Banner {
   id: string;
-  title: string;
-  imageUrl: string;
-  link?: string;
-  order: number;
-  status: "active" | "inactive";
-  createdAt: string;
+  location: string;
+  name: string;
+  description: string;
+  image_url: string;
+  isdisplay?: boolean;
 }
 
-// Fields the create/edit form is allowed to send
-export type BannerFormData = Omit<Banner, "id" | "createdAt">;
+export type BannerFormData = Omit<Banner, "id">;

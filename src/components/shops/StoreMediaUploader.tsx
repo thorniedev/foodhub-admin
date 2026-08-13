@@ -20,6 +20,7 @@ import {
   importStoreMediaFromUrl,
   uploadStoreMediaFile,
 } from "@/src/lib/storeMediaClient";
+import { compressImage } from "@/src/utils/imageCompression";
 
 import type {
   StoreMediaPurpose,
@@ -151,10 +152,12 @@ export default function StoreMediaUploader({
       try {
         setLoading(true);
         setError(null);
+        
+        const compressedFile = await compressImage(file, 1); // Compress to 1MB limit for Java backend
 
         const media =
           await uploadStoreMediaFile(
-            file,
+            compressedFile,
             purpose,
           );
 
