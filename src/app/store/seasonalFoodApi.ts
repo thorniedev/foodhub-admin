@@ -1,48 +1,42 @@
-import { SeasonalFoodImage } from "@/src/types/seasonalFood";
+import { Season, SeasonalFoodImage } from "@/src/types/seasonalFood";
 import { baseApi } from "./baseApi";
 
-
-let memoryStore: SeasonalFoodImage[] | null = null;
-
-async function ensureStore(): Promise<SeasonalFoodImage[]> {
-  if (memoryStore) {
-    return memoryStore;
+const seasonStringToInt = (season: Season): number => {
+  switch (season) {
+    case "rainy": return 1;
+    case "dry": return 2;
+    case "hot": return 3;
+    case "festival": return 4;
+    default: return 1;
   }
+};
 
-  const res = await fetch("/data/seasonalFoodImages.json");
-
-  if (!res.ok) {
-    throw new Error(`Failed to load seasonal foods: ${res.status}`);
+const seasonIntToString = (seasonInt: number): Season => {
+  switch (seasonInt) {
+    case 1: return "rainy";
+    case 2: return "dry";
+    case 3: return "hot";
+    case 4: return "festival";
+    default: return "rainy";
   }
-
-  const data: SeasonalFoodImage[] = await res.json();
-
-  memoryStore = data;
-
-  return memoryStore;
-}
+};
 
 export const seasonalFoodApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getSeasonalFoods: builder.query<SeasonalFoodImage[], void>({
-      queryFn: async () => {
-        try {
-          const data = await ensureStore();
-
-          return { data: [...data] };
-        } catch (error) {
-          return {
-            error: {
-              status: "CUSTOM_ERROR",
-              error:
-                error instanceof Error
-                  ? error.message
-                  : "Failed to load seasonal foods",
-            },
-          };
-        }
+      query: () => ({ url: "/api/banners" }),
+      transformResponse: (response: any[]) => {
+        return response
+          .filter((item) => item.season !== null && item.season !== undefined)
+          .map((item) => ({
+            id: item.id,
+            name: item.name,
+            image_url: item.image_url,
+            season: seasonIntToString(item.season),
+            order: item.order ?? item.displayOrder ?? 0,
+            isdisplay: item.isdisplay ?? item.isDisplay ?? true,
+          }));
       },
-
       providesTags: (result) =>
         result
           ? [
@@ -50,161 +44,59 @@ export const seasonalFoodApi = baseApi.injectEndpoints({
                 type: "SeasonalFood" as const,
                 id,
               })),
-              {
-                type: "SeasonalFood" as const,
-                id: "LIST",
-              },
+              { type: "SeasonalFood" as const, id: "LIST" },
             ]
-          : [
-              {
-                type: "SeasonalFood" as const,
-                id: "LIST",
-              },
-            ],
+          : [{ type: "SeasonalFood" as const, id: "LIST" }],
     }),
 
-addSeasonalFood: builder.mutation<
-  SeasonalFoodImage,
-  Omit<SeasonalFoodImage, "id">
->({
-  queryFn: async (newItem) => {
-    const data = await ensureStore();
+    addSeasonalFood: builder.mutation<
+      SeasonalFoodImage,
+      Omit<SeasonalFoodImage, "id">
+    >({
+      query: (newItem) => {
+        const payload = {
+          id: crypto.randomUUID(),
+          name: newItem.name,
+          season: seasonStringToInt(newItem.season),
+          order: newItem.order,
+          isdisplay: newItem.isdisplay ?? true,
+          image_url: newItem.image_url,
+        };
+        return { url: "/api/banners/seasonal", method: "POST", body: payload };
+      },
+      invalidatesTags: [{ type: "SeasonalFood", id: "LIST" }],
+    }),
 
-    const item: SeasonalFoodImage = {
-      ...newItem,
-      id: `SF${String(data.length + 1).padStart(3, "0")}`,
-    };
+    updateSeasonalFood: builder.mutation<
+      SeasonalFoodImage,
+      { id: string; changes: Partial<SeasonalFoodImage> }
+    >({
+      query: ({ id, changes }) => {
+        const payload: any = { ...changes };
+        if (changes.season) {
+          payload.season = seasonStringToInt(changes.season);
+        }
+        return {
+          url: `/api/banners/seasonal/${id}`,
+          method: "PUT",
+          body: payload,
+        };
+      },
+      invalidatesTags: (_r, _e, { id }) => [
+        { type: "SeasonalFood", id },
+        { type: "SeasonalFood", id: "LIST" },
+      ],
+    }),
 
-    memoryStore = [item, ...data];
-
-    return { data: item };
-  },
-
-  invalidatesTags: [
-    {
-      type: "SeasonalFood",
-      id: "LIST",
-    },
-  ],
-}),
-
-updateSeasonalFood: builder.mutation<
-  SeasonalFoodImage,
-  { id: string; changes: Partial<SeasonalFoodImage> }
->({
-  queryFn: async ({ id, changes }) => {
-    const data = await ensureStore();
-
-    const index = data.findIndex((item) => item.id === id);
-
-    if (index === -1) {
-      return {
-        error: {
-          status: 404,
-          data: "Item not found",
-        } as any,
-      };
-    }
-
-    const updated = {
-      ...data[index],
-      ...changes,
-    };
-
-    memoryStore = [
-      ...data.slice(0, index),
-      updated,
-      ...data.slice(index + 1),
-    ];
-
-    return { data: updated };
-  },
-
-  invalidatesTags: (result, error, { id }) => [
-    {
-      type: "SeasonalFood",
-      id,
-    },
-    {
-      type: "SeasonalFood",
-      id: "LIST",
-    },
-  ],
-}),
-
-deleteSeasonalFood: builder.mutation<{ id: string }, string>({
-  queryFn: async (id) => {
-    const data = await ensureStore();
-
-    memoryStore = data.filter((item) => item.id !== id);
-
-    return {
-      data: { id },
-    };
-  },
-
-  invalidatesTags: (result, error, id) => [
-    {
-      type: "SeasonalFood",
-      id,
-    },
-    {
-      type: "SeasonalFood",
-      id: "LIST",
-    },
-  ],
-}),
-
-toggleSeasonalFoodStatus: builder.mutation<
-  SeasonalFoodImage,
-  string
->({
-  queryFn: async (id) => {
-    const data = await ensureStore();
-
-    const index = data.findIndex((item) => item.id === id);
-
-    if (index === -1) {
-      return {
-        error: {
-          status: 404,
-          data: "Item not found",
-        } as any,
-      };
-    }
-
-    const current = data[index];
-
-    const updated: SeasonalFoodImage = {
-      ...current,
-      status:
-        current.status === "disabled"
-          ? "active"
-          : "disabled",
-    };
-
-    memoryStore = [
-      ...data.slice(0, index),
-      updated,
-      ...data.slice(index + 1),
-    ];
-
-    return { data: updated };
-  },
-
-  invalidatesTags: (result, error, id) => [
-    {
-      type: "SeasonalFood",
-      id,
-    },
-    {
-      type: "SeasonalFood",
-      id: "LIST",
-    },
-  ],
-}),
+    deleteSeasonalFood: builder.mutation<{ id: string }, string>({
+      query: (id) => ({ url: `/api/banners/${id}`, method: "DELETE" }),
+      invalidatesTags: (_r, _e, id) => [
+        { type: "SeasonalFood", id },
+        { type: "SeasonalFood", id: "LIST" },
+      ],
+    }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const {
@@ -212,5 +104,4 @@ export const {
   useAddSeasonalFoodMutation,
   useUpdateSeasonalFoodMutation,
   useDeleteSeasonalFoodMutation,
-  useToggleSeasonalFoodStatusMutation,
 } = seasonalFoodApi;

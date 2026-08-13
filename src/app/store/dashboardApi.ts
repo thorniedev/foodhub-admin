@@ -8,7 +8,7 @@ export const dashboardApi = baseApi.injectEndpoints({
       providesTags: ["Dashboard"],
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const { useGetDashboardDataQuery } = dashboardApi;

@@ -91,7 +91,7 @@ export const feedbackApi = baseApi.injectEndpoints({
       },
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const {

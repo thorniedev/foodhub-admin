@@ -21,7 +21,7 @@ export const restaurantApi = baseApi.injectEndpoints({
       providesTags: [{ type: "Restaurant", id: "LIST" }],
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const { useGetRestaurantsQuery } = restaurantApi;

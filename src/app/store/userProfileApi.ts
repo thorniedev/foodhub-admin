@@ -154,7 +154,7 @@
 //   ],
 // }),
 // }),
-// overrideExisting: false,
+// overrideExisting: true,
 // });
 
 // export const {
@@ -301,7 +301,7 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
     }),
   }),
 
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const {

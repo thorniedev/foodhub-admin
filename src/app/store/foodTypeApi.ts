@@ -141,7 +141,7 @@ toggleFoodTypeStatus: builder.mutation<FoodType, string>({
   ],
 }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const {

@@ -222,7 +222,7 @@ export const shopApi = adminBaseApi.injectEndpoints({
       transformResponse: (r) => normalizeOne<Store>(r),
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const {
