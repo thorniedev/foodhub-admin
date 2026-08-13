@@ -207,18 +207,31 @@ export default function IngredientManager() {
      - this keeps counts accurate
   ===================================================== */
 
-  const {
-    data,
-    error,
-    isLoading,
-    isFetching,
-    refetch,
-  } =
-    useGetIngredientsQuery({
-      page: 0,
-      size: 1000,
-      sort: "name,asc",
-    });
+//   const {
+//     data,
+//     error,
+//     isLoading,
+//     isFetching,
+//     refetch,
+//   } =
+//     useGetIngredientsQuery({
+//   page: 0,
+//   size: 100,
+//   sort: "name,asc",
+// });
+
+
+const {
+  data,
+  error,
+  isLoading,
+  isFetching,
+  refetch,
+} = useGetIngredientsQuery({
+  page: 0,
+  size: 20,
+  sort: "name,asc",
+});
 
   /* =====================================================
      MUTATIONS

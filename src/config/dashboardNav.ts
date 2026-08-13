@@ -84,15 +84,15 @@ export const dashboardNav: NavItem[] = [
     children: [
       {
         label: "ប្រភេទម្ហូប",
-        href: "/filter-tags/food-categories",
+        href: "/filter/food-categories",
       },
       {
         label: "ម្ហូបតាមប្រទេស",
-        href: "/filter-tags/cuisines",
+        href: "/filter/cuisines",
       },
       {
         label: "ពេលទទួលទាន",
-        href: "/filter-tags/meal-times",
+        href: "/filter/meal-times",
       },
       {
         label: "របបអាហារ",
@@ -100,7 +100,7 @@ export const dashboardNav: NavItem[] = [
       },
       {
         label: "ក្រុមអាយុ",
-        href: "/filter-tags/age-groups",
+        href: "/filter/age-groups",
       },
       {
         label: "អាឡែស៊ី",
@@ -112,59 +112,59 @@ export const dashboardNav: NavItem[] = [
       },
       {
         label: "កម្រិតហឹរ",
-        href: "/filter-tags/spice-levels",
+        href: "/filter/spice-levels",
       },
       {
         label: "ពេលចម្អិន",
-        href: "/filter-tags/preparation-times",
+        href: "/filter/preparation-times",
       },
       {
         label: "ចម្ងាយ",
-        href: "/filter-tags/distances",
+        href: "/filter/distances",
       },
       {
         label: "វិធីចម្អិន",
-        href: "/filter-tags/cooking-methods",
+        href: "/filter/cooking-methods",
       },
       {
         label: "លក្ខណៈម្ហូប",
-        href: "/filter-tags/food-styles",
+        href: "/filter/food-styles",
       },
       {
         label: "គោលដៅសុខភាព",
-        href: "/filter-tags/health-goals",
+        href: "/filter/health-goals",
       },
       {
         label: "តំបន់",
-        href: "/filter-tags/regions",
+        href: "/filter/regions",
       },
       {
         label: "រសជាតិ",
-        href: "/filter-tags/tastes",
+        href: "/filter/tastes",
       },
       {
         label: "វាយនភាព",
-        href: "/filter-tags/textures",
+        href: "/filter/textures",
       },
       {
         label: "គ្រឿងផ្សំ",
-        href: "/filter-tags/ingredients",
+        href: "/filter/ingredients",
       },
       {
         label: "សារធាតុចិញ្ចឹម",
-        href: "/filter-tags/nutrition",
+        href: "/filter/nutrition",
       },
       {
         label: "តម្លៃ",
-        href: "/filter-tags/price-levels",
+        href: "/filter/price-levels",
       },
       {
         label: "ការវាយតម្លៃ",
-        href: "/filter-tags/ratings",
+        href: "/filter/ratings",
       },
       {
         label: "កម្រិតណែនាំ AI",
-        href: "/filter-tags/ai-scores",
+        href: "/filter/ai-scores",
       },
     ],
   },
