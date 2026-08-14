@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  type ChangeEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 
 import {
   CheckCircle2,
@@ -22,25 +17,19 @@ import {
 } from "@/src/lib/storeMediaClient";
 import { compressImage } from "@/src/utils/imageCompression";
 
-import type {
-  StoreMediaPurpose,
-} from "@/src/types/media";
+import type { StoreMediaPurpose } from "@/src/types/media";
 
 interface StoreMediaUploaderProps {
   label: string;
   purpose: StoreMediaPurpose;
   mediaUuid: string;
-  onMediaUuidChange: (
-    uuid: string,
-  ) => void;
+  onMediaUuidChange: (uuid: string) => void;
   variant?: "logo" | "cover";
 }
 
-const ACCEPTED_TYPES =
-  "image/png,image/jpeg,image/gif,image/webp";
+const ACCEPTED_TYPES = "image/png,image/jpeg,image/gif,image/webp";
 
-const MAX_BYTES =
-  10 * 1024 * 1024;
+const MAX_BYTES = 10 * 1024 * 1024;
 
 export default function StoreMediaUploader({
   label,
@@ -49,58 +38,31 @@ export default function StoreMediaUploader({
   onMediaUuidChange,
   variant = "cover",
 }: StoreMediaUploaderProps) {
-  const inputRef =
-    useRef<HTMLInputElement | null>(
-      null,
-    );
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const [
-    imageUrlInput,
-    setImageUrlInput,
-  ] = useState("");
+  const [imageUrlInput, setImageUrlInput] = useState("");
 
-  const [
-    previewUrl,
-    setPreviewUrl,
-  ] = useState<string | null>(
-    null,
-  );
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const [
-    objectUrl,
-    setObjectUrl,
-  ] = useState<string | null>(
-    null,
-  );
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
 
-  const [mode, setMode] = useState<
-    "upload" | "url"
-  >("upload");
+  const [mode, setMode] = useState<"upload" | "url">("upload");
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [error, setError] = useState<
-    string | null
-  >(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
       if (objectUrl) {
-        URL.revokeObjectURL(
-          objectUrl,
-        );
+        URL.revokeObjectURL(objectUrl);
       }
     };
   }, [objectUrl]);
 
-  const replacePreviewObjectUrl = (
-    url: string | null,
-  ) => {
+  const replacePreviewObjectUrl = (url: string | null) => {
     if (objectUrl) {
-      URL.revokeObjectURL(
-        objectUrl,
-      );
+      URL.revokeObjectURL(objectUrl);
     }
 
     setObjectUrl(url);
@@ -110,137 +72,99 @@ export default function StoreMediaUploader({
     }
   };
 
-  const handleFileChange =
-    async (
-      event: ChangeEvent<HTMLInputElement>,
-    ) => {
-      const file =
-        event.target.files?.[0];
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
 
-      event.target.value = "";
+    event.target.value = "";
 
-      if (!file) {
-        return;
-      }
+    if (!file) {
+      return;
+    }
 
-      if (
-        ![
-          "image/png",
-          "image/jpeg",
-          "image/gif",
-          "image/webp",
-        ].includes(file.type)
-      ) {
-        setError(
-          "Only PNG, JPEG, GIF and WebP images are supported.",
-        );
+    if (
+      !["image/png", "image/jpeg", "image/gif", "image/webp"].includes(
+        file.type,
+      )
+    ) {
+      setError("Only PNG, JPEG, GIF and WebP images are supported.");
 
-        return;
-      }
+      return;
+    }
 
-      if (file.size > MAX_BYTES) {
-        setError(
-          "Image must be 10 MB or smaller.",
-        );
+    if (file.size > MAX_BYTES) {
+      setError("Image must be 10 MB or smaller.");
 
-        return;
-      }
+      return;
+    }
 
-      const localPreview =
-        URL.createObjectURL(file);
+    const localPreview = URL.createObjectURL(file);
 
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const compressedFile = await compressImage(file, 1); // Compress to 1MB limit for Java backend
+    try {
+      setLoading(true);
+      setError(null);
 
-        const media =
-          await uploadStoreMediaFile(
-            compressedFile,
-            purpose,
-          );
+      const compressedFile = await compressImage(file, 1); // Compress to 1MB limit for Java backend
 
-        replacePreviewObjectUrl(
-          localPreview,
-        );
+      const media = await uploadStoreMediaFile(compressedFile, purpose);
 
-        onMediaUuidChange(
-          media.uuid,
-        );
-      } catch (uploadError) {
-        URL.revokeObjectURL(
-          localPreview,
-        );
+      replacePreviewObjectUrl(localPreview);
 
-        setError(
-          uploadError instanceof Error
-            ? uploadError.message
-            : "Image upload failed.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+      onMediaUuidChange(media.uuid);
+    } catch (uploadError) {
+      URL.revokeObjectURL(localPreview);
 
-  const handleImportUrl =
-    async () => {
-      const cleanUrl =
-        imageUrlInput.trim();
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Image upload failed.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      if (!cleanUrl) {
-        setError(
-          "Please paste an image URL.",
-        );
+  const handleImportUrl = async () => {
+    const cleanUrl = imageUrlInput.trim();
 
-        return;
-      }
+    if (!cleanUrl) {
+      setError("Please paste an image URL.");
 
-      try {
-        new URL(cleanUrl);
-      } catch {
-        setError(
-          "Please enter a valid image URL.",
-        );
+      return;
+    }
 
-        return;
-      }
+    try {
+      new URL(cleanUrl);
+    } catch {
+      setError("Please enter a valid image URL.");
 
-      try {
-        setLoading(true);
-        setError(null);
+      return;
+    }
 
-        const media =
-          await importStoreMediaFromUrl(
-            cleanUrl,
-            purpose,
-          );
+    try {
+      setLoading(true);
+      setError(null);
 
-        replacePreviewObjectUrl(
-          null,
-        );
+      const media = await importStoreMediaFromUrl(cleanUrl, purpose);
 
-        setPreviewUrl(cleanUrl);
+      replacePreviewObjectUrl(null);
 
-        onMediaUuidChange(
-          media.uuid,
-        );
-      } catch (importError) {
-        setError(
-          importError instanceof Error
-            ? importError.message
-            : "Image URL import failed.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+      setPreviewUrl(cleanUrl);
+
+      onMediaUuidChange(media.uuid);
+    } catch (importError) {
+      setError(
+        importError instanceof Error
+          ? importError.message
+          : "Image URL import failed.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const clearImage = () => {
     if (objectUrl) {
-      URL.revokeObjectURL(
-        objectUrl,
-      );
+      URL.revokeObjectURL(objectUrl);
     }
 
     setObjectUrl(null);
@@ -251,19 +175,14 @@ export default function StoreMediaUploader({
     onMediaUuidChange("");
   };
 
-  const previewHeight =
-    variant === "logo"
-      ? "h-44"
-      : "h-52";
+  const previewHeight = variant === "logo" ? "h-44" : "h-52";
 
   return (
     <div className="overflow-hidden rounded-[22px] border border-gray-100 bg-white">
       <div className="border-b border-gray-100 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xl font-semibold text-[#F97316]">
-              {label}
-            </p>
+            <p className="text-xl font-semibold text-[#F97316]">{label}</p>
 
             <p className="mt-1 text-sm text-gray-400">
               PNG, JPG, GIF or WebP · max 10 MB
@@ -295,14 +214,9 @@ export default function StoreMediaUploader({
           />
         ) : (
           <div className="text-center text-gray-300">
-            <ImageIcon
-              size={38}
-              className="mx-auto"
-            />
+            <ImageIcon size={38} className="mx-auto" />
 
-            <p className="mt-2 text-xs font-semibold">
-              No image selected
-            </p>
+            <p className="mt-2 text-xs font-semibold">No image selected</p>
           </div>
         )}
 
@@ -326,9 +240,7 @@ export default function StoreMediaUploader({
         <div className="grid grid-cols-2 gap-2 rounded-2xl bg-gray-50 p-1.5">
           <button
             type="button"
-            onClick={() =>
-              setMode("upload")
-            }
+            onClick={() => setMode("upload")}
             className={`inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-black transition ${
               mode === "upload"
                 ? "bg-white text-[#137A3D] shadow-sm"
@@ -341,9 +253,7 @@ export default function StoreMediaUploader({
 
           <button
             type="button"
-            onClick={() =>
-              setMode("url")
-            }
+            onClick={() => setMode("url")}
             className={`inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-black transition ${
               mode === "url"
                 ? "bg-white text-[#137A3D] shadow-sm"
@@ -361,41 +271,28 @@ export default function StoreMediaUploader({
               ref={inputRef}
               type="file"
               accept={ACCEPTED_TYPES}
-              onChange={
-                handleFileChange
-              }
+              onChange={handleFileChange}
               className="hidden"
             />
 
             <button
               type="button"
               disabled={loading}
-              onClick={() =>
-                inputRef.current?.click()
-              }
+              onClick={() => inputRef.current?.click()}
               className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 text-base font-semibold text-[#137A3D] transition hover:bg-emerald-100 disabled:opacity-50"
             >
               <Upload size={17} />
 
-              {mediaUuid
-                ? "Replace image"
-                : "Choose image"}
+              {mediaUuid ? "Replace image" : "Choose image"}
             </button>
           </>
         ) : (
           <div className="mt-3 flex">
             <input
               value={imageUrlInput}
-              onChange={(event) =>
-                setImageUrlInput(
-                  event.target.value,
-                )
-              }
+              onChange={(event) => setImageUrlInput(event.target.value)}
               onKeyDown={(event) => {
-                if (
-                  event.key ===
-                  "Enter"
-                ) {
+                if (event.key === "Enter") {
                   event.preventDefault();
                   void handleImportUrl();
                 }
@@ -406,13 +303,8 @@ export default function StoreMediaUploader({
 
             <button
               type="button"
-              disabled={
-                loading ||
-                !imageUrlInput.trim()
-              }
-              onClick={() =>
-                void handleImportUrl()
-              }
+              disabled={loading || !imageUrlInput.trim()}
+              onClick={() => void handleImportUrl()}
               className="rounded-r-xl bg-[#136C34] px-4 text-base text-white disabled:opacity-50"
             >
               Import

@@ -56,31 +56,23 @@ export default function ShopsManager() {
     text: string;
   } | null>(null);
 
-  const {
-    data,
-    error,
-    isLoading,
-    isFetching,
-    refetch,
-  } = useGetShopsQuery({
+  const { data, error, isLoading, isFetching, refetch } = useGetShopsQuery({
     query: serverQuery || undefined,
     page,
     size,
   });
 
-  const {
-    data: suggestionData,
-    isFetching: suggestionsLoading,
-  } = useGetShopsQuery(
-    {
-      query: suggestionQuery || undefined,
-      page: 0,
-      size: 8,
-    },
-    {
-      skip: suggestionQuery.length < 2,
-    },
-  );
+  const { data: suggestionData, isFetching: suggestionsLoading } =
+    useGetShopsQuery(
+      {
+        query: suggestionQuery || undefined,
+        page: 0,
+        size: 8,
+      },
+      {
+        skip: suggestionQuery.length < 2,
+      },
+    );
 
   const suggestions = suggestionData?.contents ?? [];
 
@@ -112,8 +104,10 @@ export default function ShopsManager() {
   const counts = {
     all: stores.length,
     pending: stores.filter((store) => store.reviewStatus === "PENDING").length,
-    approved: stores.filter((store) => store.reviewStatus === "APPROVED").length,
-    rejected: stores.filter((store) => store.reviewStatus === "REJECTED").length,
+    approved: stores.filter((store) => store.reviewStatus === "APPROVED")
+      .length,
+    rejected: stores.filter((store) => store.reviewStatus === "REJECTED")
+      .length,
   };
 
   const filteredStores =
@@ -124,21 +118,37 @@ export default function ShopsManager() {
   const sortedStores = [...filteredStores].sort((first, second) => {
     switch (sortBy) {
       case "NAME_ASC":
-        return (first.storeName ?? "").localeCompare(second.storeName ?? "", undefined, {
-          sensitivity: "base",
-        });
+        return (first.storeName ?? "").localeCompare(
+          second.storeName ?? "",
+          undefined,
+          {
+            sensitivity: "base",
+          },
+        );
       case "NAME_DESC":
-        return (second.storeName ?? "").localeCompare(first.storeName ?? "", undefined, {
-          sensitivity: "base",
-        });
+        return (second.storeName ?? "").localeCompare(
+          first.storeName ?? "",
+          undefined,
+          {
+            sensitivity: "base",
+          },
+        );
       case "NEWEST": {
-        const firstTime = first.createdAt ? new Date(first.createdAt).getTime() : 0;
-        const secondTime = second.createdAt ? new Date(second.createdAt).getTime() : 0;
+        const firstTime = first.createdAt
+          ? new Date(first.createdAt).getTime()
+          : 0;
+        const secondTime = second.createdAt
+          ? new Date(second.createdAt).getTime()
+          : 0;
         return secondTime - firstTime;
       }
       case "OLDEST": {
-        const firstTime = first.createdAt ? new Date(first.createdAt).getTime() : 0;
-        const secondTime = second.createdAt ? new Date(second.createdAt).getTime() : 0;
+        const firstTime = first.createdAt
+          ? new Date(first.createdAt).getTime()
+          : 0;
+        const secondTime = second.createdAt
+          ? new Date(second.createdAt).getTime()
+          : 0;
         return firstTime - secondTime;
       }
       default:
@@ -257,7 +267,10 @@ export default function ShopsManager() {
               <div className="absolute left-0 top-[52px] z-[100] w-[500px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
                 {suggestionsLoading ? (
                   <div className="flex items-center justify-center gap-2 px-5 py-6 text-lg text-gray-500">
-                    <Loader2 size={20} className="animate-spin text-[#137A3D]" />
+                    <Loader2
+                      size={20}
+                      className="animate-spin text-[#137A3D]"
+                    />
                     កំពុងស្វែងរក...
                   </div>
                 ) : suggestions.length === 0 ? (
@@ -293,7 +306,9 @@ export default function ShopsManager() {
                               {store.storeName}
                             </p>
                             <p className="mt-1 truncate text-sm text-gray-400">
-                              {[store.addressLine, store.city].filter(Boolean).join(", ") || "No address"}
+                              {[store.addressLine, store.city]
+                                .filter(Boolean)
+                                .join(", ") || "No address"}
                             </p>
                           </div>
 
@@ -333,7 +348,9 @@ export default function ShopsManager() {
 
             {sizeOpen && (
               <div className="absolute right-0 top-[52px] z-[100] w-[160px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg text-[#F97316]">ចំនួនក្នុងទំព័រ</p>
+                <p className="px-3 pb-2 pt-1 text-lg text-[#F97316]">
+                  ចំនួនក្នុងទំព័រ
+                </p>
                 {[10, 20, 50].map((value) => {
                   const selected = size === value;
                   return (
@@ -352,7 +369,9 @@ export default function ShopsManager() {
                       }`}
                     >
                       <span>{value} / ទំព័រ</span>
-                      {selected && <Check size={16} className="text-[#137A3D]" />}
+                      {selected && (
+                        <Check size={16} className="text-[#137A3D]" />
+                      )}
                     </button>
                   );
                 })}
@@ -400,7 +419,9 @@ export default function ShopsManager() {
                       }`}
                     >
                       <span>{option.label}</span>
-                      {selected && <Check size={16} className="text-[#137A3D]" />}
+                      {selected && (
+                        <Check size={16} className="text-[#137A3D]" />
+                      )}
                     </button>
                   );
                 })}
@@ -457,8 +478,8 @@ export default function ShopsManager() {
           </div>
         ) : sortedStores.length === 0 ? (
           <div className="flex min-h-[340px] flex-col items-center justify-center">
-            <Store size={42} className="text-[#F97316]" />
-            <p className="mt-3 text-lg text-[#F97316]">មិនមាន Store</p>
+            <Store size={60} className="text-[#F97316]" />
+            <p className="mt-3 text-2xl text-[#F97316]">មិនមាន Store</p>
           </div>
         ) : (
           <ShopsTable

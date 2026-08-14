@@ -300,34 +300,45 @@ export default function ShopDetailManager({
      UI
   ======================================================= */
   return (
-    <div className="space-y-5 p-4 sm:p-6 lg:p-7">
+    <div
+      className="
+        w-full
+        min-w-0
+        max-w-full
+        space-y-5
+        overflow-x-hidden
+        p-4
+        sm:p-5
+        lg:p-6
+      "
+    >
       {/* =================================================
           STORE PROFILE HEADER
       ================================================== */}
-      <StoreProfileHeader
-        store={store}
-        busy={busy}
-        onEdit={() => {
-          setNotice(null);
-
-          setEditOpen(true);
-        }}
-        onStatus={openStatus}
-        onHours={() => {
-          setNotice(null);
-
-          setHoursOpen(true);
-        }}
-      />
+      <div className="min-w-0 max-w-full">
+        <StoreProfileHeader
+          store={store}
+          busy={busy}
+          onEdit={() => {
+            setNotice(null);
+            setEditOpen(true);
+          }}
+          onStatus={openStatus}
+          onHours={() => {
+            setNotice(null);
+            setHoursOpen(true);
+          }}
+        />
+      </div>
 
       {/* =================================================
           MESSAGE
       ================================================== */}
       {notice && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-base ${
+          className={`max-w-full rounded-2xl border px-5 py-4 text-lg leading-7 ${
             notice.type === "success"
-              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+              ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
           }`}
         >
@@ -339,38 +350,60 @@ export default function ShopDetailManager({
           HOURS ERROR
       ================================================== */}
       {hoursError && (
-        <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-base text-amber-700">
+        <div className="max-w-full rounded-2xl border border-secondary-100 bg-secondary-50 px-5 py-4 text-lg leading-7 text-secondary-600">
           Store loaded successfully, but opening hours could not be loaded.
         </div>
       )}
 
       {/* =================================================
-          STORE INFORMATION GRID
+          RESPONSIVE MASONRY-LIKE CONTENT
+
+          - One column inside normal dashboard widths.
+          - Two columns only on very wide dashboard content.
+          - Every section keeps its own natural height.
+          - No shared grid-row height, so growing data does not
+            create large blank spaces or break neighboring cards.
       ================================================== */}
-      <div className="grid items-start gap-5 xl:grid-cols-2">
-        {/* STORE OVERVIEW */}
-        <StoreOverviewSection store={store} />
+      <div
+        className="
+          w-full
+          min-w-0
+          max-w-full
+          columns-1
+          [column-gap:1.25rem]
+          2xl:columns-2
+        "
+      >
+        <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
+          <StoreOverviewSection store={store} />
+        </div>
 
-        {/* LOCATION */}
-        <StoreContactLocationSection store={store} />
+        <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
+          <StoreContactLocationSection store={store} />
+        </div>
 
-        {/* RATINGS */}
-        <StoreRatingsSection store={store} />
+        <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
+          <StoreRatingsSection store={store} />
+        </div>
 
-        {/* LOGO + COVER */}
-        <StoreMediaSection store={store} />
+        <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
+          <StoreMediaSection store={store} />
+        </div>
 
-        {/* SOCIAL LINKS */}
-        <StoreSocialLinksSection links={store.socialLinks ?? []} />
+        <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
+          <StoreSocialLinksSection links={store.socialLinks ?? []} />
+        </div>
 
-        {/* OPENING HOURS */}
-        <StoreHoursSection
-          hours={hours}
-          loading={hoursLoading || hoursFetching}
-        />
+        <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
+          <StoreHoursSection
+            hours={hours}
+            loading={hoursLoading || hoursFetching}
+          />
+        </div>
 
-        {/* SYSTEM INFORMATION */}
-        <StoreSystemInfoSection store={store} />
+        <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
+          <StoreSystemInfoSection store={store} />
+        </div>
       </div>
 
       {/* =================================================

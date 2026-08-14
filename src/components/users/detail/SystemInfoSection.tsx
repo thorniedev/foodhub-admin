@@ -1,7 +1,9 @@
-import { Info } from "lucide-react";
+import { Clock3, Fingerprint, Info } from "lucide-react";
 
 import type { AdminProfile } from "@/src/types/userProfile";
+
 import { formatDateTime } from "@/src/lib/userProfileFormat";
+
 import { Section } from "./BasicInfoSection";
 
 export default function SystemInfoSection({
@@ -10,22 +12,26 @@ export default function SystemInfoSection({
   profile: AdminProfile;
 }) {
   return (
-    <Section title="System information" icon={<Info size={20} />}>
+    <Section title="System information" icon={<Info size={22} />}>
       <div className="space-y-3">
         <Row
           label="Avatar media UUID"
           value={profile.avatarMediaUuid ?? "—"}
+          icon={<Fingerprint size={20} />}
           mono
+          accent
         />
 
         <Row
           label="Created at"
           value={formatDateTime(profile.createdAt)}
+          icon={<Clock3 size={20} />}
         />
 
         <Row
           label="Updated at"
           value={formatDateTime(profile.updatedAt)}
+          icon={<Clock3 size={20} />}
         />
       </div>
     </Section>
@@ -35,25 +41,90 @@ export default function SystemInfoSection({
 function Row({
   label,
   value,
+  icon,
   mono = false,
+  accent = false,
 }: {
   label: string;
   value: string;
+  icon?: React.ReactNode;
   mono?: boolean;
+  accent?: boolean;
 }) {
   return (
-    <div className="grid gap-1 rounded-2xl bg-gray-50 px-4 py-3 sm:grid-cols-[170px_1fr]">
-      <span className="text-base font-semibold text-[#F97316]">
-        {label}
-      </span>
+    <div
+      className="
+        flex
+        min-w-0
+        items-center
+        gap-4
+        rounded-2xl
+        border
+        border-gray-100
+        bg-gray-50/60
+        px-4
+        py-4
+        transition
+        hover:border-gray-200
+        hover:bg-gray-50
+      "
+    >
+      {icon && (
+        <div
+          className={`
+            flex
+            h-11
+            w-11
+            shrink-0
+            items-center
+            justify-center
+            rounded-xl
+            ${
+              accent
+                ? "bg-secondary-50 text-secondary-500"
+                : "bg-primary-50 text-primary-800"
+            }
+          `}
+        >
+          {icon}
+        </div>
+      )}
 
-      <span
-        className={`break-all text-base text-gray-700 ${
-          mono ? "font-mono text-sm" : ""
-        }`}
+      <div
+        className="
+          grid
+          min-w-0
+          flex-1
+          gap-1
+          sm:grid-cols-[180px_1fr]
+          sm:items-center
+          sm:gap-4
+        "
       >
-        {value}
-      </span>
+        <p
+          className="
+            text-lg
+            font-medium
+            text-gray-500
+          "
+        >
+          {label}
+        </p>
+
+        <p
+          className={`
+            min-w-0
+            break-all
+            text-lg
+            font-medium
+            text-gray-800
+            ${mono ? "font-mono text-base" : ""}
+          `}
+          title={value}
+        >
+          {value}
+        </p>
+      </div>
     </div>
   );
 }

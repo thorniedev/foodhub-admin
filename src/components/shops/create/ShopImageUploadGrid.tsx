@@ -11,43 +11,100 @@ export default function ShopImageUploadGrid({
 }: {
   logoMediaUuid: string;
   coverMediaUuid: string;
-  onChange: (
-    key:
-      | "logoMediaUuid"
-      | "coverMediaUuid",
-    value: string,
-  ) => void;
+  onChange: (key: "logoMediaUuid" | "coverMediaUuid", value: string) => void;
 }) {
   return (
-    <section className="rounded-[24px] border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-[#137A3D]">
-          <ImageIcon size={20} />
+    <section
+      className="
+        rounded-2xl
+        border
+        border-gray-100
+        bg-white
+        p-5
+        sm:p-6
+      "
+    >
+      {/* Header */}
+      <div
+        className="
+          flex
+          items-start
+          gap-4
+        "
+      >
+        <div
+          className="
+            flex
+            h-11
+            w-11
+            shrink-0
+            items-center
+            justify-center
+            rounded-xl
+            bg-primary-50
+            text-primary-800
+          "
+        >
+          <ImageIcon size={22} />
         </div>
 
-        <div>
-          <h2 className="text-4xl font-bold text-gray-900">
+        <div className="min-w-0">
+          <p
+            className="
+              text-3xl
+              font-semibold
+              text-primary-800
+            "
+          >
             Store media
-          </h2>
-
-          <p className="mt-2 text-base leading-7 text-gray-500">
-            Upload the logo and cover from your computer or import a public image URL.
-            The backend Media API creates the media UUID automatically.
           </p>
+
+          <p
+            className="
+              mt-2
+              max-w-3xl
+              text-lg
+              leading-8
+              text-gray-500
+            "
+          >
+            Upload the store logo and cover image from your computer, or import
+            them using a public image URL.
+          </p>
+
+          <div
+            className="
+              mt-3
+              inline-flex
+              items-center
+              rounded-full
+              bg-secondary-50
+              px-3
+              py-1.5
+              text-base
+              font-medium
+              text-secondary-600
+            "
+          >
+            Media UUID is generated automatically
+          </div>
         </div>
       </div>
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-2">
+      {/* Upload grid */}
+      <div
+        className="
+          mt-6
+          grid
+          gap-5
+          lg:grid-cols-2
+        "
+      >
         <StoreMediaUploader
           label="Store logo"
           purpose="STORE_LOGO"
           mediaUuid={logoMediaUuid}
-          onMediaUuidChange={(uuid) =>
-            onChange(
-              "logoMediaUuid",
-              uuid,
-            )
-          }
+          onMediaUuidChange={(uuid) => onChange("logoMediaUuid", uuid)}
           variant="logo"
         />
 
@@ -55,12 +112,7 @@ export default function ShopImageUploadGrid({
           label="Store cover"
           purpose="STORE_COVER"
           mediaUuid={coverMediaUuid}
-          onMediaUuidChange={(uuid) =>
-            onChange(
-              "coverMediaUuid",
-              uuid,
-            )
-          }
+          onMediaUuidChange={(uuid) => onChange("coverMediaUuid", uuid)}
           variant="cover"
         />
       </div>

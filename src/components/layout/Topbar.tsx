@@ -27,7 +27,7 @@ export default function Topbar() {
   const adminInitials = getAdminInitials(admin);
 
   return (
-    <header className="sticky top-0 z-40 flex min-h-[84px] flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-white px-4 py-4 md:flex-nowrap md:px-8">
+    <header className="sticky top-0 z-40 flex min-h-[75px] flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-white px-4  md:flex-nowrap md:px-8">
       {/* LEFT */}
       <div className="flex min-w-0 items-center gap-3">
         <button
@@ -39,7 +39,7 @@ export default function Topbar() {
           <Menu size={22} />
         </button>
 
-        <div className="flex min-w-0 items-center gap-2 text-base font-semibold text-primary-800 md:text-lg">
+        <div className="flex min-w-0 items-center overflow-visible  gap-2 text-base font-semibold text-primary-800 md:text-3xl">
           {parent && (
             <>
               <span className="hidden text-gray-400 sm:inline">{parent}</span>

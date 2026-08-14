@@ -24,17 +24,31 @@ export default function ShopsHeader({
             </div>
 
             <div>
-              <p className="text-5xl font-bold">គ្រប់គ្រងហាង</p>
-              <p className="mt-2 max-w-2xl text-xl leading-7 text-white/85">
-                គ្រប់គ្រង បន្ថែម កែប្រែ ស្ថានភាព ម៉ោងបើកបិទ ទីតាំង និង Google Places សម្រាប់ហាងក្នុង FoodHub។
+              <p className="text-3xl font-bold text-accent-400">គ្រប់គ្រងហាង</p>
+              <p className="mt-6 max-w-2xl text-xl  text-white/85">
+                គ្រប់គ្រង បន្ថែម កែប្រែ ស្ថានភាព ម៉ោងបើកបិទ{" "}
+                <br className=" md:block max-md:hidden" /> ទីតាំង និង Google
+                Places សម្រាប់ហាងក្នុង FoodHub។
               </p>
             </div>
           </div>
 
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Stat icon={<Building2 size={20} />} label="ហាងសរុប" value={total} />
-            <Stat icon={<ShieldCheck size={20} />} label="Approved ក្នុងទំព័រ" value={approved} />
-            <Stat icon={<MapPinned size={20} />} label="Pending ក្នុងទំព័រ" value={pending} />
+            <Stat
+              icon={<Building2 size={20} />}
+              label="ហាងសរុប"
+              value={total}
+            />
+            <Stat
+              icon={<ShieldCheck size={20} />}
+              label="Approved ក្នុងទំព័រ"
+              value={approved}
+            />
+            <Stat
+              icon={<MapPinned size={20} />}
+              label="Pending ក្នុងទំព័រ"
+              value={pending}
+            />
           </div>
         </div>
 
@@ -50,14 +64,22 @@ export default function ShopsHeader({
   );
 }
 
-function Stat({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {
+function Stat({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: number;
+}) {
   return (
-    <div className="rounded-3xl bg-white/10 px-5 py-4">
-      <div className="flex items-center gap-2 text-xl text-white/75">
+    <div className="rounded-3xl bg-white/20 px-5 py-4">
+      <div className="flex items-center gap-2 text-xl text-white/80">
         {icon}
         <span>{label}</span>
       </div>
-      <p className="mt-1 text-2xl font-bold">{value}</p>
+      <p className="mt-1  text-2xl font-bold">{value}</p>
     </div>
   );
 }
