@@ -459,7 +459,7 @@ export default function UsersManager() {
   ======================================================= */
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 lg:p-7">
+    <div className="space-y-5">
       <UsersHeader
         total={data?.totalElements ?? 0}
         activeCount={counts.active}
@@ -555,7 +555,9 @@ export default function UsersManager() {
                 ) : (
                   <>
                     <div className="border-b border-gray-100 px-5 py-3">
-                      <p className="text-lg text-secondary-500">លទ្ធផលស្វែងរក</p>
+                      <p className="text-lg text-secondary-500">
+                        លទ្ធផលស្វែងរក
+                      </p>
                     </div>
 
                     <div className="max-h-[340px] overflow-y-auto p-2">
@@ -716,7 +718,9 @@ export default function UsersManager() {
 
             {sortOpen && (
               <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg text-secondary-500">តម្រៀប</p>
+                <p className="px-3 pb-2 pt-1 text-lg text-secondary-500">
+                  តម្រៀប
+                </p>
 
                 {sortOptions.map((option) => {
                   const selected = sortBy === option.value;
