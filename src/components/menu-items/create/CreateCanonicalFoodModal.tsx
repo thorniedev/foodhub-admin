@@ -182,7 +182,7 @@ export default function CreateCanonicalFoodModal({
         isActive: form.isActive,
       };
 
-      await createFood(payload).unwrap();
+      await createFood({ body: payload }).unwrap();
       await onCreated();
       onClose();
     } catch (requestError) {

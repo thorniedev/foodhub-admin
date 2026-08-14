@@ -158,7 +158,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import type { CreateMemberProfileRequest } from "@/types/member-profile/member-profile";
+import type { CreateMemberProfileRequest } from "@/src/types/member-profile/member-profile";
 
 export const dynamic = "force-dynamic";
 

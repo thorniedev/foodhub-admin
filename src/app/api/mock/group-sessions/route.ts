@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { createMockGroupSession } from "@/lib/mock-group-session-store";
-import type { CreateGroupSessionRequest } from "@/types/group-recommendation";
+import { createMockGroupSession } from "@/src/lib/mock-group-session-store";
+import type { CreateGroupSessionRequest } from "@/src/types/group-recommendation";
 
 export const dynamic = "force-dynamic";
 

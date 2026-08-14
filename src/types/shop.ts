@@ -1,4 +1,4 @@
-// export type StoreReviewStatus = "PENDING" | "APPROVED" | "REJECTED" | string;
+export type StoreReviewStatus = "PENDING" | "APPROVED" | "REJECTED" | string;
 export type StoreOperatingStatus =
   | "OPEN"
   | "CLOSED"

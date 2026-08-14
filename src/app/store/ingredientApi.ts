@@ -231,7 +231,7 @@
 // // // // //     //   getIngredients:
 // // // // //     //     builder.query<
 // // // // //     //       IngredientPage,
-// // // // //     //       IngredientListParams | void
+// // // // //     //       IngredientListParams | undefined
 // // // // //     //     >({
 // // // // //     //       query: (params) => ({
 // // // // //     //         url: "/ingredients",
@@ -259,7 +259,7 @@
 
 // // // // // //     getIngredients: builder.query<
 // // // // // //   IngredientPage,
-// // // // // //   IngredientListParams | void
+// // // // // //   IngredientListParams | undefined
 // // // // // // >({
 // // // // // //   query: (params) => ({
 // // // // // //     url: "/ingredients",
@@ -275,7 +275,7 @@
 // // // // // // }),
 // // // // // getIngredients: builder.query<
 // // // // //   IngredientPage,
-// // // // //   IngredientListParams | void
+// // // // //   IngredientListParams | undefined
 // // // // // >({
 // // // // //   query: (params) => ({
 // // // // //     url: "/ingredients",
@@ -649,7 +649,7 @@
 // // // //       getIngredients:
 // // // //         builder.query<
 // // // //           IngredientPage,
-// // // //           IngredientListParams | void
+// // // //           IngredientListParams | undefined
 // // // //         >({
 // // // //           query: (params) => ({
 // // // //             url: "/catalog/ingredients",
@@ -871,7 +871,7 @@
 // // //       getIngredients:
 // // //         builder.query<
 // // //           IngredientPage,
-// // //           IngredientListParams | void
+// // //           IngredientListParams | undefined
 // // //         >({
 // // //           query: (params) => ({
 // // //             url: "/ingredients",
@@ -1170,7 +1170,7 @@
 // //     endpoints: (builder) => ({
 // //       getIngredients: builder.query<
 // //         IngredientPage,
-// //         IngredientListParams | void
+// //         IngredientListParams | undefined
 // //       >({
 // //         query: (params) => ({
 // //           url: "/catalog/ingredients",
@@ -1484,7 +1484,7 @@
 
 //       getIngredients: builder.query<
 //         IngredientPage,
-//         IngredientListParams | void
+//         IngredientListParams | undefined
 //       >({
 //         query: (params) => ({
 //           url: "ingredients",
@@ -1907,7 +1907,7 @@ export const ingredientApi =
 
       getIngredients: builder.query<
         IngredientPage,
-        IngredientListParams | void
+        IngredientListParams | undefined
       >({
         query: (params) => ({
           url: "catalog/ingredients",

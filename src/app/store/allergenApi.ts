@@ -7,7 +7,7 @@ export const allergenApi = adminBaseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllergens: builder.query<
       PagedResponse<Allergen>,
-      ListParams | void
+      ListParams | undefined
     >({
       query: (params) => {
         const page = params?.page ?? 0;
