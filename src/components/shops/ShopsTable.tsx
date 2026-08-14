@@ -28,9 +28,9 @@ export default function ShopsTable({
           <tr className="border-b border-gray-100 bg-gray-50/50">
             <th className="px-5 py-4 text-xl font-bold text-[#136C34]">ហាង</th>
             <th className="px-5 py-4 text-xl font-bold text-[#136C34]">ទីតាំង</th>
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Rating</th>
+            {/* <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Rating</th>
             <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Review</th>
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Account</th>
+            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Account</th> */}
             <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Operating</th>
             <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Open now</th>
             <th className="px-5 py-4 text-right text-xl font-bold text-[#136C34]">សកម្មភាព</th>
@@ -85,7 +85,7 @@ export default function ShopsTable({
                   </div>
                 </td>
 
-                <td className="px-5 py-4">
+                {/* <td className="px-5 py-4">
                   <span className="inline-flex items-center gap-1.5 text-base text-gray-700">
                     <Star size={16} className="fill-amber-400 text-amber-400" />
                     {Number(store.averageRating || 0).toFixed(1)}
@@ -103,7 +103,7 @@ export default function ShopsTable({
                   <button type="button" disabled={disabled} onClick={() => onStatus(store, "ACCOUNT")}>
                     <StatusBadge value={store.accountStatus} kind="account" />
                   </button>
-                </td>
+                </td> */}
 
                 <td className="px-5 py-4">
                   <button type="button" disabled={disabled} onClick={() => onStatus(store, "OPERATING")}>

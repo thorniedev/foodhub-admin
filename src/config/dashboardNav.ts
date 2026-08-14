@@ -79,7 +79,7 @@ export const dashboardNav: NavItem[] = [
     ],
   },
   {
-    label: "ស្លាកត្រង",
+    label: "ចម្រោះទិន្នន័យ",
     icon: SlidersHorizontal,
     children: [
       {

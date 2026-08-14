@@ -1,25 +1,58 @@
-import { NextRequest, NextResponse } from "next/server";
+import type {
+  NextRequest,
+} from "next/server";
 
 import {
-  ALLOWED_IMAGE_MIME_TYPES,
-  MAX_IMAGE_BYTES,
-  forwardMediaToBackend,
-  isStoreMediaPurpose,
-} from "../_shared";
+  NextResponse,
+} from "next/server";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const runtime =
+  "nodejs";
+
+export const dynamic =
+  "force-dynamic";
+
+function getBackendApiBaseUrl(): string {
+  const configured =
+    process.env
+      .BACKEND_API_URL ||
+    process.env
+      .NEXT_PUBLIC_API_BASE_URL ||
+    "http://localhost:7070/api/v1";
+
+  const clean =
+    configured
+      .trim()
+      .replace(
+        /\/+$/,
+        "",
+      );
+
+  if (
+    clean.endsWith(
+      "/api/v1",
+    )
+  ) {
+    return clean;
+  }
+
+  return `${clean}/api/v1`;
+}
 
 export async function POST(
   request: NextRequest,
-): Promise<Response> {
+) {
   const accessToken =
-    request.cookies.get("foodhub_access_token")?.value;
+    request.cookies.get(
+      "foodhub_access_token",
+    )?.value;
 
   if (!accessToken) {
     return NextResponse.json(
       {
-        message: "Admin session is missing or expired.",
+        status: 401,
+        message:
+          "Missing admin access token.",
       },
       {
         status: 401,
@@ -27,84 +60,131 @@ export async function POST(
     );
   }
 
-  let formData: FormData;
-
   try {
-    formData = await request.formData();
-  } catch {
-    return NextResponse.json(
+    const incomingForm =
+      await request.formData();
+
+    const file =
+      incomingForm.get(
+        "file",
+      );
+
+    const purpose =
+      String(
+        incomingForm.get(
+          "purpose",
+        ) ??
+          "CATALOG_FOOD_PRIMARY",
+      ).trim();
+
+    if (
+      !(file instanceof File)
+    ) {
+      return NextResponse.json(
+        {
+          status: 400,
+          message:
+            "Image file is required.",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    const backendForm =
+      new FormData();
+
+    backendForm.append(
+      "file",
+      file,
+      file.name,
+    );
+
+    const backendUrl =
+      new URL(
+        `${getBackendApiBaseUrl()}/media`,
+      );
+
+    backendUrl.searchParams.set(
+      "purpose",
+      purpose,
+    );
+
+    const backendResponse =
+      await fetch(
+        backendUrl,
+        {
+          method: "POST",
+          headers: {
+            Accept:
+              "application/json",
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+          body:
+            backendForm,
+          cache:
+            "no-store",
+        },
+      );
+
+    const body =
+      await backendResponse.arrayBuffer();
+
+    const contentType =
+      backendResponse.headers.get(
+        "content-type",
+      ) ??
+      "application/json";
+
+    if (
+      !backendResponse.ok
+    ) {
+      console.error(
+        "[MEDIA UPLOAD ERROR]",
+        {
+          status:
+            backendResponse.status,
+          purpose,
+          response:
+            new TextDecoder().decode(
+              body,
+            ),
+        },
+      );
+    }
+
+    return new NextResponse(
+      body.byteLength
+        ? body
+        : null,
       {
-        message: "Invalid multipart form data.",
-      },
-      {
-        status: 400,
+        status:
+          backendResponse.status,
+        headers: {
+          "Content-Type":
+            contentType,
+          "Cache-Control":
+            "no-store",
+        },
       },
     );
-  }
-
-  const file = formData.get("file");
-  const purpose = formData.get("purpose");
-
-  if (!(file instanceof File)) {
-    return NextResponse.json(
-      {
-        message: "Image file is required.",
-      },
-      {
-        status: 400,
-      },
+  } catch (error) {
+    console.error(
+      "[MEDIA UPLOAD CONNECTION ERROR]",
+      error,
     );
-  }
 
-  if (!isStoreMediaPurpose(purpose)) {
     return NextResponse.json(
       {
+        status: 502,
         message:
-          "purpose must be STORE_LOGO or STORE_COVER.",
+          "Could not upload media.",
       },
       {
-        status: 400,
+        status: 502,
       },
     );
   }
-
-  if (!ALLOWED_IMAGE_MIME_TYPES.has(file.type)) {
-    return NextResponse.json(
-      {
-        message:
-          "Only PNG, JPEG, GIF and WebP images are supported.",
-      },
-      {
-        status: 415,
-      },
-    );
-  }
-
-  if (file.size <= 0) {
-    return NextResponse.json(
-      {
-        message: "The selected image is empty.",
-      },
-      {
-        status: 400,
-      },
-    );
-  }
-
-  if (file.size > MAX_IMAGE_BYTES) {
-    return NextResponse.json(
-      {
-        message: "Image must be 10 MB or smaller.",
-      },
-      {
-        status: 413,
-      },
-    );
-  }
-
-  return forwardMediaToBackend({
-    accessToken,
-    file,
-    purpose,
-  });
 }

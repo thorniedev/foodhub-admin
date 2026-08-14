@@ -232,7 +232,8 @@ export default function PublishMenuItemModal({
           isFeatured: values.isFeatured,
           source: values.source || "MANUAL",
         },
-        primaryMediaUuids: [],
+        primaryMediaUuids:
+          item?.primaryMediaUuids ?? [],
         ingredients: ingredientPayload,
         dietaryTypes: item?.dietaryTypes ?? [],
         allergenDeclarations:

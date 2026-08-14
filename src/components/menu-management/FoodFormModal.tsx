@@ -101,23 +101,17 @@ export default function FoodFormModal({
           ? String(item.nutritionData.calories)
           : "",
       protein:
-        item.nutritionData?.protein != null
-          ? String(item.nutritionData.protein)
-          : item.nutritionData?.proteinGrams != null
-            ? String(item.nutritionData.proteinGrams)
-            : "",
+        item.nutritionData?.proteinGrams != null
+          ? String(item.nutritionData.proteinGrams)
+          : "",
       carbohydrate:
-        item.nutritionData?.carbohydrate != null
-          ? String(item.nutritionData.carbohydrate)
-          : item.nutritionData?.carbsGrams != null
-            ? String(item.nutritionData.carbsGrams)
-            : "",
+        item.nutritionData?.carbsGrams != null
+          ? String(item.nutritionData.carbsGrams)
+          : "",
       fat:
-        item.nutritionData?.fat != null
-          ? String(item.nutritionData.fat)
-          : item.nutritionData?.fatGrams != null
-            ? String(item.nutritionData.fatGrams)
-            : "",
+        item.nutritionData?.fatGrams != null
+          ? String(item.nutritionData.fatGrams)
+          : "",
       isActive: item.isActive !== false,
     });
 
@@ -125,13 +119,29 @@ export default function FoodFormModal({
     setError(null);
   }, [item, open]);
 
-  const activeCategories = useMemo(
-    () =>
-      categories.filter(
-        (category) => category.isActive !== false,
-      ),
-    [categories],
-  );
+  const activeCategories = useMemo(() => {
+    const foodRoot = categories.find(
+      (category) =>
+        category.code?.trim().toUpperCase() === "FOOD" &&
+        !category.parentCategoryUuid,
+    );
+
+    if (!foodRoot) {
+      // Do not offer root categories as Food's category.
+      // The current backend flow requires Food to use a sub-category.
+      return categories.filter(
+        (category) =>
+          category.isActive !== false &&
+          Boolean(category.parentCategoryUuid),
+      );
+    }
+
+    return categories.filter(
+      (category) =>
+        category.isActive !== false &&
+        category.parentCategoryUuid === foodRoot.uuid,
+    );
+  }, [categories]);
 
   const submit = async () => {
     try {
@@ -151,15 +161,16 @@ export default function FoodFormModal({
         description: values.description.trim() || null,
         categoryUuid: values.categoryUuid,
         cuisineUuid: values.cuisineUuid || null,
-        primaryMediaUuids: [],
+        primaryMediaUuids:
+          item?.primaryMediaUuids ?? [],
         defaultSpiceLevel: numberOrNull(
           values.defaultSpiceLevel,
         ),
         nutritionData: {
           calories: numberOrNull(values.calories),
-          protein: numberOrNull(values.protein),
-          carbohydrate: numberOrNull(values.carbohydrate),
-          fat: numberOrNull(values.fat),
+          proteinGrams: numberOrNull(values.protein),
+          carbsGrams: numberOrNull(values.carbohydrate),
+          fatGrams: numberOrNull(values.fat),
         },
         mealTypes: item?.mealTypes ?? [],
         ageRules: item?.ageRules ?? [],
