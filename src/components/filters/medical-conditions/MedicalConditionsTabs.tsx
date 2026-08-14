@@ -73,8 +73,8 @@ export default function MedicalConditionsTabs({
               }
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-lg transition ${
                 selected
-                  ? "bg-[#136C34] text-white"
-                  : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
+                  ? "bg-primary-800 text-white"
+                  : "bg-white text-gray-500 hover:bg-primary-50 hover:text-primary-800"
               }`}
             >
               {
@@ -82,7 +82,7 @@ export default function MedicalConditionsTabs({
               }
 
               <span
-                className={`flex h-6 w-6 items-center justify-center rounded-full text-sm ${
+                className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base ${
                   selected
                     ? "bg-white/20 text-white"
                     : "bg-gray-100 text-gray-500"

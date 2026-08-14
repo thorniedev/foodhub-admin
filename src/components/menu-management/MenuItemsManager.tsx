@@ -310,7 +310,7 @@ export default function MenuItemsManager() {
   };
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 lg:p-7">
+    <div className="space-y-5">
       <div className="rounded-[28px] bg-gradient-to-br from-[#137A3D] to-[#0f8e48] p-6 text-white shadow-sm sm:p-7">
         <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
           <div className="flex items-center gap-3">

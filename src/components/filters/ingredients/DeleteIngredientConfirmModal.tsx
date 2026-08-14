@@ -1,6 +1,10 @@
+"use client";
+
+import { useEffect } from "react";
+
 import {
-  AlertTriangle,
   Loader2,
+  Trash2,
   X,
 } from "lucide-react";
 
@@ -11,7 +15,6 @@ import type {
 interface Props {
   item: Ingredient | null;
   deleting?: boolean;
-
   onClose: () => void;
   onConfirm: () => void;
 }
@@ -22,37 +25,49 @@ export default function DeleteIngredientConfirmModal({
   onClose,
   onConfirm,
 }: Props) {
+  useEffect(() => {
+    if (!item) return;
+
+    const previousOverflow =
+      document.body.style.overflow;
+
+    document.body.style.overflow =
+      "hidden";
+
+    return () => {
+      document.body.style.overflow =
+        previousOverflow;
+    };
+  }, [item]);
+
   if (!item) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 z-[220] flex items-center justify-center bg-black/35 px-4 backdrop-blur-[2px]">
-      <div className="w-full max-w-[500px] rounded-[26px] bg-white p-6 shadow-2xl">
+    <div className="fixed inset-0 z-[220] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
+      <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-500">
-            <AlertTriangle
-              size={24}
-            />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+            <Trash2 size={24} />
           </div>
 
           <button
             type="button"
-            disabled={
-              deleting
-            }
+            disabled={deleting}
             onClick={onClose}
-            className="rounded-xl p-2 text-gray-400 transition hover:bg-gray-100 disabled:opacity-40"
+            aria-label="Close"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
-        <h3 className="mt-5 text-2xl font-bold text-gray-800">
+        <p className="mt-5 text-3xl font-semibold text-primary-800">
           បិទគ្រឿងផ្សំ?
-        </h3>
+        </p>
 
-        <p className="mt-3 text-base leading-7 text-gray-500">
+        <p className="mt-3 text-lg leading-8 text-gray-500">
           តើអ្នកចង់បិទ{" "}
           <span className="font-semibold text-gray-800">
             {item.name}
@@ -60,35 +75,29 @@ export default function DeleteIngredientConfirmModal({
           មែនទេ?
         </p>
 
-        <p className="mt-2 text-sm leading-6 text-gray-400">
+        <p className="mt-2 text-lg leading-8 text-gray-400">
           ទិន្នន័យមិនត្រូវបានលុបចេញពី Database ទេ។ វានឹងត្រូវបានកំណត់ជាអសកម្ម ហើយអាចស្ដារឡើងវិញបាន។
         </p>
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 grid grid-cols-2 gap-3">
           <button
             type="button"
-            disabled={
-              deleting
-            }
+            disabled={deleting}
             onClick={onClose}
-            className="h-11 rounded-xl border border-gray-200 px-5 text-gray-600 transition hover:bg-gray-50 disabled:opacity-40"
+            className="min-h-12 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             បោះបង់
           </button>
 
           <button
             type="button"
-            disabled={
-              deleting
-            }
-            onClick={
-              onConfirm
-            }
-            className="inline-flex h-11 min-w-[110px] items-center justify-center gap-2 rounded-xl bg-red-500 px-5 font-semibold text-white transition hover:bg-red-600 disabled:opacity-50"
+            disabled={deleting}
+            onClick={onConfirm}
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-500 px-4 text-lg font-medium text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {deleting && (
               <Loader2
-                size={17}
+                size={20}
                 className="animate-spin"
               />
             )}

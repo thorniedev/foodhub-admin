@@ -7,20 +7,19 @@ import {
 
 import type { DietaryType } from "@/src/types/dietaryType";
 
-import { formatAdminDate } from "@/src/types/safetyResource";
+import {
+  formatAdminDate,
+} from "@/src/types/safetyResource";
 
 type Props = {
   items: DietaryType[];
   disabled?: boolean;
-
   onEdit: (
     item: DietaryType,
   ) => void;
-
   onDelete: (
     item: DietaryType,
   ) => void;
-
   onRestore: (
     item: DietaryType,
   ) => void;
@@ -34,229 +33,163 @@ export default function DietaryTypesTable({
   onRestore,
 }: Props) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
+    <div className="w-full min-w-0 max-w-full overflow-x-auto">
+      <table className="w-full min-w-[1100px] border-collapse text-left">
         {/* =================================================
-            HEADER
+            TABLE HEADER
         ================================================== */}
-
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/50 text-left">
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">
+          <tr className="border-b border-gray-100 bg-gray-50/70">
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               របបអាហារ
             </th>
 
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               កូដ
             </th>
 
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               ប្រភេទ
             </th>
 
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               ការពិពណ៌នា
             </th>
 
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               ស្ថានភាព
             </th>
 
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               កែប្រែចុងក្រោយ
             </th>
 
-            <th className="px-5 py-4 text-right text-xl font-bold text-[#136C34]">
+            <th className="px-6 py-4 text-right text-xl font-semibold text-primary-800">
               សកម្មភាព
             </th>
           </tr>
         </thead>
 
         {/* =================================================
-            BODY
+            TABLE BODY
         ================================================== */}
-
         <tbody>
-          {items.map(
-            (item) => (
-              <tr
-                key={
-                  item.uuid
-                }
-                className="border-b border-gray-100 transition last:border-0 hover:bg-gray-50/60"
-              >
-                {/* =======================================
-                    NAME
-                ======================================== */}
-
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[#136C34]">
-                      <Salad
-                        size={20}
-                      />
-                    </div>
-
-                    <p className="text-lg text-gray-800">
-                      {
-                        item.name
-                      }
-                    </p>
+          {items.map((item) => (
+            <tr
+              key={item.uuid}
+              className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
+            >
+              {/* Dietary type */}
+              <td className="px-6 py-5">
+                <div className="flex min-w-[220px] items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
+                    <Salad size={20} />
                   </div>
-                </td>
 
-                {/* =======================================
-                    CODE
-                ======================================== */}
-
-                <td className="px-5 py-4">
-                  <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-base text-gray-600">
-                    {
-                      item.code
-                    }
-                  </span>
-                </td>
-
-                {/* =======================================
-                    CATEGORY
-                ======================================== */}
-
-                <td className="px-5 py-4">
-                  <span className="inline-flex rounded-full bg-orange-50 px-3 py-1 text-base text-orange-700">
-                    {
-                      item.category
-                    }
-                  </span>
-                </td>
-
-                {/* =======================================
-                    DESCRIPTION
-                ======================================== */}
-
-                <td className="max-w-[340px] px-5 py-4 text-base leading-6 text-gray-500">
-                  <p className="line-clamp-2">
-                    {item.description ||
-                      "—"}
+                  <p className="text-lg font-medium text-gray-800">
+                    {item.name}
                   </p>
-                </td>
+                </div>
+              </td>
 
-                {/* =======================================
-                    STATUS
-                ======================================== */}
+              {/* Code */}
+              <td className="px-6 py-5">
+                <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1.5 font-mono text-lg font-medium text-gray-600">
+                  {item.code}
+                </span>
+              </td>
 
-                <td className="px-5 py-4">
-                  <span
-                    className={`inline-flex rounded-full px-3 py-1 text-lg ${
-                      item.active
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-gray-100 text-gray-500"
-                    }`}
+              {/* Category */}
+              <td className="px-6 py-5">
+                <span className="inline-flex rounded-full bg-secondary-50 px-3.5 py-1.5 text-lg font-medium text-secondary-600 ring-1 ring-inset ring-secondary-100">
+                  {item.category}
+                </span>
+              </td>
+
+              {/* Description */}
+              <td className="max-w-[360px] px-6 py-5">
+                <p className="line-clamp-2 text-lg leading-8 text-gray-500">
+                  {item.description || "—"}
+                </p>
+              </td>
+
+              {/* Status */}
+              <td className="px-6 py-5">
+                <StatusBadge
+                  active={item.active}
+                />
+              </td>
+
+              {/* Updated date */}
+              <td className="whitespace-nowrap px-6 py-5 text-lg text-gray-500">
+                {formatAdminDate(
+                  item.updatedAt,
+                )}
+              </td>
+
+              {/* Actions */}
+              <td className="px-6 py-5">
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() =>
+                      onEdit(item)
+                    }
+                    className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+                    title="កែប្រែ"
                   >
-                    {item.active
-                      ? "សកម្ម"
-                      : "អសកម្ម"}
-                  </span>
-                </td>
+                    <Pencil size={20} />
+                  </button>
 
-                {/* =======================================
-                    UPDATED
-                ======================================== */}
-
-                <td className="whitespace-nowrap px-5 py-4 text-base text-gray-500">
-                  {formatAdminDate(
-                    item.updatedAt,
-                  )}
-                </td>
-
-                {/* =======================================
-                    ACTIONS
-                ======================================== */}
-
-                <td className="px-5 py-4">
-                  <div className="flex justify-end gap-1">
-                    {/* EDIT */}
-
+                  {item.active ? (
                     <button
                       type="button"
-                      disabled={
-                        disabled
-                      }
+                      disabled={disabled}
                       onClick={() =>
-                        onEdit(
-                          item,
-                        )
+                        onDelete(item)
                       }
-                      className="rounded-lg p-2 text-blue-500 transition hover:bg-blue-50 disabled:opacity-40"
-                      title="កែប្រែ"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      title="បិទ"
                     >
-                      <Pencil
-                        size={18}
-                      />
+                      <Trash2 size={20} />
                     </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={disabled}
+                      onClick={() =>
+                        onRestore(item)
+                      }
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      title="ស្ដារ"
+                    >
+                      <RotateCcw size={20} />
+                    </button>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
 
-                    {/* DELETE / RESTORE */}
-
-                    {item.active ? (
-                      <button
-                        type="button"
-                        disabled={
-                          disabled
-                        }
-                        onClick={() =>
-                          onDelete(
-                            item,
-                          )
-                        }
-                        className="rounded-lg p-2 text-red-400 transition hover:bg-red-50 disabled:opacity-40"
-                        title="បិទ"
-                      >
-                        <Trash2
-                          size={18}
-                        />
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={
-                          disabled
-                        }
-                        onClick={() =>
-                          onRestore(
-                            item,
-                          )
-                        }
-                        className="rounded-lg p-2 text-emerald-600 transition hover:bg-emerald-50 disabled:opacity-40"
-                        title="ស្ដារ"
-                      >
-                        <RotateCcw
-                          size={18}
-                        />
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ),
-          )}
-
-          {/* =================================================
-              EMPTY
-          ================================================== */}
-
-          {items.length ===
-            0 && (
+          {/* Empty state */}
+          {items.length === 0 && (
             <tr>
               <td
                 colSpan={7}
-                className="px-5 py-16 text-center"
+                className="px-6 py-16 text-center"
               >
                 <Salad
                   size={36}
                   className="mx-auto text-gray-300"
                 />
 
-                <p className="mt-3 text-lg text-[#F97316]">
+                <p className="mt-3 text-lg font-medium text-gray-500">
                   មិនមានទិន្នន័យរបបអាហារ
+                </p>
+
+                <p className="mt-1 text-lg text-gray-400">
+                  ទិន្នន័យរបបអាហារនឹងបង្ហាញនៅទីនេះ។
                 </p>
               </td>
             </tr>
@@ -264,5 +197,33 @@ export default function DietaryTypesTable({
         </tbody>
       </table>
     </div>
+  );
+}
+
+function StatusBadge({
+  active,
+}: {
+  active: boolean;
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-lg font-medium ring-1 ring-inset ${
+        active
+          ? "bg-primary-50 text-primary-700 ring-primary-100"
+          : "bg-gray-100 text-gray-500 ring-gray-200"
+      }`}
+    >
+      <span
+        className={`h-2 w-2 shrink-0 rounded-full ${
+          active
+            ? "bg-primary-600"
+            : "bg-gray-400"
+        }`}
+      />
+
+      {active
+        ? "សកម្ម"
+        : "អសកម្ម"}
+    </span>
   );
 }

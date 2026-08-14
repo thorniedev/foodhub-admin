@@ -427,7 +427,7 @@ function CatalogHeader({
       <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+            <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-2xl bg-white/15">
               <SlidersHorizontal size={25} />
             </div>
 
@@ -573,7 +573,7 @@ function CatalogToolbar({
                 {tab.label}
 
                 <span
-                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base font-medium ${
+                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
                     active ? "bg-white/20 text-white" : "bg-white text-gray-500"
                   }`}
                 >
@@ -629,9 +629,7 @@ function CatalogToolbar({
                         {item.localName || item.name}
                       </p>
 
-                      <p className="mt-1 text-base text-gray-400">
-                        {item.code}
-                      </p>
+                      <p className="mt-1 text-lg text-gray-400">{item.code}</p>
                     </button>
                   ))
                 )}
@@ -785,7 +783,7 @@ function CatalogTable({
                     </p>
 
                     {item.description && (
-                      <p className="mt-1 max-w-[400px] truncate text-base leading-7 text-gray-400">
+                      <p className="mt-1 max-w-[400px] truncate text-lg leading-7 text-gray-400">
                         {item.description}
                       </p>
                     )}
@@ -888,7 +886,7 @@ function NumericValue({
       <span className="text-lg font-semibold text-gray-800">{value}</span>
 
       {unit && (
-        <span className="text-base font-medium text-gray-500">{unit}</span>
+        <span className="text-lg font-medium text-gray-500">{unit}</span>
       )}
     </div>
   );
@@ -1000,7 +998,7 @@ function DeleteCatalogOptionModal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+            className="flex h-[52px] w-[52px] items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
           >
             <X size={22} />
           </button>

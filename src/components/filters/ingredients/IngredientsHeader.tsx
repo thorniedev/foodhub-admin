@@ -17,7 +17,7 @@ export default function IngredientsHeader({
   onAdd,
 }: Props) {
   return (
-    <section className="relative overflow-hidden rounded-[30px] bg-[#138A3C] px-8 py-8 text-white shadow-sm lg:px-10">
+    <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
       {/* Decoration */}
       <div className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full bg-white/5" />
 
@@ -26,14 +26,14 @@ export default function IngredientsHeader({
       <div className="relative z-10">
         <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-start">
           <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/15">
-              <Leaf size={27} />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+              <Leaf size={25} />
             </div>
 
             <div>
-              <h1 className="text-4xl font-bold leading-tight lg:text-5xl">
+              <p className="text-3xl font-bold text-accent-400">
                 គ្រប់គ្រងគ្រឿងផ្សំ
-              </h1>
+              </p>
 
               <p className="mt-2 text-lg text-white/85">
                 គ្រប់គ្រងគ្រឿងផ្សំដែលប្រើសម្រាប់ម្ហូប និងការត្រងក្នុង FoodHub។
@@ -44,7 +44,7 @@ export default function IngredientsHeader({
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex h-14 shrink-0 items-center justify-center gap-2 rounded-full bg-white px-7 text-lg font-semibold text-[#136C34] shadow-sm transition hover:bg-emerald-50"
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50"
           >
             <Plus size={20} />
 
@@ -85,7 +85,7 @@ function StatCard({
   value: number;
 }) {
   return (
-    <div className="rounded-[22px] bg-white/10 px-6 py-5 backdrop-blur-sm">
+    <div className="rounded-[22px] bg-white/20 px-6 py-5 backdrop-blur-sm">
       <p className="text-lg text-white/80">
         {label}
       </p>

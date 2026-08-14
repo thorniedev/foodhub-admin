@@ -64,8 +64,8 @@ export default function IngredientsTabs({
             }
             className={`inline-flex h-12 items-center gap-2 rounded-full px-5 text-lg transition ${
               active
-                ? "bg-[#136C34] text-white shadow-sm"
-                : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
+                ? "bg-primary-800 text-white shadow-sm"
+                : "bg-white text-gray-500 hover:bg-primary-50 hover:text-primary-800"
             }`}
           >
             <span>
@@ -73,7 +73,7 @@ export default function IngredientsTabs({
             </span>
 
             <span
-              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-sm ${
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg ${
                 active
                   ? "bg-white/20 text-white"
                   : "bg-gray-100 text-gray-500"

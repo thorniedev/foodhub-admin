@@ -2,13 +2,9 @@ import type { ResourceStatusFilter } from "@/src/types/safetyResource";
 
 type Props = {
   value: ResourceStatusFilter;
-
   allCount: number;
-
   activeCount: number;
-
   inactiveCount: number;
-
   onChange: (
     value: ResourceStatusFilter,
   ) => void;
@@ -50,50 +46,37 @@ export default function DietaryTypesTabs({
 
   return (
     <div className="flex items-center gap-2">
-      {tabs.map(
-        (tab) => {
-          const selected =
-            value ===
-            tab.value;
+      {tabs.map((tab) => {
+        const selected =
+          value === tab.value;
 
-          return (
-            <button
-              key={
-                tab.value
-              }
-              type="button"
-              onClick={() =>
-                onChange(
-                  tab.value,
-                )
-              }
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-lg transition ${
+        return (
+          <button
+            key={tab.value}
+            type="button"
+            onClick={() =>
+              onChange(tab.value)
+            }
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
+              selected
+                ? "bg-primary-800 text-white"
+                : "bg-white text-gray-500 hover:bg-primary-50 hover:text-primary-800"
+            }`}
+          >
+            {tab.label}
+
+            <span
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
                 selected
-                  ? "bg-[#136C34] text-white"
-                  : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
+                  ? "bg-white/20 text-white"
+                  : "bg-gray-100 text-gray-500"
               }`}
             >
-              {
-                tab.label
-              }
-
-              <span
-                className={`flex h-6 w-6 items-center justify-center rounded-full text-sm ${
-                  selected
-                    ? "bg-white/20 text-white"
-                    : "bg-gray-100 text-gray-500"
-                }`}
-              >
-                {
-                  counts[
-                    tab.value
-                  ]
-                }
-              </span>
-            </button>
-          );
-        },
-      )}
+              {counts[tab.value]}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }

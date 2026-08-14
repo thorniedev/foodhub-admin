@@ -29,14 +29,14 @@ export default function AllergensToolbar({
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="ស្វែងរកតាមឈ្មោះ កូដ ឬការពិពណ៌នា..."
-          className="w-full rounded-full border border-gray-200 bg-white py-3 pl-11 pr-4 text-sm text-gray-700 outline-none transition focus:border-[#136C34] focus:ring-2 focus:ring-[#136C34]/10"
+          className="h-[52px] w-full rounded-full border border-gray-200 bg-white py-3 pl-11 pr-4 text-lg text-gray-700 outline-none transition focus:border-primary-800 focus:ring-2 focus:ring-primary-100"
         />
       </div>
 
       <select
         value={size}
         onChange={(event) => onSizeChange(Number(event.target.value))}
-        className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-600 outline-none focus:border-[#136C34]"
+        className="h-[52px] rounded-full border border-gray-200 bg-white px-4 text-lg text-gray-600 outline-none focus:border-primary-800"
       >
         <option value={10}>10 / ទំព័រ</option>
         <option value={20}>20 / ទំព័រ</option>
@@ -47,7 +47,7 @@ export default function AllergensToolbar({
         type="button"
         onClick={onRefresh}
         disabled={refreshing}
-        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-[#136C34] disabled:opacity-50"
+        className="inline-flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-primary-800 disabled:opacity-50"
         aria-label="Refresh"
       >
         <RefreshCw size={17} className={refreshing ? "animate-spin" : ""} />

@@ -1,47 +1,31 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-  type FormEvent,
-} from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
-import {
-  AlertTriangle,
-  ChevronDown,
-  LoaderCircle,
-  X,
-} from "lucide-react";
+import { AlertTriangle, ChevronDown, Loader2, Salad, X } from "lucide-react";
 
 import type {
   DietaryType,
   DietaryTypeFormValues,
 } from "@/src/types/dietaryType";
 
-import {
-  DIETARY_TYPE_CATEGORIES,
-} from "@/src/types/dietaryType";
+import { DIETARY_TYPE_CATEGORIES } from "@/src/types/dietaryType";
 
-const EMPTY_FORM: DietaryTypeFormValues =
-  {
-    code: "",
-    name: "",
-    category:
-      "LIFESTYLE",
-    description: "",
-    active: true,
-  };
+const initialValues: DietaryTypeFormValues = {
+  code: "",
+  name: "",
+  category: "LIFESTYLE",
+  description: "",
+  active: true,
+};
 
-type Props = {
+interface DietaryTypeFormModalProps {
   open: boolean;
   item: DietaryType | null;
   saving: boolean;
   onClose: () => void;
-
-  onSubmit: (
-    values: DietaryTypeFormValues,
-  ) => Promise<void>;
-};
+  onSubmit: (values: DietaryTypeFormValues) => Promise<void>;
+}
 
 export default function DietaryTypeFormModal({
   open,
@@ -49,362 +33,265 @@ export default function DietaryTypeFormModal({
   saving,
   onClose,
   onSubmit,
-}: Props) {
-  const [form, setForm] =
-    useState<DietaryTypeFormValues>(
-      EMPTY_FORM,
-    );
+}: DietaryTypeFormModalProps) {
+  const [values, setValues] = useState<DietaryTypeFormValues>(initialValues);
 
-  const [
-    validationError,
-    setValidationError,
-  ] = useState("");
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  /* =======================================================
-     INITIAL DATA
-  ======================================================= */
+  /* =========================================================
+     RESET FORM WHEN MODAL OPENS
+  ========================================================= */
 
   useEffect(() => {
-    if (!open) {
+    if (!open) return;
+
+    setValues(
+      item
+        ? {
+            code: item.code,
+            name: item.name,
+            category: item.category,
+            description: item.description ?? "",
+            active: item.active,
+          }
+        : initialValues,
+    );
+
+    setLocalError(null);
+  }, [open, item]);
+
+  /* =========================================================
+     LOCK PAGE SCROLL
+  ========================================================= */
+
+  useEffect(() => {
+    if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  /* =========================================================
+     SUBMIT
+  ========================================================= */
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLocalError(null);
+
+    const code = values.code.trim();
+
+    const name = values.name.trim();
+
+    const category = values.category.trim();
+
+    if (!code) {
+      setLocalError("សូមបញ្ចូលកូដរបបអាហារ។");
       return;
     }
 
-    setForm(
-      item
-        ? {
-            code:
-              item.code,
+    if (!name) {
+      setLocalError("សូមបញ្ចូលឈ្មោះរបបអាហារ។");
+      return;
+    }
 
-            name:
-              item.name,
+    if (!category) {
+      setLocalError("សូមជ្រើសរើសប្រភេទរបបអាហារ។");
+      return;
+    }
 
-            category:
-              item.category,
-
-            description:
-              item.description ??
-              "",
-
-            active:
-              item.active,
-          }
-        : EMPTY_FORM,
-    );
-
-    setValidationError(
-      "",
-    );
-  }, [open, item]);
-
-  if (!open) {
-    return null;
-  }
-
-  /* =======================================================
-     SUBMIT
-  ======================================================= */
-
-  const handleSubmit =
-    async (
-      event: FormEvent,
-    ) => {
-      event.preventDefault();
-
-      const code =
-        form.code.trim();
-
-      const name =
-        form.name.trim();
-
-      const category =
-        form.category.trim();
-
-      if (
-        !code ||
-        !name ||
-        !category
-      ) {
-        setValidationError(
-          "សូមបំពេញកូដ ឈ្មោះ និងប្រភេទរបបអាហារ។",
-        );
-
-        return;
-      }
-
-      setValidationError(
-        "",
-      );
-
-      await onSubmit({
-        ...form,
-
-        code,
-
-        name,
-
-        category,
-
-        description:
-          form.description.trim(),
-      });
-    };
-
-  /* =======================================================
-     UI
-  ======================================================= */
+    await onSubmit({
+      ...values,
+      code,
+      name,
+      category,
+      description: values.description.trim(),
+    });
+  };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
-      <div className="w-full max-w-xl overflow-hidden rounded-[28px] bg-white shadow-2xl">
-        {/* HEADER */}
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
+      <div className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-gray-100 bg-white shadow-2xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {/* =================================================
+            HEADER
+            Same concept as UserCreateModal
+        ================================================== */}
+        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-gray-100 bg-white/95 px-6 py-5 backdrop-blur-md sm:px-8">
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
+              <Salad size={24} />
+            </div>
 
-        <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
-          <div>
-            <p className="text-4xl font-bold text-[#136C34]">
-              {item
-                ? "កែប្រែរបបអាហារ"
-                : "បន្ថែមរបបអាហារថ្មី"}
-            </p>
+            <div className="min-w-0">
+              <p className="text-2xl font-semibold text-primary-800">
+                {item ? "កែប្រែរបបអាហារ" : "បន្ថែមរបបអាហារថ្មី"}
+              </p>
+
+              <p className="mt-1 text-lg text-gray-500">
+                {item
+                  ? "កែប្រែព័ត៌មានរបបអាហារ និងរក្សាទុកការផ្លាស់ប្តូរ។"
+                  : "បង្កើតរបបអាហារថ្មីសម្រាប់ប្រើក្នុង FoodHub។"}
+              </p>
+            </div>
           </div>
 
           <button
             type="button"
-            onClick={onClose}
             disabled={saving}
-            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            onClick={onClose}
             aria-label="Close"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
-        {/* FORM */}
+        {/* =================================================
+            FORM
+        ================================================== */}
+        <form onSubmit={handleSubmit} className="space-y-6 p-6 sm:p-8">
+          {/* Code + Name */}
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              label="កូដ"
+              value={values.code}
+              onChange={(value) =>
+                setValues((previous) => ({
+                  ...previous,
+                  code: value,
+                }))
+              }
+              placeholder="VEGAN"
+              required
+            />
 
-        <form
-          onSubmit={
-            handleSubmit
-          }
-          className="space-y-5 p-6"
-        >
-          {/* CODE + NAME */}
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* CODE */}
-
-            <div>
-              <label className="mb-2 block text-xl font-semibold text-[#F97316]">
-                កូដ *
-              </label>
-
-              <input
-                value={
-                  form.code
-                }
-                onChange={(
-                  event,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-
-                      code:
-                        event
-                          .target
-                          .value,
-                    }),
-                  )
-                }
-                placeholder="VEGAN"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
-              />
-            </div>
-
-            {/* NAME */}
-
-            <div>
-              <label className="mb-2 block text-xl font-semibold text-[#F97316]">
-                ឈ្មោះ *
-              </label>
-
-              <input
-                value={
-                  form.name
-                }
-                onChange={(
-                  event,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-
-                      name:
-                        event
-                          .target
-                          .value,
-                    }),
-                  )
-                }
-                placeholder="Vegan"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
-              />
-            </div>
+            <Field
+              label="ឈ្មោះ"
+              value={values.name}
+              onChange={(value) =>
+                setValues((previous) => ({
+                  ...previous,
+                  name: value,
+                }))
+              }
+              placeholder="Vegan"
+              required
+            />
           </div>
 
-          {/* CATEGORY */}
-
+          {/* Category */}
           <div>
-            <label className="mb-2 block text-xl font-semibold text-[#F97316]">
-              ប្រភេទ *
-            </label>
+            <label className="block">
+              <span className="mb-2 block text-lg font-medium text-primary-800">
+                ប្រភេទ *
+              </span>
 
-            <div className="relative">
-              <select
-                value={
-                  form.category
-                }
-                onChange={(
-                  event,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
+              <div className="relative">
+                <select
+                  value={values.category}
+                  onChange={(event) =>
+                    setValues((previous) => ({
                       ...previous,
-
-                      category:
-                        event
-                          .target
-                          .value,
-                    }),
-                  )
-                }
-                className="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 pr-11 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
-              >
-                {DIETARY_TYPE_CATEGORIES.map(
-                  (
-                    category,
-                  ) => (
-                    <option
-                      key={
-                        category
-                      }
-                      value={
-                        category
-                      }
-                    >
-                      {
-                        category
-                      }
+                      category: event.target.value,
+                    }))
+                  }
+                  className="h-[52px] w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 pr-12 text-lg text-gray-800 outline-none transition hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+                >
+                  {DIETARY_TYPE_CATEGORIES.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
                     </option>
-                  ),
-                )}
-              </select>
+                  ))}
+                </select>
 
-              <ChevronDown
-                size={18}
-                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-            </div>
-          </div>
-
-          {/* DESCRIPTION */}
-
-          <div>
-            <label className="mb-2 block text-xl font-semibold text-[#F97316]">
-              ការពិពណ៌នា
+                <ChevronDown
+                  size={20}
+                  className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                />
+              </div>
             </label>
-
-            <textarea
-              rows={4}
-              value={
-                form.description
-              }
-              onChange={(
-                event,
-              ) =>
-                setForm(
-                  (
-                    previous,
-                  ) => ({
-                    ...previous,
-
-                    description:
-                      event
-                        .target
-                        .value,
-                  }),
-                )
-              }
-              placeholder="សរសេរការពិពណ៌នាអំពីរបបអាហារ..."
-              className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
-            />
           </div>
 
-          {/* ACTIVE */}
+          {/* Description */}
+          <div>
+            <label className="block">
+              <span className="mb-2 block text-lg font-medium text-primary-800">
+                ការពិពណ៌នា
+              </span>
 
-          <label className="flex cursor-pointer items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
-            <div>
-              <p className="text-xl font-semibold text-[#F97316]">
-                សកម្ម
-              </p>
+              <textarea
+                rows={4}
+                value={values.description}
+                onChange={(event) =>
+                  setValues((previous) => ({
+                    ...previous,
+                    description: event.target.value,
+                  }))
+                }
+                placeholder="សរសេរការពិពណ៌នាអំពីរបបអាហារ..."
+                className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg leading-8 text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+              />
+            </label>
+          </div>
 
-              <p className="mt-0.5 text-base text-gray-500">
-                បើក ដើម្បីឱ្យកំណត់ត្រានេះសកម្ម។
+          {/* Active status */}
+          <div className="flex items-center justify-between gap-5 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4">
+            <div className="min-w-0">
+              <p className="text-lg font-medium text-primary-800">ស្ថានភាព</p>
+
+              <p className="mt-1 text-lg leading-7 text-gray-500">
+                បើក ដើម្បីឱ្យរបបអាហារនេះសកម្ម និងអាចប្រើបានក្នុងប្រព័ន្ធ។
               </p>
             </div>
 
-            <input
-              type="checkbox"
-              checked={
-                form.active
+            <button
+              type="button"
+              role="switch"
+              aria-checked={values.active}
+              onClick={() =>
+                setValues((previous) => ({
+                  ...previous,
+                  active: !previous.active,
+                }))
               }
-              onChange={(
-                event,
-              ) =>
-                setForm(
-                  (
-                    previous,
-                  ) => ({
-                    ...previous,
-
-                    active:
-                      event
-                        .target
-                        .checked,
-                  }),
-                )
-              }
-              className="h-5 w-5 accent-[#F97316]"
-            />
-          </label>
-
-          {/* VALIDATION */}
-
-          {validationError && (
-            <div className="flex gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-              <AlertTriangle
-                size={18}
-                className="shrink-0"
+              className={`relative h-7 w-12 shrink-0 rounded-full transition focus:outline-none focus:ring-4 focus:ring-primary-100 ${
+                values.active ? "bg-primary-700" : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-all ${
+                  values.active ? "left-6" : "left-1"
+                }`}
               />
+            </button>
+          </div>
 
-              {
-                validationError
-              }
+          {/* Validation error */}
+          {localError && (
+            <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg leading-7 text-red-600">
+              <AlertTriangle size={21} className="mt-0.5 shrink-0" />
+
+              <span>{localError}</span>
             </div>
           )}
 
-          {/* ACTIONS */}
-
-          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end">
+          {/* =================================================
+              FOOTER ACTIONS
+              Same concept as UserCreateModal
+          ================================================== */}
+          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-end">
             <button
               type="button"
-              onClick={onClose}
               disabled={saving}
-              className="rounded-xl border border-gray-200 px-5 py-2.5 text-lg text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              onClick={onClose}
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-medium text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               បោះបង់
             </button>
@@ -412,22 +299,58 @@ export default function DietaryTypeFormModal({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#136C34] px-5 py-2.5 text-lg text-white transition hover:bg-[#0f592b] disabled:opacity-60"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary-800 px-7 text-lg font-medium text-white transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {saving && (
-                <LoaderCircle
-                  size={17}
-                  className="animate-spin"
-                />
-              )}
+              {saving && <Loader2 size={20} className="animate-spin" />}
 
-              {item
-                ? "រក្សាទុកការកែប្រែ"
-                : "បន្ថែម"}
+              {saving
+                ? "កំពុងរក្សាទុក..."
+                : item
+                  ? "រក្សាទុកការកែប្រែ"
+                  : "បន្ថែមរបបអាហារ"}
             </button>
           </div>
         </form>
       </div>
     </div>
+  );
+}
+
+/* =========================================================
+   REUSABLE FIELD
+   Same field concept as UserCreateModal
+========================================================= */
+
+function Field({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+  required,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-lg font-medium text-primary-800">
+        {label}
+        {required ? " *" : ""}
+      </span>
+
+      <input
+        type={type}
+        value={value}
+        required={required}
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-[52px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+      />
+    </label>
   );
 }

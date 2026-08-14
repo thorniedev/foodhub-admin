@@ -36,27 +36,27 @@ export default function AgeGroupsTable({
       <table className="min-w-[980px] w-full border-collapse text-left">
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/50">
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">
+            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               ក្រុមអាយុ
             </th>
 
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">
+            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               កូដ
             </th>
 
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">
+            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               ចន្លោះអាយុ
             </th>
 
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">
+            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               ការពិពណ៌នា
             </th>
 
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">
+            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               ស្ថានភាព
             </th>
 
-            <th className="px-5 py-4 text-right text-xl font-bold text-[#136C34]">
+            <th className="px-6 py-5 text-right text-xl font-semibold text-primary-800">
               សកម្មភាព
             </th>
           </tr>
@@ -71,9 +71,9 @@ export default function AgeGroupsTable({
                 }
                 className="border-b border-gray-100 transition last:border-0 hover:bg-gray-50/60"
               >
-                <td className="px-5 py-4">
+                <td className="px-6 py-5">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[#136C34]">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
                       <UsersRound
                         size={
                           20
@@ -89,15 +89,15 @@ export default function AgeGroupsTable({
                   </div>
                 </td>
 
-                <td className="px-5 py-4">
-                  <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-sm font-semibold text-gray-600">
+                <td className="px-6 py-5">
+                  <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-lg font-semibold text-gray-600">
                     {
                       item.code
                     }
                   </span>
                 </td>
 
-                <td className="whitespace-nowrap px-5 py-4 text-base text-gray-600">
+                <td className="whitespace-nowrap px-6 py-5 text-lg text-gray-600">
                   {
                     item.minAge
                   }{" "}
@@ -108,18 +108,18 @@ export default function AgeGroupsTable({
                   ឆ្នាំ
                 </td>
 
-                <td className="max-w-[380px] px-5 py-4 text-base leading-6 text-gray-500">
+                <td className="max-w-[380px] px-6 py-5 text-lg leading-6 text-gray-500">
                   <p className="line-clamp-2">
                     {item.description ||
                       "—"}
                   </p>
                 </td>
 
-                <td className="px-5 py-4">
+                <td className="px-6 py-5">
                   <span
-                    className={`inline-flex rounded-full px-3 py-1 text-base font-semibold ${
+                    className={`inline-flex rounded-full px-3 py-1 text-lg font-semibold ${
                       item.isActive
-                        ? "bg-emerald-50 text-emerald-700"
+                        ? "bg-primary-50 text-primary-700"
                         : "bg-gray-100 text-gray-500"
                     }`}
                   >
@@ -129,8 +129,8 @@ export default function AgeGroupsTable({
                   </span>
                 </td>
 
-                <td className="px-5 py-4">
-                  <div className="flex justify-end gap-1">
+                <td className="px-6 py-5">
+                  <div className="flex justify-end gap-2">
                     <button
                       type="button"
                       disabled={
@@ -141,13 +141,11 @@ export default function AgeGroupsTable({
                           item,
                         )
                       }
-                      className="rounded-lg p-2 text-blue-500 transition hover:bg-blue-50 disabled:opacity-40"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 disabled:opacity-40"
                       title="កែប្រែ"
                     >
                       <Pencil
-                        size={
-                          18
-                        }
+                        size={20}
                       />
                     </button>
 
@@ -161,13 +159,11 @@ export default function AgeGroupsTable({
                           item,
                         )
                       }
-                      className="rounded-lg p-2 text-red-400 transition hover:bg-red-50 disabled:opacity-40"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-red-400 transition hover:bg-red-50 disabled:opacity-40"
                       title="លុប"
                     >
                       <Trash2
-                        size={
-                          18
-                        }
+                        size={20}
                       />
                     </button>
                   </div>
@@ -192,7 +188,7 @@ export default function AgeGroupsTable({
                   className="mx-auto text-gray-300"
                 />
 
-                <p className="mt-3 text-base text-gray-500">
+                <p className="mt-3 text-lg text-gray-500">
                   មិនមានទិន្នន័យក្រុមអាយុ
                 </p>
               </td>

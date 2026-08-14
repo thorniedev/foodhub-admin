@@ -1,17 +1,8 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-  type FormEvent,
-} from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
-import {
-  AlertTriangle,
-  Loader2,
-  UserPlus,
-  X,
-} from "lucide-react";
+import { AlertTriangle, Loader2, UserPlus, X } from "lucide-react";
 
 import type { CreateAdminUserPayload } from "@/src/types/userProfile";
 
@@ -19,9 +10,7 @@ interface UserCreateModalProps {
   open: boolean;
   saving: boolean;
   onClose: () => void;
-  onSubmit: (
-    values: CreateAdminUserPayload,
-  ) => Promise<void>;
+  onSubmit: (values: CreateAdminUserPayload) => Promise<void>;
 }
 
 const initialValues: CreateAdminUserPayload = {
@@ -40,11 +29,9 @@ export default function UserCreateModal({
   onClose,
   onSubmit,
 }: UserCreateModalProps) {
-  const [values, setValues] =
-    useState<CreateAdminUserPayload>(initialValues);
+  const [values, setValues] = useState<CreateAdminUserPayload>(initialValues);
 
-  const [localError, setLocalError] =
-    useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -56,8 +43,7 @@ export default function UserCreateModal({
   useEffect(() => {
     if (!open) return;
 
-    const previousOverflow =
-      document.body.style.overflow;
+    const previousOverflow = document.body.style.overflow;
 
     document.body.style.overflow = "hidden";
 
@@ -68,23 +54,17 @@ export default function UserCreateModal({
 
   if (!open) return null;
 
-  const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLocalError(null);
 
     if (values.password !== values.confirmedPassword) {
-      setLocalError(
-        "Password និង Confirm password មិនដូចគ្នាទេ។",
-      );
+      setLocalError("Password និង Confirm password មិនដូចគ្នាទេ។");
       return;
     }
 
     if (values.password.length < 6) {
-      setLocalError(
-        "Password ត្រូវមានយ៉ាងហោចណាស់ 6 តួអក្សរ។",
-      );
+      setLocalError("Password ត្រូវមានយ៉ាងហោចណាស់ 6 តួអក្សរ។");
       return;
     }
 
@@ -122,10 +102,7 @@ export default function UserCreateModal({
           </button>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-6 p-6 sm:p-8"
-        >
+        <form onSubmit={handleSubmit} className="space-y-6 p-6 sm:p-8">
           <div className="grid gap-5 sm:grid-cols-2">
             <Field
               label="First name"
@@ -220,10 +197,7 @@ export default function UserCreateModal({
 
           {localError && (
             <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg leading-7 text-red-600">
-              <AlertTriangle
-                size={21}
-                className="mt-0.5 shrink-0"
-              />
+              <AlertTriangle size={21} className="mt-0.5 shrink-0" />
               <span>{localError}</span>
             </div>
           )}
@@ -243,13 +217,9 @@ export default function UserCreateModal({
               disabled={saving}
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary-800 px-7 text-lg font-medium text-white transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {saving && (
-                <Loader2 size={20} className="animate-spin" />
-              )}
+              {saving && <Loader2 size={20} className="animate-spin" />}
 
-              {saving
-                ? "កំពុងបង្កើត..."
-                : "បង្កើតអ្នកប្រើ"}
+              {saving ? "កំពុងបង្កើត..." : "បង្កើតអ្នកប្រើ"}
             </button>
           </div>
         </form>
@@ -285,9 +255,7 @@ function Field({
         value={value}
         required={required}
         placeholder={placeholder}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
+        onChange={(event) => onChange(event.target.value)}
         className="h-[52px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
       />
     </label>
