@@ -1,16 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import {
-  useParams,
-  useRouter,
-} from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
-import {
-  AlertTriangle,
-  ArrowLeft,
-  Loader2,
-} from "lucide-react";
+import { AlertTriangle, ArrowLeft, Loader2 } from "lucide-react";
 
 import {
   useGetShopByUuidQuery,
@@ -18,10 +11,7 @@ import {
   useUpdateShopMutation,
 } from "@/src/app/store/shop/shopApi";
 
-import type {
-  StoreStatusAction,
-  UpdateStorePayload,
-} from "@/src/types/shop";
+import type { StoreStatusAction, UpdateStorePayload } from "@/src/types/shop";
 
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
 
@@ -42,9 +32,7 @@ interface ShopDetailManagerProps {
   storeUuid?: string;
 }
 
-function isValidUuid(
-  value: string | null | undefined,
-): value is string {
+function isValidUuid(value: string | null | undefined): value is string {
   if (!value) {
     return false;
   }
@@ -84,7 +72,6 @@ export default function ShopDetailManager({
     id?: string;
   }>();
 
-
   const fromProp = typeof storeUuid === "string" ? storeUuid.trim() : "";
   const fromUuidParam =
     typeof params?.uuid === "string" ? params.uuid.trim() : "";
@@ -115,14 +102,9 @@ export default function ShopDetailManager({
     isLoading: storeLoading,
     isFetching: storeFetching,
     refetch: refetchStore,
-  } =
-    useGetShopByUuidQuery(
-      resolvedStoreUuid,
-      {
-        skip:
-          !hasValidStoreUuid,
-      },
-    );
+  } = useGetShopByUuidQuery(resolvedStoreUuid, {
+    skip: !hasValidStoreUuid,
+  });
 
   /* =======================================================
      GET STORE HOURS
@@ -133,54 +115,22 @@ export default function ShopDetailManager({
     isLoading: hoursLoading,
     isFetching: hoursFetching,
     refetch: refetchHours,
-  } =
-    useGetStoreHoursQuery(
-      resolvedStoreUuid,
-      {
-        skip:
-          !hasValidStoreUuid,
-      },
-    );
+  } = useGetStoreHoursQuery(resolvedStoreUuid, {
+    skip: !hasValidStoreUuid,
+  });
 
-  const [
-    updateStore,
-    {
-      isLoading:
-        updatingStore,
-    },
-  ] =
-    useUpdateShopMutation();
+  const [updateStore, { isLoading: updatingStore }] = useUpdateShopMutation();
 
-  const [
-    editOpen,
-    setEditOpen,
-  ] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
-  const [
-    statusOpen,
-    setStatusOpen,
-  ] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
 
-  const [
-    hoursOpen,
-    setHoursOpen,
-  ] = useState(false);
+  const [hoursOpen, setHoursOpen] = useState(false);
 
-  const [
-    statusAction,
-    setStatusAction,
-  ] =
-    useState<StoreStatusAction>(
-      "REVIEW",
-    );
+  const [statusAction, setStatusAction] = useState<StoreStatusAction>("REVIEW");
 
-  const [
-    notice,
-    setNotice,
-  ] = useState<{
-    type:
-      | "success"
-      | "error";
+  const [notice, setNotice] = useState<{
+    type: "success" | "error";
 
     text: string;
   } | null>(null);
@@ -191,10 +141,7 @@ export default function ShopDetailManager({
         <div className="flex min-h-[500px] items-center justify-center rounded-[30px] border border-red-100 bg-white px-6 shadow-sm">
           <div className="max-w-lg text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
-              <AlertTriangle
-                size={32}
-                className="text-red-500"
-              />
+              <AlertTriangle size={32} className="text-red-500" />
             </div>
 
             <h1 className="mt-5 text-2xl font-black text-gray-900">
@@ -202,50 +149,27 @@ export default function ShopDetailManager({
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-gray-500">
-              The Store UUID was
-              not received correctly
-              from the URL.
+              The Store UUID was not received correctly from the URL.
             </p>
 
             <div className="mt-4 rounded-2xl bg-gray-50 p-4 text-left font-mono text-xs text-gray-500">
-              <p>
-                prop:{" "}
-                {String(
-                  storeUuid ??
-                    "undefined",
-                )}
+              <p>prop: {String(storeUuid ?? "undefined")}</p>
+
+              <p className="mt-1">
+                params.uuid: {String(params?.uuid ?? "undefined")}
               </p>
 
               <p className="mt-1">
-                params.uuid:{" "}
-                {String(
-                  params?.uuid ??
-                    "undefined",
-                )}
-              </p>
-
-              <p className="mt-1">
-                params.id:{" "}
-                {String(
-                  params?.id ??
-                    "undefined",
-                )}
+                params.id: {String(params?.id ?? "undefined")}
               </p>
             </div>
 
             <button
               type="button"
-              onClick={() =>
-                router.push(
-                  "/shops",
-                )
-              }
+              onClick={() => router.push("/shops")}
               className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#137A3D] px-5 py-3 text-sm font-black text-white transition hover:bg-[#0f6833]"
             >
-              <ArrowLeft
-                size={17}
-              />
-
+              <ArrowLeft size={17} />
               Back to Stores
             </button>
           </div>
@@ -260,10 +184,7 @@ export default function ShopDetailManager({
   if (storeLoading) {
     return (
       <div className="flex min-h-[65vh] flex-col items-center justify-center">
-        <Loader2
-          size={36}
-          className="animate-spin text-[#137A3D]"
-        />
+        <Loader2 size={36} className="animate-spin text-[#137A3D]" />
 
         <p className="mt-3 text-sm font-semibold text-gray-400">
           Loading Store...
@@ -275,45 +196,31 @@ export default function ShopDetailManager({
   /* =======================================================
      STORE ERROR
   ======================================================= */
-  if (
-    storeError ||
-    !store
-  ) {
+  if (storeError || !store) {
     return (
       <div className="p-4 sm:p-6 lg:p-7">
         <div className="flex min-h-[500px] items-center justify-center rounded-[30px] border border-red-100 bg-white px-6 shadow-sm">
           <div className="max-w-lg text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
-              <AlertTriangle
-                size={32}
-                className="text-red-500"
-              />
+              <AlertTriangle size={32} className="text-red-500" />
             </div>
 
             <h1 className="mt-5 text-2xl font-black text-gray-900">
-              មិនអាចទាញយក
-              Store detail
+              មិនអាចទាញយក Store detail
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-gray-500">
-              {getShopApiErrorMessage(
-                storeError,
-              )}
+              {getShopApiErrorMessage(storeError)}
             </p>
 
             <p className="mt-3 break-all font-mono text-xs text-gray-400">
-              UUID:{" "}
-              {
-                resolvedStoreUuid
-              }
+              UUID: {resolvedStoreUuid}
             </p>
 
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <button
                 type="button"
-                onClick={() =>
-                  void refetchStore()
-                }
+                onClick={() => void refetchStore()}
                 className="rounded-xl bg-[#137A3D] px-5 py-3 text-sm font-black text-white transition hover:bg-[#0f6833]"
               >
                 សាកល្បងម្តងទៀត
@@ -321,17 +228,10 @@ export default function ShopDetailManager({
 
               <button
                 type="button"
-                onClick={() =>
-                  router.push(
-                    "/shops",
-                  )
-                }
+                onClick={() => router.push("/shops")}
                 className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-black text-gray-700 transition hover:bg-gray-50"
               >
-                <ArrowLeft
-                  size={17}
-                />
-
+                <ArrowLeft size={17} />
                 Stores
               </button>
             </div>
@@ -344,52 +244,38 @@ export default function ShopDetailManager({
   /* =======================================================
      UPDATE STORE
   ======================================================= */
-  const handleEdit =
-    async (
-      values: UpdateStorePayload,
-    ) => {
-      try {
-        setNotice(null);
+  const handleEdit = async (values: UpdateStorePayload) => {
+    try {
+      setNotice(null);
 
-        await updateStore({
-          storeUuid:
-            resolvedStoreUuid,
+      await updateStore({
+        storeUuid: resolvedStoreUuid,
 
-          body: values,
-        }).unwrap();
+        body: values,
+      }).unwrap();
 
-        setEditOpen(false);
+      setEditOpen(false);
 
-        setNotice({
-          type: "success",
-          text: "បានកែប្រែ Store ដោយជោគជ័យ។",
-        });
+      setNotice({
+        type: "success",
+        text: "បានកែប្រែ Store ដោយជោគជ័យ។",
+      });
 
-        await refetchStore();
-      } catch (
-        updateError
-      ) {
-        setNotice({
-          type: "error",
+      await refetchStore();
+    } catch (updateError) {
+      setNotice({
+        type: "error",
 
-          text:
-            getShopApiErrorMessage(
-              updateError,
-            ),
-        });
-      }
-    };
+        text: getShopApiErrorMessage(updateError),
+      });
+    }
+  };
 
   /* =======================================================
      OPEN STATUS MODAL
   ======================================================= */
-  const openStatus = (
-    action:
-      StoreStatusAction,
-  ) => {
-    setStatusAction(
-      action,
-    );
+  const openStatus = (action: StoreStatusAction) => {
+    setStatusAction(action);
 
     setStatusOpen(true);
   };
@@ -397,25 +283,18 @@ export default function ShopDetailManager({
   /* =======================================================
      REFRESH STORE
   ======================================================= */
-  const refreshStore =
-    async () => {
-      await refetchStore();
-    };
+  const refreshStore = async () => {
+    await refetchStore();
+  };
 
   /* =======================================================
      REFRESH STORE + HOURS
   ======================================================= */
-  const refreshHours =
-    async () => {
-      await Promise.all([
-        refetchStore(),
-        refetchHours(),
-      ]);
-    };
+  const refreshHours = async () => {
+    await Promise.all([refetchStore(), refetchHours()]);
+  };
 
-  const busy =
-    updatingStore ||
-    storeFetching;
+  const busy = updatingStore || storeFetching;
 
   /* =======================================================
      UI
@@ -433,9 +312,7 @@ export default function ShopDetailManager({
 
           setEditOpen(true);
         }}
-        onStatus={
-          openStatus
-        }
+        onStatus={openStatus}
         onHours={() => {
           setNotice(null);
 
@@ -449,8 +326,7 @@ export default function ShopDetailManager({
       {notice && (
         <div
           className={`rounded-2xl border px-4 py-3 text-base ${
-            notice.type ===
-            "success"
+            notice.type === "success"
               ? "border-emerald-100 bg-emerald-50 text-emerald-700"
               : "border-red-100 bg-red-50 text-red-600"
           }`}
@@ -464,9 +340,7 @@ export default function ShopDetailManager({
       ================================================== */}
       {hoursError && (
         <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-base text-amber-700">
-          Store loaded
-          successfully, but opening
-          hours could not be loaded.
+          Store loaded successfully, but opening hours could not be loaded.
         </div>
       )}
 
@@ -475,114 +349,66 @@ export default function ShopDetailManager({
       ================================================== */}
       <div className="grid items-start gap-5 xl:grid-cols-2">
         {/* STORE OVERVIEW */}
-        <StoreOverviewSection
-          store={store}
-        />
+        <StoreOverviewSection store={store} />
 
         {/* LOCATION */}
-        <StoreContactLocationSection
-          store={store}
-        />
+        <StoreContactLocationSection store={store} />
 
         {/* RATINGS */}
-        <StoreRatingsSection
-          store={store}
-        />
+        <StoreRatingsSection store={store} />
 
         {/* LOGO + COVER */}
-        <StoreMediaSection
-          store={store}
-        />
+        <StoreMediaSection store={store} />
 
         {/* SOCIAL LINKS */}
-        <StoreSocialLinksSection
-          links={
-            store.socialLinks ??
-            []
-          }
-        />
+        <StoreSocialLinksSection links={store.socialLinks ?? []} />
 
         {/* OPENING HOURS */}
         <StoreHoursSection
           hours={hours}
-          loading={
-            hoursLoading ||
-            hoursFetching
-          }
+          loading={hoursLoading || hoursFetching}
         />
 
         {/* SYSTEM INFORMATION */}
-        <StoreSystemInfoSection
-          store={store}
-        />
+        <StoreSystemInfoSection store={store} />
       </div>
 
       {/* =================================================
           EDIT STORE MODAL
       ================================================== */}
       <ShopEditModal
-        store={
-          editOpen
-            ? store
-            : null
-        }
-        saving={
-          updatingStore
-        }
+        store={editOpen ? store : null}
+        saving={updatingStore}
         onClose={() => {
-          if (
-            !updatingStore
-          ) {
-            setEditOpen(
-              false,
-            );
+          if (!updatingStore) {
+            setEditOpen(false);
           }
         }}
-        onSubmit={
-          handleEdit
-        }
+        onSubmit={handleEdit}
       />
 
       {/* =================================================
           STORE STATUS MODAL
       ================================================== */}
       <ShopStatusModal
-        store={
-          statusOpen
-            ? store
-            : null
-        }
-        initialAction={
-          statusAction
-        }
+        store={statusOpen ? store : null}
+        initialAction={statusAction}
         onClose={() => {
-          setStatusOpen(
-            false,
-          );
+          setStatusOpen(false);
         }}
-        onChanged={
-          refreshStore
-        }
+        onChanged={refreshStore}
       />
 
       {/* =================================================
           OPENING HOURS MODAL
       ================================================== */}
       <StoreHoursModal
-        storeUuid={
-          resolvedStoreUuid
-        }
-        open={
-          hoursOpen
-        }
+        storeUuid={resolvedStoreUuid}
+        open={hoursOpen}
         onClose={() => {
-          setHoursOpen(
-            false,
-          );
+          setHoursOpen(false);
         }}
-        onChanged={
-          refreshHours
-        }
+        onChanged={refreshHours}
       />
     </div>
   );

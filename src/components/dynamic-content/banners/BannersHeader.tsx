@@ -28,7 +28,8 @@ export default function BannersHeader({
                 ការគ្រប់គ្រងខ្លឹមសារថាមវន្ត
               </p>
               <p className="text-emerald-50 text-sm sm:text-base lg:text-lg mt-2 sm:mt-3 max-w-xl">
-                ផ្ទាំងគ្រប់គ្រងទិន្នន័យ ដែលអនុញ្ញាតឱ្យអ្នកមើលឃើញខ្លឹមសារផ្សព្វផ្សាយសកម្មទាំងអស់ក្នុងកម្មវិធី
+                ផ្ទាំងគ្រប់គ្រងទិន្នន័យ
+                ដែលអនុញ្ញាតឱ្យអ្នកមើលឃើញខ្លឹមសារផ្សព្វផ្សាយសកម្មទាំងអស់ក្នុងកម្មវិធី
               </p>
             </div>
           </div>
@@ -46,15 +47,21 @@ export default function BannersHeader({
 
         <div className="flex items-center gap-3 sm:gap-4 mt-6 flex-wrap">
           <div className="bg-white/10 rounded-xl px-4 py-3 min-w-[120px] sm:min-w-[140px] flex-1 sm:flex-none">
-            <p className="text-sm sm:text-base lg:text-lg text-emerald-50">រូបភាពផ្សព្វផ្សាយ</p>
+            <p className="text-sm sm:text-base lg:text-lg text-emerald-50">
+              រូបភាពផ្សព្វផ្សាយ
+            </p>
             <p className="text-xl font-bold">{totalBanners}</p>
           </div>
           <div className="bg-white/10 rounded-xl px-4 py-3 min-w-[120px] sm:min-w-[140px] flex-1 sm:flex-none">
-            <p className="text-sm sm:text-base lg:text-lg text-emerald-50">អាហាររដូវកាល</p>
+            <p className="text-sm sm:text-base lg:text-lg text-emerald-50">
+              អាហាររដូវកាល
+            </p>
             <p className="text-xl font-bold">{totalSeasonal}</p>
           </div>
           <div className="bg-white/10 rounded-xl px-4 py-3 min-w-[120px] sm:min-w-[140px] flex-1 sm:flex-none">
-            <p className="text-sm sm:text-base lg:text-lg text-emerald-50">អាហារតាមតំបន់</p>
+            <p className="text-sm sm:text-base lg:text-lg text-emerald-50">
+              អាហារតាមតំបន់
+            </p>
             <p className="text-xl font-bold">{totalArea}</p>
           </div>
         </div>
