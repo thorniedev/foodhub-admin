@@ -45,53 +45,53 @@ export default function UserDetailHeader({
       <div className="relative">
         <Link
           href="/users"
-          className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-base text-white transition hover:bg-white/15"
+          className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-lg text-white transition hover:bg-white/15"
         >
-          <ArrowLeft size={17} />
+          <ArrowLeft size={18} />
           ត្រឡប់ទៅ Users
         </Link>
 
         <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 items-center gap-4">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[24px] bg-white text-2xl font-bold text-[#137A3D] shadow-sm">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[24px] bg-white text-2xl font-bold text-primary-800 shadow-sm">
               {initials(name)}
             </div>
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                <p className="truncate text-4xl font-bold">
+                <p className="truncate text-3xl font-bold text-accent-400">
                   {name}
                 </p>
 
                 <StatusBadge status={user.status} />
               </div>
 
-              <p className="mt-2 text-lg text-white/85">
-                @{user.username}
-              </p>
+              {/* <p className="mt-2 text-lg text-white/85">
+                {user.username}
+              </p> */}
 
-              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-base text-white/85">
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-lg text-white/85">
                 <span className="inline-flex items-center gap-2">
-                  <Mail size={16} />
+                  <Mail size={18} />
                   {user.primaryEmail ?? "No email"}
                 </span>
 
                 <span className="inline-flex items-center gap-2">
-                  <User size={16} />
+                  <User size={18} />
                   Last login: {formatDateTime(user.lastLoginAt)}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             <button
               type="button"
               disabled={busy}
               onClick={onStatusEdit}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-lg text-[#137A3D] transition hover:bg-emerald-50 disabled:opacity-50"
+              className="inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-5 text-lg font-medium text-primary-800 transition hover:bg-primary-50 disabled:opacity-50"
             >
-              <Pencil size={17} />
+              <Pencil size={19} />
               Account status
             </button>
 
@@ -99,9 +99,9 @@ export default function UserDetailHeader({
               type="button"
               disabled={busy}
               onClick={onDelete}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-red-200/30 bg-red-500/15 px-4 text-lg text-white transition hover:bg-red-500/25 disabled:opacity-50"
+              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-200/30 bg-red-500/15 px-5 text-lg font-medium text-white transition hover:bg-red-500/25 disabled:opacity-50"
             >
-              <Trash2 size={17} />
+              <Trash2 size={19} />
               Soft delete
             </button>
           </div>
@@ -136,9 +136,11 @@ function Info({
   value: string;
 }) {
   return (
-    <div className="rounded-3xl bg-white/10 px-5 py-4">
-      <p className="text-xl text-white/75">{label}</p>
-      <p className="mt-1 truncate text-lg text-white">{value}</p>
+    <div className="rounded-3xl bg-white/20 px-5 py-4">
+      <p className="text-xl text-white/80">{label}</p>
+      <p className="mt-1 truncate text-lg font-medium text-white">
+        {value}
+      </p>
     </div>
   );
 }

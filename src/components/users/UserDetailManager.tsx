@@ -232,20 +232,20 @@ export default function UserDetailManager({
   if (userLoading) {
     return (
       <div className="flex min-h-[65vh] items-center justify-center">
-        <Loader2 size={34} className="animate-spin text-[#137A3D]" />
+        <Loader2 size={34} className="animate-spin text-primary-700" />
       </div>
     );
   }
 
   if (userError || !user) {
     return (
-      <div className="p-5 sm:p-7">
+      <div className="w-full min-w-0 max-w-full">
         <div className="flex min-h-[420px] flex-col items-center justify-center rounded-[28px] border border-red-100 bg-white px-6 text-center">
           <AlertTriangle size={42} className="text-red-400" />
 
-          <h1 className="mt-4 text-xl font-bold text-gray-800">
+          <p className="mt-4 text-xl font-bold text-gray-800">
             មិនអាចទាញយក User detail
-          </h1>
+          </p>
 
           <p className="mt-2 max-w-lg text-base leading-7 text-gray-500">
             {getAdminApiErrorMessage(userError)}
@@ -259,7 +259,7 @@ export default function UserDetailManager({
   const userBusy = updatingStatus || deletingUser;
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 lg:p-7">
+    <div className="w-full min-w-0 max-w-full space-y-5">
       <UserDetailHeader
         user={user}
         busy={userBusy}
@@ -271,7 +271,7 @@ export default function UserDetailManager({
         <div
           className={`rounded-2xl border px-4 py-3 text-base ${
             notice.type === "success"
-              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+              ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
           }`}
         >
@@ -285,8 +285,8 @@ export default function UserDetailManager({
         </div>
       )}
 
-      <div className="grid items-start gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
-        <div className="xl:sticky xl:top-5">
+      <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]">
+        <div className="min-w-0 xl:sticky xl:top-5">
           <RelatedProfilesPanel
             data={profilePageData}
             loading={profilesLoading}

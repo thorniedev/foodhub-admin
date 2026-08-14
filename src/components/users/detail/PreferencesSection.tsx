@@ -13,9 +13,9 @@ export default function PreferencesSection({
     return (
       <Section
         title="Preferences"
-        icon={<Star size={20} />}
+        icon={<Star size={22} />}
       >
-        <div className="rounded-2xl bg-gray-50 px-4 py-6 text-center text-base text-gray-400">
+        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-8 text-center text-lg text-gray-400">
           No preference data returned.
         </div>
       </Section>
@@ -23,7 +23,10 @@ export default function PreferencesSection({
   }
 
   return (
-    <Section title="Preferences" icon={<Star size={20} />}>
+    <Section
+      title="Preferences"
+      icon={<Star size={22} />}
+    >
       <div className="space-y-4">
         <Tags
           label="Cuisines"
@@ -79,18 +82,20 @@ function Tags({
 }) {
   return (
     <div>
-      <p className="mb-2 text-base font-semibold text-[#F97316]">
+      <p className="mb-2 text-lg font-medium text-gray-500">
         {label}
       </p>
 
       <div className="flex flex-wrap gap-2">
         {values.length === 0 ? (
-          <span className="text-base text-gray-400">—</span>
+          <span className="text-lg text-gray-400">
+            —
+          </span>
         ) : (
           values.map((value) => (
             <span
               key={value}
-              className="rounded-full bg-emerald-50 px-3 py-1.5 text-base text-[#137A3D]"
+              className="rounded-full bg-primary-50 px-3.5 py-1.5 text-lg font-medium text-primary-700 ring-1 ring-inset ring-primary-100"
             >
               {humanizeEnum(value)}
             </span>
@@ -109,12 +114,12 @@ function Info({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl bg-gray-50 px-4 py-3">
-      <p className="text-base font-semibold text-[#F97316]">
+    <div className="rounded-2xl border border-gray-100 bg-gray-50/60 px-4 py-4 transition hover:border-gray-200 hover:bg-gray-50">
+      <p className="text-lg font-medium text-gray-500">
         {label}
       </p>
 
-      <p className="mt-1 text-base text-gray-700">
+      <p className="mt-1 text-lg font-semibold text-gray-800">
         {value}
       </p>
     </div>

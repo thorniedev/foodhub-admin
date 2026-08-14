@@ -56,7 +56,7 @@ export function Section({
 
         <p
           className="
-            text-3xl
+            text-2xl
             font-semibold
             text-primary-800
           "

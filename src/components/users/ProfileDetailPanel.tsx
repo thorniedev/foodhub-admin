@@ -36,22 +36,22 @@ export default function ProfileDetailPanel({
 }: ProfileDetailPanelProps) {
   if (loading) {
     return (
-      <section className="flex min-h-[520px] items-center justify-center rounded-[24px] border border-gray-100 bg-white">
-        <Loader2 size={30} className="animate-spin text-[#137A3D]" />
+      <section className="flex min-h-[520px] min-w-0 items-center justify-center rounded-2xl border border-gray-100 bg-white">
+        <Loader2 size={30} className="animate-spin text-primary-800" />
       </section>
     );
   }
 
   if (error) {
     return (
-      <section className="flex min-h-[520px] flex-col items-center justify-center rounded-[24px] border border-red-100 bg-white px-6 text-center">
+      <section className="flex min-h-[520px] min-w-0 flex-col items-center justify-center rounded-2xl border border-red-100 bg-white px-6 text-center">
         <AlertTriangle size={38} className="text-red-400" />
 
-        <h3 className="mt-3 text-xl font-bold text-gray-800">
+        <p className="mt-3 text-2xl font-semibold text-primary-800">
           មិនអាចផ្ទុក Profile detail
-        </h3>
+        </p>
 
-        <p className="mt-2 max-w-md text-base leading-7 text-gray-500">
+        <p className="mt-2 max-w-md text-lg leading-8 text-gray-500">
           {getAdminApiErrorMessage(error)}
         </p>
       </section>
@@ -60,14 +60,14 @@ export default function ProfileDetailPanel({
 
   if (!profile) {
     return (
-      <section className="flex min-h-[520px] flex-col items-center justify-center rounded-[24px] border border-dashed border-gray-200 bg-white px-6 text-center">
+      <section className="flex min-h-[520px] min-w-0 flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white px-6 text-center">
         <User size={42} className="text-gray-300" />
 
-        <h3 className="mt-3 text-xl font-bold text-gray-700">
+        <p className="mt-3 text-2xl font-semibold text-primary-800">
           ជ្រើសរើស Profile មួយ
-        </h3>
+        </p>
 
-        <p className="mt-2 text-base text-gray-400">
+        <p className="mt-2 text-lg text-gray-400">
           ចុច Profile ខាងឆ្វេង ដើម្បីទាញយក safety detail ពី API ពិត។
         </p>
       </section>
@@ -75,7 +75,7 @@ export default function ProfileDetailPanel({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4">
       <ProfileHeader
         profile={profile}
         busy={busy}
@@ -83,7 +83,7 @@ export default function ProfileDetailPanel({
         onRestore={onRestore}
       />
 
-      <div className="grid gap-4 2xl:grid-cols-2">
+      <div className="grid min-w-0 gap-4 2xl:grid-cols-2">
         <BasicInfoSection profile={profile} />
         <AgeGroupSection profile={profile} />
         <AllergiesSection allergies={profile.allergies ?? []} />

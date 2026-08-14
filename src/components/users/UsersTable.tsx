@@ -1,19 +1,10 @@
 import Link from "next/link";
 
-import {
-  CheckCircle,
-  Eye,
-  Pencil,
-  Trash2,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle, Eye, Pencil, Trash2, XCircle } from "lucide-react";
 
 import type { AdminUser } from "@/src/types/userProfile";
 
-import {
-  displayName,
-  initials,
-} from "@/src/lib/userProfileFormat";
+import { displayName, initials } from "@/src/lib/userProfileFormat";
 
 interface UsersTableProps {
   users: AdminUser[];
@@ -29,16 +20,29 @@ export default function UsersTable({
   onDelete,
 }: UsersTableProps) {
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-[1080px] w-full border-collapse text-left">
+    <div className="w-full min-w-0 max-w-full overflow-x-auto">
+      <table className="w-full min-w-[1080px] border-collapse text-left">
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/50">
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">អ្នកប្រើ</th>
-            {/* <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Username</th> */}
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Email</th>
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">Verified</th>
-            <th className="px-5 py-4 text-xl font-bold text-[#136C34]">ស្ថានភាព</th>
-            <th className="px-5 py-4 text-right text-xl font-bold text-[#136C34]">សកម្មភាព</th>
+          <tr className="border-b border-gray-100 bg-gray-50/70">
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+              អ្នកប្រើ
+            </th>
+
+            {/* <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+              Email
+            </th> */}
+
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+              Verified
+            </th>
+
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+              ស្ថានភាព
+            </th>
+
+            <th className="px-6 py-4 text-right text-xl font-semibold text-primary-800">
+              សកម្មភាព
+            </th>
           </tr>
         </thead>
 
@@ -50,55 +54,67 @@ export default function UsersTable({
               user.username,
             );
 
+            const detailHref = `/users/${user.uuid}`;
+
             return (
               <tr
                 key={user.uuid}
-                className="border-b border-gray-100 bg-white transition last:border-0 hover:bg-gray-50/60"
+                className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
               >
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-lg font-bold text-[#136C34]">
+                <td className="px-6 py-4">
+                  <Link
+                    href={detailHref}
+                    title={`មើលព័ត៌មាន ${name}`}
+                    className="group flex min-w-[260px] items-center gap-4 rounded-2xl outline-none transition focus-visible:ring-4 focus-visible:ring-primary-100"
+                  >
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-primary-100 bg-primary-50 text-lg font-semibold text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100">
                       {initials(name)}
                     </div>
 
-                    <p className="truncate text-lg text-gray-800">{name}</p>
-                  </div>
+                    <div className="min-w-0">
+                      <p className="max-w-[250px] truncate text-lg font-medium text-gray-800 transition group-hover:text-primary-800">
+                        {name}
+                      </p>
+
+                      <p className="mt-1 truncate text-base text-gray-400">
+                        @{user.username}
+                      </p>
+                    </div>
+                  </Link>
                 </td>
-{/* 
-                <td className="px-5 py-4 text-base text-gray-700">
-                  {user.username}
+
+                {/* <td className="max-w-[320px] px-6 py-4">
+                  <p className="truncate text-lg text-gray-500">
+                    {user.primaryEmail ?? "—"}
+                  </p>
                 </td> */}
 
-                <td className="max-w-[300px] px-5 py-4 text-base text-gray-500">
-                  <p className="truncate">{user.primaryEmail ?? "—"}</p>
-                </td>
-
-                <td className="px-5 py-4">
+                <td className="px-6 py-4">
                   {user.emailVerified ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-base text-emerald-700">
-                      <CheckCircle size={15} />
+                    <span className="inline-flex items-center gap-2 rounded-full bg-primary-50 px-3.5 py-1.5 text-lg font-medium text-primary-700 ring-1 ring-inset ring-primary-100">
+                      <CheckCircle size={17} />
                       Yes
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-base text-amber-700">
-                      <XCircle size={15} />
+                    <span className="inline-flex items-center gap-2 rounded-full bg-secondary-50 px-3.5 py-1.5 text-lg font-medium text-secondary-600 ring-1 ring-inset ring-secondary-100">
+                      <XCircle size={17} />
                       No
                     </span>
                   )}
                 </td>
 
-                <td className="px-5 py-4">
+                <td className="px-6 py-4">
                   <StatusBadge status={user.status} />
                 </td>
 
-                <td className="px-5 py-4">
-                  <div className="flex items-center justify-end gap-1">
+                <td className="px-6 py-4">
+                  <div className="flex items-center justify-end gap-2">
                     <Link
-                      href={`/users/${user.uuid}`}
+                      href={detailHref}
                       title="View user profiles"
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-emerald-600 transition hover:bg-emerald-50"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100"
                     >
-                      <Eye size={18} />
+                      <Eye size={20} />
                     </Link>
 
                     <button
@@ -106,9 +122,9 @@ export default function UsersTable({
                       disabled={disabled}
                       onClick={() => onStatusEdit(user)}
                       title="Change status"
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-blue-500 transition hover:bg-blue-50 disabled:opacity-40"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      <Pencil size={18} />
+                      <Pencil size={20} />
                     </button>
 
                     <button
@@ -116,9 +132,9 @@ export default function UsersTable({
                       disabled={disabled}
                       onClick={() => onDelete(user)}
                       title="Soft delete"
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-red-400 transition hover:bg-red-50 disabled:opacity-40"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      <Trash2 size={18} />
+                      <Trash2 size={20} />
                     </button>
                   </div>
                 </td>
@@ -128,8 +144,14 @@ export default function UsersTable({
 
           {users.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-5 py-16 text-center text-lg text-gray-400">
-                មិនមានអ្នកប្រើប្រាស់
+              <td colSpan={5} className="px-6 py-16 text-center">
+                <p className="text-lg font-medium text-gray-500">
+                  មិនមានអ្នកប្រើប្រាស់
+                </p>
+
+                <p className="mt-1 text-lg text-gray-400">
+                  ទិន្នន័យអ្នកប្រើនឹងបង្ហាញនៅទីនេះ
+                </p>
               </td>
             </tr>
           )}
@@ -139,25 +161,33 @@ export default function UsersTable({
   );
 }
 
-export function StatusBadge({
-  status,
-}: {
-  status: string;
-}) {
-  const normalized = status?.toUpperCase();
+export function StatusBadge({ status }: { status: string }) {
+  const normalized = String(status || "UNKNOWN").toUpperCase();
 
   const className =
     normalized === "ACTIVE"
-      ? "bg-emerald-50 text-emerald-700"
+      ? "bg-primary-50 text-primary-700 ring-primary-100"
       : normalized === "SUSPENDED"
-        ? "bg-amber-50 text-amber-700"
-        : normalized === "DELETED"
-          ? "bg-red-50 text-red-700"
-          : "bg-gray-100 text-gray-600";
+        ? "bg-secondary-50 text-secondary-600 ring-secondary-100"
+        : normalized === "DELETED" || normalized === "DISABLED"
+          ? "bg-red-50 text-red-600 ring-red-100"
+          : "bg-gray-100 text-gray-600 ring-gray-200";
+
+  const dotClassName =
+    normalized === "ACTIVE"
+      ? "bg-primary-600"
+      : normalized === "SUSPENDED"
+        ? "bg-secondary-500"
+        : normalized === "DELETED" || normalized === "DISABLED"
+          ? "bg-red-500"
+          : "bg-gray-400";
 
   return (
-    <span className={`inline-flex rounded-full px-3 py-1 text-lg ${className}`}>
-      {status || "UNKNOWN"}
+    <span
+      className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-lg font-medium ring-1 ring-inset ${className}`}
+    >
+      <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
+      {normalized}
     </span>
   );
 }
