@@ -34,7 +34,7 @@ export default function MedicalConditionsHeader({
             </div>
 
             <div>
-              <p className="text-5xl font-bold">
+              <p className="text-3xl font-bold text-accent-400">
                 គ្រប់គ្រងស្ថានភាពសុខភាព
               </p>
 
@@ -47,7 +47,7 @@ export default function MedicalConditionsHeader({
           {/* STATS */}
 
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="rounded-3xl bg-white/10 px-5 py-4">
+            <div className="rounded-3xl bg-white/20 px-5 py-4">
               <p className="text-xl text-white/75">
                 សរុប
               </p>
@@ -57,7 +57,7 @@ export default function MedicalConditionsHeader({
               </p>
             </div>
 
-            <div className="rounded-3xl bg-white/10 px-5 py-4">
+            <div className="rounded-3xl bg-white/20 px-5 py-4">
               <p className="text-xl text-white/75">
                 សកម្មក្នុងទំព័រ
               </p>
@@ -67,7 +67,7 @@ export default function MedicalConditionsHeader({
               </p>
             </div>
 
-            <div className="rounded-3xl bg-white/10 px-5 py-4">
+            <div className="rounded-3xl bg-white/20 px-5 py-4">
               <p className="text-xl text-white/75">
                 អសកម្មក្នុងទំព័រ
               </p>
@@ -84,7 +84,7 @@ export default function MedicalConditionsHeader({
         <button
           type="button"
           onClick={onAdd}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
         >
           <Plus size={20} />
 

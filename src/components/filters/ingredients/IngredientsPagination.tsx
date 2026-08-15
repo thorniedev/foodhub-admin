@@ -29,7 +29,7 @@ export default function IngredientsPagination({
 
   return (
     <div className="flex items-center justify-between border-t border-gray-100 px-5 py-4">
-      <p className="text-base text-gray-500">
+      <p className="text-lg text-gray-500">
         សរុប{" "}
         <span className="font-semibold text-gray-700">
           {
@@ -58,11 +58,11 @@ export default function IngredientsPagination({
           />
         </button>
 
-        <div className="flex h-10 min-w-10 items-center justify-center rounded-xl bg-[#136C34] px-3 text-sm font-semibold text-white">
+        <div className="flex h-10 min-w-10 items-center justify-center rounded-xl bg-primary-800 px-3 text-lg font-semibold text-white">
           {page + 1}
         </div>
 
-        <span className="text-sm text-gray-400">
+        <span className="text-lg text-gray-400">
           /{" "}
           {
             safeTotalPages

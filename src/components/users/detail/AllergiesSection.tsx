@@ -12,7 +12,7 @@ export default function AllergiesSection({
   return (
     <Section
       title={`Allergies (${allergies.length})`}
-      icon={<Shield size={20} />}
+      icon={<Shield size={22} />}
     >
       {allergies.length === 0 ? (
         <Empty />
@@ -21,33 +21,34 @@ export default function AllergiesSection({
           {allergies.map((item) => (
             <div
               key={item.uuid}
-              className="rounded-2xl border border-red-100 bg-red-50/50 p-4"
+              className="rounded-2xl border border-red-100 bg-red-50/40 p-4 transition hover:border-red-200 hover:bg-red-50/60"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-lg font-semibold text-gray-900">
                     {item.name}
                   </p>
-                  <p className="mt-1 text-base text-gray-400">
+
+                  <p className="mt-1 text-lg text-gray-500">
                     {item.code}
                   </p>
                 </div>
 
-                <span className="rounded-full bg-white px-3 py-1 text-base text-red-600">
+                <span className="rounded-full bg-white px-3.5 py-1.5 text-lg font-medium text-red-600 ring-1 ring-inset ring-red-100">
                   {humanizeEnum(item.severity)}
                 </span>
               </div>
 
-              <p className="mt-3 text-base leading-7 text-gray-600">
+              <p className="mt-3 text-lg leading-8 text-gray-600">
                 {item.reactionNotes || "No reaction notes."}
               </p>
 
-              <div className="mt-3 flex flex-wrap gap-2 text-sm">
-                <span className="rounded-full bg-white px-3 py-1.5 text-gray-600">
+              <div className="mt-3 flex flex-wrap gap-2 text-lg">
+                <span className="rounded-full bg-white px-3 py-1.5 text-gray-600 ring-1 ring-inset ring-red-100">
                   Cross-contact: {item.avoidCrossContact ? "Avoid" : "No"}
                 </span>
 
-                <span className="rounded-full bg-white px-3 py-1.5 text-gray-600">
+                <span className="rounded-full bg-white px-3 py-1.5 text-gray-600 ring-1 ring-inset ring-red-100">
                   Diagnosed: {item.medicallyDiagnosed ? "Yes" : "No"}
                 </span>
               </div>
@@ -61,7 +62,7 @@ export default function AllergiesSection({
 
 function Empty() {
   return (
-    <div className="rounded-2xl bg-gray-50 px-4 py-6 text-center text-base text-gray-400">
+    <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-8 text-center text-lg text-gray-400">
       No allergies assigned.
     </div>
   );

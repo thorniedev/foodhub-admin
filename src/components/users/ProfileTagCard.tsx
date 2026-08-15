@@ -31,34 +31,34 @@ export default function ProfileTagCard({
     <button
       type="button"
       onClick={onSelect}
-      className={`w-full rounded-[22px] border p-4 text-left transition ${
+      className={`w-full rounded-2xl border p-4 text-left transition focus:outline-none focus:ring-4 focus:ring-primary-100 ${
         selected
-          ? "border-emerald-300 bg-emerald-50 shadow-[0_8px_25px_rgba(19,122,61,0.08)]"
-          : "border-gray-100 bg-white hover:border-emerald-100 hover:bg-emerald-50/30"
+          ? "border-primary-200 bg-primary-50"
+          : "border-gray-100 bg-white hover:border-primary-100 hover:bg-primary-50/40"
       }`}
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#137A3D] text-base font-bold text-white">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-800 text-lg font-semibold text-white">
           {initials(profile.profileName)}
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate text-lg text-gray-900">
+            <p className="truncate text-lg font-medium text-gray-900">
               {profile.profileName}
             </p>
 
             {profile.isDefault && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
-                <Star size={11} />
+              <span className="inline-flex items-center gap-1 rounded-full bg-secondary-50 px-2.5 py-1 text-base font-medium text-secondary-600">
+                <Star size={14} />
                 Default
               </span>
             )}
 
             <span
-              className={`rounded-full px-2 py-0.5 text-xs ${
+              className={`rounded-full px-2.5 py-1 text-base font-medium ${
                 profile.isActive
-                  ? "bg-emerald-100 text-emerald-700"
+                  ? "bg-primary-50 text-primary-700"
                   : "bg-red-50 text-red-600"
               }`}
             >
@@ -66,20 +66,20 @@ export default function ProfileTagCard({
             </span>
           </div>
 
-          <div className="mt-3 grid gap-2 text-sm text-gray-500 sm:grid-cols-2">
+          <div className="mt-3 grid gap-2 text-base text-gray-500 sm:grid-cols-2">
             <span className="inline-flex items-center gap-1.5">
-              <User size={13} />
+              <User size={16} />
               {humanizeEnum(profile.relationship)}
             </span>
 
             <span className="inline-flex items-center gap-1.5">
-              <Calendar size={13} />
+              <Calendar size={16} />
               {formatDateOnly(profile.dateOfBirth)}
               {age !== null ? ` · ${age}y` : ""}
             </span>
 
             <span className="inline-flex items-center gap-1.5">
-              <Globe2 size={13} />
+              <Globe2 size={16} />
               {(profile.preferredLanguage ?? "—").toUpperCase()}
             </span>
 

@@ -21,7 +21,7 @@ export default function ShopsTabs({
   onChange: (value: StoreReviewFilter) => void;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2  ">
       {tabs.map((tab) => {
         const active = tab.value === value;
 
@@ -30,7 +30,7 @@ export default function ShopsTabs({
             key={tab.value}
             type="button"
             onClick={() => onChange(tab.value)}
-            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-lg transition ${
+            className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-3 py-1.5 text-lg transition ${
               active
                 ? "bg-[#136C34] text-white"
                 : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"

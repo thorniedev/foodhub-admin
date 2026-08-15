@@ -11,10 +11,7 @@ import {
   Utensils,
 } from "lucide-react";
 
-import {
-  useMemo,
-  useState,
-} from "react";
+import { useMemo, useState } from "react";
 
 import {
   useCreateManagedFoodMutation,
@@ -31,9 +28,7 @@ import {
   useUpdateStoreMenuItemMutation,
 } from "@/src/app/store/menuManagementApi";
 
-import {
-  getMenuManagementApiError,
-} from "@/src/lib/menuManagementApiError";
+import { getMenuManagementApiError } from "@/src/lib/menuManagementApiError";
 
 import type {
   FoodRecord,
@@ -51,17 +46,12 @@ import PublishedMenuItemsTable from "./PublishedMenuItemsTable";
 
 type Tab = "FOODS" | "WEBSITE";
 
-type Notice =
-  | {
-      type: "success" | "error";
-      text: string;
-    }
-  | null;
+type Notice = {
+  type: "success" | "error";
+  text: string;
+} | null;
 
-function matchesFood(
-  item: FoodRecord,
-  search: string,
-) {
+function matchesFood(item: FoodRecord, search: string) {
   const query = search.trim().toLowerCase();
 
   if (!query) return true;
@@ -81,10 +71,7 @@ function matchesFood(
   );
 }
 
-function matchesMenuItem(
-  item: MenuItemRecord,
-  search: string,
-) {
+function matchesMenuItem(item: MenuItemRecord, search: string) {
   const query = search.trim().toLowerCase();
 
   if (!query) return true;
@@ -109,23 +96,16 @@ export default function MenuItemsManager() {
   const [search, setSearch] = useState("");
   const [notice, setNotice] = useState<Notice>(null);
 
-  const [foodModalOpen, setFoodModalOpen] =
-    useState(false);
-  const [editingFood, setEditingFood] =
-    useState<FoodRecord | null>(null);
+  const [foodModalOpen, setFoodModalOpen] = useState(false);
+  const [editingFood, setEditingFood] = useState<FoodRecord | null>(null);
 
-  const [menuModalOpen, setMenuModalOpen] =
-    useState(false);
-  const [editingMenu, setEditingMenu] =
-    useState<MenuItemRecord | null>(null);
+  const [menuModalOpen, setMenuModalOpen] = useState(false);
+  const [editingMenu, setEditingMenu] = useState<MenuItemRecord | null>(null);
 
-  const [deletingFood, setDeletingFood] =
-    useState<FoodRecord | null>(null);
-  const [deletingMenu, setDeletingMenu] =
-    useState<MenuItemRecord | null>(null);
+  const [deletingFood, setDeletingFood] = useState<FoodRecord | null>(null);
+  const [deletingMenu, setDeletingMenu] = useState<MenuItemRecord | null>(null);
 
-  const [detailUuid, setDetailUuid] =
-    useState<string | null>(null);
+  const [detailUuid, setDetailUuid] = useState<string | null>(null);
 
   const foodsQuery = useGetManagedFoodsQuery({
     page: 0,
@@ -133,69 +113,45 @@ export default function MenuItemsManager() {
     sort: "createdAt,desc",
   });
 
-  const menuItemsQuery =
-    useGetPublishedMenuItemsQuery({
-      page: 0,
-      size: 100,
-      sort: "createdAt,desc",
-    });
+  const menuItemsQuery = useGetPublishedMenuItemsQuery({
+    page: 0,
+    size: 100,
+    sort: "createdAt,desc",
+  });
 
-  const categoriesQuery =
-    useGetManagedFoodCategoriesQuery();
-  const cuisinesQuery =
-    useGetManagedCuisinesQuery();
-  const ingredientsQuery =
-    useGetManagedIngredientsQuery();
-  const storesQuery =
-    useGetManagedStoresQuery();
+  const categoriesQuery = useGetManagedFoodCategoriesQuery();
+  const cuisinesQuery = useGetManagedCuisinesQuery();
+  const ingredientsQuery = useGetManagedIngredientsQuery();
+  const storesQuery = useGetManagedStoresQuery();
 
-  const [
-    createFood,
-    { isLoading: creatingFood },
-  ] = useCreateManagedFoodMutation();
+  const [createFood, { isLoading: creatingFood }] =
+    useCreateManagedFoodMutation();
 
-  const [
-    updateFood,
-    { isLoading: updatingFood },
-  ] = useUpdateManagedFoodMutation();
+  const [updateFood, { isLoading: updatingFood }] =
+    useUpdateManagedFoodMutation();
 
-  const [
-    deleteFood,
-    { isLoading: deletingFoodRequest },
-  ] = useDeleteManagedFoodMutation();
+  const [deleteFood, { isLoading: deletingFoodRequest }] =
+    useDeleteManagedFoodMutation();
 
-  const [
-    createMenuItem,
-    { isLoading: creatingMenuItem },
-  ] = useCreateStoreMenuItemMutation();
+  const [createMenuItem, { isLoading: creatingMenuItem }] =
+    useCreateStoreMenuItemMutation();
 
-  const [
-    updateMenuItem,
-    { isLoading: updatingMenuItem },
-  ] = useUpdateStoreMenuItemMutation();
+  const [updateMenuItem, { isLoading: updatingMenuItem }] =
+    useUpdateStoreMenuItemMutation();
 
-  const [
-    deleteMenuItem,
-    { isLoading: deletingMenuItemRequest },
-  ] = useDeleteStoreMenuItemMutation();
+  const [deleteMenuItem, { isLoading: deletingMenuItemRequest }] =
+    useDeleteStoreMenuItemMutation();
 
   const foods = foodsQuery.data?.content ?? [];
-  const menuItems =
-    menuItemsQuery.data?.content ?? [];
+  const menuItems = menuItemsQuery.data?.content ?? [];
 
   const filteredFoods = useMemo(
-    () =>
-      foods.filter((item) =>
-        matchesFood(item, search),
-      ),
+    () => foods.filter((item) => matchesFood(item, search)),
     [foods, search],
   );
 
   const filteredMenuItems = useMemo(
-    () =>
-      menuItems.filter((item) =>
-        matchesMenuItem(item, search),
-      ),
+    () => menuItems.filter((item) => matchesMenuItem(item, search)),
     [menuItems, search],
   );
 
@@ -208,26 +164,16 @@ export default function MenuItemsManager() {
     deletingMenuItemRequest;
 
   const currentLoading =
-    tab === "FOODS"
-      ? foodsQuery.isLoading
-      : menuItemsQuery.isLoading;
+    tab === "FOODS" ? foodsQuery.isLoading : menuItemsQuery.isLoading;
 
   const currentError =
-    tab === "FOODS"
-      ? foodsQuery.error
-      : menuItemsQuery.error;
+    tab === "FOODS" ? foodsQuery.error : menuItemsQuery.error;
 
   const refreshAll = async () => {
-    await Promise.all([
-      foodsQuery.refetch(),
-      menuItemsQuery.refetch(),
-    ]);
+    await Promise.all([foodsQuery.refetch(), menuItemsQuery.refetch()]);
   };
 
-  const saveFood = async (
-    payload: FoodWritePayload,
-    images: File[],
-  ) => {
+  const saveFood = async (payload: FoodWritePayload, images: File[]) => {
     try {
       setNotice(null);
 
@@ -240,8 +186,7 @@ export default function MenuItemsManager() {
 
         setNotice({
           type: "success",
-          text:
-            "បានកែប្រែ Food Catalog ដោយជោគជ័យ។",
+          text: "បានកែប្រែ Food Catalog ដោយជោគជ័យ។",
         });
       } else {
         await createFood({
@@ -251,8 +196,7 @@ export default function MenuItemsManager() {
 
         setNotice({
           type: "success",
-          text:
-            "បានបង្កើត Food Catalog។ Store អាចជ្រើស Food នេះបាន។",
+          text: "បានបង្កើត Food Catalog។ Store អាចជ្រើស Food នេះបាន។",
         });
       }
 
@@ -261,8 +205,7 @@ export default function MenuItemsManager() {
 
       await refreshAll();
     } catch (error) {
-      const message =
-        getMenuManagementApiError(error);
+      const message = getMenuManagementApiError(error);
 
       setNotice({
         type: "error",
@@ -290,8 +233,7 @@ export default function MenuItemsManager() {
 
         setNotice({
           type: "success",
-          text:
-            "បានកែប្រែ Menu Item ដោយជោគជ័យ។",
+          text: "បានកែប្រែ Menu Item ដោយជោគជ័យ។",
         });
       } else {
         await createMenuItem({
@@ -302,8 +244,7 @@ export default function MenuItemsManager() {
 
         setNotice({
           type: "success",
-          text:
-            "បាន Publish Menu Item។ វានឹងចូល Public Menu Item API របស់ Website។",
+          text: "បាន Publish Menu Item។ វានឹងចូល Public Menu Item API របស់ Website។",
         });
       }
 
@@ -313,8 +254,7 @@ export default function MenuItemsManager() {
 
       await refreshAll();
     } catch (error) {
-      const message =
-        getMenuManagementApiError(error);
+      const message = getMenuManagementApiError(error);
 
       setNotice({
         type: "error",
@@ -329,24 +269,20 @@ export default function MenuItemsManager() {
     if (!deletingFood) return;
 
     try {
-      await deleteFood(
-        deletingFood.uuid,
-      ).unwrap();
+      await deleteFood(deletingFood.uuid).unwrap();
 
       setDeletingFood(null);
 
       setNotice({
         type: "success",
-        text:
-          "បាន deactivate/delete Food Catalog។",
+        text: "បាន deactivate/delete Food Catalog។",
       });
 
       await refreshAll();
     } catch (error) {
       setNotice({
         type: "error",
-        text:
-          getMenuManagementApiError(error),
+        text: getMenuManagementApiError(error),
       });
     }
   };
@@ -355,9 +291,7 @@ export default function MenuItemsManager() {
     if (!deletingMenu) return;
 
     try {
-      await deleteMenuItem(
-        deletingMenu.uuid,
-      ).unwrap();
+      await deleteMenuItem(deletingMenu.uuid).unwrap();
 
       setDeletingMenu(null);
 
@@ -370,14 +304,13 @@ export default function MenuItemsManager() {
     } catch (error) {
       setNotice({
         type: "error",
-        text:
-          getMenuManagementApiError(error),
+        text: getMenuManagementApiError(error),
       });
     }
   };
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 lg:p-7">
+    <div className="space-y-5">
       <div className="rounded-[28px] bg-gradient-to-br from-[#137A3D] to-[#0f8e48] p-6 text-white shadow-sm sm:p-7">
         <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
           <div className="flex items-center gap-3">
@@ -386,9 +319,7 @@ export default function MenuItemsManager() {
             </div>
 
             <div>
-              <h1 className="text-3xl font-black sm:text-4xl">
-                ប្រភេទអាហារ
-              </h1>
+              <h1 className="text-3xl font-black sm:text-4xl">ប្រភេទអាហារ</h1>
               <p className="mt-1 text-sm text-white/75">
                 Food Catalog សម្រាប់ Store និង Menu Items សម្រាប់ Website
               </p>
@@ -439,10 +370,7 @@ export default function MenuItemsManager() {
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="inline-flex w-fit rounded-2xl border border-gray-100 bg-white p-1 shadow-sm">
-          <TabButton
-            active={tab === "FOODS"}
-            onClick={() => setTab("FOODS")}
-          >
+          <TabButton active={tab === "FOODS"} onClick={() => setTab("FOODS")}>
             <Store size={16} />
             សម្រាប់ Store
             <Count>{foods.length}</Count>
@@ -467,9 +395,7 @@ export default function MenuItemsManager() {
 
             <input
               value={search}
-              onChange={(event) =>
-                setSearch(event.target.value)
-              }
+              onChange={(event) => setSearch(event.target.value)}
               placeholder="ស្វែងរក..."
               className="h-12 w-full min-w-[280px] rounded-2xl border border-gray-200 bg-white pl-11 pr-4 text-sm outline-none focus:border-[#137A3D] focus:ring-4 focus:ring-emerald-50 sm:w-[360px]"
             />
@@ -477,18 +403,14 @@ export default function MenuItemsManager() {
 
           <button
             type="button"
-            disabled={
-              foodsQuery.isFetching ||
-              menuItemsQuery.isFetching
-            }
+            disabled={foodsQuery.isFetching || menuItemsQuery.isFetching}
             onClick={() => void refreshAll()}
             className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50"
           >
             <RefreshCw
               size={18}
               className={
-                foodsQuery.isFetching ||
-                menuItemsQuery.isFetching
+                foodsQuery.isFetching || menuItemsQuery.isFetching
                   ? "animate-spin"
                   : ""
               }
@@ -512,24 +434,16 @@ export default function MenuItemsManager() {
       <section className="overflow-hidden rounded-[26px] border border-gray-100 bg-white shadow-sm">
         {currentLoading ? (
           <div className="flex min-h-[360px] items-center justify-center">
-            <Loader2
-              size={30}
-              className="animate-spin text-[#137A3D]"
-            />
+            <Loader2 size={30} className="animate-spin text-[#137A3D]" />
           </div>
         ) : currentError ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
-            <AlertTriangle
-              size={38}
-              className="text-red-400"
-            />
+            <AlertTriangle size={38} className="text-red-400" />
             <h3 className="mt-3 text-xl font-black text-gray-900">
               មិនអាចទាញយកទិន្នន័យបានទេ
             </h3>
             <p className="mt-2 max-w-xl text-sm leading-6 text-gray-500">
-              {getMenuManagementApiError(
-                currentError,
-              )}
+              {getMenuManagementApiError(currentError)}
             </p>
           </div>
         ) : tab === "FOODS" ? (
@@ -546,9 +460,7 @@ export default function MenuItemsManager() {
           <PublishedMenuItemsTable
             items={filteredMenuItems}
             busy={busy}
-            onView={(item) =>
-              setDetailUuid(item.uuid)
-            }
+            onView={(item) => setDetailUuid(item.uuid)}
             onEdit={(item) => {
               setEditingMenu(item);
               setMenuModalOpen(true);
@@ -578,15 +490,9 @@ export default function MenuItemsManager() {
         foods={foods}
         stores={storesQuery.data ?? []}
         ingredients={ingredientsQuery.data ?? []}
-        saving={
-          creatingMenuItem ||
-          updatingMenuItem
-        }
+        saving={creatingMenuItem || updatingMenuItem}
         onClose={() => {
-          if (
-            creatingMenuItem ||
-            updatingMenuItem
-          ) {
+          if (creatingMenuItem || updatingMenuItem) {
             return;
           }
           setMenuModalOpen(false);
@@ -601,31 +507,22 @@ export default function MenuItemsManager() {
         description={
           deletingFood
             ? `Food: ${
-                deletingFood.localName ||
-                deletingFood.canonicalName
+                deletingFood.localName || deletingFood.canonicalName
               }. Backend Food DELETE គឺសម្រាប់ deactivate/cleanup។`
             : ""
         }
         deleting={deletingFoodRequest}
         onClose={() => setDeletingFood(null)}
-        onConfirm={() =>
-          void confirmDeleteFood()
-        }
+        onConfirm={() => void confirmDeleteFood()}
       />
 
       <DeleteConfirmModal
         open={Boolean(deletingMenu)}
         title="លុប Menu Item?"
-        description={
-          deletingMenu
-            ? `Menu Item: ${deletingMenu.name}.`
-            : ""
-        }
+        description={deletingMenu ? `Menu Item: ${deletingMenu.name}.` : ""}
         deleting={deletingMenuItemRequest}
         onClose={() => setDeletingMenu(null)}
-        onConfirm={() =>
-          void confirmDeleteMenu()
-        }
+        onConfirm={() => void confirmDeleteMenu()}
       />
 
       <MenuItemDetailModal
@@ -649,13 +546,9 @@ function Stat({
     <div className="rounded-2xl bg-white/10 p-4">
       <div className="flex items-center gap-2 text-white/80">
         {icon}
-        <span className="text-sm font-bold">
-          {label}
-        </span>
+        <span className="text-sm font-bold">{label}</span>
       </div>
-      <p className="mt-2 text-3xl font-black">
-        {value}
-      </p>
+      <p className="mt-2 text-3xl font-black">{value}</p>
     </div>
   );
 }
@@ -674,9 +567,7 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={`inline-flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-black transition ${
-        active
-          ? "bg-[#137A3D] text-white"
-          : "text-gray-500 hover:bg-gray-50"
+        active ? "bg-[#137A3D] text-white" : "text-gray-500 hover:bg-gray-50"
       }`}
     >
       {children}
@@ -684,11 +575,7 @@ function TabButton({
   );
 }
 
-function Count({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function Count({ children }: { children: React.ReactNode }) {
   return (
     <span className="rounded-full bg-black/10 px-2 py-0.5 text-xs">
       {children}

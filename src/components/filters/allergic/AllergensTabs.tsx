@@ -39,14 +39,14 @@ export default function AllergensTabs({
             onClick={() => onChange(tab.value)}
             className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-lg transition ${
               selected
-                ? "bg-[#136C34] text-white"
-                : "bg-white text-gray-500  hover:bg-emerald-50 hover:text-[#136C34]"
+                ? "bg-primary-800 text-white"
+                : "bg-white text-gray-500  hover:bg-primary-50 hover:text-primary-800"
             }`}
           >
             {tab.label}
 
             <span
-              className={`rounded-full w-6 h-6 flex items-center justify-center text-sm ${
+              className={`rounded-full w-6 h-6 flex items-center justify-center text-lg ${
                 selected
                   ? "bg-white/20 text-white"
                   : "bg-gray-100 text-gray-500"

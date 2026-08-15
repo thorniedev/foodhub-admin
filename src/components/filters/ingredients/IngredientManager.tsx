@@ -654,7 +654,7 @@ const {
     };
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 lg:p-7">
+    <div className="space-y-5">
       {/* =================================================
           HEADER
       ================================================== */}
@@ -775,7 +775,7 @@ const {
                 }
               }}
               placeholder="ស្វែងរកឈ្មោះ កូដ ឬការពិពណ៌នា..."
-              className="h-12 w-[390px] rounded-2xl border border-gray-200 bg-white py-2 pl-11 pr-10 text-base text-gray-700 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-[#137A3D]/10"
+              className="h-[52px] w-[390px] rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
             />
 
             {search && (
@@ -812,10 +812,10 @@ const {
                         size={
                           30
                         }
-                        className="mx-auto text-[#F97316]"
+                        className="mx-auto text-secondary-600"
                       />
 
-                      <p className="mt-2 text-base text-[#F97316]">
+                      <p className="mt-2 text-lg text-secondary-600">
                         មិនមានគ្រឿងផ្សំដែលត្រូវគ្នា
                       </p>
                     </div>
@@ -848,10 +848,10 @@ const {
                                 0,
                               );
                             }}
-                            className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-emerald-50"
+                            className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
                           >
                             <div className="min-w-0">
-                              <p className="truncate text-base font-semibold text-gray-800">
+                              <p className="truncate text-lg font-semibold text-gray-800">
                                 {
                                   item.name
                                 }
@@ -877,7 +877,7 @@ const {
                             <span
                               className={`shrink-0 rounded-full px-2 py-1 text-xs ${
                                 item.isActive
-                                  ? "bg-emerald-50 text-emerald-600"
+                                  ? "bg-primary-50 text-primary-700"
                                   : "bg-gray-100 text-gray-500"
                               }`}
                             >
@@ -915,10 +915,10 @@ const {
                   false,
                 );
               }}
-              className={`flex h-12 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${
+              className={`flex h-12 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${
                 sizeOpen
-                  ? "border-[#137A3D] ring-2 ring-[#137A3D]/10"
-                  : "border-gray-200 hover:border-[#137A3D]/50"
+                  ? "border-primary-800 ring-2 ring-primary-100"
+                  : "border-gray-200 hover:border-primary-800/50"
               }`}
             >
               <span className="text-gray-700">
@@ -973,7 +973,7 @@ const {
                         }}
                         className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left ${
                           selected
-                            ? "bg-emerald-50 text-[#137A3D]"
+                            ? "bg-primary-50 text-primary-800"
                             : "text-gray-600 hover:bg-gray-50"
                         }`}
                       >
@@ -1023,8 +1023,8 @@ const {
               }}
               className={`flex h-12 w-12 items-center justify-center rounded-2xl border transition ${
                 sortOpen
-                  ? "border-[#137A3D] bg-emerald-50 text-[#137A3D]"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-[#137A3D] hover:bg-emerald-50 hover:text-[#137A3D]"
+                  ? "border-primary-800 bg-primary-50 text-primary-800"
+                  : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
               }`}
             >
               <ArrowUpDown
@@ -1036,7 +1036,7 @@ const {
 
             {sortOpen && (
               <div className="absolute right-0 top-[56px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                <p className="px-3 pb-2 pt-1 text-base text-[#F97316]">
+                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
                   តម្រៀប
                 </p>
 
@@ -1069,7 +1069,7 @@ const {
                         }}
                         className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left ${
                           selected
-                            ? "bg-emerald-50 text-[#137A3D]"
+                            ? "bg-primary-50 text-primary-800"
                             : "text-gray-600 hover:bg-gray-50"
                         }`}
                       >
@@ -1103,7 +1103,7 @@ const {
           className={`rounded-2xl border px-4 py-3 ${
             notice.type ===
             "success"
-              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+              ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
           }`}
         >
@@ -1122,7 +1122,7 @@ const {
               size={
                 32
               }
-              className="animate-spin text-[#136C34]"
+              className="animate-spin text-primary-800"
             />
           </div>
         ) : error ? (
@@ -1134,11 +1134,11 @@ const {
               className="text-red-400"
             />
 
-            <h3 className="mt-3 text-xl font-bold text-gray-800">
+            <p className="mt-3 text-xl font-bold text-gray-800">
               មិនអាចទាញយកទិន្នន័យគ្រឿងផ្សំបានទេ
-            </h3>
+            </p>
 
-            <p className="mt-2 max-w-xl text-base leading-7 text-gray-500">
+            <p className="mt-2 max-w-xl text-lg leading-7 text-gray-500">
               {getIngredientApiErrorMessage(
                 error,
               )}
@@ -1149,7 +1149,7 @@ const {
               onClick={() =>
                 void refetch()
               }
-              className="mt-4 rounded-xl bg-[#136C34] px-5 py-2.5 text-white"
+              className="mt-4 rounded-full bg-primary-800 px-5 py-2.5 text-white"
             >
               សាកល្បងម្តងទៀត
             </button>

@@ -552,7 +552,7 @@ export default function MedicalConditionManager() {
   ======================================================= */
 
   return (
-    <div className="space-y-5">
+    <div className="w-full min-w-0 max-w-full space-y-5">
       {/* =================================================
           HEADER
       ================================================== */}
@@ -677,7 +677,7 @@ export default function MedicalConditionManager() {
                 }
               }}
               placeholder="ស្វែងរកតាមឈ្មោះ កូដ ឬការពិពណ៌នា..."
-              className="h-11 w-[500px] rounded-2xl border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-[#137A3D]/10"
+              className="h-[52px] w-[500px] rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
             />
 
             {/* CLEAR */}
@@ -713,10 +713,10 @@ export default function MedicalConditionManager() {
                     <div className="px-5 py-6 text-center">
                       <HeartPulse
                         size={32}
-                        className="mx-auto text-[#F97316]"
+                        className="mx-auto text-secondary-600"
                       />
 
-                      <p className="mt-2 text-lg text-[#F97316]">
+                      <p className="mt-2 text-lg text-secondary-600">
                         មិនមានស្ថានភាពសុខភាពដែលត្រូវគ្នា
                       </p>
                     </div>
@@ -725,7 +725,7 @@ export default function MedicalConditionManager() {
                       {/* HEADER */}
 
                       <div className="border-b border-gray-100 px-5 py-3">
-                        <p className="text-lg uppercase tracking-wide text-[#F97316]">
+                        <p className="text-lg uppercase tracking-wide text-secondary-600">
                           លទ្ធផលស្វែងរក
                         </p>
                       </div>
@@ -758,11 +758,11 @@ export default function MedicalConditionManager() {
                                   0,
                                 );
                               }}
-                              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-emerald-50"
+                              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
                             >
                               {/* ICON */}
 
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[#137A3D]">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
                                 <HeartPulse
                                   size={24}
                                 />
@@ -771,20 +771,20 @@ export default function MedicalConditionManager() {
                               {/* INFORMATION */}
 
                               <div className="min-w-0 flex-1">
-                                <p className="truncate text-base font-black text-gray-800">
+                                <p className="truncate text-lg font-black text-gray-800">
                                   {
                                     item.name
                                   }
                                 </p>
 
-                                <span className="mt-1 inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-sm text-gray-500">
+                                <span className="mt-1 inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-lg text-gray-500">
                                   {
                                     item.code
                                   }
                                 </span>
 
                                 {item.description && (
-                                  <p className="mt-1 truncate text-sm text-gray-400">
+                                  <p className="mt-1 truncate text-lg text-gray-400">
                                     {
                                       item.description
                                     }
@@ -795,9 +795,9 @@ export default function MedicalConditionManager() {
                               {/* STATUS */}
 
                               <span
-                                className={`shrink-0 rounded-full px-2 py-1 text-base font-bold ${
+                                className={`shrink-0 rounded-full px-2 py-1 text-lg font-bold ${
                                   item.active
-                                    ? "bg-emerald-50 text-emerald-600"
+                                    ? "bg-primary-50 text-primary-700"
                                     : "bg-gray-100 text-gray-500"
                                 }`}
                               >
@@ -834,10 +834,10 @@ export default function MedicalConditionManager() {
                   false,
                 );
               }}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${
+              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${
                 sizeOpen
-                  ? "border-[#137A3D] ring-2 ring-[#137A3D]/10"
-                  : "border-gray-200 hover:border-[#137A3D]/50"
+                  ? "border-primary-800 ring-2 ring-primary-100"
+                  : "border-gray-200 hover:border-primary-800/50"
               }`}
             >
               <span className="text-gray-700">
@@ -857,7 +857,7 @@ export default function MedicalConditionManager() {
 
             {sizeOpen && (
               <div className="absolute right-0 top-[52px] z-[100] w-[160px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg text-[#F97316]">
+                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
                   ចំនួនក្នុងទំព័រ
                 </p>
 
@@ -886,10 +886,10 @@ export default function MedicalConditionManager() {
                             false,
                           );
                         }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${
                           selected
-                            ? "bg-emerald-50 text-[#137A3D]"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
+                            ? "bg-primary-50 text-primary-800"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
                         }`}
                       >
                         <span>
@@ -902,7 +902,7 @@ export default function MedicalConditionManager() {
                             size={
                               16
                             }
-                            className="text-[#137A3D]"
+                            className="text-primary-800"
                           />
                         )}
                       </button>
@@ -934,8 +934,8 @@ export default function MedicalConditionManager() {
               }}
               className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
                 sortOpen
-                  ? "border-[#137A3D] bg-emerald-50 text-[#137A3D]"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-[#137A3D] hover:bg-emerald-50 hover:text-[#137A3D]"
+                  ? "border-primary-800 bg-primary-50 text-primary-800"
+                  : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
               }`}
               aria-label="Sort medical conditions"
               title="Sort medical conditions"
@@ -947,7 +947,7 @@ export default function MedicalConditionManager() {
 
             {sortOpen && (
               <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg uppercase tracking-wide text-[#F97316]">
+                <p className="px-3 pb-2 pt-1 text-lg uppercase tracking-wide text-secondary-600">
                   តម្រៀប
                 </p>
 
@@ -974,10 +974,10 @@ export default function MedicalConditionManager() {
                             false,
                           );
                         }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${
                           selected
-                            ? "bg-emerald-50 text-[#137A3D]"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
+                            ? "bg-primary-50 text-primary-800"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
                         }`}
                       >
                         <span>
@@ -991,7 +991,7 @@ export default function MedicalConditionManager() {
                             size={
                               16
                             }
-                            className="text-[#137A3D]"
+                            className="text-primary-800"
                           />
                         )}
                       </button>
@@ -1010,10 +1010,10 @@ export default function MedicalConditionManager() {
 
       {message && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm ${
+          className={`rounded-2xl border px-4 py-3 text-lg ${
             message.type ===
             "success"
-              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+              ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
           }`}
         >
@@ -1030,7 +1030,7 @@ export default function MedicalConditionManager() {
           <div className="flex min-h-[320px] items-center justify-center">
             <LoaderCircle
               size={30}
-              className="animate-spin text-[#136C34]"
+              className="animate-spin text-primary-800"
             />
           </div>
         ) : error ? (
@@ -1040,11 +1040,11 @@ export default function MedicalConditionManager() {
               className="text-red-400"
             />
 
-            <h3 className="mt-3 text-lg font-bold text-gray-800">
+            <p className="mt-3 text-lg font-bold text-gray-800">
               មិនអាចទាញយកទិន្នន័យស្ថានភាពសុខភាពបានទេ
-            </h3>
+            </p>
 
-            <p className="mt-2 text-base text-gray-500">
+            <p className="mt-2 text-lg text-gray-500">
               {getApiErrorMessage(
                 error,
               )}
@@ -1055,7 +1055,7 @@ export default function MedicalConditionManager() {
               onClick={() =>
                 void refetch()
               }
-              className="mt-4 rounded-xl bg-[#136C34] px-4 py-2.5 text-lg text-white"
+              className="mt-4 rounded-full bg-primary-800 px-4 py-2.5 text-lg text-white"
             >
               សាកល្បងម្តងទៀត
             </button>
@@ -1065,10 +1065,10 @@ export default function MedicalConditionManager() {
           <div className="flex min-h-[320px] flex-col items-center justify-center text-center">
             <HeartPulse
               size={40}
-              className="text-[#F97316]"
+              className="text-secondary-600"
             />
 
-            <p className="mt-3 text-lg text-[#F97316]">
+            <p className="mt-3 text-lg text-secondary-600">
               មិនមានទិន្នន័យ
             </p>
           </div>

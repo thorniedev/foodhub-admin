@@ -438,7 +438,7 @@ export default function AllergenManager() {
   ======================================================= */
 
   return (
-    <div className="space-y-5">
+    <div className="w-full min-w-0 max-w-full space-y-5">
       {/* =================================================
           HEADER
       ================================================== */}
@@ -520,7 +520,7 @@ export default function AllergenManager() {
                 }
               }}
               placeholder="ស្វែងរកតាមអាឡែស៊ី ឬការពិពណ៌នា..."
-              className="h-11 w-[500px] rounded-2xl border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-[#137A3D]/10"
+              className="h-[52px] w-[500px] rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
             />
 
             {/* =========================================
@@ -556,9 +556,9 @@ export default function AllergenManager() {
 
                 {suggestions.length === 0 ? (
                   <div className="px-5 py-6 text-center ">
-                    <ShieldAlert size={32} className="mx-auto text-[#F97316]" />
+                    <ShieldAlert size={32} className="mx-auto text-secondary-600" />
 
-                    <p className="mt-2 text-lg text-[#F97316]">
+                    <p className="mt-2 text-lg text-secondary-600">
                       មិនមានអាឡែស៊ីដែលត្រូវគ្នា
                     </p>
                   </div>
@@ -569,7 +569,7 @@ export default function AllergenManager() {
                       ================================== */}
 
                     <div className="border-b border-gray-100 px-5 py-3">
-                      <p className="text-lg uppercase tracking-wide text-[#F97316]">
+                      <p className="text-lg uppercase tracking-wide text-secondary-600">
                         លទ្ធផលស្វែងរក
                       </p>
                     </div>
@@ -597,11 +597,11 @@ export default function AllergenManager() {
 
                             setPage(0);
                           }}
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-emerald-50"
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
                         >
                           {/* ICON */}
 
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[#137A3D]">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
                             <ShieldAlert size={24} />
                           </div>
 
@@ -610,14 +610,14 @@ export default function AllergenManager() {
                           <div className="min-w-0 flex-1">
                             {/* ALLERGEN */}
 
-                            <p className="truncate text-base font-black text-gray-800">
+                            <p className="truncate text-lg font-black text-gray-800">
                               {item.code}
                             </p>
 
                             {/* DESCRIPTION */}
 
                             {item.description && (
-                              <p className="mt-1 truncate text-sm text-gray-400">
+                              <p className="mt-1 truncate text-lg text-gray-400">
                                 {item.description}
                               </p>
                             )}
@@ -626,9 +626,9 @@ export default function AllergenManager() {
                           {/* STATUS */}
 
                           <span
-                            className={`shrink-0 rounded-full px-2 py-1 text-base font-bold ${
+                            className={`shrink-0 rounded-full px-2 py-1 text-lg font-bold ${
                               item.active
-                                ? "bg-emerald-50 text-emerald-600"
+                                ? "bg-primary-50 text-primary-700"
                                 : "bg-gray-100 text-gray-500"
                             }`}
                           >
@@ -651,10 +651,10 @@ export default function AllergenManager() {
             <button
               type="button"
               onClick={() => setSizeOpen((current) => !current)}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${
+              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${
                 sizeOpen
-                  ? "border-[#137A3D] ring-2 ring-[#137A3D]/10"
-                  : "border-gray-200 hover:border-[#137A3D]/50"
+                  ? "border-primary-800 ring-2 ring-primary-100"
+                  : "border-gray-200 hover:border-primary-800/50"
               }`}
             >
               <span className="text-gray-700">{size} / ទំព័រ</span>
@@ -669,7 +669,7 @@ export default function AllergenManager() {
 
             {sizeOpen && (
               <div className="absolute right-0 top-[52px] z-[100] w-[150px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg  text-[#F97316]">
+                <p className="px-3 pb-2 pt-1 text-lg  text-secondary-600">
                   ចំនួនក្នុងទំព័រ
                 </p>
 
@@ -685,16 +685,16 @@ export default function AllergenManager() {
                         setPage(0);
                         setSizeOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${
                         selected
-                          ? "bg-emerald-50 text-[#137A3D]"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
+                          ? "bg-primary-50 text-primary-800"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
                       }`}
                     >
                       <span>{value} / ទំព័រ</span>
 
                       {selected && (
-                        <Check size={16} className="text-[#137A3D]" />
+                        <Check size={16} className="text-primary-800" />
                       )}
                     </button>
                   );
@@ -713,8 +713,8 @@ export default function AllergenManager() {
               onClick={() => setSortOpen((current) => !current)}
               className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
                 sortOpen
-                  ? "border-[#137A3D] bg-emerald-50 text-[#137A3D]"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-[#137A3D] hover:bg-emerald-50 hover:text-[#137A3D]"
+                  ? "border-primary-800 bg-primary-50 text-primary-800"
+                  : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
               }`}
               aria-label="Sort allergens"
               title="Sort allergens"
@@ -728,7 +728,7 @@ export default function AllergenManager() {
 
             {sortOpen && (
               <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg uppercase tracking-wide text-[#F97316]">
+                <p className="px-3 pb-2 pt-1 text-lg uppercase tracking-wide text-secondary-600">
                   តម្រៀប
                 </p>
 
@@ -744,16 +744,16 @@ export default function AllergenManager() {
 
                         setSortOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${
                         selected
-                          ? "bg-emerald-50 text-[#137A3D]"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
+                          ? "bg-primary-50 text-primary-800"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
                       }`}
                     >
                       <span>{option.label}</span>
 
                       {selected && (
-                        <Check size={16} className="text-[#137A3D]" />
+                        <Check size={16} className="text-primary-800" />
                       )}
                     </button>
                   );
@@ -770,9 +770,9 @@ export default function AllergenManager() {
 
       {message && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm ${
+          className={`rounded-2xl border px-4 py-3 text-lg ${
             message.type === "success"
-              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+              ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
           }`}
         >
@@ -785,7 +785,7 @@ export default function AllergenManager() {
       ================================================== */}
 
       {error && (
-        <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-lg text-red-600">
           {getApiErrorMessage(error)}
         </div>
       )}

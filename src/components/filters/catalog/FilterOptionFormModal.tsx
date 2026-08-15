@@ -4,11 +4,16 @@ import {
   useEffect,
   useState,
   type FormEvent,
+  type ReactNode,
 } from "react";
 
 import {
   AlertTriangle,
+  Clock3,
+  Hash,
   Loader2,
+  Settings2,
+  SlidersHorizontal,
   X,
 } from "lucide-react";
 
@@ -17,6 +22,10 @@ import type {
   FilterCatalogOptionFormValues,
   FilterGroupDefinition,
 } from "@/src/types/filterCatalog";
+
+/* =========================================================
+   DEFAULT FORM VALUES
+========================================================= */
 
 const EMPTY_FORM: FilterCatalogOptionFormValues = {
   localName: "",
@@ -29,6 +38,20 @@ const EMPTY_FORM: FilterCatalogOptionFormValues = {
   endTime: "",
   active: true,
 };
+
+/* =========================================================
+   FILTER OPTION FORM MODAL
+   UI concept follows ShopEditModal:
+   - sticky popup header
+   - grouped section cards
+   - text-3xl section titles
+   - text-lg minimum normal text
+   - h-[52px] inputs
+   - primary green labels/focus
+   - rounded-full footer actions
+   - hidden modal scrollbar
+   - body scroll lock
+========================================================= */
 
 export default function FilterOptionFormModal({
   open,
@@ -59,6 +82,10 @@ export default function FilterOptionFormModal({
     setValidationError,
   ] = useState("");
 
+  /* =======================================================
+     LOAD FORM VALUES
+  ======================================================= */
+
   useEffect(() => {
     if (!open) {
       return;
@@ -69,15 +96,14 @@ export default function FilterOptionFormModal({
         ? {
             localName:
               item.localName,
-            name: item.name,
+            name:
+              item.name,
             description:
-              item.description ??
-              "",
+              item.description ?? "",
             parentUuid:
               item.parentUuid ?? "",
             numericValue:
-              item.numericValue ===
-              null
+              item.numericValue === null
                 ? ""
                 : String(
                     item.numericValue,
@@ -97,9 +123,34 @@ export default function FilterOptionFormModal({
     setValidationError("");
   }, [open, item]);
 
+  /* =======================================================
+     LOCK BACKGROUND SCROLL
+  ======================================================= */
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const previousOverflow =
+      document.body.style.overflow;
+
+    document.body.style.overflow =
+      "hidden";
+
+    return () => {
+      document.body.style.overflow =
+        previousOverflow;
+    };
+  }, [open]);
+
   if (!open) {
     return null;
   }
+
+  /* =======================================================
+     SUBMIT + VALIDATION
+  ======================================================= */
 
   const handleSubmit =
     async (
@@ -134,13 +185,27 @@ export default function FilterOptionFormModal({
         return;
       }
 
-      if (group.source === "MEAL_TYPE_API") {
-        if (!form.startTime?.trim()) {
-          setValidationError("សូមបញ្ចូលម៉ោងចាប់ផ្តើម។ (Start time is required)");
+      if (
+        group.source ===
+        "MEAL_TYPE_API"
+      ) {
+        if (
+          !form.startTime?.trim()
+        ) {
+          setValidationError(
+            "សូមបញ្ចូលម៉ោងចាប់ផ្តើម។ (Start time is required)",
+          );
+
           return;
         }
-        if (!form.endTime?.trim()) {
-          setValidationError("សូមបញ្ចូលម៉ោងបញ្ចប់។ (End time is required)");
+
+        if (
+          !form.endTime?.trim()
+        ) {
+          setValidationError(
+            "សូមបញ្ចូលម៉ោងបញ្ចប់។ (End time is required)",
+          );
+
           return;
         }
       }
@@ -151,236 +216,661 @@ export default function FilterOptionFormModal({
     };
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
-      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] bg-white shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-start justify-between border-b border-gray-100 bg-white px-6 py-5">
-          <div>
-            <p className="text-3xl font-bold text-[#136C34]">
-              {item
-                ? `កែប្រែ ${group.labelKm}`
-                : `បន្ថែម ${group.labelKm}`}
-            </p>
+    <div
+      className="
+        fixed
+        inset-0
+        z-[150]
+        flex
+        items-center
+        justify-center
+        bg-black/40
+        p-4
+        backdrop-blur-[3px]
+      "
+    >
+      {/* =================================================
+          MODAL
+      ================================================== */}
+      <div
+        className="
+          max-h-[94vh]
+          w-full
+          max-w-2xl
+          overflow-y-auto
+          rounded-3xl
+          border
+          border-gray-100
+          bg-white
+          shadow-2xl
+          [scrollbar-width:none]
+          [-ms-overflow-style:none]
+          [&::-webkit-scrollbar]:hidden
+        "
+      >
+        {/* =================================================
+            HEADER
+            Same popup concept as ShopEditModal
+        ================================================== */}
+        <div
+          className="
+            sticky
+            top-0
+            z-30
+            flex
+            items-center
+            justify-between
+            border-b
+            border-gray-100
+            bg-white/95
+            px-6
+            py-5
+            backdrop-blur-md
+            sm:px-8
+          "
+        >
+          <div className="flex min-w-0 items-center gap-4">
+            <div
+              className="
+                flex
+                h-12
+                w-12
+                shrink-0
+                items-center
+                justify-center
+                rounded-xl
+                bg-primary-50
+                text-primary-800
+              "
+            >
+              <SlidersHorizontal
+                size={24}
+              />
+            </div>
 
-            <p className="mt-2 text-base text-gray-500">
-              {group.labelEn}
-            </p>
+            <div className="min-w-0">
+              <p
+                className="
+                  text-3xl
+                  font-semibold
+                  text-primary-800
+                "
+              >
+                {item
+                  ? `កែប្រែ ${group.labelKm}`
+                  : `បន្ថែម ${group.labelKm}`}
+              </p>
+
+              <p
+                className="
+                  mt-1
+                  truncate
+                  text-lg
+                  text-gray-500
+                "
+              >
+                {group.labelEn}
+              </p>
+            </div>
           </div>
 
           <button
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            aria-label="Close"
+            className="
+              flex
+              h-11
+              w-11
+              shrink-0
+              items-center
+              justify-center
+              rounded-full
+              text-gray-400
+              transition
+              hover:bg-gray-100
+              hover:text-gray-700
+              focus:outline-none
+              focus:ring-4
+              focus:ring-gray-100
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
+        {/* =================================================
+            FORM
+        ================================================== */}
         <form
-          onSubmit={handleSubmit}
-          className="space-y-5 p-6"
+          onSubmit={
+            handleSubmit
+          }
+          className="
+            space-y-6
+            p-6
+            sm:p-8
+          "
         >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field
-              label="ឈ្មោះសម្រាប់បង្ហាញ *"
-              value={
-                form.localName
-              }
-              onChange={(value) =>
-                setForm(
-                  (previous) => ({
-                    ...previous,
-                    localName:
-                      value,
-                  }),
-                )
-              }
-              placeholder={`ឧ. បញ្ចូលឈ្មោះ${group.labelKm}`}
-            />
+          {/* =================================================
+              SECTION 1: BASIC INFORMATION
+          ================================================== */}
+          <Section
+            icon={
+              <SlidersHorizontal
+                size={22}
+              />
+            }
+            title="ព័ត៌មានមូលដ្ឋាន"
+          >
+            <p className="mb-5 text-lg leading-7 text-gray-500">
+              សូមបំពេញឈ្មោះយ៉ាងហោចណាស់មួយ
+              ជាភាសាខ្មែរ ឬភាសាអង់គ្លេស។
+            </p>
 
-            <Field
-              label="English name"
-              value={form.name}
-              onChange={(value) =>
-                setForm(
-                  (previous) => ({
-                    ...previous,
-                    name: value,
-                  }),
-                )
-              }
-              placeholder={`e.g. Enter ${group.labelEn}`}
-            />
-          </div>
-
-          {group.source === "FOOD_CATEGORY_API" && (
-            <div>
-              <label className="mb-2 block text-xl font-semibold text-[#F97316]">
-                ប្រភេទមេ (Parent Category)
-              </label>
-
-              <select
-                value={form.parentUuid || ""}
-                onChange={(event) =>
-                  setForm((previous) => ({
-                    ...previous,
-                    parentUuid: event.target.value,
-                  }))
+            <div
+              className="
+                grid
+                gap-5
+                sm:grid-cols-2
+              "
+            >
+              <Field
+                label="ឈ្មោះសម្រាប់បង្ហាញ"
+                value={
+                  form.localName
                 }
-                className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
-              >
-                <option value="">គ្មាន (Top Level)</option>
-                {options
-                  ?.filter(
-                    (opt) =>
-                      opt.active &&
-                      opt.uuid !== item?.uuid &&
-                      !opt.parentUuid
+                onChange={(
+                  value,
+                ) =>
+                  setForm(
+                    (
+                      previous,
+                    ) => ({
+                      ...previous,
+                      localName:
+                        value,
+                    }),
                   )
-                  .map((opt) => (
-                    <option key={opt.uuid} value={opt.uuid}>
-                      {opt.localName || opt.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          )}
-
-          {group.source === "MEAL_TYPE_API" && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field
-                label="ម៉ោងចាប់ផ្តើម *"
-                type="time"
-                step="1"
-                value={form.startTime || ""}
-                onChange={(value) =>
-                  setForm((previous) => ({
-                    ...previous,
-                    startTime: value,
-                  }))
                 }
+                placeholder={`ឧ. បញ្ចូលឈ្មោះ ${group.labelKm}`}
               />
 
               <Field
-                label="ម៉ោងបញ្ចប់ *"
-                type="time"
-                step="1"
-                value={form.endTime || ""}
-                onChange={(value) =>
-                  setForm((previous) => ({
-                    ...previous,
-                    endTime: value,
-                  }))
+                label="English name"
+                value={
+                  form.name
                 }
+                onChange={(
+                  value,
+                ) =>
+                  setForm(
+                    (
+                      previous,
+                    ) => ({
+                      ...previous,
+                      name: value,
+                    }),
+                  )
+                }
+                placeholder={`e.g. Enter ${group.labelEn}`}
               />
             </div>
-          )}
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field
-              label="Numeric value"
-              type="number"
-              step="any"
-              value={
-                form.numericValue
-              }
-              onChange={(value) =>
-                setForm(
-                  (previous) => ({
-                    ...previous,
-                    numericValue:
-                      value,
-                  }),
-                )
-              }
-              placeholder="Optional"
-            />
+            {/* Parent category */}
+            {group.source ===
+              "FOOD_CATEGORY_API" && (
+              <div className="mt-5">
+                <FieldLabel>
+                  ប្រភេទមេ
+                  (Parent Category)
+                </FieldLabel>
 
-            <Field
-              label="Unit"
-              value={form.unit}
-              onChange={(value) =>
-                setForm(
-                  (previous) => ({
-                    ...previous,
-                    unit: value,
-                  }),
-                )
-              }
-              placeholder="MINUTE, KM, G, STAR..."
-            />
-          </div>
+                <select
+                  value={
+                    form.parentUuid ||
+                    ""
+                  }
+                  onChange={(
+                    event,
+                  ) =>
+                    setForm(
+                      (
+                        previous,
+                      ) => ({
+                        ...previous,
+                        parentUuid:
+                          event.target
+                            .value,
+                      }),
+                    )
+                  }
+                  className="
+                    h-[52px]
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    bg-gray-50
+                    px-4
+                    text-lg
+                    text-gray-800
+                    outline-none
+                    transition
+                    hover:border-gray-300
+                    focus:border-primary-600
+                    focus:bg-white
+                    focus:ring-4
+                    focus:ring-primary-100
+                  "
+                >
+                  <option value="">
+                    គ្មាន
+                    (Top Level)
+                  </option>
 
-          <div>
-            <label className="mb-2 block text-xl font-semibold text-[#F97316]">
-              ការពិពណ៌នា
+                  {options
+                    ?.filter(
+                      (
+                        option,
+                      ) =>
+                        option.active &&
+                        option.uuid !==
+                          item?.uuid &&
+                        !option.parentUuid,
+                    )
+                    .map(
+                      (
+                        option,
+                      ) => (
+                        <option
+                          key={
+                            option.uuid
+                          }
+                          value={
+                            option.uuid
+                          }
+                        >
+                          {option.localName ||
+                            option.name}
+                        </option>
+                      ),
+                    )}
+                </select>
+              </div>
+            )}
+
+            {/* Description */}
+            <label className="mt-5 block">
+              <FieldLabel>
+                ការពិពណ៌នា
+              </FieldLabel>
+
+              <textarea
+                rows={4}
+                value={
+                  form.description
+                }
+                onChange={(
+                  event,
+                ) =>
+                  setForm(
+                    (
+                      previous,
+                    ) => ({
+                      ...previous,
+                      description:
+                        event.target
+                          .value,
+                    }),
+                  )
+                }
+                placeholder="បញ្ចូលការពិពណ៌នា..."
+                className="
+                  w-full
+                  resize-none
+                  rounded-xl
+                  border
+                  border-gray-200
+                  bg-gray-50
+                  px-4
+                  py-3.5
+                  text-lg
+                  leading-8
+                  text-gray-800
+                  outline-none
+                  transition
+                  placeholder:text-gray-400
+                  hover:border-gray-300
+                  focus:border-primary-600
+                  focus:bg-white
+                  focus:ring-4
+                  focus:ring-primary-100
+                "
+              />
             </label>
+          </Section>
 
-            <textarea
-              rows={4}
-              value={
-                form.description
-              }
-              onChange={(event) =>
-                setForm(
-                  (previous) => ({
-                    ...previous,
-                    description:
-                      event.target
-                        .value,
-                  }),
-                )
-              }
-              className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
-            />
-          </div>
+          {/* =================================================
+              SECTION 2: VALUE / UNIT / TIME
+          ================================================== */}
+          <Section
+            icon={
+              group.source ===
+              "MEAL_TYPE_API" ? (
+                <Clock3
+                  size={22}
+                />
+              ) : (
+                <Hash
+                  size={22}
+                />
+              )
+            }
+            title={
+              group.source ===
+              "MEAL_TYPE_API"
+                ? "ពេលវេលា និងតម្លៃ"
+                : "តម្លៃ និងឯកតា"
+            }
+          >
+            {/* Meal start/end time */}
+            {group.source ===
+              "MEAL_TYPE_API" && (
+              <div
+                className="
+                  mb-5
+                  grid
+                  gap-5
+                  sm:grid-cols-2
+                "
+              >
+                <Field
+                  label="ម៉ោងចាប់ផ្តើម"
+                  type="time"
+                  step="1"
+                  required
+                  value={
+                    form.startTime ||
+                    ""
+                  }
+                  onChange={(
+                    value,
+                  ) =>
+                    setForm(
+                      (
+                        previous,
+                      ) => ({
+                        ...previous,
+                        startTime:
+                          value,
+                      }),
+                    )
+                  }
+                />
 
-          <label className="flex cursor-pointer items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
-            <div>
-              <p className="text-xl font-semibold text-[#F97316]">
-                សកម្ម
-              </p>
+                <Field
+                  label="ម៉ោងបញ្ចប់"
+                  type="time"
+                  step="1"
+                  required
+                  value={
+                    form.endTime ||
+                    ""
+                  }
+                  onChange={(
+                    value,
+                  ) =>
+                    setForm(
+                      (
+                        previous,
+                      ) => ({
+                        ...previous,
+                        endTime:
+                          value,
+                      }),
+                    )
+                  }
+                />
+              </div>
+            )}
 
-              <p className="mt-1 text-base text-gray-500">
-                បើក ដើម្បីឱ្យស្លាកនេះបង្ហាញនៅក្នុង Form បង្កើតម្ហូប។
-              </p>
-            </div>
-
-            <input
-              type="checkbox"
-              checked={
-                form.active
-              }
-              onChange={(event) =>
-                setForm(
-                  (previous) => ({
-                    ...previous,
-                    active:
-                      event.target
-                        .checked,
-                  }),
-                )
-              }
-              className="h-5 w-5 accent-[#F97316]"
-            />
-          </label>
-
-          {validationError && (
-            <div className="flex gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-              <AlertTriangle
-                size={18}
-                className="shrink-0"
+            <div
+              className="
+                grid
+                gap-5
+                sm:grid-cols-2
+              "
+            >
+              <Field
+                label="Numeric value"
+                type="number"
+                step="any"
+                value={
+                  form.numericValue
+                }
+                onChange={(
+                  value,
+                ) =>
+                  setForm(
+                    (
+                      previous,
+                    ) => ({
+                      ...previous,
+                      numericValue:
+                        value,
+                    }),
+                  )
+                }
+                placeholder="Optional"
               />
-              {validationError}
+
+              <Field
+                label="Unit"
+                value={
+                  form.unit
+                }
+                onChange={(
+                  value,
+                ) =>
+                  setForm(
+                    (
+                      previous,
+                    ) => ({
+                      ...previous,
+                      unit: value,
+                    }),
+                  )
+                }
+                placeholder="MINUTE, KM, G, STAR..."
+              />
+            </div>
+          </Section>
+
+          {/* =================================================
+              SECTION 3: STATUS
+          ================================================== */}
+          <Section
+            icon={
+              <Settings2
+                size={22}
+              />
+            }
+            title="ស្ថានភាព"
+          >
+            <div
+              className="
+                flex
+                items-center
+                justify-between
+                gap-5
+                rounded-2xl
+                border
+                border-gray-100
+                bg-gray-50
+                px-5
+                py-4
+              "
+            >
+              <div className="min-w-0">
+                <p
+                  className="
+                    text-lg
+                    font-medium
+                    text-primary-800
+                  "
+                >
+                  សកម្ម
+                </p>
+
+                <p
+                  className="
+                    mt-1
+                    text-lg
+                    leading-7
+                    text-gray-500
+                  "
+                >
+                  បើក ដើម្បីឱ្យស្លាកនេះបង្ហាញ
+                  នៅក្នុង Form បង្កើតម្ហូប។
+                </p>
+              </div>
+
+              <button
+                type="button"
+                role="switch"
+                aria-checked={
+                  form.active
+                }
+                onClick={() =>
+                  setForm(
+                    (
+                      previous,
+                    ) => ({
+                      ...previous,
+                      active:
+                        !previous.active,
+                    }),
+                  )
+                }
+                className={`
+                  relative
+                  h-7
+                  w-12
+                  shrink-0
+                  rounded-full
+                  transition
+                  focus:outline-none
+                  focus:ring-4
+                  focus:ring-primary-100
+                  ${
+                    form.active
+                      ? "bg-primary-700"
+                      : "bg-gray-300"
+                  }
+                `}
+              >
+                <span
+                  className={`
+                    absolute
+                    top-1
+                    h-5
+                    w-5
+                    rounded-full
+                    bg-white
+                    shadow-sm
+                    transition-all
+                    ${
+                      form.active
+                        ? "left-6"
+                        : "left-1"
+                    }
+                  `}
+                />
+              </button>
+            </div>
+          </Section>
+
+          {/* =================================================
+              VALIDATION ERROR
+          ================================================== */}
+          {validationError && (
+            <div
+              className="
+                flex
+                items-start
+                gap-3
+                rounded-2xl
+                border
+                border-red-100
+                bg-red-50
+                px-5
+                py-4
+                text-lg
+                leading-7
+                text-red-600
+              "
+            >
+              <AlertTriangle
+                size={21}
+                className="
+                  mt-0.5
+                  shrink-0
+                "
+              />
+
+              <span>
+                {validationError}
+              </span>
             </div>
           )}
 
-          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end">
+          {/* =================================================
+              ACTION BUTTONS
+          ================================================== */}
+          <div
+            className="
+              flex
+              flex-col-reverse
+              gap-3
+              border-t
+              border-gray-100
+              pt-6
+              sm:flex-row
+              sm:items-center
+              sm:justify-end
+            "
+          >
             <button
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="rounded-xl border border-gray-200 px-5 py-2.5 text-lg text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              className="
+                inline-flex
+                min-h-12
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-gray-200
+                bg-white
+                px-7
+                text-lg
+                font-medium
+                text-gray-600
+                transition
+                hover:border-primary-200
+                hover:bg-primary-50
+                hover:text-primary-800
+                focus:outline-none
+                focus:ring-4
+                focus:ring-primary-100
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
             >
               បោះបង់
             </button>
@@ -388,18 +878,39 @@ export default function FilterOptionFormModal({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#136C34] px-5 py-2.5 text-lg text-white transition hover:bg-[#0f592b] disabled:opacity-60"
+              className="
+                inline-flex
+                min-h-12
+                items-center
+                justify-center
+                gap-2
+                rounded-full
+                bg-primary-800
+                px-7
+                text-lg
+                font-medium
+                text-white
+                transition
+                hover:bg-primary-900
+                focus:outline-none
+                focus:ring-4
+                focus:ring-primary-200
+                disabled:cursor-not-allowed
+                disabled:opacity-60
+              "
             >
               {saving && (
                 <Loader2
-                  size={17}
+                  size={20}
                   className="animate-spin"
                 />
               )}
 
-              {item
-                ? "រក្សាទុកការកែប្រែ"
-                : "បន្ថែម"}
+              {saving
+                ? "កំពុងរក្សាទុក..."
+                : item
+                  ? "រក្សាទុកការកែប្រែ"
+                  : "បន្ថែម"}
             </button>
           </div>
         </form>
@@ -408,6 +919,100 @@ export default function FilterOptionFormModal({
   );
 }
 
+/* =========================================================
+   SECTION
+   Same section-card style as ShopEditModal
+========================================================= */
+
+function Section({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      className="
+        rounded-2xl
+        border
+        border-gray-100
+        bg-white
+        p-5
+        sm:p-6
+      "
+    >
+      <div className="mb-6 flex items-center gap-3">
+        <div
+          className="
+            flex
+            h-11
+            w-11
+            shrink-0
+            items-center
+            justify-center
+            rounded-xl
+            bg-primary-50
+            text-primary-800
+          "
+        >
+          {icon}
+        </div>
+
+        <p
+          className="
+            text-3xl
+            font-semibold
+            text-primary-800
+          "
+        >
+          {title}
+        </p>
+      </div>
+
+      {children}
+    </section>
+  );
+}
+
+/* =========================================================
+   FIELD LABEL
+========================================================= */
+
+function FieldLabel({
+  children,
+  required = false,
+}: {
+  children: ReactNode;
+  required?: boolean;
+}) {
+  return (
+    <span
+      className="
+        mb-2
+        block
+        text-lg
+        font-medium
+        text-primary-800
+      "
+    >
+      {children}
+
+      {required && (
+        <span className="text-red-500">
+          {" "}*
+        </span>
+      )}
+    </span>
+  );
+}
+
+/* =========================================================
+   INPUT FIELD
+========================================================= */
+
 function Field({
   label,
   value,
@@ -415,6 +1020,7 @@ function Field({
   type = "text",
   step,
   placeholder,
+  required = false,
 }: {
   label: string;
   value: string;
@@ -424,18 +1030,26 @@ function Field({
   type?: string;
   step?: string;
   placeholder?: string;
+  required?: boolean;
 }) {
   return (
-    <label>
-      <span className="mb-2 block text-xl font-semibold text-[#F97316]">
+    <label className="block">
+      <FieldLabel
+        required={
+          required
+        }
+      >
         {label}
-      </span>
+      </FieldLabel>
 
       <input
         type={type}
         step={step}
+        required={required}
         value={value}
-        onChange={(event) =>
+        onChange={(
+          event,
+        ) =>
           onChange(
             event.target.value,
           )
@@ -443,7 +1057,25 @@ function Field({
         placeholder={
           placeholder
         }
-        className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+        className="
+          h-[52px]
+          w-full
+          rounded-xl
+          border
+          border-gray-200
+          bg-gray-50
+          px-4
+          text-lg
+          text-gray-800
+          outline-none
+          transition
+          placeholder:text-gray-400
+          hover:border-gray-300
+          focus:border-primary-600
+          focus:bg-white
+          focus:ring-4
+          focus:ring-primary-100
+        "
       />
     </label>
   );

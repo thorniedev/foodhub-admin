@@ -137,7 +137,7 @@ export default function MenuItemsManager() {
   };
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 lg:p-7">
+    <div className="space-y-5">
       <MenuItemsHeader
         foodCount={foodData?.totalElements ?? foods.length}
         menuItemCount={menuData?.totalElements ?? menuItems.length}

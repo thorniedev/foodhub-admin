@@ -1,40 +1,96 @@
 import type { ReactNode } from "react";
+
 import { ExternalLink, Mail, MapPin, Phone } from "lucide-react";
 
 import type { Store } from "@/src/types/shop";
+
 import { Section } from "./StoreOverviewSection";
 
-export default function StoreContactLocationSection({ store }: { store: Store }) {
+/* =========================================================
+   STORE CONTACT & LOCATION
+========================================================= */
+
+export default function StoreContactLocationSection({
+  store,
+}: {
+  store: Store;
+}) {
   return (
-    <Section title="Contact & location" icon={<MapPin size={20} />}>
+    <Section title="Contact & location" icon={<MapPin size={22} />}>
       <div className="space-y-3">
-        <Row label="Address" value={store.addressLine} icon={<MapPin size={17} />} />
+        <Row
+          label="Address"
+          value={store.addressLine}
+          icon={<MapPin size={19} />}
+        />
+
         <Row label="Commune" value={store.commune ?? "—"} />
+
         <Row label="District" value={store.district ?? "—"} />
+
         <Row label="City" value={store.city ?? "—"} />
+
         <Row label="Province" value={store.province ?? "—"} />
+
         <Row label="Postal code" value={store.postalCode ?? "—"} />
-        <Row label="Phone" value={store.phoneNumber ?? "—"} icon={<Phone size={17} />} />
-        <Row label="Email" value={store.email ?? "—"} icon={<Mail size={17} />} />
+
+        <Row
+          label="Phone"
+          value={store.phoneNumber ?? "—"}
+          icon={<Phone size={19} />}
+        />
+
+        <Row
+          label="Email"
+          value={store.email ?? "—"}
+          icon={<Mail size={19} />}
+        />
+
         <Row
           label="Coordinates"
           value={`${store.latitude}, ${store.longitude}`}
           mono
         />
 
-        <a
-          href={`https://www.google.com/maps?q=${store.latitude},${store.longitude}`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2.5 text-base font-semibold text-[#136C34] transition hover:bg-emerald-100"
-        >
-          <ExternalLink size={17} />
-          Open coordinates in Google Maps
-        </a>
+        {/* Google Maps */}
+        <div className="pt-2">
+          <a
+            href={`https://www.google.com/maps?q=${store.latitude},${store.longitude}`}
+            target="_blank"
+            rel="noreferrer"
+            className="
+              inline-flex
+              min-h-12
+              items-center
+              justify-center
+              gap-2
+              rounded-full
+              border
+              border-secondary-200
+              bg-secondary-50
+              px-5
+              text-lg
+              font-medium
+              text-secondary-700
+              transition
+              hover:bg-secondary-100
+              focus:outline-none
+              focus:ring-4
+              focus:ring-secondary-100
+            "
+          >
+            <ExternalLink size={19} />
+            Open coordinates in Google Maps
+          </a>
+        </div>
       </div>
     </Section>
   );
 }
+
+/* =========================================================
+   ROW
+========================================================= */
 
 function Row({
   label,
@@ -48,16 +104,70 @@ function Row({
   mono?: boolean;
 }) {
   return (
-    <div className="grid gap-1 rounded-2xl bg-gray-50 px-4 py-3 sm:grid-cols-[150px_1fr]">
-      <span className="flex items-center gap-1.5 text-lg font-semibold text-[#F97316]">
-        {icon}
-        {label}
-      </span>
-      <span
-        className={`break-words text-base text-gray-700 ${mono ? "font-mono text-sm" : ""}`}
+    <div
+      className="
+        grid
+        min-w-0
+        gap-2
+        rounded-2xl
+        border
+        border-gray-100
+        bg-gray-50/60
+        px-4
+        py-3.5
+        transition
+        hover:border-gray-200
+        hover:bg-gray-50
+        sm:grid-cols-[170px_1fr]
+        sm:items-center
+      "
+    >
+      {/* Label */}
+      <div
+        className="
+          flex
+          items-center
+          gap-2
+          text-lg
+          font-medium
+          text-gray-500
+        "
+      >
+        {icon && (
+          <span
+            className="
+              flex
+              h-8
+              w-8
+              shrink-0
+              items-center
+              justify-center
+              rounded-lg
+              bg-primary-50
+              text-primary-800
+            "
+          >
+            {icon}
+          </span>
+        )}
+
+        <span>{label}</span>
+      </div>
+
+      {/* Value */}
+      <p
+        className={`
+          min-w-0
+          break-words
+          text-lg
+          font-medium
+          text-gray-800
+          ${mono ? "font-mono text-base" : ""}
+        `}
+        title={value}
       >
         {value}
-      </span>
+      </p>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useState,
+} from "react";
 
 import {
   AlertTriangle,
@@ -54,17 +56,20 @@ export default function DietaryTypeManager() {
   /* =======================================================
      PAGINATION
   ======================================================= */
+  const [page, setPage] =
+    useState(0);
 
-  const [page, setPage] = useState(0);
-  const [size, setSize] = useState(20);
+  const [size, setSize] =
+    useState(20);
 
-  const [sizeOpen, setSizeOpen] =
-    useState(false);
+  const [
+    sizeOpen,
+    setSizeOpen,
+  ] = useState(false);
 
   /* =======================================================
      SEARCH
   ======================================================= */
-
   const [search, setSearch] =
     useState("");
 
@@ -76,7 +81,6 @@ export default function DietaryTypeManager() {
   /* =======================================================
      FILTER
   ======================================================= */
-
   const [
     statusFilter,
     setStatusFilter,
@@ -88,33 +92,47 @@ export default function DietaryTypeManager() {
   /* =======================================================
      SORT
   ======================================================= */
-
-  const [sortBy, setSortBy] =
+  const [
+    sortBy,
+    setSortBy,
+  ] =
     useState<DietaryTypeSort>(
       "A_Z",
     );
 
-  const [sortOpen, setSortOpen] =
-    useState(false);
+  const [
+    sortOpen,
+    setSortOpen,
+  ] = useState(false);
 
   /* =======================================================
      MODALS
   ======================================================= */
-
-  const [editing, setEditing] =
+  const [
+    editing,
+    setEditing,
+  ] =
     useState<DietaryType | null>(
       null,
     );
 
-  const [formOpen, setFormOpen] =
-    useState(false);
+  const [
+    formOpen,
+    setFormOpen,
+  ] = useState(false);
 
-  const [deleting, setDeleting] =
+  const [
+    deleting,
+    setDeleting,
+  ] =
     useState<DietaryType | null>(
       null,
     );
 
-  const [message, setMessage] =
+  const [
+    message,
+    setMessage,
+  ] =
     useState<ApiMessage | null>(
       null,
     );
@@ -122,7 +140,6 @@ export default function DietaryTypeManager() {
   /* =======================================================
      DATA
   ======================================================= */
-
   const {
     data,
     isLoading,
@@ -135,13 +152,12 @@ export default function DietaryTypeManager() {
   });
 
   /*
-   * Search suggestion data.
-   *
-   * Load more records so suggestions are
-   * not limited to the current page.
+   * Load a larger list for search suggestions/results so
+   * search is not limited to the current page.
    */
   const {
-    data: suggestionData,
+    data:
+      suggestionData,
   } = useGetDietaryTypesQuery({
     page: 0,
     size: 100,
@@ -150,7 +166,6 @@ export default function DietaryTypeManager() {
   /* =======================================================
      MUTATIONS
   ======================================================= */
-
   const [
     createItem,
     {
@@ -188,19 +203,13 @@ export default function DietaryTypeManager() {
     useRestoreDietaryTypeMutation();
 
   /* =======================================================
-     ITEMS
+     ITEMS + COUNTS
   ======================================================= */
-
   const items =
     data?.contents ?? [];
 
   const suggestionItems =
-    suggestionData?.contents ??
-    [];
-
-  /* =======================================================
-     COUNTS
-  ======================================================= */
+    suggestionData?.contents ?? [];
 
   const activeCount =
     items.filter(
@@ -214,49 +223,32 @@ export default function DietaryTypeManager() {
   /* =======================================================
      SEARCH
   ======================================================= */
-
   const normalizedSearch =
     search
       .trim()
       .toLowerCase();
 
-  /*
-   * Search remains based on the existing Dietary Type data:
-   *
-   * - code
-   * - name
-   * - category
-   * - description
-   */
   const suggestions =
     normalizedSearch
       ? suggestionItems
-          .filter((item) => {
-            const values = [
+          .filter((item) =>
+            [
               item.code,
               item.name,
               item.category,
               item.description ??
                 "",
-            ];
-
-            return values.some(
-              (value) =>
-                value
-                  .toLowerCase()
-                  .includes(
-                    normalizedSearch,
-                  ),
-            );
-          })
+            ].some((value) =>
+              value
+                .toLowerCase()
+                .includes(
+                  normalizedSearch,
+                ),
+            ),
+          )
           .slice(0, 8)
       : [];
 
-  /*
-   * While searching, use the larger dataset so
-   * suggestions/results aren't restricted to
-   * the current 20 records.
-   */
   const searchSource =
     normalizedSearch
       ? suggestionItems
@@ -265,7 +257,6 @@ export default function DietaryTypeManager() {
   /* =======================================================
      FILTER
   ======================================================= */
-
   const filteredItems =
     searchSource.filter(
       (item) => {
@@ -279,15 +270,11 @@ export default function DietaryTypeManager() {
             "INACTIVE" &&
             !item.active);
 
-        if (
-          !statusMatches
-        ) {
+        if (!statusMatches) {
           return false;
         }
 
-        if (
-          !normalizedSearch
-        ) {
+        if (!normalizedSearch) {
           return true;
         }
 
@@ -310,106 +297,81 @@ export default function DietaryTypeManager() {
   /* =======================================================
      SORT
   ======================================================= */
+  const sortedItems =
+    [...filteredItems].sort(
+      (first, second) => {
+        switch (sortBy) {
+          case "A_Z":
+            return (
+              first.name ?? ""
+            ).localeCompare(
+              second.name ?? "",
+              undefined,
+              {
+                sensitivity:
+                  "base",
+              },
+            );
 
-  const sortedItems = [
-    ...filteredItems,
-  ].sort(
-    (
-      first,
-      second,
-    ) => {
-      switch (sortBy) {
-        /* ===============================================
-           A → Z
-        ================================================ */
+          case "Z_A":
+            return (
+              second.name ?? ""
+            ).localeCompare(
+              first.name ?? "",
+              undefined,
+              {
+                sensitivity:
+                  "base",
+              },
+            );
 
-        case "A_Z":
-          return (
-            first.name ?? ""
-          ).localeCompare(
-            second.name ?? "",
-            undefined,
-            {
-              sensitivity:
-                "base",
-            },
-          );
+          case "NEWEST": {
+            const firstTime =
+              first.updatedAt
+                ? new Date(
+                    first.updatedAt,
+                  ).getTime()
+                : 0;
 
-        /* ===============================================
-           Z → A
-        ================================================ */
+            const secondTime =
+              second.updatedAt
+                ? new Date(
+                    second.updatedAt,
+                  ).getTime()
+                : 0;
 
-        case "Z_A":
-          return (
-            second.name ?? ""
-          ).localeCompare(
-            first.name ?? "",
-            undefined,
-            {
-              sensitivity:
-                "base",
-            },
-          );
+            return (
+              secondTime -
+              firstTime
+            );
+          }
 
-        /* ===============================================
-           NEWEST
-        ================================================ */
+          case "OLDEST": {
+            const firstTime =
+              first.updatedAt
+                ? new Date(
+                    first.updatedAt,
+                  ).getTime()
+                : 0;
 
-        case "NEWEST": {
-          const firstTime =
-            first.updatedAt
-              ? new Date(
-                  first.updatedAt,
-                ).getTime()
-              : 0;
+            const secondTime =
+              second.updatedAt
+                ? new Date(
+                    second.updatedAt,
+                  ).getTime()
+                : 0;
 
-          const secondTime =
-            second.updatedAt
-              ? new Date(
-                  second.updatedAt,
-                ).getTime()
-              : 0;
+            return (
+              firstTime -
+              secondTime
+            );
+          }
 
-          return (
-            secondTime -
-            firstTime
-          );
+          default:
+            return 0;
         }
-
-        /* ===============================================
-           OLDEST
-        ================================================ */
-
-        case "OLDEST": {
-          const firstTime =
-            first.updatedAt
-              ? new Date(
-                  first.updatedAt,
-                ).getTime()
-              : 0;
-
-          const secondTime =
-            second.updatedAt
-              ? new Date(
-                  second.updatedAt,
-                ).getTime()
-              : 0;
-
-          return (
-            firstTime -
-            secondTime
-          );
-        }
-
-        default:
-          return 0;
-      }
-    },
-  );
-
-  /* =======================================================
-     SORT OPTIONS
-  ======================================================= */
+      },
+    );
 
   const sortOptions: {
     value: DietaryTypeSort;
@@ -433,10 +395,6 @@ export default function DietaryTypeManager() {
     },
   ];
 
-  /* =======================================================
-     BUSY
-  ======================================================= */
-
   const busy =
     isCreating ||
     isUpdating ||
@@ -446,36 +404,31 @@ export default function DietaryTypeManager() {
   /* =======================================================
      SAVE
   ======================================================= */
-
   const handleSave = async (
-    values: DietaryTypeFormValues,
+    values:
+      DietaryTypeFormValues,
   ) => {
     setMessage(null);
 
     try {
       if (editing) {
-        const body: DietaryTypePayload =
-          {
-            code:
-              values.code,
-
-            name:
-              values.name,
-
-            category:
-              values.category,
-
-            description:
-              values.description ||
-              null,
-
-            iconMediaUuid:
-              editing.iconMediaUuid ??
-              null,
-
-            active:
-              values.active,
-          };
+        const body:
+          DietaryTypePayload = {
+          code:
+            values.code,
+          name:
+            values.name,
+          category:
+            values.category,
+          description:
+            values.description ||
+            null,
+          iconMediaUuid:
+            editing.iconMediaUuid ??
+            null,
+          active:
+            values.active,
+        };
 
         await updateItem({
           code:
@@ -485,30 +438,26 @@ export default function DietaryTypeManager() {
 
         setMessage({
           type: "success",
-          text: "បានកែប្រែរបបអាហារដោយជោគជ័យ។",
+          text:
+            "បានកែប្រែរបបអាហារដោយជោគជ័យ។",
         });
       } else {
-        const body: DietaryTypePayload =
-          {
-            code:
-              values.code,
-
-            name:
-              values.name,
-
-            category:
-              values.category,
-
-            description:
-              values.description ||
-              null,
-
-            iconMediaUuid:
-              null,
-
-            active:
-              values.active,
-          };
+        const body:
+          DietaryTypePayload = {
+          code:
+            values.code,
+          name:
+            values.name,
+          category:
+            values.category,
+          description:
+            values.description ||
+            null,
+          iconMediaUuid:
+            null,
+          active:
+            values.active,
+        };
 
         await createItem(
           body,
@@ -518,19 +467,18 @@ export default function DietaryTypeManager() {
 
         setMessage({
           type: "success",
-          text: "បានបន្ថែមរបបអាហារដោយជោគជ័យ។",
+          text:
+            "បានបន្ថែមរបបអាហារដោយជោគជ័យ។",
         });
       }
 
       setFormOpen(false);
-
       setEditing(null);
 
       await refetch();
     } catch (saveError) {
       setMessage({
         type: "error",
-
         text:
           getApiErrorMessage(
             saveError,
@@ -542,7 +490,6 @@ export default function DietaryTypeManager() {
   /* =======================================================
      DELETE
   ======================================================= */
-
   const handleDelete =
     async () => {
       if (!deleting) {
@@ -558,14 +505,16 @@ export default function DietaryTypeManager() {
 
         setMessage({
           type: "success",
-          text: "បានបិទរបបអាហារដោយជោគជ័យ។",
+          text:
+            "បានបិទរបបអាហារដោយជោគជ័យ។",
         });
 
         await refetch();
-      } catch (deleteError) {
+      } catch (
+        deleteError
+      ) {
         setMessage({
           type: "error",
-
           text:
             getApiErrorMessage(
               deleteError,
@@ -577,7 +526,6 @@ export default function DietaryTypeManager() {
   /* =======================================================
      RESTORE
   ======================================================= */
-
   const handleRestore =
     async (
       item: DietaryType,
@@ -589,14 +537,16 @@ export default function DietaryTypeManager() {
 
         setMessage({
           type: "success",
-          text: "បានស្ដាររបបអាហារដោយជោគជ័យ។",
+          text:
+            "បានស្ដាររបបអាហារដោយជោគជ័យ។",
         });
 
         await refetch();
-      } catch (restoreError) {
+      } catch (
+        restoreError
+      ) {
         setMessage({
           type: "error",
-
           text:
             getApiErrorMessage(
               restoreError,
@@ -608,13 +558,9 @@ export default function DietaryTypeManager() {
   /* =======================================================
      UI
   ======================================================= */
-
   return (
-    <div className="space-y-5">
-      {/* =================================================
-          HEADER
-      ================================================== */}
-
+    <div className="w-full min-w-0 max-w-full space-y-5">
+      {/* COMPONENT: DietaryTypesHeader */}
       <DietaryTypesHeader
         total={
           data?.totalElements ??
@@ -628,461 +574,417 @@ export default function DietaryTypeManager() {
         }
         onAdd={() => {
           setEditing(null);
-
           setMessage(null);
-
           setFormOpen(true);
         }}
       />
 
       {/* =================================================
-          TABS + TOOLBAR
+          FILTER + SEARCH + SORT TOOLBAR
       ================================================== */}
-
-      <div className="flex w-full flex-nowrap items-center justify-between gap-4">
-        {/* ===============================================
-            LEFT
-        ================================================ */}
-
-        <div className="shrink-0">
-          <DietaryTypesTabs
-            value={
-              statusFilter
-            }
-            allCount={
-              items.length
-            }
-            activeCount={
-              activeCount
-            }
-            inactiveCount={
-              inactiveCount
-            }
-            onChange={(
-              value,
-            ) => {
-              setStatusFilter(
-                value,
-              );
-
-              setPage(0);
-            }}
-          />
-        </div>
-
-        {/* ===============================================
-            RIGHT
-        ================================================ */}
-
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          {/* =============================================
-              SEARCH
-          ============================================== */}
-
-          <div className="relative">
-            <Search
-              size={17}
-              className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
-            />
-
-            <input
-              value={search}
+      <section className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-5">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          {/* Status tabs */}
+          <div className="w-full min-w-0 overflow-x-auto pb-1 xl:w-auto">
+            <DietaryTypesTabs
+              value={
+                statusFilter
+              }
+              allCount={
+                items.length
+              }
+              activeCount={
+                activeCount
+              }
+              inactiveCount={
+                inactiveCount
+              }
               onChange={(
-                event,
+                value,
               ) => {
-                const value =
-                  event.target
-                    .value;
-
-                setSearch(value);
-
-                setPage(0);
-
-                setShowSuggestions(
-                  value
-                    .trim()
-                    .length > 0,
+                setStatusFilter(
+                  value,
                 );
+                setPage(0);
               }}
-              onFocus={() => {
-                if (
-                  search
-                    .trim()
-                    .length >
-                  0
-                ) {
-                  setShowSuggestions(
-                    true,
-                  );
-                }
-              }}
-              onKeyDown={(
-                event,
-              ) => {
-                if (
-                  event.key ===
-                  "Escape"
-                ) {
-                  setShowSuggestions(
-                    false,
-                  );
-                }
-
-                if (
-                  event.key ===
-                  "Enter"
-                ) {
-                  setShowSuggestions(
-                    false,
-                  );
-                }
-              }}
-              placeholder="ស្វែងរករបបអាហារ កូដ ប្រភេទ ឬការពិពណ៌នា..."
-              className="h-11 w-[500px] rounded-2xl border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-[#137A3D]/10"
             />
+          </div>
 
-            {/* CLEAR */}
+          {/* Search + controls */}
+          <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center xl:w-auto">
+            {/* Search */}
+            <div className="relative min-w-0 flex-1 sm:min-w-[380px]">
+              <Search
+                size={20}
+                className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
+              />
 
-            {search && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearch("");
+              <input
+                value={search}
+                onChange={(
+                  event,
+                ) => {
+                  const value =
+                    event.target
+                      .value;
 
-                  setShowSuggestions(
-                    false,
+                  setSearch(
+                    value,
                   );
 
                   setPage(0);
+
+                  setShowSuggestions(
+                    value
+                      .trim()
+                      .length > 0,
+                  );
                 }}
-                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
-                aria-label="Clear search"
-              >
-                <X size={16} />
-              </button>
-            )}
+                onFocus={() => {
+                  if (
+                    search
+                      .trim()
+                      .length > 0
+                  ) {
+                    setShowSuggestions(
+                      true,
+                    );
+                  }
+                }}
+                onKeyDown={(
+                  event,
+                ) => {
+                  if (
+                    event.key ===
+                    "Escape"
+                  ) {
+                    setShowSuggestions(
+                      false,
+                    );
+                  }
 
-            {/* =========================================
-                SUGGESTIONS
-            ========================================== */}
+                  if (
+                    event.key ===
+                    "Enter"
+                  ) {
+                    setShowSuggestions(
+                      false,
+                    );
+                  }
+                }}
+                placeholder="ស្វែងរករបបអាហារ កូដ ប្រភេទ ឬការពិពណ៌នា..."
+                className="h-[52px] w-full rounded-full border border-gray-200 bg-gray-50 pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+              />
 
-            {showSuggestions &&
-              normalizedSearch && (
-                <div className="absolute left-0 top-[52px] z-[100] w-[500px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
-                  {suggestions.length ===
-                  0 ? (
-                    <div className="px-5 py-6 text-center">
-                      <Salad
-                        size={32}
-                        className="mx-auto text-[#F97316]"
-                      />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setShowSuggestions(
+                      false,
+                    );
+                    setPage(0);
+                  }}
+                  className="absolute right-3 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+                  aria-label="Clear search"
+                >
+                  <X size={18} />
+                </button>
+              )}
 
-                      <p className="mt-2 text-lg text-[#F97316]">
-                        មិនមានរបបអាហារដែលត្រូវគ្នា
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      {/* HEADER */}
+              {/* Search suggestions */}
+              {showSuggestions &&
+                normalizedSearch && (
+                  <div className="absolute left-0 top-[60px] z-[100] w-full min-w-[320px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl">
+                    {suggestions.length ===
+                    0 ? (
+                      <div className="px-5 py-6 text-center">
+                        <Salad
+                          size={32}
+                          className="mx-auto text-gray-300"
+                        />
 
-                      <div className="border-b border-gray-100 px-5 py-3">
-                        <p className="text-lg uppercase tracking-wide text-[#F97316]">
-                          លទ្ធផលស្វែងរក
+                        <p className="mt-2 text-lg font-medium text-gray-500">
+                          មិនមានរបបអាហារដែលត្រូវគ្នា
                         </p>
                       </div>
+                    ) : (
+                      <>
+                        <div className="border-b border-gray-100 px-5 py-3">
+                          <p className="text-lg font-medium text-primary-800">
+                            លទ្ធផលស្វែងរក
+                          </p>
+                        </div>
 
-                      {/* RESULTS */}
-
-                      <div className="max-h-[340px] overflow-y-auto p-2">
-                        {suggestions.map(
-                          (item) => (
-                            <button
-                              key={
-                                item.uuid
-                              }
-                              type="button"
-                              onMouseDown={(
-                                event,
-                              ) => {
-                                event.preventDefault();
-                              }}
-                              onClick={() => {
-                                setSearch(
-                                  item.name,
-                                );
-
-                                setShowSuggestions(
-                                  false,
-                                );
-
-                                setPage(
-                                  0,
-                                );
-                              }}
-                              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-emerald-50"
-                            >
-                              {/* ICON */}
-
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[#137A3D]">
-                                <Salad
-                                  size={24}
-                                />
-                              </div>
-
-                              {/* INFO */}
-
-                              <div className="min-w-0 flex-1">
-                                <p className="truncate text-base font-black text-gray-800">
-                                  {
-                                    item.name
-                                  }
-                                </p>
-
-                                <div className="mt-1 flex items-center gap-2">
-                                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-sm text-gray-500">
-                                    {
-                                      item.code
-                                    }
-                                  </span>
-
-                                  <span className="rounded-full bg-orange-50 px-2 py-0.5 text-sm text-orange-600">
-                                    {
-                                      item.category
-                                    }
-                                  </span>
+                        <div className="max-h-[340px] overflow-y-auto p-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                          {suggestions.map(
+                            (
+                              item,
+                            ) => (
+                              <button
+                                key={
+                                  item.uuid
+                                }
+                                type="button"
+                                onMouseDown={(
+                                  event,
+                                ) => {
+                                  event.preventDefault();
+                                }}
+                                onClick={() => {
+                                  setSearch(
+                                    item.name,
+                                  );
+                                  setShowSuggestions(
+                                    false,
+                                  );
+                                  setPage(
+                                    0,
+                                  );
+                                }}
+                                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
+                              >
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
+                                  <Salad
+                                    size={20}
+                                  />
                                 </div>
 
-                                {item.description && (
-                                  <p className="mt-1 truncate text-sm text-gray-400">
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-lg font-semibold text-gray-800">
                                     {
-                                      item.description
+                                      item.name
                                     }
                                   </p>
-                                )}
-                              </div>
 
-                              {/* STATUS */}
+                                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                                    <span className="rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-lg text-gray-500">
+                                      {
+                                        item.code
+                                      }
+                                    </span>
 
-                              <span
-                                className={`shrink-0 rounded-full px-2 py-1 text-base font-bold ${
-                                  item.active
-                                    ? "bg-emerald-50 text-emerald-600"
-                                    : "bg-gray-100 text-gray-500"
-                                }`}
-                              >
-                                {item.active
-                                  ? "សកម្ម"
-                                  : "អសកម្ម"}
-                              </span>
-                            </button>
-                          ),
-                        )}
-                      </div>
-                    </>
+                                    <span className="rounded-full bg-secondary-50 px-2.5 py-1 text-lg font-medium text-secondary-600">
+                                      {
+                                        item.category
+                                      }
+                                    </span>
+                                  </div>
+
+                                  {item.description && (
+                                    <p className="mt-1 truncate text-lg text-gray-400">
+                                      {
+                                        item.description
+                                      }
+                                    </p>
+                                  )}
+                                </div>
+
+                                <span
+                                  className={`shrink-0 rounded-full px-3 py-1.5 text-lg font-medium ${
+                                    item.active
+                                      ? "bg-primary-50 text-primary-700"
+                                      : "bg-gray-100 text-gray-500"
+                                  }`}
+                                >
+                                  {item.active
+                                    ? "សកម្ម"
+                                    : "អសកម្ម"}
+                                </span>
+                              </button>
+                            ),
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+            </div>
+
+            {/* Page size */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setSizeOpen(
+                    (current) =>
+                      !current,
+                  );
+
+                  setSortOpen(
+                    false,
+                  );
+                }}
+                className={`flex h-[52px] min-w-[150px] items-center justify-between gap-3 rounded-full border bg-white px-4 text-lg font-medium transition ${
+                  sizeOpen
+                    ? "border-primary-600 ring-4 ring-primary-100"
+                    : "border-gray-200 text-gray-700 hover:border-primary-200 hover:bg-primary-50"
+                }`}
+              >
+                <span>
+                  {size} / ទំព័រ
+                </span>
+
+                <ChevronDown
+                  size={18}
+                  className={`text-gray-400 transition-transform duration-200 ${
+                    sizeOpen
+                      ? "rotate-180"
+                      : ""
+                  }`}
+                />
+              </button>
+
+              {sizeOpen && (
+                <div className="absolute right-0 top-[60px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                  <p className="px-3 pb-2 pt-1 text-lg font-medium text-primary-800">
+                    ចំនួនក្នុងទំព័រ
+                  </p>
+
+                  {[10, 20, 50].map(
+                    (value) => {
+                      const selected =
+                        size ===
+                        value;
+
+                      return (
+                        <button
+                          key={
+                            value
+                          }
+                          type="button"
+                          onClick={() => {
+                            setSize(
+                              value,
+                            );
+                            setPage(
+                              0,
+                            );
+                            setSizeOpen(
+                              false,
+                            );
+                          }}
+                          className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-lg font-medium transition ${
+                            selected
+                              ? "bg-primary-50 text-primary-800"
+                              : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
+                          }`}
+                        >
+                          <span>
+                            {
+                              value
+                            }{" "}
+                            / ទំព័រ
+                          </span>
+
+                          {selected && (
+                            <Check
+                              size={
+                                18
+                              }
+                            />
+                          )}
+                        </button>
+                      );
+                    },
                   )}
                 </div>
               )}
-          </div>
+            </div>
 
-          {/* =============================================
-              PAGE SIZE
-          ============================================== */}
+            {/* Sort */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setSortOpen(
+                    (current) =>
+                      !current,
+                  );
 
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                setSizeOpen(
-                  (
-                    current,
-                  ) =>
-                    !current,
-                );
-
-                setSortOpen(
-                  false,
-                );
-              }}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${
-                sizeOpen
-                  ? "border-[#137A3D] ring-2 ring-[#137A3D]/10"
-                  : "border-gray-200 hover:border-[#137A3D]/50"
-              }`}
-            >
-              <span className="text-gray-700">
-                {size} /
-                ទំព័រ
-              </span>
-
-              <ChevronDown
-                size={17}
-                className={`text-gray-400 transition-transform duration-200 ${
-                  sizeOpen
-                    ? "rotate-180"
-                    : ""
+                  setSizeOpen(
+                    false,
+                  );
+                }}
+                className={`flex h-[52px] w-[52px] items-center justify-center rounded-full border transition ${
+                  sortOpen
+                    ? "border-primary-600 bg-primary-50 text-primary-800 ring-4 ring-primary-100"
+                    : "border-gray-200 bg-white text-gray-600 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800"
                 }`}
-              />
-            </button>
+                aria-label="Sort dietary types"
+                title="Sort dietary types"
+              >
+                <ArrowUpDown
+                  size={20}
+                />
+              </button>
 
-            {sizeOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[160px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg text-[#F97316]">
-                  ចំនួនក្នុងទំព័រ
-                </p>
+              {sortOpen && (
+                <div className="absolute right-0 top-[60px] z-[100] w-[210px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                  <p className="px-3 pb-2 pt-1 text-lg font-medium text-primary-800">
+                    តម្រៀប
+                  </p>
 
-                {[10, 20, 50].map(
-                  (value) => {
-                    const selected =
-                      size ===
-                      value;
+                  {sortOptions.map(
+                    (
+                      option,
+                    ) => {
+                      const selected =
+                        sortBy ===
+                        option.value;
 
-                    return (
-                      <button
-                        key={
-                          value
-                        }
-                        type="button"
-                        onClick={() => {
-                          setSize(
-                            value,
-                          );
-
-                          setPage(
-                            0,
-                          );
-
-                          setSizeOpen(
-                            false,
-                          );
-                        }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
-                          selected
-                            ? "bg-emerald-50 text-[#137A3D]"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
-                        }`}
-                      >
-                        <span>
-                          {value} /
-                          ទំព័រ
-                        </span>
-
-                        {selected && (
-                          <Check
-                            size={
-                              16
-                            }
-                            className="text-[#137A3D]"
-                          />
-                        )}
-                      </button>
-                    );
-                  },
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* =============================================
-              SORT
-          ============================================== */}
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                setSortOpen(
-                  (
-                    current,
-                  ) =>
-                    !current,
-                );
-
-                setSizeOpen(
-                  false,
-                );
-              }}
-              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
-                sortOpen
-                  ? "border-[#137A3D] bg-emerald-50 text-[#137A3D]"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-[#137A3D] hover:bg-emerald-50 hover:text-[#137A3D]"
-              }`}
-              aria-label="Sort dietary types"
-              title="Sort dietary types"
-            >
-              <ArrowUpDown
-                size={18}
-              />
-            </button>
-
-            {sortOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg uppercase tracking-wide text-[#F97316]">
-                  តម្រៀប
-                </p>
-
-                {sortOptions.map(
-                  (
-                    option,
-                  ) => {
-                    const selected =
-                      sortBy ===
-                      option.value;
-
-                    return (
-                      <button
-                        key={
-                          option.value
-                        }
-                        type="button"
-                        onClick={() => {
-                          setSortBy(
-                            option.value,
-                          );
-
-                          setSortOpen(
-                            false,
-                          );
-                        }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
-                          selected
-                            ? "bg-emerald-50 text-[#137A3D]"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
-                        }`}
-                      >
-                        <span>
-                          {
-                            option.label
+                      return (
+                        <button
+                          key={
+                            option.value
                           }
-                        </span>
-
-                        {selected && (
-                          <Check
-                            size={
-                              16
+                          type="button"
+                          onClick={() => {
+                            setSortBy(
+                              option.value,
+                            );
+                            setSortOpen(
+                              false,
+                            );
+                          }}
+                          className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-lg font-medium transition ${
+                            selected
+                              ? "bg-primary-50 text-primary-800"
+                              : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
+                          }`}
+                        >
+                          <span>
+                            {
+                              option.label
                             }
-                            className="text-[#137A3D]"
-                          />
-                        )}
-                      </button>
-                    );
-                  },
-                )}
-              </div>
-            )}
+                          </span>
+
+                          {selected && (
+                            <Check
+                              size={
+                                18
+                              }
+                            />
+                          )}
+                        </button>
+                      );
+                    },
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* =================================================
-          MESSAGE
-      ================================================== */}
-
+      {/* COMPONENT: Notice */}
       {message && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm ${
+          className={`rounded-2xl border px-5 py-4 text-lg leading-7 ${
             message.type ===
             "success"
-              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+              ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
           }`}
         >
@@ -1091,29 +993,35 @@ export default function DietaryTypeManager() {
       )}
 
       {/* =================================================
-          TABLE
+          TABLE AREA
       ================================================== */}
-
-      <section className="overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
+      <section className="w-full min-w-0 max-w-full overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
         {isLoading ? (
           <div className="flex min-h-[320px] items-center justify-center">
-            <LoaderCircle
-              size={30}
-              className="animate-spin text-[#136C34]"
-            />
+            <div className="text-center">
+              <LoaderCircle
+                size={32}
+                className="mx-auto animate-spin text-primary-800"
+              />
+
+              <p className="mt-3 text-lg font-medium text-gray-500">
+                កំពុងទាញទិន្នន័យ...
+              </p>
+            </div>
           </div>
         ) : error ? (
           <div className="flex min-h-[320px] flex-col items-center justify-center px-6 text-center">
-            <AlertTriangle
-              size={34}
-              className="text-red-400"
-            />
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+              <AlertTriangle
+                size={28}
+              />
+            </div>
 
-            <h3 className="mt-3 text-lg font-bold text-gray-800">
+            <p className="mt-4 text-2xl font-semibold text-primary-800">
               មិនអាចទាញយកទិន្នន័យរបបអាហារបានទេ
-            </h3>
+            </p>
 
-            <p className="mt-2 text-base text-gray-500">
+            <p className="mt-2 max-w-xl text-lg leading-8 text-gray-500">
               {getApiErrorMessage(
                 error,
               )}
@@ -1124,21 +1032,25 @@ export default function DietaryTypeManager() {
               onClick={() =>
                 void refetch()
               }
-              className="mt-4 rounded-xl bg-[#136C34] px-4 py-2.5 text-lg text-white"
+              className="mt-5 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-800 px-6 text-lg font-medium text-white transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200"
             >
               សាកល្បងម្តងទៀត
             </button>
           </div>
         ) : sortedItems.length ===
           0 ? (
-          <div className="flex min-h-[320px] flex-col items-center justify-center text-center">
+          <div className="flex min-h-[320px] flex-col items-center justify-center px-6 text-center">
             <Salad
               size={40}
-              className="text-[#F97316]"
+              className="text-gray-300"
             />
 
-            <p className="mt-3 text-lg text-[#F97316]">
+            <p className="mt-3 text-lg font-medium text-gray-500">
               មិនមានទិន្នន័យ
+            </p>
+
+            <p className="mt-1 text-lg text-gray-400">
+              សូមសាកល្បងស្វែងរក ឬជ្រើស filter ផ្សេងទៀត។
             </p>
           </div>
         ) : (
@@ -1146,16 +1058,13 @@ export default function DietaryTypeManager() {
             items={
               sortedItems
             }
-            disabled={
-              busy
-            }
+            disabled={busy}
             onEdit={(
               item,
             ) => {
               setEditing(
                 item,
               );
-
               setFormOpen(
                 true,
               );
@@ -1172,13 +1081,6 @@ export default function DietaryTypeManager() {
             }
           />
         )}
-
-        {/* ===============================================
-            PAGINATION
-
-            Hide normal pagination while using the
-            100-item client search dataset.
-        ================================================ */}
 
         {!isLoading &&
           !error &&
@@ -1206,10 +1108,7 @@ export default function DietaryTypeManager() {
           )}
       </section>
 
-      {/* =================================================
-          FORM
-      ================================================== */}
-
+      {/* COMPONENT: DietaryTypeFormModal */}
       <DietaryTypeFormModal
         open={formOpen}
         item={editing}
@@ -1225,32 +1124,22 @@ export default function DietaryTypeManager() {
             return;
           }
 
-          setFormOpen(
-            false,
-          );
-
-          setEditing(
-            null,
-          );
+          setFormOpen(false);
+          setEditing(null);
         }}
         onSubmit={
           handleSave
         }
       />
 
-      {/* =================================================
-          DELETE
-      ================================================== */}
-
+      {/* COMPONENT: DeleteDietaryTypeConfirmModal */}
       <DeleteDietaryTypeConfirmModal
         item={deleting}
         deleting={
           isDeleting
         }
         onClose={() => {
-          if (
-            !isDeleting
-          ) {
+          if (!isDeleting) {
             setDeleting(
               null,
             );

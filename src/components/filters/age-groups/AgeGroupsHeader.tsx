@@ -19,7 +19,7 @@ export default function AgeGroupsHeader({
   onAdd,
 }: Props) {
   return (
-    <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8">
+    <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
       <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/5" />
 
       <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
@@ -34,7 +34,7 @@ export default function AgeGroupsHeader({
             </div>
 
             <div>
-              <p className="text-5xl font-bold">
+              <p className="text-3xl font-bold text-accent-400">
                 គ្រប់គ្រងក្រុមអាយុ
               </p>
 
@@ -45,7 +45,7 @@ export default function AgeGroupsHeader({
           </div>
 
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-3xl bg-white/10 px-5 py-4">
+            <div className="rounded-3xl bg-white/20 px-5 py-4">
               <p className="text-xl text-white/75">
                 ក្រុមអាយុសកម្មសរុប
               </p>
@@ -55,7 +55,7 @@ export default function AgeGroupsHeader({
               </p>
             </div>
 
-            <div className="rounded-3xl bg-white/10 px-5 py-4">
+            <div className="rounded-3xl bg-white/20 px-5 py-4">
               <p className="text-xl text-white/75">
                 ក្នុងទំព័រនេះ
               </p>
@@ -74,7 +74,7 @@ export default function AgeGroupsHeader({
           onClick={
             onAdd
           }
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
         >
           <Plus
             size={

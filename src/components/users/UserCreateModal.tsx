@@ -1,17 +1,8 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-  type FormEvent,
-} from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
-import {
-  AlertTriangle,
-  Loader2,
-  UserPlus,
-  X,
-} from "lucide-react";
+import { AlertTriangle, Loader2, UserPlus, X } from "lucide-react";
 
 import type { CreateAdminUserPayload } from "@/src/types/userProfile";
 
@@ -19,9 +10,7 @@ interface UserCreateModalProps {
   open: boolean;
   saving: boolean;
   onClose: () => void;
-  onSubmit: (
-    values: CreateAdminUserPayload,
-  ) => Promise<void>;
+  onSubmit: (values: CreateAdminUserPayload) => Promise<void>;
 }
 
 const initialValues: CreateAdminUserPayload = {
@@ -40,45 +29,42 @@ export default function UserCreateModal({
   onClose,
   onSubmit,
 }: UserCreateModalProps) {
-  const [values, setValues] =
-    useState<CreateAdminUserPayload>(initialValues);
+  const [values, setValues] = useState<CreateAdminUserPayload>(initialValues);
 
-  const [localError, setLocalError] =
-    useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) {
-      return;
-    }
+    if (!open) return;
 
     setValues(initialValues);
     setLocalError(null);
   }, [open]);
 
-  if (!open) {
-    return null;
-  }
+  useEffect(() => {
+    if (!open) return;
 
-  const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLocalError(null);
 
-    if (
-      values.password !==
-      values.confirmedPassword
-    ) {
-      setLocalError(
-        "Password និង Confirm password មិនដូចគ្នាទេ។",
-      );
+    if (values.password !== values.confirmedPassword) {
+      setLocalError("Password និង Confirm password មិនដូចគ្នាទេ។");
       return;
     }
 
     if (values.password.length < 6) {
-      setLocalError(
-        "Password ត្រូវមានយ៉ាងហោចណាស់ 6 តួអក្សរ។",
-      );
+      setLocalError("Password ត្រូវមានយ៉ាងហោចណាស់ 6 តួអក្សរ។");
       return;
     }
 
@@ -104,18 +90,15 @@ export default function UserCreateModal({
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
             aria-label="Close"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5 p-6"
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
+        <form onSubmit={handleSubmit} className="space-y-6 p-6 sm:p-8">
+          <div className="grid gap-5 sm:grid-cols-2">
             <Field
               label="First name"
               value={values.firstName}
@@ -178,7 +161,7 @@ export default function UserCreateModal({
               required
             />
 
-            <div />
+            <div className="hidden sm:block" />
 
             <Field
               label="Password"
@@ -208,21 +191,18 @@ export default function UserCreateModal({
           </div>
 
           {localError && (
-            <div className="flex gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-              <AlertTriangle
-                size={18}
-                className="shrink-0"
-              />
-              {localError}
+            <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg leading-7 text-red-600">
+              <AlertTriangle size={21} className="mt-0.5 shrink-0" />
+              <span>{localError}</span>
             </div>
           )}
 
-          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end">
+          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-end">
             <button
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="rounded-xl border border-gray-200 px-5 py-2.5 text-lg text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-medium text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               បោះបង់
             </button>
@@ -230,15 +210,11 @@ export default function UserCreateModal({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#136C34] px-5 py-2.5 text-lg text-white transition hover:bg-[#0f592b] disabled:opacity-60"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary-800 px-7 text-lg font-medium text-white transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {saving && (
-                <Loader2 size={17} className="animate-spin" />
-              )}
+              {saving && <Loader2 size={20} className="animate-spin" />}
 
-              {saving
-                ? "កំពុងបង្កើត..."
-                : "បង្កើតអ្នកប្រើ"}
+              {saving ? "កំពុងបង្កើត..." : "បង្កើតអ្នកប្រើ"}
             </button>
           </div>
         </form>
@@ -264,7 +240,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xl font-semibold text-[#F97316]">
+      <span className="mb-2 block text-lg font-medium text-primary-800">
         {label}
         {required ? " *" : ""}
       </span>
@@ -274,10 +250,8 @@ function Field({
         value={value}
         required={required}
         placeholder={placeholder}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
-        className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition placeholder:text-gray-300 focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+        onChange={(event) => onChange(event.target.value)}
+        className="h-[52px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
       />
     </label>
   );

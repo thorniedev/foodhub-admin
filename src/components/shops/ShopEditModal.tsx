@@ -1,13 +1,26 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
-import { AlertTriangle, Loader2, Pencil, X } from "lucide-react";
+import { type FormEvent, type ReactNode, useEffect, useState } from "react";
+
+import {
+  AlertTriangle,
+  Image as ImageIcon,
+  Loader2,
+  MapPin,
+  Pencil,
+  Phone,
+  Store as StoreIcon,
+  X,
+} from "lucide-react";
 
 import type {
   Store,
   StoreOperatingStatus,
   UpdateStorePayload,
 } from "@/src/types/shop";
+
+import { imageUrlOrNull } from "@/src/lib/shopFormat";
+import StoreMediaImage from "./detail/StoreMediaImage";
 import StoreMediaUploader from "./StoreMediaUploader";
 import StoreSelect from "./StoreSelect";
 
@@ -44,6 +57,9 @@ export default function ShopEditModal({
   const [values, setValues] = useState<FormState | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
 
+  /*
+   * Load existing store data
+   */
   useEffect(() => {
     if (!store) {
       setValues(null);
@@ -64,19 +80,44 @@ export default function ShopEditModal({
       email: store.email ?? "",
       logoMediaUuid: store.logoMediaUuid ?? "",
       coverMediaUuid: store.coverMediaUuid ?? "",
+
       priceLevel: store.priceLevel == null ? "" : String(store.priceLevel),
+
       hygieneRating:
         store.hygieneRating == null ? "" : String(store.hygieneRating),
+
       operatingStatus: store.operatingStatus ?? "UNKNOWN",
     });
 
     setLocalError(null);
   }, [store]);
 
+  /*
+   * Disable background page scrolling
+   */
+  useEffect(() => {
+    if (!store) return;
+
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [store]);
+
   if (!store || !values) return null;
 
   const set = (key: keyof FormState, value: string) => {
-    setValues((current) => (current ? { ...current, [key]: value } : current));
+    setValues((current) =>
+      current
+        ? {
+            ...current,
+            [key]: value,
+          }
+        : current,
+    );
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -85,13 +126,21 @@ export default function ShopEditModal({
     const latitude = Number(values.latitude);
     const longitude = Number(values.longitude);
 
+    /*
+     * Latitude validation
+     */
     if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
       setLocalError("Latitude ត្រូវនៅចន្លោះ -90 និង 90។");
+
       return;
     }
 
+    /*
+     * Longitude validation
+     */
     if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
       setLocalError("Longitude ត្រូវនៅចន្លោះ -180 និង 180។");
+
       return;
     }
 
@@ -99,88 +148,257 @@ export default function ShopEditModal({
 
     await onSubmit({
       storeName: values.storeName.trim(),
+
       description: values.description.trim() || null,
+
       addressLine: values.addressLine.trim(),
+
       city: values.city.trim() || null,
+
       province: values.province.trim() || null,
+
       countryCode: values.countryCode.trim().toUpperCase(),
+
       timezone: values.timezone.trim(),
+
       latitude,
+
       longitude,
+
       phoneNumber: values.phoneNumber.trim() || null,
+
       email: values.email.trim() || null,
+
       logoMediaUuid: values.logoMediaUuid.trim() || null,
+
       coverMediaUuid: values.coverMediaUuid.trim() || null,
+
       priceLevel: values.priceLevel.trim() ? Number(values.priceLevel) : null,
+
       hygieneRating: values.hygieneRating.trim()
         ? Number(values.hygieneRating)
         : null,
+
       operatingStatus: values.operatingStatus,
     });
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px]">
-      <div className="max-h-[94vh] w-full max-w-5xl overflow-y-auto rounded-[28px] bg-white shadow-2xl">
-        <div className="sticky top-0 z-20 flex items-start justify-between border-b border-gray-100 bg-white px-6 py-5">
-          <div>
-            <p className="flex items-center gap-3 text-4xl font-bold text-[#136C34]">
-              <Pencil size={28} />
-              កែប្រែ Store
-            </p>
-            <p className="mt-1 text-base text-gray-500">{store.storeName}</p>
+    <div
+      className="
+        fixed inset-0 z-[120]
+        flex items-center justify-center
+        bg-black/40
+        p-4
+        backdrop-blur-[3px]
+      "
+    >
+      {/* Modal */}
+      <div
+        className="
+          max-h-[94vh]
+          w-full
+          max-w-5xl
+          overflow-y-auto
+          rounded-3xl
+          border border-gray-100
+          bg-white
+          shadow-2xl
+
+          [scrollbar-width:none]
+          [-ms-overflow-style:none]
+          [&::-webkit-scrollbar]:hidden
+        "
+      >
+        {/* ================= HEADER ================= */}
+        <div
+          className="
+            sticky top-0 z-30
+            flex items-center justify-between
+            border-b border-gray-100
+            bg-white/95
+            px-6 py-5
+            backdrop-blur-md
+            sm:px-8
+          "
+        >
+          <div className="flex min-w-0 items-center gap-4">
+            {/* Header icon */}
+            <div
+              className="
+                flex h-12 w-12
+                shrink-0
+                items-center justify-center
+                rounded-xl
+                bg-primary-50
+                text-primary-800
+              "
+            >
+              <Pencil size={24} />
+            </div>
+
+            {/* Header text */}
+            <div className="min-w-0">
+              <p
+                className="
+                  text-3xl
+                  font-semibold
+                  text-primary-800
+                "
+              >
+                កែប្រែព័ត៌មានហាង
+              </p>
+
+              <p
+                className="
+                  mt-1
+                  truncate
+                  text-lg
+                  text-gray-500
+                "
+              >
+                {store.storeName}
+              </p>
+            </div>
           </div>
 
+          {/* Close */}
           <button
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
             aria-label="Close"
+            className="
+              flex h-11 w-11
+              shrink-0
+              items-center justify-center
+              rounded-full
+              text-gray-400
+              transition
+              hover:bg-gray-100
+              hover:text-gray-700
+              focus:outline-none
+              focus:ring-4
+              focus:ring-gray-100
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
-        <form onSubmit={submit} className="space-y-6 p-6">
-          <section className="rounded-[24px] border border-gray-100 bg-white p-5 shadow-sm">
-            <p className="text-3xl font-bold text-gray-900">ព័ត៌មានហាង</p>
-
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        {/* ================= FORM ================= */}
+        <form onSubmit={submit} className="space-y-6 p-6 sm:p-8">
+          {/* ================= STORE INFO ================= */}
+          <Section icon={<StoreIcon size={22} />} title="ព័ត៌មានហាង">
+            <div className="grid gap-5 sm:grid-cols-2">
               <Field
                 label="ឈ្មោះហាង"
                 value={values.storeName}
                 onChange={(value) => set("storeName", value)}
                 required
               />
+
               <Field
                 label="Country code"
                 value={values.countryCode}
                 onChange={(value) => set("countryCode", value)}
                 required
               />
-              <Field
-                label="Address"
-                value={values.addressLine}
-                onChange={(value) => set("addressLine", value)}
-                required
-              />
+
               <Field
                 label="Timezone"
                 value={values.timezone}
                 onChange={(value) => set("timezone", value)}
                 required
               />
+
+              {/* Operating Status */}
+              <label className="block">
+                <FieldLabel>Operating status</FieldLabel>
+
+                <StoreSelect
+                  value={values.operatingStatus}
+                  onChange={(value) => set("operatingStatus", value)}
+                  options={[
+                    {
+                      value: "OPEN",
+                      label: "OPEN",
+                    },
+                    {
+                      value: "CLOSED",
+                      label: "CLOSED",
+                    },
+                    {
+                      value: "TEMPORARILY_CLOSED",
+                      label: "TEMPORARILY_CLOSED",
+                    },
+                    {
+                      value: "UNKNOWN",
+                      label: "UNKNOWN",
+                    },
+                  ]}
+                />
+              </label>
+
+              {/* Description */}
+              <label className="block sm:col-span-2">
+                <FieldLabel>ការពិពណ៌នា</FieldLabel>
+
+                <textarea
+                  rows={4}
+                  value={values.description}
+                  onChange={(event) => set("description", event.target.value)}
+                  placeholder="បញ្ចូលការពិពណ៌នាអំពីហាង..."
+                  className="
+                    w-full
+                    resize-none
+                    rounded-xl
+                    border border-gray-200
+                    bg-gray-50
+                    px-4 py-3.5
+                    text-lg
+                    leading-7
+                    text-gray-800
+                    outline-none
+                    transition
+                    placeholder:text-gray-400
+                    hover:border-gray-300
+                    focus:border-primary-600
+                    focus:bg-white
+                    focus:ring-4
+                    focus:ring-primary-100
+                  "
+                />
+              </label>
+            </div>
+          </Section>
+
+          {/* ================= LOCATION ================= */}
+          <Section icon={<MapPin size={22} />} title="ព័ត៌មានទីតាំង">
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <Field
+                  label="Address"
+                  value={values.addressLine}
+                  onChange={(value) => set("addressLine", value)}
+                  required
+                />
+              </div>
+
               <Field
                 label="City"
                 value={values.city}
                 onChange={(value) => set("city", value)}
               />
+
               <Field
                 label="Province"
                 value={values.province}
                 onChange={(value) => set("province", value)}
               />
+
               <Field
                 label="Latitude"
                 type="number"
@@ -189,6 +407,7 @@ export default function ShopEditModal({
                 onChange={(value) => set("latitude", value)}
                 required
               />
+
               <Field
                 label="Longitude"
                 type="number"
@@ -197,23 +416,32 @@ export default function ShopEditModal({
                 onChange={(value) => set("longitude", value)}
                 required
               />
+            </div>
+          </Section>
+
+          {/* ================= CONTACT ================= */}
+          <Section icon={<Phone size={22} />} title="ព័ត៌មានទំនាក់ទំនង">
+            <div className="grid gap-5 sm:grid-cols-2">
               <Field
                 label="Phone"
                 value={values.phoneNumber}
                 onChange={(value) => set("phoneNumber", value)}
               />
+
               <Field
                 label="Email"
                 type="email"
                 value={values.email}
                 onChange={(value) => set("email", value)}
               />
+
               <Field
                 label="Price level"
                 type="number"
                 value={values.priceLevel}
                 onChange={(value) => set("priceLevel", value)}
               />
+
               <Field
                 label="Hygiene rating"
                 type="number"
@@ -221,83 +449,149 @@ export default function ShopEditModal({
                 value={values.hygieneRating}
                 onChange={(value) => set("hygieneRating", value)}
               />
-
-              <label>
-                <span className="mb-2 block text-xl font-semibold text-[#F97316]">
-                  Operating status
-                </span>
-                <StoreSelect
-                  value={values.operatingStatus}
-                  onChange={(value) => set("operatingStatus", value)}
-                  options={[
-                    { value: "OPEN", label: "OPEN" },
-                    { value: "CLOSED", label: "CLOSED" },
-                    {
-                      value: "TEMPORARILY_CLOSED",
-                      label: "TEMPORARILY_CLOSED",
-                    },
-                    { value: "UNKNOWN", label: "UNKNOWN" },
-                  ]}
-                />
-              </label>
-
-              <label className="sm:col-span-2">
-                <span className="mb-2 block text-xl font-semibold text-[#F97316]">
-                  ការពិពណ៌នា
-                </span>
-                <textarea
-                  rows={4}
-                  value={values.description}
-                  onChange={(event) => set("description", event.target.value)}
-                  className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
-                />
-              </label>
             </div>
-          </section>
+          </Section>
 
-          <section className="rounded-[24px] border border-gray-100 bg-white p-5 shadow-sm">
-            <p className="text-3xl font-bold text-gray-900">Store media</p>
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              <StoreMediaUploader
-                label="Store logo"
-                purpose="STORE_LOGO"
-                mediaUuid={values.logoMediaUuid}
-                onMediaUuidChange={(uuid) => set("logoMediaUuid", uuid)}
-                variant="logo"
-              />
-              <StoreMediaUploader
-                label="Store cover"
-                purpose="STORE_COVER"
-                mediaUuid={values.coverMediaUuid}
-                onMediaUuidChange={(uuid) => set("coverMediaUuid", uuid)}
-                variant="cover"
-              />
+          {/* ================= MEDIA ================= */}
+          <Section icon={<ImageIcon size={22} />} title="រូបភាពហាង">
+            <div className="grid gap-5 lg:grid-cols-2">
+              {/* Current logo + update control */}
+              <div className="space-y-4">
+                <CurrentStoreImage
+                  label="រូបសញ្ញាបច្ចុប្បន្ន"
+                  mediaUuid={values.logoMediaUuid}
+                  fallbackUrl={
+                    store.logoMediaUuid ? null : imageUrlOrNull(store.logoUrl)
+                  }
+                  variant="logo"
+                />
+
+                <StoreMediaUploader
+                  label="កែប្រែរូបសញ្ញា"
+                  purpose="STORE_LOGO"
+                  mediaUuid={values.logoMediaUuid}
+                  onMediaUuidChange={(uuid) => set("logoMediaUuid", uuid)}
+                  variant="logo"
+                />
+              </div>
+
+              {/* Current cover + update control */}
+              <div className="space-y-4">
+                <CurrentStoreImage
+                  label="រូបគម្របបច្ចុប្បន្ន"
+                  mediaUuid={values.coverMediaUuid}
+                  fallbackUrl={
+                    store.coverMediaUuid
+                      ? null
+                      : imageUrlOrNull(store.coverImageUrl)
+                  }
+                  variant="cover"
+                />
+
+                <StoreMediaUploader
+                  label="កែប្រែរូបគម្រប"
+                  purpose="STORE_COVER"
+                  mediaUuid={values.coverMediaUuid}
+                  onMediaUuidChange={(uuid) => set("coverMediaUuid", uuid)}
+                  variant="cover"
+                />
+              </div>
             </div>
-          </section>
+          </Section>
 
+          {/* ================= ERROR ================= */}
           {localError && (
-            <div className="flex gap-2 rounded-xl bg-red-50 px-4 py-3 text-base text-red-600">
-              <AlertTriangle size={19} className="shrink-0" />
-              {localError}
+            <div
+              className="
+                flex items-start
+                gap-3
+                rounded-2xl
+                border border-red-100
+                bg-red-50
+                px-5 py-4
+                text-lg
+                leading-7
+                text-red-600
+              "
+            >
+              <AlertTriangle size={21} className="mt-0.5 shrink-0" />
+
+              <span>{localError}</span>
             </div>
           )}
 
-          <div className="flex justify-end gap-3 border-t border-gray-100 pt-5">
+          {/* ================= ACTION BUTTONS ================= */}
+          <div
+            className="
+              flex
+              flex-col-reverse
+              gap-3
+              border-t
+              border-gray-100
+              pt-6
+              sm:flex-row
+              sm:items-center
+              sm:justify-end
+            "
+          >
+            {/* Cancel */}
             <button
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="rounded-xl border border-gray-200 px-5 py-2.5 text-lg text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              className="
+                inline-flex
+                min-h-12
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-gray-200
+                bg-white
+                px-7
+                text-lg
+                font-medium
+                text-gray-600
+                transition
+                hover:border-primary-200
+                hover:bg-primary-50
+                hover:text-primary-800
+                focus:outline-none
+                focus:ring-4
+                focus:ring-primary-100
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
             >
               បោះបង់
             </button>
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#136C34] px-5 py-2.5 text-lg text-white transition hover:bg-[#0f592b] disabled:opacity-60"
+              className="
+                inline-flex
+                min-h-12
+                items-center
+                justify-center
+                gap-2
+                rounded-full
+                bg-primary-800
+                px-7
+                text-lg
+                font-medium
+                text-white
+                transition
+                hover:bg-primary-900
+                focus:outline-none
+                focus:ring-4
+                focus:ring-primary-200
+                disabled:cursor-not-allowed
+                disabled:opacity-60
+              "
             >
-              {saving && <Loader2 size={17} className="animate-spin" />}
+              {saving && <Loader2 size={20} className="animate-spin" />}
               រក្សាទុក
             </button>
           </div>
@@ -306,6 +600,199 @@ export default function ShopEditModal({
     </div>
   );
 }
+
+/* =========================================================
+   CURRENT STORE IMAGE
+========================================================= */
+
+function CurrentStoreImage({
+  label,
+  mediaUuid,
+  fallbackUrl,
+  variant,
+}: {
+  label: string;
+  mediaUuid: string;
+  fallbackUrl: string | null;
+  variant: "logo" | "cover";
+}) {
+  const hasMediaUuid = Boolean(mediaUuid.trim());
+
+  const previewHeight = variant === "logo" ? "h-48" : "h-56";
+
+  return (
+    <div
+      className="
+        overflow-hidden
+        rounded-2xl
+        border border-gray-100
+        bg-white
+      "
+    >
+      <div
+        className="
+          border-b
+          border-gray-100
+          px-5 py-4
+        "
+      >
+        <p
+          className="
+            text-lg
+            font-semibold
+            text-primary-800
+          "
+        >
+          {label}
+        </p>
+
+        <p
+          className="
+            mt-1
+            text-base
+            text-gray-400
+          "
+        >
+          រូបភាពដែលកំពុងប្រើនៅលើហាង
+        </p>
+      </div>
+
+      <div
+        className={`
+          flex
+          ${previewHeight}
+          items-center
+          justify-center
+          overflow-hidden
+          bg-gray-50
+        `}
+      >
+        {hasMediaUuid ? (
+          <StoreMediaImage
+            mediaUuid={mediaUuid}
+            alt={label}
+            className={
+              variant === "logo"
+                ? "h-full w-full object-contain p-5"
+                : "h-full w-full object-cover"
+            }
+          />
+        ) : fallbackUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={fallbackUrl}
+            alt={label}
+            className={
+              variant === "logo"
+                ? "h-full w-full object-contain p-5"
+                : "h-full w-full object-cover"
+            }
+          />
+        ) : (
+          <div className="text-center">
+            <ImageIcon
+              size={40}
+              className="
+                mx-auto
+                text-gray-300
+              "
+            />
+
+            <p
+              className="
+                mt-3
+                text-lg
+                font-medium
+                text-gray-400
+              "
+            >
+              មិនមានរូបភាព
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   SECTION
+========================================================= */
+
+function Section({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      className="
+        rounded-2xl
+        border
+        border-gray-100
+        bg-white
+        p-5
+        sm:p-6
+      "
+    >
+      {/* Section heading */}
+      <div className="mb-6 flex items-center gap-3">
+        <div
+          className="
+            flex h-11 w-11
+            shrink-0
+            items-center justify-center
+            rounded-xl
+            bg-primary-50
+            text-primary-800
+          "
+        >
+          {icon}
+        </div>
+
+        <p
+          className="
+            text-3xl
+            font-semibold
+            text-primary-800
+          "
+        >
+          {title}
+        </p>
+      </div>
+
+      {children}
+    </section>
+  );
+}
+
+/* =========================================================
+   FIELD LABEL
+========================================================= */
+
+function FieldLabel({ children }: { children: ReactNode }) {
+  return (
+    <span
+      className="
+        mb-2
+        block
+        text-lg
+        font-medium
+        text-primary-800
+      "
+    >
+      {children}
+    </span>
+  );
+}
+
+/* =========================================================
+   INPUT FIELD
+========================================================= */
 
 function Field({
   label,
@@ -323,15 +810,34 @@ function Field({
   step?: string;
 }) {
   return (
-    <label>
-      <span className="mb-2 block text-xl font-semibold text-[#F97316]">{label}</span>
+    <label className="block">
+      <FieldLabel>{label}</FieldLabel>
+
       <input
         type={type}
         step={step}
         required={required}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+        className="
+          h-[52px]
+          w-full
+          rounded-xl
+          border
+          border-gray-200
+          bg-gray-50
+          px-4
+          text-lg
+          text-gray-800
+          outline-none
+          transition
+          placeholder:text-gray-400
+          hover:border-gray-300
+          focus:border-primary-600
+          focus:bg-white
+          focus:ring-4
+          focus:ring-primary-100
+        "
       />
     </label>
   );
