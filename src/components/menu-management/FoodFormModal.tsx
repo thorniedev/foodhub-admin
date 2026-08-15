@@ -8,15 +8,22 @@ import ImagePicker from "./ImagePicker";
 import type {
   CuisineOption,
   EventOption,
+  FoodAgeRuleRelation,
   FoodCategoryOption,
+  FoodDietaryTypeRelation,
   FoodEventRelation,
+  FoodMealTypeRelation,
   FoodRecord,
   FoodSeasonRelation,
   FoodWeatherRelation,
   FoodWritePayload,
+  NutritionData,
   SeasonOption,
   WeatherConditionOption,
 } from "@/src/types/menu-management";
+import type { MealType } from "@/src/types/mealType";
+import type { AgeGroup } from "@/src/types/ageGroup";
+import type { DietaryType } from "@/src/types/dietaryType";
 
 type FormState = {
   canonicalName: string;
@@ -29,6 +36,7 @@ type FormState = {
   protein: string;
   carbohydrate: string;
   fat: string;
+  fiber: string;
   isActive: boolean;
 };
 
@@ -43,6 +51,7 @@ const EMPTY: FormState = {
   protein: "",
   carbohydrate: "",
   fat: "",
+  fiber: "",
   isActive: true,
 };
 
@@ -61,6 +70,9 @@ export default function FoodFormModal({
   seasons = [],
   events = [],
   weatherConditions = [],
+  mealTypes = [],
+  ageGroups = [],
+  dietaryTypes = [],
   saving,
   onClose,
   onSubmit,
@@ -72,6 +84,9 @@ export default function FoodFormModal({
   seasons?: SeasonOption[];
   events?: EventOption[];
   weatherConditions?: WeatherConditionOption[];
+  mealTypes?: MealType[];
+  ageGroups?: AgeGroup[];
+  dietaryTypes?: DietaryType[];
   saving: boolean;
   onClose: () => void;
   onSubmit: (
@@ -83,10 +98,13 @@ export default function FoodFormModal({
   const [images, setImages] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Metadata relations state
+  // Metadata relations state (all filters in ចម្រោះទិន្នន័យ)
   const [seasonRows, setSeasonRows] = useState<FoodSeasonRelation[]>([]);
   const [eventRows, setEventRows] = useState<FoodEventRelation[]>([]);
   const [weatherRows, setWeatherRows] = useState<FoodWeatherRelation[]>([]);
+  const [mealTypeRows, setMealTypeRows] = useState<FoodMealTypeRelation[]>([]);
+  const [ageRuleRows, setAgeRuleRows] = useState<FoodAgeRuleRelation[]>([]);
+  const [dietaryTypeRows, setDietaryTypeRows] = useState<FoodDietaryTypeRelation[]>([]);
 
   useEffect(() => {
     if (!open) return;
@@ -97,6 +115,9 @@ export default function FoodFormModal({
       setSeasonRows([]);
       setEventRows([]);
       setWeatherRows([]);
+      setMealTypeRows([]);
+      setAgeRuleRows([]);
+      setDietaryTypeRows([]);
       setError(null);
       return;
     }
@@ -125,12 +146,18 @@ export default function FoodFormModal({
           ? String(item.nutritionData.proteinGrams)
           : "",
       carbohydrate:
-        item.nutritionData?.carbsGrams != null
-          ? String(item.nutritionData.carbsGrams)
-          : "",
+        item.nutritionData?.carbohydrateGrams != null
+          ? String(item.nutritionData.carbohydrateGrams)
+          : item.nutritionData?.carbsGrams != null
+            ? String(item.nutritionData.carbsGrams)
+            : "",
       fat:
         item.nutritionData?.fatGrams != null
           ? String(item.nutritionData.fatGrams)
+          : "",
+      fiber:
+        item.nutritionData?.fiberGrams != null
+          ? String(item.nutritionData.fiberGrams)
           : "",
       isActive: item.isActive !== false,
     });
@@ -140,7 +167,7 @@ export default function FoodFormModal({
     setSeasonRows(
       rawSeasons.map((s: any) => ({
         seasonUuid: s.seasonUuid ?? s.uuid ?? s.season?.uuid ?? "",
-        suitabilityScore: s.suitabilityScore != null ? Number(s.suitabilityScore) : 1.0,
+        suitabilityScore: s.suitabilityScore != null ? Number(s.suitabilityScore) : 0.95,
         reasonText: s.reasonText ?? "",
       })).filter((s) => Boolean(s.seasonUuid)),
     );
@@ -163,30 +190,37 @@ export default function FoodFormModal({
       })).filter((w) => Boolean(w.weatherConditionUuid)),
     );
 
+    const rawMealTypes = Array.isArray(item.mealTypes) ? item.mealTypes : [];
+    setMealTypeRows(
+      rawMealTypes.map((m: any) => ({
+        mealTypeUuid: m.mealTypeUuid ?? m.uuid ?? m.mealType?.uuid ?? "",
+        suitabilityScore: m.suitabilityScore != null ? Number(m.suitabilityScore) : 1.0,
+      })).filter((m) => Boolean(m.mealTypeUuid)),
+    );
+
+    const rawAgeRules = Array.isArray(item.ageRules) ? item.ageRules : [];
+    setAgeRuleRows(
+      rawAgeRules.map((a: any) => ({
+        ageGroupUuid: a.ageGroupUuid ?? a.uuid ?? a.ageGroup?.uuid ?? "",
+        ruleResult: a.ruleResult || "ALLOWED",
+        reasonText: a.reasonText ?? "Suitable as a normal serving.",
+      })).filter((a) => Boolean(a.ageGroupUuid)),
+    );
+
+    const rawDietary = Array.isArray(item.dietaryTypes) ? item.dietaryTypes : [];
+    setDietaryTypeRows(
+      rawDietary.map((d: any) => ({
+        code: d.code ?? "",
+        name: d.name ?? d.code ?? "",
+      })).filter((d) => Boolean(d.code)),
+    );
+
     setImages([]);
     setError(null);
   }, [item, open]);
 
   const activeCategories = useMemo(() => {
-    const foodRoot = categories.find(
-      (category) =>
-        category.code?.trim().toUpperCase() === "FOOD" &&
-        !category.parentCategoryUuid,
-    );
-
-    if (!foodRoot) {
-      return categories.filter(
-        (category) =>
-          category.isActive !== false &&
-          Boolean(category.parentCategoryUuid),
-      );
-    }
-
-    return categories.filter(
-      (category) =>
-        category.isActive !== false &&
-        category.parentCategoryUuid === foodRoot.uuid,
-    );
+    return categories.filter((category) => category.isActive !== false);
   }, [categories]);
 
   const submit = async () => {
@@ -198,35 +232,44 @@ export default function FoodFormModal({
       }
 
       if (!values.categoryUuid) {
-        throw new Error("Category is required.");
+        throw new Error("Category (ប្រភេទម្ហូប) is required.");
       }
+
+      if (!values.cuisineUuid) {
+        throw new Error("Cuisine (ម្ហូបតាមប្រទេស) is required.");
+      }
+
+      const nutritionData: NutritionData = {
+        calories: numberOrNull(values.calories) ?? 0,
+        proteinGrams: numberOrNull(values.protein) ?? 0,
+        carbohydrateGrams: numberOrNull(values.carbohydrate) ?? 0,
+        fatGrams: numberOrNull(values.fat) ?? 0,
+        fiberGrams: numberOrNull(values.fiber) ?? 0,
+      };
+
+      const hasImages = Array.isArray(images) && images.length > 0;
 
       const payload: FoodWritePayload = {
         canonicalName: values.canonicalName.trim(),
         localName: values.localName.trim() || null,
         description: values.description.trim() || null,
         categoryUuid: values.categoryUuid,
-        cuisineUuid: values.cuisineUuid || null,
-        primaryMediaUuids:
-          item?.primaryMediaUuids ?? [],
-        defaultSpiceLevel: numberOrNull(
-          values.defaultSpiceLevel,
-        ),
-        nutritionData: {
-          calories: numberOrNull(values.calories),
-          proteinGrams: numberOrNull(values.protein),
-          carbsGrams: numberOrNull(values.carbohydrate),
-          fatGrams: numberOrNull(values.fat),
-        },
-        mealTypes: item?.mealTypes ?? [],
-        ageRules: item?.ageRules ?? [],
-        dietaryTypes: item?.dietaryTypes ?? [],
+        cuisineUuid: values.cuisineUuid,
+        ...(hasImages ? {} : { primaryMediaUuids: item?.primaryMediaUuids ?? [] }),
+        defaultSpiceLevel: numberOrNull(values.defaultSpiceLevel) ?? 0,
+        nutritionData,
         seasons: seasonRows
           .filter((r) => Boolean(r.seasonUuid))
           .map((r) => ({
             seasonUuid: r.seasonUuid,
-            suitabilityScore: r.suitabilityScore ?? 1.0,
+            suitabilityScore: r.suitabilityScore ?? 0.95,
             reasonText: r.reasonText?.trim() || null,
+          })),
+        dietaryTypes: dietaryTypeRows
+          .filter((r) => Boolean(r.code))
+          .map((r) => ({
+            code: r.code,
+            name: r.name || r.code,
           })),
         events: eventRows
           .filter((r) => Boolean(r.eventUuid))
@@ -241,6 +284,19 @@ export default function FoodFormModal({
             weatherConditionUuid: r.weatherConditionUuid,
             suitabilityScore: r.suitabilityScore ?? 0.95,
             reasonText: r.reasonText?.trim() || null,
+          })),
+        mealTypes: mealTypeRows
+          .filter((r) => Boolean(r.mealTypeUuid))
+          .map((r) => ({
+            mealTypeUuid: r.mealTypeUuid,
+            suitabilityScore: r.suitabilityScore ?? 1.0,
+          })),
+        ageRules: ageRuleRows
+          .filter((r) => Boolean(r.ageGroupUuid))
+          .map((r) => ({
+            ageGroupUuid: r.ageGroupUuid,
+            ruleResult: r.ruleResult || "ALLOWED",
+            reasonText: r.reasonText?.trim() || "Suitable as a normal serving.",
           })),
         isActive: values.isActive,
       };
@@ -263,9 +319,7 @@ export default function FoodFormModal({
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
           <div>
             <h2 className="text-2xl font-black text-gray-900">
-              {item
-                ? "កែប្រែ Food Catalog"
-                : "បន្ថែម Food Catalog"}
+              {item ? "កែប្រែ Food Catalog" : "បន្ថែម Food Catalog"}
             </h2>
             <p className="mt-1 text-sm text-gray-400">
               Food នេះអាចឱ្យ Store ជ្រើសយកទៅបង្កើត Menu Item។
@@ -307,7 +361,7 @@ export default function FoodFormModal({
             />
 
             <label>
-              <Label>Category *</Label>
+              <Label>Category (ប្រភេទម្ហូប) *</Label>
               <select
                 value={values.categoryUuid}
                 onChange={(event) =>
@@ -320,10 +374,7 @@ export default function FoodFormModal({
               >
                 <option value="">ជ្រើស Category</option>
                 {activeCategories.map((category) => (
-                  <option
-                    key={category.uuid}
-                    value={category.uuid}
-                  >
+                  <option key={category.uuid} value={category.uuid}>
                     {category.name} ({category.code})
                   </option>
                 ))}
@@ -331,7 +382,7 @@ export default function FoodFormModal({
             </label>
 
             <label>
-              <Label>Cuisine</Label>
+              <Label>Cuisine (ម្ហូបតាមប្រទេស) *</Label>
               <select
                 value={values.cuisineUuid}
                 onChange={(event) =>
@@ -344,15 +395,9 @@ export default function FoodFormModal({
               >
                 <option value="">ជ្រើស Cuisine</option>
                 {cuisines
-                  .filter(
-                    (cuisine) =>
-                      cuisine.isActive !== false,
-                  )
+                  .filter((cuisine) => cuisine.isActive !== false)
                   .map((cuisine) => (
-                    <option
-                      key={cuisine.uuid}
-                      value={cuisine.uuid}
-                    >
+                    <option key={cuisine.uuid} value={cuisine.uuid}>
                       {cuisine.name}
                     </option>
                   ))}
@@ -383,9 +428,7 @@ export default function FoodFormModal({
                 }
                 className="h-5 w-5 accent-[#137A3D]"
               />
-              <span className="font-bold text-gray-700">
-                Active
-              </span>
+              <span className="font-bold text-gray-700">Active</span>
             </label>
 
             <label className="md:col-span-2">
@@ -404,17 +447,17 @@ export default function FoodFormModal({
             </label>
           </div>
 
+          {/* Nutrition Section */}
           <div>
-            <h3 className="mb-3 text-lg font-black text-gray-900">
-              Nutrition
-            </h3>
+            <h3 className="mb-3 text-lg font-black text-gray-900">Nutrition</h3>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {[
                 ["calories", "Calories"],
                 ["protein", "Protein (g)"],
                 ["carbohydrate", "Carbohydrate (g)"],
                 ["fat", "Fat (g)"],
+                ["fiber", "Fiber (g)"],
               ].map(([key, label]) => (
                 <Field
                   key={key}
@@ -428,6 +471,7 @@ export default function FoodFormModal({
                         | "protein"
                         | "carbohydrate"
                         | "fat"
+                        | "fiber"
                       >
                     ]
                   }
@@ -440,6 +484,236 @@ export default function FoodFormModal({
                 />
               ))}
             </div>
+          </div>
+
+          {/* Dietary Types Metadata Section */}
+          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-black text-gray-900">របបអាហារ (Dietary Types)</h3>
+                <p className="text-xs text-gray-400">កំណត់របបអាហារដែលត្រូវគ្នា (Gluten Free, Vegan, Halal, etc.)</p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setDietaryTypeRows((current) => [
+                    ...current,
+                    { code: "", name: "" },
+                  ])
+                }
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
+              >
+                <Plus size={14} />
+                បន្ថែមរបបអាហារ
+              </button>
+            </div>
+
+            {dietaryTypeRows.length === 0 ? (
+              <p className="mt-3 text-xs italic text-gray-400">មិនទាន់បានជ្រើសរបបអាហារ</p>
+            ) : (
+              <div className="mt-3 space-y-2.5">
+                {dietaryTypeRows.map((row, idx) => (
+                  <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm border border-gray-100">
+                    <select
+                      value={row.code}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const found = dietaryTypes.find((d) => d.code === val);
+                        setDietaryTypeRows((prev) =>
+                          prev.map((r, i) =>
+                            i === idx
+                              ? { ...r, code: val, name: found?.name ?? val }
+                              : r,
+                          ),
+                        );
+                      }}
+                      className="h-10 flex-1 min-w-[200px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    >
+                      <option value="">ជ្រើសរបបអាហារ...</option>
+                      {dietaryTypes.map((d) => (
+                        <option key={d.uuid || d.code} value={d.code}>
+                          {d.name} ({d.code})
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={() => setDietaryTypeRows((prev) => prev.filter((_, i) => i !== idx))}
+                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Meal Types Metadata Section */}
+          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-black text-gray-900">ពេលទទួលទាន (Meal Types)</h3>
+                <p className="text-xs text-gray-400">កំណត់ពេលទទួលទាន (Breakfast, Lunch, Dinner, etc.)</p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setMealTypeRows((current) => [
+                    ...current,
+                    { mealTypeUuid: "", suitabilityScore: 1.0 },
+                  ])
+                }
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
+              >
+                <Plus size={14} />
+                បន្ថែមពេលទទួលទាន
+              </button>
+            </div>
+
+            {mealTypeRows.length === 0 ? (
+              <p className="mt-3 text-xs italic text-gray-400">មិនទាន់បានជ្រើសពេលទទួលទាន</p>
+            ) : (
+              <div className="mt-3 space-y-2.5">
+                {mealTypeRows.map((row, idx) => (
+                  <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm border border-gray-100">
+                    <select
+                      value={row.mealTypeUuid}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setMealTypeRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, mealTypeUuid: val } : r)),
+                        );
+                      }}
+                      className="h-10 flex-1 min-w-[200px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    >
+                      <option value="">ជ្រើសពេលទទួលទាន...</option>
+                      {mealTypes.map((m) => (
+                        <option key={m.uuid} value={m.uuid}>
+                          {m.name} ({m.code})
+                        </option>
+                      ))}
+                    </select>
+
+                    <input
+                      type="number"
+                      step="0.05"
+                      min="0"
+                      max="1"
+                      placeholder="Suitability Score (0-1)"
+                      value={row.suitabilityScore ?? 1.0}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setMealTypeRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
+                        );
+                      }}
+                      className="h-10 w-32 rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setMealTypeRows((prev) => prev.filter((_, i) => i !== idx))}
+                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Age Rules Section */}
+          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-black text-gray-900">ក្រុមអាយុ (Age Rules)</h3>
+                <p className="text-xs text-gray-400">កំណត់លក្ខខណ្ឌសាកសមសម្រាប់ក្រុមអាយុ</p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setAgeRuleRows((current) => [
+                    ...current,
+                    {
+                      ageGroupUuid: "",
+                      ruleResult: "ALLOWED",
+                      reasonText: "Suitable as a normal serving.",
+                    },
+                  ])
+                }
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
+              >
+                <Plus size={14} />
+                បន្ថែមក្រុមអាយុ
+              </button>
+            </div>
+
+            {ageRuleRows.length === 0 ? (
+              <p className="mt-3 text-xs italic text-gray-400">មិនទាន់បានជ្រើសក្រុមអាយុ</p>
+            ) : (
+              <div className="mt-3 space-y-2.5">
+                {ageRuleRows.map((row, idx) => (
+                  <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm border border-gray-100">
+                    <select
+                      value={row.ageGroupUuid}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setAgeRuleRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, ageGroupUuid: val } : r)),
+                        );
+                      }}
+                      className="h-10 flex-1 min-w-[160px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    >
+                      <option value="">ជ្រើសក្រុមអាយុ...</option>
+                      {ageGroups.map((ag) => (
+                        <option key={ag.uuid} value={ag.uuid}>
+                          {ag.name} ({ag.code})
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={row.ruleResult || "ALLOWED"}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setAgeRuleRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, ruleResult: val } : r)),
+                        );
+                      }}
+                      className="h-10 w-32 rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    >
+                      <option value="ALLOWED">ALLOWED</option>
+                      <option value="WARNING">WARNING</option>
+                      <option value="RESTRICTED">RESTRICTED</option>
+                    </select>
+
+                    <input
+                      type="text"
+                      placeholder="ហេតុផល (Reason)..."
+                      value={row.reasonText ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setAgeRuleRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
+                        );
+                      }}
+                      className="h-10 flex-1 min-w-[180px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setAgeRuleRows((prev) => prev.filter((_, i) => i !== idx))}
+                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Seasons Metadata Section */}
@@ -630,7 +904,7 @@ export default function FoodFormModal({
                 onClick={() =>
                   setWeatherRows((current) => [
                     ...current,
-                    { weatherConditionUuid: "", suitabilityScore: 0.95, reasonText: "" },
+                    { weatherConditionUuid: "", suitabilityScore: 0.8, reasonText: "" },
                   ])
                 }
                 className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
@@ -670,7 +944,7 @@ export default function FoodFormModal({
                       min="0"
                       max="1"
                       placeholder="Score (0-1)"
-                      value={row.suitabilityScore ?? 0.95}
+                      value={row.suitabilityScore ?? 0.8}
                       onChange={(e) => {
                         const val = Number(e.target.value);
                         setWeatherRows((prev) =>

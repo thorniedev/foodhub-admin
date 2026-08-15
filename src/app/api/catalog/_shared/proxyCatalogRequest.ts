@@ -269,7 +269,15 @@ export async function proxyCatalogRequest(
     method,
     frontendUrl: request.url,
     backendUrl: target.toString(),
+    contentType: headers.get("content-type"),
   });
+
+  if (body) {
+    try {
+      const text = new TextDecoder().decode(body);
+      console.log("[CATALOG PROXY REQUEST BODY]", text.slice(0, 1500));
+    } catch {}
+  }
 
   try {
     let backendResponse = await callBackend(target, method, headers, body);
@@ -285,11 +293,13 @@ export async function proxyCatalogRequest(
     }
 
     const responseBody = await backendResponse.arrayBuffer();
+    const responseText = new TextDecoder().decode(responseBody);
 
     console.log("[CATALOG PROXY RESPONSE]", {
       method,
       backendUrl: target.toString(),
       status: backendResponse.status,
+      body: responseText.slice(0, 2000),
     });
 
     const response = new NextResponse(

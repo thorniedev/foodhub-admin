@@ -170,8 +170,10 @@ export default function CreateCanonicalFoodModal({
         nutritionData: {
           calories: Number(form.calories || 0),
           proteinGrams: Number(form.proteinGrams || 0),
+          carbohydrateGrams: Number(form.carbsGrams || 0),
           carbsGrams: Number(form.carbsGrams || 0),
           fatGrams: Number(form.fatGrams || 0),
+          fiberGrams: 0,
         },
         dietaryTypes: parseJsonArray(form.dietaryTypes, "Dietary Types"),
         seasons: parseJsonArray(form.seasons, "Seasons"),

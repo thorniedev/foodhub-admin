@@ -636,28 +636,9 @@ function buildMultipartBody(
   const formData =
     new FormData();
 
-  /*
-   * IMPORTANT:
-   * Spring @RequestPart needs this part to have:
-   *
-   * Content-Type: application/json
-   */
-  const jsonBlob =
-    new Blob(
-      [
-        JSON.stringify(
-          body,
-        ),
-      ],
-      {
-        type:
-          "application/json",
-      },
-    );
-
   formData.append(
     jsonPartName,
-    jsonBlob,
+    typeof body === "string" ? body : JSON.stringify(body),
   );
 
   /*

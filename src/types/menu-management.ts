@@ -576,6 +576,22 @@ export interface FoodWeatherRelation {
   reasonText?: string | null;
 }
 
+export interface FoodMealTypeRelation {
+  mealTypeUuid: string;
+  suitabilityScore?: number;
+}
+
+export interface FoodAgeRuleRelation {
+  ageGroupUuid: string;
+  ruleResult?: "ALLOWED" | "CAUTION" | "RESTRICTED" | string;
+  reasonText?: string | null;
+}
+
+export interface FoodDietaryTypeRelation {
+  code: string;
+  name: string;
+}
+
 export interface StoreOption {
   id?: number;
   uuid: string;
@@ -591,8 +607,10 @@ export interface StoreOption {
 export interface NutritionData {
   calories?: number | null;
   proteinGrams?: number | null;
+  carbohydrateGrams?: number | null;
   carbsGrams?: number | null;
   fatGrams?: number | null;
+  fiberGrams?: number | null;
 }
 
 export interface FoodRecord {
@@ -743,15 +761,15 @@ export interface FoodWritePayload {
   description?: string | null;
   categoryUuid: string;
   cuisineUuid?: string | null;
-  primaryMediaUuids: string[];
+  primaryMediaUuids?: string[];
   defaultSpiceLevel?: number | null;
   nutritionData?: NutritionData | null;
-  mealTypes: unknown[];
-  ageRules: unknown[];
-  dietaryTypes?: unknown[];
-  seasons?: FoodSeasonRelation[] | unknown[];
-  events?: FoodEventRelation[] | unknown[];
-  suitableWeather?: FoodWeatherRelation[] | unknown[];
+  mealTypes: FoodMealTypeRelation[];
+  ageRules: FoodAgeRuleRelation[];
+  dietaryTypes: FoodDietaryTypeRelation[];
+  seasons: FoodSeasonRelation[];
+  events: FoodEventRelation[];
+  suitableWeather: FoodWeatherRelation[];
   isActive: boolean;
 }
 

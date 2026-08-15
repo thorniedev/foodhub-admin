@@ -849,12 +849,7 @@ function makeMultipart(
 
   form.append(
     key,
-    new Blob(
-      [JSON.stringify(payload)],
-      {
-        type: "application/json",
-      },
-    ),
+    typeof payload === "string" ? payload : JSON.stringify(payload),
   );
 
   images.slice(0, 4).forEach((image) => {
@@ -1325,15 +1320,25 @@ export const menuManagementApi =
             payload,
             images,
           }) {
+            const hasImages = Array.isArray(images) && images.length > 0;
             const result = await browserRequest<unknown>(
               "/api/catalog/foods",
               {
                 method: "POST",
-                body: makeMultipart(
-                  "food",
-                  payload,
-                  images,
-                ),
+                ...(hasImages
+                  ? {
+                      body: makeMultipart(
+                        "food",
+                        payload,
+                        images,
+                      ),
+                    }
+                  : {
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(payload),
+                    }),
               },
             );
 
@@ -1372,7 +1377,7 @@ export const menuManagementApi =
                 body: makeMultipart(
                   "food",
                   payload,
-                  images,
+                  images ?? [],
                 ),
               },
             );
@@ -1420,21 +1425,21 @@ export const menuManagementApi =
             const p = (params ?? {}) as PublicMenuItemListParams;
             const query = makeQuery({
               page: p.page ?? 0,
-              size: p.size ?? 100,
+              size: p.size ?? 20,
               sort:
                 p.sort ??
                 "createdAt,desc",
               query: p.query,
               rootCategoryCode:
                 p.rootCategoryCode,
-              storeUuid:
-                p.storeUuid,
-              foodUuid:
-                p.foodUuid,
+              storeUuid: p.storeUuid,
+              foodUuid: p.foodUuid,
               availabilityStatus:
                 p.availabilityStatus,
               featured:
-                p.featured,
+                p.featured !== undefined
+                  ? String(p.featured)
+                  : undefined,
             });
 
             const result = await browserRequest<unknown>(
@@ -1520,17 +1525,27 @@ export const menuManagementApi =
             payload,
             images,
           }) {
+            const hasImages = Array.isArray(images) && images.length > 0;
             const result = await browserRequest<unknown>(
               `/api/catalog/stores/${encodeURIComponent(
                 storeUuid,
               )}/menu-items`,
               {
                 method: "POST",
-                body: makeMultipart(
-                  "request",
-                  payload,
-                  images,
-                ),
+                ...(hasImages
+                  ? {
+                      body: makeMultipart(
+                        "request",
+                        payload,
+                        images,
+                      ),
+                    }
+                  : {
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(payload),
+                    }),
               },
             );
 
@@ -1560,17 +1575,27 @@ export const menuManagementApi =
             payload,
             images,
           }) {
+            const hasImages = Array.isArray(images) && images.length > 0;
             const result = await browserRequest<unknown>(
               `/api/catalog/menu-items/${encodeURIComponent(
                 uuid,
               )}`,
               {
                 method: "PUT",
-                body: makeMultipart(
-                  "request",
-                  payload,
-                  images,
-                ),
+                ...(hasImages
+                  ? {
+                      body: makeMultipart(
+                        "request",
+                        payload,
+                        images,
+                      ),
+                    }
+                  : {
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(payload),
+                    }),
               },
             );
 
