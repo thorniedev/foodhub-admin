@@ -33,6 +33,7 @@ import {
 import { useGetMealTypesQuery } from "@/src/app/store/mealTypeApi";
 import { useGetAgeGroupsQuery } from "@/src/app/store/ageGroupApi";
 import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
+import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
 
 import { getMenuManagementApiError } from "@/src/lib/menuManagementApiError";
 
@@ -135,6 +136,7 @@ export default function MenuItemsManager() {
   const mealTypesQuery = useGetMealTypesQuery({ page: 0, size: 100 });
   const ageGroupsQuery = useGetAgeGroupsQuery({ page: 0, size: 100 });
   const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 });
+  const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 });
 
   const [createFood, { isLoading: creatingFood }] =
     useCreateManagedFoodMutation();
@@ -508,6 +510,8 @@ export default function MenuItemsManager() {
         foods={foods}
         stores={storesQuery.data ?? []}
         ingredients={ingredientsQuery.data ?? []}
+        dietaryTypes={dietaryTypesQuery.data?.contents ?? []}
+        allergens={allergensQuery.data?.contents ?? []}
         saving={creatingMenuItem || updatingMenuItem}
         onClose={() => {
           if (creatingMenuItem || updatingMenuItem) {

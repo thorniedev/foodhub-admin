@@ -1526,26 +1526,39 @@ export const menuManagementApi =
             images,
           }) {
             const hasImages = Array.isArray(images) && images.length > 0;
+            let body: FormData | string;
+            let headers: Record<string, string> | undefined;
+
+            if (hasImages) {
+              const form = new FormData();
+              form.append(
+                "request",
+                new Blob([JSON.stringify(payload)], {
+                  type: "application/json",
+                }),
+              );
+              // First image is thumbnail
+              form.append("thumbnail", images[0]);
+              // Remaining images are gallery
+              images.slice(1, 4).forEach((image) => {
+                form.append("gallery", image);
+              });
+              body = form;
+            } else {
+              headers = {
+                "Content-Type": "application/json",
+              };
+              body = JSON.stringify(payload);
+            }
+
             const result = await browserRequest<unknown>(
               `/api/catalog/stores/${encodeURIComponent(
                 storeUuid,
               )}/menu-items`,
               {
                 method: "POST",
-                ...(hasImages
-                  ? {
-                      body: makeMultipart(
-                        "request",
-                        payload,
-                        images,
-                      ),
-                    }
-                  : {
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify(payload),
-                    }),
+                headers,
+                body,
               },
             );
 
@@ -1575,37 +1588,103 @@ export const menuManagementApi =
             payload,
             images,
           }) {
-            const hasImages = Array.isArray(images) && images.length > 0;
-            const result = await browserRequest<unknown>(
+            // 1. Update Core MenuItem
+            const coreResult = await browserRequest<unknown>(
               `/api/catalog/menu-items/${encodeURIComponent(
                 uuid,
               )}`,
               {
                 method: "PUT",
-                ...(hasImages
-                  ? {
-                      body: makeMultipart(
-                        "request",
-                        payload,
-                        images,
-                      ),
-                    }
-                  : {
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify(payload),
-                    }),
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  foodUuid: payload.foodUuid,
+                  menuItem: payload.menuItem,
+                }),
               },
             );
 
-            if ("error" in result) {
-              return result;
+            if ("error" in coreResult) {
+              return coreResult;
+            }
+
+            // 2. Update Ingredients if provided
+            if (payload.ingredients !== undefined) {
+              await browserRequest<unknown>(
+                `/api/catalog/menu-items/${encodeURIComponent(
+                  uuid,
+                )}/ingredients`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    ingredients: payload.ingredients,
+                  }),
+                },
+              );
+            }
+
+            // 3. Update Dietary Types if provided
+            if (payload.dietaryTypes !== undefined) {
+              await browserRequest<unknown>(
+                `/api/catalog/menu-items/${encodeURIComponent(
+                  uuid,
+                )}/dietary-types`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    dietaryTypes: payload.dietaryTypes,
+                  }),
+                },
+              );
+            }
+
+            // 4. Update Allergen Declarations if provided
+            if (payload.allergenDeclarations !== undefined) {
+              await browserRequest<unknown>(
+                `/api/catalog/menu-items/${encodeURIComponent(
+                  uuid,
+                )}/allergen-declarations`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    declarations: payload.allergenDeclarations,
+                  }),
+                },
+              );
+            }
+
+            // 5. Update Images if any new images selected
+            if (Array.isArray(images) && images.length > 0) {
+              const form = new FormData();
+              form.append("thumbnail", images[0]);
+              images.slice(1, 4).forEach((image) => {
+                form.append("gallery", image);
+              });
+
+              await browserRequest<unknown>(
+                `/api/catalog/menu-items/${encodeURIComponent(
+                  uuid,
+                )}/images`,
+                {
+                  method: "PUT",
+                  body: form,
+                },
+              );
             }
 
             return {
               data: unwrap<MenuItemRecord>(
-                result.data as never,
+                coreResult.data as never,
               ),
             };
           },

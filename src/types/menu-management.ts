@@ -728,6 +728,8 @@ export interface MenuItemRecord {
 
   primaryMediaUuids?: string[];
   primaryMediaUrls?: string[];
+  thumbnailMediaUuid?: string | null;
+  galleryMediaUuids?: string[];
   gallery?: string[];
   thumbnail?: string | null;
   imageUrl?: string | null;
@@ -748,8 +750,8 @@ export interface MenuItemRecord {
   food?: FoodRecord | null;
 
   ingredients?: MenuItemIngredientRecord[];
-  dietaryTypes?: unknown[];
-  allergenDeclarations?: unknown[];
+  dietaryTypes?: MenuItemDietaryTypeRecord[] | unknown[];
+  allergenDeclarations?: MenuItemAllergenDeclarationRecord[] | unknown[];
 
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -789,9 +791,11 @@ export interface MenuItemWritePayload {
   };
 
   primaryMediaUuids?: string[];
+  thumbnailMediaUuid?: string | null;
+  galleryMediaUuids?: string[];
   ingredients: MenuItemIngredientPayload[];
-  dietaryTypes: unknown[];
-  allergenDeclarations: unknown[];
+  dietaryTypes: MenuItemDietaryTypePayload[];
+  allergenDeclarations: MenuItemAllergenDeclarationPayload[];
 }
 
 export interface ListParams {
