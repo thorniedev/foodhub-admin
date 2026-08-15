@@ -706,30 +706,33 @@ export const menuItemApi =
         >({
           query: (
             params,
-          ) => ({
-            url:
-              "catalog/food-categories",
+          ) => {
+            const p = (params ?? {}) as CatalogListParams;
+            return {
+              url:
+                "catalog/food-categories",
 
-            method:
-              "GET",
+              method:
+                "GET",
 
-            params: {
-              page:
-                params?.page ??
-                0,
+              params: {
+                page:
+                  p.page ??
+                  0,
 
-              size:
-                params?.size ??
-                200,
+                size:
+                  p.size ??
+                  200,
 
-              ...(params?.sort
-                ? {
-                    sort:
-                      params.sort,
-                  }
-                : {}),
-            },
-          }),
+                ...(p.sort
+                  ? {
+                      sort:
+                        p.sort,
+                    }
+                  : {}),
+              },
+            };
+          },
 
           transformResponse:
             (
@@ -803,30 +806,33 @@ export const menuItemApi =
         >({
           query: (
             params,
-          ) => ({
-            url:
-              "catalog/cuisines",
+          ) => {
+            const p = (params ?? {}) as CatalogListParams;
+            return {
+              url:
+                "catalog/cuisines",
 
-            method:
-              "GET",
+              method:
+                "GET",
 
-            params: {
-              page:
-                params?.page ??
-                0,
+              params: {
+                page:
+                  p.page ??
+                  0,
 
-              size:
-                params?.size ??
-                200,
+                size:
+                  p.size ??
+                  200,
 
-              ...(params?.sort
-                ? {
-                    sort:
-                      params.sort,
-                  }
-                : {}),
-            },
-          }),
+                ...(p.sort
+                  ? {
+                      sort:
+                        p.sort,
+                    }
+                  : {}),
+              },
+            };
+          },
 
           transformResponse:
             (
@@ -896,34 +902,37 @@ export const menuItemApi =
         >({
           query: (
             params,
-          ) => ({
-            url:
-              "catalog/foods",
+          ) => {
+            const p = (params ?? {}) as FoodListParams;
+            return {
+              url:
+                "catalog/foods",
 
-            method:
-              "GET",
+              method:
+                "GET",
 
-            params: {
-              page:
-                params?.page ??
-                0,
+              params: {
+                page:
+                  p.page ??
+                  0,
 
-              size:
-                params?.size ??
-                200,
+                size:
+                  p.size ??
+                  200,
 
-              sort:
-                params?.sort ??
-                "createdAt,desc",
+                sort:
+                  p.sort ??
+                  "createdAt,desc",
 
-              ...(params?.query
-                ? {
-                    query:
-                      params.query,
-                  }
-                : {}),
-            },
-          }),
+                ...(p.query
+                  ? {
+                      query:
+                        p.query,
+                    }
+                  : {}),
+              },
+            };
+          },
 
           transformResponse:
             (
@@ -944,6 +953,18 @@ export const menuItemApi =
           ) =>
             result
               ? [
+                  ...result.contents.map(
+                    ({
+                      uuid,
+                    }) => ({
+                      type:
+                        "Food" as const,
+
+                      id:
+                        uuid,
+                    }),
+                  ),
+
                   {
                     type:
                       "Food" as const,
@@ -951,18 +972,6 @@ export const menuItemApi =
                     id:
                       "LIST",
                   },
-
-                  ...result.contents.map(
-                    (
-                      food,
-                    ) => ({
-                      type:
-                        "Food" as const,
-
-                      id:
-                        food.uuid,
-                    }),
-                  ),
                 ]
               : [
                   {
@@ -989,30 +998,34 @@ export const menuItemApi =
       createFood:
         builder.mutation<
           CatalogFood,
-          {
-            body:
-              CreateCatalogFoodPayload;
+          | CreateCatalogFoodPayload
+          | {
+              body:
+                CreateCatalogFoodPayload;
 
-            images?: File[];
-          }
+              images?: File[];
+            }
         >({
-          query: ({
-            body,
-            images = [],
-          }) => ({
-            url:
-              "catalog/foods",
+          query: (
+            arg,
+          ) => {
+            const body = "body" in arg ? arg.body : arg;
+            const images = "images" in arg && arg.images ? arg.images : [];
+            return {
+              url:
+                "catalog/foods",
 
-            method:
-              "POST",
+              method:
+                "POST",
 
-            body:
-              buildMultipartBody(
-                "food",
-                body,
-                images,
-              ),
-          }),
+              body:
+                buildMultipartBody(
+                  "food",
+                  body,
+                  images,
+                ),
+            };
+          },
 
           transformResponse:
             (
@@ -1046,41 +1059,44 @@ export const menuItemApi =
         >({
           query: (
             params,
-          ) => ({
-            url:
-              "catalog/menu-items",
+          ) => {
+            const p = (params ?? {}) as MenuItemListParams;
+            return {
+              url:
+                "catalog/menu-items",
 
-            method:
-              "GET",
+              method:
+                "GET",
 
-            params: {
-              page:
-                params?.page ??
-                0,
+              params: {
+                page:
+                  p.page ??
+                  0,
 
-              size:
-                params?.size ??
-                100,
+                size:
+                  p.size ??
+                  100,
 
-              sort:
-                params?.sort ??
-                "createdAt,desc",
+                sort:
+                  p.sort ??
+                  "createdAt,desc",
 
-              ...(params?.foodUuid
-                ? {
-                    foodUuid:
-                      params.foodUuid,
-                  }
-                : {}),
+                ...(p.foodUuid
+                  ? {
+                      foodUuid:
+                        p.foodUuid,
+                    }
+                  : {}),
 
-              ...(params?.rootCategoryCode
-                ? {
-                    rootCategoryCode:
-                      params.rootCategoryCode,
-                  }
-                : {}),
-            },
-          }),
+                ...(p.rootCategoryCode
+                  ? {
+                      rootCategoryCode:
+                        p.rootCategoryCode,
+                    }
+                  : {}),
+              },
+            };
+          },
 
           transformResponse:
             (
@@ -1315,6 +1331,45 @@ export const menuItemApi =
             {
               type:
                 "Food",
+
+              id:
+                "LIST",
+            },
+          ],
+        }),
+
+      createMenuItem:
+        builder.mutation<
+          MenuItem,
+          CreateMenuItemPayload
+        >({
+          queryFn: (
+            payload,
+          ) => {
+            const item: MenuItem = {
+              ...payload,
+              uuid:
+                typeof crypto !==
+                  "undefined" &&
+                crypto.randomUUID
+                  ? crypto.randomUUID()
+                  : `item-${Date.now()}`,
+              legacyId:
+                Date.now(),
+              createdAt:
+                new Date().toISOString(),
+              updatedAt:
+                new Date().toISOString(),
+            };
+            return {
+              data: item,
+            };
+          },
+
+          invalidatesTags: [
+            {
+              type:
+                "MenuItem",
 
               id:
                 "LIST",

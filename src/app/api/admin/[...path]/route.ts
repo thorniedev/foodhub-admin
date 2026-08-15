@@ -23,6 +23,11 @@ function normalizeBaseUrl(value: string): string {
   return value.trim().replace(/\/+$/, "");
 }
 
+function normalizeBackendUrl(value: string): string {
+  const trimmed = normalizeBaseUrl(value);
+  return /\/api\/v1$/i.test(trimmed) ? trimmed : `${trimmed}/api/v1`;
+}
+
 function getConfig() {
   const backendApiUrl =
     process.env.BACKEND_API_URL ??
@@ -46,7 +51,7 @@ function getConfig() {
   const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET;
 
   return {
-    backendApiUrl: normalizeBaseUrl(backendApiUrl),
+    backendApiUrl: normalizeBackendUrl(backendApiUrl),
     keycloakUrl: normalizeBaseUrl(keycloakUrl),
     realm,
     clientId,

@@ -1909,23 +1909,22 @@ export const ingredientApi =
         IngredientPage,
         IngredientListParams | undefined
       >({
-        query: (params) => ({
-          url: "catalog/ingredients",
+        query: (params) => {
+          const p = (params ?? {}) as IngredientListParams;
+          return {
+            url: "catalog/ingredients",
 
-          method: "GET",
+            method: "GET",
 
-          params: {
-            page:
-              params?.page ?? 0,
+            params: {
+              page: p.page ?? 0,
 
-            size:
-              params?.size ?? 20,
+              size: p.size ?? 20,
 
-            sort:
-              params?.sort ??
-              "name,asc",
-          },
-        }),
+              sort: p.sort ?? "name,asc",
+            },
+          };
+        },
 
         transformResponse: (
           response:

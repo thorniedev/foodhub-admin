@@ -158,7 +158,20 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import type { CreateMemberProfileRequest } from "@/src/types/member-profile/member-profile";
+export interface CreateMemberProfileRequest {
+  profileName: string;
+  relationship: string;
+  gender: string;
+  dateOfBirth: string;
+  preferredLanguage?: string;
+  avatarMediaUuid?: string | null;
+  isDefault?: boolean;
+  allergies?: string[];
+  dietaryTypes?: string[];
+  medicalConditions?: string[];
+  ingredientAvoids?: string[];
+  preferences?: Record<string, unknown> | null;
+}
 
 export const dynamic = "force-dynamic";
 
