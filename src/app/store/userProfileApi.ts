@@ -208,15 +208,18 @@ function normalizePage<T>(response: SpringPage<T>): AdminPage<T> {
 export const userProfileApi = adminBaseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAdminUsers: builder.query<AdminPage<AdminUser>, AdminPageQuery | void>({
-      query: (params) => ({
-        url: "/users",
-        method: "GET",
-        params: {
-          page: params?.page ?? 0,
-          size: params?.size ?? 20,
-          sort: params?.sort ?? "createdAt,desc",
-        },
-      }),
+      query: (params) => {
+        const p = (params ?? {}) as AdminPageQuery;
+        return {
+          url: "/users",
+          method: "GET",
+          params: {
+            page: p.page ?? 0,
+            size: p.size ?? 20,
+            sort: p.sort ?? "createdAt,desc",
+          },
+        };
+      },
       transformResponse: (response: SpringPage<AdminUser>) =>
         normalizePage(response),
     }),

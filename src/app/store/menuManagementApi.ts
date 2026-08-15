@@ -947,13 +947,14 @@ export const menuManagementApi =
           ListParams | void
         >({
           async queryFn(params) {
+            const p = (params ?? {}) as ListParams;
             const query = makeQuery({
-              page: params?.page ?? 0,
-              size: params?.size ?? 100,
+              page: p.page ?? 0,
+              size: p.size ?? 100,
               sort:
-                params?.sort ??
+                p.sort ??
                 "createdAt,desc",
-              query: params?.query,
+              query: p.query,
             });
 
             const result = await browserRequest<unknown>(
@@ -1098,23 +1099,24 @@ export const menuManagementApi =
           PublicMenuItemListParams | void
         >({
           async queryFn(params) {
+            const p = (params ?? {}) as PublicMenuItemListParams;
             const query = makeQuery({
-              page: params?.page ?? 0,
-              size: params?.size ?? 100,
+              page: p.page ?? 0,
+              size: p.size ?? 100,
               sort:
-                params?.sort ??
+                p.sort ??
                 "createdAt,desc",
-              query: params?.query,
+              query: p.query,
               rootCategoryCode:
-                params?.rootCategoryCode,
+                p.rootCategoryCode,
               storeUuid:
-                params?.storeUuid,
+                p.storeUuid,
               foodUuid:
-                params?.foodUuid,
+                p.foodUuid,
               availabilityStatus:
-                params?.availabilityStatus,
+                p.availabilityStatus,
               featured:
-                params?.featured,
+                p.featured,
             });
 
             const result = await browserRequest<unknown>(

@@ -10,8 +10,9 @@ export const allergenApi = adminBaseApi.injectEndpoints({
       ListParams | void
     >({
       query: (params) => {
-        const page = params?.page ?? 0;
-        const size = params?.size ?? 20;
+        const p = (params ?? {}) as ListParams;
+        const page = p.page ?? 0;
+        const size = p.size ?? 20;
 
         return {
           url: "/allergens",

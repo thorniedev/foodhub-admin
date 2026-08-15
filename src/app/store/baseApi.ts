@@ -63,6 +63,7 @@ export const baseApi = createApi({
     "result",
     "Restaurant",
     "MenuItem",
+    "Food",
     "Allergen",
     "Cuisine",
     "FoodCategory",

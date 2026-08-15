@@ -105,15 +105,18 @@ function normalizeObjects(response: unknown): Record<string, unknown>[] {
 export const shopApi = adminBaseApi.injectEndpoints({
   endpoints: (builder) => ({
     getShops: builder.query<StorePage, GetAdminStoresParams | void>({
-      query: (params) => ({
-        url: "/stores",
-        method: "GET",
-        params: {
-          query: params?.query?.trim() || undefined,
-          page: params?.page ?? 0,
-          size: params?.size ?? 20,
-        },
-      }),
+      query: (params) => {
+        const p = (params ?? {}) as GetAdminStoresParams;
+        return {
+          url: "/stores",
+          method: "GET",
+          params: {
+            query: p.query?.trim() || undefined,
+            page: p.page ?? 0,
+            size: p.size ?? 20,
+          },
+        };
+      },
       transformResponse: normalizeStorePage,
     }),
     getShopByUuid: builder.query<Store, string>({
