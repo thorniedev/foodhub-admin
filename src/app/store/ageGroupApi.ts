@@ -104,19 +104,22 @@ export const ageGroupApi =
         AgeGroupPage,
         GetAgeGroupsParams | undefined
       >({
-        query: (params) => ({
-          url: "/age-groups",
+        query: (params) => {
+          const p = (params ?? {}) as GetAgeGroupsParams;
+          return {
+            url: "/age-groups",
 
-          method: "GET",
+            method: "GET",
 
-          params: {
-            page: params?.page ?? 0,
+            params: {
+              page: p.page ?? 0,
 
-            size: params?.size ?? 20,
+              size: p.size ?? 20,
 
-            sort: params?.sort ?? "minAge,asc",
-          },
-        }),
+              sort: p.sort ?? "minAge,asc",
+            },
+          };
+        },
 
         transformResponse: (
           response:
