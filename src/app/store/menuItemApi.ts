@@ -1404,7 +1404,6 @@ export const {
   useGetMenuItemDetailQuery,
   useLazyGetMenuItemDetailQuery,
 
-  useCreateMenuItemMutation,
   useCreateStoreMenuItemMutation,
 } = menuItemApi;
 

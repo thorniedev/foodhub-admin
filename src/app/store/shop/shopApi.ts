@@ -104,18 +104,6 @@ function normalizeObjects(response: unknown): Record<string, unknown>[] {
 
 export const shopApi = adminBaseApi.injectEndpoints({
   endpoints: (builder) => ({
-<<<<<<< HEAD
-    getShops: builder.query<StorePage, GetAdminStoresParams | undefined>({
-      query: (params) => ({
-        url: "/stores",
-        method: "GET",
-        params: {
-          query: params?.query?.trim() || undefined,
-          page: params?.page ?? 0,
-          size: params?.size ?? 20,
-        },
-      }),
-=======
     getShops: builder.query<StorePage, GetAdminStoresParams | void>({
       query: (params) => {
         const p = (params ?? {}) as GetAdminStoresParams;
@@ -129,7 +117,6 @@ export const shopApi = adminBaseApi.injectEndpoints({
           },
         };
       },
->>>>>>> origin/souheng
       transformResponse: normalizeStorePage,
     }),
     getShopByUuid: builder.query<Store, string>({
