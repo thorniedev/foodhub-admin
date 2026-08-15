@@ -32,13 +32,13 @@ export default async function LoginPage({
       <section className="w-full max-w-md rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-[#136C34]">
-            FoodHub
+            MhouBahar
           </p>
           <h1 className="mt-3 text-2xl font-bold text-gray-900">
             Admin dashboard
           </h1>
           <p className="mt-2 text-sm text-gray-500">
-            Sign in with your FoodHub administrator account.
+            Sign in with your MhouBahar administrator account.
           </p>
         </div>
 
@@ -65,7 +65,7 @@ export default async function LoginPage({
           href="/"
           className="mt-4 block text-center text-xs text-gray-400 hover:text-gray-600"
         >
-          FoodHub Admin
+          MhouBahar Admin
         </Link>
       </section>
     </main>

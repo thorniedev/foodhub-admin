@@ -14,8 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FoodHub Admin",
-  description: "FoodHub admin dashboard",
+  title: "MhouBahar Admin",
+  description: "MhouBahar admin dashboard",
+  icons: {
+    icon: "/assets/logo/mhoubahar.ico",
+  },
 };
 
 export default function RootLayout({

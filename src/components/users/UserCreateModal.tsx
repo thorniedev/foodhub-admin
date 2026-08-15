@@ -96,7 +96,7 @@ export default function UserCreateModal({
             </p>
 
             <p className="mt-2 text-base text-gray-500">
-              បង្កើត regular FoodHub user និង Keycloak account។
+              បង្កើត regular MhouBahar user និង Keycloak account។
             </p>
           </div>
 

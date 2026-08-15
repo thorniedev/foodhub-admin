@@ -398,7 +398,7 @@ export default function Sidebar() {
           <div className="flex h-20 shrink-0 items-center justify-between px-6">
             <Image
               src="/Image/logo.png"
-              alt="FoodHub"
+              alt="MhouBahar"
               width={90}
               height={90}
               priority

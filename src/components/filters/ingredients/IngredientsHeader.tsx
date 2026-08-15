@@ -36,7 +36,7 @@ export default function IngredientsHeader({
               </h1>
 
               <p className="mt-2 text-lg text-white/85">
-                គ្រប់គ្រងគ្រឿងផ្សំដែលប្រើសម្រាប់ម្ហូប និងការត្រងក្នុង FoodHub។
+                គ្រប់គ្រងគ្រឿងផ្សំដែលប្រើសម្រាប់ម្ហូប និងការត្រងក្នុង MhouBahar។
               </p>
             </div>
           </div>
