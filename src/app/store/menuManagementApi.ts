@@ -302,7 +302,7 @@
 //       getManagedFoods:
 //         builder.query<
 //           ApiPage<FoodRecord>,
-//           ListParams | void
+//           ListParams | undefined
 //         >({
 //           async queryFn(params) {
 //             const query = makeQuery({
@@ -453,7 +453,7 @@
 //       getPublishedMenuItems:
 //         builder.query<
 //           ApiPage<MenuItemRecord>,
-//           PublicMenuItemListParams | void
+//           PublicMenuItemListParams | undefined
 //         >({
 //           async queryFn(params) {
 //             const query = makeQuery({
@@ -944,7 +944,7 @@ export const menuManagementApi =
       getManagedFoods:
         builder.query<
           ApiPage<FoodRecord>,
-          ListParams | void
+          ListParams | undefined
         >({
           async queryFn(params) {
             const query = makeQuery({
@@ -1095,7 +1095,7 @@ export const menuManagementApi =
       getPublishedMenuItems:
         builder.query<
           ApiPage<MenuItemRecord>,
-          PublicMenuItemListParams | void
+          PublicMenuItemListParams | undefined
         >({
           async queryFn(params) {
             const query = makeQuery({

@@ -102,7 +102,7 @@ export const ageGroupApi =
 
       getAgeGroups: builder.query<
         AgeGroupPage,
-        GetAgeGroupsParams | void
+        GetAgeGroupsParams | undefined
       >({
         query: (params) => ({
           url: "/age-groups",

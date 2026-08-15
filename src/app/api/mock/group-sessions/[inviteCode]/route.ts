@@ -5,7 +5,7 @@ import {
   getMockGroupSession,
   joinMockGroupSession,
   submitMockGroupVote,
-} from "@/lib/mock-group-session-store";
+} from "@/src/lib/mock-group-session-store";
 
 export const dynamic = "force-dynamic";
 

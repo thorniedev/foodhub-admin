@@ -72,7 +72,7 @@ function readMessage(value: unknown): string | null {
   return null;
 }
 
-export function getMenuManagementApiError(
+export function getMenuItemApiErrorMessage(
   error: unknown,
 ): string {
   if (!error) {
