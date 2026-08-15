@@ -19,10 +19,13 @@ import {
   useDeleteManagedFoodMutation,
   useDeleteStoreMenuItemMutation,
   useGetManagedCuisinesQuery,
+  useGetManagedEventsQuery,
   useGetManagedFoodCategoriesQuery,
   useGetManagedFoodsQuery,
   useGetManagedIngredientsQuery,
+  useGetManagedSeasonsQuery,
   useGetManagedStoresQuery,
+  useGetManagedWeatherConditionsQuery,
   useGetPublishedMenuItemsQuery,
   useUpdateManagedFoodMutation,
   useUpdateStoreMenuItemMutation,
@@ -123,6 +126,9 @@ export default function MenuItemsManager() {
   const cuisinesQuery = useGetManagedCuisinesQuery();
   const ingredientsQuery = useGetManagedIngredientsQuery();
   const storesQuery = useGetManagedStoresQuery();
+  const seasonsQuery = useGetManagedSeasonsQuery();
+  const eventsQuery = useGetManagedEventsQuery();
+  const weatherQuery = useGetManagedWeatherConditionsQuery();
 
   const [createFood, { isLoading: creatingFood }] =
     useCreateManagedFoodMutation();
@@ -475,6 +481,9 @@ export default function MenuItemsManager() {
         item={editingFood}
         categories={categoriesQuery.data ?? []}
         cuisines={cuisinesQuery.data ?? []}
+        seasons={seasonsQuery.data ?? []}
+        events={eventsQuery.data ?? []}
+        weatherConditions={weatherQuery.data ?? []}
         saving={creatingFood || updatingFood}
         onClose={() => {
           if (creatingFood || updatingFood) return;

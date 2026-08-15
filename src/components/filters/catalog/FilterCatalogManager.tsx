@@ -21,11 +21,11 @@ import {
 import { getFilterGroupBySlug } from "@/src/config/filterCatalog";
 
 import { useCuisineCatalog } from "@/src/hooks/useCuisineCatalog";
-
 import { useFoodCategoryCatalog } from "@/src/hooks/useFoodCategoryCatalog";
-
 import { useMealTypeCatalog } from "@/src/hooks/useMealTypeCatalog";
-
+import { useSeasonCatalog } from "@/src/hooks/useSeasonCatalog";
+import { useEventCatalog } from "@/src/hooks/useEventCatalog";
+import { useWeatherConditionCatalog } from "@/src/hooks/useWeatherConditionCatalog";
 import { useFilterCatalog } from "@/src/hooks/useFilterCatalog";
 
 import type {
@@ -77,7 +77,10 @@ export default function FilterCatalogManager({
     group.source !== "LOCAL" &&
     group.source !== "CUISINE_API" &&
     group.source !== "FOOD_CATEGORY_API" &&
-    group.source !== "MEAL_TYPE_API"
+    group.source !== "MEAL_TYPE_API" &&
+    group.source !== "SEASON_API" &&
+    group.source !== "EVENT_API" &&
+    group.source !== "WEATHER_CONDITION_API"
   ) {
     return (
       <div className="w-full min-w-0 max-w-full p-4 sm:p-6">
@@ -108,12 +111,12 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
   const group = getFilterGroupBySlug(groupSlug)!;
 
   const localCatalog = useFilterCatalog(group.code);
-
   const cuisineCatalog = useCuisineCatalog();
-
   const foodCategoryCatalog = useFoodCategoryCatalog();
-
   const mealTypeCatalog = useMealTypeCatalog();
+  const seasonCatalog = useSeasonCatalog();
+  const eventCatalog = useEventCatalog();
+  const weatherConditionCatalog = useWeatherConditionCatalog();
 
   const { groupOptions, createOption, updateOption, setActive } =
     group.source === "CUISINE_API"
@@ -122,7 +125,13 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         ? foodCategoryCatalog
         : group.source === "MEAL_TYPE_API"
           ? mealTypeCatalog
-          : localCatalog;
+          : group.source === "SEASON_API"
+            ? seasonCatalog
+            : group.source === "EVENT_API"
+              ? eventCatalog
+              : group.source === "WEATHER_CONDITION_API"
+                ? weatherConditionCatalog
+                : localCatalog;
 
   const [search, setSearch] = useState("");
 

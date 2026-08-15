@@ -1,15 +1,21 @@
 "use client";
 
-import { Loader2, Save, X } from "lucide-react";
+import { Loader2, Plus, Save, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import ImagePicker from "./ImagePicker";
 
 import type {
   CuisineOption,
+  EventOption,
   FoodCategoryOption,
+  FoodEventRelation,
   FoodRecord,
+  FoodSeasonRelation,
+  FoodWeatherRelation,
   FoodWritePayload,
+  SeasonOption,
+  WeatherConditionOption,
 } from "@/src/types/menu-management";
 
 type FormState = {
@@ -52,6 +58,9 @@ export default function FoodFormModal({
   item,
   categories,
   cuisines,
+  seasons = [],
+  events = [],
+  weatherConditions = [],
   saving,
   onClose,
   onSubmit,
@@ -60,6 +69,9 @@ export default function FoodFormModal({
   item: FoodRecord | null;
   categories: FoodCategoryOption[];
   cuisines: CuisineOption[];
+  seasons?: SeasonOption[];
+  events?: EventOption[];
+  weatherConditions?: WeatherConditionOption[];
   saving: boolean;
   onClose: () => void;
   onSubmit: (
@@ -71,12 +83,20 @@ export default function FoodFormModal({
   const [images, setImages] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  // Metadata relations state
+  const [seasonRows, setSeasonRows] = useState<FoodSeasonRelation[]>([]);
+  const [eventRows, setEventRows] = useState<FoodEventRelation[]>([]);
+  const [weatherRows, setWeatherRows] = useState<FoodWeatherRelation[]>([]);
+
   useEffect(() => {
     if (!open) return;
 
     if (!item) {
       setValues(EMPTY);
       setImages([]);
+      setSeasonRows([]);
+      setEventRows([]);
+      setWeatherRows([]);
       setError(null);
       return;
     }
@@ -115,6 +135,34 @@ export default function FoodFormModal({
       isActive: item.isActive !== false,
     });
 
+    // Populate metadata relations if editing
+    const rawSeasons = Array.isArray(item.seasons) ? item.seasons : [];
+    setSeasonRows(
+      rawSeasons.map((s: any) => ({
+        seasonUuid: s.seasonUuid ?? s.uuid ?? s.season?.uuid ?? "",
+        suitabilityScore: s.suitabilityScore != null ? Number(s.suitabilityScore) : 1.0,
+        reasonText: s.reasonText ?? "",
+      })).filter((s) => Boolean(s.seasonUuid)),
+    );
+
+    const rawEvents = Array.isArray(item.events) ? item.events : [];
+    setEventRows(
+      rawEvents.map((e: any) => ({
+        eventUuid: e.eventUuid ?? e.uuid ?? e.event?.uuid ?? "",
+        relevanceScore: e.relevanceScore != null ? Number(e.relevanceScore) : 0.9,
+        reasonText: e.reasonText ?? "",
+      })).filter((e) => Boolean(e.eventUuid)),
+    );
+
+    const rawWeather = Array.isArray(item.suitableWeather) ? item.suitableWeather : [];
+    setWeatherRows(
+      rawWeather.map((w: any) => ({
+        weatherConditionUuid: w.weatherConditionUuid ?? w.uuid ?? w.weatherCondition?.uuid ?? "",
+        suitabilityScore: w.suitabilityScore != null ? Number(w.suitabilityScore) : 0.95,
+        reasonText: w.reasonText ?? "",
+      })).filter((w) => Boolean(w.weatherConditionUuid)),
+    );
+
     setImages([]);
     setError(null);
   }, [item, open]);
@@ -127,8 +175,6 @@ export default function FoodFormModal({
     );
 
     if (!foodRoot) {
-      // Do not offer root categories as Food's category.
-      // The current backend flow requires Food to use a sub-category.
       return categories.filter(
         (category) =>
           category.isActive !== false &&
@@ -175,9 +221,27 @@ export default function FoodFormModal({
         mealTypes: item?.mealTypes ?? [],
         ageRules: item?.ageRules ?? [],
         dietaryTypes: item?.dietaryTypes ?? [],
-        seasons: item?.seasons ?? [],
-        events: item?.events ?? [],
-        suitableWeather: item?.suitableWeather ?? [],
+        seasons: seasonRows
+          .filter((r) => Boolean(r.seasonUuid))
+          .map((r) => ({
+            seasonUuid: r.seasonUuid,
+            suitabilityScore: r.suitabilityScore ?? 1.0,
+            reasonText: r.reasonText?.trim() || null,
+          })),
+        events: eventRows
+          .filter((r) => Boolean(r.eventUuid))
+          .map((r) => ({
+            eventUuid: r.eventUuid,
+            relevanceScore: r.relevanceScore ?? 0.9,
+            reasonText: r.reasonText?.trim() || null,
+          })),
+        suitableWeather: weatherRows
+          .filter((r) => Boolean(r.weatherConditionUuid))
+          .map((r) => ({
+            weatherConditionUuid: r.weatherConditionUuid,
+            suitabilityScore: r.suitabilityScore ?? 0.95,
+            reasonText: r.reasonText?.trim() || null,
+          })),
         isActive: values.isActive,
       };
 
@@ -327,7 +391,7 @@ export default function FoodFormModal({
             <label className="md:col-span-2">
               <Label>Description</Label>
               <textarea
-                rows={4}
+                rows={3}
                 value={values.description}
                 onChange={(event) =>
                   setValues((current) => ({
@@ -348,9 +412,9 @@ export default function FoodFormModal({
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 ["calories", "Calories"],
-                ["protein", "Protein"],
-                ["carbohydrate", "Carbohydrate"],
-                ["fat", "Fat"],
+                ["protein", "Protein (g)"],
+                ["carbohydrate", "Carbohydrate (g)"],
+                ["fat", "Fat (g)"],
               ].map(([key, label]) => (
                 <Field
                   key={key}
@@ -376,6 +440,270 @@ export default function FoodFormModal({
                 />
               ))}
             </div>
+          </div>
+
+          {/* Seasons Metadata Section */}
+          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-black text-gray-900">រដូវកាល (Seasons)</h3>
+                <p className="text-xs text-gray-400">កំណត់រដូវកាលដែលសាកសមសម្រាប់ម្ហូបនេះ</p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setSeasonRows((current) => [
+                    ...current,
+                    { seasonUuid: "", suitabilityScore: 1.0, reasonText: "" },
+                  ])
+                }
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
+              >
+                <Plus size={14} />
+                បន្ថែមរដូវកាល
+              </button>
+            </div>
+
+            {seasonRows.length === 0 ? (
+              <p className="mt-3 text-xs italic text-gray-400">មិនទាន់បានជ្រើសរដូវកាល</p>
+            ) : (
+              <div className="mt-3 space-y-2.5">
+                {seasonRows.map((row, idx) => (
+                  <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm border border-gray-100">
+                    <select
+                      value={row.seasonUuid}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSeasonRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, seasonUuid: val } : r)),
+                        );
+                      }}
+                      className="h-10 flex-1 min-w-[160px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    >
+                      <option value="">ជ្រើសរដូវកាល...</option>
+                      {seasons.map((s) => (
+                        <option key={s.uuid} value={s.uuid}>
+                          {s.name} {s.localName ? `(${s.localName})` : ""}
+                        </option>
+                      ))}
+                    </select>
+
+                    <input
+                      type="number"
+                      step="0.05"
+                      min="0"
+                      max="1"
+                      placeholder="Score (0-1)"
+                      value={row.suitabilityScore ?? 1.0}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setSeasonRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
+                        );
+                      }}
+                      className="h-10 w-24 rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="ហេតុផល (Reason)..."
+                      value={row.reasonText ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSeasonRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
+                        );
+                      }}
+                      className="h-10 flex-1 min-w-[180px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setSeasonRows((prev) => prev.filter((_, i) => i !== idx))}
+                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Events Metadata Section */}
+          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-black text-gray-900">ព្រឹត្តិការណ៍ / បុណ្យទាន (Events)</h3>
+                <p className="text-xs text-gray-400">កំណត់ពិធីបុណ្យ ឬព្រឹត្តិការណ៍ដែលពាក់ព័ន្ធ</p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setEventRows((current) => [
+                    ...current,
+                    { eventUuid: "", relevanceScore: 0.9, reasonText: "" },
+                  ])
+                }
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
+              >
+                <Plus size={14} />
+                បន្ថែមព្រឹត្តិការណ៍
+              </button>
+            </div>
+
+            {eventRows.length === 0 ? (
+              <p className="mt-3 text-xs italic text-gray-400">មិនទាន់បានជ្រើសព្រឹត្តិការណ៍</p>
+            ) : (
+              <div className="mt-3 space-y-2.5">
+                {eventRows.map((row, idx) => (
+                  <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm border border-gray-100">
+                    <select
+                      value={row.eventUuid}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setEventRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, eventUuid: val } : r)),
+                        );
+                      }}
+                      className="h-10 flex-1 min-w-[160px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    >
+                      <option value="">ជ្រើសព្រឹត្តិការណ៍...</option>
+                      {events.map((ev) => (
+                        <option key={ev.uuid} value={ev.uuid}>
+                          {ev.name} {ev.localName ? `(${ev.localName})` : ""}
+                        </option>
+                      ))}
+                    </select>
+
+                    <input
+                      type="number"
+                      step="0.05"
+                      min="0"
+                      max="1"
+                      placeholder="Score (0-1)"
+                      value={row.relevanceScore ?? 0.9}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setEventRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, relevanceScore: val } : r)),
+                        );
+                      }}
+                      className="h-10 w-24 rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="ហេតុផល (Reason)..."
+                      value={row.reasonText ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setEventRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
+                        );
+                      }}
+                      className="h-10 flex-1 min-w-[180px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setEventRows((prev) => prev.filter((_, i) => i !== idx))}
+                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Weather Conditions Metadata Section */}
+          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-black text-gray-900">ស្ថានភាពអាកាសធាតុ (Weather Conditions)</h3>
+                <p className="text-xs text-gray-400">កំណត់អាកាសធាតុដែលសាកសមសម្រាប់ម្ហូបនេះ</p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setWeatherRows((current) => [
+                    ...current,
+                    { weatherConditionUuid: "", suitabilityScore: 0.95, reasonText: "" },
+                  ])
+                }
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
+              >
+                <Plus size={14} />
+                បន្ថែមអាកាសធាតុ
+              </button>
+            </div>
+
+            {weatherRows.length === 0 ? (
+              <p className="mt-3 text-xs italic text-gray-400">មិនទាន់បានជ្រើសអាកាសធាតុ</p>
+            ) : (
+              <div className="mt-3 space-y-2.5">
+                {weatherRows.map((row, idx) => (
+                  <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm border border-gray-100">
+                    <select
+                      value={row.weatherConditionUuid}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setWeatherRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, weatherConditionUuid: val } : r)),
+                        );
+                      }}
+                      className="h-10 flex-1 min-w-[160px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    >
+                      <option value="">ជ្រើសអាកាសធាតុ...</option>
+                      {weatherConditions.map((w) => (
+                        <option key={w.uuid} value={w.uuid}>
+                          {w.name} {w.localName ? `(${w.localName})` : ""}
+                        </option>
+                      ))}
+                    </select>
+
+                    <input
+                      type="number"
+                      step="0.05"
+                      min="0"
+                      max="1"
+                      placeholder="Score (0-1)"
+                      value={row.suitabilityScore ?? 0.95}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setWeatherRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
+                        );
+                      }}
+                      className="h-10 w-24 rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="ហេតុផល (Reason)..."
+                      value={row.reasonText ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setWeatherRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
+                        );
+                      }}
+                      className="h-10 flex-1 min-w-[180px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setWeatherRows((prev) => prev.filter((_, i) => i !== idx))}
+                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <ImagePicker

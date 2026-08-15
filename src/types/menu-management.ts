@@ -531,6 +531,51 @@ export interface IngredientOption {
   isActive?: boolean;
 }
 
+export interface SeasonOption {
+  uuid: string;
+  code: string;
+  name: string;
+  localName?: string | null;
+  description?: string | null;
+  isActive?: boolean;
+}
+
+export interface EventOption {
+  uuid: string;
+  code: string;
+  name: string;
+  localName?: string | null;
+  description?: string | null;
+  isActive?: boolean;
+}
+
+export interface WeatherConditionOption {
+  uuid: string;
+  code: string;
+  name: string;
+  localName?: string | null;
+  description?: string | null;
+  isActive?: boolean;
+}
+
+export interface FoodSeasonRelation {
+  seasonUuid: string;
+  suitabilityScore?: number;
+  reasonText?: string | null;
+}
+
+export interface FoodEventRelation {
+  eventUuid: string;
+  relevanceScore?: number;
+  reasonText?: string | null;
+}
+
+export interface FoodWeatherRelation {
+  weatherConditionUuid: string;
+  suitabilityScore?: number;
+  reasonText?: string | null;
+}
+
 export interface StoreOption {
   id?: number;
   uuid: string;
@@ -614,6 +659,40 @@ export interface MenuItemIngredientRecord {
   notes?: string | null;
 }
 
+export interface MenuItemDietaryTypePayload {
+  dietaryTypeUuid: string;
+  verificationStatus?: "VERIFIED" | "UNVERIFIED" | string;
+  notes?: string | null;
+}
+
+export interface MenuItemDietaryTypeRecord {
+  uuid?: string;
+  dietaryTypeUuid?: string;
+  code?: string;
+  name?: string;
+  verificationStatus?: "VERIFIED" | "UNVERIFIED" | string;
+  notes?: string | null;
+}
+
+export interface MenuItemAllergenDeclarationPayload {
+  allergenUuid: string;
+  declarationType?: "CONTAINS" | "MAY_CONTAIN" | string;
+  riskLevel?: "LOW" | "MEDIUM" | "HIGH" | string;
+  verificationStatus?: "VERIFIED" | "UNVERIFIED" | string;
+  notes?: string | null;
+}
+
+export interface MenuItemAllergenDeclarationRecord {
+  uuid?: string;
+  allergenUuid?: string;
+  code?: string;
+  name?: string;
+  declarationType?: "CONTAINS" | "MAY_CONTAIN" | string;
+  riskLevel?: "LOW" | "MEDIUM" | "HIGH" | string;
+  verificationStatus?: "VERIFIED" | "UNVERIFIED" | string;
+  notes?: string | null;
+}
+
 export interface MenuItemRecord {
   id?: number;
   uuid: string;
@@ -670,9 +749,9 @@ export interface FoodWritePayload {
   mealTypes: unknown[];
   ageRules: unknown[];
   dietaryTypes?: unknown[];
-  seasons?: unknown[];
-  events?: unknown[];
-  suitableWeather?: unknown[];
+  seasons?: FoodSeasonRelation[] | unknown[];
+  events?: FoodEventRelation[] | unknown[];
+  suitableWeather?: FoodWeatherRelation[] | unknown[];
   isActive: boolean;
 }
 
