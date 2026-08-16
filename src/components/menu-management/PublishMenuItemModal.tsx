@@ -117,6 +117,7 @@ export default function PublishMenuItemModal({
   const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>([]);
   const [dietaryTypeRows, setDietaryTypeRows] = useState<DietaryTypeRow[]>([]);
   const [allergenRows, setAllergenRows] = useState<AllergenRow[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -129,19 +130,50 @@ export default function PublishMenuItemModal({
       setDietaryTypeRows([]);
       setAllergenRows([]);
       setImages([]);
+      setExistingImages([]);
       setError(null);
       return;
     }
 
+    const list = item.images?.length
+      ? item.images
+      : item.gallery?.length
+      ? item.gallery
+      : item.primaryMediaUrls?.length
+      ? item.primaryMediaUrls
+      : [item.thumbnail || item.imageUrl].filter(Boolean);
+    setExistingImages(list as string[]);
+
+    const matchedStoreUuid =
+      item.storeUuid ||
+      item.store?.uuid ||
+      stores.find(
+        (s) =>
+          (item.store?.name &&
+            (s.name === item.store.name ||
+              s.storeName === item.store.name ||
+              s.localName === item.store.name)) ||
+          (item.store?.storeName &&
+            (s.name === item.store.storeName ||
+              s.storeName === item.store.storeName)),
+      )?.uuid ||
+      "";
+
+    const matchedFoodUuid =
+      item.foodUuid ||
+      item.food?.uuid ||
+      foods.find(
+        (f) =>
+          (item.food?.canonicalName &&
+            f.canonicalName?.toLowerCase() ===
+              item.food.canonicalName?.toLowerCase()) ||
+          (item.food?.localName && f.localName === item.food.localName),
+      )?.uuid ||
+      "";
+
     setValues({
-      storeUuid:
-        item.storeUuid ||
-        item.store?.uuid ||
-        "",
-      foodUuid:
-        item.foodUuid ||
-        item.food?.uuid ||
-        "",
+      storeUuid: matchedStoreUuid,
+      foodUuid: matchedFoodUuid,
       name: item.name || "",
       description: item.description || "",
       price:
@@ -162,60 +194,79 @@ export default function PublishMenuItemModal({
     });
 
     setIngredientRows(
-      (item.ingredients ?? []).map((ingredient) => ({
-        ingredientUuid:
-          ingredient.ingredientUuid ||
-          ingredient.uuid ||
-          "",
-        quantity:
-          ingredient.quantity != null
-            ? String(ingredient.quantity)
-            : "",
-        unit: ingredient.unit || "",
-        isOptional: Boolean(ingredient.isOptional),
-        notes: ingredient.notes || "",
-      })),
+      (item.ingredients ?? []).map((raw: any) => {
+        if (typeof raw === "string") {
+          const found = ingredients.find(
+            (i) => i.name === raw || i.code === raw || i.uuid === raw,
+          );
+          return {
+            ingredientUuid: found?.uuid || raw,
+            quantity: "",
+            unit: "",
+            isOptional: false,
+            notes: "",
+          };
+        }
+        const found = ingredients.find(
+          (i) =>
+            i.uuid === raw.ingredientUuid ||
+            i.uuid === raw.uuid ||
+            (raw.name && i.name === raw.name) ||
+            (raw.code && i.code === raw.code),
+        );
+        return {
+          ingredientUuid:
+            found?.uuid || raw.ingredientUuid || raw.uuid || "",
+          quantity:
+            raw.quantity != null ? String(raw.quantity) : "",
+          unit: raw.unit || "",
+          isOptional: Boolean(raw.isOptional),
+          notes: raw.notes || "",
+        };
+      }),
     );
 
     setDietaryTypeRows(
-      (item.dietaryTypes ?? []).map((dt: unknown) => {
-        const d = dt as {
-          dietaryTypeUuid?: string;
-          uuid?: string;
-          verificationStatus?: string;
-          notes?: string | null;
-        };
+      (item.dietaryTypes ?? item.food?.dietaryTypes ?? []).map((raw: any) => {
+        const found = dietaryTypes.find(
+          (d) =>
+            d.uuid === raw.dietaryTypeUuid ||
+            d.uuid === raw.uuid ||
+            (raw.code && d.code === raw.code) ||
+            (raw.name && d.name === raw.name),
+        );
         return {
-          dietaryTypeUuid: d.dietaryTypeUuid || d.uuid || "",
-          verificationStatus: d.verificationStatus || "UNVERIFIED",
-          notes: d.notes || "",
+          dietaryTypeUuid:
+            found?.uuid || raw.dietaryTypeUuid || raw.uuid || "",
+          verificationStatus: raw.verificationStatus || "UNVERIFIED",
+          notes: raw.notes || "",
         };
-      }),
+      }).filter((d) => Boolean(d.dietaryTypeUuid)),
     );
 
     setAllergenRows(
-      (item.allergenDeclarations ?? []).map((al: unknown) => {
-        const a = al as {
-          allergenUuid?: string;
-          uuid?: string;
-          declarationType?: string;
-          riskLevel?: string;
-          verificationStatus?: string;
-          notes?: string | null;
-        };
+      (item.allergenDeclarations ?? []).map((raw: any) => {
+        const found = allergens.find(
+          (a) =>
+            a.uuid === raw.allergenUuid ||
+            a.uuid === raw.uuid ||
+            (raw.code && a.code === raw.code) ||
+            (raw.name && a.name === raw.name),
+        );
         return {
-          allergenUuid: a.allergenUuid || a.uuid || "",
-          declarationType: a.declarationType || "MAY_CONTAIN",
-          riskLevel: a.riskLevel || "MEDIUM",
-          verificationStatus: a.verificationStatus || "UNVERIFIED",
-          notes: a.notes || "",
+          allergenUuid:
+            found?.uuid || raw.allergenUuid || raw.uuid || "",
+          declarationType: raw.declarationType || "MAY_CONTAIN",
+          riskLevel: raw.riskLevel || "MEDIUM",
+          verificationStatus: raw.verificationStatus || "UNVERIFIED",
+          notes: raw.notes || "",
         };
-      }),
+      }).filter((a) => Boolean(a.allergenUuid)),
     );
 
     setImages([]);
     setError(null);
-  }, [item, open]);
+  }, [item, open, stores, foods, ingredients, dietaryTypes, allergens]);
 
   const activeFoods = useMemo(
     () => foods.filter((food) => food.isActive !== false),
@@ -929,9 +980,11 @@ export default function PublishMenuItemModal({
           <ImagePicker
             value={images}
             onChange={setImages}
+            existingImages={existingImages}
+            onExistingChange={setExistingImages}
             label={
               item
-                ? "រូបភាពថ្មី (ទុកទទេ = រក្សារូបចាស់ | រូបទី ១: Thumbnail, រូបបន្ទាប់: Gallery)"
+                ? "រូបភាព (ទុកទទេ = រក្សារូបចាស់ | រូបទី ១: Thumbnail, រូបបន្ទាប់: Gallery)"
                 : "រូបភាព Menu Item (អតិបរមា 4 | រូបទី ១: Thumbnail, រូបបន្ទាប់: Gallery)"
             }
           />

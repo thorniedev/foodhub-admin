@@ -105,6 +105,7 @@ export default function FoodFormModal({
   const [mealTypeRows, setMealTypeRows] = useState<FoodMealTypeRelation[]>([]);
   const [ageRuleRows, setAgeRuleRows] = useState<FoodAgeRuleRelation[]>([]);
   const [dietaryTypeRows, setDietaryTypeRows] = useState<FoodDietaryTypeRelation[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
 
   useEffect(() => {
     if (!open) return;
@@ -112,6 +113,7 @@ export default function FoodFormModal({
     if (!item) {
       setValues(EMPTY);
       setImages([]);
+      setExistingImages([]);
       setSeasonRows([]);
       setEventRows([]);
       setWeatherRows([]);
@@ -122,21 +124,44 @@ export default function FoodFormModal({
       return;
     }
 
+    const list = item.images?.length
+      ? item.images
+      : item.gallery?.length
+      ? item.gallery
+      : item.primaryMediaUrls?.length
+      ? item.primaryMediaUrls
+      : [item.thumbnail || item.imageUrl].filter(Boolean);
+    setExistingImages(list as string[]);
+
+    const matchedCategoryUuid =
+      item.categoryUuid ??
+      item.category?.uuid ??
+      categories.find(
+        (c) =>
+          (item.category?.code && c.code === item.category.code) ||
+          (item.category?.name && c.name === item.category.name) ||
+          (item.categoryName && c.name === item.categoryName),
+      )?.uuid ??
+      "";
+
+    const matchedCuisineUuid =
+      item.cuisineUuid ??
+      item.cuisine?.uuid ??
+      cuisines.find(
+        (c) =>
+          (item.cuisine?.code && c.code === item.cuisine.code) ||
+          (item.cuisine?.name && c.name === item.cuisine.name) ||
+          (item.cuisineName && c.name === item.cuisineName),
+      )?.uuid ??
+      "";
+
     setValues({
       canonicalName: item.canonicalName ?? "",
       localName: item.localName ?? "",
       description: item.description ?? "",
-      categoryUuid:
-        item.categoryUuid ??
-        item.category?.uuid ??
-        "",
-      cuisineUuid:
-        item.cuisineUuid ??
-        item.cuisine?.uuid ??
-        "",
-      defaultSpiceLevel: String(
-        item.defaultSpiceLevel ?? 0,
-      ),
+      categoryUuid: matchedCategoryUuid,
+      cuisineUuid: matchedCuisineUuid,
+      defaultSpiceLevel: String(item.defaultSpiceLevel ?? 0),
       calories:
         item.nutritionData?.calories != null
           ? String(item.nutritionData.calories)
@@ -165,59 +190,158 @@ export default function FoodFormModal({
     // Populate metadata relations if editing
     const rawSeasons = Array.isArray(item.seasons) ? item.seasons : [];
     setSeasonRows(
-      rawSeasons.map((s: any) => ({
-        seasonUuid: s.seasonUuid ?? s.uuid ?? s.season?.uuid ?? "",
-        suitabilityScore: s.suitabilityScore != null ? Number(s.suitabilityScore) : 0.95,
-        reasonText: s.reasonText ?? "",
-      })).filter((s) => Boolean(s.seasonUuid)),
+      rawSeasons
+        .map((s: any) => {
+          const found = seasons.find(
+            (opt) =>
+              opt.uuid === s.seasonUuid ||
+              opt.uuid === s.uuid ||
+              opt.uuid === s.season?.uuid ||
+              (s.code && opt.code === s.code) ||
+              (s.name && opt.name === s.name),
+          );
+          return {
+            seasonUuid:
+              found?.uuid || s.seasonUuid || s.uuid || s.season?.uuid || "",
+            suitabilityScore:
+              s.suitabilityScore != null ? Number(s.suitabilityScore) : 0.95,
+            reasonText: s.reasonText ?? "",
+          };
+        })
+        .filter((s) => Boolean(s.seasonUuid)),
     );
 
     const rawEvents = Array.isArray(item.events) ? item.events : [];
     setEventRows(
-      rawEvents.map((e: any) => ({
-        eventUuid: e.eventUuid ?? e.uuid ?? e.event?.uuid ?? "",
-        relevanceScore: e.relevanceScore != null ? Number(e.relevanceScore) : 0.9,
-        reasonText: e.reasonText ?? "",
-      })).filter((e) => Boolean(e.eventUuid)),
+      rawEvents
+        .map((e: any) => {
+          const found = events.find(
+            (opt) =>
+              opt.uuid === e.eventUuid ||
+              opt.uuid === e.uuid ||
+              opt.uuid === e.event?.uuid ||
+              (e.code && opt.code === e.code) ||
+              (e.name && opt.name === e.name),
+          );
+          return {
+            eventUuid:
+              found?.uuid || e.eventUuid || e.uuid || e.event?.uuid || "",
+            relevanceScore:
+              e.relevanceScore != null ? Number(e.relevanceScore) : 0.9,
+            reasonText: e.reasonText ?? "",
+          };
+        })
+        .filter((e) => Boolean(e.eventUuid)),
     );
 
-    const rawWeather = Array.isArray(item.suitableWeather) ? item.suitableWeather : [];
+    const rawWeather = Array.isArray(item.suitableWeather)
+      ? item.suitableWeather
+      : [];
     setWeatherRows(
-      rawWeather.map((w: any) => ({
-        weatherConditionUuid: w.weatherConditionUuid ?? w.uuid ?? w.weatherCondition?.uuid ?? "",
-        suitabilityScore: w.suitabilityScore != null ? Number(w.suitabilityScore) : 0.95,
-        reasonText: w.reasonText ?? "",
-      })).filter((w) => Boolean(w.weatherConditionUuid)),
+      rawWeather
+        .map((w: any) => {
+          const found = weatherConditions.find(
+            (opt) =>
+              opt.uuid === w.weatherConditionUuid ||
+              opt.uuid === w.uuid ||
+              opt.uuid === w.weatherCondition?.uuid ||
+              (w.code && opt.code === w.code) ||
+              (w.name && opt.name === w.name),
+          );
+          return {
+            weatherConditionUuid:
+              found?.uuid ||
+              w.weatherConditionUuid ||
+              w.uuid ||
+              w.weatherCondition?.uuid ||
+              "",
+            suitabilityScore:
+              w.suitabilityScore != null ? Number(w.suitabilityScore) : 0.95,
+            reasonText: w.reasonText ?? "",
+          };
+        })
+        .filter((w) => Boolean(w.weatherConditionUuid)),
     );
 
     const rawMealTypes = Array.isArray(item.mealTypes) ? item.mealTypes : [];
     setMealTypeRows(
-      rawMealTypes.map((m: any) => ({
-        mealTypeUuid: m.mealTypeUuid ?? m.uuid ?? m.mealType?.uuid ?? "",
-        suitabilityScore: m.suitabilityScore != null ? Number(m.suitabilityScore) : 1.0,
-      })).filter((m) => Boolean(m.mealTypeUuid)),
+      rawMealTypes
+        .map((m: any) => {
+          const found = mealTypes.find(
+            (opt) =>
+              opt.uuid === m.mealTypeUuid ||
+              opt.uuid === m.uuid ||
+              opt.uuid === m.mealType?.uuid ||
+              (m.code && opt.code === m.code) ||
+              (m.name && opt.name === m.name),
+          );
+          return {
+            mealTypeUuid:
+              found?.uuid || m.mealTypeUuid || m.uuid || m.mealType?.uuid || "",
+            suitabilityScore:
+              m.suitabilityScore != null ? Number(m.suitabilityScore) : 1.0,
+          };
+        })
+        .filter((m) => Boolean(m.mealTypeUuid)),
     );
 
     const rawAgeRules = Array.isArray(item.ageRules) ? item.ageRules : [];
     setAgeRuleRows(
-      rawAgeRules.map((a: any) => ({
-        ageGroupUuid: a.ageGroupUuid ?? a.uuid ?? a.ageGroup?.uuid ?? "",
-        ruleResult: a.ruleResult || "ALLOWED",
-        reasonText: a.reasonText ?? "Suitable as a normal serving.",
-      })).filter((a) => Boolean(a.ageGroupUuid)),
+      rawAgeRules
+        .map((a: any) => {
+          const found = ageGroups.find(
+            (opt) =>
+              opt.uuid === a.ageGroupUuid ||
+              opt.uuid === a.uuid ||
+              opt.uuid === a.ageGroup?.uuid ||
+              (a.code && opt.code === a.code) ||
+              (a.name && opt.name === a.name),
+          );
+          return {
+            ageGroupUuid:
+              found?.uuid || a.ageGroupUuid || a.uuid || a.ageGroup?.uuid || "",
+            ruleResult: a.ruleResult || "ALLOWED",
+            reasonText: a.reasonText ?? "Suitable as a normal serving.",
+          };
+        })
+        .filter((a) => Boolean(a.ageGroupUuid)),
     );
 
-    const rawDietary = Array.isArray(item.dietaryTypes) ? item.dietaryTypes : [];
+    const rawDietary = Array.isArray(item.dietaryTypes)
+      ? item.dietaryTypes
+      : [];
     setDietaryTypeRows(
-      rawDietary.map((d: any) => ({
-        code: d.code ?? "",
-        name: d.name ?? d.code ?? "",
-      })).filter((d) => Boolean(d.code)),
+      rawDietary
+        .map((d: any) => {
+          const code = d.code ?? d.dietaryTypeCode ?? "";
+          const found = dietaryTypes.find(
+            (opt) =>
+              opt.code === code ||
+              opt.uuid === d.uuid ||
+              opt.uuid === d.dietaryTypeUuid,
+          );
+          return {
+            code: found?.code || code,
+            name: found?.name || d.name || code,
+          };
+        })
+        .filter((d) => Boolean(d.code)),
     );
 
     setImages([]);
     setError(null);
-  }, [item, open]);
+  }, [
+    item,
+    open,
+    categories,
+    cuisines,
+    seasons,
+    events,
+    weatherConditions,
+    mealTypes,
+    ageGroups,
+    dietaryTypes,
+  ]);
 
   const activeCategories = useMemo(() => {
     return categories.filter((category) => category.isActive !== false);
@@ -983,9 +1107,11 @@ export default function FoodFormModal({
           <ImagePicker
             value={images}
             onChange={setImages}
+            existingImages={existingImages}
+            onExistingChange={setExistingImages}
             label={
               item
-                ? "រូបភាពថ្មី (ទុកទទេ = រក្សារូបចាស់)"
+                ? "រូបភាព (ទុកទទេ = រក្សារូបចាស់)"
                 : "រូបភាព Food (អតិបរមា 4)"
             }
           />
