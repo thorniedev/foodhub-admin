@@ -1,53 +1,109 @@
+import { dashboardNav, type NavItem } from "./dashboardNav";
+
 export interface PageTitleEntry {
   title: string;
   parent?: string;
 }
 
-export const PAGE_TITLES: Record<string, PageTitleEntry> = {
-  "/": { title: "ផ្ទាំងគ្រប់គ្រង" },
-
-  "/shops": { title: "ការគ្រប់គ្រងហាង" },
-  "/shops/create": { title: "បន្ថែមហាងថ្មី", parent: "ហាង" },
-
-  "/users": { title: "អ្នកប្រើប្រាស់" },
-
-  "/food-types/dishes": { title: "អាហារ", parent: "ប្រភេទអាហារ" },
-  "/food-types/drinks": { title: "ភេសជ្ជៈ", parent: "ប្រភេទអាហារ" },
-  "/food-types/create": { title: "បន្ថែមអាហារថ្មី", parent: "ប្រភេទអាហារ" },
-  "/food-types/drinks/create": {
-    title: "បន្ថែមភេសជ្ជៈថ្មី",
-    parent: "ប្រភេទអាហារ",
-  },
-
-  "/dynamic-content": { title: "មាតិកាដែលប្រែប្រួល" },
-  "/dynamic-content/banners": {
-    title: "រូបបេណឺ",
-    parent: "មាតិកាដែលប្រែប្រួល",
-  },
-  "/dynamic-content/food-by-season": {
-    title: "រូបអាហារតាមរដូវកាល",
-    parent: "មាតិកាដែលប្រែប្រួល",
-  },
-  "/dynamic-content/food-by-area": {
-    title: "រូបអាហារតាមតំបន់",
-    parent: "មាតិកាដែលប្រែប្រួល",
-  },
-  "/dynamic-content/filters": {
-    title: "ស្លាកត្រង",
-    parent: "មាតិកាដែលប្រែប្រួល",
-  },
-};
-
 const DEFAULT_TITLE: PageTitleEntry = { title: "ផ្ទាំងគ្រប់គ្រង" };
 
-export function getPageTitle(pathname: string): PageTitleEntry {
-  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+// Explicit sub-route overrides for create/detail pages
+const SUB_ROUTE_TITLES: Record<string, PageTitleEntry> = {
+  "/shops/create": { title: "បន្ថែមហាងថ្មី", parent: "ហាង" },
+  "/users/create": { title: "បង្កើតអ្នកប្រើប្រាស់ថ្មី", parent: "អ្នកប្រើប្រាស់" },
+};
 
-  const matches = Object.keys(PAGE_TITLES)
-    .filter((path) => path !== "/" && pathname.startsWith(path))
+function buildNavLookup(): Record<string, PageTitleEntry> {
+  const lookup: Record<string, PageTitleEntry> = {};
+
+  function traverse(items: NavItem[], parentLabel?: string) {
+    for (const item of items) {
+      if (item.href) {
+        lookup[item.href] = {
+          title: item.label,
+          ...(parentLabel ? { parent: parentLabel } : {}),
+        };
+      }
+
+      if (item.children && item.children.length > 0) {
+        traverse(item.children, item.label);
+      }
+    }
+  }
+
+  traverse(dashboardNav);
+  return lookup;
+}
+
+export function getPageTitle(pathname: string): PageTitleEntry {
+  if (!pathname) return DEFAULT_TITLE;
+
+  // Clean pathname
+  const cleanPath = pathname.replace(/\/+$/, "") || "/";
+
+  // Check explicit sub-route overrides
+  if (SUB_ROUTE_TITLES[cleanPath]) {
+    return SUB_ROUTE_TITLES[cleanPath];
+  }
+
+  // Dynamic lookup generated from dashboardNav
+  const navLookup = buildNavLookup();
+
+  // Exact match
+  if (navLookup[cleanPath]) {
+    return navLookup[cleanPath];
+  }
+
+  // Match detail routes like /shops/[uuid], /users/[id], /users/[id]/profiles/[profileUuid]
+  if (cleanPath.startsWith("/shops/")) {
+    return { title: "ព័ត៌មានហាង", parent: "ហាង" };
+  }
+
+  if (cleanPath.startsWith("/users/")) {
+    if (cleanPath.includes("/profiles/")) {
+      return { title: "ព័ត៌មាន Profile", parent: "អ្នកប្រើប្រាស់" };
+    }
+    return { title: "ព័ត៌មានអ្នកប្រើប្រាស់", parent: "អ្នកប្រើប្រាស់" };
+  }
+
+  if (cleanPath.startsWith("/menu-items")) {
+    return { title: "ប្រភេទអាហារ" };
+  }
+
+  if (cleanPath.startsWith("/food-types")) {
+    return { title: "ប្រភេទអាហារ" };
+  }
+
+  if (cleanPath.startsWith("/dynamic-content")) {
+    const matched = Object.keys(navLookup)
+      .filter((p) => p !== "/" && cleanPath.startsWith(p))
+      .sort((a, b) => b.length - a.length);
+
+    if (matched.length > 0) {
+      return navLookup[matched[0]];
+    }
+    return { title: "មាតិកាដែលប្រែប្រួល" };
+  }
+
+  if (cleanPath.startsWith("/filter")) {
+    const matched = Object.keys(navLookup)
+      .filter((p) => p !== "/" && cleanPath.startsWith(p))
+      .sort((a, b) => b.length - a.length);
+
+    if (matched.length > 0) {
+      return navLookup[matched[0]];
+    }
+    return { title: "ចម្រោះទិន្នន័យ" };
+  }
+
+  // Prefix matching across all nav items
+  const matches = Object.keys(navLookup)
+    .filter((path) => path !== "/" && cleanPath.startsWith(path))
     .sort((a, b) => b.length - a.length);
 
-  if (matches.length > 0) return PAGE_TITLES[matches[0]];
+  if (matches.length > 0) {
+    return navLookup[matches[0]];
+  }
 
   return DEFAULT_TITLE;
 }
