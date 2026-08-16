@@ -157,6 +157,7 @@ function copyUsefulResponseHeaders(source: Headers): Headers {
     "cache-control",
     "etag",
     "last-modified",
+    "location",
   ]) {
     const value = source.get(name);
     if (value) {
