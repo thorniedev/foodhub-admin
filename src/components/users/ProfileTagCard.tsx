@@ -11,8 +11,8 @@ import {
   calculateAge,
   formatDateOnly,
   humanizeEnum,
-  initials,
 } from "@/src/lib/userProfileFormat";
+import UserAvatar from "./UserAvatar";
 
 interface ProfileTagCardProps {
   profile: AdminProfile;
@@ -38,9 +38,11 @@ export default function ProfileTagCard({
       }`}
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-800 text-lg font-semibold text-white">
-          {initials(profile.profileName)}
-        </div>
+        <UserAvatar
+          name={profile.profileName}
+          avatarMediaUuid={profile.avatarMediaUuid}
+          containerClassName="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary-800 text-lg font-semibold text-white"
+        />
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">

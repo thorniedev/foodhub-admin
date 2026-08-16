@@ -5,6 +5,7 @@ import { CheckCircle, Eye, Pencil, Trash2, XCircle } from "lucide-react";
 import type { AdminUser } from "@/src/types/userProfile";
 
 import { displayName, initials } from "@/src/lib/userProfileFormat";
+import UserAvatar from "./UserAvatar";
 
 interface UsersTableProps {
   users: AdminUser[];
@@ -56,6 +57,20 @@ export default function UsersTable({
 
             const detailHref = `/users/${user.uuid}`;
 
+            const avatarMediaUuid =
+              user.avatarMediaUuid ||
+              user.defaultProfile?.avatarMediaUuid ||
+              user.profiles?.[0]?.avatarMediaUuid;
+
+            const imageUrl =
+              user.avatarUrl ||
+              user.profileImage ||
+              user.profilePicture ||
+              user.picture ||
+              user.imageUrl ||
+              user.image ||
+              user.avatar;
+
             return (
               <tr
                 key={user.uuid}
@@ -67,9 +82,12 @@ export default function UsersTable({
                     title={`មើលព័ត៌មាន ${name}`}
                     className="group flex min-w-[260px] items-center gap-4 rounded-2xl outline-none transition focus-visible:ring-4 focus-visible:ring-primary-100"
                   >
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-primary-100 bg-primary-50 text-lg font-semibold text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100">
-                      {initials(name)}
-                    </div>
+                    <UserAvatar
+                      name={name}
+                      avatarMediaUuid={avatarMediaUuid}
+                      imageUrl={imageUrl}
+                      containerClassName="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-lg font-semibold text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100"
+                    />
 
                     <div className="min-w-0">
                       <p className="max-w-[250px] truncate text-lg font-medium text-gray-800 transition group-hover:text-primary-800">

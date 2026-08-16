@@ -10,13 +10,10 @@ import {
 
 import type { AdminUser } from "@/src/types/userProfile";
 
-import {
-  displayName,
-  formatDateTime,
-  initials,
-} from "@/src/lib/userProfileFormat";
+import { displayName, formatDateTime } from "@/src/lib/userProfileFormat";
 
 import { StatusBadge } from "./UsersTable";
+import UserAvatar from "./UserAvatar";
 
 interface UserDetailHeaderProps {
   user: AdminUser;
@@ -37,6 +34,20 @@ export default function UserDetailHeader({
     user.username,
   );
 
+  const avatarMediaUuid =
+    user.avatarMediaUuid ||
+    user.defaultProfile?.avatarMediaUuid ||
+    user.profiles?.[0]?.avatarMediaUuid;
+
+  const imageUrl =
+    user.avatarUrl ||
+    user.profileImage ||
+    user.profilePicture ||
+    user.picture ||
+    user.imageUrl ||
+    user.image ||
+    user.avatar;
+
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
       <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full bg-white/5" />
@@ -53,9 +64,12 @@ export default function UserDetailHeader({
 
         <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 items-center gap-4">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[24px] bg-white text-2xl font-bold text-primary-800 shadow-sm">
-              {initials(name)}
-            </div>
+            <UserAvatar
+              name={name}
+              avatarMediaUuid={avatarMediaUuid}
+              imageUrl={imageUrl}
+              containerClassName="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[24px] bg-white text-2xl font-bold text-primary-800 shadow-sm"
+            />
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
