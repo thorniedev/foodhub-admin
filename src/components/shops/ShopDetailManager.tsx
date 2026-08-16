@@ -22,11 +22,13 @@ import StoreHoursModal from "./StoreHoursModal";
 import StoreContactLocationSection from "./detail/StoreContactLocationSection";
 import StoreHoursSection from "./detail/StoreHoursSection";
 import StoreMediaSection from "./detail/StoreMediaSection";
+import StoreMenuItemsSection from "./detail/StoreMenuItemsSection";
 import StoreOverviewSection from "./detail/StoreOverviewSection";
 import StoreProfileHeader from "./detail/StoreProfileHeader";
 import StoreRatingsSection from "./detail/StoreRatingsSection";
 import StoreSocialLinksSection from "./detail/StoreSocialLinksSection";
 import StoreSystemInfoSection from "./detail/StoreSystemInfoSection";
+import MenuItemDetailModal from "../menu-management/MenuItemDetailModal";
 
 interface ShopDetailManagerProps {
   storeUuid?: string;
@@ -126,6 +128,7 @@ export default function ShopDetailManager({
   const [statusOpen, setStatusOpen] = useState(false);
 
   const [hoursOpen, setHoursOpen] = useState(false);
+  const [selectedMenuUuid, setSelectedMenuUuid] = useState<string | null>(null);
 
   const [statusAction, setStatusAction] = useState<StoreStatusAction>("REVIEW");
 
@@ -379,6 +382,13 @@ export default function ShopDetailManager({
         </div>
 
         <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
+          <StoreMenuItemsSection
+            storeUuid={resolvedStoreUuid}
+            onViewItem={(item) => setSelectedMenuUuid(item.uuid)}
+          />
+        </div>
+
+        <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
           <StoreContactLocationSection store={store} />
         </div>
 
@@ -443,6 +453,16 @@ export default function ShopDetailManager({
         }}
         onChanged={refreshHours}
       />
+
+      {/* =================================================
+          MENU ITEM DETAIL MODAL
+      ================================================== */}
+      {selectedMenuUuid && (
+        <MenuItemDetailModal
+          uuid={selectedMenuUuid}
+          onClose={() => setSelectedMenuUuid(null)}
+        />
+      )}
     </div>
   );
 }
