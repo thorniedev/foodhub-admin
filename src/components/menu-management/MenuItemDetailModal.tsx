@@ -39,6 +39,8 @@ export default function MenuItemDetailModal({
   const images = (
     data?.primaryMediaUrls?.length
       ? data.primaryMediaUrls
+      : data?.images?.length
+      ? data.images
       : data?.gallery?.length
       ? data.gallery
       : [data?.thumbnail || data?.imageUrl].filter(Boolean)

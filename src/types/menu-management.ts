@@ -642,6 +642,7 @@ export interface FoodRecord {
 
   primaryMediaUuids?: string[];
   primaryMediaUrls?: string[];
+  images?: string[];
   gallery?: string[];
   thumbnail?: string | null;
   imageUrl?: string | null;
@@ -730,6 +731,7 @@ export interface MenuItemRecord {
   primaryMediaUrls?: string[];
   thumbnailMediaUuid?: string | null;
   galleryMediaUuids?: string[];
+  images?: string[];
   gallery?: string[];
   thumbnail?: string | null;
   imageUrl?: string | null;
