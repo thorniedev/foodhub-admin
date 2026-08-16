@@ -1,65 +1,214 @@
-"use client";
+// "use client";
 
-import { MessageSquareText, Plus, Star } from "lucide-react";
+// import type {
+//   ReactNode,
+// } from "react";
 
-interface FeedbackBannerProps {
-  total: number;
-  newCount: number;
-  resolvedCount: number;
-  averageRating: number;
-  onAddNew: () => void;
-}
+// import {
+//   CheckCircle2,
+//   MessageSquareText,
+//   Plus,
+//   Sparkles,
+//   Star,
+// } from "lucide-react";
 
-export default function FeedbackBanner({
-  total,
-  newCount,
-  resolvedCount,
-  averageRating,
-  onAddNew,
-}: FeedbackBannerProps) {
-  return (
-    <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-2xl p-6 mb-6 text-white">
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div className="flex items-start gap-3">
-          <div className="bg-white/15 rounded-xl p-3">
-            <MessageSquareText size={24} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">មតិកែលម្អពីអតិថិជន</h1>
-            <p className="text-emerald-50 text-sm mt-1 max-w-md">
-              តាមដាន និងឆ្លើយតបទៅនឹងមតិកែលម្អពីអតិថិជនទាក់ទងនឹងកម្មវិធី គុណភាពអាហារ ការដឹកជញ្ជូន និងសេវាកម្ម
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={onAddNew}
-          className="flex items-center gap-2 bg-white text-emerald-600 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-emerald-50 transition-colors"
-        >
-          <Plus size={18} />
-          បន្ថែមមតិថ្មី
-        </button>
-      </div>
-      <div className="flex items-center gap-4 mt-6 flex-wrap">
-        <div className="bg-white/10 rounded-xl px-4 py-3 min-w-[140px]">
-          <p className="text-xs text-emerald-50">សរុបទាំងអស់</p>
-          <p className="text-xl font-bold">{total}</p>
-        </div>
-        <div className="bg-white/10 rounded-xl px-4 py-3 min-w-[140px]">
-          <p className="text-xs text-emerald-50">មតិថ្មី</p>
-          <p className="text-xl font-bold">{newCount}</p>
-        </div>
-        <div className="bg-white/10 rounded-xl px-4 py-3 min-w-[140px]">
-          <p className="text-xs text-emerald-50">បានដោះស្រាយ</p>
-          <p className="text-xl font-bold">{resolvedCount}</p>
-        </div>
-        <div className="bg-white/10 rounded-xl px-4 py-3 min-w-[140px]">
-          <p className="text-xs text-emerald-50">ការវាយតម្លៃមធ្យម</p>
-          <p className="text-xl font-bold flex items-center gap-1">
-            {averageRating.toFixed(1)}
-            <Star size={16} className="fill-yellow-300 text-yellow-300" />
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+// interface FeedbackBannerProps {
+//   total: number;
+//   newCount: number;
+//   resolvedCount: number;
+//   averageRating: number;
+//   onAddNew: () => void;
+// }
+
+// export default function FeedbackBanner({
+//   total,
+//   newCount,
+//   resolvedCount,
+//   averageRating,
+//   onAddNew,
+// }: FeedbackBannerProps) {
+//   return (
+//     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
+//       {/* =================================================
+//           DECORATIVE BACKGROUND
+//       ================================================== */}
+
+//       <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full bg-white/5" />
+
+//       <div className="pointer-events-none absolute -bottom-24 right-20 h-64 w-64 rounded-full bg-white/5" />
+
+//       {/* =================================================
+//           CONTENT
+//       ================================================== */}
+
+//       <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
+//         {/* =================================================
+//             LEFT CONTENT
+//         ================================================== */}
+
+//         <div className="min-w-0">
+//           {/* Title */}
+//           <div className="flex items-start gap-4">
+//             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+//               <MessageSquareText size={25} />
+//             </div>
+
+//             <div className="min-w-0">
+//               <p className="text-5xl font-bold text-accent-400">
+//                 មតិកែលម្អពីអតិថិជន
+//               </p>
+
+//               <p className="mt-6 max-w-3xl text-xl leading-8 text-white/85">
+//                 តាមដាន និងឆ្លើយតបទៅនឹងមតិកែលម្អពីអតិថិជន
+//                 ទាក់ទងនឹងកម្មវិធី គុណភាពអាហារ ការដឹកជញ្ជូន
+//                 និងសេវាកម្ម។
+//               </p>
+//             </div>
+//           </div>
+
+//           {/* =================================================
+//               STATISTICS
+//           ================================================== */}
+
+//           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+//             <StatCard
+//               icon={
+//                 <MessageSquareText
+//                   size={20}
+//                 />
+//               }
+//               label="សរុបទាំងអស់"
+//               value={total}
+//             />
+
+//             <StatCard
+//               icon={
+//                 <Sparkles
+//                   size={20}
+//                 />
+//               }
+//               label="មតិថ្មី"
+//               value={newCount}
+//             />
+
+//             <StatCard
+//               icon={
+//                 <CheckCircle2
+//                   size={20}
+//                 />
+//               }
+//               label="បានដោះស្រាយ"
+//               value={resolvedCount}
+//             />
+
+//             <RatingStatCard
+//               averageRating={
+//                 averageRating
+//               }
+//             />
+//           </div>
+//         </div>
+
+//         {/* =================================================
+//             ADD BUTTON
+//         ================================================== */}
+
+//         <button
+//           type="button"
+//           onClick={onAddNew}
+//           className="
+//             inline-flex
+//             min-h-12
+//             w-full
+//             items-center
+//             justify-center
+//             gap-2
+//             rounded-full
+//             bg-white
+//             px-5
+//             text-lg
+//             font-bold
+//             text-primary-800
+//             shadow-sm
+//             transition
+//             hover:bg-primary-50
+//             focus:outline-none
+//             focus:ring-4
+//             focus:ring-white/20
+//             sm:w-fit
+//           "
+//         >
+//           <Plus size={20} />
+
+//           បន្ថែមមតិថ្មី
+//         </button>
+//       </div>
+//     </section>
+//   );
+// }
+
+// /* =========================================================
+//    STAT CARD
+// ========================================================= */
+
+// function StatCard({
+//   icon,
+//   label,
+//   value,
+// }: {
+//   icon: ReactNode;
+//   label: string;
+//   value: number;
+// }) {
+//   return (
+//     <div className="rounded-3xl bg-white/20 px-5 py-4">
+//       <div className="flex items-center gap-2 text-xl text-white/80">
+//         {icon}
+
+//         <span>
+//           {label}
+//         </span>
+//       </div>
+
+//       <p className="mt-1 text-2xl font-bold text-white">
+//         {value}
+//       </p>
+//     </div>
+//   );
+// }
+
+// /* =========================================================
+//    RATING STAT CARD
+// ========================================================= */
+
+// function RatingStatCard({
+//   averageRating,
+// }: {
+//   averageRating: number;
+// }) {
+//   return (
+//     <div className="rounded-3xl bg-white/20 px-5 py-4">
+//       <div className="flex items-center gap-2 text-xl text-white/80">
+//         <Star
+//           size={20}
+//           className="fill-secondary-400 text-secondary-400"
+//         />
+
+//         <span>
+//           ការវាយតម្លៃមធ្យម
+//         </span>
+//       </div>
+
+//       <div className="mt-1 flex items-center gap-2">
+//         <p className="text-2xl font-bold text-white">
+//           {averageRating.toFixed(1)}
+//         </p>
+
+//         <Star
+//           size={20}
+//           className="fill-secondary-400 text-secondary-400"
+//         />
+//       </div>
+//     </div>
+//   );
+// }

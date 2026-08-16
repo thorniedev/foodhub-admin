@@ -47,7 +47,7 @@ export default function FoodByAreaPage() {
   };
 
   return (
-    <div className="p-3 sm:p-6 space-y-8">
+    <div className="   space-y-8">
       <FoodByAreaBanner
         total={areas.length}
         activeCount={activeCount}

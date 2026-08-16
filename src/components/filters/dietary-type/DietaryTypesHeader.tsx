@@ -35,7 +35,7 @@ export default function DietaryTypesHeader({
             </div>
 
             <div className="min-w-0">
-              <p className="text-3xl font-bold text-accent-400">
+              <p className="text-5xl font-bold text-accent-400">
                 គ្រប់គ្រងរបបអាហារ
               </p>
 

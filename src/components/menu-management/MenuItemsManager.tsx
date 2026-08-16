@@ -324,32 +324,60 @@ export default function MenuItemsManager() {
   };
 
   return (
-    <div className="space-y-5">
-      <div className="rounded-[28px] bg-gradient-to-br from-[#137A3D] to-[#0f8e48] p-6 text-white shadow-sm sm:p-7">
-        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
-              <Utensils size={23} />
+    <div className="w-full min-w-0 max-w-full space-y-5">
+      {/* =====================================================
+          HEADER
+          Same visual concept as UsersHeader / ShopsHeader
+      ====================================================== */}
+      <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
+        <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute -bottom-24 right-20 h-64 w-64 rounded-full bg-white/5" />
+
+        <div className="relative flex flex-col gap-7 xl:flex-row xl:items-start xl:justify-between">
+          <div className="min-w-0">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+                <Utensils size={25} />
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-5xl font-bold text-accent-400">
+                  ប្រភេទអាហារ
+                </p>
+
+                <p className="mt-6 max-w-3xl text-xl leading-7 text-white/85">
+                  Food Catalog សម្រាប់ Store និង <br className="md:block max-md:hidden" /> Menu Items សម្រាប់ Website
+                </p>
+              </div>
             </div>
 
-            <div>
-              <h1 className="text-3xl font-black sm:text-4xl">ប្រភេទអាហារ</h1>
-              <p className="mt-1 text-sm text-white/75">
-                Food Catalog សម្រាប់ Store និង Menu Items សម្រាប់ Website
-              </p>
+            {/* Statistics */}
+            <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Stat
+                icon={<Store size={20} />}
+                label="Food Catalog សម្រាប់ Store"
+                value={foods.length}
+              />
+
+              <Stat
+                icon={<Globe2 size={20} />}
+                label="Menu Items លើ Website"
+                value={menuItems.length}
+              />
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          {/* Header actions */}
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <button
               type="button"
               onClick={() => {
                 setEditingFood(null);
                 setFoodModalOpen(true);
               }}
-              className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#137A3D] shadow-sm"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-auto"
             >
-              <Plus size={18} />
+              <Plus size={20} />
               បន្ថែម Food Catalog
             </button>
 
@@ -359,51 +387,41 @@ export default function MenuItemsManager() {
                 setEditingMenu(null);
                 setMenuModalOpen(true);
               }}
-              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-white/30 bg-white/10 px-5 text-sm font-black text-white"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-white/25 bg-white/15 px-5 text-lg font-bold text-white transition hover:bg-white/20 focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-auto"
             >
-              <Globe2 size={18} />
+              <Globe2 size={20} />
               Publish ទៅ Website
             </button>
           </div>
         </div>
+      </section>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Stat
-            icon={<Store size={20} />}
-            label="Food Catalog សម្រាប់ Store"
-            value={foods.length}
-          />
-
-          <Stat
-            icon={<Globe2 size={20} />}
-            label="Menu Items លើ Website"
-            value={menuItems.length}
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        <div className="inline-flex w-fit rounded-2xl border border-gray-100 bg-white p-1 shadow-sm">
+      {/* =====================================================
+          TABS + SEARCH + REFRESH
+          Same compact toolbar concept as UsersManager
+      ====================================================== */}
+      <div className="flex w-full flex-nowrap items-center justify-between gap-4 overflow-x-auto pb-1">
+        <div className="flex shrink-0 items-center gap-2">
           <TabButton active={tab === "FOODS"} onClick={() => setTab("FOODS")}>
-            <Store size={16} />
+            <Store size={19} />
             សម្រាប់ Store
-            <Count>{foods.length}</Count>
+            <Count active={tab === "FOODS"}>{foods.length}</Count>
           </TabButton>
 
           <TabButton
             active={tab === "WEBSITE"}
             onClick={() => setTab("WEBSITE")}
           >
-            <Globe2 size={16} />
+            <Globe2 size={19} />
             Website
-            <Count>{menuItems.length}</Count>
+            <Count active={tab === "WEBSITE"}>{menuItems.length}</Count>
           </TabButton>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           <div className="relative">
             <Search
-              size={18}
+              size={19}
               className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
             />
 
@@ -411,7 +429,7 @@ export default function MenuItemsManager() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="ស្វែងរក..."
-              className="h-12 w-full min-w-[280px] rounded-2xl border border-gray-200 bg-white pl-11 pr-4 text-sm outline-none focus:border-[#137A3D] focus:ring-4 focus:ring-emerald-50 sm:w-[360px]"
+              className="h-11 w-[360px] rounded-2xl border border-gray-200 bg-white pl-11 pr-4 text-lg text-gray-700 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
             />
           </div>
 
@@ -419,10 +437,11 @@ export default function MenuItemsManager() {
             type="button"
             disabled={foodsQuery.isFetching || menuItemsQuery.isFetching}
             onClick={() => void refreshAll()}
-            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+            aria-label="Refresh"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RefreshCw
-              size={18}
+              size={19}
               className={
                 foodsQuery.isFetching || menuItemsQuery.isFetching
                   ? "animate-spin"
@@ -433,11 +452,14 @@ export default function MenuItemsManager() {
         </div>
       </div>
 
+      {/* =====================================================
+          NOTICE
+      ====================================================== */}
       {notice && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm ${
+          className={`rounded-2xl border px-5 py-4 text-lg leading-7 ${
             notice.type === "success"
-              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+              ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
           }`}
         >
@@ -445,20 +467,39 @@ export default function MenuItemsManager() {
         </div>
       )}
 
-      <section className="overflow-hidden rounded-[26px] border border-gray-100 bg-white shadow-sm">
+      {/* =====================================================
+          TABLE / CONTENT AREA
+      ====================================================== */}
+      <section className="w-full min-w-0 max-w-full overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
         {currentLoading ? (
-          <div className="flex min-h-[360px] items-center justify-center">
-            <Loader2 size={30} className="animate-spin text-[#137A3D]" />
+          <div className="flex min-h-[360px] flex-col items-center justify-center">
+            <Loader2 size={32} className="animate-spin text-primary-800" />
+
+            <p className="mt-3 text-lg font-medium text-gray-500">
+              កំពុងទាញយកទិន្នន័យ...
+            </p>
           </div>
         ) : currentError ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
-            <AlertTriangle size={38} className="text-red-400" />
-            <h3 className="mt-3 text-xl font-black text-gray-900">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+              <AlertTriangle size={28} />
+            </div>
+
+            <p className="mt-4 text-2xl font-semibold text-primary-800">
               មិនអាចទាញយកទិន្នន័យបានទេ
-            </h3>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-gray-500">
+            </p>
+
+            <p className="mt-2 max-w-xl text-lg leading-8 text-gray-500">
               {getMenuManagementApiError(currentError)}
             </p>
+
+            <button
+              type="button"
+              onClick={() => void refreshAll()}
+              className="mt-5 inline-flex min-h-12 items-center justify-center rounded-full bg-primary-800 px-6 text-lg font-medium text-white transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200"
+            >
+              សាកល្បងម្តងទៀត
+            </button>
           </div>
         ) : tab === "FOODS" ? (
           <FoodCatalogTable
@@ -484,6 +525,9 @@ export default function MenuItemsManager() {
         )}
       </section>
 
+      {/* =====================================================
+          FOOD CREATE / EDIT MODAL
+      ====================================================== */}
       <FoodFormModal
         open={foodModalOpen}
         item={editingFood}
@@ -497,13 +541,19 @@ export default function MenuItemsManager() {
         dietaryTypes={dietaryTypesQuery.data?.contents ?? []}
         saving={creatingFood || updatingFood}
         onClose={() => {
-          if (creatingFood || updatingFood) return;
+          if (creatingFood || updatingFood) {
+            return;
+          }
+
           setFoodModalOpen(false);
           setEditingFood(null);
         }}
         onSubmit={saveFood}
       />
 
+      {/* =====================================================
+          PUBLISH / EDIT MENU ITEM MODAL
+      ====================================================== */}
       <PublishMenuItemModal
         open={menuModalOpen}
         item={editingMenu}
@@ -517,12 +567,16 @@ export default function MenuItemsManager() {
           if (creatingMenuItem || updatingMenuItem) {
             return;
           }
+
           setMenuModalOpen(false);
           setEditingMenu(null);
         }}
         onSubmit={saveMenuItem}
       />
 
+      {/* =====================================================
+          DELETE FOOD CONFIRMATION
+      ====================================================== */}
       <DeleteConfirmModal
         open={Boolean(deletingFood)}
         title="បិទដំណើរការ Food Catalog (Deactivate)?"
@@ -538,6 +592,9 @@ export default function MenuItemsManager() {
         onConfirm={() => void confirmDeleteFood()}
       />
 
+      {/* =====================================================
+          DELETE MENU ITEM CONFIRMATION
+      ====================================================== */}
       <DeleteConfirmModal
         open={Boolean(deletingMenu)}
         title="លុប Menu Item?"
@@ -547,6 +604,9 @@ export default function MenuItemsManager() {
         onConfirm={() => void confirmDeleteMenu()}
       />
 
+      {/* =====================================================
+          MENU ITEM DETAIL MODAL
+      ====================================================== */}
       <MenuItemDetailModal
         uuid={detailUuid}
         onClose={() => setDetailUuid(null)}
@@ -554,6 +614,11 @@ export default function MenuItemsManager() {
     </div>
   );
 }
+
+/* =========================================================
+   HEADER STAT
+   Same card style as Users / Shops header stats
+========================================================= */
 
 function Stat({
   icon,
@@ -565,15 +630,20 @@ function Stat({
   value: number;
 }) {
   return (
-    <div className="rounded-2xl bg-white/10 p-4">
-      <div className="flex items-center gap-2 text-white/80">
+    <div className="rounded-3xl bg-white/20 px-5 py-4">
+      <div className="flex items-center gap-2 text-xl text-white/80">
         {icon}
-        <span className="text-sm font-bold">{label}</span>
+        <span>{label}</span>
       </div>
-      <p className="mt-2 text-3xl font-black">{value}</p>
+
+      <p className="mt-1 text-2xl font-bold text-white">{value}</p>
     </div>
   );
 }
+
+/* =========================================================
+   TAB BUTTON
+========================================================= */
 
 function TabButton({
   active,
@@ -588,8 +658,10 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-black transition ${
-        active ? "bg-[#137A3D] text-white" : "text-gray-500 hover:bg-gray-50"
+      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
+        active
+          ? "bg-primary-800 text-white"
+          : "bg-white text-gray-500 hover:bg-primary-50 hover:text-primary-800"
       }`}
     >
       {children}
@@ -597,9 +669,23 @@ function TabButton({
   );
 }
 
-function Count({ children }: { children: React.ReactNode }) {
+/* =========================================================
+   TAB COUNT
+========================================================= */
+
+function Count({
+  active,
+  children,
+}: {
+  active: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <span className="rounded-full bg-black/10 px-2 py-0.5 text-xs">
+    <span
+      className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
+        active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+      }`}
+    >
       {children}
     </span>
   );

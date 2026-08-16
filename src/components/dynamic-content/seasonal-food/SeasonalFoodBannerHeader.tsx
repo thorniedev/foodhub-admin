@@ -1,20 +1,28 @@
+"use client";
+
 import type { ReactNode } from "react";
 
-import { CircleOff, Leaf, Plus, ShieldCheck } from "lucide-react";
+import {
+  CalendarDays,
+  Clock3,
+  ImageIcon,
+  Plus,
+  ShieldCheck,
+} from "lucide-react";
 
-interface Props {
+interface SeasonalFoodBannerProps {
   total: number;
   activeCount: number;
-  inactiveCount: number;
-  onAdd: () => void;
+  pendingCount: number;
+  onAddNew: () => void;
 }
 
-export default function IngredientsHeader({
+export default function SeasonalFoodBanner({
   total,
   activeCount,
-  inactiveCount,
-  onAdd,
-}: Props) {
+  pendingCount,
+  onAddNew,
+}: SeasonalFoodBannerProps) {
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
       {/* =================================================
@@ -30,24 +38,25 @@ export default function IngredientsHeader({
       ================================================== */}
 
       <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
-        {/* Left content */}
-        <div className="min-w-0">
-          {/* =================================================
-              TITLE
-          ================================================== */}
+        {/* =================================================
+            LEFT CONTENT
+        ================================================== */}
 
+        <div className="min-w-0">
+          {/* Title */}
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
-              <Leaf size={25} />
+              <CalendarDays size={25} />
             </div>
 
             <div className="min-w-0">
               <p className="text-5xl font-bold text-accent-400">
-                គ្រប់គ្រងគ្រឿងផ្សំ
+                រូបភាពអាហារតាមរដូវកាល
               </p>
 
-              <p className="mt-6 max-w-2xl text-xl leading-8 text-white/85">
-                គ្រប់គ្រងគ្រឿងផ្សំដែលប្រើសម្រាប់ម្ហូប និងការត្រងក្នុង FoodHub។
+              <p className="mt-6 max-w-3xl text-xl leading-8 text-white/85">
+                គ្រប់គ្រងរូបភាព និងខ្លឹមសារអាហារពិសេសសម្រាប់រដូវកាលនីមួយៗ
+                ដែលបង្ហាញនៅលើកម្មវិធីអតិថិជន។
               </p>
             </div>
           </div>
@@ -58,21 +67,21 @@ export default function IngredientsHeader({
 
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <StatCard
-              icon={<Leaf size={20} />}
-              label="គ្រឿងផ្សំសរុប"
+              icon={<ImageIcon size={20} />}
+              label="សរុបទាំងអស់"
               value={total}
             />
 
             <StatCard
               icon={<ShieldCheck size={20} />}
-              label="សកម្ម"
+              label="កំពុងបង្ហាញ"
               value={activeCount}
             />
 
             <StatCard
-              icon={<CircleOff size={20} />}
-              label="អសកម្ម"
-              value={inactiveCount}
+              icon={<Clock3 size={20} />}
+              label="កំពុងរង់ចាំ"
+              value={pendingCount}
             />
           </div>
         </div>
@@ -83,7 +92,7 @@ export default function IngredientsHeader({
 
         <button
           type="button"
-          onClick={onAdd}
+          onClick={onAddNew}
           className="
             inline-flex
             min-h-12
@@ -107,7 +116,7 @@ export default function IngredientsHeader({
           "
         >
           <Plus size={20} />
-          បន្ថែមគ្រឿងផ្សំ
+          បន្ថែមរូបភាពថ្មី
         </button>
       </div>
     </section>

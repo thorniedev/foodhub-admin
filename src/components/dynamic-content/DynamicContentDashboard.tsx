@@ -15,7 +15,7 @@ import { Banner } from "../../types/banner";
 
 import SeasonalFoodTable from "./seasonal-food/SeasonalFoodTable";
 import SeasonalFoodFormModal from "./seasonal-food/SeasonalFoodFormModal";
-import SeasonalFoodBanner from "./seasonal-food/SeasonalFoodBanner";
+import SeasonalFoodBanner from "./seasonal-food/SeasonalFoodBannerHeader";
 import { SeasonalFoodImage } from "../../types/seasonalFood";
 import { useAddSeasonalFoodMutation, useUpdateSeasonalFoodMutation } from "../../app/store/seasonalFoodApi";
 
@@ -120,7 +120,7 @@ export default function DynamicContentDashboard() {
   };
 
   return (
-    <div className="p-3 sm:p-6 space-y-8">
+    <div className="   space-y-8">
       {activeTab === "banners" && (
         <BannersHeader
           totalBanners={unifiedActiveItems.length}

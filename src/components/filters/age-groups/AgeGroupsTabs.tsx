@@ -58,7 +58,7 @@ export default function AgeGroupsTabs({
             className={`inline-flex h-12 items-center gap-2 rounded-full px-5 text-lg transition ${
               selected
                 ? "bg-primary-800 text-white shadow-sm"
-                : "bg-white text-gray-500 hover:bg-primary-50 hover:text-primary-800"
+                : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
             }`}
           >
             {tab.label}
