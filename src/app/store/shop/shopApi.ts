@@ -224,6 +224,13 @@ export const shopApi = adminBaseApi.injectEndpoints({
       query: (body) => ({ url: "/stores/from-google", method: "POST", body }),
       transformResponse: (r) => normalizeOne<Store>(r),
     }),
+    deleteShop: builder.mutation<void, string>({
+      query: (storeUuid) => ({
+        url: `/stores/${encodeURIComponent(storeUuid)}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Store", "Shop"],
+    }),
   }),
   overrideExisting: true,
 });
@@ -235,6 +242,7 @@ export const {
   useLazyGetShopByUuidQuery,
   useCreateShopMutation,
   useUpdateShopMutation,
+  useDeleteShopMutation,
   useUpdateStoreReviewStatusMutation,
   useUpdateStoreAccountStatusMutation,
   useUpdateStoreOperatingStatusMutation,

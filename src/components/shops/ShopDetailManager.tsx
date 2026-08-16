@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { AlertTriangle, ArrowLeft, Loader2 } from "lucide-react";
 
 import {
+  useDeleteShopMutation,
   useGetShopByUuidQuery,
   useGetStoreHoursQuery,
   useUpdateShopMutation,
@@ -15,6 +16,7 @@ import type { StoreStatusAction, UpdateStorePayload } from "@/src/types/shop";
 
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
 
+import DeleteShopConfirmModal from "./DeleteShopConfirmModal";
 import ShopEditModal from "./ShopEditModal";
 import ShopStatusModal from "./ShopStatusModal";
 import StoreHoursModal from "./StoreHoursModal";
@@ -122,12 +124,12 @@ export default function ShopDetailManager({
   });
 
   const [updateStore, { isLoading: updatingStore }] = useUpdateShopMutation();
+  const [deleteStore, { isLoading: deletingStore }] = useDeleteShopMutation();
 
   const [editOpen, setEditOpen] = useState(false);
-
   const [statusOpen, setStatusOpen] = useState(false);
-
   const [hoursOpen, setHoursOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedMenuUuid, setSelectedMenuUuid] = useState<string | null>(null);
 
   const [statusAction, setStatusAction] = useState<StoreStatusAction>("REVIEW");
@@ -297,7 +299,25 @@ export default function ShopDetailManager({
     await Promise.all([refetchStore(), refetchHours()]);
   };
 
-  const busy = updatingStore || storeFetching;
+  /* =======================================================
+     DELETE STORE
+  ======================================================= */
+  const handleDelete = async () => {
+    try {
+      setNotice(null);
+      await deleteStore(resolvedStoreUuid).unwrap();
+      router.push("/shops");
+      router.refresh();
+    } catch (deleteError) {
+      setNotice({
+        type: "error",
+        text: getShopApiErrorMessage(deleteError),
+      });
+      setDeleteOpen(false);
+    }
+  };
+
+  const busy = updatingStore || deletingStore || storeFetching;
 
   /* =======================================================
      UI
@@ -330,6 +350,10 @@ export default function ShopDetailManager({
           onHours={() => {
             setNotice(null);
             setHoursOpen(true);
+          }}
+          onDelete={() => {
+            setNotice(null);
+            setDeleteOpen(true);
           }}
         />
       </div>
@@ -452,6 +476,19 @@ export default function ShopDetailManager({
           setHoursOpen(false);
         }}
         onChanged={refreshHours}
+      />
+
+      {/* =================================================
+          DELETE STORE MODAL
+      ================================================== */}
+      <DeleteShopConfirmModal
+        store={store}
+        open={deleteOpen}
+        loading={deletingStore}
+        onClose={() => {
+          if (!deletingStore) setDeleteOpen(false);
+        }}
+        onConfirm={handleDelete}
       />
 
       {/* =================================================
