@@ -2,20 +2,9 @@
 
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
 
-import {
-  CheckCircle2,
-  FileCode,
-  ImageIcon,
-  Link2,
-  Loader2,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { CheckCircle2, ImageIcon, Loader2, Trash2, Upload } from "lucide-react";
 
-import {
-  importStoreMediaFromUrl,
-  uploadStoreMediaFile,
-} from "@/src/lib/storeMediaClient";
+import { uploadStoreMediaFile } from "@/src/lib/storeMediaClient";
 import { compressImage } from "@/src/utils/imageCompression";
 
 import type { StoreMediaPurpose } from "@/src/types/media";
@@ -40,11 +29,8 @@ export default function StoreMediaUploader({
 }: StoreMediaUploaderProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const [imageUrlInput, setImageUrlInput] = useState("");
-  const [uuidInput, setUuidInput] = useState(mediaUuid || "");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
-  const [mode, setMode] = useState<"upload" | "url" | "uuid">("upload");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,11 +43,17 @@ export default function StoreMediaUploader({
   }, [objectUrl]);
 
   useEffect(() => {
-    setUuidInput(mediaUuid || "");
-    if (mediaUuid && !previewUrl) {
-      setPreviewUrl(`/api/media/${mediaUuid}`);
+    if (objectUrl) {
+      return;
     }
-  }, [mediaUuid, previewUrl]);
+
+    if (mediaUuid) {
+      setPreviewUrl(`/api/media/${mediaUuid}`);
+      return;
+    }
+
+    setPreviewUrl(null);
+  }, [mediaUuid, objectUrl]);
 
   const replacePreviewObjectUrl = (url: string | null) => {
     if (objectUrl) {
@@ -69,10 +61,7 @@ export default function StoreMediaUploader({
     }
 
     setObjectUrl(url);
-
-    if (url) {
-      setPreviewUrl(url);
-    }
+    setPreviewUrl(url);
   };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -120,52 +109,6 @@ export default function StoreMediaUploader({
     }
   };
 
-  const handleImportUrl = async () => {
-    const cleanUrl = imageUrlInput.trim();
-
-    if (!cleanUrl) {
-      setError("Please paste an image URL.");
-      return;
-    }
-
-    try {
-      new URL(cleanUrl);
-    } catch {
-      setError("Please enter a valid image URL.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const media = await importStoreMediaFromUrl(cleanUrl, purpose);
-
-      replacePreviewObjectUrl(null);
-      setPreviewUrl(cleanUrl);
-      onMediaUuidChange(media.uuid);
-    } catch (importError) {
-      setError(
-        importError instanceof Error
-          ? importError.message
-          : "Image URL import failed.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleApplyUuid = () => {
-    const clean = uuidInput.trim();
-    if (!clean) {
-      clearImage();
-      return;
-    }
-    setError(null);
-    onMediaUuidChange(clean);
-    setPreviewUrl(`/api/media/${clean}`);
-  };
-
   const clearImage = () => {
     if (objectUrl) {
       URL.revokeObjectURL(objectUrl);
@@ -173,207 +116,162 @@ export default function StoreMediaUploader({
 
     setObjectUrl(null);
     setPreviewUrl(null);
-    setImageUrlInput("");
-    setUuidInput("");
     setError(null);
-
     onMediaUuidChange("");
   };
 
-  const previewHeight = variant === "logo" ? "h-44" : "h-52";
+  const previewHeight = variant === "logo" ? "h-56" : "h-64";
 
   return (
-    <div className="overflow-hidden rounded-[22px] border border-gray-100 bg-white">
-      <div className="border-b border-gray-100 px-4 py-3">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xl font-semibold text-[#F97316]">{label}</p>
-            <p className="mt-1 text-sm text-gray-400">
-              PNG, JPG, GIF or WebP · max 10 MB
-            </p>
-          </div>
-
-          {mediaUuid && (
-            <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
-              <CheckCircle2 size={14} />
-              Attached
-            </div>
-          )}
+    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+      {/* =====================================================
+          HEADER
+      ====================================================== */}
+      <div className="flex flex-col gap-3 border-b border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-xl font-semibold text-primary-800">{label}</p>
+          <p className="mt-1 text-lg leading-7 text-gray-500">
+            PNG, JPG, GIF or WebP · max 10 MB
+          </p>
         </div>
-      </div>
 
-      <div
-        className={`relative flex ${previewHeight} items-center justify-center overflow-hidden bg-gray-50`}
-      >
-        {previewUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={previewUrl}
-            alt={`${label} preview`}
-            className={
-              variant === "logo"
-                ? "h-full w-full object-contain p-5"
-                : "h-full w-full object-cover"
-            }
-          />
-        ) : (
-          <div className="text-center text-gray-300">
-            <ImageIcon size={38} className="mx-auto" />
-            <p className="mt-2 text-xs font-semibold">No image selected</p>
+        {mediaUuid && (
+          <div className="inline-flex min-h-10 w-fit shrink-0 items-center gap-2 rounded-full bg-primary-50 px-4 text-lg font-medium text-primary-700">
+            <CheckCircle2 size={20} />
+            រូបភាពបានភ្ជាប់
           </div>
         )}
+      </div>
 
+      {/* =====================================================
+          CLICK IMAGE AREA TO UPLOAD / REPLACE
+      ====================================================== */}
+      <div className="relative p-5">
+        <input
+          ref={inputRef}
+          type="file"
+          accept={ACCEPTED_TYPES}
+          onChange={handleFileChange}
+          className="hidden"
+        />
+
+        <button
+          type="button"
+          disabled={loading}
+          onClick={() => inputRef.current?.click()}
+          aria-label={mediaUuid ? `Replace ${label}` : `Upload ${label}`}
+          className={`
+            group
+            relative
+            flex
+            ${previewHeight}
+            w-full
+            items-center
+            justify-center
+            overflow-hidden
+            rounded-2xl
+            border-2
+            border-dashed
+            border-gray-200
+            bg-gray-50
+            text-center
+            outline-none
+            transition
+            hover:border-secondary-300
+            hover:bg-secondary-50/40
+            focus:border-secondary-400
+            focus:ring-4
+            focus:ring-secondary-100
+            disabled:cursor-not-allowed
+            disabled:opacity-70
+          `}
+        >
+          {previewUrl ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewUrl}
+                alt={`${label} preview`}
+                className={
+                  variant === "logo"
+                    ? "h-full w-full object-contain p-6"
+                    : "h-full w-full object-cover"
+                }
+              />
+
+              <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/40 group-focus:bg-black/40">
+                <div className="translate-y-2 rounded-full bg-white/95 px-5 py-3 text-lg font-semibold text-secondary-700 opacity-0 shadow-lg transition group-hover:translate-y-0 group-hover:opacity-100 group-focus:translate-y-0 group-focus:opacity-100">
+                  <span className="inline-flex items-center gap-2">
+                    <Upload size={20} />
+                    ចុចដើម្បីប្តូររូបភាព
+                  </span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="px-5">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary-50 text-secondary-600 transition group-hover:bg-secondary-100 group-hover:text-secondary-700">
+                <ImageIcon size={32} />
+              </div>
+
+              <p className="mt-4 text-lg font-semibold text-secondary-600">
+                Upload រូបភាព
+              </p>
+
+              <p className="mt-2 text-lg leading-7 text-gray-500">
+                ជ្រើសរើសរូបភាពពីឧបករណ៍របស់អ្នក
+              </p>
+            </div>
+          )}
+        </button>
+
+        {/* ===================================================
+            LOADING OVERLAY
+        ==================================================== */}
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+          <div className="absolute inset-5 z-20 flex items-center justify-center rounded-2xl bg-white/90 backdrop-blur-sm">
             <div className="text-center">
               <Loader2
-                size={28}
-                className="mx-auto animate-spin text-[#137A3D]"
+                size={32}
+                className="mx-auto animate-spin text-primary-700"
               />
-              <p className="mt-2 text-xs font-bold text-gray-500">
-                Uploading...
+              <p className="mt-3 text-lg font-medium text-gray-600">
+                កំពុង Upload...
               </p>
             </div>
           </div>
         )}
+
+        {/* ===================================================
+            REMOVE ACTION
+        ==================================================== */}
+        {mediaUuid && !loading && (
+          <button
+            type="button"
+            onClick={clearImage}
+            className="absolute right-8 top-8 z-30 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-white px-4 text-lg font-medium text-red-600 shadow-md transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
+            aria-label={`Remove ${label}`}
+          >
+            <Trash2 size={20} />
+            លុប
+          </button>
+        )}
       </div>
 
-      <div className="p-4">
-        <div className="grid grid-cols-3 gap-1.5 rounded-2xl bg-gray-50 p-1.5">
-          <button
-            type="button"
-            onClick={() => setMode("upload")}
-            className={`inline-flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-xs font-black transition ${
-              mode === "upload"
-                ? "bg-white text-[#137A3D] shadow-sm"
-                : "text-gray-500"
-            }`}
-          >
-            <Upload size={14} />
-            Upload
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setMode("url")}
-            className={`inline-flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-xs font-black transition ${
-              mode === "url"
-                ? "bg-white text-[#137A3D] shadow-sm"
-                : "text-gray-500"
-            }`}
-          >
-            <Link2 size={14} />
-            URL
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setMode("uuid")}
-            className={`inline-flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-xs font-black transition ${
-              mode === "uuid"
-                ? "bg-white text-[#137A3D] shadow-sm"
-                : "text-gray-500"
-            }`}
-          >
-            <FileCode size={14} />
-            Media UUID
-          </button>
-        </div>
-
-        {mode === "upload" && (
-          <>
-            <input
-              ref={inputRef}
-              type="file"
-              accept={ACCEPTED_TYPES}
-              onChange={handleFileChange}
-              className="hidden"
-            />
-
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => inputRef.current?.click()}
-              className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 text-base font-semibold text-[#137A3D] transition hover:bg-emerald-100 disabled:opacity-50"
-            >
-              <Upload size={17} />
-              {mediaUuid ? "Replace image" : "Choose image"}
-            </button>
-          </>
-        )}
-
-        {mode === "url" && (
-          <div className="mt-3 flex">
-            <input
-              value={imageUrlInput}
-              onChange={(event) => setImageUrlInput(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  void handleImportUrl();
-                }
-              }}
-              placeholder="https://example.com/image.jpg"
-              className="h-11 min-w-0 flex-1 rounded-l-xl border border-r-0 border-gray-200 px-3 text-base outline-none focus:border-[#136C34]"
-            />
-
-            <button
-              type="button"
-              disabled={loading || !imageUrlInput.trim()}
-              onClick={() => void handleImportUrl()}
-              className="rounded-r-xl bg-[#136C34] px-4 text-base text-white disabled:opacity-50"
-            >
-              Import
-            </button>
-          </div>
-        )}
-
-        {mode === "uuid" && (
-          <div className="mt-3 flex">
-            <input
-              value={uuidInput}
-              onChange={(event) => setUuidInput(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  handleApplyUuid();
-                }
-              }}
-              placeholder="Paste media UUID (e.g. 5f894f27-...)"
-              className="h-11 min-w-0 flex-1 rounded-l-xl border border-r-0 border-gray-200 px-3 text-xs font-mono outline-none focus:border-[#136C34]"
-            />
-
-            <button
-              type="button"
-              onClick={handleApplyUuid}
-              className="rounded-r-xl bg-[#136C34] px-4 text-base text-white hover:bg-[#0f592b]"
-            >
-              Set
-            </button>
-          </div>
-        )}
-
-        {mediaUuid && (
-          <div className="mt-2 flex items-center justify-between">
-            <span className="truncate text-[11px] font-mono text-gray-400">
-              ID: {mediaUuid}
-            </span>
-            <button
-              type="button"
-              disabled={loading}
-              onClick={clearImage}
-              className="inline-flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-600 disabled:opacity-50"
-            >
-              <Trash2 size={13} />
-              Remove
-            </button>
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-3 rounded-xl bg-red-50 px-3 py-2.5 text-xs leading-5 text-red-600">
+      {/* =====================================================
+          HELPER / ERROR
+      ====================================================== */}
+      <div className="border-t border-gray-100 px-5 py-4">
+        {error ? (
+          <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-lg leading-7 text-red-600">
             {error}
           </div>
+        ) : (
+          <p className="text-lg leading-7 text-gray-500">
+            {mediaUuid
+              ? "ចុចលើរូបភាព ដើម្បីជ្រើសរើសរូបថ្មីជំនួស។"
+              : "Upload ពី File "}
+          </p>
         )}
       </div>
     </div>

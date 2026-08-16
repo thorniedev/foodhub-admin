@@ -378,7 +378,7 @@ export default function MenuItemsManager() {
               className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-auto"
             >
               <Plus size={20} />
-              បន្ថែម Food Catalog
+              បន្ថែមមីនុយ
             </button>
 
             <button

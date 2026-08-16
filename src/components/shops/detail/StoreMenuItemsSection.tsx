@@ -9,13 +9,20 @@ import {
   Sparkles,
   UtensilsCrossed,
 } from "lucide-react";
+
 import Link from "next/link";
 
 import { useGetPublishedMenuItemsQuery } from "@/src/app/store/menuManagementApi";
+
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
+
 import type { MenuItemRecord } from "@/src/types/menu-management";
 
 import { Section } from "./StoreOverviewSection";
+
+/* =========================================================
+   IMAGE RESOLVER
+========================================================= */
 
 function getMenuItemImage(item: MenuItemRecord): string | null {
   const raw =
@@ -28,6 +35,10 @@ function getMenuItemImage(item: MenuItemRecord): string | null {
 
   return resolveFoodHubCatalogImageUrl(raw);
 }
+
+/* =========================================================
+   COMPONENT
+========================================================= */
 
 export default function StoreMenuItemsSection({
   storeUuid,
@@ -53,141 +64,480 @@ export default function StoreMenuItemsSection({
       title="មុខម្ហូបក្នុងហាង (Menu Items)"
       icon={<UtensilsCrossed size={22} />}
     >
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+      {/* =================================================
+          TOP ACTIONS
+      ================================================== */}
+
+      <div
+        className="
+          mb-6
+          flex
+          flex-col
+          gap-4
+          sm:flex-row
+          sm:items-center
+          sm:justify-between
+        "
+      >
+        {/* ITEM COUNT */}
+
+        <div className="flex items-center gap-3">
+          <div
+            className="
+              inline-flex
+              min-h-11
+              items-center
+              gap-2
+              rounded-full
+              bg-primary-50
+              px-4
+              text-lg
+              font-medium
+              text-primary-800
+            "
+          >
+            <UtensilsCrossed size={19} />
             {items.length} មុខម្ហូប
-          </span>
+          </div>
+
           {isFetching && (
-            <Loader2 size={14} className="animate-spin text-gray-400" />
+            <Loader2
+              size={22}
+              className="
+                animate-spin
+                text-primary-700
+              "
+            />
           )}
         </div>
 
+        {/* MANAGE MENU */}
+
         <Link
           href="/menu-items"
-          className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50/70 px-3 py-1.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100"
+          className="
+            inline-flex
+            min-h-[48px]
+            w-full
+            items-center
+            justify-center
+            gap-2
+            rounded-full
+            border
+            border-primary-200
+            bg-primary-50
+            px-5
+            text-lg
+            font-medium
+            text-primary-800
+            transition
+            hover:border-primary-300
+            hover:bg-primary-100
+            focus:outline-none
+            focus:ring-4
+            focus:ring-primary-100
+            sm:w-fit
+          "
         >
-          <Plus size={14} />
+          <Plus size={20} />
           គ្រប់គ្រង Menu
         </Link>
       </div>
 
+      {/* =================================================
+          LOADING
+      ================================================== */}
+
       {isLoading ? (
-        <div className="flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-2xl bg-gray-50/60 p-6">
-          <Loader2 size={26} className="animate-spin text-[#137A3D]" />
-          <p className="text-xs font-semibold text-gray-400">
+        <div
+          className="
+            flex
+            min-h-[220px]
+            flex-col
+            items-center
+            justify-center
+            gap-3
+            rounded-2xl
+            border
+            border-gray-100
+            bg-gray-50/70
+            p-6
+            text-center
+          "
+        >
+          <Loader2
+            size={32}
+            className="
+              animate-spin
+              text-primary-700
+            "
+          />
+
+          <p className="text-lg font-medium text-gray-500">
             កំពុងទាញយកមុខម្ហូប...
           </p>
         </div>
       ) : items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-8 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-            <UtensilsCrossed size={22} />
+        /* =================================================
+            EMPTY STATE
+        ================================================== */
+
+        <div
+          className="
+            flex
+            min-h-[280px]
+            flex-col
+            items-center
+            justify-center
+            rounded-2xl
+            border
+            border-dashed
+            border-gray-200
+            bg-gray-50/50
+            p-6
+            text-center
+            sm:p-8
+          "
+        >
+          <div
+            className="
+              flex
+              h-16
+              w-16
+              items-center
+              justify-center
+              rounded-2xl
+              bg-primary-50
+              text-primary-700
+            "
+          >
+            <UtensilsCrossed size={29} />
           </div>
-          <p className="mt-3 font-bold text-gray-700">
+
+          <p className="mt-4 text-xl font-semibold text-primary-800">
             មិនទាន់មាន Menu Item ទេ
           </p>
-          <p className="mt-1 max-w-sm text-xs text-gray-400">
-            ហាងនេះមិនទាន់មានមុខម្ហូបណាមួយត្រូវបាន Publish ចូលក្នុង Website នៅឡើយទេ។
+
+          <p
+            className="
+              mt-2
+              max-w-xl
+              text-lg
+              leading-8
+              text-gray-500
+            "
+          >
+            ហាងនេះមិនទាន់មានមុខម្ហូបណាមួយត្រូវបាន Publish ចូលក្នុង Website
+            នៅឡើយទេ។
           </p>
+
           <Link
             href="/menu-items"
-            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-[#137A3D] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#0f6833]"
+            className="
+              mt-5
+              inline-flex
+              min-h-[52px]
+              items-center
+              justify-center
+              gap-2
+              rounded-full
+              bg-primary-800
+              px-6
+              text-lg
+              font-medium
+              text-white
+              transition
+              hover:bg-primary-900
+              focus:outline-none
+              focus:ring-4
+              focus:ring-primary-200
+            "
           >
-            <Plus size={14} />
+            <Plus size={20} />
             Publish Menu Item ដំបូង
           </Link>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        /* =================================================
+            MENU ITEM GRID
+        ================================================== */
+
+        <div
+          className="
+            grid
+            grid-cols-1
+            gap-5
+            xl:grid-cols-2
+          "
+        >
           {items.map((item) => {
             const image = getMenuItemImage(item);
+
+            const available = item.availabilityStatus === "AVAILABLE";
 
             return (
               <div
                 key={item.uuid}
                 onClick={() => onViewItem?.(item)}
-                className="group relative flex cursor-pointer gap-3.5 rounded-2xl border border-gray-100 bg-gray-50/60 p-3 transition hover:border-emerald-200 hover:bg-emerald-50/30 hover:shadow-xs"
+                className="
+                    group
+                    relative
+                    min-w-0
+                    cursor-pointer
+                    overflow-hidden
+                    rounded-2xl
+                    border
+                    border-gray-100
+                    bg-white
+                    p-4
+                    transition
+                    hover:border-primary-200
+                    hover:shadow-md
+                    sm:p-5
+                  "
               >
-                {/* Thumbnail */}
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-200">
-                  {image ? (
-                    <img
-                      src={image}
-                      alt={item.name}
-                      className="h-full w-full object-cover transition group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-2xl text-gray-400">
-                      🍜
-                    </div>
-                  )}
+                <div
+                  className="
+                      flex
+                      flex-col
+                      gap-4
+                      sm:flex-row
+                    "
+                >
+                  {/* =====================================
+                        IMAGE
+                    ====================================== */}
 
-                  {item.isFeatured && (
-                    <span className="absolute left-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-white shadow">
-                      <Sparkles size={11} />
-                    </span>
-                  )}
-                </div>
+                  <div
+                    className="
+                        relative
+                        h-48
+                        w-full
+                        shrink-0
+                        overflow-hidden
+                        rounded-2xl
+                        bg-gray-100
+                        sm:h-32
+                        sm:w-32
+                      "
+                  >
+                    {image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={image}
+                        alt={item.name}
+                        loading="lazy"
+                        className="
+                            h-full
+                            w-full
+                            object-cover
+                            transition
+                            duration-300
+                            group-hover:scale-105
+                          "
+                      />
+                    ) : (
+                      <div
+                        className="
+                            flex
+                            h-full
+                            w-full
+                            items-center
+                            justify-center
+                            bg-primary-50
+                            text-primary-700
+                          "
+                      >
+                        <UtensilsCrossed size={34} />
+                      </div>
+                    )}
 
-                {/* Details */}
-                <div className="flex min-w-0 flex-1 flex-col justify-between">
-                  <div>
-                    <div className="flex items-start justify-between gap-1">
-                      <h4 className="truncate font-bold text-gray-900 group-hover:text-[#137A3D]">
-                        {item.name}
-                      </h4>
+                    {/* FEATURED */}
+
+                    {item.isFeatured && (
+                      <div
+                        className="
+                            absolute
+                            left-2
+                            top-2
+                            flex
+                            h-10
+                            w-10
+                            items-center
+                            justify-center
+                            rounded-full
+                            bg-secondary-500
+                            text-white
+                            shadow-sm
+                          "
+                        title="Featured"
+                      >
+                        <Sparkles size={19} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* =====================================
+                        CONTENT
+                    ====================================== */}
+
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    {/* NAME + VIEW */}
+
+                    <div className="flex min-w-0 items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="
+                              truncate
+                              text-xl
+                              font-semibold
+                              text-gray-900
+                              transition
+                              group-hover:text-primary-800
+                            "
+                          title={item.name}
+                        >
+                          {item.name}
+                        </p>
+
+                        {item.food?.canonicalName &&
+                          item.food.canonicalName !== item.name && (
+                            <p
+                              className="
+                                  mt-1
+                                  truncate
+                                  text-lg
+                                  text-gray-500
+                                "
+                              title={item.food.canonicalName}
+                            >
+                              {item.food.canonicalName}
+                            </p>
+                          )}
+                      </div>
 
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
+                        onClick={(event) => {
+                          event.stopPropagation();
+
                           onViewItem?.(item);
                         }}
-                        className="rounded-lg p-1 text-gray-400 hover:bg-white hover:text-gray-700"
+                        className="
+                            flex
+                            h-11
+                            w-11
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+                            border
+                            border-gray-100
+                            bg-gray-50
+                            text-gray-500
+                            transition
+                            hover:border-primary-200
+                            hover:bg-primary-50
+                            hover:text-primary-800
+                            focus:outline-none
+                            focus:ring-4
+                            focus:ring-primary-100
+                          "
+                        aria-label="មើលព័ត៌មានលម្អិត"
                         title="មើលព័ត៌មានលម្អិត"
                       >
-                        <Eye size={15} />
+                        <Eye size={20} />
                       </button>
                     </div>
 
-                    {item.food?.canonicalName &&
-                      item.food.canonicalName !== item.name && (
-                        <p className="truncate text-xs text-gray-400">
-                          {item.food.canonicalName}
-                        </p>
-                      )}
-                  </div>
+                    {/* =====================================
+                          PRICE
+                      ====================================== */}
 
-                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-0.5 font-black text-[#137A3D]">
-                      <DollarSign size={13} />
-                      <span>
-                        {Number(item.price ?? 0).toFixed(2)}{" "}
-                        <span className="text-[10px] text-gray-400">
-                          {item.currencyCode || "USD"}
-                        </span>
-                      </span>
+                    <div className="mt-4 flex items-center gap-2">
+                      <div
+                        className="
+                            flex
+                            h-10
+                            w-10
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+                            bg-primary-50
+                            text-primary-800
+                          "
+                      >
+                        <DollarSign size={20} />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="text-lg font-semibold text-primary-800">
+                          {Number(item.price ?? 0).toFixed(2)}{" "}
+                          <span className="font-medium text-gray-500">
+                            {item.currencyCode || "USD"}
+                          </span>
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    {/* =====================================
+                          META
+                      ====================================== */}
+
+                    <div
+                      className="
+                          mt-auto
+                          flex
+                          flex-wrap
+                          items-center
+                          gap-3
+                          pt-4
+                        "
+                    >
+                      {/* PREPARATION TIME */}
+
                       {item.preparationTimeMinutes != null && (
-                        <span className="flex items-center gap-1 text-[11px] text-gray-400">
-                          <Clock size={11} />
-                          {item.preparationTimeMinutes}mn
-                        </span>
+                        <div
+                          className="
+                              inline-flex
+                              min-h-10
+                              items-center
+                              gap-2
+                              rounded-full
+                              bg-gray-50
+                              px-4
+                              text-lg
+                              font-medium
+                              text-gray-600
+                            "
+                        >
+                          <Clock size={19} />
+                          {item.preparationTimeMinutes} min
+                        </div>
                       )}
 
-                      <span
-                        className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
-                          item.availabilityStatus === "AVAILABLE"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-gray-100 text-gray-500"
-                        }`}
+                      {/* AVAILABILITY */}
+
+                      <div
+                        className={`
+                            inline-flex
+                            min-h-10
+                            items-center
+                            rounded-full
+                            px-4
+                            text-lg
+                            font-medium
+
+                            ${
+                              available
+                                ? "bg-primary-50 text-primary-800"
+                                : "bg-gray-100 text-gray-600"
+                            }
+                          `}
                       >
                         {item.availabilityStatus || "AVAILABLE"}
-                      </span>
+                      </div>
                     </div>
                   </div>
                 </div>

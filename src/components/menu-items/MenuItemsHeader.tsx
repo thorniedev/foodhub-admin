@@ -56,7 +56,7 @@ export default function MenuItemsHeader({
             className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 font-black text-[#137A3D] shadow-sm transition hover:bg-emerald-50"
           >
             <Plus size={18} />
-            បន្ថែម Food Catalog
+            បន្ថែម
           </button>
 
           <button
