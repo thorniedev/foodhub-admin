@@ -2,10 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  Clock3,
-  Hash,
   Loader2,
-  Settings2,
   SlidersHorizontal,
   X,
 } from "lucide-react";
@@ -64,16 +61,19 @@ export default function FilterCatalogDetailModal({
   group,
   initialOption,
   options,
+  onToggleStatus,
   onClose,
 }: {
   uuid: string | null;
   group: FilterGroup;
   initialOption?: FilterCatalogOption | null;
   options?: FilterCatalogOption[];
+  onToggleStatus?: (uuid: string, nextActive: boolean) => Promise<void> | void;
   onClose: () => void;
 }) {
   const [data, setData] = useState<DetailPayload | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
 
   const resource = resolveApiResource(group);
   const endpointPath = `/api/catalog/${resource}/${encodeURIComponent(uuid ?? "")}`;
@@ -133,7 +133,6 @@ export default function FilterCatalogDetailModal({
           err,
         );
 
-        // Fallback to initial local option data if available
         if (initialOption) {
           setData({
             uuid: initialOption.uuid,
@@ -214,11 +213,45 @@ export default function FilterCatalogDetailModal({
       ? displayItem.parentUuid
       : "គ្មាន (Top Level)";
 
-  const hasExtraSection =
-    group.source === "MEAL_TYPE_API" ||
+  const isMealType = group.source === "MEAL_TYPE_API";
+  const hasNumericOrUnit =
     (displayItem?.numericValue !== null &&
       displayItem?.numericValue !== undefined) ||
     Boolean(displayItem?.unit);
+
+  const handleToggleStatus = async () => {
+    if (!displayItem || isToggling) return;
+    const targetUuid = displayItem.uuid || uuid;
+    const nextActive = !isActive;
+
+    // Optimistic local update
+    setData((prev) =>
+      prev
+        ? { ...prev, isActive: nextActive, active: nextActive }
+        : {
+            uuid: targetUuid,
+            isActive: nextActive,
+            active: nextActive,
+          },
+    );
+
+    setIsToggling(true);
+    try {
+      if (onToggleStatus) {
+        await onToggleStatus(targetUuid, nextActive);
+      }
+    } catch (err) {
+      console.error("[FilterCatalogDetailModal] Failed to toggle status:", err);
+      // Revert on error
+      setData((prev) =>
+        prev
+          ? { ...prev, isActive: !nextActive, active: !nextActive }
+          : null,
+      );
+    } finally {
+      setIsToggling(false);
+    }
+  };
 
   return (
     <div
@@ -240,35 +273,27 @@ export default function FilterCatalogDetailModal({
       {/* Modal */}
       <div
         className="
-          max-h-[94vh]
           w-full
           max-w-2xl
-          overflow-y-auto
+          overflow-hidden
           rounded-3xl
           border
           border-gray-100
           bg-white
           shadow-2xl
-          [scrollbar-width:none]
-          [-ms-overflow-style:none]
-          [&::-webkit-scrollbar]:hidden
         "
       >
         {/* ================= HEADER ================= */}
         <div
           className="
-            sticky
-            top-0
-            z-30
             flex
             items-center
             justify-between
             border-b
             border-gray-100
-            bg-white/95
+            bg-white
             px-6
             py-5
-            backdrop-blur-md
             sm:px-8
           "
         >
@@ -302,7 +327,7 @@ export default function FilterCatalogDetailModal({
 
               <p
                 className="
-                  mt-1
+                  mt-0.5
                   truncate
                   text-lg
                   text-gray-500
@@ -340,348 +365,155 @@ export default function FilterCatalogDetailModal({
 
         {/* ================= CONTENT ================= */}
         {isLoading && !displayItem ? (
-          <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 p-8">
-            <Loader2 size={36} className="animate-spin text-primary-800" />
+          <div className="flex min-h-[260px] flex-col items-center justify-center gap-3 p-8">
+            <Loader2 size={34} className="animate-spin text-primary-800" />
             <p className="text-lg font-medium text-gray-500">
               កំពុងទាញយកព័ត៌មានលម្អិត...
             </p>
           </div>
         ) : (
-          <div
-            className="
-              space-y-6
-              p-6
-              sm:p-8
-            "
-          >
-            {/* ================= SECTION 1: BASIC INFORMATION ================= */}
-            <Section
-              icon={<SlidersHorizontal size={22} />}
-              title="ព័ត៌មានមូលដ្ឋាន"
-            >
-              <p className="mb-5 text-lg leading-7 text-gray-500">
-                ព័ត៌មានលម្អិតអំពី {group.labelKm} នៅក្នុងប្រព័ន្ធ FoodHub។
-              </p>
-
-              <div
-                className="
-                  grid
-                  gap-5
-                  sm:grid-cols-2
-                "
-              >
-                <div>
-                  <FieldLabel>ឈ្មោះសម្រាប់បង្ហាញ</FieldLabel>
-                  <div
-                    className="
-                      flex
-                      min-h-[52px]
-                      w-full
-                      items-center
-                      rounded-xl
-                      border
-                      border-gray-200
-                      bg-gray-50
-                      px-4
-                      py-2.5
-                      text-lg
-                      font-medium
-                      text-gray-800
-                    "
-                  >
-                    {displayItem?.localName || "—"}
-                  </div>
-                </div>
-
-                <div>
-                  <FieldLabel>English name</FieldLabel>
-                  <div
-                    className="
-                      flex
-                      min-h-[52px]
-                      w-full
-                      items-center
-                      rounded-xl
-                      border
-                      border-gray-200
-                      bg-gray-50
-                      px-4
-                      py-2.5
-                      text-lg
-                      font-medium
-                      text-gray-800
-                    "
-                  >
-                    {displayItem?.name || "—"}
-                  </div>
+          <div className="space-y-4 p-6 sm:p-7">
+            {/* Names */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <FieldLabel>ឈ្មោះសម្រាប់បង្ហាញ</FieldLabel>
+                <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                  {displayItem?.localName || "—"}
                 </div>
               </div>
 
-              {/* Parent category */}
-              {group.source === "FOOD_CATEGORY_API" && (
-                <div className="mt-5">
-                  <FieldLabel>ប្រភេទមេ (Parent Category)</FieldLabel>
-                  <div
-                    className="
-                      flex
-                      min-h-[52px]
-                      w-full
-                      items-center
-                      rounded-xl
-                      border
-                      border-gray-200
-                      bg-gray-50
-                      px-4
-                      py-2.5
-                      text-lg
-                      font-medium
-                      text-gray-800
-                    "
-                  >
-                    {parentName}
-                  </div>
-                </div>
-              )}
-
-              {/* Description */}
-              <div className="mt-5">
-                <FieldLabel>ការពិពណ៌នា</FieldLabel>
-                <div
-                  className="
-                    min-h-[110px]
-                    w-full
-                    rounded-xl
-                    border
-                    border-gray-200
-                    bg-gray-50
-                    px-4
-                    py-3.5
-                    text-lg
-                    leading-8
-                    text-gray-800
-                  "
-                >
-                  {displayItem?.description || "គ្មានការពិពណ៌នាឡើយ"}
+              <div>
+                <FieldLabel>English name</FieldLabel>
+                <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                  {displayItem?.name || "—"}
                 </div>
               </div>
-            </Section>
+            </div>
 
-            {/* ================= SECTION 2: VALUE / UNIT / TIME ================= */}
-            {hasExtraSection && (
-              <Section
-                icon={
-                  group.source === "MEAL_TYPE_API" ? (
-                    <Clock3 size={22} />
-                  ) : (
-                    <Hash size={22} />
-                  )
-                }
-                title={
-                  group.source === "MEAL_TYPE_API"
-                    ? "ពេលវេលា និងតម្លៃ"
-                    : "តម្លៃ និងឯកតា"
-                }
-              >
-                {/* Meal start/end time */}
-                {group.source === "MEAL_TYPE_API" && (
-                  <div
-                    className="
-                      mb-5
-                      grid
-                      gap-5
-                      sm:grid-cols-2
-                    "
-                  >
-                    <div>
-                      <FieldLabel>ម៉ោងចាប់ផ្តើម</FieldLabel>
-                      <div
-                        className="
-                          flex
-                          min-h-[52px]
-                          w-full
-                          items-center
-                          rounded-xl
-                          border
-                          border-gray-200
-                          bg-gray-50
-                          px-4
-                          py-2.5
-                          text-lg
-                          font-medium
-                          text-gray-800
-                        "
-                      >
-                        {displayItem?.startTime || "—"}
-                      </div>
-                    </div>
-
-                    <div>
-                      <FieldLabel>ម៉ោងបញ្ចប់</FieldLabel>
-                      <div
-                        className="
-                          flex
-                          min-h-[52px]
-                          w-full
-                          items-center
-                          rounded-xl
-                          border
-                          border-gray-200
-                          bg-gray-50
-                          px-4
-                          py-2.5
-                          text-lg
-                          font-medium
-                          text-gray-800
-                        "
-                      >
-                        {displayItem?.endTime || "—"}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div
-                  className="
-                    grid
-                    gap-5
-                    sm:grid-cols-2
-                  "
-                >
-                  <div>
-                    <FieldLabel>Numeric value</FieldLabel>
-                    <div
-                      className="
-                        flex
-                        min-h-[52px]
-                        w-full
-                        items-center
-                        rounded-xl
-                        border
-                        border-gray-200
-                        bg-gray-50
-                        px-4
-                        py-2.5
-                        text-lg
-                        font-medium
-                        text-gray-800
-                      "
-                    >
-                      {displayItem?.numericValue ?? "—"}
-                    </div>
-                  </div>
-
-                  <div>
-                    <FieldLabel>Unit</FieldLabel>
-                    <div
-                      className="
-                        flex
-                        min-h-[52px]
-                        w-full
-                        items-center
-                        rounded-xl
-                        border
-                        border-gray-200
-                        bg-gray-50
-                        px-4
-                        py-2.5
-                        text-lg
-                        font-medium
-                        text-gray-800
-                      "
-                    >
-                      {displayItem?.unit || "—"}
-                    </div>
-                  </div>
+            {/* Parent category */}
+            {group.source === "FOOD_CATEGORY_API" && (
+              <div>
+                <FieldLabel>ប្រភេទមេ (Parent Category)</FieldLabel>
+                <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                  {parentName}
                 </div>
-              </Section>
+              </div>
             )}
 
-            {/* ================= SECTION 3: STATUS ================= */}
-            <Section icon={<Settings2 size={22} />} title="ស្ថានភាព">
-              <div
-                className="
-                  flex
-                  items-center
-                  justify-between
-                  gap-5
-                  rounded-2xl
-                  border
-                  border-gray-100
-                  bg-gray-50
-                  px-5
-                  py-4
-                "
-              >
-                <div className="min-w-0">
-                  <p
-                    className="
-                      text-lg
-                      font-medium
-                      text-primary-800
-                    "
-                  >
-                    {isActive ? "សកម្ម" : "អសកម្ម"}
-                  </p>
+            {/* Description */}
+            <div>
+              <FieldLabel>ការពិពណ៌នា</FieldLabel>
+              <div className="min-h-[84px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg leading-8 text-gray-800">
+                {displayItem?.description || "គ្មានការពិពណ៌នាឡើយ"}
+              </div>
+            </div>
 
-                  <p
-                    className="
-                      mt-1
-                      text-lg
-                      leading-7
-                      text-gray-500
-                    "
-                  >
-                    {isActive
-                      ? "ស្លាកនេះកំពុងបើកដំណើរការនៅក្នុងប្រព័ន្ធ។"
-                      : "ស្លាកនេះត្រូវបានបិទដំណើរការ។"}
-                  </p>
+            {/* Meal type times */}
+            {isMealType && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <FieldLabel>ម៉ោងចាប់ផ្តើម</FieldLabel>
+                  <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                    {displayItem?.startTime || "—"}
+                  </div>
                 </div>
 
-                <span
-                  className={`
-                    inline-flex
-                    items-center
-                    gap-2
-                    whitespace-nowrap
-                    rounded-full
-                    px-3.5
-                    py-1.5
-                    text-lg
-                    font-medium
-                    ring-1
-                    ring-inset
-                    ${
-                      isActive
-                        ? "bg-primary-50 text-primary-700 ring-primary-100"
-                        : "bg-gray-100 text-gray-600 ring-gray-200"
-                    }
-                  `}
-                >
+                <div>
+                  <FieldLabel>ម៉ោងបញ្ចប់</FieldLabel>
+                  <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                    {displayItem?.endTime || "—"}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Numeric and unit */}
+            {hasNumericOrUnit && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <FieldLabel>Numeric value</FieldLabel>
+                  <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                    {displayItem?.numericValue ?? "—"}
+                  </div>
+                </div>
+
+                <div>
+                  <FieldLabel>Unit</FieldLabel>
+                  <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                    {displayItem?.unit || "—"}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Status (Clickable toggle badge) */}
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-3.5">
+              <div className="min-w-0">
+                <p className="text-lg font-medium text-primary-800">
+                  ស្ថានភាព
+                </p>
+                <p className="text-base text-gray-500">
+                  {isActive
+                    ? "បើកដំណើរការក្នុងប្រព័ន្ធ"
+                    : "បិទដំណើរការ"}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                disabled={isToggling}
+                onClick={handleToggleStatus}
+                title={
+                  isActive
+                    ? "ចុចដើម្បីប្តូរទៅជា អសកម្ម"
+                    : "ចុចដើម្បីប្តូរទៅជា សកម្ម"
+                }
+                className={`
+                  inline-flex
+                  cursor-pointer
+                  items-center
+                  gap-2.5
+                  whitespace-nowrap
+                  rounded-full
+                  px-4
+                  py-2
+                  text-lg
+                  font-medium
+                  transition-all
+                  ring-1
+                  ring-inset
+                  hover:scale-105
+                  active:scale-95
+                  focus:outline-none
+                  focus:ring-4
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                  ${
+                    isActive
+                      ? "bg-primary-50 text-primary-700 ring-primary-200 hover:bg-primary-100 focus:ring-primary-100"
+                      : "bg-gray-100 text-gray-600 ring-gray-300 hover:bg-gray-200 focus:ring-gray-200"
+                  }
+                `}
+              >
+                {isToggling ? (
+                  <Loader2 size={18} className="animate-spin text-primary-800" />
+                ) : (
                   <span
                     className={`
-                      h-2
-                      w-2
+                      h-2.5
+                      w-2.5
                       shrink-0
                       rounded-full
                       ${isActive ? "bg-primary-600" : "bg-gray-400"}
                     `}
                   />
-                  {isActive ? "សកម្ម" : "អសកម្ម"}
-                </span>
-              </div>
-            </Section>
+                )}
+                {isActive ? "សកម្ម" : "អសកម្ម"}
+              </button>
+            </div>
 
             {/* ================= FOOTER ================= */}
-            <div
-              className="
-                flex
-                items-center
-                justify-end
-                border-t
-                border-gray-100
-                pt-6
-              "
-            >
+            <div className="flex items-center justify-end border-t border-gray-100 pt-4">
               <button
                 type="button"
                 onClick={onClose}
@@ -710,66 +542,6 @@ export default function FilterCatalogDetailModal({
         )}
       </div>
     </div>
-  );
-}
-
-function Section({
-  icon,
-  title,
-  children,
-}: {
-  icon: ReactNode;
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <section
-      className="
-        rounded-2xl
-        border
-        border-gray-100
-        bg-white
-        p-5
-        sm:p-6
-      "
-    >
-      <div
-        className="
-          mb-5
-          flex
-          items-center
-          gap-3
-        "
-      >
-        <div
-          className="
-            flex
-            h-10
-            w-10
-            shrink-0
-            items-center
-            justify-center
-            rounded-xl
-            bg-primary-50
-            text-primary-800
-          "
-        >
-          {icon}
-        </div>
-
-        <p
-          className="
-            text-2xl
-            font-semibold
-            text-primary-800
-          "
-        >
-          {title}
-        </p>
-      </div>
-
-      {children}
-    </section>
   );
 }
 

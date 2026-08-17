@@ -417,6 +417,9 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         group={group}
         initialOption={viewing}
         options={groupOptions}
+        onToggleStatus={async (targetUuid, nextActive) => {
+          await setActive(targetUuid, nextActive);
+        }}
         onClose={() => setViewing(null)}
       />
     </div>
