@@ -83,17 +83,25 @@ export default function GlobalAdminSearch() {
 
   const fallbackResults = useMemo(() => {
     const list: AdminSearchResultItem[] = [];
+    const q = debouncedQuery.toLowerCase();
 
     if (fallbackShops?.contents) {
       fallbackShops.contents.forEach((shop) => {
-        list.push({
-          uuid: shop.uuid,
-          type: "STORE",
-          title: shop.storeName || "Store",
-          subtitle: shop.addressLine || shop.city || undefined,
-          status: shop.operatingStatus || shop.reviewStatus || undefined,
-          targetUrl: `/shops/${shop.uuid}`,
-        });
+        const title = shop.storeName || "Store";
+        const subtitle = shop.addressLine || shop.city || "";
+        if (
+          title.toLowerCase().includes(q) ||
+          subtitle.toLowerCase().includes(q)
+        ) {
+          list.push({
+            uuid: shop.uuid,
+            type: "STORE",
+            title,
+            subtitle: subtitle || undefined,
+            status: shop.operatingStatus || shop.reviewStatus || undefined,
+            targetUrl: `/shops/${shop.uuid}`,
+          });
+        }
       });
     }
 
@@ -108,22 +116,25 @@ export default function GlobalAdminSearch() {
             u.localName ||
             "User",
         );
-        const subtitle = typeof u.email === "string" ? u.email : undefined;
-        const status =
-          typeof u.accountStatus === "string"
-            ? u.accountStatus
-            : typeof u.status === "string"
-              ? u.status
-              : undefined;
-
-        list.push({
-          uuid: String(u.uuid || u.id || ""),
-          type: "USER",
-          title,
-          subtitle,
-          status,
-          targetUrl: `/users/${u.uuid || u.id}`,
-        });
+        const subtitle = typeof u.email === "string" ? u.email : "";
+        if (
+          title.toLowerCase().includes(q) ||
+          subtitle.toLowerCase().includes(q)
+        ) {
+          list.push({
+            uuid: String(u.uuid || u.id || ""),
+            type: "USER",
+            title,
+            subtitle: subtitle || undefined,
+            status:
+              typeof u.accountStatus === "string"
+                ? u.accountStatus
+                : typeof u.status === "string"
+                  ? u.status
+                  : undefined,
+            targetUrl: `/users/${u.uuid || u.id}`,
+          });
+        }
       });
     }
 
@@ -141,20 +152,24 @@ export default function GlobalAdminSearch() {
             ? food.description
             : typeof food.categoryName === "string"
               ? food.categoryName
-              : undefined;
-
-        list.push({
-          uuid: String(food.uuid || food.id || ""),
-          type: "FOOD",
-          title,
-          subtitle,
-          targetUrl: `/menu-items`,
-        });
+              : "";
+        if (
+          title.toLowerCase().includes(q) ||
+          subtitle.toLowerCase().includes(q)
+        ) {
+          list.push({
+            uuid: String(food.uuid || food.id || ""),
+            type: "FOOD",
+            title,
+            subtitle: subtitle || undefined,
+            targetUrl: `/menu-items`,
+          });
+        }
       });
     }
 
     return list;
-  }, [fallbackShops, fallbackUsers, fallbackFoods]);
+  }, [debouncedQuery, fallbackShops, fallbackUsers, fallbackFoods]);
 
   const rawResults = primaryResults.length > 0 ? primaryResults : fallbackResults;
   const filteredResults =
