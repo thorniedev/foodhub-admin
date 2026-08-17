@@ -61,6 +61,13 @@ export const dietaryTypeApi = adminBaseApi.injectEndpoints({
       }),
     }),
 
+    hardDeleteDietaryType: builder.mutation<void, string>({
+      query: (code) => ({
+        url: `/dietary-types/${encodeURIComponent(code)}/hard`,
+        method: "DELETE",
+      }),
+    }),
+
     restoreDietaryType: builder.mutation<DietaryType, string>({
       query: (code) => ({
         url: `/dietary-types/${encodeURIComponent(code)}/restore`,
@@ -78,5 +85,6 @@ export const {
   useCreateDietaryTypeMutation,
   useUpdateDietaryTypeMutation,
   useDeleteDietaryTypeMutation,
+  useHardDeleteDietaryTypeMutation,
   useRestoreDietaryTypeMutation,
 } = dietaryTypeApi;

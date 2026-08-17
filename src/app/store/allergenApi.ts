@@ -55,6 +55,13 @@ export const allergenApi = adminBaseApi.injectEndpoints({
       }),
     }),
 
+    hardDeleteAllergen: builder.mutation<void, string>({
+      query: (code) => ({
+        url: `/allergens/${encodeURIComponent(code)}/hard`,
+        method: "DELETE",
+      }),
+    }),
+
     restoreAllergen: builder.mutation<Allergen, string>({
       query: (code) => ({
         url: `/allergens/${encodeURIComponent(code)}/restore`,
@@ -72,5 +79,6 @@ export const {
   useCreateAllergenMutation,
   useUpdateAllergenMutation,
   useDeleteAllergenMutation,
+  useHardDeleteAllergenMutation,
   useRestoreAllergenMutation,
 } = allergenApi;
