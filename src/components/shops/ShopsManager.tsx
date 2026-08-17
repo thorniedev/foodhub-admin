@@ -14,6 +14,7 @@ import {
 
 import {
   useDeleteShopMutation,
+  useGetShopByUuidQuery,
   useGetShopsQuery,
   useUpdateShopMutation,
 } from "@/src/app/store/shop/shopApi";
@@ -50,7 +51,7 @@ export default function ShopsManager() {
   const [sortBy, setSortBy] = useState<StoreSort>("NAME_ASC");
   const [sortOpen, setSortOpen] = useState(false);
 
-  const [editing, setEditing] = useState<StoreType | null>(null);
+  const [editingUuid, setEditingUuid] = useState<string | null>(null);
   const [deletingStore, setDeletingStore] = useState<StoreType | null>(null);
   const [statusStore, setStatusStore] = useState<StoreType | null>(null);
   const [statusAction, setStatusAction] = useState<StoreStatusAction>("REVIEW");
@@ -95,15 +96,14 @@ export default function ShopsManager() {
       return;
     }
 
-    if (cleanValue.length < 2) {
-      setSuggestionQuery("");
-      setShowSuggestions(false);
-      return;
-    }
-
     const timer = window.setTimeout(() => {
-      setSuggestionQuery(cleanValue);
-      setShowSuggestions(true);
+      if (cleanValue.length < 2) {
+        setSuggestionQuery("");
+        setShowSuggestions(false);
+      } else {
+        setSuggestionQuery(cleanValue);
+        setShowSuggestions(true);
+      }
     }, 350);
 
     return () => window.clearTimeout(timer);
@@ -509,7 +509,7 @@ export default function ShopsManager() {
           <ShopsTable
             stores={sortedStores}
             disabled={updating || deleting || isFetching}
-            onEdit={setEditing}
+            onEdit={(store) => setEditingUuid(store.uuid)}
             onStatus={(store, action) => {
               setStatusStore(store);
               setStatusAction(action);
