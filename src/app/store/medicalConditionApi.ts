@@ -64,6 +64,13 @@ export const medicalConditionApi = adminBaseApi.injectEndpoints({
       }),
     }),
 
+    hardDeleteMedicalCondition: builder.mutation<void, string>({
+      query: (code) => ({
+        url: `/medical-conditions/${encodeURIComponent(code)}/hard`,
+        method: "DELETE",
+      }),
+    }),
+
     restoreMedicalCondition: builder.mutation<
       MedicalCondition,
       string
@@ -84,5 +91,6 @@ export const {
   useCreateMedicalConditionMutation,
   useUpdateMedicalConditionMutation,
   useDeleteMedicalConditionMutation,
+  useHardDeleteMedicalConditionMutation,
   useRestoreMedicalConditionMutation,
 } = medicalConditionApi;

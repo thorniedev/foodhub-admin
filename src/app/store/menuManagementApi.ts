@@ -649,15 +649,21 @@ import { adminBaseApi } from "./adminBaseApi";
 import type {
   ApiPage,
   CuisineOption,
+  EventOption,
   FoodCategoryOption,
   FoodRecord,
   FoodWritePayload,
   IngredientOption,
   ListParams,
+  MenuItemAllergenDeclarationPayload,
+  MenuItemDietaryTypePayload,
+  MenuItemIngredientPayload,
   MenuItemRecord,
   MenuItemWritePayload,
   PublicMenuItemListParams,
+  SeasonOption,
   StoreOption,
+  WeatherConditionOption,
 } from "@/src/types/menu-management";
 
 type BackendEnvelope<T> = {
@@ -843,12 +849,7 @@ function makeMultipart(
 
   form.append(
     key,
-    new Blob(
-      [JSON.stringify(payload)],
-      {
-        type: "application/json",
-      },
-    ),
+    typeof payload === "string" ? payload : JSON.stringify(payload),
   );
 
   images.slice(0, 4).forEach((image) => {
@@ -941,6 +942,318 @@ export const menuManagementApi =
           },
         }),
 
+      getManagedSeasons:
+        builder.query<SeasonOption[], void>({
+          async queryFn() {
+            const result = await browserRequest<unknown>(
+              "/api/catalog/seasons?page=0&size=100",
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data:
+                normalizePage<SeasonOption>(
+                  result.data as never,
+                ).content,
+            };
+          },
+        }),
+
+      getManagedEvents:
+        builder.query<EventOption[], void>({
+          async queryFn() {
+            const result = await browserRequest<unknown>(
+              "/api/catalog/events?page=0&size=100",
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data:
+                normalizePage<EventOption>(
+                  result.data as never,
+                ).content,
+            };
+          },
+        }),
+
+      getManagedWeatherConditions:
+        builder.query<WeatherConditionOption[], void>({
+          async queryFn() {
+            const result = await browserRequest<unknown>(
+              "/api/catalog/weather-conditions?page=0&size=100",
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data:
+                normalizePage<WeatherConditionOption>(
+                  result.data as never,
+                ).content,
+            };
+          },
+        }),
+
+      createSeason:
+        builder.mutation<
+          SeasonOption,
+          {
+            code: string;
+            name: string;
+            localName?: string | null;
+            description?: string | null;
+            isActive: boolean;
+          }
+        >({
+          async queryFn(payload) {
+            const result = await browserRequest<unknown>(
+              "/api/catalog/seasons",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: unwrap<SeasonOption>(result.data as never),
+            };
+          },
+        }),
+
+      updateSeason:
+        builder.mutation<
+          SeasonOption,
+          {
+            uuid: string;
+            payload: {
+              name?: string;
+              localName?: string | null;
+              description?: string | null;
+              isActive?: boolean;
+            };
+          }
+        >({
+          async queryFn({ uuid, payload }) {
+            const result = await browserRequest<unknown>(
+              `/api/catalog/seasons/${encodeURIComponent(uuid)}`,
+              {
+                method: "PATCH",  
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: unwrap<SeasonOption>(result.data as never),
+            };
+          },
+        }),
+
+      deleteSeason:
+        builder.mutation<void, string>({
+          async queryFn(uuid) {
+            const result = await browserRequest<unknown>(
+              `/api/catalog/seasons/${encodeURIComponent(uuid)}`,
+              {
+                method: "DELETE",
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: undefined,
+            };
+          },
+        }),
+
+      createEvent:
+        builder.mutation<
+          EventOption,
+          {
+            code: string;
+            name: string;
+            localName?: string | null;
+            description?: string | null;
+            isActive: boolean;
+          }
+        >({
+          async queryFn(payload) {
+            const result = await browserRequest<unknown>(
+              "/api/catalog/events",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: unwrap<EventOption>(result.data as never),
+            };
+          },
+        }),
+
+      updateEvent:
+        builder.mutation<
+          EventOption,
+          {
+            uuid: string;
+            payload: {
+              name?: string;
+              localName?: string | null;
+              description?: string | null;
+              isActive?: boolean;
+            };
+          }
+        >({
+          async queryFn({ uuid, payload }) {
+            const result = await browserRequest<unknown>(
+              `/api/catalog/events/${encodeURIComponent(uuid)}`,
+              {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: unwrap<EventOption>(result.data as never),
+            };
+          },
+        }),
+
+      deleteEvent:
+        builder.mutation<void, string>({
+          async queryFn(uuid) {
+            const result = await browserRequest<unknown>(
+              `/api/catalog/events/${encodeURIComponent(uuid)}`,
+              {
+                method: "DELETE",
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: undefined,
+            };
+          },
+        }),
+
+      createWeatherCondition:
+        builder.mutation<
+          WeatherConditionOption,
+          {
+            code: string;
+            name: string;
+            localName?: string | null;
+            description?: string | null;
+            isActive: boolean;
+          }
+        >({
+          async queryFn(payload) {
+            const result = await browserRequest<unknown>(
+              "/api/catalog/weather-conditions",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: unwrap<WeatherConditionOption>(result.data as never),
+            };
+          },
+        }),
+
+      updateWeatherCondition:
+        builder.mutation<
+          WeatherConditionOption,
+          {
+            uuid: string;
+            payload: {
+              name?: string;
+              localName?: string | null;
+              description?: string | null;
+              isActive?: boolean;
+            };
+          }
+        >({
+          async queryFn({ uuid, payload }) {
+            const result = await browserRequest<unknown>(
+              `/api/catalog/weather-conditions/${encodeURIComponent(uuid)}`,
+              {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: unwrap<WeatherConditionOption>(result.data as never),
+            };
+          },
+        }),
+
+      deleteWeatherCondition:
+        builder.mutation<void, string>({
+          async queryFn(uuid) {
+            const result = await browserRequest<unknown>(
+              `/api/catalog/weather-conditions/${encodeURIComponent(uuid)}`,
+              {
+                method: "DELETE",
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: undefined,
+            };
+          },
+        }),
+
       getManagedFoods:
         builder.query<
           ApiPage<FoodRecord>,
@@ -1007,15 +1320,25 @@ export const menuManagementApi =
             payload,
             images,
           }) {
+            const hasImages = Array.isArray(images) && images.length > 0;
             const result = await browserRequest<unknown>(
               "/api/catalog/foods",
               {
                 method: "POST",
-                body: makeMultipart(
-                  "food",
-                  payload,
-                  images,
-                ),
+                ...(hasImages
+                  ? {
+                      body: makeMultipart(
+                        "food",
+                        payload,
+                        images,
+                      ),
+                    }
+                  : {
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(payload),
+                    }),
               },
             );
 
@@ -1054,7 +1377,7 @@ export const menuManagementApi =
                 body: makeMultipart(
                   "food",
                   payload,
-                  images,
+                  images ?? [],
                 ),
               },
             );
@@ -1102,21 +1425,21 @@ export const menuManagementApi =
             const p = (params ?? {}) as PublicMenuItemListParams;
             const query = makeQuery({
               page: p.page ?? 0,
-              size: p.size ?? 100,
+              size: p.size ?? 20,
               sort:
                 p.sort ??
                 "createdAt,desc",
               query: p.query,
               rootCategoryCode:
                 p.rootCategoryCode,
-              storeUuid:
-                p.storeUuid,
-              foodUuid:
-                p.foodUuid,
+              storeUuid: p.storeUuid,
+              foodUuid: p.foodUuid,
               availabilityStatus:
                 p.availabilityStatus,
               featured:
-                p.featured,
+                p.featured !== undefined
+                  ? String(p.featured)
+                  : undefined,
             });
 
             const result = await browserRequest<unknown>(
@@ -1136,13 +1459,44 @@ export const menuManagementApi =
           },
         }),
 
-      getPublishedMenuItemDetail:
+      getMenuItem:
         builder.query<MenuItemRecord, string>({
           async queryFn(uuid) {
             const result = await browserRequest<unknown>(
               `/api/catalog/menu-items/${encodeURIComponent(
                 uuid,
-              )}/detail`,
+              )}`,
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: unwrap<MenuItemRecord>(
+                result.data as never,
+              ),
+            };
+          },
+        }),
+
+      getPublishedMenuItemDetail:
+        builder.query<
+          MenuItemRecord,
+          string | { uuid: string; latitude?: number; longitude?: number }
+        >({
+          async queryFn(arg) {
+            const uuid = typeof arg === "string" ? arg : arg.uuid;
+            const params: Record<string, string | number | boolean | undefined> = {};
+            if (typeof arg === "object") {
+              if (arg.latitude != null) params.latitude = arg.latitude;
+              if (arg.longitude != null) params.longitude = arg.longitude;
+            }
+            const queryString = makeQuery(params);
+            const result = await browserRequest<unknown>(
+              `/api/catalog/menu-items/${encodeURIComponent(
+                uuid,
+              )}/detail${queryString}`,
             );
 
             if ("error" in result) {
@@ -1171,17 +1525,40 @@ export const menuManagementApi =
             payload,
             images,
           }) {
+            const hasImages = Array.isArray(images) && images.length > 0;
+            let body: FormData | string;
+            let headers: Record<string, string> | undefined;
+
+            if (hasImages) {
+              const form = new FormData();
+              form.append(
+                "request",
+                new Blob([JSON.stringify(payload)], {
+                  type: "application/json",
+                }),
+              );
+              // First image is thumbnail
+              form.append("thumbnail", images[0]);
+              // Remaining images are gallery
+              images.slice(1, 4).forEach((image) => {
+                form.append("gallery", image);
+              });
+              body = form;
+            } else {
+              headers = {
+                "Content-Type": "application/json",
+              };
+              body = JSON.stringify(payload);
+            }
+
             const result = await browserRequest<unknown>(
               `/api/catalog/stores/${encodeURIComponent(
                 storeUuid,
               )}/menu-items`,
               {
                 method: "POST",
-                body: makeMultipart(
-                  "request",
-                  payload,
-                  images,
-                ),
+                headers,
+                body,
               },
             );
 
@@ -1211,27 +1588,103 @@ export const menuManagementApi =
             payload,
             images,
           }) {
-            const result = await browserRequest<unknown>(
+            // 1. Update Core MenuItem
+            const coreResult = await browserRequest<unknown>(
               `/api/catalog/menu-items/${encodeURIComponent(
                 uuid,
               )}`,
               {
                 method: "PUT",
-                body: makeMultipart(
-                  "request",
-                  payload,
-                  images,
-                ),
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  foodUuid: payload.foodUuid,
+                  menuItem: payload.menuItem,
+                }),
               },
             );
 
-            if ("error" in result) {
-              return result;
+            if ("error" in coreResult) {
+              return coreResult;
+            }
+
+            // 2. Update Ingredients if provided
+            if (payload.ingredients !== undefined) {
+              await browserRequest<unknown>(
+                `/api/catalog/menu-items/${encodeURIComponent(
+                  uuid,
+                )}/ingredients`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    ingredients: payload.ingredients,
+                  }),
+                },
+              );
+            }
+
+            // 3. Update Dietary Types if provided
+            if (payload.dietaryTypes !== undefined) {
+              await browserRequest<unknown>(
+                `/api/catalog/menu-items/${encodeURIComponent(
+                  uuid,
+                )}/dietary-types`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    dietaryTypes: payload.dietaryTypes,
+                  }),
+                },
+              );
+            }
+
+            // 4. Update Allergen Declarations if provided
+            if (payload.allergenDeclarations !== undefined) {
+              await browserRequest<unknown>(
+                `/api/catalog/menu-items/${encodeURIComponent(
+                  uuid,
+                )}/allergen-declarations`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    declarations: payload.allergenDeclarations,
+                  }),
+                },
+              );
+            }
+
+            // 5. Update Images if any new images selected
+            if (Array.isArray(images) && images.length > 0) {
+              const form = new FormData();
+              form.append("thumbnail", images[0]);
+              images.slice(1, 4).forEach((image) => {
+                form.append("gallery", image);
+              });
+
+              await browserRequest<unknown>(
+                `/api/catalog/menu-items/${encodeURIComponent(
+                  uuid,
+                )}/images`,
+                {
+                  method: "PUT",
+                  body: form,
+                },
+              );
             }
 
             return {
               data: unwrap<MenuItemRecord>(
-                result.data as never,
+                coreResult.data as never,
               ),
             };
           },
@@ -1258,6 +1711,134 @@ export const menuManagementApi =
             };
           },
         }),
+
+      replaceMenuItemIngredients:
+        builder.mutation<
+          unknown,
+          {
+            uuid: string;
+            ingredients: MenuItemIngredientPayload[];
+          }
+        >({
+          async queryFn({ uuid, ingredients }) {
+            const result = await browserRequest<unknown>(
+              `/api/catalog/menu-items/${encodeURIComponent(
+                uuid,
+              )}/ingredients`,
+              {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ingredients }),
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: result.data,
+            };
+          },
+        }),
+
+      replaceMenuItemDietaryTypes:
+        builder.mutation<
+          unknown,
+          {
+            uuid: string;
+            dietaryTypes: MenuItemDietaryTypePayload[];
+          }
+        >({
+          async queryFn({ uuid, dietaryTypes }) {
+            const result = await browserRequest<unknown>(
+              `/api/catalog/menu-items/${encodeURIComponent(
+                uuid,
+              )}/dietary-types`,
+              {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ dietaryTypes }),
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: result.data,
+            };
+          },
+        }),
+
+      replaceMenuItemAllergens:
+        builder.mutation<
+          unknown,
+          {
+            uuid: string;
+            declarations: MenuItemAllergenDeclarationPayload[];
+          }
+        >({
+          async queryFn({ uuid, declarations }) {
+            const result = await browserRequest<unknown>(
+              `/api/catalog/menu-items/${encodeURIComponent(
+                uuid,
+              )}/allergen-declarations`,
+              {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ declarations }),
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: result.data,
+            };
+          },
+        }),
+
+      replaceMenuItemImages:
+        builder.mutation<
+          unknown,
+          {
+            uuid: string;
+            thumbnail?: File | null;
+            gallery?: File[];
+          }
+        >({
+          async queryFn({ uuid, thumbnail, gallery = [] }) {
+            const form = new FormData();
+            if (thumbnail) {
+              form.append("thumbnail", thumbnail);
+            }
+            gallery.forEach((file) => {
+              form.append("gallery", file);
+            });
+
+            const result = await browserRequest<unknown>(
+              `/api/catalog/menu-items/${encodeURIComponent(
+                uuid,
+              )}/images`,
+              {
+                method: "PUT",
+                body: form,
+              },
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: result.data,
+            };
+          },
+        }),
     }),
 
     overrideExisting: false,
@@ -1268,6 +1849,21 @@ export const {
   useGetManagedCuisinesQuery,
   useGetManagedIngredientsQuery,
   useGetManagedStoresQuery,
+  useGetManagedSeasonsQuery,
+  useGetManagedEventsQuery,
+  useGetManagedWeatherConditionsQuery,
+
+  useCreateSeasonMutation,
+  useUpdateSeasonMutation,
+  useDeleteSeasonMutation,
+
+  useCreateEventMutation,
+  useUpdateEventMutation,
+  useDeleteEventMutation,
+
+  useCreateWeatherConditionMutation,
+  useUpdateWeatherConditionMutation,
+  useDeleteWeatherConditionMutation,
 
   useGetManagedFoodsQuery,
   useGetManagedFoodQuery,
@@ -1276,8 +1872,13 @@ export const {
   useDeleteManagedFoodMutation,
 
   useGetPublishedMenuItemsQuery,
+  useGetMenuItemQuery,
   useGetPublishedMenuItemDetailQuery,
   useCreateStoreMenuItemMutation,
   useUpdateStoreMenuItemMutation,
   useDeleteStoreMenuItemMutation,
+  useReplaceMenuItemIngredientsMutation,
+  useReplaceMenuItemDietaryTypesMutation,
+  useReplaceMenuItemAllergensMutation,
+  useReplaceMenuItemImagesMutation,
 } = menuManagementApi;

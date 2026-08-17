@@ -18,6 +18,7 @@ import {
   useGetAdminProfileQuery,
   useGetAdminUserProfilesQuery,
   useGetAdminUserQuery,
+  useHardDeleteAdminUserMutation,
   useRestoreAdminProfileMutation,
   useUpdateAdminUserStatusMutation,
 } from "@/src/app/store/userProfileApi";
@@ -32,6 +33,7 @@ import type {
 import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
 
 import DeleteUserConfirmModal from "./DeleteUserConfirmModal";
+import HardDeleteUserConfirmModal from "./HardDeleteUserConfirmModal";
 import ProfileActionConfirmModal from "./ProfileActionConfirmModal";
 import ProfileDetailPanel from "./ProfileDetailPanel";
 import RelatedProfilesPanel from "./RelatedProfilesPanel";
@@ -62,6 +64,9 @@ export default function UserDetailManager({
     useState<AdminUser | null>(null);
 
   const [deleteUser, setDeleteUser] =
+    useState<AdminUser | null>(null);
+
+  const [hardDeleteUser, setHardDeleteUser] =
     useState<AdminUser | null>(null);
 
   const [profileAction, setProfileAction] = useState<{
@@ -131,6 +136,9 @@ export default function UserDetailManager({
   const [deleteAdminUser, { isLoading: deletingUser }] =
     useDeleteAdminUserMutation();
 
+  const [hardDeleteAdminUser, { isLoading: hardDeletingUser }] =
+    useHardDeleteAdminUserMutation();
+
   const [deleteAdminProfile, { isLoading: deletingProfile }] =
     useDeleteAdminProfileMutation();
 
@@ -181,6 +189,33 @@ export default function UserDetailManager({
       setNotice({
         type: "success",
         text: "User ត្រូវបាន soft-delete។ កំពុងត្រឡប់ទៅ User list...",
+      });
+
+      router.replace("/users");
+      router.refresh();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAdminApiErrorMessage(requestError),
+      });
+    }
+  };
+
+  const handleHardDeleteUser = async () => {
+    if (!hardDeleteUser) {
+      return;
+    }
+
+    const target = hardDeleteUser;
+
+    try {
+      await hardDeleteAdminUser(target.uuid).unwrap();
+
+      setHardDeleteUser(null);
+
+      setNotice({
+        type: "success",
+        text: "User ត្រូវបាន hard-delete ជាអចិន្ត្រៃយ៍។ កំពុងត្រឡប់ទៅ User list...",
       });
 
       router.replace("/users");
@@ -256,7 +291,7 @@ export default function UserDetailManager({
   }
 
   const profileBusy = deletingProfile || restoringProfile;
-  const userBusy = updatingStatus || deletingUser;
+  const userBusy = updatingStatus || deletingUser || hardDeletingUser;
 
   return (
     <div className="w-full min-w-0 max-w-full space-y-5">
@@ -265,6 +300,7 @@ export default function UserDetailManager({
         busy={userBusy}
         onStatusEdit={() => setStatusUser(user)}
         onDelete={() => setDeleteUser(user)}
+        onHardDelete={() => setHardDeleteUser(user)}
       />
 
       {notice && (
@@ -347,6 +383,17 @@ export default function UserDetailManager({
           }
         }}
         onConfirm={handleDeleteUser}
+      />
+
+      <HardDeleteUserConfirmModal
+        user={hardDeleteUser}
+        deleting={hardDeletingUser}
+        onClose={() => {
+          if (!hardDeletingUser) {
+            setHardDeleteUser(null);
+          }
+        }}
+        onConfirm={handleHardDeleteUser}
       />
 
       <ProfileActionConfirmModal

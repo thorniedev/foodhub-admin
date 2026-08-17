@@ -19,14 +19,21 @@ import {
   useDeleteManagedFoodMutation,
   useDeleteStoreMenuItemMutation,
   useGetManagedCuisinesQuery,
+  useGetManagedEventsQuery,
   useGetManagedFoodCategoriesQuery,
   useGetManagedFoodsQuery,
   useGetManagedIngredientsQuery,
+  useGetManagedSeasonsQuery,
   useGetManagedStoresQuery,
+  useGetManagedWeatherConditionsQuery,
   useGetPublishedMenuItemsQuery,
   useUpdateManagedFoodMutation,
   useUpdateStoreMenuItemMutation,
 } from "@/src/app/store/menuManagementApi";
+import { useGetMealTypesQuery } from "@/src/app/store/mealTypeApi";
+import { useGetAgeGroupsQuery } from "@/src/app/store/ageGroupApi";
+import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
+import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
 
 import { getMenuManagementApiError } from "@/src/lib/menuManagementApiError";
 
@@ -123,6 +130,13 @@ export default function MenuItemsManager() {
   const cuisinesQuery = useGetManagedCuisinesQuery();
   const ingredientsQuery = useGetManagedIngredientsQuery();
   const storesQuery = useGetManagedStoresQuery();
+  const seasonsQuery = useGetManagedSeasonsQuery();
+  const eventsQuery = useGetManagedEventsQuery();
+  const weatherQuery = useGetManagedWeatherConditionsQuery();
+  const mealTypesQuery = useGetMealTypesQuery({ page: 0, size: 100 });
+  const ageGroupsQuery = useGetAgeGroupsQuery({ page: 0, size: 100 });
+  const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 });
+  const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 });
 
   const [createFood, { isLoading: creatingFood }] =
     useCreateManagedFoodMutation();
@@ -275,7 +289,7 @@ export default function MenuItemsManager() {
 
       setNotice({
         type: "success",
-        text: "បាន deactivate/delete Food Catalog។",
+        text: "បានប្តូរ Food Catalog ទៅជា 'អសកម្ម' (Inactive) ដោយជោគជ័យ។",
       });
 
       await refreshAll();
@@ -475,6 +489,12 @@ export default function MenuItemsManager() {
         item={editingFood}
         categories={categoriesQuery.data ?? []}
         cuisines={cuisinesQuery.data ?? []}
+        seasons={seasonsQuery.data ?? []}
+        events={eventsQuery.data ?? []}
+        weatherConditions={weatherQuery.data ?? []}
+        mealTypes={mealTypesQuery.data?.contents ?? []}
+        ageGroups={ageGroupsQuery.data?.contents ?? []}
+        dietaryTypes={dietaryTypesQuery.data?.contents ?? []}
         saving={creatingFood || updatingFood}
         onClose={() => {
           if (creatingFood || updatingFood) return;
@@ -490,6 +510,8 @@ export default function MenuItemsManager() {
         foods={foods}
         stores={storesQuery.data ?? []}
         ingredients={ingredientsQuery.data ?? []}
+        dietaryTypes={dietaryTypesQuery.data?.contents ?? []}
+        allergens={allergensQuery.data?.contents ?? []}
         saving={creatingMenuItem || updatingMenuItem}
         onClose={() => {
           if (creatingMenuItem || updatingMenuItem) {
@@ -503,12 +525,12 @@ export default function MenuItemsManager() {
 
       <DeleteConfirmModal
         open={Boolean(deletingFood)}
-        title="លុប Food Catalog?"
+        title="បិទដំណើរការ Food Catalog (Deactivate)?"
         description={
           deletingFood
-            ? `Food: ${
+            ? `Food "${
                 deletingFood.localName || deletingFood.canonicalName
-              }. Backend Food DELETE គឺសម្រាប់ deactivate/cleanup។`
+              }" នឹងត្រូវប្តូរស្ថានភាពទៅជា 'អសកម្ម' (Inactive)។`
             : ""
         }
         deleting={deletingFoodRequest}

@@ -19,6 +19,7 @@ import {
   useCreateAdminUserMutation,
   useDeleteAdminUserMutation,
   useGetAdminUsersQuery,
+  useHardDeleteAdminUserMutation,
   useRestoreAdminUserMutation,
   useUpdateAdminUserStatusMutation,
 } from "@/src/app/store/userProfileApi";
@@ -34,6 +35,7 @@ import { displayName } from "@/src/lib/userProfileFormat";
 import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
 
 import DeleteUserConfirmModal from "./DeleteUserConfirmModal";
+import HardDeleteUserConfirmModal from "./HardDeleteUserConfirmModal";
 import UserCreateModal from "./UserCreateModal";
 import UserEditModal from "./UserEditModal";
 import UsersHeader from "./UsersHeader";
@@ -97,6 +99,8 @@ export default function UsersManager() {
 
   const [deleteUser, setDeleteUser] = useState<AdminUser | null>(null);
 
+  const [hardDeleteUser, setHardDeleteUser] = useState<AdminUser | null>(null);
+
   const [recentlyDeleted, setRecentlyDeleted] = useState<AdminUser | null>(
     null,
   );
@@ -141,6 +145,9 @@ export default function UsersManager() {
 
   const [deleteAdminUser, { isLoading: deleting }] =
     useDeleteAdminUserMutation();
+
+  const [hardDeleteAdminUser, { isLoading: hardDeleting }] =
+    useHardDeleteAdminUserMutation();
 
   const [restoreAdminUser, { isLoading: restoring }] =
     useRestoreAdminUserMutation();
@@ -425,6 +432,38 @@ export default function UsersManager() {
   };
 
   /* =======================================================
+     HARD DELETE
+  ======================================================= */
+
+  const handleHardDelete = async () => {
+    if (!hardDeleteUser) {
+      return;
+    }
+
+    const target = hardDeleteUser;
+
+    setNotice(null);
+
+    try {
+      await hardDeleteAdminUser(target.uuid).unwrap();
+
+      setHardDeleteUser(null);
+
+      setNotice({
+        type: "success",
+        text: "បាន hard-delete អ្នកប្រើប្រាស់ជាអចិន្ត្រៃយ៍។",
+      });
+
+      await refetch();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAdminApiErrorMessage(requestError),
+      });
+    }
+  };
+
+  /* =======================================================
      RESTORE
   ======================================================= */
 
@@ -452,7 +491,7 @@ export default function UsersManager() {
     }
   };
 
-  const busy = creating || updatingStatus || deleting || restoring;
+  const busy = creating || updatingStatus || deleting || hardDeleting || restoring;
 
   /* =======================================================
      UI
@@ -829,6 +868,7 @@ export default function UsersManager() {
             disabled={busy}
             onStatusEdit={setStatusUser}
             onDelete={setDeleteUser}
+            onHardDelete={setHardDeleteUser}
           />
         )}
 
@@ -878,6 +918,17 @@ export default function UsersManager() {
           }
         }}
         onConfirm={handleDelete}
+      />
+
+      <HardDeleteUserConfirmModal
+        user={hardDeleteUser}
+        deleting={hardDeleting}
+        onClose={() => {
+          if (!hardDeleting) {
+            setHardDeleteUser(null);
+          }
+        }}
+        onConfirm={handleHardDelete}
       />
     </div>
   );

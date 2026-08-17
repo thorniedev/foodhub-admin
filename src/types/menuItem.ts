@@ -211,10 +211,12 @@ export interface CreateCatalogFoodPayload {
   primaryMediaUuids: string[];
   defaultSpiceLevel: number;
   nutritionData: {
-    calories: number;
-    proteinGrams: number;
-    carbsGrams: number;
-    fatGrams: number;
+    calories?: number;
+    proteinGrams?: number;
+    carbohydrateGrams?: number;
+    carbsGrams?: number;
+    fatGrams?: number;
+    fiberGrams?: number;
   };
   dietaryTypes: Array<Record<string, unknown>>;
   seasons: Array<Record<string, unknown>>;

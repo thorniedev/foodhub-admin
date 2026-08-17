@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { AlertTriangle, ArrowLeft, Loader2 } from "lucide-react";
 
 import {
+  useDeleteShopMutation,
   useGetShopByUuidQuery,
   useGetStoreHoursQuery,
   useUpdateShopMutation,
@@ -15,6 +16,7 @@ import type { StoreStatusAction, UpdateStorePayload } from "@/src/types/shop";
 
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
 
+import DeleteShopConfirmModal from "./DeleteShopConfirmModal";
 import ShopEditModal from "./ShopEditModal";
 import ShopStatusModal from "./ShopStatusModal";
 import StoreHoursModal from "./StoreHoursModal";
@@ -22,11 +24,13 @@ import StoreHoursModal from "./StoreHoursModal";
 import StoreContactLocationSection from "./detail/StoreContactLocationSection";
 import StoreHoursSection from "./detail/StoreHoursSection";
 import StoreMediaSection from "./detail/StoreMediaSection";
+import StoreMenuItemsSection from "./detail/StoreMenuItemsSection";
 import StoreOverviewSection from "./detail/StoreOverviewSection";
 import StoreProfileHeader from "./detail/StoreProfileHeader";
 import StoreRatingsSection from "./detail/StoreRatingsSection";
 import StoreSocialLinksSection from "./detail/StoreSocialLinksSection";
 import StoreSystemInfoSection from "./detail/StoreSystemInfoSection";
+import MenuItemDetailModal from "../menu-management/MenuItemDetailModal";
 
 interface ShopDetailManagerProps {
   storeUuid?: string;
@@ -120,12 +124,13 @@ export default function ShopDetailManager({
   });
 
   const [updateStore, { isLoading: updatingStore }] = useUpdateShopMutation();
+  const [deleteStore, { isLoading: deletingStore }] = useDeleteShopMutation();
 
   const [editOpen, setEditOpen] = useState(false);
-
   const [statusOpen, setStatusOpen] = useState(false);
-
   const [hoursOpen, setHoursOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedMenuUuid, setSelectedMenuUuid] = useState<string | null>(null);
 
   const [statusAction, setStatusAction] = useState<StoreStatusAction>("REVIEW");
 
@@ -294,7 +299,25 @@ export default function ShopDetailManager({
     await Promise.all([refetchStore(), refetchHours()]);
   };
 
-  const busy = updatingStore || storeFetching;
+  /* =======================================================
+     DELETE STORE
+  ======================================================= */
+  const handleDelete = async () => {
+    try {
+      setNotice(null);
+      await deleteStore(resolvedStoreUuid).unwrap();
+      router.push("/shops");
+      router.refresh();
+    } catch (deleteError) {
+      setNotice({
+        type: "error",
+        text: getShopApiErrorMessage(deleteError),
+      });
+      setDeleteOpen(false);
+    }
+  };
+
+  const busy = updatingStore || deletingStore || storeFetching;
 
   /* =======================================================
      UI
@@ -327,6 +350,10 @@ export default function ShopDetailManager({
           onHours={() => {
             setNotice(null);
             setHoursOpen(true);
+          }}
+          onDelete={() => {
+            setNotice(null);
+            setDeleteOpen(true);
           }}
         />
       </div>
@@ -376,6 +403,13 @@ export default function ShopDetailManager({
       >
         <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
           <StoreOverviewSection store={store} />
+        </div>
+
+        <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
+          <StoreMenuItemsSection
+            storeUuid={resolvedStoreUuid}
+            onViewItem={(item) => setSelectedMenuUuid(item.uuid)}
+          />
         </div>
 
         <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
@@ -443,6 +477,29 @@ export default function ShopDetailManager({
         }}
         onChanged={refreshHours}
       />
+
+      {/* =================================================
+          DELETE STORE MODAL
+      ================================================== */}
+      <DeleteShopConfirmModal
+        store={store}
+        open={deleteOpen}
+        loading={deletingStore}
+        onClose={() => {
+          if (!deletingStore) setDeleteOpen(false);
+        }}
+        onConfirm={handleDelete}
+      />
+
+      {/* =================================================
+          MENU ITEM DETAIL MODAL
+      ================================================== */}
+      {selectedMenuUuid && (
+        <MenuItemDetailModal
+          uuid={selectedMenuUuid}
+          onClose={() => setSelectedMenuUuid(null)}
+        />
+      )}
     </div>
   );
 }

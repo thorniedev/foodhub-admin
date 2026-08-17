@@ -15,11 +15,21 @@ function readMessage(value: unknown): string | null {
 
   const record = value as Record<string, unknown>;
 
+  if (record.fieldErrors && Array.isArray(record.fieldErrors)) {
+    const messages = (record.fieldErrors as Array<{ field?: string; message?: string }>)
+      .map((f) => (f.field ? `${f.field}: ${f.message}` : f.message))
+      .filter(Boolean);
+    if (messages.length) {
+      return messages.join(", ");
+    }
+  }
+
   for (const key of [
     "message",
     "error",
     "error_description",
     "detail",
+    "errorCode",
   ]) {
     const candidate = record[key];
 

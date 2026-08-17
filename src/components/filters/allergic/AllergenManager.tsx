@@ -15,6 +15,7 @@ import {
   useCreateAllergenMutation,
   useDeleteAllergenMutation,
   useGetAllergensQuery,
+  useHardDeleteAllergenMutation,
   useRestoreAllergenMutation,
   useUpdateAllergenMutation,
 } from "@/src/app/store/allergenApi";
@@ -31,12 +32,14 @@ import {
   type ResourceStatusFilter,
 } from "@/src/types/safetyResource";
 
+import AllergenDetailModal from "./AllergenDetailModal";
 import AllergenFormModal from "./AllergenFormModal";
 import AllergensHeader from "./AllergensHeader";
 import AllergensPagination from "./AllergensPagination";
 import AllergensTable from "./AllergensTable";
 import AllergensTabs from "./AllergensTabs";
 import DeleteAllergenConfirmModal from "./DeleteAllergenConfirmModal";
+import HardDeleteAllergenConfirmModal from "./HardDeleteAllergenConfirmModal";
 
 /* =========================================================
    SORT TYPE
@@ -80,9 +83,15 @@ export default function AllergenManager() {
 
   const [editing, setEditing] = useState<Allergen | null>(null);
 
+  const [viewing, setViewing] = useState<Allergen | null>(null);
+
   const [formOpen, setFormOpen] = useState(false);
 
   const [deleting, setDeleting] = useState<Allergen | null>(null);
+
+  const [hardDeletingItem, setHardDeletingItem] = useState<Allergen | null>(
+    null,
+  );
 
   const [message, setMessage] = useState<ApiMessage | null>(null);
 
@@ -116,6 +125,9 @@ export default function AllergenManager() {
   const [updateItem, { isLoading: isUpdating }] = useUpdateAllergenMutation();
 
   const [deleteItem, { isLoading: isDeleting }] = useDeleteAllergenMutation();
+
+  const [hardDeleteItem, { isLoading: isHardDeleting }] =
+    useHardDeleteAllergenMutation();
 
   const [restoreItem, { isLoading: isRestoring }] =
     useRestoreAllergenMutation();
@@ -284,7 +296,12 @@ export default function AllergenManager() {
      BUSY
   ======================================================= */
 
-  const busy = isCreating || isUpdating || isDeleting || isRestoring;
+  const busy =
+    isCreating ||
+    isUpdating ||
+    isDeleting ||
+    isHardDeleting ||
+    isRestoring;
 
   /* =======================================================
      SORT OPTIONS
@@ -429,6 +446,34 @@ export default function AllergenManager() {
       setMessage({
         type: "error",
         text: getApiErrorMessage(restoreError),
+      });
+    }
+  };
+
+  /* =======================================================
+     HARD DELETE
+  ======================================================= */
+
+  const handleHardDelete = async () => {
+    if (!hardDeletingItem) {
+      return;
+    }
+
+    try {
+      await hardDeleteItem(hardDeletingItem.code).unwrap();
+
+      setMessage({
+        type: "success",
+        text: `បានលុបអាឡែស៊ី "${hardDeletingItem.name || hardDeletingItem.code}" ជាអចិន្ត្រៃយ៍ដោយជោគជ័យ។`,
+      });
+
+      setHardDeletingItem(null);
+
+      await refetch();
+    } catch (hardDeleteError) {
+      setMessage({
+        type: "error",
+        text: getApiErrorMessage(hardDeleteError),
       });
     }
   };
@@ -798,12 +843,14 @@ export default function AllergenManager() {
         <AllergensTable
           allergens={sortedItems}
           disabled={busy}
+          onView={(item) => setViewing(item)}
           onEdit={(item) => {
             setEditing(item);
 
             setFormOpen(true);
           }}
           onDelete={setDeleting}
+          onHardDelete={(item) => setHardDeletingItem(item)}
           onRestore={(item) => void handleRestore(item)}
         />
 
@@ -851,6 +898,22 @@ export default function AllergenManager() {
           }
         }}
         onConfirm={handleDelete}
+      />
+
+      <HardDeleteAllergenConfirmModal
+        item={hardDeletingItem}
+        deleting={isHardDeleting}
+        onClose={() => {
+          if (!isHardDeleting) {
+            setHardDeletingItem(null);
+          }
+        }}
+        onConfirm={handleHardDelete}
+      />
+
+      <AllergenDetailModal
+        item={viewing}
+        onClose={() => setViewing(null)}
       />
     </div>
   );

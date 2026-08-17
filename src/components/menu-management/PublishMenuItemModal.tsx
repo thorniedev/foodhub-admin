@@ -1,13 +1,17 @@
 "use client";
 
-import { Loader2, Plus, Save, Trash2, X } from "lucide-react";
+import { Loader2, Plus, Save, Trash2, Utensils, X, ShieldAlert, Sparkles, Heart } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import ImagePicker from "./ImagePicker";
 
+import type { Allergen } from "@/src/types/allergen";
+import type { DietaryType } from "@/src/types/dietaryType";
 import type {
   FoodRecord,
   IngredientOption,
+  MenuItemAllergenDeclarationPayload,
+  MenuItemDietaryTypePayload,
   MenuItemIngredientPayload,
   MenuItemRecord,
   MenuItemWritePayload,
@@ -19,6 +23,20 @@ type IngredientRow = {
   quantity: string;
   unit: string;
   isOptional: boolean;
+  notes: string;
+};
+
+type DietaryTypeRow = {
+  dietaryTypeUuid: string;
+  verificationStatus: "VERIFIED" | "UNVERIFIED" | string;
+  notes: string;
+};
+
+type AllergenRow = {
+  allergenUuid: string;
+  declarationType: "CONTAINS" | "MAY_CONTAIN" | string;
+  riskLevel: "LOW" | "MEDIUM" | "HIGH" | string;
+  verificationStatus: "VERIFIED" | "UNVERIFIED" | string;
   notes: string;
 };
 
@@ -60,7 +78,12 @@ function storeLabel(store: StoreOption): string {
 }
 
 function foodLabel(food: FoodRecord): string {
-  return food.localName || food.canonicalName;
+  const local = food.localName?.trim();
+  const canonical = food.canonicalName?.trim();
+  if (local && canonical && local !== canonical) {
+    return `${local} (${canonical})`;
+  }
+  return local || canonical || food.uuid;
 }
 
 export default function PublishMenuItemModal({
@@ -69,6 +92,8 @@ export default function PublishMenuItemModal({
   foods,
   stores,
   ingredients,
+  dietaryTypes = [],
+  allergens = [],
   saving,
   onClose,
   onSubmit,
@@ -78,6 +103,8 @@ export default function PublishMenuItemModal({
   foods: FoodRecord[];
   stores: StoreOption[];
   ingredients: IngredientOption[];
+  dietaryTypes?: DietaryType[];
+  allergens?: Allergen[];
   saving: boolean;
   onClose: () => void;
   onSubmit: (
@@ -87,7 +114,10 @@ export default function PublishMenuItemModal({
   ) => Promise<void>;
 }) {
   const [values, setValues] = useState<FormState>(EMPTY);
-  const [rows, setRows] = useState<IngredientRow[]>([]);
+  const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>([]);
+  const [dietaryTypeRows, setDietaryTypeRows] = useState<DietaryTypeRow[]>([]);
+  const [allergenRows, setAllergenRows] = useState<AllergenRow[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -96,21 +126,54 @@ export default function PublishMenuItemModal({
 
     if (!item) {
       setValues(EMPTY);
-      setRows([]);
+      setIngredientRows([]);
+      setDietaryTypeRows([]);
+      setAllergenRows([]);
       setImages([]);
+      setExistingImages([]);
       setError(null);
       return;
     }
 
+    const list = item.images?.length
+      ? item.images
+      : item.gallery?.length
+      ? item.gallery
+      : item.primaryMediaUrls?.length
+      ? item.primaryMediaUrls
+      : [item.thumbnail || item.imageUrl].filter(Boolean);
+    setExistingImages(list as string[]);
+
+    const matchedStoreUuid =
+      item.storeUuid ||
+      item.store?.uuid ||
+      stores.find(
+        (s) =>
+          (item.store?.name &&
+            (s.name === item.store.name ||
+              s.storeName === item.store.name ||
+              s.localName === item.store.name)) ||
+          (item.store?.storeName &&
+            (s.name === item.store.storeName ||
+              s.storeName === item.store.storeName)),
+      )?.uuid ||
+      "";
+
+    const matchedFoodUuid =
+      item.foodUuid ||
+      item.food?.uuid ||
+      foods.find(
+        (f) =>
+          (item.food?.canonicalName &&
+            f.canonicalName?.toLowerCase() ===
+              item.food.canonicalName?.toLowerCase()) ||
+          (item.food?.localName && f.localName === item.food.localName),
+      )?.uuid ||
+      "";
+
     setValues({
-      storeUuid:
-        item.storeUuid ||
-        item.store?.uuid ||
-        "",
-      foodUuid:
-        item.foodUuid ||
-        item.food?.uuid ||
-        "",
+      storeUuid: matchedStoreUuid,
+      foodUuid: matchedFoodUuid,
       name: item.name || "",
       description: item.description || "",
       price:
@@ -130,49 +193,145 @@ export default function PublishMenuItemModal({
       source: item.source || "MANUAL",
     });
 
-    setRows(
-      (item.ingredients ?? []).map((ingredient) => ({
-        ingredientUuid:
-          ingredient.ingredientUuid ||
-          ingredient.uuid ||
-          "",
-        quantity:
-          ingredient.quantity != null
-            ? String(ingredient.quantity)
-            : "",
-        unit: ingredient.unit || "",
-        isOptional: Boolean(ingredient.isOptional),
-        notes: ingredient.notes || "",
-      })),
+    setIngredientRows(
+      (item.ingredients ?? []).map((raw: any) => {
+        if (typeof raw === "string") {
+          const found = ingredients.find(
+            (i) => i.name === raw || i.code === raw || i.uuid === raw,
+          );
+          return {
+            ingredientUuid: found?.uuid || raw,
+            quantity: "",
+            unit: "",
+            isOptional: false,
+            notes: "",
+          };
+        }
+        const found = ingredients.find(
+          (i) =>
+            i.uuid === raw.ingredientUuid ||
+            i.uuid === raw.uuid ||
+            (raw.name && i.name === raw.name) ||
+            (raw.code && i.code === raw.code),
+        );
+        return {
+          ingredientUuid:
+            found?.uuid || raw.ingredientUuid || raw.uuid || "",
+          quantity:
+            raw.quantity != null ? String(raw.quantity) : "",
+          unit: raw.unit || "",
+          isOptional: Boolean(raw.isOptional),
+          notes: raw.notes || "",
+        };
+      }),
+    );
+
+    setDietaryTypeRows(
+      (item.dietaryTypes ?? item.food?.dietaryTypes ?? []).map((raw: any) => {
+        const found = dietaryTypes.find(
+          (d) =>
+            d.uuid === raw.dietaryTypeUuid ||
+            d.uuid === raw.uuid ||
+            (raw.code && d.code === raw.code) ||
+            (raw.name && d.name === raw.name),
+        );
+        return {
+          dietaryTypeUuid:
+            found?.uuid || raw.dietaryTypeUuid || raw.uuid || "",
+          verificationStatus: raw.verificationStatus || "UNVERIFIED",
+          notes: raw.notes || "",
+        };
+      }).filter((d) => Boolean(d.dietaryTypeUuid)),
+    );
+
+    setAllergenRows(
+      (item.allergenDeclarations ?? []).map((raw: any) => {
+        const found = allergens.find(
+          (a) =>
+            a.uuid === raw.allergenUuid ||
+            a.uuid === raw.uuid ||
+            (raw.code && a.code === raw.code) ||
+            (raw.name && a.name === raw.name),
+        );
+        return {
+          allergenUuid:
+            found?.uuid || raw.allergenUuid || raw.uuid || "",
+          declarationType: raw.declarationType || "MAY_CONTAIN",
+          riskLevel: raw.riskLevel || "MEDIUM",
+          verificationStatus: raw.verificationStatus || "UNVERIFIED",
+          notes: raw.notes || "",
+        };
+      }).filter((a) => Boolean(a.allergenUuid)),
     );
 
     setImages([]);
     setError(null);
-  }, [item, open]);
+  }, [item, open, stores, foods, ingredients, dietaryTypes, allergens]);
 
   const activeFoods = useMemo(
-    () =>
-      foods.filter((food) => food.isActive !== false),
+    () => foods.filter((food) => food.isActive !== false),
     [foods],
   );
 
   const activeIngredients = useMemo(
-    () =>
-      ingredients.filter(
-        (ingredient) => ingredient.isActive !== false,
-      ),
+    () => ingredients.filter((ingredient) => ingredient.isActive !== false),
     [ingredients],
   );
 
-  const updateRow = (
+  const activeDietaryTypes = useMemo(
+    () => dietaryTypes.filter((dt) => dt.active !== false),
+    [dietaryTypes],
+  );
+
+  const activeAllergens = useMemo(
+    () => allergens.filter((al) => al.active !== false),
+    [allergens],
+  );
+
+  const handleFoodSelect = (selectedUuid: string) => {
+    const selectedFood = foods.find((f) => f.uuid === selectedUuid);
+    setValues((current) => {
+      const isAutoName = !current.name || (selectedFood && foods.some((f) => f.canonicalName === current.name || f.localName === current.name));
+      const isAutoDesc = !current.description || (selectedFood && foods.some((f) => f.description === current.description));
+
+      return {
+        ...current,
+        foodUuid: selectedUuid,
+        name: isAutoName && selectedFood ? (selectedFood.localName || selectedFood.canonicalName) : current.name,
+        description: isAutoDesc && selectedFood?.description ? selectedFood.description : current.description,
+      };
+    });
+  };
+
+  const updateIngredientRow = (
     index: number,
     changes: Partial<IngredientRow>,
   ) => {
-    setRows((current) =>
+    setIngredientRows((current) =>
       current.map((row, rowIndex) =>
-        rowIndex === index
-          ? { ...row, ...changes }
-          : row,
+        rowIndex === index ? { ...row, ...changes } : row,
+      ),
+    );
+  };
+
+  const updateDietaryTypeRow = (
+    index: number,
+    changes: Partial<DietaryTypeRow>,
+  ) => {
+    setDietaryTypeRows((current) =>
+      current.map((row, rowIndex) =>
+        rowIndex === index ? { ...row, ...changes } : row,
+      ),
+    );
+  };
+
+  const updateAllergenRow = (
+    index: number,
+    changes: Partial<AllergenRow>,
+  ) => {
+    setAllergenRows((current) =>
+      current.map((row, rowIndex) =>
+        rowIndex === index ? { ...row, ...changes } : row,
       ),
     );
   };
@@ -182,62 +341,71 @@ export default function PublishMenuItemModal({
       setError(null);
 
       if (!item && !values.storeUuid) {
-        throw new Error("Store is required.");
+        throw new Error("សូមជ្រើសរើស Store (Store is required).");
       }
 
       if (!values.foodUuid) {
-        throw new Error("Food is required.");
+        throw new Error("សូមជ្រើសរើស Food Catalog (Food is required).");
       }
 
       if (!values.name.trim()) {
-        throw new Error("Menu item name is required.");
+        throw new Error("សូមបញ្ចូលឈ្មោះ Menu Item (Name is required).");
       }
 
       const price = Number(values.price);
-
-      if (!Number.isFinite(price)) {
-        throw new Error("Price is required.");
+      if (!Number.isFinite(price) || price < 0) {
+        throw new Error("សូមបញ្ចូលតម្លៃត្រឹមត្រូវ (Valid price is required).");
       }
 
-      const ingredientPayload:
-        MenuItemIngredientPayload[] = rows
-          .filter((row) => row.ingredientUuid)
-          .map((row) => ({
-            ingredientUuid: row.ingredientUuid,
-            quantity: row.quantity.trim()
-              ? Number(row.quantity)
-              : null,
-            unit: row.unit.trim() || null,
-            isOptional: row.isOptional,
-            notes: row.notes.trim() || null,
-          }));
+      const ingredientPayload: MenuItemIngredientPayload[] = ingredientRows
+        .filter((row) => row.ingredientUuid)
+        .map((row) => ({
+          ingredientUuid: row.ingredientUuid,
+          quantity: row.quantity.trim() ? Number(row.quantity) : null,
+          unit: row.unit.trim() || null,
+          isOptional: Boolean(row.isOptional),
+          notes: row.notes.trim() || null,
+        }));
+
+      const dietaryTypePayload: MenuItemDietaryTypePayload[] = dietaryTypeRows
+        .filter((row) => row.dietaryTypeUuid)
+        .map((row) => ({
+          dietaryTypeUuid: row.dietaryTypeUuid,
+          verificationStatus: row.verificationStatus || "UNVERIFIED",
+          notes: row.notes.trim() || null,
+        }));
+
+      const allergenPayload: MenuItemAllergenDeclarationPayload[] = allergenRows
+        .filter((row) => row.allergenUuid)
+        .map((row) => ({
+          allergenUuid: row.allergenUuid,
+          declarationType: row.declarationType || "MAY_CONTAIN",
+          riskLevel: row.riskLevel || "MEDIUM",
+          verificationStatus: row.verificationStatus || "UNVERIFIED",
+          notes: row.notes.trim() || null,
+        }));
 
       const payload: MenuItemWritePayload = {
         foodUuid: values.foodUuid,
         menuItem: {
           name: values.name.trim(),
-          description:
-            values.description.trim() || null,
+          description: values.description.trim() || null,
           price,
-          currencyCode:
-            values.currencyCode.trim() || "USD",
-          preparationTimeMinutes:
-            values.preparationTimeMinutes.trim()
-              ? Number(values.preparationTimeMinutes)
-              : null,
-          availabilityStatus:
-            values.availabilityStatus,
-          ingredientDataStatus:
-            values.ingredientDataStatus,
+          currencyCode: values.currencyCode.trim() || "USD",
+          preparationTimeMinutes: values.preparationTimeMinutes.trim()
+            ? Number(values.preparationTimeMinutes)
+            : null,
+          availabilityStatus: values.availabilityStatus,
+          ingredientDataStatus: values.ingredientDataStatus,
           isFeatured: values.isFeatured,
           source: values.source || "MANUAL",
         },
-        primaryMediaUuids:
-          item?.primaryMediaUuids ?? [],
+        primaryMediaUuids: item?.primaryMediaUuids ?? [],
+        thumbnailMediaUuid: item?.thumbnailMediaUuid ?? null,
+        galleryMediaUuids: item?.galleryMediaUuids ?? [],
         ingredients: ingredientPayload,
-        dietaryTypes: item?.dietaryTypes ?? [],
-        allergenDeclarations:
-          item?.allergenDeclarations ?? [],
+        dietaryTypes: dietaryTypePayload,
+        allergenDeclarations: allergenPayload,
       };
 
       await onSubmit(
@@ -257,18 +425,24 @@ export default function PublishMenuItemModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[140] overflow-y-auto bg-black/45 p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-[140] overflow-y-auto bg-black/50 p-4 backdrop-blur-sm">
       <div className="mx-auto my-6 w-full max-w-5xl rounded-[30px] bg-white shadow-2xl">
+        {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
-          <div>
-            <h2 className="text-2xl font-black text-gray-900">
-              {item
-                ? "កែប្រែ Menu Item"
-                : "Publish Menu Item ទៅ Website"}
-            </h2>
-            <p className="mt-1 text-sm text-gray-400">
-              ជ្រើស Store + Food Catalog ហើយកំណត់តម្លៃ និងរូបភាព។
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#137A3D]/10 text-[#137A3D]">
+              <Utensils size={22} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black text-gray-900">
+                {item
+                  ? "កែប្រែ Menu Item (Edit Menu Item)"
+                  : "Publish Menu Item ទៅ Website"}
+              </h2>
+              <p className="mt-0.5 text-xs text-gray-500">
+                ជ្រើស Store + Food Catalog រួចកំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីផ្សាយលើ Website
+              </p>
+            </div>
           </div>
 
           <button
@@ -282,9 +456,10 @@ export default function PublishMenuItemModal({
         </div>
 
         <div className="space-y-6 p-6">
+          {/* Main Info */}
           <div className="grid gap-4 md:grid-cols-2">
             <label>
-              <Label>Store *</Label>
+              <Label>Store (ហាងបម្រើ) *</Label>
               <select
                 disabled={Boolean(item)}
                 value={values.storeUuid}
@@ -296,12 +471,9 @@ export default function PublishMenuItemModal({
                 }
                 className={inputClass}
               >
-                <option value="">ជ្រើស Store</option>
+                <option value="">ជ្រើសរើស Store</option>
                 {stores.map((store) => (
-                  <option
-                    key={store.uuid}
-                    value={store.uuid}
-                  >
+                  <option key={store.uuid} value={store.uuid}>
                     {storeLabel(store)}
                   </option>
                 ))}
@@ -309,23 +481,15 @@ export default function PublishMenuItemModal({
             </label>
 
             <label>
-              <Label>Food Catalog *</Label>
+              <Label>Food Catalog (មុខម្ហូបមេ) *</Label>
               <select
                 value={values.foodUuid}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    foodUuid: event.target.value,
-                  }))
-                }
+                onChange={(event) => handleFoodSelect(event.target.value)}
                 className={inputClass}
               >
-                <option value="">ជ្រើស Food</option>
+                <option value="">ជ្រើសរើស Food Catalog</option>
                 {activeFoods.map((food) => (
-                  <option
-                    key={food.uuid}
-                    value={food.uuid}
-                  >
+                  <option key={food.uuid} value={food.uuid}>
                     {foodLabel(food)}
                   </option>
                 ))}
@@ -333,8 +497,9 @@ export default function PublishMenuItemModal({
             </label>
 
             <Field
-              label="Menu item name *"
+              label="ឈ្មោះ Menu Item (Website Name) *"
               value={values.name}
+              placeholder="ឧទាហរណ៍៖ សម្លកកូរពិសេស ឬ Phnom Penh Noodle Soup"
               onChange={(value) =>
                 setValues((current) => ({
                   ...current,
@@ -344,9 +509,10 @@ export default function PublishMenuItemModal({
             />
 
             <Field
-              label="Price *"
+              label="តម្លៃ (Price) *"
               type="number"
               value={values.price}
+              placeholder="3.50"
               onChange={(value) =>
                 setValues((current) => ({
                   ...current,
@@ -356,8 +522,9 @@ export default function PublishMenuItemModal({
             />
 
             <Field
-              label="Currency"
+              label="រូបិយប័ណ្ណ (Currency)"
               value={values.currencyCode}
+              placeholder="USD"
               onChange={(value) =>
                 setValues((current) => ({
                   ...current,
@@ -367,9 +534,10 @@ export default function PublishMenuItemModal({
             />
 
             <Field
-              label="Preparation minutes"
+              label="រយៈពេលធ្វើ (Preparation minutes)"
               type="number"
               value={values.preparationTimeMinutes}
+              placeholder="10"
               onChange={(value) =>
                 setValues((current) => ({
                   ...current,
@@ -379,50 +547,49 @@ export default function PublishMenuItemModal({
             />
 
             <label>
-              <Label>Availability</Label>
+              <Label>ស្ថានភាព دستیابی (Availability)</Label>
               <select
                 value={values.availabilityStatus}
                 onChange={(event) =>
                   setValues((current) => ({
                     ...current,
-                    availabilityStatus:
-                      event.target.value,
+                    availabilityStatus: event.target.value,
                   }))
                 }
                 className={inputClass}
               >
-                <option value="AVAILABLE">AVAILABLE</option>
-                <option value="UNAVAILABLE">UNAVAILABLE</option>
-                <option value="SOLD_OUT">SOLD_OUT</option>
-                <option value="HIDDEN">HIDDEN</option>
+                <option value="AVAILABLE">AVAILABLE (មានលក់)</option>
+                <option value="UNAVAILABLE">UNAVAILABLE (មិនមានលក់)</option>
+                <option value="SOLD_OUT">SOLD_OUT (អស់ស្តុក)</option>
+                <option value="HIDDEN">HIDDEN (លាក់ទុក)</option>
               </select>
             </label>
 
             <label>
-              <Label>Ingredient data</Label>
+              <Label>ទិន្នន័យគ្រឿងផ្សំ (Ingredient Data Status)</Label>
               <select
                 value={values.ingredientDataStatus}
                 onChange={(event) =>
                   setValues((current) => ({
                     ...current,
-                    ingredientDataStatus:
-                      event.target.value,
+                    ingredientDataStatus: event.target.value,
                   }))
                 }
                 className={inputClass}
               >
-                <option value="UNKNOWN">UNKNOWN</option>
-                <option value="PARTIAL">PARTIAL</option>
-                <option value="COMPLETE">COMPLETE</option>
-                <option value="VERIFIED">VERIFIED</option>
+                <option value="COMPLETE">COMPLETE (ពេញលេញ)</option>
+                <option value="VERIFIED">VERIFIED (បានផ្ទៀងផ្ទាត់)</option>
+                <option value="PARTIAL">PARTIAL (ផ្នែកខ្លះ)</option>
+                <option value="UNKNOWN">UNKNOWN (មិនច្បាស់)</option>
               </select>
             </label>
 
             <label className="md:col-span-2">
-              <Label>Description</Label>
+              <Label>ការពិពណ៌នា (Description)</Label>
               <textarea
-                rows={4}
+                rows={3}
                 value={values.description}
+                placeholder="ការពិពណ៌នាអំពីមុខម្ហូបនេះសម្រាប់អតិថិជន..."
                 onChange={(event) =>
                   setValues((current) => ({
                     ...current,
@@ -433,7 +600,7 @@ export default function PublishMenuItemModal({
               />
             </label>
 
-            <label className="flex items-center gap-3">
+            <label className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50/50 p-4 md:col-span-2">
               <input
                 type="checkbox"
                 checked={values.isFeatured}
@@ -443,29 +610,38 @@ export default function PublishMenuItemModal({
                     isFeatured: event.target.checked,
                   }))
                 }
-                className="h-5 w-5 accent-[#137A3D]"
+                className="h-5 w-5 rounded accent-[#137A3D]"
               />
-              <span className="font-bold text-gray-700">
-                Featured
-              </span>
+              <div>
+                <span className="font-bold text-gray-900">
+                  Featured (បង្ហាញជាមុខម្ហូបលេចធ្លោលើ Website)
+                </span>
+                <p className="text-xs text-gray-500">
+                  បើកដើម្បីបង្ហាញនៅទំព័រមុខ និង Highlighted Sections។
+                </p>
+              </div>
             </label>
           </div>
 
-          <section className="rounded-2xl border border-gray-100 p-4">
+          {/* Recipe Ingredients */}
+          <section className="rounded-2xl border border-gray-100 p-5">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-black text-gray-900">
-                  Ingredients
-                </h3>
-                <p className="mt-1 text-xs text-gray-400">
-                  ជ្រើស Ingredient ដែល Admin បានបង្កើតរួច។
-                </p>
+              <div className="flex items-center gap-2">
+                <Sparkles size={18} className="text-[#137A3D]" />
+                <div>
+                  <h3 className="font-black text-gray-900">
+                    គ្រឿងផ្សំ (Ingredients Recipe)
+                  </h3>
+                  <p className="mt-0.5 text-xs text-gray-400">
+                    កំណត់គ្រឿងផ្សំ បរិមាណ និងខ្នាតសម្រាប់មុខម្ហូបនេះ។
+                  </p>
+                </div>
               </div>
 
               <button
                 type="button"
                 onClick={() =>
-                  setRows((current) => [
+                  setIngredientRows((current) => [
                     ...current,
                     {
                       ingredientUuid: "",
@@ -476,37 +652,31 @@ export default function PublishMenuItemModal({
                     },
                   ])
                 }
-                className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-black text-[#137A3D]"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-black text-[#137A3D] hover:bg-emerald-100 transition"
               >
                 <Plus size={15} />
-                បន្ថែម
+                បន្ថែមគ្រឿងផ្សំ
               </button>
             </div>
 
             <div className="mt-4 space-y-3">
-              {rows.map((row, index) => (
+              {ingredientRows.map((row, index) => (
                 <div
                   key={index}
-                  className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[2fr_1fr_1fr_auto]"
+                  className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[2fr_1fr_1fr_auto_auto]"
                 >
                   <select
                     value={row.ingredientUuid}
                     onChange={(event) =>
-                      updateRow(index, {
-                        ingredientUuid:
-                          event.target.value,
+                      updateIngredientRow(index, {
+                        ingredientUuid: event.target.value,
                       })
                     }
                     className={inputClass}
                   >
-                    <option value="">
-                      ជ្រើស Ingredient
-                    </option>
+                    <option value="">ជ្រើស Ingredient</option>
                     {activeIngredients.map((ingredient) => (
-                      <option
-                        key={ingredient.uuid}
-                        value={ingredient.uuid}
-                      >
+                      <option key={ingredient.uuid} value={ingredient.uuid}>
                         {ingredient.name} ({ingredient.code})
                       </option>
                     ))}
@@ -514,10 +684,10 @@ export default function PublishMenuItemModal({
 
                   <input
                     type="number"
-                    placeholder="Quantity"
+                    placeholder="បរិមាណ (Qty)"
                     value={row.quantity}
                     onChange={(event) =>
-                      updateRow(index, {
+                      updateIngredientRow(index, {
                         quantity: event.target.value,
                       })
                     }
@@ -525,24 +695,35 @@ export default function PublishMenuItemModal({
                   />
 
                   <input
-                    placeholder="Unit"
+                    placeholder="ខ្នាត (Unit e.g. g, ml)"
                     value={row.unit}
                     onChange={(event) =>
-                      updateRow(index, {
+                      updateIngredientRow(index, {
                         unit: event.target.value,
                       })
                     }
                     className={inputClass}
                   />
 
+                  <label className="flex items-center gap-2 px-2 text-xs font-bold text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={row.isOptional}
+                      onChange={(event) =>
+                        updateIngredientRow(index, {
+                          isOptional: event.target.checked,
+                        })
+                      }
+                      className="h-4 w-4 rounded accent-[#137A3D]"
+                    />
+                    Optional
+                  </label>
+
                   <button
                     type="button"
                     onClick={() =>
-                      setRows((current) =>
-                        current.filter(
-                          (_, rowIndex) =>
-                            rowIndex !== index,
-                        ),
+                      setIngredientRows((current) =>
+                        current.filter((_, rowIndex) => rowIndex !== index),
                       )
                     }
                     className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-100 text-red-400 hover:bg-red-50"
@@ -552,21 +733,259 @@ export default function PublishMenuItemModal({
                 </div>
               ))}
 
-              {!rows.length && (
+              {!ingredientRows.length && (
                 <p className="py-4 text-center text-sm text-gray-400">
-                  មិនទាន់បានបន្ថែម Ingredient។
+                  មិនទាន់បានបន្ថែម Ingredient ទេ។
                 </p>
               )}
             </div>
           </section>
 
+          {/* Dietary Types */}
+          <section className="rounded-2xl border border-gray-100 p-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Heart size={18} className="text-emerald-600" />
+                <div>
+                  <h3 className="font-black text-gray-900">
+                    របបអាហារ (Dietary Types)
+                  </h3>
+                  <p className="mt-0.5 text-xs text-gray-400">
+                    សម្គាល់របបអាហារ (Vegan, Halal, Keto, etc.)
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setDietaryTypeRows((current) => [
+                    ...current,
+                    {
+                      dietaryTypeUuid: "",
+                      verificationStatus: "UNVERIFIED",
+                      notes: "",
+                    },
+                  ])
+                }
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-black text-[#137A3D] hover:bg-emerald-100 transition"
+              >
+                <Plus size={15} />
+                បន្ថែម Dietary Type
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {dietaryTypeRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[2fr_1.5fr_2fr_auto]"
+                >
+                  <select
+                    value={row.dietaryTypeUuid}
+                    onChange={(event) =>
+                      updateDietaryTypeRow(index, {
+                        dietaryTypeUuid: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  >
+                    <option value="">ជ្រើស Dietary Type</option>
+                    {activeDietaryTypes.map((dt) => (
+                      <option key={dt.uuid} value={dt.uuid}>
+                        {dt.name} ({dt.code})
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={row.verificationStatus}
+                    onChange={(event) =>
+                      updateDietaryTypeRow(index, {
+                        verificationStatus: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  >
+                    <option value="UNVERIFIED">UNVERIFIED</option>
+                    <option value="VERIFIED">VERIFIED</option>
+                  </select>
+
+                  <input
+                    placeholder="កំណត់ចំណាំ (Notes)"
+                    value={row.notes}
+                    onChange={(event) =>
+                      updateDietaryTypeRow(index, {
+                        notes: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDietaryTypeRows((current) =>
+                        current.filter((_, rowIndex) => rowIndex !== index),
+                      )
+                    }
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-100 text-red-400 hover:bg-red-50"
+                  >
+                    <Trash2 size={17} />
+                  </button>
+                </div>
+              ))}
+
+              {!dietaryTypeRows.length && (
+                <p className="py-4 text-center text-sm text-gray-400">
+                  មិនទាន់បានកំណត់ Dietary Type ទេ។
+                </p>
+              )}
+            </div>
+          </section>
+
+          {/* Allergen Declarations */}
+          <section className="rounded-2xl border border-gray-100 p-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShieldAlert size={18} className="text-amber-600" />
+                <div>
+                  <h3 className="font-black text-gray-900">
+                    ប្រតិកម្មអាឡែហ្ស៊ី (Allergen Declarations)
+                  </h3>
+                  <p className="mt-0.5 text-xs text-gray-400">
+                    ប្រកាសសារធាតុបង្កអាឡែហ្ស៊ី និងកម្រិតហានិភ័យសម្រាប់សុវត្ថិភាពអតិថិជន។
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setAllergenRows((current) => [
+                    ...current,
+                    {
+                      allergenUuid: "",
+                      declarationType: "MAY_CONTAIN",
+                      riskLevel: "MEDIUM",
+                      verificationStatus: "UNVERIFIED",
+                      notes: "",
+                    },
+                  ])
+                }
+                className="inline-flex items-center gap-1.5 rounded-xl bg-amber-50 px-3 py-2 text-xs font-black text-amber-800 hover:bg-amber-100 transition"
+              >
+                <Plus size={15} />
+                បន្ថែម Allergen
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {allergenRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[1.8fr_1.2fr_1fr_1fr_1.5fr_auto]"
+                >
+                  <select
+                    value={row.allergenUuid}
+                    onChange={(event) =>
+                      updateAllergenRow(index, {
+                        allergenUuid: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  >
+                    <option value="">ជ្រើស Allergen</option>
+                    {activeAllergens.map((al) => (
+                      <option key={al.uuid} value={al.uuid}>
+                        {al.name} ({al.code})
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={row.declarationType}
+                    onChange={(event) =>
+                      updateAllergenRow(index, {
+                        declarationType: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  >
+                    <option value="MAY_CONTAIN">MAY_CONTAIN (អាចមាន)</option>
+                    <option value="CONTAINS">CONTAINS (មានផ្ទុក)</option>
+                  </select>
+
+                  <select
+                    value={row.riskLevel}
+                    onChange={(event) =>
+                      updateAllergenRow(index, {
+                        riskLevel: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  >
+                    <option value="LOW">LOW</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="HIGH">HIGH</option>
+                  </select>
+
+                  <select
+                    value={row.verificationStatus}
+                    onChange={(event) =>
+                      updateAllergenRow(index, {
+                        verificationStatus: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  >
+                    <option value="UNVERIFIED">UNVERIFIED</option>
+                    <option value="VERIFIED">VERIFIED</option>
+                  </select>
+
+                  <input
+                    placeholder="កំណត់ចំណាំ (Notes)"
+                    value={row.notes}
+                    onChange={(event) =>
+                      updateAllergenRow(index, {
+                        notes: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setAllergenRows((current) =>
+                        current.filter((_, rowIndex) => rowIndex !== index),
+                      )
+                    }
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-100 text-red-400 hover:bg-red-50"
+                  >
+                    <Trash2 size={17} />
+                  </button>
+                </div>
+              ))}
+
+              {!allergenRows.length && (
+                <p className="py-4 text-center text-sm text-gray-400">
+                  មិនទាន់បានប្រកាស Allergen ទេ។
+                </p>
+              )}
+            </div>
+          </section>
+
+          {/* Images */}
           <ImagePicker
             value={images}
             onChange={setImages}
+            existingImages={existingImages}
+            onExistingChange={setExistingImages}
             label={
               item
-                ? "រូបភាពថ្មី (ទុកទទេ = រក្សារូបចាស់)"
-                : "រូបភាព Menu Item (អតិបរមា 4)"
+                ? "រូបភាព (ទុកទទេ = រក្សារូបចាស់ | រូបទី ១: Thumbnail, រូបបន្ទាប់: Gallery)"
+                : "រូបភាព Menu Item (អតិបរមា 4 | រូបទី ១: Thumbnail, រូបបន្ទាប់: Gallery)"
             }
           />
 
@@ -576,12 +995,13 @@ export default function PublishMenuItemModal({
             </div>
           )}
 
+          {/* Footer Actions */}
           <div className="flex justify-end gap-3 border-t border-gray-100 pt-5">
             <button
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-600"
+              className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50"
             >
               បោះបង់
             </button>
@@ -590,14 +1010,14 @@ export default function PublishMenuItemModal({
               type="button"
               disabled={saving}
               onClick={() => void submit()}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#137A3D] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#137A3D] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-700/20 hover:bg-[#0f8e48] disabled:opacity-60 transition"
             >
               {saving ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
                 <Save size={16} />
               )}
-              {item ? "រក្សាទុក" : "Publish"}
+              {item ? "រក្សាទុក (Save Changes)" : "Publish ទៅ Website"}
             </button>
           </div>
         </div>
@@ -624,11 +1044,13 @@ function Label({
 function Field({
   label,
   value,
+  placeholder,
   onChange,
   type = "text",
 }: {
   label: string;
   value: string;
+  placeholder?: string;
   onChange: (value: string) => void;
   type?: string;
 }) {
@@ -638,6 +1060,7 @@ function Field({
       <input
         type={type}
         value={value}
+        placeholder={placeholder}
         onChange={(event) =>
           onChange(event.target.value)
         }

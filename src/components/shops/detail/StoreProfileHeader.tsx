@@ -216,6 +216,7 @@ import {
   Phone,
   Settings2,
   Star,
+  Trash2,
 } from "lucide-react";
 
 import type { Store, StoreStatusAction } from "@/src/types/shop";
@@ -233,12 +234,14 @@ export default function StoreProfileHeader({
   onEdit,
   onStatus,
   onHours,
+  onDelete,
 }: {
   store: Store;
   busy?: boolean;
   onEdit: () => void;
   onStatus: (action: StoreStatusAction) => void;
   onHours: () => void;
+  onDelete?: () => void;
 }) {
   const fallbackCover = imageUrlOrNull(store.coverImageUrl);
   const fallbackLogo = imageUrlOrNull(store.logoUrl);
@@ -430,6 +433,31 @@ export default function StoreProfileHeader({
               <Clock3 size={20} />
               ម៉ោងដំណើរការ
             </button>
+
+            {onDelete && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={onDelete}
+                className="
+                  inline-flex min-h-12 items-center gap-2
+                  rounded-xl border border-red-200
+                  bg-white px-5
+                  text-lg font-medium text-red-600
+                  transition
+                  hover:bg-red-50
+                  hover:border-red-300
+                  focus:outline-none
+                  focus:ring-4
+                  focus:ring-red-100
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                "
+              >
+                <Trash2 size={20} />
+                លុប Store
+              </button>
+            )}
           </div>
         </div>
 

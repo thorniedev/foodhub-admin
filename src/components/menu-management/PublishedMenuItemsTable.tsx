@@ -42,6 +42,7 @@ function imageUrl(
     item.thumbnail ||
     item.imageUrl ||
     item.primaryMediaUrls?.[0] ||
+    item.images?.[0] ||
     item.gallery?.[0] ||
     null;
 
