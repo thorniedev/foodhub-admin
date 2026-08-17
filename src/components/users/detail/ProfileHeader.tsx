@@ -45,13 +45,12 @@ export default function ProfileHeader({
               )}
 
               <span
-                className={`rounded-full px-3 py-1.5 text-lg font-medium ${
-                  profile.isActive
-                    ? "bg-white/15 text-white"
-                    : "bg-red-400/20 text-red-100"
-                }`}
+                className={`rounded-full px-3 py-1.5 text-lg font-medium ${profile.isActive
+                  ? "bg-white/15 text-white"
+                  : "bg-red-400/20 text-red-100"
+                  }`}
               >
-                {profile.isActive ? "ACTIVE" : "DELETED"}
+                {profile.isActive ? "សកម្ម" : "DELETED"}
               </span>
             </div>
 
@@ -71,7 +70,7 @@ export default function ProfileHeader({
               className="inline-flex min-h-12 items-center gap-2 rounded-full bg-red-500/20 px-5 text-lg font-medium text-white ring-1 ring-red-200/20 transition hover:bg-red-500/30 disabled:opacity-50"
             >
               <Trash2 size={19} />
-              Soft delete
+              បញ្ឈប់
             </button>
           ) : (
             <button
@@ -91,10 +90,10 @@ export default function ProfileHeader({
               disabled={busy}
               onClick={onHardDelete}
               className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-300 bg-red-600 px-5 text-lg font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
-              title="Permanently hard delete profile"
+              title="Permanently លុប profile"
             >
               <AlertOctagon size={19} />
-              Hard delete
+              លុប
             </button>
           )}
         </div>

@@ -33,11 +33,10 @@ export default function ProfileActionConfirmModal({
       <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div
-            className={`flex h-14 w-14 items-center justify-center rounded-2xl ${
-              deleting
+            className={`flex h-14 w-14 items-center justify-center rounded-2xl ${deleting
                 ? "bg-red-50 text-red-500"
                 : "bg-primary-50 text-primary-800"
-            }`}
+              }`}
           >
             {deleting ? (
               <Trash2 size={24} />
@@ -58,7 +57,7 @@ export default function ProfileActionConfirmModal({
         </div>
 
         <p className="mt-5 text-2xl font-semibold text-primary-800">
-          {deleting ? "Soft delete Profile?" : "Restore Profile?"}
+          {deleting ? " បញ្ឈប់ Profile?" : "Restore Profile?"}
         </p>
 
         <p className="mt-3 text-lg leading-8 text-gray-500">
@@ -85,11 +84,10 @@ export default function ProfileActionConfirmModal({
             type="button"
             disabled={loading}
             onClick={() => void onConfirm()}
-            className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-4 text-lg font-medium text-white disabled:opacity-60 ${
-              deleting
+            className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-4 text-lg font-medium text-white disabled:opacity-60 ${deleting
                 ? "bg-red-500 hover:bg-red-600"
                 : "bg-primary-800 hover:bg-primary-900"
-            }`}
+              }`}
           >
             {loading && (
               <Loader2 size={20} className="animate-spin" />

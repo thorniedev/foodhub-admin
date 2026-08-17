@@ -1233,7 +1233,7 @@ function GooglePlacePreviewCard({ preview }: { preview: GooglePlacePreview }) {
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="text-lg font-medium text-primary-800">Website</p>
+                <p className="text-lg font-medium text-primary-800">វែបសាយ</p>
 
                 <a
                   href={website}

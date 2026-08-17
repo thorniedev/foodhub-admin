@@ -17,7 +17,7 @@ const tabs: Array<{
   countKey: keyof UsersTabsProps["counts"];
 }> = [
   { value: "ALL", label: "ទាំងអស់", countKey: "all" },
-  { value: "ACTIVE", label: "Active", countKey: "active" },
+  { value: "ACTIVE", label: "សកម្ម", countKey: "active" },
   { value: "SUSPENDED", label: "Suspended", countKey: "suspended" },
   { value: "DISABLED", label: "Disabled", countKey: "disabled" },
 ];

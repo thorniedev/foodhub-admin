@@ -416,6 +416,7 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         uuid={viewing?.uuid ?? null}
         group={group}
         initialOption={viewing}
+        options={groupOptions}
         onClose={() => setViewing(null)}
       />
     </div>

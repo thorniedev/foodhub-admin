@@ -210,7 +210,7 @@ export default function MenuItemsTable({
 
                 <td className="px-6 py-4">
                   <span className="inline-flex rounded-full bg-primary-50 px-3.5 py-1.5 text-lg font-medium text-primary-700 ring-1 ring-inset ring-primary-100">
-                    WEBSITE
+                    វែបសាយ
                   </span>
                 </td>
               </tr>

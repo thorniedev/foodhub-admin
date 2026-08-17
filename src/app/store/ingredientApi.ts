@@ -359,7 +359,7 @@
 // // // // //         }),
 
 // // // // //       /* =========================================
-// // // // //          SOFT DELETE
+// // // // //           បញ្ឈប់
 // // // // //       ========================================== */
 
 // // // // //       deleteIngredient:
@@ -1636,7 +1636,7 @@
 //       }),
 
 //       /* =====================================================
-//          SOFT DELETE
+//           បញ្ឈប់
 //       ===================================================== */
 
 //       deleteIngredient: builder.mutation<
@@ -1929,8 +1929,8 @@ export const ingredientApi =
         transformResponse: (
           response:
             | ApiResponse<
-                SpringPage<Ingredient>
-              >
+              SpringPage<Ingredient>
+            >
             | SpringPage<Ingredient>,
         ) =>
           normalizeIngredientPage(
@@ -1940,24 +1940,24 @@ export const ingredientApi =
         providesTags: (result) =>
           result
             ? [
-                {
-                  type: "Ingredient" as const,
-                  id: "LIST",
-                },
+              {
+                type: "Ingredient" as const,
+                id: "LIST",
+              },
 
-                ...result.contents.map(
-                  (item) => ({
-                    type: "Ingredient" as const,
-                    id: item.uuid,
-                  }),
-                ),
-              ]
-            : [
-                {
+              ...result.contents.map(
+                (item) => ({
                   type: "Ingredient" as const,
-                  id: "LIST",
-                },
-              ],
+                  id: item.uuid,
+                }),
+              ),
+            ]
+            : [
+              {
+                type: "Ingredient" as const,
+                id: "LIST",
+              },
+            ],
       }),
 
       /* =====================================================
@@ -1994,11 +1994,11 @@ export const ingredientApi =
             _error,
             uuid,
           ) => [
-            {
-              type: "Ingredient",
-              id: uuid,
-            },
-          ],
+              {
+                type: "Ingredient",
+                id: uuid,
+              },
+            ],
         }),
 
       /* =====================================================
@@ -2080,20 +2080,20 @@ export const ingredientApi =
             _error,
             { uuid },
           ) => [
-            {
-              type: "Ingredient",
-              id: uuid,
-            },
+              {
+                type: "Ingredient",
+                id: uuid,
+              },
 
-            {
-              type: "Ingredient",
-              id: "LIST",
-            },
-          ],
+              {
+                type: "Ingredient",
+                id: "LIST",
+              },
+            ],
         }),
 
       /* =====================================================
-         DEACTIVATE / SOFT DELETE
+         DEACTIVATE /  បញ្ឈប់
 
          Your current UI uses:
          useDeleteIngredientMutation()
@@ -2140,16 +2140,16 @@ export const ingredientApi =
             _error,
             uuid,
           ) => [
-            {
-              type: "Ingredient",
-              id: uuid,
-            },
+              {
+                type: "Ingredient",
+                id: uuid,
+              },
 
-            {
-              type: "Ingredient",
-              id: "LIST",
-            },
-          ],
+              {
+                type: "Ingredient",
+                id: "LIST",
+              },
+            ],
         }),
 
       /* =====================================================
@@ -2194,16 +2194,16 @@ export const ingredientApi =
             _error,
             uuid,
           ) => [
-            {
-              type: "Ingredient",
-              id: uuid,
-            },
+              {
+                type: "Ingredient",
+                id: uuid,
+              },
 
-            {
-              type: "Ingredient",
-              id: "LIST",
-            },
-          ],
+              {
+                type: "Ingredient",
+                id: "LIST",
+              },
+            ],
         }),
 
       /* =====================================================
@@ -2212,7 +2212,7 @@ export const ingredientApi =
          DELETE
          /api/v1/admin/catalog/ingredients/{uuid}
 
-         This is separate from the Soft Delete button.
+         This is separate from the  បញ្ឈប់ button.
       ===================================================== */
 
       hardDeleteIngredient:
@@ -2233,16 +2233,16 @@ export const ingredientApi =
             _error,
             uuid,
           ) => [
-            {
-              type: "Ingredient",
-              id: uuid,
-            },
+              {
+                type: "Ingredient",
+                id: uuid,
+              },
 
-            {
-              type: "Ingredient",
-              id: "LIST",
-            },
-          ],
+              {
+                type: "Ingredient",
+                id: "LIST",
+              },
+            ],
         }),
     }),
 

@@ -118,10 +118,10 @@ export default function UserDetailHeader({
               disabled={busy}
               onClick={onDelete}
               className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-200/30 bg-red-500/15 px-5 text-lg font-medium text-white transition hover:bg-red-500/25 disabled:opacity-50"
-              title="Soft delete user"
+              title=" បញ្ឈប់ user"
             >
               <Trash2 size={19} />
-              Soft delete
+              បញ្ឈប់
             </button>
 
             {onHardDelete && (
@@ -130,10 +130,10 @@ export default function UserDetailHeader({
                 disabled={busy}
                 onClick={onHardDelete}
                 className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-300 bg-red-600 px-5 text-lg font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
-                title="Permanently hard delete user"
+                title="Permanently លុប user"
               >
                 <AlertOctagon size={19} />
-                Hard delete
+                លុប
               </button>
             )}
           </div>
@@ -142,7 +142,7 @@ export default function UserDetailHeader({
         <div className="mt-7 grid gap-3 sm:grid-cols-3">
           <Info
             label="Email verified"
-            value={user.emailVerified ? "Yes" : "No"}
+            value={user.emailVerified ? "បានផ្ទៀងផ្ទាត់" : "មិនបានផ្ទៀងផ្ទាត់"}
           />
 
           <Info

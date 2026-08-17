@@ -227,7 +227,7 @@ export default function StoreMenuItemsSection({
               text-gray-500
             "
           >
-            ហាងនេះមិនទាន់មានមុខម្ហូបណាមួយត្រូវបាន Publish ចូលក្នុង Website
+            ហាងនេះមិនទាន់មានមុខម្ហូបណាមួយត្រូវបាន Publish ចូលក្នុង វែបសាយ
             នៅឡើយទេ។
           </p>
 

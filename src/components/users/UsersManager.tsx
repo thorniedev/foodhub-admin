@@ -45,13 +45,13 @@ import UsersTabs from "./UsersTabs";
 
 type Notice =
   | {
-      type: "success";
-      text: string;
-    }
+    type: "success";
+    text: string;
+  }
   | {
-      type: "error";
-      text: string;
-    }
+    type: "error";
+    text: string;
+  }
   | null;
 
 type UserSort = "A_Z" | "Z_A" | "NEWEST" | "OLDEST";
@@ -318,23 +318,23 @@ export default function UsersManager() {
     value: UserSort;
     label: string;
   }> = [
-    {
-      value: "A_Z",
-      label: "A → Z",
-    },
-    {
-      value: "Z_A",
-      label: "Z → A",
-    },
-    {
-      value: "NEWEST",
-      label: "ថ្មីបំផុត",
-    },
-    {
-      value: "OLDEST",
-      label: "ចាស់បំផុត",
-    },
-  ];
+      {
+        value: "A_Z",
+        label: "A → Z",
+      },
+      {
+        value: "Z_A",
+        label: "Z → A",
+      },
+      {
+        value: "NEWEST",
+        label: "ថ្មីបំផុត",
+      },
+      {
+        value: "OLDEST",
+        label: "ចាស់បំផុត",
+      },
+    ];
 
   /* =======================================================
      CREATE
@@ -432,7 +432,7 @@ export default function UsersManager() {
   };
 
   /* =======================================================
-     HARD DELETE
+     លុប
   ======================================================= */
 
   const handleHardDelete = async () => {
@@ -644,15 +644,14 @@ export default function UsersManager() {
                             </div>
 
                             <span
-                              className={`shrink-0 rounded-full px-2.5 py-1 text-sm ${
-                                user.status === "ACTIVE"
+                              className={`shrink-0 rounded-full px-2.5 py-1 text-sm ${user.status === "ACTIVE"
                                   ? "bg-primary-50 text-primary-700"
                                   : user.status === "SUSPENDED"
                                     ? "bg-secondary-50 text-secondary-600"
                                     : user.status === "DELETED"
                                       ? "bg-red-50 text-red-700"
                                       : "bg-gray-100 text-gray-500"
-                              }`}
+                                }`}
                             >
                               {user.status}
                             </span>
@@ -678,19 +677,17 @@ export default function UsersManager() {
 
                 setShowSuggestions(false);
               }}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${
-                sizeOpen
+              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${sizeOpen
                   ? "border-primary-600 ring-2 ring-primary-100"
                   : "border-gray-200 hover:border-primary-600/50"
-              }`}
+                }`}
             >
               <span className="text-gray-700">{size} / ទំព័រ</span>
 
               <ChevronDown
                 size={17}
-                className={`text-gray-400 transition-transform duration-200 ${
-                  sizeOpen ? "rotate-180" : ""
-                }`}
+                className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
@@ -714,11 +711,10 @@ export default function UsersManager() {
 
                         setSizeOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
-                        selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
                           ? "bg-primary-50 text-primary-700"
                           : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
-                      }`}
+                        }`}
                     >
                       <span>{value} / ទំព័រ</span>
 
@@ -744,11 +740,10 @@ export default function UsersManager() {
 
                 setShowSuggestions(false);
               }}
-              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
-                sortOpen
+              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen
                   ? "border-primary-600 bg-primary-50 text-primary-700"
                   : "border-gray-200 bg-white text-gray-600 hover:border-primary-600 hover:bg-primary-50 hover:text-primary-700"
-              }`}
+                }`}
               aria-label="Sort users"
               title="Sort users"
             >
@@ -773,11 +768,10 @@ export default function UsersManager() {
 
                         setSortOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
-                        selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
                           ? "bg-primary-50 text-primary-700"
                           : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
-                      }`}
+                        }`}
                     >
                       <span>{option.label}</span>
 
@@ -799,11 +793,10 @@ export default function UsersManager() {
 
       {notice && (
         <div
-          className={`flex flex-col gap-3 rounded-2xl border px-4 py-3 text-base sm:flex-row sm:items-center sm:justify-between ${
-            notice.type === "success"
+          className={`flex flex-col gap-3 rounded-2xl border px-4 py-3 text-base sm:flex-row sm:items-center sm:justify-between ${notice.type === "success"
               ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
-          }`}
+            }`}
         >
           <span>{notice.text}</span>
 

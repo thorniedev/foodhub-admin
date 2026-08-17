@@ -148,7 +148,7 @@ export default function DietaryTypeManager() {
     hardDeleteItem,
     {
       isLoading:
-        isHardDeleting,
+      isHardDeleting,
     },
   ] =
     useHardDeleteDietaryTypeMutation();
@@ -157,7 +157,7 @@ export default function DietaryTypeManager() {
     restoreItem,
     {
       isLoading:
-        isRestoring,
+      isRestoring,
     },
   ] =
     useRestoreDietaryTypeMutation();
@@ -180,12 +180,12 @@ export default function DietaryTypeManager() {
 
   const suggestions = normalizedSearch
     ? suggestionItems
-        .filter((item) =>
-          [item.code, item.name, item.category, item.description ?? ""].some(
-            (value) => value.toLowerCase().includes(normalizedSearch),
-          ),
-        )
-        .slice(0, 8)
+      .filter((item) =>
+        [item.code, item.name, item.category, item.description ?? ""].some(
+          (value) => value.toLowerCase().includes(normalizedSearch),
+        ),
+      )
+      .slice(0, 8)
     : [];
 
   const searchSource = normalizedSearch ? suggestionItems : items;
@@ -260,23 +260,23 @@ export default function DietaryTypeManager() {
     value: DietaryTypeSort;
     label: string;
   }[] = [
-    {
-      value: "A_Z",
-      label: "A → Z",
-    },
-    {
-      value: "Z_A",
-      label: "Z → A",
-    },
-    {
-      value: "NEWEST",
-      label: "ថ្មីបំផុត",
-    },
-    {
-      value: "OLDEST",
-      label: "ចាស់បំផុត",
-    },
-  ];
+      {
+        value: "A_Z",
+        label: "A → Z",
+      },
+      {
+        value: "Z_A",
+        label: "Z → A",
+      },
+      {
+        value: "NEWEST",
+        label: "ថ្មីបំផុត",
+      },
+      {
+        value: "OLDEST",
+        label: "ចាស់បំផុត",
+      },
+    ];
 
   const busy =
     isCreating ||
@@ -371,7 +371,7 @@ export default function DietaryTypeManager() {
   };
 
   /* =======================================================
-     HARD DELETE
+     លុប
   ======================================================= */
   const handleHardDelete =
     async () => {
@@ -393,7 +393,7 @@ export default function DietaryTypeManager() {
 
         await refetch();
       } catch (
-        hardDeleteError
+      hardDeleteError
       ) {
         setMessage({
           type: "error",
@@ -406,7 +406,7 @@ export default function DietaryTypeManager() {
     };
 
   /* =======================================================
-     HARD DELETE
+     លុប
   ======================================================= */
   const handleRestore =
     async (
@@ -425,7 +425,7 @@ export default function DietaryTypeManager() {
 
         await refetch();
       } catch (
-        restoreError
+      restoreError
       ) {
         setMessage({
           type: "error",
@@ -587,11 +587,10 @@ export default function DietaryTypeManager() {
                             </div>
 
                             <span
-                              className={`shrink-0 rounded-full px-3 py-1.5 text-lg font-medium ${
-                                item.active
+                              className={`shrink-0 rounded-full px-3 py-1.5 text-lg font-medium ${item.active
                                   ? "bg-primary-50 text-primary-700"
                                   : "bg-gray-100 text-gray-500"
-                              }`}
+                                }`}
                             >
                               {item.active ? "សកម្ម" : "អសកម្ម"}
                             </span>
@@ -613,19 +612,17 @@ export default function DietaryTypeManager() {
 
                   setSortOpen(false);
                 }}
-                className={`flex h-[52px] min-w-[150px] items-center justify-between gap-3 rounded-full border bg-white px-4 text-lg font-medium transition ${
-                  sizeOpen
+                className={`flex h-[52px] min-w-[150px] items-center justify-between gap-3 rounded-full border bg-white px-4 text-lg font-medium transition ${sizeOpen
                     ? "border-primary-600 ring-4 ring-primary-100"
                     : "border-gray-200 text-gray-700 hover:border-primary-200 hover:bg-primary-50"
-                }`}
+                  }`}
               >
                 <span>{size} / ទំព័រ</span>
 
                 <ChevronDown
                   size={18}
-                  className={`text-gray-400 transition-transform duration-200 ${
-                    sizeOpen ? "rotate-180" : ""
-                  }`}
+                  className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
@@ -647,11 +644,10 @@ export default function DietaryTypeManager() {
                           setPage(0);
                           setSizeOpen(false);
                         }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-lg font-medium transition ${
-                          selected
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-lg font-medium transition ${selected
                             ? "bg-primary-50 text-primary-800"
                             : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
-                        }`}
+                          }`}
                       >
                         <span>{value} / ទំព័រ</span>
 
@@ -672,11 +668,10 @@ export default function DietaryTypeManager() {
 
                   setSizeOpen(false);
                 }}
-                className={`flex h-[52px] w-[52px] items-center justify-center rounded-full border transition ${
-                  sortOpen
+                className={`flex h-[52px] w-[52px] items-center justify-center rounded-full border transition ${sortOpen
                     ? "border-primary-600 bg-primary-50 text-primary-800 ring-4 ring-primary-100"
                     : "border-gray-200 bg-white text-gray-600 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800"
-                }`}
+                  }`}
                 aria-label="Sort dietary types"
                 title="Sort dietary types"
               >
@@ -700,11 +695,10 @@ export default function DietaryTypeManager() {
                           setSortBy(option.value);
                           setSortOpen(false);
                         }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-lg font-medium transition ${
-                          selected
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-lg font-medium transition ${selected
                             ? "bg-primary-50 text-primary-800"
                             : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
-                        }`}
+                          }`}
                       >
                         <span>{option.label}</span>
 
@@ -722,11 +716,10 @@ export default function DietaryTypeManager() {
       {/* COMPONENT: Notice */}
       {message && (
         <div
-          className={`rounded-2xl border px-5 py-4 text-lg leading-7 ${
-            message.type === "success"
+          className={`rounded-2xl border px-5 py-4 text-lg leading-7 ${message.type === "success"
               ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
-          }`}
+            }`}
         >
           {message.text}
         </div>

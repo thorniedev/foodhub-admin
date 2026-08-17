@@ -307,7 +307,7 @@ export default function MenuItemsManager() {
 
         setNotice({
           type: "success",
-          text: "បាន Publish Menu Item។ វានឹងចូល Public Menu Item API របស់ Website។",
+          text: "បាន Publish Menu Item។ វានឹងចូល Public Menu Item API របស់ វែបសាយ។",
         });
       }
 
@@ -395,7 +395,7 @@ export default function MenuItemsManager() {
                 </p>
 
                 <p className="mt-6 max-w-3xl text-xl leading-7 text-white/85">
-                  Food Catalog សម្រាប់ Store និង <br className="md:block max-md:hidden" /> Menu Items សម្រាប់ Website
+                  Food Catalog សម្រាប់ហាង និង <br className="md:block max-md:hidden" /> Menu Items សម្រាប់ វែបសាយ
                 </p>
               </div>
             </div>
@@ -404,13 +404,13 @@ export default function MenuItemsManager() {
             <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Stat
                 icon={<Store size={20} />}
-                label="Food Catalog សម្រាប់ Store"
+                label="Food Catalog សម្រាប់ហាង"
                 value={foods.length}
               />
 
               <Stat
                 icon={<Globe2 size={20} />}
-                label="Menu Items លើ Website"
+                label="Menu Items លើ វែបសាយ"
                 value={menuItems.length}
               />
             </div>
@@ -439,7 +439,7 @@ export default function MenuItemsManager() {
               className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-white/25 bg-white/15 px-5 text-lg font-bold text-white transition hover:bg-white/20 focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-auto"
             >
               <Globe2 size={20} />
-              Publish ទៅ Website
+              Publish ទៅ វែបសាយ
             </button>
           </div>
         </div>
@@ -453,7 +453,7 @@ export default function MenuItemsManager() {
         <div className="flex shrink-0 items-center gap-2">
           <TabButton active={tab === "FOODS"} onClick={() => setTab("FOODS")}>
             <Store size={19} />
-            សម្រាប់ Store
+            សម្រាប់ហាង
             <Count active={tab === "FOODS"}>{foods.length}</Count>
           </TabButton>
 
@@ -462,7 +462,7 @@ export default function MenuItemsManager() {
             onClick={() => setTab("WEBSITE")}
           >
             <Globe2 size={19} />
-            Website
+            វែបសាយ
             <Count active={tab === "WEBSITE"}>{menuItems.length}</Count>
           </TabButton>
         </div>
@@ -485,11 +485,10 @@ export default function MenuItemsManager() {
           <button
             type="button"
             onClick={() => setFilterModalOpen(true)}
-            className={`flex h-12 items-center gap-2 rounded-2xl border px-4 text-xs font-bold transition shadow-xs ${
-              isAdvancedFilterActive
+            className={`flex h-12 items-center gap-2 rounded-2xl border px-4 text-xs font-bold transition shadow-xs ${isAdvancedFilterActive
                 ? "border-emerald-600 bg-emerald-700 text-white"
                 : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-            }`}
+              }`}
           >
             <Sliders size={16} />
             <span>តម្រងកម្រិតខ្ពស់</span>
@@ -524,11 +523,10 @@ export default function MenuItemsManager() {
       ====================================================== */}
       {notice && (
         <div
-          className={`rounded-2xl border px-5 py-4 text-lg leading-7 ${
-            notice.type === "success"
+          className={`rounded-2xl border px-5 py-4 text-lg leading-7 ${notice.type === "success"
               ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
-          }`}
+            }`}
         >
           {notice.text}
         </div>
@@ -649,9 +647,8 @@ export default function MenuItemsManager() {
         title="បិទដំណើរការ Food Catalog (Deactivate)?"
         description={
           deletingFood
-            ? `Food "${
-                deletingFood.localName || deletingFood.canonicalName
-              }" នឹងត្រូវប្តូរស្ថានភាពទៅជា 'អសកម្ម' (Inactive)។`
+            ? `Food "${deletingFood.localName || deletingFood.canonicalName
+            }" នឹងត្រូវប្តូរស្ថានភាពទៅជា 'អសកម្ម' (Inactive)។`
             : ""
         }
         deleting={deletingFoodRequest}
@@ -734,11 +731,10 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
-        active
+      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${active
           ? "bg-primary-800 text-white"
           : "bg-white text-gray-500 hover:bg-primary-50 hover:text-primary-800"
-      }`}
+        }`}
     >
       {children}
     </button>
@@ -758,9 +754,8 @@ function Count({
 }) {
   return (
     <span
-      className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
-        active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
-      }`}
+      className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+        }`}
     >
       {children}
     </span>

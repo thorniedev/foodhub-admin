@@ -29,7 +29,7 @@ export default function MenuItemsTabs({
     },
     {
       value: "PUBLISHED" as const,
-      label: "Published on Website",
+      label: "Published លើ វែបសាយ",
       count: menuItemCount,
       icon: Globe2,
     },

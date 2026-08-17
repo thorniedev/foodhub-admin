@@ -236,7 +236,7 @@ export default function CreateStoreMenuItemModal({
               Publish Menu Item
             </p>
             <h2 className="mt-1 text-2xl font-black text-gray-900 sm:text-3xl">
-              បង្កើត Store Menu Item ហើយបង្ហាញលើ Website
+              បង្កើត Store Menu Item ហើយបង្ហាញលើ វែបសាយ
             </h2>
           </div>
 
@@ -461,7 +461,7 @@ export default function CreateStoreMenuItemModal({
               className="inline-flex h-12 items-center gap-2 rounded-2xl bg-[#137A3D] px-6 font-bold text-white hover:bg-[#0f6333] disabled:opacity-60"
             >
               {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-              Publish to Website
+              Publish ទៅ វែបសាយ
             </button>
           </div>
         </div>

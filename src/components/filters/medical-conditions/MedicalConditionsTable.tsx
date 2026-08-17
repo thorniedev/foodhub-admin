@@ -131,16 +131,14 @@ export default function MedicalConditionsTable({
 
                 <td className="px-6 py-5">
                   <span
-                    className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-lg font-medium ring-1 ring-inset ${
-                      item.active
+                    className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-lg font-medium ring-1 ring-inset ${item.active
                         ? "bg-primary-50 text-primary-700 ring-primary-100"
                         : "bg-gray-100 text-gray-500 ring-gray-200"
-                    }`}
+                      }`}
                   >
                     <span
-                      className={`h-2 w-2 rounded-full ${
-                        item.active ? "bg-primary-600" : "bg-gray-400"
-                      }`}
+                      className={`h-2 w-2 rounded-full ${item.active ? "bg-primary-600" : "bg-gray-400"
+                        }`}
                     />
                     {item.active
                       ? "សកម្ម"
@@ -232,7 +230,7 @@ export default function MedicalConditionsTable({
                         disabled={disabled}
                         onClick={() => onHardDelete(item)}
                         className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:opacity-40"
-                        title="លុបជាអចិន្ត្រៃយ៍ (Hard Delete)"
+                        title="លុបជាអចិន្ត្រៃយ៍ (លុប)"
                       >
                         <AlertOctagon size={20} />
                       </button>
@@ -247,22 +245,22 @@ export default function MedicalConditionsTable({
 
           {items.length ===
             0 && (
-            <tr>
-              <td
-                colSpan={6}
-                className="px-5 py-16 text-center"
-              >
-                <HeartPulse
-                  size={36}
-                  className="mx-auto text-secondary-600"
-                />
+              <tr>
+                <td
+                  colSpan={6}
+                  className="px-5 py-16 text-center"
+                >
+                  <HeartPulse
+                    size={36}
+                    className="mx-auto text-secondary-600"
+                  />
 
-                <p className="mt-3 text-lg text-secondary-600">
-                  មិនមានទិន្នន័យស្ថានភាពសុខភាព
-                </p>
-              </td>
-            </tr>
-          )}
+                  <p className="mt-3 text-lg text-secondary-600">
+                    មិនមានទិន្នន័យស្ថានភាពសុខភាព
+                  </p>
+                </td>
+              </tr>
+            )}
         </tbody>
       </table>
     </div>

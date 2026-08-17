@@ -64,7 +64,7 @@ export default function ProfileTagCard({
                   : "bg-red-50 text-red-600"
               }`}
             >
-              {profile.isActive ? "ACTIVE" : "DELETED"}
+              {profile.isActive ? "សកម្ម" : "DELETED"}
             </span>
           </div>
 

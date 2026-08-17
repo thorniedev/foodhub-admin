@@ -43,9 +43,7 @@ export default function HardDeleteProfileConfirmModal({
         </div>
 
         <div className="mt-5">
-          <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-xs font-black uppercase tracking-wider text-red-700 ring-1 ring-inset ring-red-200">
-            Permanent Action
-          </span>
+        
 
           <h3 className="mt-2 text-2xl font-black text-gray-900 sm:text-3xl">
             លុប Profile ជាអចិន្ត្រៃយ៍ ?
@@ -56,7 +54,7 @@ export default function HardDeleteProfileConfirmModal({
             <span className="font-bold text-gray-800">
               {profile.profileName}
             </span>{" "}
-            នឹងត្រូវលុបចេញពីប្រព័ន្ធទាំងស្រុង (Hard Delete) ហើយមិនអាចត្រឡប់ក្រោយវិញបានទេ។
+            នឹងត្រូវលុបចេញពីប្រព័ន្ធទាំងស្រុង (លុប) ហើយមិនអាចត្រឡប់ក្រោយវិញបានទេ។
           </p>
         </div>
 

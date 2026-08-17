@@ -80,10 +80,6 @@ export default function UserCreateModal({
               <UserPlus size={28} />
               បង្កើតអ្នកប្រើថ្មី
             </p>
-
-            <p className="mt-2 text-base text-gray-500">
-              បង្កើត regular MhouBahar user និង Keycloak account។
-            </p>
           </div>
 
           <button

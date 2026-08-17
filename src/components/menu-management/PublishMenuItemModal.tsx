@@ -453,12 +453,12 @@ export default function PublishMenuItemModal({
               <p className="text-3xl font-semibold text-primary-800">
                 {item
                   ? "កែប្រែ Menu Item (Edit Menu Item)"
-                  : "Publish Menu Item ទៅ Website"}
+                  : "Publish Menu Item ទៅ វែបសាយ"}
               </p>
 
               <p className="mt-2 max-w-3xl text-lg leading-8 text-gray-500">
                 ជ្រើស Store + Food Catalog រួចកំណត់តម្លៃ សុវត្ថិភាពម្ហូប
-                និងរូបភាពដើម្បីផ្សាយលើ Website។
+                និងរូបភាពដើម្បីផ្សាយលើ វែបសាយ។
               </p>
             </div>
           </div>
@@ -484,7 +484,7 @@ export default function PublishMenuItemModal({
                 ព័ត៌មាន Menu Item
               </p>
               <p className="mt-2 text-lg leading-8 text-gray-500">
-                កំណត់ព័ត៌មានសំខាន់ៗដែលនឹងបង្ហាញនៅលើ Website។
+                កំណត់ព័ត៌មានសំខាន់ៗដែលនឹងបង្ហាញនៅលើ វែបសាយ។
               </p>
             </div>
 
@@ -522,7 +522,7 @@ export default function PublishMenuItemModal({
               </label>
 
               <Field
-                label="ឈ្មោះ Menu Item (Website Name) *"
+                label="ឈ្មោះ Menu Item (ឈ្មោះវែបសាយ) *"
                 value={values.name}
                 placeholder="ឧទាហរណ៍៖ សម្លកកូរពិសេស ឬ Phnom Penh Noodle Soup"
                 onChange={(value) =>
@@ -642,7 +642,7 @@ export default function PublishMenuItemModal({
                   <div className="flex items-center gap-2 text-secondary-700">
                     <Sparkles size={20} className="shrink-0" />
                     <p className="text-lg font-semibold">
-                      Featured (បង្ហាញជាមុខម្ហូបលេចធ្លោលើ Website)
+                      Featured (បង្ហាញជាមុខម្ហូបលេចធ្លោលើ វែបសាយ)
                     </p>
                   </div>
 
@@ -1051,7 +1051,7 @@ export default function PublishMenuItemModal({
                 <Save size={20} />
               )}
 
-              {item ? "រក្សាទុក (Save Changes)" : "Publish ទៅ Website"}
+              {item ? "រក្សាទុក (Save Changes)" : "Publish ទៅ វែបសាយ"}
             </button>
           </div>
         </div>

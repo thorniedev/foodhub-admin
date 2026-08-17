@@ -53,7 +53,7 @@ export default function UsersHeader({
 
             <Stat
               icon={<UserRoundCheck size={20} />}
-              label="Active ក្នុងទំព័រ"
+              label="សកម្ម ក្នុងទំព័រ"
               value={activeCount}
             />
 

@@ -529,6 +529,15 @@ export function StatusBadge({
         ? "bg-red-500"
         : "bg-gray-400";
 
+  const label =
+    normalized === "OPEN"
+      ? "បើក"
+      : normalized === "CLOSED"
+        ? "បិទ"
+        : normalized === "TEMPORARILY_CLOSED"
+          ? "បិទបណ្តោះអាសន្ន"
+          : normalized;
+
   return (
     <span
       className={`
@@ -556,7 +565,7 @@ export function StatusBadge({
         `}
       />
 
-      {normalized}
+      {label}
     </span>
   );
 }
@@ -593,7 +602,7 @@ function OpenStatusBadge({ isOpen }: { isOpen: boolean | null | undefined }) {
             bg-primary-600
           "
         />
-        OPEN
+        បើក
       </span>
     );
   }
@@ -625,7 +634,7 @@ function OpenStatusBadge({ isOpen }: { isOpen: boolean | null | undefined }) {
             bg-red-500
           "
         />
-        CLOSED
+        បិទ
       </span>
     );
   }

@@ -45,7 +45,7 @@ export default function MenuItemsHeader({
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-emerald-50/90 sm:text-base">
             Food Catalog គឺជា master data ដែល Store អាចជ្រើសយក។ Published Menu Item
-            គឺជា Food + Store + តម្លៃ + រូបភាព ដែលបង្ហាញទៅ Website។
+            គឺជា Food + Store + តម្លៃ + រូបភាព ដែលបង្ហាញទៅ វែបសាយ។
           </p>
         </div>
 

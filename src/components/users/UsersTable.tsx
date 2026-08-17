@@ -114,12 +114,12 @@ export default function UsersTable({
                   {user.emailVerified ? (
                     <span className="inline-flex items-center gap-2 rounded-full bg-primary-50 px-3.5 py-1.5 text-lg font-medium text-primary-700 ring-1 ring-inset ring-primary-100">
                       <CheckCircle size={17} />
-                      Yes
+                      បានផ្ទៀងផ្ទាត់
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-2 rounded-full bg-secondary-50 px-3.5 py-1.5 text-lg font-medium text-secondary-600 ring-1 ring-inset ring-secondary-100">
                       <XCircle size={17} />
-                      No
+                      មិនបានផ្ទៀងផ្ទាត់
                     </span>
                   )}
                 </td>
@@ -152,7 +152,7 @@ export default function UsersTable({
                       type="button"
                       disabled={disabled}
                       onClick={() => onDelete(user)}
-                      title="Soft delete"
+                      title=" បញ្ឈប់"
                       className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Trash2 size={20} />
@@ -163,7 +163,7 @@ export default function UsersTable({
                         type="button"
                         disabled={disabled}
                         onClick={() => onHardDelete(user)}
-                        title="Hard delete (Permanent)"
+                        title="លុប (Permanent)"
                         className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <AlertOctagon size={20} />
@@ -215,12 +215,21 @@ export function StatusBadge({ status }: { status: string }) {
           ? "bg-red-500"
           : "bg-gray-400";
 
+  const label =
+    normalized === "ACTIVE"
+      ? "សកម្ម"
+      : normalized === "SUSPENDED"
+        ? "SUSPENDED"
+        : normalized === "DISABLED"
+          ? "DISABLED"
+          : normalized;
+
   return (
     <span
       className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-lg font-medium ring-1 ring-inset ${className}`}
     >
       <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
-      {normalized}
+      {label}
     </span>
   );
 }

@@ -78,7 +78,7 @@ export default function PublishedMenuItemsTable({
         </div>
 
         <p className="mt-4 text-2xl font-semibold text-primary-800">
-          មិនទាន់មាន Menu Item លើ Website
+          មិនទាន់មាន Menu Item លើ វែបសាយ
         </p>
 
         <p className="mt-2 max-w-xl text-lg leading-8 text-gray-500">
