@@ -644,6 +644,15 @@ export default function WeatherConditionManager() {
         uuid={
           detailUuid
         }
+        onToggleStatus={async (targetUuid, nextActive) => {
+          await updateWeather({
+            uuid: targetUuid,
+            body: {
+              isActive: nextActive,
+            },
+          }).unwrap();
+          await refetch();
+        }}
         onClose={() =>
           setDetailUuid(
             null,

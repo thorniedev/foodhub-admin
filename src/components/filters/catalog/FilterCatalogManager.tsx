@@ -780,6 +780,10 @@ function CatalogTable({
               </th>
 
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+                ការពិពណ៌នា
+              </th>
+
+              <th className="px-6 py-4 text-xl font-semibold text-primary-800">
                 Code
               </th>
 
@@ -803,19 +807,18 @@ function CatalogTable({
                 key={item.uuid}
                 className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
               >
-                {/* Name + description */}
+                {/* Name */}
                 <td className="px-6 py-5">
-                  <div className="min-w-[280px]">
-                    <p className="text-lg font-medium text-gray-800">
-                      {item.localName || item.name}
-                    </p>
+                  <p className="text-lg font-medium text-gray-800">
+                    {item.localName || item.name}
+                  </p>
+                </td>
 
-                    {item.description && (
-                      <p className="mt-1 max-w-[400px] truncate text-lg leading-7 text-gray-400">
-                        {item.description}
-                      </p>
-                    )}
-                  </div>
+                {/* Description */}
+                <td className="max-w-[340px] px-6 py-5">
+                  <p className="line-clamp-2 text-lg text-gray-500">
+                    {item.description || "—"}
+                  </p>
                 </td>
 
                 {/* Code */}
@@ -882,7 +885,7 @@ function CatalogTable({
 
             {items.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-6 py-16 text-center">
+                <td colSpan={6} className="px-6 py-16 text-center">
                   <Search size={34} className="mx-auto text-gray-300" />
 
                   <p className="mt-3 text-lg font-medium text-gray-500">
