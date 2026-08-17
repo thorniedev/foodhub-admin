@@ -1423,53 +1423,34 @@ export const menuManagementApi =
         >({
           async queryFn(params) {
             const p = (params ?? {}) as PublicMenuItemListParams;
-            const query = makeQuery({
-              page: p.page ?? 0,
-              size: p.size ?? 20,
-              sort:
-                p.sort ??
-                "createdAt,desc",
-              query: p.query,
-              rootCategoryCode:
-                p.rootCategoryCode,
-              storeUuid: p.storeUuid,
-              foodUuid: p.foodUuid,
-              availabilityStatus:
-                p.availabilityStatus,
-              featured:
-                p.featured !== undefined
-                  ? String(p.featured)
-                  : undefined,
-            });
 
+            // 1. Primary: Discovery Search API (POST /api/discovery/menu-items/search)
             let result = await browserRequest<unknown>(
-              `/api/catalog/menu-items${query}`,
+              `/api/discovery/menu-items/search?page=${p.page ?? 0}&size=${
+                p.size ?? 100
+              }&sort=${encodeURIComponent(p.sort ?? "FOODHUB_RATING_DESC")}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  query: p.query,
+                  categoryUuids: p.rootCategoryCode ? [p.rootCategoryCode] : undefined,
+                }),
+              },
             );
 
-            if (
-              "error" in result &&
-              (result.error as { status?: number })?.status === 404
-            ) {
+            // 2. Fallback: GET /api/menu-items
+            if ("error" in result) {
+              const query = makeQuery({
+                page: p.page ?? 0,
+                size: p.size ?? 100,
+                sort: p.sort ?? "createdAt,desc",
+                query: p.query,
+                storeUuid: p.storeUuid,
+              });
+
               result = await browserRequest<unknown>(
                 `/api/menu-items${query}`,
-              );
-            }
-
-            if (
-              "error" in result &&
-              (result.error as { status?: number })?.status === 404
-            ) {
-              result = await browserRequest<unknown>(
-                `/api/discovery/menu-items/search?page=${p.page ?? 0}&size=${
-                  p.size ?? 20
-                }`,
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    query: p.query,
-                  }),
-                },
               );
             }
 
@@ -1478,10 +1459,7 @@ export const menuManagementApi =
             }
 
             return {
-              data:
-                normalizePage<MenuItemRecord>(
-                  result.data as never,
-                ),
+              data: normalizePage<MenuItemRecord>(result.data as never),
             };
           },
         }),
