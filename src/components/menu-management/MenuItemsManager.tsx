@@ -386,37 +386,43 @@ export default function MenuItemsManager({
             </div>
 
             <div>
-              <h1 className="text-3xl font-black sm:text-4xl">ប្រភេទអាហារ</h1>
+              <h1 className="text-3xl font-black sm:text-4xl">
+                {initialTab === "WEBSITE" ? "មីនុយ" : "ម្ហូបអាហារ"}
+              </h1>
               <p className="mt-1 text-sm text-white/75">
-                Food Catalog សម្រាប់ Store និង Menu Items សម្រាប់ Website
+                {initialTab === "WEBSITE"
+                  ? "គ្រប់គ្រង និង បង្កើត Menu Items សម្រាប់ Store"
+                  : "គ្រប់គ្រងបញ្ជីម្ហូបអាហារក្នុង Catalog (Food Catalog)"}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setEditingFood(null);
-                setFoodModalOpen(true);
-              }}
-              className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#137A3D] shadow-sm"
-            >
-              <Plus size={18} />
-              បន្ថែម Food Catalog
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setEditingMenu(null);
-                setMenuModalOpen(true);
-              }}
-              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-white/30 bg-white/10 px-5 text-sm font-black text-white"
-            >
-              <Globe2 size={18} />
-              Publish ទៅ Website
-            </button>
+            {initialTab === "WEBSITE" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingMenu(null);
+                  setMenuModalOpen(true);
+                }}
+                className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#137A3D] shadow-sm hover:bg-emerald-50 transition"
+              >
+                <Plus size={18} />
+                បង្កើត មីនុយ (Menu Item)
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingFood(null);
+                  setFoodModalOpen(true);
+                }}
+                className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#137A3D] shadow-sm hover:bg-emerald-50 transition"
+              >
+                <Plus size={18} />
+                បន្ថែម Food Catalog
+              </button>
+            )}
           </div>
         </div>
 
