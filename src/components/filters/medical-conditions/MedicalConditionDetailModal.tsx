@@ -163,12 +163,7 @@ export default function MedicalConditionDetailModal({
                 </span>
               </div>
 
-              <div className="mt-1 flex items-center gap-2 text-xs font-medium text-gray-400">
-                <span>API Endpoint:</span>
-                <code className="rounded bg-gray-100 px-2 py-0.5 font-mono text-gray-700">
-                  GET {swaggerApiPath}
-                </code>
-              </div>
+        
             </div>
           </div>
 
@@ -253,67 +248,7 @@ export default function MedicalConditionDetailModal({
               </p>
             </div>
 
-            {/* UUID & Timestamp Metadata */}
-            {/* <div className="space-y-2 rounded-2xl border border-gray-100 bg-emerald-50/30 p-4">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-800">
-                  <Hash size={14} />
-                  UUID
-                </span>
-                {displayItem.uuid && (
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(displayItem.uuid, "uuid")}
-                    className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 text-xs font-medium text-gray-600 shadow-sm transition hover:bg-gray-50"
-                  >
-                    {copiedKey === "uuid" ? (
-                      <>
-                        <Check size={13} className="text-emerald-600" />
-                        <span className="text-emerald-600">បានចម្លង</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={13} />
-                        <span>ចម្លង UUID</span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-              <p className="break-all font-mono text-sm font-semibold text-gray-800">
-                {displayItem.uuid || "—"}
-              </p>
-
-              {displayItem.updatedAt && (
-                <div className="mt-3 flex items-center gap-1.5 pt-2 border-t border-emerald-100/60 text-xs text-gray-500">
-                  <Clock size={13} className="text-gray-400" />
-                  <span>កែប្រែចុងក្រោយ: {formatAdminDate(displayItem.updatedAt)}</span>
-                </div>
-              )}
-            </div> */}
-
-            {/* Toggle Raw JSON Response */}
-            {/* {rawResponse ? (
-              <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/70">
-                <button
-                  type="button"
-                  onClick={() => setShowRawJson(!showRawJson)}
-                  className="flex w-full items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-500 transition hover:bg-gray-100"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Code2 size={14} />
-                    Raw API Response (JSON)
-                  </span>
-                  {showRawJson ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </button>
-
-                {showRawJson && (
-                  <div className="border-t border-gray-200/60 bg-gray-900 p-4 text-xs font-mono text-emerald-400 overflow-x-auto max-h-60">
-                    <pre>{JSON.stringify(rawResponse, null, 2)}</pre>
-                  </div>
-                )}
-              </div>
-            ) : null} */}
+    
           </div>
         )}
 

@@ -1,4 +1,5 @@
 import {
+  Eye,
   Leaf,
   Pencil,
   RotateCcw,
@@ -12,6 +13,10 @@ import type {
 interface Props {
   items: Ingredient[];
   disabled?: boolean;
+
+  onView: (
+    item: Ingredient,
+  ) => void;
 
   onEdit: (
     item: Ingredient,
@@ -59,6 +64,7 @@ function formatDate(
 export default function IngredientsTable({
   items,
   disabled = false,
+  onView,
   onEdit,
   onDelete,
   onRestore,
@@ -171,6 +177,16 @@ export default function IngredientsTable({
 
                 <td className="px-6 py-5">
                   <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => onView(item)}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      title="មើលព័ត៌មានលម្អិត"
+                    >
+                      <Eye size={20} />
+                    </button>
+
                     <button
                       type="button"
                       disabled={

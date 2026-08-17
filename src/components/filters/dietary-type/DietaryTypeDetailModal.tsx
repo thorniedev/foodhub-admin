@@ -164,12 +164,7 @@ export default function DietaryTypeDetailModal({
                 </span>
               </div>
 
-              <div className="mt-1 flex items-center gap-2 text-xs font-medium text-gray-400">
-                <span>API Endpoint:</span>
-                <code className="rounded bg-gray-100 px-2 py-0.5 font-mono text-gray-700">
-                  GET {swaggerApiPath}
-                </code>
-              </div>
+        
             </div>
           </div>
 

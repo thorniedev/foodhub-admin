@@ -11,18 +11,18 @@ import {
   Copy,
   Hash,
   Info,
+  Leaf,
   Loader2,
-  ShieldAlert,
   Sparkles,
   Tag,
   X,
 } from "lucide-react";
 
-import type { Allergen } from "@/src/types/allergen";
+import type { Ingredient } from "@/src/types/ingredient";
 import { formatAdminDate } from "@/src/types/safetyResource";
 
-interface AllergenDetailModalProps {
-  item: Allergen | null;
+interface IngredientDetailModalProps {
+  item: Ingredient | null;
   onClose: () => void;
 }
 
@@ -34,20 +34,20 @@ interface ApiResponseEnvelope<T> {
   timestamp?: string;
 }
 
-export default function AllergenDetailModal({
+export default function IngredientDetailModal({
   item,
   onClose,
-}: AllergenDetailModalProps) {
-  const [data, setData] = useState<Allergen | null>(null);
+}: IngredientDetailModalProps) {
+  const [data, setData] = useState<Ingredient | null>(null);
   const [rawResponse, setRawResponse] = useState<unknown>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [showRawJson, setShowRawJson] = useState(false);
 
-  const identifier = item?.code || item?.uuid || "";
-  const endpointPath = `/api/admin/allergens/${encodeURIComponent(identifier)}`;
-  const swaggerApiPath = `/api/v1/admin/allergens/${identifier}`;
+  const uuid = item?.uuid || "";
+  const endpointPath = `/api/admin/catalog/ingredients/${encodeURIComponent(uuid)}`;
+  const swaggerApiPath = `/api/v1/admin/catalog/ingredients/${uuid}`;
 
   useEffect(() => {
     if (!item) {
@@ -75,28 +75,28 @@ export default function AllergenDetailModal({
         }
 
         const json = (await res.json()) as
-          | ApiResponseEnvelope<Allergen>
-          | Allergen;
+          | ApiResponseEnvelope<Ingredient>
+          | Ingredient;
 
         if (!isMounted) return;
 
         setRawResponse(json);
 
-        let detail: Allergen | null = null;
+        let detail: Ingredient | null = null;
         if (json && typeof json === "object") {
           if ("payload" in json && json.payload && typeof json.payload === "object") {
-            detail = json.payload as Allergen;
+            detail = json.payload as Ingredient;
           } else if ("data" in json && json.data && typeof json.data === "object") {
-            detail = json.data as Allergen;
+            detail = json.data as Ingredient;
           } else {
-            detail = json as Allergen;
+            detail = json as Ingredient;
           }
         }
 
         setData(detail || item);
       } catch (err) {
         if (!isMounted) return;
-        console.warn(`[AllergenDetailModal] Could not fetch ${endpointPath}:`, err);
+        console.warn(`[IngredientDetailModal] Could not fetch ${endpointPath}:`, err);
         setIsError(true);
         // Fallback to table item
         setData(item);
@@ -125,7 +125,7 @@ export default function AllergenDetailModal({
   }
 
   const displayItem = data || item;
-  const isActive = displayItem.active;
+  const isActive = displayItem.isActive;
 
   return (
     <div
@@ -138,14 +138,14 @@ export default function AllergenDetailModal({
         {/* Modal Header */}
         <div className="flex items-start justify-between border-b border-gray-100 pb-5">
           <div className="flex items-center gap-3.5">
-            <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-amber-50 text-amber-800">
-              <ShieldAlert size={26} />
+            <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-emerald-50 text-primary-800">
+              <Leaf size={26} />
             </div>
 
             <div>
               <div className="flex items-center gap-2.5">
                 <h2 className="text-2xl font-black text-gray-900 sm:text-3xl">
-                  {displayItem.name || displayItem.code}
+                  {displayItem.name}
                 </h2>
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-black ${
@@ -163,6 +163,7 @@ export default function AllergenDetailModal({
                 </span>
               </div>
 
+              
             </div>
           </div>
 
@@ -193,7 +194,7 @@ export default function AllergenDetailModal({
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
                     <Tag size={14} />
-                    Code / អាឡែស៊ី
+                    Code / កូដ
                   </span>
                   {displayItem.code && (
                     <button
@@ -227,16 +228,14 @@ export default function AllergenDetailModal({
               </div>
 
               {/* Name */}
-              {displayItem.name && displayItem.name !== displayItem.code && (
-                <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50 sm:col-span-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                    ឈ្មោះអាឡែស៊ី (Name)
-                  </span>
-                  <p className="mt-2 text-base font-bold text-gray-900">
-                    {displayItem.name}
-                  </p>
-                </div>
-              )}
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50 sm:col-span-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                  ឈ្មោះគ្រឿងផ្សំ (Name)
+                </span>
+                <p className="mt-2 text-base font-bold text-gray-900">
+                  {displayItem.name || "—"}
+                </p>
+              </div>
             </div>
 
             {/* Description */}
