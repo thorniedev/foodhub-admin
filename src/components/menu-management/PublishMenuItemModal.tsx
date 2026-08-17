@@ -135,13 +135,19 @@ export default function PublishMenuItemModal({
       return;
     }
 
-    const list = item.images?.length
+    const list = item.primaryMediaUrls?.length
+      ? item.primaryMediaUrls
+      : item.primaryMediaUuids?.length
+      ? item.primaryMediaUuids
+      : item.primaryMediaUuid
+      ? [item.primaryMediaUuid]
+      : item.images?.length
       ? item.images
       : item.gallery?.length
       ? item.gallery
-      : item.primaryMediaUrls?.length
-      ? item.primaryMediaUrls
-      : [item.thumbnail || item.imageUrl].filter(Boolean);
+      : item.galleryMediaUuids?.length
+      ? item.galleryMediaUuids
+      : [item.thumbnail || item.imageUrl || item.thumbnailMediaUuid].filter(Boolean);
     setExistingImages(list as string[]);
 
     const matchedStoreUuid =

@@ -47,9 +47,14 @@ function imageUrl(
   const raw =
     item.thumbnail ||
     item.imageUrl ||
+    item.primaryMediaUuid ||
+    item.thumbnailMediaUuid ||
     item.primaryMediaUrls?.[0] ||
+    item.primaryMediaUuids?.[0] ||
     item.images?.[0] ||
     item.gallery?.[0] ||
+    item.galleryMediaUuids?.[0] ||
+    (item as any).mediaUuid ||
     null;
 
   return resolveFoodHubCatalogImageUrl(

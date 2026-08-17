@@ -39,11 +39,17 @@ export default function MenuItemDetailModal({
   const images = (
     data?.primaryMediaUrls?.length
       ? data.primaryMediaUrls
+      : data?.primaryMediaUuids?.length
+      ? data.primaryMediaUuids
+      : data?.primaryMediaUuid
+      ? [data.primaryMediaUuid]
       : data?.images?.length
       ? data.images
       : data?.gallery?.length
       ? data.gallery
-      : [data?.thumbnail || data?.imageUrl].filter(Boolean)
+      : data?.galleryMediaUuids?.length
+      ? data.galleryMediaUuids
+      : [data?.thumbnail || data?.imageUrl || data?.thumbnailMediaUuid].filter(Boolean)
   ) as string[];
 
   return (

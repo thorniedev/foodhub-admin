@@ -640,8 +640,11 @@ export interface FoodRecord {
   defaultSpiceLevel?: number | null;
   nutritionData?: NutritionData | null;
 
+  primaryMediaUuid?: string | null;
   primaryMediaUuids?: string[];
   primaryMediaUrls?: string[];
+  thumbnailMediaUuid?: string | null;
+  galleryMediaUuids?: string[];
   images?: string[];
   gallery?: string[];
   thumbnail?: string | null;
@@ -727,6 +730,7 @@ export interface MenuItemRecord {
   isFeatured?: boolean;
   source?: MenuItemSource;
 
+  primaryMediaUuid?: string | null;
   primaryMediaUuids?: string[];
   primaryMediaUrls?: string[];
   thumbnailMediaUuid?: string | null;
