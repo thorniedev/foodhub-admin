@@ -18,6 +18,7 @@ import {
   useGetAdminProfileQuery,
   useGetAdminUserProfilesQuery,
   useGetAdminUserQuery,
+  useHardDeleteAdminProfileMutation,
   useHardDeleteAdminUserMutation,
   useRestoreAdminProfileMutation,
   useUpdateAdminUserStatusMutation,
@@ -33,6 +34,7 @@ import type {
 import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
 
 import DeleteUserConfirmModal from "./DeleteUserConfirmModal";
+import HardDeleteProfileConfirmModal from "./HardDeleteProfileConfirmModal";
 import HardDeleteUserConfirmModal from "./HardDeleteUserConfirmModal";
 import ProfileActionConfirmModal from "./ProfileActionConfirmModal";
 import ProfileDetailPanel from "./ProfileDetailPanel";
@@ -68,6 +70,9 @@ export default function UserDetailManager({
 
   const [hardDeleteUser, setHardDeleteUser] =
     useState<AdminUser | null>(null);
+
+  const [hardDeleteProfile, setHardDeleteProfile] =
+    useState<AdminProfile | null>(null);
 
   const [profileAction, setProfileAction] = useState<{
     action: "DELETE" | "RESTORE";
@@ -141,6 +146,9 @@ export default function UserDetailManager({
 
   const [deleteAdminProfile, { isLoading: deletingProfile }] =
     useDeleteAdminProfileMutation();
+
+  const [hardDeleteAdminProfile, { isLoading: hardDeletingProfile }] =
+    useHardDeleteAdminProfileMutation();
 
   const [restoreAdminProfile, { isLoading: restoringProfile }] =
     useRestoreAdminProfileMutation();
@@ -228,6 +236,32 @@ export default function UserDetailManager({
     }
   };
 
+  const handleHardDeleteProfile = async () => {
+    if (!hardDeleteProfile) {
+      return;
+    }
+
+    const target = hardDeleteProfile;
+
+    try {
+      await hardDeleteAdminProfile(target.uuid).unwrap();
+
+      setHardDeleteProfile(null);
+      setNotice({
+        type: "success",
+        text: `Profile "${target.profileName}" ត្រូវបានលុបជាអចិន្ត្រៃយ៍។`,
+      });
+
+      setSelectedProfileUuid(null);
+      await refetchProfiles();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAdminApiErrorMessage(requestError),
+      });
+    }
+  };
+
   const handleProfileAction = async () => {
     if (!profileAction) {
       return;
@@ -290,7 +324,7 @@ export default function UserDetailManager({
     );
   }
 
-  const profileBusy = deletingProfile || restoringProfile;
+  const profileBusy = deletingProfile || restoringProfile || hardDeletingProfile;
   const userBusy = updatingStatus || deletingUser || hardDeletingUser;
 
   return (
@@ -352,6 +386,11 @@ export default function UserDetailManager({
               });
             }
           }}
+          onHardDelete={() => {
+            if (selectedProfile) {
+              setHardDeleteProfile(selectedProfile);
+            }
+          }}
           onRestore={() => {
             if (selectedProfile) {
               setProfileAction({
@@ -394,6 +433,17 @@ export default function UserDetailManager({
           }
         }}
         onConfirm={handleHardDeleteUser}
+      />
+
+      <HardDeleteProfileConfirmModal
+        profile={hardDeleteProfile}
+        deleting={hardDeletingProfile}
+        onClose={() => {
+          if (!hardDeletingProfile) {
+            setHardDeleteProfile(null);
+          }
+        }}
+        onConfirm={handleHardDeleteProfile}
       />
 
       <ProfileActionConfirmModal

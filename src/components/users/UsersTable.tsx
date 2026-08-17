@@ -98,7 +98,7 @@ export default function UsersTable({
                       </p>
 
                       <p className="mt-1 truncate text-base text-gray-400">
-                        @{user.username}
+                        {user.username}
                       </p>
                     </div>
                   </Link>

@@ -1,4 +1,4 @@
-import { RotateCcw, Trash2 } from "lucide-react";
+import { AlertOctagon, RotateCcw, Trash2 } from "lucide-react";
 
 import type { AdminProfile } from "@/src/types/userProfile";
 
@@ -9,6 +9,7 @@ interface ProfileHeaderProps {
   profile: AdminProfile;
   busy?: boolean;
   onDelete: () => void;
+  onHardDelete?: () => void;
   onRestore: () => void;
 }
 
@@ -16,6 +17,7 @@ export default function ProfileHeader({
   profile,
   busy = false,
   onDelete,
+  onHardDelete,
   onRestore,
 }: ProfileHeaderProps) {
   return (
@@ -60,7 +62,7 @@ export default function ProfileHeader({
           </div>
         </div>
 
-        <div className="flex shrink-0 gap-2">
+        <div className="flex flex-wrap shrink-0 gap-2">
           {profile.isActive ? (
             <button
               type="button"
@@ -80,6 +82,19 @@ export default function ProfileHeader({
             >
               <RotateCcw size={19} />
               Restore
+            </button>
+          )}
+
+          {onHardDelete && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={onHardDelete}
+              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-300 bg-red-600 px-5 text-lg font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+              title="Permanently hard delete profile"
+            >
+              <AlertOctagon size={19} />
+              Hard delete
             </button>
           )}
         </div>

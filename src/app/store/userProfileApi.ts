@@ -307,6 +307,17 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
       }),
     }),
 
+    hardDeleteAdminProfile: builder.mutation<void, string>({
+      query: (profileUuid) => ({
+        url: `/profiles/${encodeURIComponent(profileUuid)}/hard`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _error, profileUuid) => [
+        { type: "AdminProfile", id: profileUuid },
+        { type: "AdminProfile", id: "LIST" },
+      ],
+    }),
+
     restoreAdminProfile: builder.mutation<AdminProfile, string>({
       query: (profileUuid) => ({
         url: `/profiles/${encodeURIComponent(profileUuid)}/restore`,
@@ -329,5 +340,6 @@ export const {
   useGetAdminUserProfilesQuery,
   useGetAdminProfileQuery,
   useDeleteAdminProfileMutation,
+  useHardDeleteAdminProfileMutation,
   useRestoreAdminProfileMutation,
 } = userProfileApi;

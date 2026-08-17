@@ -23,6 +23,7 @@ interface ProfileDetailPanelProps {
   error: unknown;
   busy?: boolean;
   onDelete: () => void;
+  onHardDelete?: () => void;
   onRestore: () => void;
 }
 
@@ -32,6 +33,7 @@ export default function ProfileDetailPanel({
   error,
   busy = false,
   onDelete,
+  onHardDelete,
   onRestore,
 }: ProfileDetailPanelProps) {
   if (loading) {
@@ -80,6 +82,7 @@ export default function ProfileDetailPanel({
         profile={profile}
         busy={busy}
         onDelete={onDelete}
+        onHardDelete={onHardDelete}
         onRestore={onRestore}
       />
 

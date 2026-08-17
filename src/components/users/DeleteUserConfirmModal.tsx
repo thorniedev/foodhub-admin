@@ -58,7 +58,7 @@ export default function DeleteUserConfirmModal({
           <span className="font-semibold text-gray-800">
             {name}
           </span>{" "}
-          នឹងត្រូវ soft-delete តាម rule របស់ backend។
+          នឹងត្រូវបានផ្អាកការប្រើប្រាស់
         </p>
 
         <div className="mt-6 grid grid-cols-2 gap-3">
