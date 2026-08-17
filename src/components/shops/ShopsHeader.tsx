@@ -28,16 +28,9 @@
                 <p className="mt-6 max-w-2xl text-xl  text-white/85">
                   គ្រប់គ្រង បន្ថែម កែប្រែ ស្ថានភាព ម៉ោងបើកបិទ{" "}
                   <br className=" md:block max-md:hidden" /> ទីតាំង និង Google
-                  Places សម្រាប់ហាងក្នុង FoodHub។
+                  Places សម្រាប់ហាងក្នុង MhouBahar។
                 </p>
               </div>
-            </div>
-
-            <div>
-              <p className="text-5xl font-bold">គ្រប់គ្រងហាង</p>
-              <p className="mt-2 max-w-2xl text-xl leading-7 text-white/85">
-                គ្រប់គ្រង បន្ថែម កែប្រែ ស្ថានភាព ម៉ោងបើកបិទ ទីតាំង និង Google Places សម្រាប់ហាងក្នុង MhouBahar។
-              </p>
             </div>
           </div>
 
