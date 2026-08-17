@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
 import {
@@ -59,6 +60,36 @@ function imageUrl(
 
   return resolveFoodHubCatalogImageUrl(
     raw,
+  );
+}
+
+function TableAvatar({
+  src,
+  alt,
+  fallbackEmoji,
+}: {
+  src: string | null;
+  alt: string;
+  fallbackEmoji: string;
+}) {
+  const [error, setError] = useState(false);
+
+  if (!src || error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center text-lg text-gray-300">
+        {fallbackEmoji}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className="h-full w-full object-cover"
+      loading="lazy"
+      onError={() => setError(true)}
+    />
   );
 }
 
@@ -128,22 +159,11 @@ export default function FoodCatalogTable({
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                        {image ? (
-                          <img
-                            src={image}
-                            alt={
-                              foodName(
-                                item,
-                              )
-                            }
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-lg text-gray-300">
-                            🍽️
-                          </div>
-                        )}
+                        <TableAvatar
+                          src={image}
+                          alt={foodName(item)}
+                          fallbackEmoji="🍽️"
+                        />
                       </div>
 
                       <div className="min-w-0">
