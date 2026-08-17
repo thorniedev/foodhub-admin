@@ -19,6 +19,7 @@ import {
   useCreateDietaryTypeMutation,
   useDeleteDietaryTypeMutation,
   useGetDietaryTypesQuery,
+  useHardDeleteDietaryTypeMutation,
   useRestoreDietaryTypeMutation,
   useUpdateDietaryTypeMutation,
 } from "@/src/app/store/dietaryTypeApi";
@@ -36,11 +37,13 @@ import {
 } from "@/src/types/safetyResource";
 
 import DeleteDietaryTypeConfirmModal from "./DeleteDietaryTypeConfirmModal";
+import DietaryTypeDetailModal from "./DietaryTypeDetailModal";
 import DietaryTypeFormModal from "./DietaryTypeFormModal";
 import DietaryTypesHeader from "./DietaryTypesHeader";
 import DietaryTypesPagination from "./DietaryTypesPagination";
 import DietaryTypesTable from "./DietaryTypesTable";
 import DietaryTypesTabs from "./DietaryTypesTabs";
+import HardDeleteDietaryTypeConfirmModal from "./HardDeleteDietaryTypeConfirmModal";
 
 /* =========================================================
    SORT
@@ -117,6 +120,14 @@ export default function DietaryTypeManager() {
     );
 
   const [
+    viewing,
+    setViewing,
+  ] =
+    useState<DietaryType | null>(
+      null,
+    );
+
+  const [
     formOpen,
     setFormOpen,
   ] = useState(false);
@@ -124,6 +135,14 @@ export default function DietaryTypeManager() {
   const [
     deleting,
     setDeleting,
+  ] =
+    useState<DietaryType | null>(
+      null,
+    );
+
+  const [
+    hardDeletingItem,
+    setHardDeletingItem,
   ] =
     useState<DietaryType | null>(
       null,
@@ -192,6 +211,15 @@ export default function DietaryTypeManager() {
     },
   ] =
     useDeleteDietaryTypeMutation();
+
+  const [
+    hardDeleteItem,
+    {
+      isLoading:
+        isHardDeleting,
+    },
+  ] =
+    useHardDeleteDietaryTypeMutation();
 
   const [
     restoreItem,
@@ -399,6 +427,7 @@ export default function DietaryTypeManager() {
     isCreating ||
     isUpdating ||
     isDeleting ||
+    isHardDeleting ||
     isRestoring;
 
   /* =======================================================
@@ -518,6 +547,41 @@ export default function DietaryTypeManager() {
           text:
             getApiErrorMessage(
               deleteError,
+            ),
+        });
+      }
+    };
+
+  /* =======================================================
+     HARD DELETE
+  ======================================================= */
+  const handleHardDelete =
+    async () => {
+      if (!hardDeletingItem) {
+        return;
+      }
+
+      try {
+        await hardDeleteItem(
+          hardDeletingItem.code,
+        ).unwrap();
+
+        setMessage({
+          type: "success",
+          text: `បានលុបរបបអាហារ "${hardDeletingItem.name}" ជាអចិន្ត្រៃយ៍ដោយជោគជ័យ។`,
+        });
+
+        setHardDeletingItem(null);
+
+        await refetch();
+      } catch (
+        hardDeleteError
+      ) {
+        setMessage({
+          type: "error",
+          text:
+            getApiErrorMessage(
+              hardDeleteError,
             ),
         });
       }
@@ -1059,6 +1123,9 @@ export default function DietaryTypeManager() {
               sortedItems
             }
             disabled={busy}
+            onView={(item) =>
+              setViewing(item)
+            }
             onEdit={(
               item,
             ) => {
@@ -1071,6 +1138,13 @@ export default function DietaryTypeManager() {
             }}
             onDelete={
               setDeleting
+            }
+            onHardDelete={(
+              item,
+            ) =>
+              setHardDeletingItem(
+                item,
+              )
             }
             onRestore={(
               item,
@@ -1147,6 +1221,32 @@ export default function DietaryTypeManager() {
         }}
         onConfirm={
           handleDelete
+        }
+      />
+
+      {/* COMPONENT: HardDeleteDietaryTypeConfirmModal */}
+      <HardDeleteDietaryTypeConfirmModal
+        item={hardDeletingItem}
+        deleting={
+          isHardDeleting
+        }
+        onClose={() => {
+          if (!isHardDeleting) {
+            setHardDeletingItem(
+              null,
+            );
+          }
+        }}
+        onConfirm={
+          handleHardDelete
+        }
+      />
+
+      {/* COMPONENT: DietaryTypeDetailModal */}
+      <DietaryTypeDetailModal
+        item={viewing}
+        onClose={() =>
+          setViewing(null)
         }
       />
     </div>
