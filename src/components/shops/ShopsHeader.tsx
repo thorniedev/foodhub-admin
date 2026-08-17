@@ -24,7 +24,7 @@ export default function ShopsHeader({
             </div>
 
             <div>
-              <p className="text-3xl font-bold text-accent-400">គ្រប់គ្រងហាង</p>
+              <p className="text-5xl font-bold text-accent-400">គ្រប់គ្រងហាង</p>
               <p className="mt-6 max-w-2xl text-xl  text-white/85">
                 គ្រប់គ្រង បន្ថែម កែប្រែ ស្ថានភាព ម៉ោងបើកបិទ{" "}
                 <br className=" md:block max-md:hidden" /> ទីតាំង និង Google

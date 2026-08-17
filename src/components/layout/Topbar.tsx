@@ -42,7 +42,7 @@ export default function Topbar() {
         <div className="flex min-w-0 items-center overflow-visible  gap-2 text-base font-semibold text-primary-800 md:text-3xl">
           {parent && (
             <>
-              <span className="hidden text-gray-400 sm:inline">{parent}</span>
+              <span className="hidden pt-1 text-2xl text-gray-400 sm:inline">{parent}</span>
 
               <span className="hidden text-gray-300 sm:inline">›</span>
             </>
