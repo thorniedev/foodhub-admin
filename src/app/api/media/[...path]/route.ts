@@ -64,7 +64,31 @@ async function handleProxy(
     const responseBuffer = await backendResponse.arrayBuffer();
     const responseHeaders = new Headers();
 
-    const backendContentType = backendResponse.headers.get("content-type");
+    const backendContentType = backendResponse.headers.get("content-type") || "";
+
+    // If backend returned JSON (e.g. { url: "https://minio..." } or { payload: { url: "..." } }), redirect browser image request directly to image URL
+    if (backendContentType.includes("application/json") && request.method === "GET") {
+      try {
+        const text = new TextDecoder().decode(responseBuffer);
+        const json = JSON.parse(text);
+        const targetUrl =
+          json.url ||
+          json.payload?.url ||
+          json.data?.url ||
+          json.accessUrl ||
+          json.payload?.accessUrl;
+
+        if (
+          typeof targetUrl === "string" &&
+          (targetUrl.startsWith("http://") || targetUrl.startsWith("https://"))
+        ) {
+          return NextResponse.redirect(targetUrl, { status: 307 });
+        }
+      } catch {
+        // Continue returning the original JSON buffer
+      }
+    }
+
     if (backendContentType) {
       responseHeaders.set("Content-Type", backendContentType);
     }

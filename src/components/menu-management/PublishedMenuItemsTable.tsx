@@ -49,6 +49,13 @@ function imageUrl(
     item.gallery?.[0] ||
     item.galleryMediaUuids?.[0] ||
     (item as any).mediaUuid ||
+    item.food?.thumbnail ||
+    item.food?.imageUrl ||
+    item.food?.primaryMediaUuid ||
+    item.food?.thumbnailMediaUuid ||
+    item.food?.primaryMediaUrls?.[0] ||
+    item.food?.primaryMediaUuids?.[0] ||
+    (item.food as any)?.mediaUuid ||
     null;
 
   return resolveFoodHubCatalogImageUrl(
