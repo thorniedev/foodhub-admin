@@ -87,7 +87,7 @@ export default function GlobalAdminSearch() {
 
     if (fallbackShops?.contents) {
       fallbackShops.contents.forEach((shop) => {
-        const storeName = shop.storeName || shop.name || shop.localName || "";
+        const storeName = shop.storeName || "";
         const address = shop.addressLine || shop.city || "";
         const combinedText = `${storeName} ${address}`.toLowerCase();
 
