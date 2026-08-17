@@ -1442,9 +1442,36 @@ export const menuManagementApi =
                   : undefined,
             });
 
-            const result = await browserRequest<unknown>(
+            let result = await browserRequest<unknown>(
               `/api/catalog/menu-items${query}`,
             );
+
+            if (
+              "error" in result &&
+              (result.error as { status?: number })?.status === 404
+            ) {
+              result = await browserRequest<unknown>(
+                `/api/menu-items${query}`,
+              );
+            }
+
+            if (
+              "error" in result &&
+              (result.error as { status?: number })?.status === 404
+            ) {
+              result = await browserRequest<unknown>(
+                `/api/discovery/menu-items/search?page=${p.page ?? 0}&size=${
+                  p.size ?? 20
+                }`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    query: p.query,
+                  }),
+                },
+              );
+            }
 
             if ("error" in result) {
               return result;
