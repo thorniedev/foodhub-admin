@@ -1428,14 +1428,17 @@ export const menuManagementApi =
             let result = await browserRequest<unknown>(
               `/api/discovery/menu-items/search?page=${p.page ?? 0}&size=${
                 p.size ?? 100
-              }&sort=${encodeURIComponent(p.sort ?? "FOODHUB_RATING_DESC")}`,
+              }&sort=FOODHUB_RATING_DESC`,
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  query: p.query,
-                  categoryUuids: p.rootCategoryCode ? [p.rootCategoryCode] : undefined,
-                }),
+                body: JSON.stringify(
+                  p.query
+                    ? { query: p.query }
+                    : p.rootCategoryCode
+                    ? { categoryUuids: [p.rootCategoryCode] }
+                    : {},
+                ),
               },
             );
 
@@ -1444,7 +1447,7 @@ export const menuManagementApi =
               const query = makeQuery({
                 page: p.page ?? 0,
                 size: p.size ?? 100,
-                sort: p.sort ?? "createdAt,desc",
+                sort: "createdAt,desc",
                 query: p.query,
                 storeUuid: p.storeUuid,
               });
@@ -1556,8 +1559,8 @@ export const menuManagementApi =
               body = JSON.stringify(payload);
             }
 
-            const result = await browserRequest<unknown>(
-              `/api/catalog/stores/${encodeURIComponent(
+            let result = await browserRequest<unknown>(
+              `/api/admin/stores/${encodeURIComponent(
                 storeUuid,
               )}/menu-items`,
               {
@@ -1566,6 +1569,22 @@ export const menuManagementApi =
                 body,
               },
             );
+
+            if (
+              "error" in result &&
+              (result.error as { status?: number })?.status === 404
+            ) {
+              result = await browserRequest<unknown>(
+                `/api/catalog/stores/${encodeURIComponent(
+                  storeUuid,
+                )}/menu-items`,
+                {
+                  method: "POST",
+                  headers,
+                  body,
+                },
+              );
+            }
 
             if ("error" in result) {
               return result;
@@ -1593,9 +1612,9 @@ export const menuManagementApi =
             payload,
             images,
           }) {
-            // 1. Update Core MenuItem
-            const coreResult = await browserRequest<unknown>(
-              `/api/catalog/menu-items/${encodeURIComponent(
+            // 1. Update Core MenuItem (POSTMAN Collection: PUT /api/v1/admin/menu-items/{uuid})
+            let coreResult = await browserRequest<unknown>(
+              `/api/admin/menu-items/${encodeURIComponent(
                 uuid,
               )}`,
               {
@@ -1605,19 +1624,48 @@ export const menuManagementApi =
                 },
                 body: JSON.stringify({
                   foodUuid: payload.foodUuid,
-                  menuItem: payload.menuItem,
+                  name: payload.menuItem?.name,
+                  description: payload.menuItem?.description,
+                  price: payload.menuItem?.price,
+                  currencyCode: payload.menuItem?.currencyCode ?? "USD",
+                  preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes,
+                  availabilityStatus: payload.menuItem?.availabilityStatus ?? "AVAILABLE",
+                  ingredientDataStatus: payload.menuItem?.ingredientDataStatus ?? "VERIFIED",
+                  featured: payload.menuItem?.isFeatured ?? true,
+                  source: "ADMIN",
                 }),
               },
             );
+
+            if (
+              "error" in coreResult &&
+              (coreResult.error as { status?: number })?.status === 404
+            ) {
+              coreResult = await browserRequest<unknown>(
+                `/api/catalog/menu-items/${encodeURIComponent(
+                  uuid,
+                )}`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    foodUuid: payload.foodUuid,
+                    menuItem: payload.menuItem,
+                  }),
+                },
+              );
+            }
 
             if ("error" in coreResult) {
               return coreResult;
             }
 
-            // 2. Update Ingredients if provided
+            // 2. Update Ingredients if provided (POSTMAN Collection: PUT /api/v1/admin/menu-items/{uuid}/ingredients)
             if (payload.ingredients !== undefined) {
               await browserRequest<unknown>(
-                `/api/catalog/menu-items/${encodeURIComponent(
+                `/api/admin/menu-items/${encodeURIComponent(
                   uuid,
                 )}/ingredients`,
                 {
@@ -1632,10 +1680,10 @@ export const menuManagementApi =
               );
             }
 
-            // 3. Update Dietary Types if provided
+            // 3. Update Dietary Types if provided (POSTMAN Collection: PUT /api/v1/admin/menu-items/{uuid}/dietary-types)
             if (payload.dietaryTypes !== undefined) {
               await browserRequest<unknown>(
-                `/api/catalog/menu-items/${encodeURIComponent(
+                `/api/admin/menu-items/${encodeURIComponent(
                   uuid,
                 )}/dietary-types`,
                 {
@@ -1650,10 +1698,10 @@ export const menuManagementApi =
               );
             }
 
-            // 4. Update Allergen Declarations if provided
+            // 4. Update Allergen Declarations if provided (POSTMAN Collection: PUT /api/v1/admin/menu-items/{uuid}/allergen-declarations)
             if (payload.allergenDeclarations !== undefined) {
               await browserRequest<unknown>(
-                `/api/catalog/menu-items/${encodeURIComponent(
+                `/api/admin/menu-items/${encodeURIComponent(
                   uuid,
                 )}/allergen-declarations`,
                 {
@@ -1698,14 +1746,28 @@ export const menuManagementApi =
       deleteStoreMenuItem:
         builder.mutation<void, string>({
           async queryFn(uuid) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/menu-items/${encodeURIComponent(
+            let result = await browserRequest<unknown>(
+              `/api/admin/menu-items/${encodeURIComponent(
                 uuid,
               )}`,
               {
                 method: "DELETE",
               },
             );
+
+            if (
+              "error" in result &&
+              (result.error as { status?: number })?.status === 404
+            ) {
+              result = await browserRequest<unknown>(
+                `/api/catalog/menu-items/${encodeURIComponent(
+                  uuid,
+                )}`,
+                {
+                  method: "DELETE",
+                },
+              );
+            }
 
             if ("error" in result) {
               return result;
