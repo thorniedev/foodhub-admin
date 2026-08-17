@@ -65,17 +65,17 @@ export default function GlobalAdminSearch() {
   const shouldSkipFallback = debouncedQuery.length < 2;
 
   const { data: fallbackShops, isFetching: fallbackShopsLoading } = useGetShopsQuery(
-    { query: debouncedQuery, page: 0, size: 6 },
+    { query: debouncedQuery, page: 0, size: 100 },
     { skip: shouldSkipFallback || (selectedType !== "ALL" && selectedType !== "STORE") },
   );
 
   const { data: fallbackUsers, isFetching: fallbackUsersLoading } = useGetAdminUsersQuery(
-    { query: debouncedQuery, page: 0, size: 6 },
+    { query: debouncedQuery, page: 0, size: 100 },
     { skip: shouldSkipFallback || (selectedType !== "ALL" && selectedType !== "USER") },
   );
 
   const { data: fallbackFoods, isFetching: fallbackFoodsLoading } = useGetManagedFoodsQuery(
-    { query: debouncedQuery, page: 0, size: 6 },
+    { query: debouncedQuery, page: 0, size: 100 },
     { skip: shouldSkipFallback || (selectedType !== "ALL" && selectedType !== "FOOD" && selectedType !== "MENU_ITEM") },
   );
 
@@ -172,10 +172,11 @@ export default function GlobalAdminSearch() {
   }, [debouncedQuery, fallbackShops, fallbackUsers, fallbackFoods]);
 
   const rawResults = primaryResults.length > 0 ? primaryResults : fallbackResults;
-  const filteredResults =
+  const filteredResults = (
     selectedType === "ALL"
       ? rawResults
-      : rawResults.filter((r) => r.type === selectedType);
+      : rawResults.filter((r) => r.type === selectedType)
+  ).slice(0, 15);
 
   const isSearchLoading =
     isFetching ||
