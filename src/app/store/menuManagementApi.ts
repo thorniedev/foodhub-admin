@@ -1589,11 +1589,25 @@ export const menuManagementApi =
               return result;
             }
 
-            const createdItem = unwrap<MenuItemRecord>(result.data as never);
-            const newItemUuid = createdItem?.uuid;
+            const rawRes = (result.data ?? {}) as any;
+            const createdItem = unwrap<MenuItemRecord>(rawRes);
+            const newItemUuid =
+              createdItem?.uuid ??
+              rawRes?.uuid ??
+              rawRes?.payload?.uuid ??
+              rawRes?.data?.uuid ??
+              rawRes?.menuItemUuid ??
+              rawRes?.payload?.menuItemUuid ??
+              rawRes?.id ??
+              rawRes?.payload?.id;
 
-            // 2. Upload Multi-Images for the newly created MenuItem
-            if (newItemUuid && Array.isArray(images) && images.length > 0) {
+            // 2. Upload Multi-Images for the newly created MenuItem (guarded against undefined UUID)
+            if (
+              newItemUuid &&
+              String(newItemUuid) !== "undefined" &&
+              Array.isArray(images) &&
+              images.length > 0
+            ) {
               const form = new FormData();
               // Thumbnail & Gallery
               form.append("thumbnail", images[0]);
@@ -1604,9 +1618,11 @@ export const menuManagementApi =
                 form.append("images", image);
               });
 
+              const validUuid = String(newItemUuid);
+
               let imgResult = await browserRequest<unknown>(
                 `/api/admin/menu-items/${encodeURIComponent(
-                  newItemUuid,
+                  validUuid,
                 )}/images`,
                 {
                   method: "PUT",
@@ -1617,7 +1633,7 @@ export const menuManagementApi =
               if ("error" in imgResult) {
                 imgResult = await browserRequest<unknown>(
                   `/api/admin/menu-items/${encodeURIComponent(
-                    newItemUuid,
+                    validUuid,
                   )}/images`,
                   {
                     method: "POST",
@@ -1629,7 +1645,7 @@ export const menuManagementApi =
               if ("error" in imgResult) {
                 await browserRequest<unknown>(
                   `/api/catalog/menu-items/${encodeURIComponent(
-                    newItemUuid,
+                    validUuid,
                   )}/images`,
                   {
                     method: "PUT",
