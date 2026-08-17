@@ -620,8 +620,9 @@ function normalizePossiblyArrayPage<T>(
    images -> File
 
    MENU ITEM CREATE:
-   request -> application/json
-   images  -> File
+   request   -> application/json
+   thumbnail -> File   (first image)
+   gallery   -> File   (remaining images)
 ========================================================= */
 
 function buildMultipartBody(
@@ -663,10 +664,41 @@ function buildMultipartBody(
   /*
    * Backend supports multiple image parts.
    * Limit frontend to 4 images.
+   *
+   * The two endpoints name their file parts differently:
+   *
+   * FoodController      -> images
+   * MenuItemController  -> thumbnail + gallery
    */
-  images
-    .slice(0, 4)
-    .forEach(
+  const supplied =
+    images.slice(0, 4);
+
+  if (
+    jsonPartName ===
+    "request"
+  ) {
+    const [
+      thumbnail,
+      ...gallery
+    ] = supplied;
+
+    if (thumbnail) {
+      formData.append(
+        "thumbnail",
+        thumbnail,
+      );
+    }
+
+    gallery.forEach(
+      (image) => {
+        formData.append(
+          "gallery",
+          image,
+        );
+      },
+    );
+  } else {
+    supplied.forEach(
       (image) => {
         formData.append(
           "images",
@@ -674,6 +706,7 @@ function buildMultipartBody(
         );
       },
     );
+  }
 
   /*
    * DO NOT manually set:
@@ -710,7 +743,7 @@ export const menuItemApi =
             const p = (params ?? {}) as CatalogListParams;
             return {
               url:
-                "catalog/food-categories",
+                "/api/catalog/food-categories",
 
               method:
                 "GET",
@@ -776,7 +809,7 @@ export const menuItemApi =
             body,
           ) => ({
             url:
-              "catalog/food-categories",
+              "/api/catalog/food-categories",
 
             method:
               "POST",
@@ -810,7 +843,7 @@ export const menuItemApi =
             const p = (params ?? {}) as CatalogListParams;
             return {
               url:
-                "catalog/cuisines",
+                "/api/catalog/cuisines",
 
               method:
                 "GET",
@@ -872,7 +905,7 @@ export const menuItemApi =
             body,
           ) => ({
             url:
-              "catalog/cuisines",
+              "/api/catalog/cuisines",
 
             method:
               "POST",
@@ -906,7 +939,7 @@ export const menuItemApi =
             const p = (params ?? {}) as FoodListParams;
             return {
               url:
-                "catalog/foods",
+                "/api/catalog/foods",
 
               method:
                 "GET",
@@ -1013,7 +1046,7 @@ export const menuItemApi =
             const images = "images" in arg && arg.images ? arg.images : [];
             return {
               url:
-                "catalog/foods",
+                "/api/catalog/foods",
 
               method:
                 "POST",
@@ -1063,7 +1096,7 @@ export const menuItemApi =
             const p = (params ?? {}) as MenuItemListParams;
             return {
               url:
-                "catalog/menu-items",
+                "/api/catalog/menu-items",
 
               method:
                 "GET",
@@ -1161,7 +1194,7 @@ export const menuItemApi =
             uuid,
           ) => ({
             url:
-              `catalog/menu-items/${encodeURIComponent(
+              `/api/catalog/menu-items/${encodeURIComponent(
                 uuid,
               )}`,
 
@@ -1221,7 +1254,7 @@ export const menuItemApi =
             longitude,
           }) => ({
             url:
-              `catalog/menu-items/${encodeURIComponent(
+              `/api/catalog/menu-items/${encodeURIComponent(
                 uuid,
               )}/detail`,
 
@@ -1294,7 +1327,7 @@ export const menuItemApi =
             images = [],
           }) => ({
             url:
-              `catalog/stores/${encodeURIComponent(
+              `/api/catalog/stores/${encodeURIComponent(
                 storeUuid,
               )}/menu-items`,
 

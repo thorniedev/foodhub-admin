@@ -9,6 +9,7 @@ import {
   MapPin,
   Pencil,
   Phone,
+  Share2,
   Store as StoreIcon,
   X,
 } from "lucide-react";
@@ -16,6 +17,7 @@ import {
 import type {
   Store,
   StoreOperatingStatus,
+  StoreSocialLink,
   UpdateStorePayload,
 } from "@/src/types/shop";
 
@@ -23,6 +25,9 @@ import { imageUrlOrNull } from "@/src/lib/shopFormat";
 import StoreMediaImage from "./detail/StoreMediaImage";
 import StoreMediaUploader from "./StoreMediaUploader";
 import StoreSelect from "./StoreSelect";
+import StoreSocialLinksEditor, {
+  getSocialLinksError,
+} from "./StoreSocialLinksEditor";
 
 type FormState = {
   storeName: string;
@@ -55,6 +60,7 @@ export default function ShopEditModal({
   onSubmit: (values: UpdateStorePayload) => Promise<void>;
 }) {
   const [values, setValues] = useState<FormState | null>(null);
+  const [socialLinks, setSocialLinks] = useState<StoreSocialLink[]>([]);
   const [localError, setLocalError] = useState<string | null>(null);
 
   /*
@@ -63,8 +69,22 @@ export default function ShopEditModal({
   useEffect(() => {
     if (!store) {
       setValues(null);
+      setSocialLinks([]);
       return;
     }
+
+    setSocialLinks(
+      [...(store.socialLinks ?? [])]
+        .sort(
+          (first, second) =>
+            (first.displayOrder ?? 0) - (second.displayOrder ?? 0),
+        )
+        .map((link, index) => ({
+          platform: link.platform,
+          profileUrl: link.profileUrl ?? "",
+          displayOrder: Number(link.displayOrder) || index + 1,
+        })),
+    );
 
     setValues({
       storeName: store.storeName ?? "",
@@ -144,6 +164,27 @@ export default function ShopEditModal({
       return;
     }
 
+    /*
+     * Social links validation.
+     *
+     * The list is always sent, so removing a row here removes it on the store.
+     */
+    const cleanedSocialLinks = socialLinks
+      .map((link, index) => ({
+        platform: link.platform.trim(),
+        profileUrl: link.profileUrl.trim(),
+        displayOrder: Number(link.displayOrder) || index + 1,
+      }))
+      .filter((link) => link.platform && link.profileUrl);
+
+    const socialLinksError = getSocialLinksError(cleanedSocialLinks);
+
+    if (socialLinksError) {
+      setLocalError(socialLinksError);
+
+      return;
+    }
+
     setLocalError(null);
 
     await onSubmit({
@@ -180,6 +221,15 @@ export default function ShopEditModal({
         : null,
 
       operatingStatus: values.operatingStatus,
+
+      /*
+       * Sending the field replaces the store's links, so only send it when the
+       * current links are known (or the admin added some). Omitting it leaves
+       * whatever the store already has untouched.
+       */
+      ...(Array.isArray(store.socialLinks) || cleanedSocialLinks.length > 0
+        ? { socialLinks: cleanedSocialLinks }
+        : {}),
     });
   };
 
@@ -450,6 +500,15 @@ export default function ShopEditModal({
                 onChange={(value) => set("hygieneRating", value)}
               />
             </div>
+          </Section>
+
+          {/* ================= SOCIAL LINKS ================= */}
+          <Section icon={<Share2 size={22} />} title="Social links">
+            <StoreSocialLinksEditor
+              links={socialLinks}
+              onChange={setSocialLinks}
+              disabled={saving}
+            />
           </Section>
 
           {/* ================= MEDIA ================= */}

@@ -5,7 +5,6 @@
 
   export default function StoreSystemInfoSection({ store }: { store: Store }) {
     const rows = [
-      ["Store UUID", store.uuid],
       ["Review status", store.reviewStatus],
       ["Account status", store.accountStatus],
       ["Operating status", store.operatingStatus],
@@ -24,11 +23,7 @@
               <span className="text-lg font-semibold text-[#F97316]">
                 {label}
               </span>
-              <span
-                className={`break-all text-base text-gray-700 ${
-                  label.includes("UUID") ? "font-mono text-sm" : ""
-                }`}
-              >
+              <span className="break-all text-base text-gray-700">
                 {value}
               </span>
             </div>

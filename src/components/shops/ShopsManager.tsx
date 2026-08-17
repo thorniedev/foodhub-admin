@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import {
+  useGetShopByUuidQuery,
   useGetShopsQuery,
   useUpdateShopMutation,
 } from "@/src/app/store/shop/shopApi";
@@ -48,7 +49,12 @@ export default function ShopsManager() {
   const [sortBy, setSortBy] = useState<StoreSort>("NAME_ASC");
   const [sortOpen, setSortOpen] = useState(false);
 
-  const [editing, setEditing] = useState<StoreType | null>(null);
+  /*
+   * The list endpoint returns store summaries, which omit social links, hours
+   * and several editable fields. Edit therefore works off the store detail,
+   * fetched by uuid, so saving never blanks data the row never carried.
+   */
+  const [editingUuid, setEditingUuid] = useState<string | null>(null);
   const [statusStore, setStatusStore] = useState<StoreType | null>(null);
   const [statusAction, setStatusAction] = useState<StoreStatusAction>("REVIEW");
   const [notice, setNotice] = useState<{
@@ -75,6 +81,12 @@ export default function ShopsManager() {
     );
 
   const suggestions = suggestionData?.contents ?? [];
+
+  const {
+    data: editingStore,
+    isFetching: editingStoreLoading,
+    error: editingStoreError,
+  } = useGetShopByUuidQuery(editingUuid ?? "", { skip: !editingUuid });
 
   const [updateShop, { isLoading: updating }] = useUpdateShopMutation();
 
@@ -183,12 +195,12 @@ export default function ShopsManager() {
   };
 
   const edit = async (values: UpdateStorePayload) => {
-    if (!editing) return;
+    if (!editingUuid) return;
 
     try {
       setNotice(null);
-      await updateShop({ storeUuid: editing.uuid, body: values }).unwrap();
-      setEditing(null);
+      await updateShop({ storeUuid: editingUuid, body: values }).unwrap();
+      setEditingUuid(null);
       setNotice({ type: "success", text: "បានកែប្រែ Store ដោយជោគជ័យ។" });
       await refetch();
     } catch (requestError) {
@@ -485,7 +497,7 @@ export default function ShopsManager() {
           <ShopsTable
             stores={sortedStores}
             disabled={updating || isFetching}
-            onEdit={setEditing}
+            onEdit={(store) => setEditingUuid(store.uuid)}
             onStatus={(store, action) => {
               setStatusStore(store);
               setStatusAction(action);
@@ -504,11 +516,44 @@ export default function ShopsManager() {
         )}
       </section>
 
+      {/* Detail fetch stands in for the edit modal until the store arrives. */}
+      {editingUuid && !editingStore && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
+          <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-2xl">
+            {editingStoreError ? (
+              <>
+                <AlertTriangle size={32} className="mx-auto text-red-500" />
+                <p className="mt-4 text-lg text-gray-700">
+                  {getShopApiErrorMessage(editingStoreError)}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setEditingUuid(null)}
+                  className="mt-6 h-11 rounded-full bg-primary-800 px-6 text-lg font-medium text-white"
+                >
+                  បិទ
+                </button>
+              </>
+            ) : (
+              <>
+                <Loader2
+                  size={32}
+                  className="mx-auto animate-spin text-[#137A3D]"
+                />
+                <p className="mt-4 text-lg text-gray-500">
+                  កំពុងទាញយកព័ត៌មានហាង...
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <ShopEditModal
-        store={editing}
-        saving={updating}
+        store={editingUuid ? (editingStore ?? null) : null}
+        saving={updating || editingStoreLoading}
         onClose={() => {
-          if (!updating) setEditing(null);
+          if (!updating) setEditingUuid(null);
         }}
         onSubmit={edit}
       />

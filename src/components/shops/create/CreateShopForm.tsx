@@ -14,6 +14,7 @@ import type {
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
 
 import GooglePlacesImportModal from "../GooglePlacesImportModal";
+import { getSocialLinksError } from "../StoreSocialLinksEditor";
 import ShopBasicInfoSection from "./ShopBasicInfoSection";
 import ShopHoursSection from "./ShopHoursSection";
 import ShopImageUploadGrid from "./ShopImageUploadGrid";
@@ -93,6 +94,20 @@ export default function CreateShopForm() {
       return;
     }
 
+    const cleanedSocialLinks = socialLinks
+      .map((link, index) => ({
+        platform: link.platform.trim(),
+        profileUrl: link.profileUrl.trim(),
+        displayOrder: Number(link.displayOrder) || index + 1,
+      }))
+      .filter((link) => link.platform && link.profileUrl);
+
+    const socialLinksError = getSocialLinksError(cleanedSocialLinks);
+    if (socialLinksError) {
+      setError(socialLinksError);
+      return;
+    }
+
     const body: CreateStorePayload = {
       storeName: values.storeName.trim(),
       description: values.description.trim() || null,
@@ -115,13 +130,7 @@ export default function CreateShopForm() {
         ? Number(values.hygieneRating)
         : null,
       operatingStatus: values.operatingStatus,
-      socialLinks: socialLinks
-        .map((link, index) => ({
-          platform: link.platform.trim(),
-          profileUrl: link.profileUrl.trim(),
-          displayOrder: Number(link.displayOrder) || index + 1,
-        }))
-        .filter((link) => link.platform && link.profileUrl),
+      socialLinks: cleanedSocialLinks,
     };
 
     try {
