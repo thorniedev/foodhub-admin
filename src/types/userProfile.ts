@@ -215,6 +215,7 @@ export interface AdminPageQuery {
   page?: number;
   size?: number;
   sort?: string;
+  query?: string;
 }
 
 export interface AdminUserProfilesQuery extends AdminPageQuery {

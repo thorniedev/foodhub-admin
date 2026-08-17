@@ -2,6 +2,8 @@ import { Plus, Share2, Trash2 } from "lucide-react";
 
 import type { StoreSocialLink } from "@/src/types/shop";
 
+import StoreSocialLinksEditor from "../StoreSocialLinksEditor";
+
 export default function ShopSocialSection({
   links,
   onChange,

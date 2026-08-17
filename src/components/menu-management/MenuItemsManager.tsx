@@ -7,11 +7,15 @@ import {
   Plus,
   RefreshCw,
   Search,
+  Sliders,
   Store,
   Utensils,
 } from "lucide-react";
 
 import { useMemo, useState } from "react";
+
+import { useSearchAdvancedMenuItemsMutation } from "@/src/app/store/discoveryApi";
+import type { AdvancedMenuItemSearchRequest } from "@/src/types/discovery";
 
 import {
   useCreateManagedFoodMutation,
@@ -50,6 +54,7 @@ import FoodFormModal from "./FoodFormModal";
 import MenuItemDetailModal from "./MenuItemDetailModal";
 import PublishMenuItemModal from "./PublishMenuItemModal";
 import PublishedMenuItemsTable from "./PublishedMenuItemsTable";
+import AdvancedFilterModal from "./AdvancedFilterModal";
 
 type Tab = "FOODS" | "WEBSITE";
 
@@ -138,6 +143,13 @@ export default function MenuItemsManager() {
   const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 });
   const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 });
 
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedMenuItemSearchRequest>({});
+  const [isAdvancedFilterActive, setIsAdvancedFilterActive] = useState(false);
+
+  const [searchAdvancedItems, { data: discoveryData, isLoading: discoveryLoading }] =
+    useSearchAdvancedMenuItemsMutation();
+
   const [createFood, { isLoading: creatingFood }] =
     useCreateManagedFoodMutation();
 
@@ -168,6 +180,43 @@ export default function MenuItemsManager() {
     () => menuItems.filter((item) => matchesMenuItem(item, search)),
     [menuItems, search],
   );
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (advancedFilters.query) count++;
+    if (advancedFilters.categoryUuids?.length) count += advancedFilters.categoryUuids.length;
+    if (advancedFilters.cuisineUuids?.length) count += advancedFilters.cuisineUuids.length;
+    if (advancedFilters.mealTypeUuids?.length) count += advancedFilters.mealTypeUuids.length;
+    if (advancedFilters.dietaryTypeUuids?.length) count += advancedFilters.dietaryTypeUuids.length;
+    if (advancedFilters.excludeAllergenUuids?.length) count += advancedFilters.excludeAllergenUuids.length;
+    if (advancedFilters.seasonUuids?.length) count += advancedFilters.seasonUuids.length;
+    if (advancedFilters.eventUuids?.length) count += advancedFilters.eventUuids.length;
+    if (advancedFilters.minimumPrice !== undefined || advancedFilters.maximumPrice !== undefined) count++;
+    if (advancedFilters.minimumSpiceLevel !== undefined || advancedFilters.maximumSpiceLevel !== undefined) count++;
+    if (advancedFilters.openNow) count++;
+    if (advancedFilters.featuredOnly) count++;
+    if (advancedFilters.hasImage) count++;
+    return count;
+  }, [advancedFilters]);
+
+  const handleApplyAdvancedFilters = async (filters: AdvancedMenuItemSearchRequest) => {
+    setAdvancedFilters(filters);
+    setIsAdvancedFilterActive(true);
+    setTab("WEBSITE");
+    try {
+      await searchAdvancedItems({
+        params: { page: 0, size: 20, sort: filters.sort ?? "FOODHUB_RATING_DESC" },
+        body: filters,
+      }).unwrap();
+    } catch (err) {
+      console.error("[ADVANCED DISCOVERY SEARCH ERROR]", err);
+    }
+  };
+
+  const handleResetAdvancedFilters = () => {
+    setAdvancedFilters({});
+    setIsAdvancedFilterActive(false);
+  };
 
   const busy =
     creatingFood ||
@@ -435,7 +484,25 @@ export default function MenuItemsManager() {
 
           <button
             type="button"
-            disabled={foodsQuery.isFetching || menuItemsQuery.isFetching}
+            onClick={() => setFilterModalOpen(true)}
+            className={`flex h-12 items-center gap-2 rounded-2xl border px-4 text-xs font-bold transition shadow-xs ${
+              isAdvancedFilterActive
+                ? "border-emerald-600 bg-emerald-700 text-white"
+                : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            <Sliders size={16} />
+            <span>តម្រងកម្រិតខ្ពស់</span>
+            {activeFilterCount > 0 && (
+              <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-extrabold text-white">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            disabled={foodsQuery.isFetching || menuItemsQuery.isFetching || discoveryLoading}
             onClick={() => void refreshAll()}
             aria-label="Refresh"
             className="flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
@@ -443,7 +510,7 @@ export default function MenuItemsManager() {
             <RefreshCw
               size={19}
               className={
-                foodsQuery.isFetching || menuItemsQuery.isFetching
+                foodsQuery.isFetching || menuItemsQuery.isFetching || discoveryLoading
                   ? "animate-spin"
                   : ""
               }
@@ -513,8 +580,8 @@ export default function MenuItemsManager() {
           />
         ) : (
           <PublishedMenuItemsTable
-            items={filteredMenuItems}
-            busy={busy}
+            items={isAdvancedFilterActive ? (discoveryData?.contents ?? []) : filteredMenuItems}
+            busy={busy || discoveryLoading}
             onView={(item) => setDetailUuid(item.uuid)}
             onEdit={(item) => {
               setEditingMenu(item);
@@ -610,6 +677,15 @@ export default function MenuItemsManager() {
       <MenuItemDetailModal
         uuid={detailUuid}
         onClose={() => setDetailUuid(null)}
+      />
+
+      <AdvancedFilterModal
+        isOpen={filterModalOpen}
+        onClose={() => setFilterModalOpen(false)}
+        onApply={handleApplyAdvancedFilters}
+        onReset={handleResetAdvancedFilters}
+        currentFilters={advancedFilters}
+        activeFilterCount={activeFilterCount}
       />
     </div>
   );

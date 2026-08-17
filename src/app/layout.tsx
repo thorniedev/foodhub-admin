@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: "MhouBahar Admin",
   description: "MhouBahar admin dashboard",
   icons: {
-    icon: "/assets/logo/mhoubahar.ico",
+    icon: "/assets/logo/mhoubahar.png",
   },
 };
 

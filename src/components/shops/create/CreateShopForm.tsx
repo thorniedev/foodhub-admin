@@ -26,6 +26,7 @@ import type {
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
 
 import GooglePlacesImportModal from "../GooglePlacesImportModal";
+import { getSocialLinksError } from "../StoreSocialLinksEditor";
 import ShopBasicInfoSection from "./ShopBasicInfoSection";
 import ShopHoursSection from "./ShopHoursSection";
 import ShopImageUploadGrid from "./ShopImageUploadGrid";
