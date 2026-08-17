@@ -1573,22 +1573,23 @@ export const menuManagementApi =
               }
             }
 
-            // 2. Create Core Menu Item with primaryMediaUuid & galleryMediaUuids (POSTMAN 04 Menu Items Request 01)
-            const jsonPayload = {
+            // 2. Create Core Menu Item with strict Postman 04 Menu Items Request 01 schema
+            const jsonPayload: Record<string, unknown> = {
               foodUuid: payload.foodUuid,
               name: payload.menuItem?.name,
-              description: payload.menuItem?.description,
-              primaryMediaUuid: primaryMediaUuid || undefined,
-              primaryMediaUuids: primaryMediaUuid ? [primaryMediaUuid] : undefined,
-              galleryMediaUuids: galleryMediaUuids.length ? galleryMediaUuids : undefined,
+              description: payload.menuItem?.description || undefined,
               price: payload.menuItem?.price,
-              currencyCode: payload.menuItem?.currencyCode ?? "USD",
-              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes,
-              availabilityStatus: payload.menuItem?.availabilityStatus ?? "AVAILABLE",
-              ingredientDataStatus: payload.menuItem?.ingredientDataStatus ?? "VERIFIED",
+              currencyCode: payload.menuItem?.currencyCode || "USD",
+              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes || undefined,
+              availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
+              ingredientDataStatus: payload.menuItem?.ingredientDataStatus || "VERIFIED",
               featured: payload.menuItem?.isFeatured ?? true,
               source: "ADMIN",
             };
+
+            if (primaryMediaUuid) {
+              jsonPayload.primaryMediaUuid = primaryMediaUuid;
+            }
 
             let result = await browserRequest<unknown>(
               `/api/admin/stores/${encodeURIComponent(
@@ -1625,8 +1626,88 @@ export const menuManagementApi =
               return result;
             }
 
+            const rawCreated = (result.data ?? {}) as any;
+            const createdItem = unwrap<MenuItemRecord>(rawCreated);
+            const createdUuid =
+              createdItem?.uuid ||
+              rawCreated?.uuid ||
+              rawCreated?.payload?.uuid ||
+              rawCreated?.data?.uuid ||
+              rawCreated?.menuItemUuid ||
+              rawCreated?.id;
+
+            // 3. Attach Ingredients if provided (POSTMAN 04 Request 07)
+            if (createdUuid && Array.isArray(payload.ingredients) && payload.ingredients.length > 0) {
+              try {
+                await browserRequest<unknown>(
+                  `/api/admin/menu-items/${encodeURIComponent(createdUuid)}/ingredients`,
+                  {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      ingredients: payload.ingredients.map((ing) => ({
+                        ingredientUuid: ing.ingredientUuid,
+                        quantity: ing.quantity ?? 1,
+                        unit: ing.unit ?? "unit",
+                        optional: (ing as any).optional ?? ing.isOptional ?? false,
+                        notes: ing.notes || undefined,
+                      })),
+                    }),
+                  },
+                );
+              } catch (e) {
+                console.warn("[ATTACH INGREDIENTS WARNING]", e);
+              }
+            }
+
+            // 4. Attach Dietary Types if provided (POSTMAN 04 Request 10)
+            if (createdUuid && Array.isArray(payload.dietaryTypes) && payload.dietaryTypes.length > 0) {
+              try {
+                await browserRequest<unknown>(
+                  `/api/admin/menu-items/${encodeURIComponent(createdUuid)}/dietary-types`,
+                  {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      dietaryTypes: payload.dietaryTypes.map((d) => ({
+                        dietaryTypeUuid: d.dietaryTypeUuid,
+                        verificationStatus: d.verificationStatus || "VERIFIED",
+                        notes: d.notes || undefined,
+                      })),
+                    }),
+                  },
+                );
+              } catch (e) {
+                console.warn("[ATTACH DIETARY WARNING]", e);
+              }
+            }
+
+            // 5. Attach Allergen Declarations if provided (POSTMAN 04 Request 12)
+            if (createdUuid && Array.isArray(payload.allergenDeclarations) && payload.allergenDeclarations.length > 0) {
+              try {
+                await browserRequest<unknown>(
+                  `/api/admin/menu-items/${encodeURIComponent(createdUuid)}/allergen-declarations`,
+                  {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      declarations: payload.allergenDeclarations.map((a) => ({
+                        allergenUuid: a.allergenUuid,
+                        declarationType: a.declarationType || "MAY_CONTAIN",
+                        riskLevel: a.riskLevel || "MEDIUM",
+                        verificationStatus: a.verificationStatus || "VERIFIED",
+                        notes: a.notes || undefined,
+                      })),
+                    }),
+                  },
+                );
+              } catch (e) {
+                console.warn("[ATTACH ALLERGENS WARNING]", e);
+              }
+            }
+
             return {
-              data: unwrap<MenuItemRecord>(result.data as never),
+              data: createdItem,
             };
           },
         }),
@@ -1683,6 +1764,23 @@ export const menuManagementApi =
             }
 
             // 2. Update Core MenuItem (POSTMAN Collection: PUT /api/v1/admin/menu-items/{uuid})
+            const coreBody: Record<string, unknown> = {
+              foodUuid: payload.foodUuid,
+              name: payload.menuItem?.name,
+              description: payload.menuItem?.description || undefined,
+              price: payload.menuItem?.price,
+              currencyCode: payload.menuItem?.currencyCode || "USD",
+              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes || undefined,
+              availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
+              ingredientDataStatus: payload.menuItem?.ingredientDataStatus || "VERIFIED",
+              featured: payload.menuItem?.isFeatured ?? true,
+              source: "ADMIN",
+            };
+
+            if (primaryMediaUuid) {
+              coreBody.primaryMediaUuid = primaryMediaUuid;
+            }
+
             let coreResult = await browserRequest<unknown>(
               `/api/admin/menu-items/${encodeURIComponent(
                 targetUuid,
@@ -1692,21 +1790,7 @@ export const menuManagementApi =
                 headers: {
                   "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                  foodUuid: payload.foodUuid,
-                  name: payload.menuItem?.name,
-                  description: payload.menuItem?.description,
-                  primaryMediaUuid: primaryMediaUuid || undefined,
-                  primaryMediaUuids: primaryMediaUuid ? [primaryMediaUuid] : undefined,
-                  galleryMediaUuids: galleryMediaUuids.length ? galleryMediaUuids : undefined,
-                  price: payload.menuItem?.price,
-                  currencyCode: payload.menuItem?.currencyCode ?? "USD",
-                  preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes,
-                  availabilityStatus: payload.menuItem?.availabilityStatus ?? "AVAILABLE",
-                  ingredientDataStatus: payload.menuItem?.ingredientDataStatus ?? "VERIFIED",
-                  featured: payload.menuItem?.isFeatured ?? true,
-                  source: "ADMIN",
-                }),
+                body: JSON.stringify(coreBody),
               },
             );
 
@@ -1736,7 +1820,7 @@ export const menuManagementApi =
             }
 
             // 3. Update Ingredients if provided
-            if (payload.ingredients !== undefined) {
+            if (payload.ingredients !== undefined && Array.isArray(payload.ingredients)) {
               await browserRequest<unknown>(
                 `/api/admin/menu-items/${encodeURIComponent(
                   targetUuid,
@@ -1747,14 +1831,20 @@ export const menuManagementApi =
                     "Content-Type": "application/json",
                   },
                   body: JSON.stringify({
-                    ingredients: payload.ingredients,
+                    ingredients: payload.ingredients.map((ing) => ({
+                      ingredientUuid: ing.ingredientUuid,
+                      quantity: ing.quantity ?? 1,
+                      unit: ing.unit ?? "unit",
+                      optional: (ing as any).optional ?? ing.isOptional ?? false,
+                      notes: ing.notes || undefined,
+                    })),
                   }),
                 },
               );
             }
 
             // 4. Update Dietary Types if provided
-            if (payload.dietaryTypes !== undefined) {
+            if (payload.dietaryTypes !== undefined && Array.isArray(payload.dietaryTypes)) {
               await browserRequest<unknown>(
                 `/api/admin/menu-items/${encodeURIComponent(
                   targetUuid,
@@ -1765,14 +1855,18 @@ export const menuManagementApi =
                     "Content-Type": "application/json",
                   },
                   body: JSON.stringify({
-                    dietaryTypes: payload.dietaryTypes,
+                    dietaryTypes: payload.dietaryTypes.map((d) => ({
+                      dietaryTypeUuid: d.dietaryTypeUuid,
+                      verificationStatus: d.verificationStatus || "VERIFIED",
+                      notes: d.notes || undefined,
+                    })),
                   }),
                 },
               );
             }
 
             // 5. Update Allergen Declarations if provided
-            if (payload.allergenDeclarations !== undefined) {
+            if (payload.allergenDeclarations !== undefined && Array.isArray(payload.allergenDeclarations)) {
               await browserRequest<unknown>(
                 `/api/admin/menu-items/${encodeURIComponent(
                   targetUuid,
@@ -1783,7 +1877,13 @@ export const menuManagementApi =
                     "Content-Type": "application/json",
                   },
                   body: JSON.stringify({
-                    declarations: payload.allergenDeclarations,
+                    declarations: payload.allergenDeclarations.map((a) => ({
+                      allergenUuid: a.allergenUuid,
+                      declarationType: a.declarationType || "MAY_CONTAIN",
+                      riskLevel: a.riskLevel || "MEDIUM",
+                      verificationStatus: a.verificationStatus || "VERIFIED",
+                      notes: a.notes || undefined,
+                    })),
                   }),
                 },
               );
