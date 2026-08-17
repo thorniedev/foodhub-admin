@@ -291,17 +291,44 @@ export default function MenuItemsManager({
     try {
       setNotice(null);
 
-      if (editingMenu) {
-        await updateMenuItem({
-          uuid: editingMenu.uuid,
-          payload,
-          images,
-        }).unwrap();
+      const targetUuid =
+        editingMenu?.uuid ||
+        (editingMenu as any)?.menuItemUuid ||
+        (editingMenu as any)?.id;
 
-        setNotice({
-          type: "success",
-          text: "បានកែប្រែ Menu Item ដោយជោគជ័យ។",
-        });
+      if (targetUuid && String(targetUuid) !== "undefined") {
+        try {
+          await updateMenuItem({
+            uuid: String(targetUuid),
+            payload,
+            images,
+          }).unwrap();
+
+          setNotice({
+            type: "success",
+            text: "បានកែប្រែ Menu Item ដោយជោគជ័យ។",
+          });
+        } catch (updateErr: any) {
+          // If update returns 404 (item not yet created as store menu item), create it!
+          if (
+            updateErr?.status === 404 ||
+            updateErr?.data?.status === 404 ||
+            updateErr?.status === 400
+          ) {
+            await createMenuItem({
+              storeUuid,
+              payload,
+              images,
+            }).unwrap();
+
+            setNotice({
+              type: "success",
+              text: "បាន Publish Menu Item ទៅ Store ដោយជោគជ័យ។",
+            });
+          } else {
+            throw updateErr;
+          }
+        }
       } else {
         await createMenuItem({
           storeUuid,
@@ -311,7 +338,7 @@ export default function MenuItemsManager({
 
         setNotice({
           type: "success",
-          text: "បាន Publish Menu Item។ វានឹងចូល Public Menu Item API របស់ Website។",
+          text: "បាន Publish Menu Item ទៅ Store ដោយជោគជ័យ។",
         });
       }
 

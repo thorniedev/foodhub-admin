@@ -1648,13 +1648,9 @@ export const menuManagementApi =
             const targetUuid =
               uuid && String(uuid) !== "undefined"
                 ? String(uuid)
-                : (payload as any)?.uuid || (payload as any)?.menuItemUuid;
-
-            if (!targetUuid || targetUuid === "undefined") {
-              return {
-                error: toError(400, "Missing valid MenuItem UUID for update."),
-              };
-            }
+                : (payload as any)?.uuid ||
+                  (payload as any)?.menuItemUuid ||
+                  (payload as any)?.id;
 
             let primaryMediaUuid = payload.thumbnailMediaUuid || payload.primaryMediaUuids?.[0];
             const galleryMediaUuids: string[] = [...(payload.galleryMediaUuids ?? [])];
