@@ -645,6 +645,7 @@
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 import { adminBaseApi } from "./adminBaseApi";
+import { uploadMenuItemMediaFile } from "@/src/lib/menuItemMediaClient";
 
 import type {
   ApiPage,
@@ -1540,11 +1541,46 @@ export const menuManagementApi =
             payload,
             images,
           }) {
-            // 1. Create Core Menu Item (POSTMAN Collection: POST /api/v1/admin/stores/{storeUuid}/menu-items)
+            let primaryMediaUuid = payload.thumbnailMediaUuid || payload.primaryMediaUuids?.[0];
+            const galleryMediaUuids: string[] = [...(payload.galleryMediaUuids ?? [])];
+
+            // 1. Upload Images to Media API first if new files provided
+            if (Array.isArray(images) && images.length > 0) {
+              try {
+                // Upload primary/thumbnail image
+                if (images[0]) {
+                  const uploadedPrimary = await uploadMenuItemMediaFile(
+                    images[0],
+                    "MENU_ITEM_PRIMARY",
+                  );
+                  if (uploadedPrimary.uuid) {
+                    primaryMediaUuid = uploadedPrimary.uuid;
+                  }
+                }
+
+                // Upload gallery images
+                for (let i = 1; i < images.length && i < 4; i++) {
+                  const uploadedGallery = await uploadMenuItemMediaFile(
+                    images[i],
+                    "MENU_ITEM_GALLERY",
+                  );
+                  if (uploadedGallery.uuid) {
+                    galleryMediaUuids.push(uploadedGallery.uuid);
+                  }
+                }
+              } catch (mediaError) {
+                console.warn("[MENU ITEM MEDIA UPLOAD FAILED, CONTINUING WITH CREATION]", mediaError);
+              }
+            }
+
+            // 2. Create Core Menu Item with primaryMediaUuid & galleryMediaUuids (POSTMAN 04 Menu Items Request 01)
             const jsonPayload = {
               foodUuid: payload.foodUuid,
               name: payload.menuItem?.name,
               description: payload.menuItem?.description,
+              primaryMediaUuid: primaryMediaUuid || undefined,
+              primaryMediaUuids: primaryMediaUuid ? [primaryMediaUuid] : undefined,
+              galleryMediaUuids: galleryMediaUuids.length ? galleryMediaUuids : undefined,
               price: payload.menuItem?.price,
               currencyCode: payload.menuItem?.currencyCode ?? "USD",
               preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes,
@@ -1589,74 +1625,8 @@ export const menuManagementApi =
               return result;
             }
 
-            const rawRes = (result.data ?? {}) as any;
-            const createdItem = unwrap<MenuItemRecord>(rawRes);
-            const newItemUuid =
-              createdItem?.uuid ??
-              rawRes?.uuid ??
-              rawRes?.payload?.uuid ??
-              rawRes?.data?.uuid ??
-              rawRes?.menuItemUuid ??
-              rawRes?.payload?.menuItemUuid ??
-              rawRes?.id ??
-              rawRes?.payload?.id;
-
-            // 2. Upload Multi-Images for the newly created MenuItem (guarded against undefined UUID)
-            if (
-              newItemUuid &&
-              String(newItemUuid) !== "undefined" &&
-              Array.isArray(images) &&
-              images.length > 0
-            ) {
-              const form = new FormData();
-              // Thumbnail & Gallery
-              form.append("thumbnail", images[0]);
-              images.slice(1, 4).forEach((image) => {
-                form.append("gallery", image);
-              });
-              images.forEach((image) => {
-                form.append("images", image);
-              });
-
-              const validUuid = String(newItemUuid);
-
-              let imgResult = await browserRequest<unknown>(
-                `/api/admin/menu-items/${encodeURIComponent(
-                  validUuid,
-                )}/images`,
-                {
-                  method: "PUT",
-                  body: form,
-                },
-              );
-
-              if ("error" in imgResult) {
-                imgResult = await browserRequest<unknown>(
-                  `/api/admin/menu-items/${encodeURIComponent(
-                    validUuid,
-                  )}/images`,
-                  {
-                    method: "POST",
-                    body: form,
-                  },
-                );
-              }
-
-              if ("error" in imgResult) {
-                await browserRequest<unknown>(
-                  `/api/catalog/menu-items/${encodeURIComponent(
-                    validUuid,
-                  )}/images`,
-                  {
-                    method: "PUT",
-                    body: form,
-                  },
-                );
-              }
-            }
-
             return {
-              data: createdItem,
+              data: unwrap<MenuItemRecord>(result.data as never),
             };
           },
         }),
@@ -1675,10 +1645,51 @@ export const menuManagementApi =
             payload,
             images,
           }) {
-            // 1. Update Core MenuItem (POSTMAN Collection: PUT /api/v1/admin/menu-items/{uuid})
+            const targetUuid =
+              uuid && String(uuid) !== "undefined"
+                ? String(uuid)
+                : (payload as any)?.uuid || (payload as any)?.menuItemUuid;
+
+            if (!targetUuid || targetUuid === "undefined") {
+              return {
+                error: toError(400, "Missing valid MenuItem UUID for update."),
+              };
+            }
+
+            let primaryMediaUuid = payload.thumbnailMediaUuid || payload.primaryMediaUuids?.[0];
+            const galleryMediaUuids: string[] = [...(payload.galleryMediaUuids ?? [])];
+
+            // 1. Upload Images to Media API first if new files provided
+            if (Array.isArray(images) && images.length > 0) {
+              try {
+                if (images[0]) {
+                  const uploadedPrimary = await uploadMenuItemMediaFile(
+                    images[0],
+                    "MENU_ITEM_PRIMARY",
+                  );
+                  if (uploadedPrimary.uuid) {
+                    primaryMediaUuid = uploadedPrimary.uuid;
+                  }
+                }
+
+                for (let i = 1; i < images.length && i < 4; i++) {
+                  const uploadedGallery = await uploadMenuItemMediaFile(
+                    images[i],
+                    "MENU_ITEM_GALLERY",
+                  );
+                  if (uploadedGallery.uuid) {
+                    galleryMediaUuids.push(uploadedGallery.uuid);
+                  }
+                }
+              } catch (mediaError) {
+                console.warn("[MENU ITEM MEDIA UPLOAD FAILED, CONTINUING WITH UPDATE]", mediaError);
+              }
+            }
+
+            // 2. Update Core MenuItem (POSTMAN Collection: PUT /api/v1/admin/menu-items/{uuid})
             let coreResult = await browserRequest<unknown>(
               `/api/admin/menu-items/${encodeURIComponent(
-                uuid,
+                targetUuid,
               )}`,
               {
                 method: "PUT",
@@ -1689,6 +1700,9 @@ export const menuManagementApi =
                   foodUuid: payload.foodUuid,
                   name: payload.menuItem?.name,
                   description: payload.menuItem?.description,
+                  primaryMediaUuid: primaryMediaUuid || undefined,
+                  primaryMediaUuids: primaryMediaUuid ? [primaryMediaUuid] : undefined,
+                  galleryMediaUuids: galleryMediaUuids.length ? galleryMediaUuids : undefined,
                   price: payload.menuItem?.price,
                   currencyCode: payload.menuItem?.currencyCode ?? "USD",
                   preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes,
@@ -1706,7 +1720,7 @@ export const menuManagementApi =
             ) {
               coreResult = await browserRequest<unknown>(
                 `/api/catalog/menu-items/${encodeURIComponent(
-                  uuid,
+                  targetUuid,
                 )}`,
                 {
                   method: "PUT",
@@ -1725,11 +1739,11 @@ export const menuManagementApi =
               return coreResult;
             }
 
-            // 2. Update Ingredients if provided (POSTMAN Collection: PUT /api/v1/admin/menu-items/{uuid}/ingredients)
+            // 3. Update Ingredients if provided
             if (payload.ingredients !== undefined) {
               await browserRequest<unknown>(
                 `/api/admin/menu-items/${encodeURIComponent(
-                  uuid,
+                  targetUuid,
                 )}/ingredients`,
                 {
                   method: "PUT",
@@ -1743,11 +1757,11 @@ export const menuManagementApi =
               );
             }
 
-            // 3. Update Dietary Types if provided (POSTMAN Collection: PUT /api/v1/admin/menu-items/{uuid}/dietary-types)
+            // 4. Update Dietary Types if provided
             if (payload.dietaryTypes !== undefined) {
               await browserRequest<unknown>(
                 `/api/admin/menu-items/${encodeURIComponent(
-                  uuid,
+                  targetUuid,
                 )}/dietary-types`,
                 {
                   method: "PUT",
@@ -1761,11 +1775,11 @@ export const menuManagementApi =
               );
             }
 
-            // 4. Update Allergen Declarations if provided (POSTMAN Collection: PUT /api/v1/admin/menu-items/{uuid}/allergen-declarations)
+            // 5. Update Allergen Declarations if provided
             if (payload.allergenDeclarations !== undefined) {
               await browserRequest<unknown>(
                 `/api/admin/menu-items/${encodeURIComponent(
-                  uuid,
+                  targetUuid,
                 )}/allergen-declarations`,
                 {
                   method: "PUT",
@@ -1777,52 +1791,6 @@ export const menuManagementApi =
                   }),
                 },
               );
-            }
-
-            // 5. Update Images if any new images selected
-            if (uuid && Array.isArray(images) && images.length > 0) {
-              const form = new FormData();
-              form.append("thumbnail", images[0]);
-              images.slice(1, 4).forEach((image) => {
-                form.append("gallery", image);
-              });
-              images.forEach((image) => {
-                form.append("images", image);
-              });
-
-              let imgResult = await browserRequest<unknown>(
-                `/api/admin/menu-items/${encodeURIComponent(
-                  uuid,
-                )}/images`,
-                {
-                  method: "PUT",
-                  body: form,
-                },
-              );
-
-              if ("error" in imgResult) {
-                imgResult = await browserRequest<unknown>(
-                  `/api/admin/menu-items/${encodeURIComponent(
-                    uuid,
-                  )}/images`,
-                  {
-                    method: "POST",
-                    body: form,
-                  },
-                );
-              }
-
-              if ("error" in imgResult) {
-                await browserRequest<unknown>(
-                  `/api/catalog/menu-items/${encodeURIComponent(
-                    uuid,
-                  )}/images`,
-                  {
-                    method: "PUT",
-                    body: form,
-                  },
-                );
-              }
             }
 
             return {
