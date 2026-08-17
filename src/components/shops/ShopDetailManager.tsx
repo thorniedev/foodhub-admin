@@ -142,7 +142,7 @@ export default function ShopDetailManager({
 
   if (!hasValidStoreUuid) {
     return (
-      <div className="p-4 sm:p-6 lg:p-7">
+      <div className="p-4 ">
         <div className="flex min-h-[500px] items-center justify-center rounded-[30px] border border-red-100 bg-white px-6 shadow-sm">
           <div className="max-w-lg text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
@@ -203,7 +203,7 @@ export default function ShopDetailManager({
   ======================================================= */
   if (storeError || !store) {
     return (
-      <div className="p-4 sm:p-6 lg:p-7">
+      <div className="p-4 ">
         <div className="flex min-h-[500px] items-center justify-center rounded-[30px] border border-red-100 bg-white px-6 shadow-sm">
           <div className="max-w-lg text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
@@ -330,9 +330,8 @@ export default function ShopDetailManager({
         max-w-full
         space-y-5
         overflow-x-hidden
-        p-4
-        sm:p-5
-        lg:p-6
+       
+       
       "
     >
       {/* =================================================

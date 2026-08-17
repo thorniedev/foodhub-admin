@@ -401,7 +401,7 @@ export default function WeatherConditionManager() {
     };
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 lg:p-7">
+    <div className="space-y-5 ">
       <WeatherConditionHeader
         total={
           data?.totalElements ??

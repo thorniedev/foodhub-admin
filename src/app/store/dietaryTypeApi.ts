@@ -10,7 +10,7 @@ export const dietaryTypeApi = adminBaseApi.injectEndpoints({
   endpoints: (builder) => ({
     getDietaryTypes: builder.query<
       PagedResponse<DietaryType>,
-      ListParams | void
+      ListParams | undefined
     >({
       query: (params) => {
         const p = (params ?? {}) as ListParams;

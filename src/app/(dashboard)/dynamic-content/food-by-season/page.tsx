@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import { useGetSeasonalFoodsQuery, useDeleteSeasonalFoodMutation, useAddSeasonalFoodMutation, useUpdateSeasonalFoodMutation } from "../../../store/seasonalFoodApi";
 import SeasonalFoodTable from "../../../../components/dynamic-content/seasonal-food/SeasonalFoodTable";
 import SeasonalFoodFormModal from "../../../../components/dynamic-content/seasonal-food/SeasonalFoodFormModal";
-import SeasonalFoodBanner from "../../../../components/dynamic-content/seasonal-food/SeasonalFoodBanner";
+import SeasonalFoodBanner from "../../../../components/dynamic-content/seasonal-food/SeasonalFoodBannerHeader";
 import { SeasonalFoodImage, Season } from "../../../../types/seasonalFood";
 
 const SEASON_LABELS: Record<Season, string> = {
@@ -46,7 +46,7 @@ export default function SeasonalFoodPage() {
   };
 
   return (
-    <div className="p-3 sm:p-6 space-y-8">
+    <div className="   space-y-8">
       <SeasonalFoodBanner
         total={seasonal.length}
         activeCount={activeCount}

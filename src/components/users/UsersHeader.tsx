@@ -33,12 +33,12 @@ export default function UsersHeader({
             </div>
 
             <div>
-              <p className="text-3xl font-bold text-accent-400">
+              <p className="text-5xl font-bold text-accent-400">
                 គ្រប់គ្រងអ្នកប្រើប្រាស់
               </p>
 
               <p className="mt-6 max-w-2xl text-xl text-white/85">
-                គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ ស្ថានភាពគណនី និងពិនិត្យ Profile
+                គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ ស្ថានភាពគណនី និងពិនិត្យ <br className="md:block max-md:hidden" /> Profile
                 របស់អ្នកប្រើនីមួយៗក្នុង FoodHub។
               </p>
             </div>

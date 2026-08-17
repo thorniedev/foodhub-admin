@@ -330,3 +330,5 @@ export interface MenuItemListParams extends CatalogListParams {
 export interface FoodListParams extends CatalogListParams {
   query?: string;
 }
+
+

@@ -35,7 +35,7 @@ export const dashboardNav: NavItem[] = [
     href: "/users",
   },
   {
-    label: "ប្រភេទអាហារ",
+    label: "មីនុយ",
     icon: Utensils,
     href: "/menu-items",
   },

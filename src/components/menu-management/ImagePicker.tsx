@@ -1,12 +1,7 @@
 "use client";
 
 import { ImagePlus, Minus, X } from "lucide-react";
-import {
-  type ChangeEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
 
 const ACCEPTED = "image/png,image/jpeg,image/gif,image/webp";
@@ -93,9 +88,9 @@ export default function ImagePicker({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-bold text-gray-800">{label}</span>
+        <span className="text-lg font-bold text-gray-800">{label}</span>
 
-        <span className="text-xs text-gray-400">
+        <span className="text-lg text-gray-400">
           {totalCount}/{MAX_FILES}
         </span>
       </div>

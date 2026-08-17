@@ -302,7 +302,7 @@
 //       getManagedFoods:
 //         builder.query<
 //           ApiPage<FoodRecord>,
-//           ListParams | void
+//           ListParams | undefined
 //         >({
 //           async queryFn(params) {
 //             const query = makeQuery({
@@ -453,7 +453,7 @@
 //       getPublishedMenuItems:
 //         builder.query<
 //           ApiPage<MenuItemRecord>,
-//           PublicMenuItemListParams | void
+//           PublicMenuItemListParams | undefined
 //         >({
 //           async queryFn(params) {
 //             const query = makeQuery({
@@ -638,8 +638,6 @@
 //   useDeleteStoreMenuItemMutation,
 // } = menuManagementApi;
 
-
-
 "use client";
 
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
@@ -674,9 +672,7 @@ type BackendEnvelope<T> = {
   timestamp?: string;
 };
 
-function unwrap<T>(
-  value: BackendEnvelope<T> | T,
-): T {
+function unwrap<T>(value: BackendEnvelope<T> | T): T {
   if (value && typeof value === "object") {
     const wrapper = value as BackendEnvelope<T>;
 
@@ -726,10 +722,8 @@ function normalizePage<T>(
     content,
     number: raw.number ?? 0,
     size: raw.size ?? content.length,
-    numberOfElements:
-      raw.numberOfElements ?? content.length,
-    totalElements:
-      raw.totalElements ?? content.length,
+    numberOfElements: raw.numberOfElements ?? content.length,
+    totalElements: raw.totalElements ?? content.length,
     totalPages: Math.max(raw.totalPages ?? 1, 1),
     first: raw.first ?? true,
     last: raw.last ?? true,
@@ -744,10 +738,7 @@ function toError(
   if (status === "FETCH_ERROR") {
     return {
       status: "FETCH_ERROR",
-      error:
-        typeof data === "string"
-          ? data
-          : "Network request failed.",
+      error: typeof data === "string" ? data : "Network request failed.",
     };
   }
 
@@ -760,10 +751,7 @@ function toError(
 async function browserRequest<T>(
   url: string,
   init?: RequestInit,
-): Promise<
-  | { data: T }
-  | { error: FetchBaseQueryError }
-> {
+): Promise<{ data: T } | { error: FetchBaseQueryError }> {
   try {
     const response = await fetch(url, {
       credentials: "include",
@@ -802,21 +790,14 @@ async function browserRequest<T>(
     return {
       error: toError(
         "FETCH_ERROR",
-        error instanceof Error
-          ? error.message
-          : "Network request failed.",
+        error instanceof Error ? error.message : "Network request failed.",
       ),
     };
   }
 }
 
 function makeQuery(
-  params:
-    | Record<
-        string,
-        string | number | boolean | undefined
-      >
-    | undefined,
+  params: Record<string, string | number | boolean | undefined> | undefined,
 ): string {
   if (!params) {
     return "";
@@ -825,10 +806,7 @@ function makeQuery(
   const search = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
-    if (
-      value === undefined ||
-      value === ""
-    ) {
+    if (value === undefined || value === "") {
       return;
     }
 
@@ -859,179 +837,147 @@ function makeMultipart(
   return form;
 }
 
-export const menuManagementApi =
-  adminBaseApi.injectEndpoints({
-    endpoints: (builder) => ({
-      getManagedFoodCategories:
-        builder.query<FoodCategoryOption[], void>({
-          async queryFn() {
-            const result = await browserRequest<unknown>(
-              "/api/catalog/food-categories?size=200",
-            );
+export const menuManagementApi = adminBaseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getManagedFoodCategories: builder.query<FoodCategoryOption[], void>({
+      async queryFn() {
+        const result = await browserRequest<unknown>(
+          "/api/catalog/food-categories?size=200",
+        );
 
-            if ("error" in result) {
-              return result;
-            }
+        if ("error" in result) {
+          return result;
+        }
 
-            return {
-              data:
-                normalizePage<FoodCategoryOption>(
-                  result.data as never,
-                ).content,
-            };
-          },
-        }),
+        return {
+          data: normalizePage<FoodCategoryOption>(result.data as never).content,
+        };
+      },
+    }),
 
-      getManagedCuisines:
-        builder.query<CuisineOption[], void>({
-          async queryFn() {
-            const result = await browserRequest<unknown>(
-              "/api/catalog/cuisines?page=0&size=100",
-            );
+    getManagedCuisines: builder.query<CuisineOption[], void>({
+      async queryFn() {
+        const result = await browserRequest<unknown>(
+          "/api/catalog/cuisines?page=0&size=100",
+        );
 
-            if ("error" in result) {
-              return result;
-            }
+        if ("error" in result) {
+          return result;
+        }
 
-            return {
-              data:
-                normalizePage<CuisineOption>(
-                  result.data as never,
-                ).content,
-            };
-          },
-        }),
+        return {
+          data: normalizePage<CuisineOption>(result.data as never).content,
+        };
+      },
+    }),
 
-      getManagedIngredients:
-        builder.query<IngredientOption[], void>({
-          async queryFn() {
-            const result = await browserRequest<unknown>(
-              "/api/admin/catalog/ingredients?page=0&size=100&sort=name%2Casc",
-            );
+    getManagedIngredients: builder.query<IngredientOption[], void>({
+      async queryFn() {
+        const result = await browserRequest<unknown>(
+          "/api/admin/catalog/ingredients?page=0&size=100&sort=name%2Casc",
+        );
 
-            if ("error" in result) {
-              return result;
-            }
+        if ("error" in result) {
+          return result;
+        }
 
-            return {
-              data:
-                normalizePage<IngredientOption>(
-                  result.data as never,
-                ).content,
-            };
-          },
-        }),
+        return {
+          data: normalizePage<IngredientOption>(result.data as never).content,
+        };
+      },
+    }),
 
-      getManagedStores:
-        builder.query<StoreOption[], void>({
-          async queryFn() {
-            const result = await browserRequest<unknown>(
-              "/api/admin/stores?page=0&size=100",
-            );
+    getManagedStores: builder.query<StoreOption[], void>({
+      async queryFn() {
+        const result = await browserRequest<unknown>(
+          "/api/admin/stores?page=0&size=100",
+        );
 
-            if ("error" in result) {
-              return result;
-            }
+        if ("error" in result) {
+          return result;
+        }
 
-            return {
-              data:
-                normalizePage<StoreOption>(
-                  result.data as never,
-                ).content,
-            };
-          },
-        }),
+        return {
+          data: normalizePage<StoreOption>(result.data as never).content,
+        };
+      },
+    }),
 
-      getManagedSeasons:
-        builder.query<SeasonOption[], void>({
-          async queryFn() {
-            const result = await browserRequest<unknown>(
-              "/api/catalog/seasons?page=0&size=100",
-            );
+    getManagedSeasons: builder.query<SeasonOption[], void>({
+      async queryFn() {
+        const result = await browserRequest<unknown>(
+          "/api/catalog/seasons?page=0&size=100",
+        );
 
-            if ("error" in result) {
-              return result;
-            }
+        if ("error" in result) {
+          return result;
+        }
 
-            return {
-              data:
-                normalizePage<SeasonOption>(
-                  result.data as never,
-                ).content,
-            };
-          },
-        }),
+        return {
+          data: normalizePage<SeasonOption>(result.data as never).content,
+        };
+      },
+    }),
 
-      getManagedEvents:
-        builder.query<EventOption[], void>({
-          async queryFn() {
-            const result = await browserRequest<unknown>(
-              "/api/catalog/events?page=0&size=100",
-            );
+    getManagedEvents: builder.query<EventOption[], void>({
+      async queryFn() {
+        const result = await browserRequest<unknown>(
+          "/api/catalog/events?page=0&size=100",
+        );
 
-            if ("error" in result) {
-              return result;
-            }
+        if ("error" in result) {
+          return result;
+        }
 
-            return {
-              data:
-                normalizePage<EventOption>(
-                  result.data as never,
-                ).content,
-            };
-          },
-        }),
+        return {
+          data: normalizePage<EventOption>(result.data as never).content,
+        };
+      },
+    }),
 
-      getManagedWeatherConditions:
-        builder.query<WeatherConditionOption[], void>({
-          async queryFn() {
-            const result = await browserRequest<unknown>(
-              "/api/catalog/weather-conditions?page=0&size=100",
-            );
+    getManagedWeatherConditions: builder.query<WeatherConditionOption[], void>({
+      async queryFn() {
+        const result = await browserRequest<unknown>(
+          "/api/catalog/weather-conditions?page=0&size=100",
+        );
 
-            if ("error" in result) {
-              return result;
-            }
+        if ("error" in result) {
+          return result;
+        }
 
-            return {
-              data:
-                normalizePage<WeatherConditionOption>(
-                  result.data as never,
-                ).content,
-            };
-          },
-        }),
+        return {
+          data: normalizePage<WeatherConditionOption>(result.data as never)
+            .content,
+        };
+      },
+    }),
 
-      createSeason:
-        builder.mutation<
-          SeasonOption,
-          {
-            code: string;
-            name: string;
-            localName?: string | null;
-            description?: string | null;
-            isActive: boolean;
-          }
-        >({
-          async queryFn(payload) {
-            const result = await browserRequest<unknown>(
-              "/api/catalog/seasons",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-              },
-            );
+    createSeason: builder.mutation<
+      SeasonOption,
+      {
+        code: string;
+        name: string;
+        localName?: string | null;
+        description?: string | null;
+        isActive: boolean;
+      }
+    >({
+      async queryFn(payload) {
+        const result = await browserRequest<unknown>("/api/catalog/seasons", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-            if ("error" in result) {
-              return result;
-            }
+        if ("error" in result) {
+          return result;
+        }
 
-            return {
-              data: unwrap<SeasonOption>(result.data as never),
-            };
-          },
-        }),
+        return {
+          data: unwrap<SeasonOption>(result.data as never),
+        };
+      },
+    }),
 
       updateSeason:
         builder.mutation<
@@ -1050,799 +996,691 @@ export const menuManagementApi =
             const result = await browserRequest<unknown>(
               `/api/catalog/seasons/${encodeURIComponent(uuid)}`,
               {
-                method: "PATCH",  
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: unwrap<SeasonOption>(result.data as never),
-            };
-          },
-        }),
-
-      deleteSeason:
-        builder.mutation<void, string>({
-          async queryFn(uuid) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/seasons/${encodeURIComponent(uuid)}`,
-              {
-                method: "DELETE",
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: undefined,
-            };
-          },
-        }),
-
-      createEvent:
-        builder.mutation<
-          EventOption,
-          {
-            code: string;
-            name: string;
-            localName?: string | null;
-            description?: string | null;
-            isActive: boolean;
-          }
-        >({
-          async queryFn(payload) {
-            const result = await browserRequest<unknown>(
-              "/api/catalog/events",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: unwrap<EventOption>(result.data as never),
-            };
-          },
-        }),
-
-      updateEvent:
-        builder.mutation<
-          EventOption,
-          {
-            uuid: string;
-            payload: {
-              name?: string;
-              localName?: string | null;
-              description?: string | null;
-              isActive?: boolean;
-            };
-          }
-        >({
-          async queryFn({ uuid, payload }) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/events/${encodeURIComponent(uuid)}`,
-              {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
               },
             );
 
-            if ("error" in result) {
-              return result;
-            }
+        if ("error" in result) {
+          return result;
+        }
 
-            return {
-              data: unwrap<EventOption>(result.data as never),
-            };
-          },
-        }),
+        return {
+          data: unwrap<SeasonOption>(result.data as never),
+        };
+      },
+    }),
 
-      deleteEvent:
-        builder.mutation<void, string>({
-          async queryFn(uuid) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/events/${encodeURIComponent(uuid)}`,
-              {
-                method: "DELETE",
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: undefined,
-            };
-          },
-        }),
-
-      createWeatherCondition:
-        builder.mutation<
-          WeatherConditionOption,
+    deleteSeason: builder.mutation<void, string>({
+      async queryFn(uuid) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/seasons/${encodeURIComponent(uuid)}`,
           {
-            code: string;
-            name: string;
-            localName?: string | null;
-            description?: string | null;
-            isActive: boolean;
-          }
-        >({
-          async queryFn(payload) {
-            const result = await browserRequest<unknown>(
-              "/api/catalog/weather-conditions",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: unwrap<WeatherConditionOption>(result.data as never),
-            };
+            method: "DELETE",
           },
-        }),
+        );
 
-      updateWeatherCondition:
-        builder.mutation<
-          WeatherConditionOption,
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: undefined,
+        };
+      },
+    }),
+
+    createEvent: builder.mutation<
+      EventOption,
+      {
+        code: string;
+        name: string;
+        localName?: string | null;
+        description?: string | null;
+        isActive: boolean;
+      }
+    >({
+      async queryFn(payload) {
+        const result = await browserRequest<unknown>("/api/catalog/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: unwrap<EventOption>(result.data as never),
+        };
+      },
+    }),
+
+    updateEvent: builder.mutation<
+      EventOption,
+      {
+        uuid: string;
+        payload: {
+          name?: string;
+          localName?: string | null;
+          description?: string | null;
+          isActive?: boolean;
+        };
+      }
+    >({
+      async queryFn({ uuid, payload }) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/events/${encodeURIComponent(uuid)}`,
           {
-            uuid: string;
-            payload: {
-              name?: string;
-              localName?: string | null;
-              description?: string | null;
-              isActive?: boolean;
-            };
-          }
-        >({
-          async queryFn({ uuid, payload }) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/weather-conditions/${encodeURIComponent(uuid)}`,
-              {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: unwrap<WeatherConditionOption>(result.data as never),
-            };
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
           },
-        }),
+        );
 
-      deleteWeatherCondition:
-        builder.mutation<void, string>({
-          async queryFn(uuid) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/weather-conditions/${encodeURIComponent(uuid)}`,
-              {
-                method: "DELETE",
-              },
-            );
+        if ("error" in result) {
+          return result;
+        }
 
-            if ("error" in result) {
-              return result;
-            }
+        return {
+          data: unwrap<EventOption>(result.data as never),
+        };
+      },
+    }),
 
-            return {
-              data: undefined,
-            };
-          },
-        }),
-
-      getManagedFoods:
-        builder.query<
-          ApiPage<FoodRecord>,
-          ListParams | void
-        >({
-          async queryFn(params) {
-            const p = (params ?? {}) as ListParams;
-            const query = makeQuery({
-              page: p.page ?? 0,
-              size: p.size ?? 100,
-              sort:
-                p.sort ??
-                "createdAt,desc",
-              query: p.query,
-            });
-
-            const result = await browserRequest<unknown>(
-              `/api/catalog/foods${query}`,
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data:
-                normalizePage<FoodRecord>(
-                  result.data as never,
-                ),
-            };
-          },
-        }),
-
-      getManagedFood:
-        builder.query<FoodRecord, string>({
-          async queryFn(uuid) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/foods/${encodeURIComponent(
-                uuid,
-              )}`,
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: unwrap<FoodRecord>(
-                result.data as never,
-              ),
-            };
-          },
-        }),
-
-      createManagedFood:
-        builder.mutation<
-          FoodRecord,
+    deleteEvent: builder.mutation<void, string>({
+      async queryFn(uuid) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/events/${encodeURIComponent(uuid)}`,
           {
-            payload: FoodWritePayload;
-            images: File[];
-          }
-        >({
-          async queryFn({
-            payload,
-            images,
-          }) {
-            const hasImages = Array.isArray(images) && images.length > 0;
-            const result = await browserRequest<unknown>(
-              "/api/catalog/foods",
-              {
-                method: "POST",
-                ...(hasImages
-                  ? {
-                      body: makeMultipart(
-                        "food",
-                        payload,
-                        images,
-                      ),
-                    }
-                  : {
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify(payload),
-                    }),
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: unwrap<FoodRecord>(
-                result.data as never,
-              ),
-            };
+            method: "DELETE",
           },
-        }),
+        );
 
-      updateManagedFood:
-        builder.mutation<
-          FoodRecord,
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: undefined,
+        };
+      },
+    }),
+
+    createWeatherCondition: builder.mutation<
+      WeatherConditionOption,
+      {
+        code: string;
+        name: string;
+        localName?: string | null;
+        description?: string | null;
+        isActive: boolean;
+      }
+    >({
+      async queryFn(payload) {
+        const result = await browserRequest<unknown>(
+          "/api/catalog/weather-conditions",
           {
-            uuid: string;
-            payload: Partial<FoodWritePayload>;
-            images: File[];
-          }
-        >({
-          async queryFn({
-            uuid,
-            payload,
-            images,
-          }) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/foods/${encodeURIComponent(
-                uuid,
-              )}`,
-              {
-                method: "PATCH",
-                body: makeMultipart(
-                  "food",
-                  payload,
-                  images ?? [],
-                ),
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: unwrap<FoodRecord>(
-                result.data as never,
-              ),
-            };
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
           },
-        }),
+        );
 
-      deleteManagedFood:
-        builder.mutation<void, string>({
-          async queryFn(uuid) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/foods/${encodeURIComponent(
-                uuid,
-              )}`,
-              {
-                method: "DELETE",
-              },
-            );
+        if ("error" in result) {
+          return result;
+        }
 
-            if ("error" in result) {
-              return result;
-            }
+        return {
+          data: unwrap<WeatherConditionOption>(result.data as never),
+        };
+      },
+    }),
 
-            return {
-              data: undefined,
-            };
-          },
-        }),
-
-      getPublishedMenuItems:
-        builder.query<
-          ApiPage<MenuItemRecord>,
-          PublicMenuItemListParams | void
-        >({
-          async queryFn(params) {
-            const p = (params ?? {}) as PublicMenuItemListParams;
-            const query = makeQuery({
-              page: p.page ?? 0,
-              size: p.size ?? 20,
-              sort:
-                p.sort ??
-                "createdAt,desc",
-              query: p.query,
-              rootCategoryCode:
-                p.rootCategoryCode,
-              storeUuid: p.storeUuid,
-              foodUuid: p.foodUuid,
-              availabilityStatus:
-                p.availabilityStatus,
-              featured:
-                p.featured !== undefined
-                  ? String(p.featured)
-                  : undefined,
-            });
-
-            const result = await browserRequest<unknown>(
-              `/api/catalog/menu-items${query}`,
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data:
-                normalizePage<MenuItemRecord>(
-                  result.data as never,
-                ),
-            };
-          },
-        }),
-
-      getMenuItem:
-        builder.query<MenuItemRecord, string>({
-          async queryFn(uuid) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/menu-items/${encodeURIComponent(
-                uuid,
-              )}`,
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: unwrap<MenuItemRecord>(
-                result.data as never,
-              ),
-            };
-          },
-        }),
-
-      getPublishedMenuItemDetail:
-        builder.query<
-          MenuItemRecord,
-          string | { uuid: string; latitude?: number; longitude?: number }
-        >({
-          async queryFn(arg) {
-            const uuid = typeof arg === "string" ? arg : arg.uuid;
-            const params: Record<string, string | number | boolean | undefined> = {};
-            if (typeof arg === "object") {
-              if (arg.latitude != null) params.latitude = arg.latitude;
-              if (arg.longitude != null) params.longitude = arg.longitude;
-            }
-            const queryString = makeQuery(params);
-            const result = await browserRequest<unknown>(
-              `/api/catalog/menu-items/${encodeURIComponent(
-                uuid,
-              )}/detail${queryString}`,
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: unwrap<MenuItemRecord>(
-                result.data as never,
-              ),
-            };
-          },
-        }),
-
-      createStoreMenuItem:
-        builder.mutation<
-          MenuItemRecord,
+    updateWeatherCondition: builder.mutation<
+      WeatherConditionOption,
+      {
+        uuid: string;
+        payload: {
+          name?: string;
+          localName?: string | null;
+          description?: string | null;
+          isActive?: boolean;
+        };
+      }
+    >({
+      async queryFn({ uuid, payload }) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/weather-conditions/${encodeURIComponent(uuid)}`,
           {
-            storeUuid: string;
-            payload: MenuItemWritePayload;
-            images: File[];
-          }
-        >({
-          async queryFn({
-            storeUuid,
-            payload,
-            images,
-          }) {
-            const hasImages = Array.isArray(images) && images.length > 0;
-            let body: FormData | string;
-            let headers: Record<string, string> | undefined;
-
-            if (hasImages) {
-              const form = new FormData();
-              form.append(
-                "request",
-                new Blob([JSON.stringify(payload)], {
-                  type: "application/json",
-                }),
-              );
-              // First image is thumbnail
-              form.append("thumbnail", images[0]);
-              // Remaining images are gallery
-              images.slice(1, 4).forEach((image) => {
-                form.append("gallery", image);
-              });
-              body = form;
-            } else {
-              headers = {
-                "Content-Type": "application/json",
-              };
-              body = JSON.stringify(payload);
-            }
-
-            const result = await browserRequest<unknown>(
-              `/api/catalog/stores/${encodeURIComponent(
-                storeUuid,
-              )}/menu-items`,
-              {
-                method: "POST",
-                headers,
-                body,
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: unwrap<MenuItemRecord>(
-                result.data as never,
-              ),
-            };
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
           },
-        }),
+        );
 
-      updateStoreMenuItem:
-        builder.mutation<
-          MenuItemRecord,
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: unwrap<WeatherConditionOption>(result.data as never),
+        };
+      },
+    }),
+
+    deleteWeatherCondition: builder.mutation<void, string>({
+      async queryFn(uuid) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/weather-conditions/${encodeURIComponent(uuid)}`,
           {
-            uuid: string;
-            payload: MenuItemWritePayload;
-            images: File[];
-          }
-        >({
-          async queryFn({
-            uuid,
-            payload,
-            images,
-          }) {
-            // 1. Update Core MenuItem
-            const coreResult = await browserRequest<unknown>(
-              `/api/catalog/menu-items/${encodeURIComponent(
-                uuid,
-              )}`,
-              {
-                method: "PUT",
+            method: "DELETE",
+          },
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: undefined,
+        };
+      },
+    }),
+
+    getManagedFoods: builder.query<ApiPage<FoodRecord>, ListParams | void>({
+      async queryFn(params) {
+        const p = (params ?? {}) as ListParams;
+        const query = makeQuery({
+          page: p.page ?? 0,
+          size: p.size ?? 100,
+          sort: p.sort ?? "createdAt,desc",
+          query: p.query,
+        });
+
+        const result = await browserRequest<unknown>(
+          `/api/catalog/foods${query}`,
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: normalizePage<FoodRecord>(result.data as never),
+        };
+      },
+    }),
+
+    getManagedFood: builder.query<FoodRecord, string>({
+      async queryFn(uuid) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/foods/${encodeURIComponent(uuid)}`,
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: unwrap<FoodRecord>(result.data as never),
+        };
+      },
+    }),
+
+    createManagedFood: builder.mutation<
+      FoodRecord,
+      {
+        payload: FoodWritePayload;
+        images: File[];
+      }
+    >({
+      async queryFn({ payload, images }) {
+        const hasImages = Array.isArray(images) && images.length > 0;
+        const result = await browserRequest<unknown>("/api/catalog/foods", {
+          method: "POST",
+          ...(hasImages
+            ? {
+                body: makeMultipart("food", payload, images),
+              }
+            : {
                 headers: {
                   "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                  foodUuid: payload.foodUuid,
-                  menuItem: payload.menuItem,
-                }),
-              },
-            );
+                body: JSON.stringify(payload),
+              }),
+        });
 
-            if ("error" in coreResult) {
-              return coreResult;
-            }
+        if ("error" in result) {
+          return result;
+        }
 
-            // 2. Update Ingredients if provided
-            if (payload.ingredients !== undefined) {
-              await browserRequest<unknown>(
-                `/api/catalog/menu-items/${encodeURIComponent(
-                  uuid,
-                )}/ingredients`,
-                {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    ingredients: payload.ingredients,
-                  }),
-                },
-              );
-            }
-
-            // 3. Update Dietary Types if provided
-            if (payload.dietaryTypes !== undefined) {
-              await browserRequest<unknown>(
-                `/api/catalog/menu-items/${encodeURIComponent(
-                  uuid,
-                )}/dietary-types`,
-                {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    dietaryTypes: payload.dietaryTypes,
-                  }),
-                },
-              );
-            }
-
-            // 4. Update Allergen Declarations if provided
-            if (payload.allergenDeclarations !== undefined) {
-              await browserRequest<unknown>(
-                `/api/catalog/menu-items/${encodeURIComponent(
-                  uuid,
-                )}/allergen-declarations`,
-                {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    declarations: payload.allergenDeclarations,
-                  }),
-                },
-              );
-            }
-
-            // 5. Update Images if any new images selected
-            if (Array.isArray(images) && images.length > 0) {
-              const form = new FormData();
-              form.append("thumbnail", images[0]);
-              images.slice(1, 4).forEach((image) => {
-                form.append("gallery", image);
-              });
-
-              await browserRequest<unknown>(
-                `/api/catalog/menu-items/${encodeURIComponent(
-                  uuid,
-                )}/images`,
-                {
-                  method: "PUT",
-                  body: form,
-                },
-              );
-            }
-
-            return {
-              data: unwrap<MenuItemRecord>(
-                coreResult.data as never,
-              ),
-            };
-          },
-        }),
-
-      deleteStoreMenuItem:
-        builder.mutation<void, string>({
-          async queryFn(uuid) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/menu-items/${encodeURIComponent(
-                uuid,
-              )}`,
-              {
-                method: "DELETE",
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: undefined,
-            };
-          },
-        }),
-
-      replaceMenuItemIngredients:
-        builder.mutation<
-          unknown,
-          {
-            uuid: string;
-            ingredients: MenuItemIngredientPayload[];
-          }
-        >({
-          async queryFn({ uuid, ingredients }) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/menu-items/${encodeURIComponent(
-                uuid,
-              )}/ingredients`,
-              {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ingredients }),
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: result.data,
-            };
-          },
-        }),
-
-      replaceMenuItemDietaryTypes:
-        builder.mutation<
-          unknown,
-          {
-            uuid: string;
-            dietaryTypes: MenuItemDietaryTypePayload[];
-          }
-        >({
-          async queryFn({ uuid, dietaryTypes }) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/menu-items/${encodeURIComponent(
-                uuid,
-              )}/dietary-types`,
-              {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ dietaryTypes }),
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: result.data,
-            };
-          },
-        }),
-
-      replaceMenuItemAllergens:
-        builder.mutation<
-          unknown,
-          {
-            uuid: string;
-            declarations: MenuItemAllergenDeclarationPayload[];
-          }
-        >({
-          async queryFn({ uuid, declarations }) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/menu-items/${encodeURIComponent(
-                uuid,
-              )}/allergen-declarations`,
-              {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ declarations }),
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: result.data,
-            };
-          },
-        }),
-
-      replaceMenuItemImages:
-        builder.mutation<
-          unknown,
-          {
-            uuid: string;
-            thumbnail?: File | null;
-            gallery?: File[];
-          }
-        >({
-          async queryFn({ uuid, thumbnail, gallery = [] }) {
-            const form = new FormData();
-            if (thumbnail) {
-              form.append("thumbnail", thumbnail);
-            }
-            gallery.forEach((file) => {
-              form.append("gallery", file);
-            });
-
-            const result = await browserRequest<unknown>(
-              `/api/catalog/menu-items/${encodeURIComponent(
-                uuid,
-              )}/images`,
-              {
-                method: "PUT",
-                body: form,
-              },
-            );
-
-            if ("error" in result) {
-              return result;
-            }
-
-            return {
-              data: result.data,
-            };
-          },
-        }),
+        return {
+          data: unwrap<FoodRecord>(result.data as never),
+        };
+      },
     }),
 
-    overrideExisting: false,
-  });
+    updateManagedFood: builder.mutation<
+      FoodRecord,
+      {
+        uuid: string;
+        payload: Partial<FoodWritePayload>;
+        images: File[];
+      }
+    >({
+      async queryFn({ uuid, payload, images }) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/foods/${encodeURIComponent(uuid)}`,
+          {
+            method: "PATCH",
+            body: makeMultipart("food", payload, images ?? []),
+          },
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: unwrap<FoodRecord>(result.data as never),
+        };
+      },
+    }),
+
+    deleteManagedFood: builder.mutation<void, string>({
+      async queryFn(uuid) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/foods/${encodeURIComponent(uuid)}`,
+          {
+            method: "DELETE",
+          },
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: undefined,
+        };
+      },
+    }),
+
+    getPublishedMenuItems: builder.query<
+      ApiPage<MenuItemRecord>,
+      PublicMenuItemListParams | void
+    >({
+      async queryFn(params) {
+        const p = (params ?? {}) as PublicMenuItemListParams;
+        const query = makeQuery({
+          page: p.page ?? 0,
+          size: p.size ?? 20,
+          sort: p.sort ?? "createdAt,desc",
+          query: p.query,
+          rootCategoryCode: p.rootCategoryCode,
+          storeUuid: p.storeUuid,
+          foodUuid: p.foodUuid,
+          availabilityStatus: p.availabilityStatus,
+          featured: p.featured !== undefined ? String(p.featured) : undefined,
+        });
+
+        const result = await browserRequest<unknown>(
+          `/api/catalog/menu-items${query}`,
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: normalizePage<MenuItemRecord>(result.data as never),
+        };
+      },
+    }),
+
+    getMenuItem: builder.query<MenuItemRecord, string>({
+      async queryFn(uuid) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/menu-items/${encodeURIComponent(uuid)}`,
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: unwrap<MenuItemRecord>(result.data as never),
+        };
+      },
+    }),
+
+    getPublishedMenuItemDetail: builder.query<
+      MenuItemRecord,
+      string | { uuid: string; latitude?: number; longitude?: number }
+    >({
+      async queryFn(arg) {
+        const uuid = typeof arg === "string" ? arg : arg.uuid;
+        const params: Record<string, string | number | boolean | undefined> =
+          {};
+        if (typeof arg === "object") {
+          if (arg.latitude != null) params.latitude = arg.latitude;
+          if (arg.longitude != null) params.longitude = arg.longitude;
+        }
+        const queryString = makeQuery(params);
+        const result = await browserRequest<unknown>(
+          `/api/catalog/menu-items/${encodeURIComponent(
+            uuid,
+          )}/detail${queryString}`,
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: unwrap<MenuItemRecord>(result.data as never),
+        };
+      },
+    }),
+
+    createStoreMenuItem: builder.mutation<
+      MenuItemRecord,
+      {
+        storeUuid: string;
+        payload: MenuItemWritePayload;
+        images: File[];
+      }
+    >({
+      async queryFn({ storeUuid, payload, images }) {
+        const hasImages = Array.isArray(images) && images.length > 0;
+        let body: FormData | string;
+        let headers: Record<string, string> | undefined;
+
+        if (hasImages) {
+          const form = new FormData();
+          form.append(
+            "request",
+            new Blob([JSON.stringify(payload)], {
+              type: "application/json",
+            }),
+          );
+          // First image is thumbnail
+          form.append("thumbnail", images[0]);
+          // Remaining images are gallery
+          images.slice(1, 4).forEach((image) => {
+            form.append("gallery", image);
+          });
+          body = form;
+        } else {
+          headers = {
+            "Content-Type": "application/json",
+          };
+          body = JSON.stringify(payload);
+        }
+
+        const result = await browserRequest<unknown>(
+          `/api/catalog/stores/${encodeURIComponent(storeUuid)}/menu-items`,
+          {
+            method: "POST",
+            headers,
+            body,
+          },
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: unwrap<MenuItemRecord>(result.data as never),
+        };
+      },
+    }),
+
+    updateStoreMenuItem: builder.mutation<
+      MenuItemRecord,
+      {
+        uuid: string;
+        payload: MenuItemWritePayload;
+        images: File[];
+      }
+    >({
+      async queryFn({ uuid, payload, images }) {
+        // 1. Update Core MenuItem
+        const coreResult = await browserRequest<unknown>(
+          `/api/catalog/menu-items/${encodeURIComponent(uuid)}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              foodUuid: payload.foodUuid,
+              menuItem: payload.menuItem,
+            }),
+          },
+        );
+
+        if ("error" in coreResult) {
+          return coreResult;
+        }
+
+        // 2. Update Ingredients if provided
+        if (payload.ingredients !== undefined) {
+          await browserRequest<unknown>(
+            `/api/catalog/menu-items/${encodeURIComponent(uuid)}/ingredients`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                ingredients: payload.ingredients,
+              }),
+            },
+          );
+        }
+
+        // 3. Update Dietary Types if provided
+        if (payload.dietaryTypes !== undefined) {
+          await browserRequest<unknown>(
+            `/api/catalog/menu-items/${encodeURIComponent(uuid)}/dietary-types`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                dietaryTypes: payload.dietaryTypes,
+              }),
+            },
+          );
+        }
+
+        // 4. Update Allergen Declarations if provided
+        if (payload.allergenDeclarations !== undefined) {
+          await browserRequest<unknown>(
+            `/api/catalog/menu-items/${encodeURIComponent(
+              uuid,
+            )}/allergen-declarations`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                declarations: payload.allergenDeclarations,
+              }),
+            },
+          );
+        }
+
+        // 5. Update Images if any new images selected
+        if (Array.isArray(images) && images.length > 0) {
+          const form = new FormData();
+          form.append("thumbnail", images[0]);
+          images.slice(1, 4).forEach((image) => {
+            form.append("gallery", image);
+          });
+
+          await browserRequest<unknown>(
+            `/api/catalog/menu-items/${encodeURIComponent(uuid)}/images`,
+            {
+              method: "PUT",
+              body: form,
+            },
+          );
+        }
+
+        return {
+          data: unwrap<MenuItemRecord>(coreResult.data as never),
+        };
+      },
+    }),
+
+    deleteStoreMenuItem: builder.mutation<void, string>({
+      async queryFn(uuid) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/menu-items/${encodeURIComponent(uuid)}`,
+          {
+            method: "DELETE",
+          },
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: undefined,
+        };
+      },
+    }),
+
+    replaceMenuItemIngredients: builder.mutation<
+      unknown,
+      {
+        uuid: string;
+        ingredients: MenuItemIngredientPayload[];
+      }
+    >({
+      async queryFn({ uuid, ingredients }) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/menu-items/${encodeURIComponent(uuid)}/ingredients`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ingredients }),
+          },
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: result.data,
+        };
+      },
+    }),
+
+    replaceMenuItemDietaryTypes: builder.mutation<
+      unknown,
+      {
+        uuid: string;
+        dietaryTypes: MenuItemDietaryTypePayload[];
+      }
+    >({
+      async queryFn({ uuid, dietaryTypes }) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/menu-items/${encodeURIComponent(uuid)}/dietary-types`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ dietaryTypes }),
+          },
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: result.data,
+        };
+      },
+    }),
+
+    replaceMenuItemAllergens: builder.mutation<
+      unknown,
+      {
+        uuid: string;
+        declarations: MenuItemAllergenDeclarationPayload[];
+      }
+    >({
+      async queryFn({ uuid, declarations }) {
+        const result = await browserRequest<unknown>(
+          `/api/catalog/menu-items/${encodeURIComponent(
+            uuid,
+          )}/allergen-declarations`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ declarations }),
+          },
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: result.data,
+        };
+      },
+    }),
+
+    replaceMenuItemImages: builder.mutation<
+      unknown,
+      {
+        uuid: string;
+        thumbnail?: File | null;
+        gallery?: File[];
+      }
+    >({
+      async queryFn({ uuid, thumbnail, gallery = [] }) {
+        const form = new FormData();
+        if (thumbnail) {
+          form.append("thumbnail", thumbnail);
+        }
+        gallery.forEach((file) => {
+          form.append("gallery", file);
+        });
+
+        const result = await browserRequest<unknown>(
+          `/api/catalog/menu-items/${encodeURIComponent(uuid)}/images`,
+          {
+            method: "PUT",
+            body: form,
+          },
+        );
+
+        if ("error" in result) {
+          return result;
+        }
+
+        return {
+          data: result.data,
+        };
+      },
+    }),
+  }),
+
+  overrideExisting: false,
+});
 
 export const {
   useGetManagedFoodCategoriesQuery,

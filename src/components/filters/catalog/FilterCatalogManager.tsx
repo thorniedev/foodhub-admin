@@ -454,7 +454,7 @@ function CatalogHeader({
             </div>
 
             <div className="min-w-0">
-              <p className="text-3xl font-bold text-accent-400">
+              <p className="text-5xl font-bold text-accent-400">
                 {group.labelKm}
               </p>
 
@@ -574,7 +574,7 @@ function CatalogToolbar({
   ];
 
   return (
-    <section className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-5">
+    <section className=" ">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         {/* Status tabs */}
         <div className="flex w-full min-w-0 gap-2 overflow-x-auto pb-1 xl:w-auto">
@@ -589,7 +589,7 @@ function CatalogToolbar({
                 className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
                   active
                     ? "bg-primary-800 text-white"
-                    : "bg-gray-50 text-gray-500 hover:bg-primary-50 hover:text-primary-800"
+                    : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
                 }`}
               >
                 {tab.label}

@@ -43,7 +43,7 @@ export default function UsersTable({
               ស្ថានភាព
             </th>
 
-            <th className="px-6 py-4 text-right text-xl font-semibold text-primary-800">
+            <th className="px-6 py-4 text-center text-xl font-semibold text-primary-800">
               សកម្មភាព
             </th>
           </tr>

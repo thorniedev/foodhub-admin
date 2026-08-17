@@ -35,12 +35,12 @@ export default function DietaryTypesHeader({
             </div>
 
             <div className="min-w-0">
-              <p className="text-3xl font-bold text-accent-400">
+              <p className="text-5xl font-bold text-accent-400">
                 គ្រប់គ្រងរបបអាហារ
               </p>
 
-              <p className="mt-6 max-w-2xl text-xl leading-8 text-white/85">
-                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារប្រភេទរបបអាហារដែលប្រើក្នុងប្រព័ន្ធ FoodHub។
+              <p className="mt-2 max-w-2xl text-xl leading-7 text-white/85">
+                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារប្រភេទរបបអាហារដែលប្រើក្នុងប្រព័ន្ធ MhouBahar។
               </p>
             </div>
           </div>
