@@ -22,6 +22,11 @@ import {
 } from "@/src/app/store/adminSearchApi";
 import type { AdminEntityType, AdminSearchResultItem } from "@/src/types/adminSearch";
 
+import { useMemo } from "react";
+import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
+import { useGetAdminUsersQuery } from "@/src/app/store/userProfileApi";
+import { useGetManagedFoodsQuery } from "@/src/app/store/menuManagementApi";
+
 export default function GlobalAdminSearch() {
   const [inputQuery, setInputQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -52,10 +57,115 @@ export default function GlobalAdminSearch() {
 
   const typesFilter = selectedType !== "ALL" ? [selectedType] : undefined;
 
-  const { data, isFetching, error } = useAdminGlobalSearchQuery(
+  const { data, isFetching } = useAdminGlobalSearchQuery(
     { query: debouncedQuery, types: typesFilter, page: 0, size: 12 },
     { skip: debouncedQuery.length < 2 },
   );
+
+  const shouldSkipFallback = debouncedQuery.length < 2;
+
+  const { data: fallbackShops, isFetching: fallbackShopsLoading } = useGetShopsQuery(
+    { query: debouncedQuery, page: 0, size: 6 },
+    { skip: shouldSkipFallback || (selectedType !== "ALL" && selectedType !== "STORE") },
+  );
+
+  const { data: fallbackUsers, isFetching: fallbackUsersLoading } = useGetAdminUsersQuery(
+    { query: debouncedQuery, page: 0, size: 6 },
+    { skip: shouldSkipFallback || (selectedType !== "ALL" && selectedType !== "USER") },
+  );
+
+  const { data: fallbackFoods, isFetching: fallbackFoodsLoading } = useGetManagedFoodsQuery(
+    { query: debouncedQuery, page: 0, size: 6 },
+    { skip: shouldSkipFallback || (selectedType !== "ALL" && selectedType !== "FOOD" && selectedType !== "MENU_ITEM") },
+  );
+
+  const primaryResults = data?.results ?? [];
+
+  const fallbackResults = useMemo(() => {
+    const list: AdminSearchResultItem[] = [];
+
+    if (fallbackShops?.contents) {
+      fallbackShops.contents.forEach((shop) => {
+        list.push({
+          uuid: shop.uuid,
+          type: "STORE",
+          title: shop.storeName || "Store",
+          subtitle: shop.addressLine || shop.city || undefined,
+          status: shop.operatingStatus || shop.reviewStatus || undefined,
+          targetUrl: `/shops/${shop.uuid}`,
+        });
+      });
+    }
+
+    if (fallbackUsers?.contents) {
+      fallbackUsers.contents.forEach((userItem) => {
+        const u = userItem as unknown as Record<string, unknown>;
+        const title = String(
+          u.username ||
+            u.fullName ||
+            u.email ||
+            u.firstName ||
+            u.localName ||
+            "User",
+        );
+        const subtitle = typeof u.email === "string" ? u.email : undefined;
+        const status =
+          typeof u.accountStatus === "string"
+            ? u.accountStatus
+            : typeof u.status === "string"
+              ? u.status
+              : undefined;
+
+        list.push({
+          uuid: String(u.uuid || u.id || ""),
+          type: "USER",
+          title,
+          subtitle,
+          status,
+          targetUrl: `/users/${u.uuid || u.id}`,
+        });
+      });
+    }
+
+    if (fallbackFoods?.content) {
+      fallbackFoods.content.forEach((foodItem) => {
+        const food = foodItem as unknown as Record<string, unknown>;
+        const title = String(
+          food.canonicalName ||
+            food.localName ||
+            food.name ||
+            "Food",
+        );
+        const subtitle =
+          typeof food.description === "string"
+            ? food.description
+            : typeof food.categoryName === "string"
+              ? food.categoryName
+              : undefined;
+
+        list.push({
+          uuid: String(food.uuid || food.id || ""),
+          type: "FOOD",
+          title,
+          subtitle,
+          targetUrl: `/menu-items`,
+        });
+      });
+    }
+
+    return list;
+  }, [fallbackShops, fallbackUsers, fallbackFoods]);
+
+  const rawResults = primaryResults.length > 0 ? primaryResults : fallbackResults;
+  const filteredResults =
+    selectedType === "ALL"
+      ? rawResults
+      : rawResults.filter((r) => r.type === selectedType);
+
+  const isSearchLoading =
+    isFetching ||
+    (primaryResults.length === 0 &&
+      (fallbackShopsLoading || fallbackUsersLoading || fallbackFoodsLoading));
 
   const [reindexSearch, { isLoading: isReindexing }] = useReindexSearchMutation();
 
@@ -76,8 +186,6 @@ export default function GlobalAdminSearch() {
       setTimeout(() => setNotice(null), 4000);
     }
   };
-
-  const results = data?.results ?? [];
 
   const getEntityIcon = (type: AdminEntityType) => {
     switch (type) {
@@ -205,22 +313,18 @@ export default function GlobalAdminSearch() {
 
           {/* RESULTS CONTENT */}
           <div className="max-h-[380px] overflow-y-auto p-2">
-            {isFetching ? (
+            {isSearchLoading ? (
               <div className="flex items-center justify-center gap-2 py-8 text-xs font-medium text-emerald-700">
                 <Loader2 size={18} className="animate-spin text-emerald-600" />
                 កំពុងស្វែងរកក្នុងប្រព័ន្ធ...
               </div>
-            ) : error ? (
-              <div className="py-6 text-center text-xs font-medium text-red-500">
-                ពុំអាចភ្ជាប់ទៅសេវាកម្មស្វែងរកបានទេ។
-              </div>
-            ) : results.length === 0 ? (
+            ) : filteredResults.length === 0 ? (
               <div className="py-8 text-center text-xs font-medium text-gray-500">
                 រកមិនឃើញលទ្ធផល &quot;{debouncedQuery}&quot; ឡើយ។
               </div>
             ) : (
               <div className="space-y-1">
-                {results.map((item) => (
+                {filteredResults.map((item) => (
                   <Link
                     key={`${item.type}-${item.uuid}`}
                     href={getEntityRoute(item)}
@@ -260,7 +364,7 @@ export default function GlobalAdminSearch() {
 
           {/* FOOTER */}
           <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-4 py-2 text-[11px] text-gray-500">
-            <span>បានរកឃើញលទ្ធផល: {data?.totalElements ?? results.length}</span>
+            <span>បានរកឃើញលទ្ធផល: {filteredResults.length}</span>
             <span className="font-medium text-emerald-800">Admin Global Index Search</span>
           </div>
         </div>

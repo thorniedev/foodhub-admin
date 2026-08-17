@@ -217,6 +217,8 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
             page: p.page ?? 0,
             size: p.size ?? 20,
             sort: p.sort ?? "createdAt,desc",
+            query: p.query ? p.query.trim() : undefined,
+            q: p.query ? p.query.trim() : undefined,
           },
         };
       },

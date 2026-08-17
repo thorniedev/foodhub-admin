@@ -102,15 +102,23 @@ function normalizeSearchResponse(response: unknown): AdminSearchResponse {
     };
   }
 
-  const rawList = Array.isArray(raw.results)
-    ? raw.results
-    : Array.isArray(raw.contents)
-      ? raw.contents
-      : Array.isArray(raw.content)
-        ? raw.content
-        : Array.isArray(raw.items)
-          ? raw.items
-          : [];
+  let rawList: unknown[] = [];
+
+  if (Array.isArray(raw.results)) {
+    rawList = raw.results;
+  } else if (Array.isArray(raw.contents)) {
+    rawList = raw.contents;
+  } else if (Array.isArray(raw.content)) {
+    rawList = raw.content;
+  } else if (Array.isArray(raw.items)) {
+    rawList = raw.items;
+  } else {
+    for (const key of ["stores", "shops", "foods", "users", "menuItems", "items", "data"]) {
+      if (Array.isArray(raw[key])) {
+        rawList.push(...(raw[key] as unknown[]));
+      }
+    }
+  }
 
   const results = rawList.map(normalizeSearchItem).filter(Boolean) as AdminSearchResultItem[];
 
