@@ -2195,7 +2195,8 @@ export default function FoodFormModal({
                 <OptionPills
                   options={activeCategories.map((category) => ({
                     value: category.uuid,
-                    label: `${category.name} (${category.code})`,
+                    // label: `${category.name} (${category.code})`,
+                      label: `${category.name} `,
                   }))}
                   selectedValues={
                     values.categoryUuid ? [values.categoryUuid] : []
@@ -2330,7 +2331,7 @@ export default function FoodFormModal({
             <OptionPills
               options={dietaryTypes.map((dietaryType) => ({
                 value: dietaryType.code,
-                label: `${dietaryType.name} (${dietaryType.code})`,
+                label: `${dietaryType.name} `,
               }))}
               selectedValues={selectedDietaryCodes}
               onToggle={toggleDietaryType}
@@ -2349,7 +2350,7 @@ export default function FoodFormModal({
             <OptionPills
               options={mealTypes.map((mealType) => ({
                 value: mealType.uuid,
-                label: `${mealType.name} (${mealType.code})`,
+                label: `${mealType.name} `,
               }))}
               selectedValues={selectedMealTypeUuids}
               onToggle={toggleMealType}
@@ -2405,7 +2406,7 @@ export default function FoodFormModal({
             <OptionPills
               options={ageGroups.map((ageGroup) => ({
                 value: ageGroup.uuid,
-                label: `${ageGroup.name} (${ageGroup.code})`,
+                label: `${ageGroup.name} `,
               }))}
               selectedValues={selectedAgeGroupUuids}
               onToggle={toggleAgeGroup}
