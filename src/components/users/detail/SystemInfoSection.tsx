@@ -14,13 +14,6 @@ export default function SystemInfoSection({
   return (
     <Section title="System information" icon={<Info size={22} />}>
       <div className="space-y-3">
-        <Row
-          label="Avatar media UUID"
-          value={profile.avatarMediaUuid ?? "—"}
-          icon={<Fingerprint size={20} />}
-          mono
-          accent
-        />
 
         <Row
           label="Created at"

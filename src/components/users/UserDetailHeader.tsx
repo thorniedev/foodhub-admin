@@ -69,6 +69,7 @@ export default function UserDetailHeader({
           <div className="flex min-w-0 items-center gap-4">
             <UserAvatar
               name={name}
+              userUuid={user.uuid}
               avatarMediaUuid={avatarMediaUuid}
               imageUrl={imageUrl}
               containerClassName="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[24px] bg-white text-2xl font-bold text-primary-800 shadow-sm"

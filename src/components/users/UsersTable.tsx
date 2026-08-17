@@ -86,6 +86,7 @@ export default function UsersTable({
                   >
                     <UserAvatar
                       name={name}
+                      userUuid={user.uuid}
                       avatarMediaUuid={avatarMediaUuid}
                       imageUrl={imageUrl}
                       containerClassName="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-lg font-semibold text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100"
