@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Search, Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 
 import { getPageTitle } from "../../config/pageTitles";
 import { useSidebar } from "../../context/SidebarContext";
@@ -12,6 +12,7 @@ import {
   getAdminDisplayName,
   getAdminInitials,
 } from "@/src/lib/currentAdminDisplay";
+import GlobalAdminSearch from "./GlobalAdminSearch";
 
 export default function Topbar() {
   const pathname = usePathname();
@@ -55,19 +56,8 @@ export default function Topbar() {
       {/* RIGHT */}
       <div className="flex w-full flex-wrap items-center justify-between gap-3 md:w-auto md:flex-nowrap md:justify-end md:gap-5">
         {/* Search */}
-        <div className="order-3 w-full flex-1 md:order-0 md:mx-4 md:w-auto md:max-w-xl lg:min-w-[320px]">
-          <div className="relative">
-            <Search
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-
-            <input
-              type="text"
-              placeholder="ស្វែងរកម្ហូបអាហារ..."
-              className="w-full rounded-full border border-gray-200 py-2.5 pl-11 pr-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-600/20"
-            />
-          </div>
+        <div className="order-3 w-full flex-1 md:order-0 md:mx-4 md:w-auto md:max-w-xl lg:min-w-[420px]">
+          <GlobalAdminSearch />
         </div>
 
         {/* Notifications */}

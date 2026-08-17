@@ -79,6 +79,8 @@ const allowedRoutes: Record<string, ReadonlySet<string>> = {
   catalog: new Set(["GET", "POST", "PATCH", "DELETE"]),
 
   media: new Set(["GET"]),
+
+  discovery: new Set(["GET", "POST"]),
 };
 
 interface RouteContext {
