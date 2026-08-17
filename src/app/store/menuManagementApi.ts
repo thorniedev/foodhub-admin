@@ -1540,31 +1540,19 @@ export const menuManagementApi =
             payload,
             images,
           }) {
-            const hasImages = Array.isArray(images) && images.length > 0;
-            let body: FormData | string;
-            let headers: Record<string, string> | undefined;
-
-            if (hasImages) {
-              const form = new FormData();
-              form.append(
-                "request",
-                new Blob([JSON.stringify(payload)], {
-                  type: "application/json",
-                }),
-              );
-              // First image is thumbnail
-              form.append("thumbnail", images[0]);
-              // Remaining images are gallery
-              images.slice(1, 4).forEach((image) => {
-                form.append("gallery", image);
-              });
-              body = form;
-            } else {
-              headers = {
-                "Content-Type": "application/json",
-              };
-              body = JSON.stringify(payload);
-            }
+            // 1. Create Core Menu Item (POSTMAN Collection: POST /api/v1/admin/stores/{storeUuid}/menu-items)
+            const jsonPayload = {
+              foodUuid: payload.foodUuid,
+              name: payload.menuItem?.name,
+              description: payload.menuItem?.description,
+              price: payload.menuItem?.price,
+              currencyCode: payload.menuItem?.currencyCode ?? "USD",
+              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes,
+              availabilityStatus: payload.menuItem?.availabilityStatus ?? "AVAILABLE",
+              ingredientDataStatus: payload.menuItem?.ingredientDataStatus ?? "VERIFIED",
+              featured: payload.menuItem?.isFeatured ?? true,
+              source: "ADMIN",
+            };
 
             let result = await browserRequest<unknown>(
               `/api/admin/stores/${encodeURIComponent(
@@ -1572,8 +1560,10 @@ export const menuManagementApi =
               )}/menu-items`,
               {
                 method: "POST",
-                headers,
-                body,
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(jsonPayload),
               },
             );
 
@@ -1587,8 +1577,10 @@ export const menuManagementApi =
                 )}/menu-items`,
                 {
                   method: "POST",
-                  headers,
-                  body,
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(jsonPayload),
                 },
               );
             }
@@ -1597,10 +1589,58 @@ export const menuManagementApi =
               return result;
             }
 
+            const createdItem = unwrap<MenuItemRecord>(result.data as never);
+            const newItemUuid = createdItem?.uuid;
+
+            // 2. Upload Multi-Images for the newly created MenuItem
+            if (newItemUuid && Array.isArray(images) && images.length > 0) {
+              const form = new FormData();
+              // Thumbnail & Gallery
+              form.append("thumbnail", images[0]);
+              images.slice(1, 4).forEach((image) => {
+                form.append("gallery", image);
+              });
+              images.forEach((image) => {
+                form.append("images", image);
+              });
+
+              let imgResult = await browserRequest<unknown>(
+                `/api/admin/menu-items/${encodeURIComponent(
+                  newItemUuid,
+                )}/images`,
+                {
+                  method: "PUT",
+                  body: form,
+                },
+              );
+
+              if ("error" in imgResult) {
+                imgResult = await browserRequest<unknown>(
+                  `/api/admin/menu-items/${encodeURIComponent(
+                    newItemUuid,
+                  )}/images`,
+                  {
+                    method: "POST",
+                    body: form,
+                  },
+                );
+              }
+
+              if ("error" in imgResult) {
+                await browserRequest<unknown>(
+                  `/api/catalog/menu-items/${encodeURIComponent(
+                    newItemUuid,
+                  )}/images`,
+                  {
+                    method: "PUT",
+                    body: form,
+                  },
+                );
+              }
+            }
+
             return {
-              data: unwrap<MenuItemRecord>(
-                result.data as never,
-              ),
+              data: createdItem,
             };
           },
         }),
@@ -1724,15 +1764,18 @@ export const menuManagementApi =
             }
 
             // 5. Update Images if any new images selected
-            if (Array.isArray(images) && images.length > 0) {
+            if (uuid && Array.isArray(images) && images.length > 0) {
               const form = new FormData();
               form.append("thumbnail", images[0]);
               images.slice(1, 4).forEach((image) => {
                 form.append("gallery", image);
               });
+              images.forEach((image) => {
+                form.append("images", image);
+              });
 
-              await browserRequest<unknown>(
-                `/api/catalog/menu-items/${encodeURIComponent(
+              let imgResult = await browserRequest<unknown>(
+                `/api/admin/menu-items/${encodeURIComponent(
                   uuid,
                 )}/images`,
                 {
@@ -1740,6 +1783,30 @@ export const menuManagementApi =
                   body: form,
                 },
               );
+
+              if ("error" in imgResult) {
+                imgResult = await browserRequest<unknown>(
+                  `/api/admin/menu-items/${encodeURIComponent(
+                    uuid,
+                  )}/images`,
+                  {
+                    method: "POST",
+                    body: form,
+                  },
+                );
+              }
+
+              if ("error" in imgResult) {
+                await browserRequest<unknown>(
+                  `/api/catalog/menu-items/${encodeURIComponent(
+                    uuid,
+                  )}/images`,
+                  {
+                    method: "PUT",
+                    body: form,
+                  },
+                );
+              }
             }
 
             return {

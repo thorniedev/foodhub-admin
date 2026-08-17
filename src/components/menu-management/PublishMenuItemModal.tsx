@@ -547,7 +547,7 @@ export default function PublishMenuItemModal({
             />
 
             <label>
-              <Label>ស្ថានភាព دستیابی (Availability)</Label>
+              <Label>ស្ថានភាព</Label>
               <select
                 value={values.availabilityStatus}
                 onChange={(event) =>
