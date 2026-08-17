@@ -1,19 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { Search } from "lucide-react";
+import { useMemo, useRef, useState, useEffect } from "react";
+import { ArrowUpDown, Check, ChevronDown, Search, X } from "lucide-react";
 import { useGetSeasonalFoodsQuery, useDeleteSeasonalFoodMutation, useAddSeasonalFoodMutation, useUpdateSeasonalFoodMutation } from "../../../store/seasonalFoodApi";
 import SeasonalFoodTable from "../../../../components/dynamic-content/seasonal-food/SeasonalFoodTable";
 import SeasonalFoodFormModal from "../../../../components/dynamic-content/seasonal-food/SeasonalFoodFormModal";
 import SeasonalFoodBanner from "../../../../components/dynamic-content/seasonal-food/SeasonalFoodBannerHeader";
-import { SeasonalFoodImage, Season } from "../../../../types/seasonalFood";
+import { SeasonalFoodImage } from "../../../../types/seasonalFood";
 
-const SEASON_LABELS: Record<Season, string> = {
-  rainy: "រដូវវស្សា",
-  dry: "រដូវប្រាំង",
-  hot: "រដូវក្តៅ",
-  festival: "ថ្ងៃបុណ្យ",
-};
+type StatusFilter = "ALL" | "ACTIVE" | "INACTIVE";
+type SortMode = "A_Z" | "Z_A" | "NEWEST" | "OLDEST";
+
+const sortOptions: Array<{ value: SortMode; label: string }> = [
+  { value: "A_Z", label: "A → Z" },
+  { value: "Z_A", label: "Z → A" },
+  { value: "NEWEST", label: "ថ្មីបំផុត" },
+  { value: "OLDEST", label: "ចាស់បំផុត" },
+];
 
 export default function SeasonalFoodPage() {
   const { data: seasonal = [] } = useGetSeasonalFoodsQuery();
@@ -24,20 +27,64 @@ export default function SeasonalFoodPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SeasonalFoodImage | null>(null);
   const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState<Season | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
+  const [size, setSize] = useState(20);
+  const [sizeOpen, setSizeOpen] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>("NEWEST");
+  const [sortOpen, setSortOpen] = useState(false);
 
-  const activeCount = seasonal.filter((s) => s.isdisplay).length;
-  const pendingCount = seasonal.length - activeCount;
+  const sizeRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
 
-  // Extract unique seasons from actual data
-  const availableSeasons = Array.from(new Set(seasonal.map((s) => s.season)));
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (sizeRef.current && !sizeRef.current.contains(target)) {
+        setSizeOpen(false);
+      }
+      if (sortRef.current && !sortRef.current.contains(target)) {
+        setSortOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  // Filter data based on search and active tab
-  const filteredData = seasonal.filter((s) => {
-    const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = activeFilter === "all" || s.season === activeFilter;
-    return matchesSearch && matchesFilter;
-  });
+  const totalCount = seasonal.length;
+  const activeCount = useMemo(
+    () => seasonal.filter((s) => s.isdisplay !== false).length,
+    [seasonal],
+  );
+  const inactiveCount = totalCount - activeCount;
+
+  // Filter data based on search and active tab and sort
+  const filteredData = useMemo(() => {
+    const list = seasonal.filter((s) => {
+      const active = s.isdisplay !== false;
+      const statusMatches =
+        statusFilter === "ALL" ||
+        (statusFilter === "ACTIVE" && active) ||
+        (statusFilter === "INACTIVE" && !active);
+
+      if (!statusMatches) return false;
+
+      const query = search.trim().toLowerCase();
+      if (!query) return true;
+
+      return (
+        s.name.toLowerCase().includes(query) ||
+        s.season?.toLowerCase().includes(query)
+      );
+    });
+
+    return list.sort((a, b) => {
+      if (sortMode === "A_Z") return (a.name || "").localeCompare(b.name || "", "km");
+      if (sortMode === "Z_A") return (b.name || "").localeCompare(a.name || "", "km");
+      const timeA = (a as any).createdAt ? new Date((a as any).createdAt).getTime() : 0;
+      const timeB = (b as any).createdAt ? new Date((b as any).createdAt).getTime() : 0;
+      return sortMode === "NEWEST" ? timeB - timeA : timeA - timeB;
+    });
+  }, [seasonal, search, statusFilter, sortMode]);
 
   const handleSubmit = async (values: Omit<SeasonalFoodImage, "id">) => {
     if (editingItem) await updateSeasonal({ id: editingItem.id, changes: values });
@@ -45,59 +92,163 @@ export default function SeasonalFoodPage() {
     setIsModalOpen(false);
   };
 
+  const statusTabs = [
+    { value: "ALL" as const, label: "ទាំងអស់", count: totalCount },
+    { value: "ACTIVE" as const, label: "សកម្ម", count: activeCount },
+    { value: "INACTIVE" as const, label: "អសកម្ម", count: inactiveCount },
+  ];
+
   return (
-    <div className="   space-y-8">
+    <div className="space-y-6">
       <SeasonalFoodBanner
         total={seasonal.length}
         activeCount={activeCount}
-        pendingCount={pendingCount}
+        pendingCount={inactiveCount}
         onAddNew={() => {
           setEditingItem(null);
           setIsModalOpen(true);
         }}
       />
 
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        {/* Dynamic Filter Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 -mx-1 px-1">
-          <button
-            onClick={() => setActiveFilter("all")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeFilter === "all"
-              ? "bg-[#136C34] text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-          >
-            ទាំងអស់ (All)
-          </button>
-
-          {availableSeasons.map((season) => (
-            <button
-              key={season}
-              onClick={() => setActiveFilter(season)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeFilter === season
-                ? "bg-[#136C34] text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+      {/* Tabs + Controls Toolbar */}
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        {/* Status Tabs */}
+        <div className="flex w-full min-w-0 gap-2 overflow-x-auto pb-1 xl:w-auto">
+          {statusTabs.map((tab) => {
+            const active = statusFilter === tab.value;
+            return (
+              <button
+                key={tab.value}
+                type="button"
+                onClick={() => setStatusFilter(tab.value)}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
+                  active
+                    ? "bg-primary-800 text-white"
+                    : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
                 }`}
-            >
-              {SEASON_LABELS[season] || season}
-            </button>
-          ))}
+              >
+                {tab.label}
+                <span
+                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
+                    active ? "bg-white/20 text-white" : "bg-white text-gray-500"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="relative w-full lg:w-72 shrink-0">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="ស្វែងរកតាមចំណងជើង..."
-            className="w-full pl-9 pr-3 py-2 text-sm sm:text-base border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
-          />
+        {/* Search + Controls */}
+        <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center xl:w-auto">
+          {/* Search Input */}
+          <div className="relative min-w-0 flex-1 sm:min-w-[340px]">
+            <Search
+              size={20}
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+            />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="ស្វែងរក រូបអាហារតាមរដូវកាល..."
+              className="h-[52px] w-full rounded-full border border-gray-200 bg-gray-50 pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                aria-label="Clear search"
+                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
+
+          {/* Page size */}
+          <div ref={sizeRef} className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setSizeOpen((prev) => !prev);
+                setSortOpen(false);
+              }}
+              className="flex h-[52px] min-w-[150px] items-center justify-between gap-3 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-700 transition hover:border-primary-200 hover:bg-primary-50"
+            >
+              {size} / ទំព័រ
+              <ChevronDown size={18} />
+            </button>
+
+            {sizeOpen && (
+              <div className="absolute right-0 top-[60px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                {[10, 20, 50].map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setSize(value);
+                      setSizeOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg transition ${
+                      size === value
+                        ? "bg-primary-50 font-medium text-primary-800"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {value} / ទំព័រ
+                    {size === value && <Check size={18} />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Sort */}
+          <div ref={sortRef} className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setSortOpen((prev) => !prev);
+                setSizeOpen(false);
+              }}
+              aria-label="Sort"
+              title="Sort"
+              className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800"
+            >
+              <ArrowUpDown size={20} />
+            </button>
+
+            {sortOpen && (
+              <div className="absolute right-0 top-[60px] z-[100] w-[210px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                {sortOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      setSortMode(option.value);
+                      setSortOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg transition ${
+                      sortMode === option.value
+                        ? "bg-primary-50 font-medium text-primary-800"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {option.label}
+                    {sortMode === option.value && <Check size={18} />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <SeasonalFoodTable
         data={filteredData}
+        pageSize={size}
         onEdit={(item) => {
           setEditingItem(item);
           setIsModalOpen(true);

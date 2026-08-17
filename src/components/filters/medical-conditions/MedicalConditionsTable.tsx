@@ -131,12 +131,17 @@ export default function MedicalConditionsTable({
 
                 <td className="px-6 py-5">
                   <span
-                    className={`inline-flex rounded-full px-3 py-1 text-lg ${
+                    className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-lg font-medium ring-1 ring-inset ${
                       item.active
-                        ? "bg-primary-50 text-primary-700"
-                        : "bg-gray-100 text-gray-500"
+                        ? "bg-primary-50 text-primary-700 ring-primary-100"
+                        : "bg-gray-100 text-gray-500 ring-gray-200"
                     }`}
                   >
+                    <span
+                      className={`h-2 w-2 rounded-full ${
+                        item.active ? "bg-primary-600" : "bg-gray-400"
+                      }`}
+                    />
                     {item.active
                       ? "សកម្ម"
                       : "អសកម្ម"}

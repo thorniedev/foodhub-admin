@@ -45,7 +45,7 @@ export default function BannersHeader({
 
             <div className="min-w-0">
               <p className="text-5xl font-bold text-accent-400">
-                ការគ្រប់គ្រងខ្លឹមសារថាមវន្ត
+                ការគ្រប់គ្រងរូបបែនណឺ
               </p>
 
               <p className="mt-6 max-w-3xl text-xl leading-8 text-white/85">

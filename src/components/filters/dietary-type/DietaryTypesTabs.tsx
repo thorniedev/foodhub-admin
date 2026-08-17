@@ -45,7 +45,7 @@ export default function DietaryTypesTabs({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full min-w-0 gap-2 overflow-x-auto pb-1 xl:w-auto">
       {tabs.map((tab) => {
         const selected =
           value === tab.value;
@@ -60,7 +60,7 @@ export default function DietaryTypesTabs({
             className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
               selected
                 ? "bg-primary-800 text-white"
-                : "bg-white text-gray-500 hover:bg-primary-50 hover:text-primary-800"
+                : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
             }`}
           >
             {tab.label}
@@ -69,7 +69,7 @@ export default function DietaryTypesTabs({
               className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
                 selected
                   ? "bg-white/20 text-white"
-                  : "bg-gray-100 text-gray-500"
+                  : "bg-white text-gray-500"
               }`}
             >
               {counts[tab.value]}
