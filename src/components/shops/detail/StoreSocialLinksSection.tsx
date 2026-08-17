@@ -1,5 +1,4 @@
 import { ExternalLink, Share2 } from "lucide-react";
-
 import type { StoreSocialLink } from "@/src/types/shop";
 import { Section } from "./StoreOverviewSection";
 
@@ -9,9 +8,9 @@ export default function StoreSocialLinksSection({
   links: StoreSocialLink[];
 }) {
   return (
-    <Section title={`Social links (${links.length})`} icon={<Share2 size={20} />}>
+    <Section title={`Social links (${links.length})`} icon={<Share2 size={24} />}>
       {links.length === 0 ? (
-        <div className="rounded-2xl bg-gray-50 p-8 text-center text-base text-gray-400">
+        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-8 text-center text-lg text-gray-400">
           No social links
         </div>
       ) : (
@@ -26,13 +25,13 @@ export default function StoreSocialLinksSection({
                 href={link.profileUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3 transition hover:bg-emerald-50"
+                className="flex items-center justify-between rounded-2xl border border-gray-100 bg-gray-50/70 px-5 py-4 transition hover:border-gray-200 hover:bg-gray-50"
               >
                 <div className="min-w-0">
-                  <p className="text-lg text-gray-800">{link.platform}</p>
-                  <p className="truncate text-base text-gray-400">{link.profileUrl}</p>
+                  <p className="text-xl font-bold text-gray-900">{link.platform}</p>
+                  <p className="mt-1 truncate text-lg text-gray-500">{link.profileUrl}</p>
                 </div>
-                <ExternalLink size={18} className="text-[#137A3D]" />
+                <ExternalLink size={20} className="text-emerald-700" />
               </a>
             ))}
         </div>

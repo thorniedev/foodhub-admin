@@ -6,7 +6,7 @@ import StoreMediaImage from "./StoreMediaImage";
 
 export default function StoreMediaSection({ store }: { store: Store }) {
   return (
-    <Section title="Store media" icon={<ImageIcon size={20} />}>
+    <Section title="Store media" icon={<ImageIcon size={24} />}>
       <div className="grid gap-4 sm:grid-cols-2">
         <MediaCard
           title="Logo"
@@ -37,8 +37,8 @@ function MediaCard({
   type: "logo" | "cover";
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
-      <div className="h-48 bg-gray-50">
+    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:border-gray-200">
+      <div className="h-48 bg-gray-50/70">
         <StoreMediaImage
           mediaUuid={mediaUuid}
           alt={alt}
@@ -52,14 +52,14 @@ function MediaCard({
 
       <div className="border-t border-gray-100 p-4">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-lg text-gray-900">{title}</p>
+          <p className="text-xl font-bold text-gray-900">{title}</p>
           {mediaUuid && (
-            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-sm text-emerald-700">
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-lg font-semibold text-emerald-700">
               Uploaded
             </span>
           )}
         </div>
-        <p className="mt-2 text-sm text-gray-400">
+        <p className="mt-2 text-lg text-gray-500">
           {mediaUuid ? "Media connected" : `No ${title.toLowerCase()} uploaded`}
         </p>
       </div>

@@ -482,7 +482,7 @@ export default function ShopsManager() {
         ) : error ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
             <AlertTriangle size={38} className="text-red-400" />
-            <h3 className="mt-4 text-xl font-black">មិនអាចទាញយក Store បានទេ</h3>
+            <p className="mt-4 text-xl font-black text-gray-900">មិនអាចទាញយក Store បានទេ</p>
             <p className="mt-2 text-base text-gray-500">
               {getShopApiErrorMessage(error)}
             </p>

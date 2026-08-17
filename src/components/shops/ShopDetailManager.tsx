@@ -149,9 +149,9 @@ export default function ShopDetailManager({
               <AlertTriangle size={32} className="text-red-500" />
             </div>
 
-            <h1 className="mt-5 text-2xl font-black text-gray-900">
+            <p className="mt-5 text-2xl font-black text-gray-900">
               Invalid Store UUID
-            </h1>
+            </p>
 
             <p className="mt-3 text-sm leading-6 text-gray-500">
               The Store UUID was not received correctly from the URL.
@@ -210,9 +210,9 @@ export default function ShopDetailManager({
               <AlertTriangle size={32} className="text-red-500" />
             </div>
 
-            <h1 className="mt-5 text-2xl font-black text-gray-900">
+            <p className="mt-5 text-2xl font-black text-gray-900">
               មិនអាចទាញយក Store detail
-            </h1>
+            </p>
 
             <p className="mt-3 text-sm leading-6 text-gray-500">
               {getShopApiErrorMessage(storeError)}

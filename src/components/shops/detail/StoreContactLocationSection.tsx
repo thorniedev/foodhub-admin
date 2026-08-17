@@ -1,14 +1,7 @@
 import type { ReactNode } from "react";
-
-import { ExternalLink, Mail, MapPin, Phone } from "lucide-react";
-
+import { ExternalLink, Mail, MapPin, Phone, Compass, Building, Navigation } from "lucide-react";
 import type { Store } from "@/src/types/shop";
-
 import { Section } from "./StoreOverviewSection";
-
-/* =========================================================
-   STORE CONTACT & LOCATION
-========================================================= */
 
 export default function StoreContactLocationSection({
   store,
@@ -16,68 +9,73 @@ export default function StoreContactLocationSection({
   store: Store;
 }) {
   return (
-    <Section title="Contact & location" icon={<MapPin size={22} />}>
-      <div className="space-y-3">
-        <Row
-          label="Address"
-          value={store.addressLine}
-          icon={<MapPin size={19} />}
+    <Section title="Contact & location" icon={<MapPin size={24} />}>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="col-span-full rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
+          <p className="flex items-center gap-1.5 text-lg font-bold uppercase tracking-wider text-gray-400">
+            <MapPin size={18} />
+            Address line
+          </p>
+          <p className="mt-2 text-xl font-bold text-gray-900">
+            {store.addressLine || "—"}
+          </p>
+        </div>
+
+        <ContactCard
+          label="Commune"
+          value={store.commune || "—"}
+          icon={<Building size={18} />}
         />
 
-        <Row label="Commune" value={store.commune ?? "—"} />
+        <ContactCard
+          label="District"
+          value={store.district || "—"}
+          icon={<Building size={18} />}
+        />
 
-        <Row label="District" value={store.district ?? "—"} />
+        <ContactCard
+          label="City"
+          value={store.city || "—"}
+          icon={<Building size={18} />}
+        />
 
-        <Row label="City" value={store.city ?? "—"} />
+        <ContactCard
+          label="Province"
+          value={store.province || "—"}
+          icon={<Building size={18} />}
+        />
 
-        <Row label="Province" value={store.province ?? "—"} />
+        <ContactCard
+          label="Postal code"
+          value={store.postalCode || "—"}
+          icon={<Navigation size={18} />}
+        />
 
-        <Row label="Postal code" value={store.postalCode ?? "—"} />
-
-        <Row
+        <ContactCard
           label="Phone"
-          value={store.phoneNumber ?? "—"}
-          icon={<Phone size={19} />}
+          value={store.phoneNumber || "—"}
+          icon={<Phone size={18} />}
         />
 
-        <Row
+        <ContactCard
           label="Email"
-          value={store.email ?? "—"}
-          icon={<Mail size={19} />}
+          value={store.email || "—"}
+          icon={<Mail size={18} />}
         />
 
-        <Row
+        <ContactCard
           label="Coordinates"
-          value={`${store.latitude}, ${store.longitude}`}
-          mono
+          value={`${store.latitude ?? "—"}, ${store.longitude ?? "—"}`}
+          icon={<Compass size={18} />}
         />
 
-        {/* Google Maps */}
-        <div className="pt-2">
+        {/* Google Maps Button Full Width */}
+        <div className="col-span-full pt-1">
           <a
             href={`https://www.google.com/maps?q=${store.latitude},${store.longitude}`}
             target="_blank"
             rel="noreferrer"
-            className="
-              inline-flex
-              min-h-12
-              items-center
-              justify-center
-              gap-2
-              rounded-full
-              border
-              border-secondary-200
-              bg-secondary-50
-              px-5
-              text-lg
-              font-medium
-              text-secondary-700
-              transition
-              hover:bg-secondary-100
-              focus:outline-none
-              focus:ring-4
-              focus:ring-secondary-100
-            "
+            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-secondary-200 bg-secondary-50 px-5 text-lg font-bold text-secondary-700 transition hover:bg-secondary-100 focus:outline-none focus:ring-4 focus:ring-secondary-100"
           >
             <ExternalLink size={19} />
             Open coordinates in Google Maps
@@ -88,84 +86,22 @@ export default function StoreContactLocationSection({
   );
 }
 
-/* =========================================================
-   ROW
-========================================================= */
-
-function Row({
+function ContactCard({
   label,
   value,
   icon,
-  mono = false,
 }: {
   label: string;
   value: string;
   icon?: ReactNode;
-  mono?: boolean;
 }) {
   return (
-    <div
-      className="
-        grid
-        min-w-0
-        gap-2
-        rounded-2xl
-        border
-        border-gray-100
-        bg-gray-50/60
-        px-4
-        py-3.5
-        transition
-        hover:border-gray-200
-        hover:bg-gray-50
-        sm:grid-cols-[170px_1fr]
-        sm:items-center
-      "
-    >
-      {/* Label */}
-      <div
-        className="
-          flex
-          items-center
-          gap-2
-          text-lg
-          font-medium
-          text-gray-500
-        "
-      >
-        {icon && (
-          <span
-            className="
-              flex
-              h-8
-              w-8
-              shrink-0
-              items-center
-              justify-center
-              rounded-lg
-              bg-primary-50
-              text-primary-800
-            "
-          >
-            {icon}
-          </span>
-        )}
-
-        <span>{label}</span>
-      </div>
-
-      {/* Value */}
-      <p
-        className={`
-          min-w-0
-          break-words
-          text-lg
-          font-medium
-          text-gray-800
-          ${mono ? "font-mono text-base" : ""}
-        `}
-        title={value}
-      >
+    <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
+      <p className="flex items-center gap-1.5 text-lg font-bold uppercase tracking-wider text-gray-400">
+        {icon}
+        {label}
+      </p>
+      <p className="mt-2 truncate text-xl font-bold text-gray-900" title={value}>
         {value}
       </p>
     </div>

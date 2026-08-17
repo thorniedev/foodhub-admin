@@ -1,14 +1,7 @@
 import type { ReactNode } from "react";
-
-import { Building2, DollarSign, ShieldCheck } from "lucide-react";
-
+import { Building2, DollarSign, Globe, MapPin, ShieldCheck, Tag, Clock, CheckCircle } from "lucide-react";
 import type { Store } from "@/src/types/shop";
-
 import { formatPriceLevel, formatRating } from "@/src/lib/shopFormat";
-
-/* =========================================================
-   SECTION
-========================================================= */
 
 export function Section({
   title,
@@ -20,47 +13,13 @@ export function Section({
   children: ReactNode;
 }) {
   return (
-    <section
-      className="
-        rounded-2xl
-        border
-        border-gray-100
-        bg-white
-        p-5
-        sm:p-6
-      "
-    >
-      <div
-        className="
-          mb-6
-          flex
-          items-center
-          gap-3
-        "
-      >
-        <div
-          className="
-            flex
-            h-11
-            w-11
-            shrink-0
-            items-center
-            justify-center
-            rounded-xl
-            bg-primary-50
-            text-primary-800
-          "
-        >
+    <section className="rounded-[32px] border border-gray-100 bg-white p-6 shadow-sm sm:p-7">
+      <div className="mb-6 flex items-center gap-3.5">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
           {icon}
         </div>
 
-        <p
-          className="
-            text-2xl
-            font-semibold
-            text-primary-800
-          "
-        >
+        <p className="text-2xl font-bold text-gray-900 sm:text-3xl">
           {title}
         </p>
       </div>
@@ -70,41 +29,41 @@ export function Section({
   );
 }
 
-/* =========================================================
-   STORE OVERVIEW
-========================================================= */
-
 export default function StoreOverviewSection({ store }: { store: Store }) {
   return (
-    <Section title="Store overview" icon={<Building2 size={22} />}>
-      <div
-        className="
-          grid
-          gap-4
-          sm:grid-cols-2
-        "
-      >
-        <Info label="Store name" value={store.storeName} />
+    <Section title="Store overview" icon={<Building2 size={24} />}>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <InfoCard
+          label="Store name"
+          value={store.storeName || "—"}
+          icon={<Tag size={18} />}
+        />
 
-        <Info label="Country" value={store.countryCode} />
+        <InfoCard
+          label="Country"
+          value={store.countryCode || "—"}
+          icon={<Globe size={18} />}
+        />
 
-        <Info
+        <InfoCard
           label="Price level"
           value={formatPriceLevel(store.priceLevel)}
-          icon={<DollarSign size={20} />}
-          accent
+          icon={<DollarSign size={18} />}
         />
 
-        <Info
+        <InfoCard
           label="Hygiene rating"
           value={formatRating(store.hygieneRating)}
-          icon={<ShieldCheck size={20} />}
-          accent
+          icon={<ShieldCheck size={18} />}
         />
 
-        <Info label="Timezone" value={store.timezone} />
+        <InfoCard
+          label="Timezone"
+          value={store.timezone || "—"}
+          icon={<Clock size={18} />}
+        />
 
-        <Info
+        <InfoCard
           label="Open now"
           value={
             store.isOpenNow === null
@@ -113,6 +72,7 @@ export default function StoreOverviewSection({ store }: { store: Store }) {
                 ? "Yes"
                 : "No"
           }
+          icon={<CheckCircle size={18} />}
           status={
             store.isOpenNow === true
               ? "success"
@@ -121,132 +81,50 @@ export default function StoreOverviewSection({ store }: { store: Store }) {
                 : "default"
           }
         />
-      </div>
 
-      {/* Description */}
-      <div
-        className="
-          mt-5
-          rounded-2xl
-          border
-          border-gray-100
-          bg-gray-50/60
-          px-5
-          py-4
-        "
-      >
-        <p
-          className="
-            text-lg
-            font-medium
-            text-primary-800
-          "
-        >
-          Description
-        </p>
+        {/* Description Full Width */}
+        <div className="col-span-full rounded-2xl border border-gray-100 bg-gray-50/70 p-5 transition hover:bg-gray-50">
+          <p className="text-lg font-bold uppercase tracking-wider text-gray-400">
+            Description
+          </p>
 
-        <p
-          className="
-            mt-2
-            whitespace-pre-wrap
-            text-lg
-            leading-8
-            text-gray-600
-          "
-        >
-          {store.description || "—"}
-        </p>
+          <p className="mt-2 whitespace-pre-wrap text-lg font-medium leading-relaxed text-gray-800">
+            {store.description || "—"}
+          </p>
+        </div>
       </div>
     </Section>
   );
 }
 
-/* =========================================================
-   INFO
-========================================================= */
-
-function Info({
+function InfoCard({
   label,
   value,
   icon,
-  accent = false,
   status = "default",
 }: {
   label: string;
   value: string;
   icon?: ReactNode;
-  accent?: boolean;
   status?: "default" | "success" | "danger";
 }) {
-  const valueStyle =
+  const valueColor =
     status === "success"
-      ? "text-primary-700"
+      ? "text-emerald-600"
       : status === "danger"
         ? "text-red-600"
-        : "text-gray-800";
+        : "text-gray-900";
 
   return (
-    <div
-      className="
-        flex
-        min-w-0
-        items-center
-        gap-4
-        rounded-2xl
-        border
-        border-gray-100
-        bg-gray-50/60
-        p-4
-        transition
-        hover:border-gray-200
-        hover:bg-gray-50
-      "
-    >
-      {icon && (
-        <div
-          className={`
-            flex
-            h-11
-            w-11
-            shrink-0
-            items-center
-            justify-center
-            rounded-xl
-            ${
-              accent
-                ? "bg-secondary-50 text-secondary-600"
-                : "bg-primary-50 text-primary-800"
-            }
-          `}
-        >
-          {icon}
-        </div>
-      )}
+    <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
+      <p className="flex items-center gap-1.5 text-lg font-bold uppercase tracking-wider text-gray-400">
+        {icon}
+        {label}
+      </p>
 
-      <div className="min-w-0 flex-1">
-        <p
-          className="
-            text-lg
-            font-medium
-            text-gray-500
-          "
-        >
-          {label}
-        </p>
-
-        <p
-          className={`
-            mt-1
-            truncate
-            text-lg
-            font-semibold
-            ${valueStyle}
-          `}
-          title={value}
-        >
-          {value}
-        </p>
-      </div>
+      <p className={`mt-2 truncate text-xl font-bold ${valueColor}`} title={value}>
+        {value}
+      </p>
     </div>
   );
 }
