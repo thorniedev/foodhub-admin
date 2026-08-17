@@ -98,6 +98,16 @@ export interface AdminUser {
   lastLoginAt: string | null;
   createdAt: string;
   updatedAt: string;
+  avatarMediaUuid?: string | null;
+  avatarUrl?: string | null;
+  profileImage?: string | null;
+  profilePicture?: string | null;
+  picture?: string | null;
+  image?: string | null;
+  imageUrl?: string | null;
+  avatar?: string | null;
+  defaultProfile?: AdminProfile | null;
+  profiles?: AdminProfile[] | null;
 }
 
 export interface CreateAdminUserPayload {

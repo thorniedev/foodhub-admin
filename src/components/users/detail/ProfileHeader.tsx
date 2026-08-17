@@ -2,7 +2,8 @@ import { RotateCcw, Trash2 } from "lucide-react";
 
 import type { AdminProfile } from "@/src/types/userProfile";
 
-import { humanizeEnum, initials } from "@/src/lib/userProfileFormat";
+import { humanizeEnum } from "@/src/lib/userProfileFormat";
+import UserAvatar from "../UserAvatar";
 
 interface ProfileHeaderProps {
   profile: AdminProfile;
@@ -23,9 +24,11 @@ export default function ProfileHeader({
 
       <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 items-center gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl font-bold text-primary-800">
-            {initials(profile.profileName)}
-          </div>
+          <UserAvatar
+            name={profile.profileName}
+            avatarMediaUuid={profile.avatarMediaUuid}
+            containerClassName="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white text-2xl font-bold text-primary-800"
+          />
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">

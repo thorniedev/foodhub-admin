@@ -17,6 +17,7 @@ import {
   useCreateMedicalConditionMutation,
   useDeleteMedicalConditionMutation,
   useGetMedicalConditionsQuery,
+  useHardDeleteMedicalConditionMutation,
   useRestoreMedicalConditionMutation,
   useUpdateMedicalConditionMutation,
 } from "@/src/app/store/medicalConditionApi";
@@ -34,6 +35,8 @@ import {
 } from "@/src/types/safetyResource";
 
 import DeleteMedicalConditionConfirmModal from "./DeleteMedicalConditionConfirmModal";
+import HardDeleteMedicalConditionConfirmModal from "./HardDeleteMedicalConditionConfirmModal";
+import MedicalConditionDetailModal from "./MedicalConditionDetailModal";
 import MedicalConditionFormModal from "./MedicalConditionFormModal";
 import MedicalConditionsHeader from "./MedicalConditionsHeader";
 import MedicalConditionsPagination from "./MedicalConditionsPagination";
@@ -107,10 +110,20 @@ export default function MedicalConditionManager() {
       null,
     );
 
+  const [viewing, setViewing] =
+    useState<MedicalCondition | null>(
+      null,
+    );
+
   const [formOpen, setFormOpen] =
     useState(false);
 
   const [deleting, setDeleting] =
+    useState<MedicalCondition | null>(
+      null,
+    );
+
+  const [hardDeletingItem, setHardDeletingItem] =
     useState<MedicalCondition | null>(
       null,
     );
@@ -167,6 +180,12 @@ export default function MedicalConditionManager() {
     { isLoading: isDeleting },
   ] =
     useDeleteMedicalConditionMutation();
+
+  const [
+    hardDeleteItem,
+    { isLoading: isHardDeleting },
+  ] =
+    useHardDeleteMedicalConditionMutation();
 
   const [
     restoreItem,
@@ -509,6 +528,43 @@ export default function MedicalConditionManager() {
           text:
             getApiErrorMessage(
               deleteError,
+            ),
+        });
+      }
+    };
+
+  /* =======================================================
+     HARD DELETE
+  ======================================================= */
+
+  const handleHardDelete =
+    async () => {
+      if (!hardDeletingItem) {
+        return;
+      }
+
+      try {
+        await hardDeleteItem(
+          hardDeletingItem.code,
+        ).unwrap();
+
+        setMessage({
+          type: "success",
+          text: `បានលុបស្ថានភាពសុខភាព "${hardDeletingItem.name}" ជាអចិន្ត្រៃយ៍ដោយជោគជ័យ។`,
+        });
+
+        setHardDeletingItem(null);
+
+        await refetch();
+      } catch (
+        hardDeleteError
+      ) {
+        setMessage({
+          type: "error",
+
+          text:
+            getApiErrorMessage(
+              hardDeleteError,
             ),
         });
       }
@@ -1078,7 +1134,24 @@ export default function MedicalConditionManager() {
               sortedItems
             }
             disabled={
-              busy
+              isCreating ||
+              isUpdating ||
+              isDeleting ||
+              isRestoring
+            }
+            onView={(
+              item,
+            ) =>
+              setViewing(
+                item,
+              )
+            }
+            onHardDelete={(
+              item,
+            ) =>
+              setHardDeletingItem(
+                item,
+              )
             }
             onEdit={(
               item,
@@ -1182,6 +1255,42 @@ export default function MedicalConditionManager() {
         }}
         onConfirm={
           handleDelete
+        }
+      />
+
+      {/* =================================================
+          HARD DELETE
+      ================================================== */}
+
+      <HardDeleteMedicalConditionConfirmModal
+        item={hardDeletingItem}
+        deleting={
+          isHardDeleting
+        }
+        onClose={() => {
+          if (
+            !isHardDeleting
+          ) {
+            setHardDeletingItem(
+              null,
+            );
+          }
+        }}
+        onConfirm={
+          handleHardDelete
+        }
+      />
+
+      {/* =================================================
+          DETAIL VIEW
+      ================================================== */}
+
+      <MedicalConditionDetailModal
+        item={viewing}
+        onClose={() =>
+          setViewing(
+            null,
+          )
         }
       />
     </div>

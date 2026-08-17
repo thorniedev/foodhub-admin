@@ -68,6 +68,7 @@ export const baseApi = createApi({
     "Cuisine",
     "FoodCategory",
     "MealType",
+    "WeatherCondition",
   ],
 
   endpoints: () => ({}),

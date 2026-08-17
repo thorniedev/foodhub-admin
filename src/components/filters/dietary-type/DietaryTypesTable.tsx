@@ -1,4 +1,6 @@
 import {
+  AlertOctagon,
+  Eye,
   Pencil,
   RotateCcw,
   Salad,
@@ -14,10 +16,16 @@ import {
 type Props = {
   items: DietaryType[];
   disabled?: boolean;
+  onView: (
+    item: DietaryType,
+  ) => void;
   onEdit: (
     item: DietaryType,
   ) => void;
   onDelete: (
+    item: DietaryType,
+  ) => void;
+  onHardDelete?: (
     item: DietaryType,
   ) => void;
   onRestore: (
@@ -28,8 +36,10 @@ type Props = {
 export default function DietaryTypesTable({
   items,
   disabled = false,
+  onView,
   onEdit,
   onDelete,
+  onHardDelete,
   onRestore,
 }: Props) {
   return (
@@ -133,6 +143,16 @@ export default function DietaryTypesTable({
                   <button
                     type="button"
                     disabled={disabled}
+                    onClick={() => onView(item)}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
+                    title="មើលព័ត៌មានលម្អិត"
+                  >
+                    <Eye size={20} />
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={disabled}
                     onClick={() =>
                       onEdit(item)
                     }
@@ -149,7 +169,7 @@ export default function DietaryTypesTable({
                       onClick={() =>
                         onDelete(item)
                       }
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
                       title="បិទ"
                     >
                       <Trash2 size={20} />
@@ -165,6 +185,18 @@ export default function DietaryTypesTable({
                       title="ស្ដារ"
                     >
                       <RotateCcw size={20} />
+                    </button>
+                  )}
+
+                  {onHardDelete && (
+                    <button
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => onHardDelete(item)}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      title="លុបជាអចិន្ត្រៃយ៍ (Hard Delete)"
+                    >
+                      <AlertOctagon size={20} />
                     </button>
                   )}
                 </div>

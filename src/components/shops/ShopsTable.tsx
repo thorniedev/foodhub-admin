@@ -921,7 +921,7 @@
 
 import Link from "next/link";
 
-import { Eye, MapPin, Pencil, Settings2 } from "lucide-react";
+import { Eye, MapPin, Pencil, Settings2, Trash2 } from "lucide-react";
 
 import type { Store, StoreStatusAction } from "@/src/types/shop";
 
@@ -939,11 +939,13 @@ export default function ShopsTable({
   disabled = false,
   onEdit,
   onStatus,
+  onDelete,
 }: {
   stores: Store[];
   disabled?: boolean;
   onEdit: (store: Store) => void;
   onStatus: (store: Store, action: StoreStatusAction) => void;
+  onDelete?: (store: Store) => void;
 }) {
   return (
     <div
@@ -1335,6 +1337,35 @@ export default function ShopsTable({
                     >
                       <Settings2 size={20} />
                     </button>
+
+                    {/* Delete */}
+                    {onDelete && (
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => onDelete(store)}
+                        className="
+                          flex
+                          h-10
+                          w-10
+                          items-center
+                          justify-center
+                          rounded-xl
+                          text-red-500
+                          transition
+                          hover:bg-red-50
+                          hover:text-red-600
+                          focus:outline-none
+                          focus:ring-4
+                          focus:ring-red-100
+                          disabled:cursor-not-allowed
+                          disabled:opacity-40
+                        "
+                        title="លុប Store"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

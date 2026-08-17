@@ -35,12 +35,13 @@ import {
   getIngredientApiErrorMessage,
 } from "@/src/lib/ingredientApiError";
 
+import DeleteIngredientConfirmModal from "./DeleteIngredientConfirmModal";
+import IngredientDetailModal from "./IngredientDetailModal";
 import IngredientFormModal from "./IngredientFormModal";
 import IngredientsHeader from "./IngredientsHeader";
 import IngredientsPagination from "./IngredientsPagination";
 import IngredientsTable from "./IngredientsTable";
 import IngredientsTabs from "./IngredientsTabs";
-import DeleteIngredientConfirmModal from "./DeleteIngredientConfirmModal";
 
 type SortMode =
   | "A_Z"
@@ -170,6 +171,14 @@ export default function IngredientManager() {
   const [
     editing,
     setEditing,
+  ] =
+    useState<Ingredient | null>(
+      null,
+    );
+
+  const [
+    viewing,
+    setViewing,
   ] =
     useState<Ingredient | null>(
       null,
@@ -1160,9 +1169,14 @@ const {
               items={
                 displayedItems
               }
-              disabled={
-                busy
-              }
+              disabled={busy}
+              onView={(
+                item,
+              ) => {
+                setViewing(
+                  item,
+                );
+              }}
               onEdit={(
                 item,
               ) => {
@@ -1266,6 +1280,17 @@ const {
         }}
         onConfirm={() =>
           void handleDelete()
+        }
+      />
+
+      {/* DETAIL VIEW */}
+
+      <IngredientDetailModal
+        item={viewing}
+        onClose={() =>
+          setViewing(
+            null,
+          )
         }
       />
     </div>

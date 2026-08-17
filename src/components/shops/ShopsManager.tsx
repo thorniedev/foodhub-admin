@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 import {
-  useGetShopByUuidQuery,
+  useDeleteShopMutation,
   useGetShopsQuery,
   useUpdateShopMutation,
 } from "@/src/app/store/shop/shopApi";
@@ -25,6 +25,7 @@ import type {
 } from "@/src/types/shop";
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
 
+import DeleteShopConfirmModal from "./DeleteShopConfirmModal";
 import ShopEditModal from "./ShopEditModal";
 import ShopsHeader from "./ShopsHeader";
 import ShopsPagination from "./ShopsPagination";
@@ -49,12 +50,8 @@ export default function ShopsManager() {
   const [sortBy, setSortBy] = useState<StoreSort>("NAME_ASC");
   const [sortOpen, setSortOpen] = useState(false);
 
-  /*
-   * The list endpoint returns store summaries, which omit social links, hours
-   * and several editable fields. Edit therefore works off the store detail,
-   * fetched by uuid, so saving never blanks data the row never carried.
-   */
-  const [editingUuid, setEditingUuid] = useState<string | null>(null);
+  const [editing, setEditing] = useState<StoreType | null>(null);
+  const [deletingStore, setDeletingStore] = useState<StoreType | null>(null);
   const [statusStore, setStatusStore] = useState<StoreType | null>(null);
   const [statusAction, setStatusAction] = useState<StoreStatusAction>("REVIEW");
   const [notice, setNotice] = useState<{
@@ -89,6 +86,7 @@ export default function ShopsManager() {
   } = useGetShopByUuidQuery(editingUuid ?? "", { skip: !editingUuid });
 
   const [updateShop, { isLoading: updating }] = useUpdateShopMutation();
+  const [deleteShop, { isLoading: deleting }] = useDeleteShopMutation();
 
   useEffect(() => {
     const cleanValue = searchInput.trim();
@@ -202,6 +200,20 @@ export default function ShopsManager() {
       await updateShop({ storeUuid: editingUuid, body: values }).unwrap();
       setEditingUuid(null);
       setNotice({ type: "success", text: "បានកែប្រែ Store ដោយជោគជ័យ។" });
+      await refetch();
+    } catch (requestError) {
+      setNotice({ type: "error", text: getShopApiErrorMessage(requestError) });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingStore) return;
+
+    try {
+      setNotice(null);
+      await deleteShop(deletingStore.uuid).unwrap();
+      setDeletingStore(null);
+      setNotice({ type: "success", text: "បានលុប Store ដោយជោគជ័យ។" });
       await refetch();
     } catch (requestError) {
       setNotice({ type: "error", text: getShopApiErrorMessage(requestError) });
@@ -496,12 +508,13 @@ export default function ShopsManager() {
         ) : (
           <ShopsTable
             stores={sortedStores}
-            disabled={updating || isFetching}
-            onEdit={(store) => setEditingUuid(store.uuid)}
+            disabled={updating || deleting || isFetching}
+            onEdit={setEditing}
             onStatus={(store, action) => {
               setStatusStore(store);
               setStatusAction(action);
             }}
+            onDelete={(store) => setDeletingStore(store)}
           />
         )}
 
@@ -565,6 +578,16 @@ export default function ShopsManager() {
         onChanged={async () => {
           await refetch();
         }}
+      />
+
+      <DeleteShopConfirmModal
+        store={deletingStore}
+        open={Boolean(deletingStore)}
+        loading={deleting}
+        onClose={() => {
+          if (!deleting) setDeletingStore(null);
+        }}
+        onConfirm={handleDelete}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import {
+  AlertOctagon,
   ArrowLeft,
   Mail,
   Pencil,
@@ -10,19 +11,17 @@ import {
 
 import type { AdminUser } from "@/src/types/userProfile";
 
-import {
-  displayName,
-  formatDateTime,
-  initials,
-} from "@/src/lib/userProfileFormat";
+import { displayName, formatDateTime } from "@/src/lib/userProfileFormat";
 
 import { StatusBadge } from "./UsersTable";
+import UserAvatar from "./UserAvatar";
 
 interface UserDetailHeaderProps {
   user: AdminUser;
   busy?: boolean;
   onStatusEdit: () => void;
   onDelete: () => void;
+  onHardDelete?: () => void;
 }
 
 export default function UserDetailHeader({
@@ -30,12 +29,27 @@ export default function UserDetailHeader({
   busy = false,
   onStatusEdit,
   onDelete,
+  onHardDelete,
 }: UserDetailHeaderProps) {
   const name = displayName(
     user.firstName,
     user.lastName,
     user.username,
   );
+
+  const avatarMediaUuid =
+    user.avatarMediaUuid ||
+    user.defaultProfile?.avatarMediaUuid ||
+    user.profiles?.[0]?.avatarMediaUuid;
+
+  const imageUrl =
+    user.avatarUrl ||
+    user.profileImage ||
+    user.profilePicture ||
+    user.picture ||
+    user.imageUrl ||
+    user.image ||
+    user.avatar;
 
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
@@ -53,9 +67,12 @@ export default function UserDetailHeader({
 
         <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 items-center gap-4">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[24px] bg-white text-2xl font-bold text-primary-800 shadow-sm">
-              {initials(name)}
-            </div>
+            <UserAvatar
+              name={name}
+              avatarMediaUuid={avatarMediaUuid}
+              imageUrl={imageUrl}
+              containerClassName="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[24px] bg-white text-2xl font-bold text-primary-800 shadow-sm"
+            />
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
@@ -100,10 +117,24 @@ export default function UserDetailHeader({
               disabled={busy}
               onClick={onDelete}
               className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-200/30 bg-red-500/15 px-5 text-lg font-medium text-white transition hover:bg-red-500/25 disabled:opacity-50"
+              title="Soft delete user"
             >
               <Trash2 size={19} />
               Soft delete
             </button>
+
+            {onHardDelete && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={onHardDelete}
+                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-300 bg-red-600 px-5 text-lg font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+                title="Permanently hard delete user"
+              >
+                <AlertOctagon size={19} />
+                Hard delete
+              </button>
+            )}
           </div>
         </div>
 

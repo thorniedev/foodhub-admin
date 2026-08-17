@@ -1,16 +1,18 @@
 import Link from "next/link";
 
-import { CheckCircle, Eye, Pencil, Trash2, XCircle } from "lucide-react";
+import { AlertOctagon, CheckCircle, Eye, Pencil, Trash2, XCircle } from "lucide-react";
 
 import type { AdminUser } from "@/src/types/userProfile";
 
 import { displayName, initials } from "@/src/lib/userProfileFormat";
+import UserAvatar from "./UserAvatar";
 
 interface UsersTableProps {
   users: AdminUser[];
   disabled?: boolean;
   onStatusEdit: (user: AdminUser) => void;
   onDelete: (user: AdminUser) => void;
+  onHardDelete?: (user: AdminUser) => void;
 }
 
 export default function UsersTable({
@@ -18,6 +20,7 @@ export default function UsersTable({
   disabled = false,
   onStatusEdit,
   onDelete,
+  onHardDelete,
 }: UsersTableProps) {
   return (
     <div className="w-full min-w-0 max-w-full overflow-x-auto">
@@ -56,6 +59,20 @@ export default function UsersTable({
 
             const detailHref = `/users/${user.uuid}`;
 
+            const avatarMediaUuid =
+              user.avatarMediaUuid ||
+              user.defaultProfile?.avatarMediaUuid ||
+              user.profiles?.[0]?.avatarMediaUuid;
+
+            const imageUrl =
+              user.avatarUrl ||
+              user.profileImage ||
+              user.profilePicture ||
+              user.picture ||
+              user.imageUrl ||
+              user.image ||
+              user.avatar;
+
             return (
               <tr
                 key={user.uuid}
@@ -67,9 +84,12 @@ export default function UsersTable({
                     title={`មើលព័ត៌មាន ${name}`}
                     className="group flex min-w-[260px] items-center gap-4 rounded-2xl outline-none transition focus-visible:ring-4 focus-visible:ring-primary-100"
                   >
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-primary-100 bg-primary-50 text-lg font-semibold text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100">
-                      {initials(name)}
-                    </div>
+                    <UserAvatar
+                      name={name}
+                      avatarMediaUuid={avatarMediaUuid}
+                      imageUrl={imageUrl}
+                      containerClassName="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-lg font-semibold text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100"
+                    />
 
                     <div className="min-w-0">
                       <p className="max-w-[250px] truncate text-lg font-medium text-gray-800 transition group-hover:text-primary-800">
@@ -132,10 +152,22 @@ export default function UsersTable({
                       disabled={disabled}
                       onClick={() => onDelete(user)}
                       title="Soft delete"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Trash2 size={20} />
                     </button>
+
+                    {onHardDelete && (
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => onHardDelete(user)}
+                        title="Hard delete (Permanent)"
+                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <AlertOctagon size={20} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

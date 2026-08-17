@@ -167,6 +167,18 @@ export const dashboardNav: NavItem[] = [
         label: "កម្រិតណែនាំ AI",
         href: "/filter/ai-scores",
       },
+      {
+        label: "រដូវកាល",
+        href: "/filter/seasons",
+      },
+      {
+        label: "ព្រឹត្តិការណ៍ / បុណ្យទាន",
+        href: "/filter/events",
+      },
+      {
+        label: "ស្ថានភាពអាកាសធាតុ",
+        href: "/filter/weather-conditions",
+      },
     ],
   },
 ];

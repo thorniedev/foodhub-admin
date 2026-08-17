@@ -548,6 +548,11 @@ async function proxyCatalogRequest(
       responseHeaders.set("Content-Type", contentType);
     }
 
+    const location = backendResponse.headers.get("location");
+    if (location) {
+      responseHeaders.set("Location", location);
+    }
+
     responseHeaders.set("Cache-Control", "no-store");
 
     if (!backendResponse.ok) {

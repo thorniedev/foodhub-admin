@@ -77,6 +77,38 @@ export default function CreateShopForm() {
     setValues((current) => ({ ...current, [key]: value }));
   };
 
+  const fillSampleData = () => {
+    const runId = Math.floor(1000 + Math.random() * 9000);
+    setValues({
+      storeName: `Sovann Kitchen ${runId}`,
+      description: "Postman automated store",
+      addressLine: "No. 25, Street 360, Phnom Penh",
+      commune: "Boeng Keng Kang",
+      district: "Chamkar Mon",
+      city: "Phnom Penh",
+      province: "Phnom Penh",
+      countryCode: "KH",
+      postalCode: "120102",
+      timezone: "Asia/Phnom_Penh",
+      latitude: "11.5484",
+      longitude: "104.9307",
+      phoneNumber: "+85512345678",
+      email: `store.${runId}@example.test`,
+      logoMediaUuid: "5f894f27-af86-44f7-afec-160b0f50bf41",
+      coverMediaUuid: "ba5c0f7a-f86c-4a03-a180-a66ee7ee2e7f",
+      priceLevel: "2",
+      hygieneRating: "4.5",
+      operatingStatus: "OPEN",
+    });
+    setSocialLinks([
+      {
+        platform: "FACEBOOK",
+        profileUrl: "https://www.facebook.com/sovannkhmerkitchen/",
+        displayOrder: 1,
+      },
+    ]);
+  };
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
@@ -171,14 +203,24 @@ export default function CreateShopForm() {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setGoogleOpen(true)}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
-          >
-            <MapPinned size={20} />
-            Import from Google
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={fillSampleData}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white/20 px-5 py-3 text-lg font-bold text-white shadow-sm transition hover:bg-white/30 sm:w-fit"
+            >
+              បំពេញទិន្នន័យគំរូ (Sample Data)
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setGoogleOpen(true)}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
+            >
+              <MapPinned size={20} />
+              Import from Google
+            </button>
+          </div>
         </div>
       </section>
 

@@ -194,6 +194,33 @@ export const FILTER_GROUPS: FilterGroupDefinition[] = [
     selectionMode: "SINGLE",
     source: "LOCAL",
   },
+  {
+    slug: "seasons",
+    code: "SEASON",
+    labelKm: "រដូវកាល",
+    labelEn: "Seasons",
+    descriptionKm: "គ្រប់គ្រងរដូវកាលដូចជា រដូវវស្សា រដូវប្រាំង។",
+    selectionMode: "MULTIPLE",
+    source: "SEASON_API",
+  },
+  {
+    slug: "events",
+    code: "EVENT",
+    labelKm: "ព្រឹត្តិការណ៍ / បុណ្យទាន",
+    labelEn: "Events & Festivals",
+    descriptionKm: "គ្រប់គ្រងពិធីបុណ្យ និងព្រឹត្តិការណ៍ផ្សេងៗ។",
+    selectionMode: "MULTIPLE",
+    source: "EVENT_API",
+  },
+  {
+    slug: "weather-conditions",
+    code: "WEATHER_CONDITION",
+    labelKm: "ស្ថានភាពអាកាសធាតុ",
+    labelEn: "Weather conditions",
+    descriptionKm: "គ្រប់គ្រងស្ថានភាពអាកាសធាតុដូចជា ភ្លៀង ក្ដៅ ត្រជាក់។",
+    selectionMode: "MULTIPLE",
+    source: "WEATHER_CONDITION_API",
+  },
 ];
 
 function seed(

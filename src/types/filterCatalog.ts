@@ -7,7 +7,10 @@ export type FilterCatalogSource =
   | "MEAL_TYPE_API"
   | "ALLERGEN_API"
   | "DIETARY_TYPE_API"
-  | "MEDICAL_CONDITION_API";
+  | "MEDICAL_CONDITION_API"
+  | "SEASON_API"
+  | "EVENT_API"
+  | "WEATHER_CONDITION_API";
 
 export interface FilterGroupDefinition {
   slug: string;

@@ -531,6 +531,67 @@ export interface IngredientOption {
   isActive?: boolean;
 }
 
+export interface SeasonOption {
+  uuid: string;
+  code: string;
+  name: string;
+  localName?: string | null;
+  description?: string | null;
+  isActive?: boolean;
+}
+
+export interface EventOption {
+  uuid: string;
+  code: string;
+  name: string;
+  localName?: string | null;
+  description?: string | null;
+  isActive?: boolean;
+}
+
+export interface WeatherConditionOption {
+  uuid: string;
+  code: string;
+  name: string;
+  localName?: string | null;
+  description?: string | null;
+  isActive?: boolean;
+}
+
+export interface FoodSeasonRelation {
+  seasonUuid: string;
+  suitabilityScore?: number;
+  reasonText?: string | null;
+}
+
+export interface FoodEventRelation {
+  eventUuid: string;
+  relevanceScore?: number;
+  reasonText?: string | null;
+}
+
+export interface FoodWeatherRelation {
+  weatherConditionUuid: string;
+  suitabilityScore?: number;
+  reasonText?: string | null;
+}
+
+export interface FoodMealTypeRelation {
+  mealTypeUuid: string;
+  suitabilityScore?: number;
+}
+
+export interface FoodAgeRuleRelation {
+  ageGroupUuid: string;
+  ruleResult?: "ALLOWED" | "CAUTION" | "RESTRICTED" | string;
+  reasonText?: string | null;
+}
+
+export interface FoodDietaryTypeRelation {
+  code: string;
+  name: string;
+}
+
 export interface StoreOption {
   id?: number;
   uuid: string;
@@ -546,8 +607,10 @@ export interface StoreOption {
 export interface NutritionData {
   calories?: number | null;
   proteinGrams?: number | null;
+  carbohydrateGrams?: number | null;
   carbsGrams?: number | null;
   fatGrams?: number | null;
+  fiberGrams?: number | null;
 }
 
 export interface FoodRecord {
@@ -579,6 +642,7 @@ export interface FoodRecord {
 
   primaryMediaUuids?: string[];
   primaryMediaUrls?: string[];
+  images?: string[];
   gallery?: string[];
   thumbnail?: string | null;
   imageUrl?: string | null;
@@ -614,6 +678,40 @@ export interface MenuItemIngredientRecord {
   notes?: string | null;
 }
 
+export interface MenuItemDietaryTypePayload {
+  dietaryTypeUuid: string;
+  verificationStatus?: "VERIFIED" | "UNVERIFIED" | string;
+  notes?: string | null;
+}
+
+export interface MenuItemDietaryTypeRecord {
+  uuid?: string;
+  dietaryTypeUuid?: string;
+  code?: string;
+  name?: string;
+  verificationStatus?: "VERIFIED" | "UNVERIFIED" | string;
+  notes?: string | null;
+}
+
+export interface MenuItemAllergenDeclarationPayload {
+  allergenUuid: string;
+  declarationType?: "CONTAINS" | "MAY_CONTAIN" | string;
+  riskLevel?: "LOW" | "MEDIUM" | "HIGH" | string;
+  verificationStatus?: "VERIFIED" | "UNVERIFIED" | string;
+  notes?: string | null;
+}
+
+export interface MenuItemAllergenDeclarationRecord {
+  uuid?: string;
+  allergenUuid?: string;
+  code?: string;
+  name?: string;
+  declarationType?: "CONTAINS" | "MAY_CONTAIN" | string;
+  riskLevel?: "LOW" | "MEDIUM" | "HIGH" | string;
+  verificationStatus?: "VERIFIED" | "UNVERIFIED" | string;
+  notes?: string | null;
+}
+
 export interface MenuItemRecord {
   id?: number;
   uuid: string;
@@ -631,6 +729,9 @@ export interface MenuItemRecord {
 
   primaryMediaUuids?: string[];
   primaryMediaUrls?: string[];
+  thumbnailMediaUuid?: string | null;
+  galleryMediaUuids?: string[];
+  images?: string[];
   gallery?: string[];
   thumbnail?: string | null;
   imageUrl?: string | null;
@@ -651,8 +752,8 @@ export interface MenuItemRecord {
   food?: FoodRecord | null;
 
   ingredients?: MenuItemIngredientRecord[];
-  dietaryTypes?: unknown[];
-  allergenDeclarations?: unknown[];
+  dietaryTypes?: MenuItemDietaryTypeRecord[] | unknown[];
+  allergenDeclarations?: MenuItemAllergenDeclarationRecord[] | unknown[];
 
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -664,15 +765,15 @@ export interface FoodWritePayload {
   description?: string | null;
   categoryUuid: string;
   cuisineUuid?: string | null;
-  primaryMediaUuids: string[];
+  primaryMediaUuids?: string[];
   defaultSpiceLevel?: number | null;
   nutritionData?: NutritionData | null;
-  mealTypes: unknown[];
-  ageRules: unknown[];
-  dietaryTypes?: unknown[];
-  seasons?: unknown[];
-  events?: unknown[];
-  suitableWeather?: unknown[];
+  mealTypes: FoodMealTypeRelation[];
+  ageRules: FoodAgeRuleRelation[];
+  dietaryTypes: FoodDietaryTypeRelation[];
+  seasons: FoodSeasonRelation[];
+  events: FoodEventRelation[];
+  suitableWeather: FoodWeatherRelation[];
   isActive: boolean;
 }
 
@@ -692,9 +793,11 @@ export interface MenuItemWritePayload {
   };
 
   primaryMediaUuids?: string[];
+  thumbnailMediaUuid?: string | null;
+  galleryMediaUuids?: string[];
   ingredients: MenuItemIngredientPayload[];
-  dietaryTypes: unknown[];
-  allergenDeclarations: unknown[];
+  dietaryTypes: MenuItemDietaryTypePayload[];
+  allergenDeclarations: MenuItemAllergenDeclarationPayload[];
 }
 
 export interface ListParams {

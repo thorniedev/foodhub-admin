@@ -1,4 +1,6 @@
 import {
+  AlertOctagon,
+  Eye,
   HeartPulse,
   Pencil,
   RotateCcw,
@@ -14,11 +16,19 @@ type Props = {
 
   disabled?: boolean;
 
+  onView: (
+    item: MedicalCondition,
+  ) => void;
+
   onEdit: (
     item: MedicalCondition,
   ) => void;
 
   onDelete: (
+    item: MedicalCondition,
+  ) => void;
+
+  onHardDelete?: (
     item: MedicalCondition,
   ) => void;
 
@@ -30,8 +40,10 @@ type Props = {
 export default function MedicalConditionsTable({
   items,
   disabled = false,
+  onView,
   onEdit,
   onDelete,
+  onHardDelete,
   onRestore,
 }: Props) {
   return (
@@ -145,6 +157,16 @@ export default function MedicalConditionsTable({
                   <div className="flex justify-end gap-2">
                     <button
                       type="button"
+                      disabled={disabled}
+                      onClick={() => onView(item)}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100 disabled:opacity-40"
+                      title="មើលព័ត៌មានលម្អិត"
+                    >
+                      <Eye size={20} />
+                    </button>
+
+                    <button
+                      type="button"
                       disabled={
                         disabled
                       }
@@ -196,6 +218,18 @@ export default function MedicalConditionsTable({
                         <RotateCcw
                           size={20}
                         />
+                      </button>
+                    )}
+
+                    {onHardDelete && (
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => onHardDelete(item)}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:opacity-40"
+                        title="លុបជាអចិន្ត្រៃយ៍ (Hard Delete)"
+                      >
+                        <AlertOctagon size={20} />
                       </button>
                     )}
                   </div>
