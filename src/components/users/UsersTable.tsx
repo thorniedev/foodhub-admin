@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { CheckCircle, Eye, Pencil, Trash2, XCircle } from "lucide-react";
+import { AlertOctagon, CheckCircle, Eye, Pencil, Trash2, XCircle } from "lucide-react";
 
 import type { AdminUser } from "@/src/types/userProfile";
 
@@ -12,6 +12,7 @@ interface UsersTableProps {
   disabled?: boolean;
   onStatusEdit: (user: AdminUser) => void;
   onDelete: (user: AdminUser) => void;
+  onHardDelete?: (user: AdminUser) => void;
 }
 
 export default function UsersTable({
@@ -19,6 +20,7 @@ export default function UsersTable({
   disabled = false,
   onStatusEdit,
   onDelete,
+  onHardDelete,
 }: UsersTableProps) {
   return (
     <div className="w-full min-w-0 max-w-full overflow-x-auto">
@@ -150,10 +152,22 @@ export default function UsersTable({
                       disabled={disabled}
                       onClick={() => onDelete(user)}
                       title="Soft delete"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Trash2 size={20} />
                     </button>
+
+                    {onHardDelete && (
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => onHardDelete(user)}
+                        title="Hard delete (Permanent)"
+                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <AlertOctagon size={20} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

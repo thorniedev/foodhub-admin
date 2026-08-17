@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import {
+  AlertOctagon,
   ArrowLeft,
   Mail,
   Pencil,
@@ -20,6 +21,7 @@ interface UserDetailHeaderProps {
   busy?: boolean;
   onStatusEdit: () => void;
   onDelete: () => void;
+  onHardDelete?: () => void;
 }
 
 export default function UserDetailHeader({
@@ -27,6 +29,7 @@ export default function UserDetailHeader({
   busy = false,
   onStatusEdit,
   onDelete,
+  onHardDelete,
 }: UserDetailHeaderProps) {
   const name = displayName(
     user.firstName,
@@ -114,10 +117,24 @@ export default function UserDetailHeader({
               disabled={busy}
               onClick={onDelete}
               className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-200/30 bg-red-500/15 px-5 text-lg font-medium text-white transition hover:bg-red-500/25 disabled:opacity-50"
+              title="Soft delete user"
             >
               <Trash2 size={19} />
               Soft delete
             </button>
+
+            {onHardDelete && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={onHardDelete}
+                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-300 bg-red-600 px-5 text-lg font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+                title="Permanently hard delete user"
+              >
+                <AlertOctagon size={19} />
+                Hard delete
+              </button>
+            )}
           </div>
         </div>
 

@@ -246,12 +246,12 @@ export default function FilterCatalogDetailModal({
                 </span>
               </div>
 
-              <div className="mt-1 flex items-center gap-2 text-xs font-medium text-gray-400">
+              {/* <div className="mt-1 flex items-center gap-2 text-xs font-medium text-gray-400">
                 <span>API Endpoint:</span>
                 <code className="rounded bg-gray-100 px-2 py-0.5 font-mono text-gray-700">
                   GET {swaggerApiPath}
                 </code>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -376,7 +376,7 @@ export default function FilterCatalogDetailModal({
             )}
 
             {/* UUID & Timestamp Metadata */}
-            <div className="space-y-2 rounded-2xl border border-gray-100 bg-emerald-50/30 p-4">
+            {/* <div className="space-y-2 rounded-2xl border border-gray-100 bg-emerald-50/30 p-4">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-800">
                   <Hash size={14} />
@@ -420,30 +420,9 @@ export default function FilterCatalogDetailModal({
                   )}
                 </div>
               )}
-            </div>
+            </div> */}
 
-            {/* Toggle Raw JSON Response */}
-            {rawResponse ? (
-              <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/70">
-                <button
-                  type="button"
-                  onClick={() => setShowRawJson(!showRawJson)}
-                  className="flex w-full items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-500 transition hover:bg-gray-100"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Code2 size={14} />
-                    Raw API Response (JSON)
-                  </span>
-                  {showRawJson ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </button>
-
-                {showRawJson && (
-                  <div className="border-t border-gray-200/60 bg-gray-900 p-4 text-xs font-mono text-emerald-400 overflow-x-auto max-h-60">
-                    <pre>{JSON.stringify(rawResponse, null, 2)}</pre>
-                  </div>
-                )}
-              </div>
-            ) : null}
+       
           </div>
         )}
 
