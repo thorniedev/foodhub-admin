@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Eye,
   Pencil,
   Plus,
   RotateCcw,
@@ -34,6 +35,7 @@ import type {
 } from "@/src/types/filterCatalog";
 
 import FilterOptionFormModal from "./FilterOptionFormModal";
+import FilterCatalogDetailModal from "./FilterCatalogDetailModal";
 
 /* =========================================================
    TYPES
@@ -148,6 +150,8 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
   const [page, setPage] = useState(0);
 
   const [editing, setEditing] = useState<FilterCatalogOption | null>(null);
+
+  const [viewing, setViewing] = useState<FilterCatalogOption | null>(null);
 
   const [formOpen, setFormOpen] = useState(false);
 
@@ -360,6 +364,7 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
       <CatalogTable
         groupLabel={group.labelKm}
         items={pageItems}
+        onView={(item) => setViewing(item)}
         onEdit={openEditModal}
         onDelete={setDeleting}
         onRestore={(item) => setActive(item.uuid, true)}
@@ -404,6 +409,14 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
 
           setDeleting(null);
         }}
+      />
+
+      {/* COMPONENT: FilterCatalogDetailModal */}
+      <FilterCatalogDetailModal
+        uuid={viewing?.uuid ?? null}
+        group={group}
+        initialOption={viewing}
+        onClose={() => setViewing(null)}
       />
     </div>
   );
@@ -740,12 +753,14 @@ function ErrorNotice({ message }: { message: string }) {
 function CatalogTable({
   groupLabel,
   items,
+  onView,
   onEdit,
   onDelete,
   onRestore,
 }: {
   groupLabel: string;
   items: FilterCatalogOption[];
+  onView: (item: FilterCatalogOption) => void;
   onEdit: (item: FilterCatalogOption) => void;
   onDelete: (item: FilterCatalogOption) => void;
   onRestore: (item: FilterCatalogOption) => void;
@@ -819,6 +834,15 @@ function CatalogTable({
                 {/* Actions */}
                 <td className="px-6 py-5">
                   <div className="flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onView(item)}
+                      title="មើលព័ត៌មានលម្អិត"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100"
+                    >
+                      <Eye size={20} />
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => onEdit(item)}

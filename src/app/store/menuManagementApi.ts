@@ -1050,7 +1050,7 @@ export const menuManagementApi =
             const result = await browserRequest<unknown>(
               `/api/catalog/seasons/${encodeURIComponent(uuid)}`,
               {
-                method: "PATCH",
+                method: "PATCH",  
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
               },
