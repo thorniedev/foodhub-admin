@@ -3,17 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/*
- * Your env may be:
- *
- * NEXT_PUBLIC_API_BASE_URL=https://food.chanthorndev.site
- *
- * or:
- *
- * NEXT_PUBLIC_API_BASE_URL=https://food.chanthorndev.site/api/v1
- *
- * This handles both.
- */
 const configuredBackendUrl = process.env.BACKEND_API_URL?.replace(/\/+$/, "");
 
 const backendApiUrl = configuredBackendUrl
@@ -22,19 +11,6 @@ const backendApiUrl = configuredBackendUrl
     : `${configuredBackendUrl}/api/v1`
   : null;
 
-/**
- * Backend paths that the Next.js proxy allows.
- *
- * Child routes automatically use the first path segment.
- *
- * Examples:
- *
- * /api/safety/allergens
- * -> safety
- *
- * /api/profiles/{uuid}/safety/allergies
- * -> profiles
- */
 const allowedRoutes: Record<string, ReadonlySet<string>> = {
   "auth/register": new Set(["POST"]),
   "auth/login": new Set(["POST"]),

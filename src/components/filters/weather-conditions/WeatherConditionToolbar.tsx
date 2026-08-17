@@ -223,13 +223,18 @@ export default function WeatherConditionToolbar({
                           </p>
                         </div>
                         <span
-                          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          className={`inline-flex items-center gap-1.5 shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                             active
-                              ? "bg-emerald-50 text-emerald-700"
+                              ? "bg-primary-50 text-primary-700"
                               : "bg-gray-100 text-gray-500"
                           }`}
                         >
-                          {active ? "ACTIVE" : "INACTIVE"}
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              active ? "bg-primary-600" : "bg-gray-400"
+                            }`}
+                          />
+                          {active ? "សកម្ម" : "អសកម្ម"}
                         </span>
                       </button>
                     );

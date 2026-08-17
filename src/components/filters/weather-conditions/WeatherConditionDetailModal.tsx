@@ -109,22 +109,16 @@ export default function WeatherConditionDetailModal({
             />
 
             <Row
-              label="Status"
+              label="ស្ថានភាព"
               value={
                 data.isActive ??
                 data.active ??
                 true
-                  ? "ACTIVE"
-                  : "INACTIVE"
+                  ? "សកម្ម"
+                  : "អសកម្ម"
               }
             />
 
-            <Row
-              label="UUID"
-              value={
-                data.uuid
-              }
-            />
           </div>
         ) : null}
       </div>

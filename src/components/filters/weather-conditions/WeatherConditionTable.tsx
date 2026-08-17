@@ -64,30 +64,30 @@ export default function WeatherConditionTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-[950px] w-full">
-        <thead className="bg-gray-50 text-left text-sm font-black uppercase tracking-wide text-gray-500">
+      <table className="min-w-[950px] w-full border-collapse text-left">
+        <thead className="border-b border-gray-100 bg-gray-50/70">
           <tr>
-            <th className="px-5 py-4">
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               Weather
             </th>
 
-            <th className="px-5 py-4">
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               Code
             </th>
 
-            <th className="px-5 py-4">
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               Local name
             </th>
 
-            <th className="px-5 py-4">
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               Description
             </th>
 
-            <th className="px-5 py-4">
-              Status
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+              ស្ថានភាព
             </th>
 
-            <th className="px-5 py-4 text-right">
+            <th className="px-6 py-4 text-right text-xl font-semibold text-primary-800">
               សកម្មភាព
             </th>
           </tr>
@@ -108,7 +108,7 @@ export default function WeatherConditionTable({
                   }
                   className="transition hover:bg-emerald-50/20"
                 >
-                  <td className="px-5 py-4">
+                  <td className="px-6 py-5">
                     <div className="flex items-center gap-3">
                       <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-primary-800">
                         <CloudRain
@@ -126,41 +126,46 @@ export default function WeatherConditionTable({
                     </div>
                   </td>
 
-                  <td className="px-5 py-4">
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-black text-gray-600">
+                  <td className="px-6 py-5">
+                    <span className="inline-flex rounded-lg bg-gray-50 px-3 py-1.5 font-mono text-lg font-medium text-gray-600">
                       {
                         item.code
                       }
                     </span>
                   </td>
 
-                  <td className="px-5 py-4 text-lg font-semibold text-gray-600">
+                  <td className="px-6 py-5 text-lg font-semibold text-gray-600">
                     {item.localName ||
                       "—"}
                   </td>
 
-                  <td className="max-w-[320px] px-5 py-4 text-lg text-gray-500">
+                  <td className="max-w-[320px] px-6 py-5 text-lg text-gray-500">
                     <p className="line-clamp-2">
                       {item.description ||
                         "—"}
                     </p>
                   </td>
 
-                  <td className="px-5 py-4">
+                  <td className="px-6 py-5">
                     <span
-                      className={`rounded-full px-3 py-1 text-sm font-black ${
+                      className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-lg font-medium ring-1 ring-inset ${
                         active
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-gray-100 text-gray-500"
+                          ? "bg-primary-50 text-primary-700 ring-primary-100"
+                          : "bg-gray-100 text-gray-500 ring-gray-200"
                       }`}
                     >
+                      <span
+                        className={`h-2 w-2 rounded-full ${
+                          active ? "bg-primary-600" : "bg-gray-400"
+                        }`}
+                      />
                       {active
-                        ? "ACTIVE"
-                        : "INACTIVE"}
+                        ? "សកម្ម"
+                        : "អសកម្ម"}
                     </span>
                   </td>
 
-                  <td className="px-5 py-4">
+                  <td className="px-6 py-5">
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
