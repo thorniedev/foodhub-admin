@@ -195,7 +195,7 @@
 //   endpoints: (builder) => ({
 //     getFoodCategories: builder.query<
 //       NormalizedPage<FoodCategoryOption>,
-//       CatalogListParams | void
+//       CatalogListParams | undefined
 //     >({
 //       query: (params) => ({
 //         url: "catalog/food-categories",
@@ -233,7 +233,7 @@
 //         unwrap(response),
 //     }),
 
-//     getCuisines: builder.query<NormalizedPage<CuisineOption>, CatalogListParams | void>({
+//     getCuisines: builder.query<NormalizedPage<CuisineOption>, CatalogListParams | undefined>({
 //       query: (params) => ({
 //         url: "catalog/cuisines",
 //         method: "GET",
@@ -269,7 +269,7 @@
 //         unwrap(response),
 //     }),
 
-//     getFoods: builder.query<NormalizedPage<CatalogFood>, FoodListParams | void>({
+//     getFoods: builder.query<NormalizedPage<CatalogFood>, FoodListParams | undefined>({
 //       query: (params) => ({
 //         url: "catalog/foods",
 //         method: "GET",
@@ -343,7 +343,7 @@
 //   ],
 // }),
 
-//     getMenuItems: builder.query<NormalizedPage<CatalogMenuItem>, MenuItemListParams | void>({
+//     getMenuItems: builder.query<NormalizedPage<CatalogMenuItem>, MenuItemListParams | undefined>({
 //       query: (params) => ({
 //         url: "catalog/menu-items",
 //         method: "GET",
@@ -683,7 +683,7 @@ export const menuItemApi =
       getFoodCategories:
         builder.query<
           NormalizedPage<FoodCategoryOption>,
-          CatalogListParams | void
+          CatalogListParams | undefined
         >({
           query: (
             params,
@@ -783,7 +783,7 @@ export const menuItemApi =
       getCuisines:
         builder.query<
           NormalizedPage<CuisineOption>,
-          CatalogListParams | void
+          CatalogListParams | undefined
         >({
           query: (
             params,
@@ -879,7 +879,7 @@ export const menuItemApi =
       getFoods:
         builder.query<
           NormalizedPage<CatalogFood>,
-          FoodListParams | void
+          FoodListParams | undefined
         >({
           query: (
             params,
@@ -1036,7 +1036,7 @@ export const menuItemApi =
       getMenuItems:
         builder.query<
           NormalizedPage<CatalogMenuItem>,
-          MenuItemListParams | void
+          MenuItemListParams | undefined
         >({
           query: (
             params,
@@ -1385,6 +1385,40 @@ export const {
   useGetMenuItemDetailQuery,
   useLazyGetMenuItemDetailQuery,
 
-  useCreateMenuItemMutation,
   useCreateStoreMenuItemMutation,
 } = menuItemApi;
+
+/* =========================================================
+   LEGACY CREATE-MENU-ITEM COMPAT ENDPOINT
+
+   The create-food form still submits the legacy CreateMenuItemPayload shape.
+   This mock mutation keeps that flow working (echoing the payload back as a
+   MenuItem) until the real classification API is wired up.
+========================================================= */
+
+const menuItemCompatApi = menuItemApi.injectEndpoints({
+  endpoints: (builder) => ({
+    createMenuItem: builder.mutation<MenuItem, CreateMenuItemPayload>({
+      queryFn: (payload) => {
+        const timestamp = new Date().toISOString();
+
+        const item: MenuItem = {
+          ...payload,
+          uuid:
+            typeof crypto !== "undefined" &&
+            typeof crypto.randomUUID === "function"
+              ? crypto.randomUUID()
+              : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        };
+
+        return { data: item };
+      },
+      invalidatesTags: [{ type: "MenuItem", id: "LIST" }],
+    }),
+  }),
+  overrideExisting: false,
+});
+
+export const { useCreateMenuItemMutation } = menuItemCompatApi;

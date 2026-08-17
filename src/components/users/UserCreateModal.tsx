@@ -72,23 +72,18 @@ export default function UserCreateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
-      <div className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-gray-100 bg-white shadow-2xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-gray-100 bg-white/95 px-6 py-5 backdrop-blur-md sm:px-8">
-          <div className="flex min-w-0 items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
-              <UserPlus size={24} />
-            </div>
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
+      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] bg-white shadow-2xl">
+        <div className="sticky top-0 z-10 flex items-start justify-between border-b border-gray-100 bg-white px-6 py-5">
+          <div>
+            <p className="flex items-center gap-3 text-4xl font-bold text-[#136C34]">
+              <UserPlus size={28} />
+              បង្កើតអ្នកប្រើថ្មី
+            </p>
 
-            <div className="min-w-0">
-              <p className="text-2xl font-semibold text-primary-800">
-                បង្កើតអ្នកប្រើថ្មី
-              </p>
-
-              <p className="mt-1 text-lg text-gray-500">
-                បង្កើត regular FoodHub user និង Keycloak account។
-              </p>
-            </div>
+            <p className="mt-2 text-base text-gray-500">
+              បង្កើត regular MhouBahar user និង Keycloak account។
+            </p>
           </div>
 
           <button

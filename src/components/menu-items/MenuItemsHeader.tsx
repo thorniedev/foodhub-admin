@@ -38,7 +38,7 @@ export default function MenuItemsHeader({
       <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-bold uppercase tracking-[0.16em] text-emerald-100">
-            FoodHub Catalog & Publishing
+            MhouBahar Catalog & Publishing
           </p>
           <h1 className="mt-2 text-3xl font-black sm:text-4xl">
             គ្រប់គ្រង Food និង Menu Items

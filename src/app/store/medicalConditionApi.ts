@@ -10,7 +10,7 @@ export const medicalConditionApi = adminBaseApi.injectEndpoints({
   endpoints: (builder) => ({
     getMedicalConditions: builder.query<
       PagedResponse<MedicalCondition>,
-      ListParams | void
+      ListParams | undefined
     >({
       query: (params) => {
         const p = (params ?? {}) as ListParams;

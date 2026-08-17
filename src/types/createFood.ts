@@ -69,3 +69,28 @@ export type DietSuitabilityKey =
 
 export type FoodClassificationSelections =
   Record<string, string[]>;
+
+/**
+ * Legacy mock-data shapes still consumed by the file-based demo APIs
+ * (`restaurantApi`, `foodTypeApi`). Kept until those mocks are replaced by the
+ * real catalog endpoints.
+ */
+export interface Restaurant {
+  id: string;
+  name: string;
+  address: string;
+}
+
+export interface CreateFoodPayload {
+  images: string[];
+  category: string;
+  ageGroups: AgeGroupKey[];
+  dietSuitability: DietSuitabilityKey[];
+  customTags: string[];
+  foodName: string;
+  description: string;
+  restaurantId: string;
+  restaurantName: string;
+  address: string;
+  status: "draft" | "published";
+}
