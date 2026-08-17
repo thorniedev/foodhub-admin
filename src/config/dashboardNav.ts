@@ -28,16 +28,20 @@ export const dashboardNav: NavItem[] = [
     icon: Store,
     href: "/shops",
   },
-
+  {
+    label: "មីនុយ",
+    icon: Utensils,
+    href: "/menu-items",
+  },
   {
     label: "អ្នកប្រើប្រាស់",
     icon: Users,
     href: "/users",
   },
   {
-    label: "មីនុយ",
-    icon: Utensils,
-    href: "/menu-items",
+    label: "ម្ហូបអាហារ",
+    icon: Layers,
+    href: "/food-catalog",
   },
   // {
   //   label: "ប្រភេទអាហារ",

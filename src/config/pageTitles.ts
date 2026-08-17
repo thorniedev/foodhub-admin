@@ -67,11 +67,11 @@ export function getPageTitle(pathname: string): PageTitleEntry {
   }
 
   if (cleanPath.startsWith("/menu-items")) {
-    return { title: "ប្រភេទអាហារ" };
+    return { title: "មីនុយ" };
   }
 
-  if (cleanPath.startsWith("/food-types")) {
-    return { title: "ប្រភេទអាហារ" };
+  if (cleanPath.startsWith("/food-catalog")) {
+    return { title: "ម្ហូបអាហារ" };
   }
 
   if (cleanPath.startsWith("/dynamic-content")) {

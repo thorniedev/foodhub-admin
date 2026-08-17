@@ -103,8 +103,12 @@ function matchesMenuItem(item: MenuItemRecord, search: string) {
   );
 }
 
-export default function MenuItemsManager() {
-  const [tab, setTab] = useState<Tab>("FOODS");
+export default function MenuItemsManager({
+  initialTab = "WEBSITE",
+}: {
+  initialTab?: Tab;
+}) {
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [search, setSearch] = useState("");
   const [notice, setNotice] = useState<Notice>(null);
 
