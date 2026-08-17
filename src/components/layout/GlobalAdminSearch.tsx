@@ -87,17 +87,16 @@ export default function GlobalAdminSearch() {
 
     if (fallbackShops?.contents) {
       fallbackShops.contents.forEach((shop) => {
-        const title = shop.storeName || "Store";
-        const subtitle = shop.addressLine || shop.city || "";
-        if (
-          title.toLowerCase().includes(q) ||
-          subtitle.toLowerCase().includes(q)
-        ) {
+        const storeName = shop.storeName || shop.name || shop.localName || "";
+        const address = shop.addressLine || shop.city || "";
+        const combinedText = `${storeName} ${address}`.toLowerCase();
+
+        if (combinedText.includes(q)) {
           list.push({
             uuid: shop.uuid,
             type: "STORE",
-            title,
-            subtitle: subtitle || undefined,
+            title: storeName || "Store",
+            subtitle: address || undefined,
             status: shop.operatingStatus || shop.reviewStatus || undefined,
             targetUrl: `/shops/${shop.uuid}`,
           });
@@ -108,24 +107,26 @@ export default function GlobalAdminSearch() {
     if (fallbackUsers?.contents) {
       fallbackUsers.contents.forEach((userItem) => {
         const u = userItem as unknown as Record<string, unknown>;
-        const title = String(
-          u.username ||
-            u.fullName ||
-            u.email ||
-            u.firstName ||
-            u.localName ||
-            "User",
-        );
-        const subtitle = typeof u.email === "string" ? u.email : "";
-        if (
-          title.toLowerCase().includes(q) ||
-          subtitle.toLowerCase().includes(q)
-        ) {
+        const username = String(u.username || "");
+        const fullName = String(u.fullName || u.name || "");
+        const firstName = String(u.firstName || "");
+        const lastName = String(u.lastName || "");
+        const email = String(u.email || "");
+
+        const combinedText = `${username} ${fullName} ${firstName} ${lastName} ${email}`.toLowerCase();
+
+        if (combinedText.includes(q)) {
+          const displayTitle =
+            username ||
+            fullName ||
+            (firstName || lastName ? `${firstName} ${lastName}`.trim() : email) ||
+            "User";
+
           list.push({
             uuid: String(u.uuid || u.id || ""),
             type: "USER",
-            title,
-            subtitle: subtitle || undefined,
+            title: displayTitle,
+            subtitle: email !== displayTitle && email ? email : undefined,
             status:
               typeof u.accountStatus === "string"
                 ? u.accountStatus
@@ -141,26 +142,25 @@ export default function GlobalAdminSearch() {
     if (fallbackFoods?.content) {
       fallbackFoods.content.forEach((foodItem) => {
         const food = foodItem as unknown as Record<string, unknown>;
-        const title = String(
-          food.canonicalName ||
-            food.localName ||
-            food.name ||
-            "Food",
-        );
-        const subtitle =
-          typeof food.description === "string"
-            ? food.description
-            : typeof food.categoryName === "string"
-              ? food.categoryName
-              : "";
-        if (
-          title.toLowerCase().includes(q) ||
-          subtitle.toLowerCase().includes(q)
-        ) {
+        const localName = String(food.localName || "");
+        const canonicalName = String(food.canonicalName || "");
+        const name = String(food.name || "");
+        const description = String(food.description || "");
+        const categoryName = String(food.categoryName || "");
+
+        const combinedText = `${localName} ${canonicalName} ${name} ${description} ${categoryName}`.toLowerCase();
+
+        if (combinedText.includes(q)) {
+          const displayTitle = localName || canonicalName || name || "Food";
+          const subtitle =
+            description ||
+            categoryName ||
+            (canonicalName !== displayTitle ? canonicalName : "");
+
           list.push({
             uuid: String(food.uuid || food.id || ""),
             type: "FOOD",
-            title,
+            title: displayTitle,
             subtitle: subtitle || undefined,
             targetUrl: `/menu-items`,
           });
