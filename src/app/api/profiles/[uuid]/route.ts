@@ -32,16 +32,10 @@ async function parseBackendResponse(
   }
 }
 
-function getBackendApiUrl(): string | null {
-  const backendApiUrl =
-    process.env.BACKEND_API_URL ??
-    process.env.NEXT_PUBLIC_API_BASE_URL;
+import { getBackendApiBaseUrl } from "@/src/lib/backendUrl";
 
-  if (!backendApiUrl) {
-    return null;
-  }
-
-  return normalizeBaseUrl(backendApiUrl);
+function getBackendApiUrl(): string {
+  return getBackendApiBaseUrl();
 }
 
 function getAccessToken(request: NextRequest): string | null {
