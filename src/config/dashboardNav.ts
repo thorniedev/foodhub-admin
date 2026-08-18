@@ -137,28 +137,12 @@ export const dashboardNav: NavItem[] = [
         href: "/filter/distances",
       },
       {
-        label: "វិធីចម្អិន",
-        href: "/filter/cooking-methods",
-      },
-      {
-        label: "លក្ខណៈម្ហូប",
-        href: "/filter/food-styles",
-      },
-      {
         label: "គោលដៅសុខភាព",
         href: "/filter/health-goals",
       },
       {
         label: "តំបន់",
         href: "/filter/regions",
-      },
-      {
-        label: "រសជាតិ",
-        href: "/filter/tastes",
-      },
-      {
-        label: "វាយនភាព",
-        href: "/filter/textures",
       },
       {
         label: "គ្រឿងផ្សំ",

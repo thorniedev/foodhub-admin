@@ -605,28 +605,6 @@ export default function PublishMenuItemModal({
                 className={`${inputClass} h-auto py-3`}
               />
             </label>
-
-            <label className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50/50 p-4 md:col-span-2">
-              <input
-                type="checkbox"
-                checked={values.isFeatured}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    isFeatured: event.target.checked,
-                  }))
-                }
-                className="h-5 w-5 rounded accent-[#137A3D]"
-              />
-              <div>
-                <span className="font-bold text-gray-900">
-                  Featured (បង្ហាញជាមុខម្ហូបលេចធ្លោលើ Website)
-                </span>
-                <p className="text-xs text-gray-500">
-                  បើកដើម្បីបង្ហាញនៅទំព័រមុខ និង Highlighted Sections។
-                </p>
-              </div>
-            </label>
           </div>
 
           {/* Recipe Ingredients */}
