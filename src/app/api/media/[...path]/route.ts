@@ -65,9 +65,15 @@ async function handleProxy(
     const responseHeaders = new Headers();
 
     const backendContentType = backendResponse.headers.get("content-type") || "";
+    const isAccessUrlEndpoint = path.some((segment) => segment === "access-url");
 
-    // If backend returned JSON (e.g. { url: "https://minio..." } or { payload: { url: "..." } }), redirect browser image request directly to image URL
-    if (backendContentType.includes("application/json") && request.method === "GET") {
+    // Only redirect direct /api/media/{uuid} GET requests if backend returns JSON containing an image URL.
+    // Never redirect /access-url requests because clients expect the JSON envelope { url, expiresAt }.
+    if (
+      !isAccessUrlEndpoint &&
+      backendContentType.includes("application/json") &&
+      request.method === "GET"
+    ) {
       try {
         const text = new TextDecoder().decode(responseBuffer);
         const json = JSON.parse(text);
