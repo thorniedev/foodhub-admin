@@ -318,22 +318,7 @@ export default function MenuItemDetailModal({
             )}
 
             {/* Raw JSON Accordion */}
-            <div className="border-t border-gray-100 pt-3">
-              <button
-                type="button"
-                onClick={() => setShowRawJson((prev) => !prev)}
-                className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-gray-600"
-              >
-                <Info size={14} />
-                {showRawJson ? "លាក់ JSON Raw Data" : "បង្ហាញ JSON Raw Data (Public API Response)"}
-              </button>
-
-              {showRawJson && (
-                <pre className="mt-3 max-h-60 overflow-auto rounded-2xl bg-gray-950 p-4 text-[11px] leading-relaxed text-gray-100">
-                  {JSON.stringify(data, null, 2)}
-                </pre>
-              )}
-            </div>
+          
           </div>
         ) : null}
 

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { useSearchAdvancedMenuItemsMutation } from "@/src/app/store/discoveryApi";
 import type { AdvancedMenuItemSearchRequest } from "@/src/types/discovery";
@@ -104,6 +105,7 @@ function matchesMenuItem(item: MenuItemRecord, search: string) {
 }
 
 export default function MenuItemsManager() {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("FOODS");
   const [search, setSearch] = useState("");
   const [notice, setNotice] = useState<Notice>(null);
@@ -580,7 +582,11 @@ export default function MenuItemsManager() {
           <PublishedMenuItemsTable
             items={isAdvancedFilterActive ? (discoveryData?.contents ?? []) : filteredMenuItems}
             busy={busy || discoveryLoading}
-            onView={(item) => setDetailUuid(item.uuid || (item as any).menuItemUuid)}
+            onView={(item) =>
+              router.push(
+                `/menu-items/${item.uuid || (item as any).menuItemUuid}`,
+              )
+            }
             onEdit={(item) => {
               setEditingMenu(item);
               setMenuModalOpen(true);

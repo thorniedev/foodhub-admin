@@ -407,7 +407,7 @@ export default function ShopDetailManager({
         <div className="mb-5 inline-block w-full min-w-0 max-w-full align-top [break-inside:avoid]">
           <StoreMenuItemsSection
             storeUuid={resolvedStoreUuid}
-            onViewItem={(item) => setSelectedMenuUuid(item.uuid)}
+            onViewItem={(item) => router.push(`/menu-items/${item.uuid}`)}
           />
         </div>
 

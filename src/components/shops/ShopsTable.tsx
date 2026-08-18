@@ -226,48 +226,9 @@ export default function ShopsTable({
                         {store.storeName}
                       </p>
 
-                      <div
-                        className="
-                       
-                          flex
-                          items-center
-                          gap-2
-                          text-lg
-                          text-gray-400
-                        "
-                      >
-                        {priceLevel && (
-                          <>
-                            <span>{priceLevel}</span>
+                   
 
-                            <span
-                              className="
-                                h-1
-                                w-1
-                                rounded-full
-                                bg-gray-300
-                              "
-                            />
-                          </>
-                        )}
-
-                        <span>{store.countryCode || "—"}</span>
-                      </div>
-
-                      {/* <p
-                        className="
-                     
-                          text-base
-                          font-medium
-                          text-primary-700
-                          opacity-0
-                          transition
-                          group-hover:opacity-100
-                          group-focus-visible:opacity-100
-                        "
-                      >
-                        មើលព័ត៌មានលម្អិត
-                      </p> */}
+                    
                     </div>
                   </Link>
                 </td>
