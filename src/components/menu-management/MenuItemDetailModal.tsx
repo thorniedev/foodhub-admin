@@ -133,7 +133,21 @@ export default function MenuItemDetailModal({
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
-                      {data.availabilityStatus || "AVAILABLE"}
+                      {(() => {
+                        const s = (data.availabilityStatus || "AVAILABLE").toUpperCase();
+                        switch (s) {
+                          case "AVAILABLE":
+                            return "មានលក់";
+                          case "UNAVAILABLE":
+                            return "មិនមានលក់";
+                          case "SOLD_OUT":
+                            return "អស់ស្តុក";
+                          case "HIDDEN":
+                            return "លាក់ទុក";
+                          default:
+                            return data.availabilityStatus || "មានលក់";
+                        }
+                      })()}
                     </span>
                     {data.isFeatured && (
                       <span className="rounded-full bg-orange-50 px-2.5 py-1 text-xs font-bold text-orange-600">

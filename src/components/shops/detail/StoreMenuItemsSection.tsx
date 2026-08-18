@@ -547,7 +547,21 @@ export default function StoreMenuItemsSection({
                             }
                           `}
                       >
-                        {item.availabilityStatus || "AVAILABLE"}
+                        {(() => {
+                          const s = (item.availabilityStatus || "AVAILABLE").toUpperCase();
+                          switch (s) {
+                            case "AVAILABLE":
+                              return "មានលក់";
+                            case "UNAVAILABLE":
+                              return "មិនមានលក់";
+                            case "SOLD_OUT":
+                              return "អស់ស្តុក";
+                            case "HIDDEN":
+                              return "លាក់ទុក";
+                            default:
+                              return item.availabilityStatus || "មានលក់";
+                          }
+                        })()}
                       </div>
                     </div>
                   </div>

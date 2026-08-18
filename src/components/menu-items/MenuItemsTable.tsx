@@ -74,7 +74,7 @@ export default function MenuItemsTable({
             </th>
 
             <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-              Availability
+              ស្ថានភាព
             </th>
 
             <th className="px-6 py-4 text-xl font-semibold text-primary-800">
@@ -229,6 +229,22 @@ function AvailabilityBadge({
   available: boolean;
   value: string;
 }) {
+  const status = value.toUpperCase();
+  const getStatusLabel = (s: string) => {
+    switch (s) {
+      case "AVAILABLE":
+        return "មានលក់";
+      case "UNAVAILABLE":
+        return "មិនមានលក់";
+      case "SOLD_OUT":
+        return "អស់ស្តុក";
+      case "HIDDEN":
+        return "លាក់ទុក";
+      default:
+        return s.replace(/_/g, " ");
+    }
+  };
+
   return (
     <span
       className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-lg font-medium ring-1 ring-inset ${
@@ -245,7 +261,7 @@ function AvailabilityBadge({
         }`}
       />
 
-      {value}
+      {getStatusLabel(status)}
     </span>
   );
 }

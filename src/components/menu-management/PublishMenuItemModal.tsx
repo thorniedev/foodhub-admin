@@ -575,14 +575,14 @@ export default function PublishMenuItemModal({
               />
 
               <label>
-                <Label>ស្ថានភាព دستیابی (Availability)</Label>
+                <Label>ស្ថានភាព (Availability)</Label>
                 <FormSelect
                   value={values.availabilityStatus}
                   options={[
-                    { value: "AVAILABLE", label: "AVAILABLE (មានលក់)" },
-                    { value: "UNAVAILABLE", label: "UNAVAILABLE (មិនមានលក់)" },
-                    { value: "SOLD_OUT", label: "SOLD_OUT (អស់ស្តុក)" },
-                    { value: "HIDDEN", label: "HIDDEN (លាក់ទុក)" },
+                    { value: "AVAILABLE", label: "មានលក់" },
+                    { value: "UNAVAILABLE", label: "មិនមានលក់" },
+                    { value: "SOLD_OUT", label: "អស់ស្តុក" },
+                    { value: "HIDDEN", label: "លាក់ទុក" },
                   ]}
                   onChange={(value) =>
                     setValues((current) => ({

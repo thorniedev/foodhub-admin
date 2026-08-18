@@ -788,10 +788,6 @@ function CatalogTable({
               </th>
 
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-                Value
-              </th>
-
-              <th className="px-6 py-4 text-xl font-semibold text-primary-800">
                 ស្ថានភាព
               </th>
 
@@ -826,11 +822,6 @@ function CatalogTable({
                   <span className="inline-flex rounded-lg bg-gray-50 px-3 py-1.5 font-mono text-lg font-medium text-gray-600">
                     {item.code}
                   </span>
-                </td>
-
-                {/* Numeric value + unit */}
-                <td className="px-6 py-5">
-                  <NumericValue value={item.numericValue} unit={item.unit} />
                 </td>
 
                 {/* Status */}
@@ -885,7 +876,7 @@ function CatalogTable({
 
             {items.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-6 py-16 text-center">
+                <td colSpan={5} className="px-6 py-16 text-center">
                   <Search size={34} className="mx-auto text-gray-300" />
 
                   <p className="mt-3 text-lg font-medium text-gray-500">
@@ -905,32 +896,6 @@ function CatalogTable({
   );
 }
 
-/* =========================================================
-   COMPONENT 5: NUMERIC VALUE CELL
-   Suggested file: NumericValue.tsx
-========================================================= */
-
-function NumericValue({
-  value,
-  unit,
-}: {
-  value: number | null | undefined;
-  unit: string | null | undefined;
-}) {
-  if (value === null || value === undefined) {
-    return <span className="text-lg text-gray-400">—</span>;
-  }
-
-  return (
-    <div className="flex items-baseline gap-1.5">
-      <span className="text-lg font-semibold text-gray-800">{value}</span>
-
-      {unit && (
-        <span className="text-lg font-medium text-gray-500">{unit}</span>
-      )}
-    </div>
-  );
-}
 
 /* =========================================================
    COMPONENT 6: STATUS BADGE

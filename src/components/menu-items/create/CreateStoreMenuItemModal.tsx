@@ -347,15 +347,16 @@ export default function CreateStoreMenuItemModal({
                 />
               </Field>
 
-              <Field label="Availability">
+              <Field label="ស្ថានភាព (Availability)">
                 <select
                   value={form.availabilityStatus}
                   onChange={(event) => set("availabilityStatus", event.target.value)}
                   className="field-input"
                 >
-                  <option value="AVAILABLE">AVAILABLE</option>
-                  <option value="UNAVAILABLE">UNAVAILABLE</option>
-                  <option value="SOLD_OUT">SOLD_OUT</option>
+                  <option value="AVAILABLE">មានលក់</option>
+                  <option value="UNAVAILABLE">មិនមានលក់</option>
+                  <option value="SOLD_OUT">អស់ស្តុក</option>
+                  <option value="HIDDEN">លាក់ទុក</option>
                 </select>
               </Field>
 
