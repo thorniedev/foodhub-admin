@@ -1474,7 +1474,9 @@ export const menuManagementApi =
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   ...(p.query ? { query: p.query } : {}),
-                  ...(p.storeUuid ? { storeUuid: p.storeUuid } : {}),
+                  ...(p.storeUuid
+                    ? { storeUuid: p.storeUuid, storeUuids: [p.storeUuid] }
+                    : {}),
                   ...(p.rootCategoryCode ? { categoryUuids: [p.rootCategoryCode] } : {}),
                 }),
               },
