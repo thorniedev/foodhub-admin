@@ -7,15 +7,13 @@ import {
   Plus,
   RefreshCw,
   Search,
-  Sliders,
   Store,
   Utensils,
+  X,
+  Layers,
 } from "lucide-react";
 
 import { useMemo, useState } from "react";
-
-import { useSearchAdvancedMenuItemsMutation } from "@/src/app/store/discoveryApi";
-import type { AdvancedMenuItemSearchRequest } from "@/src/types/discovery";
 
 import {
   useCreateManagedFoodMutation,
@@ -40,7 +38,7 @@ import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
 import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
 
 import { getMenuManagementApiError } from "@/src/lib/menuManagementApiError";
-import { isDrinkCategory, isFoodCategory, DRINK_KEYWORDS } from "@/src/lib/catalogCategoryHelper";
+import { isDrinkCategory, isFoodCategory, DRINK_KEYWORDS, extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 
 import type {
   FoodRecord,
@@ -55,64 +53,25 @@ import FoodFormModal from "./FoodFormModal";
 import MenuItemDetailModal from "./MenuItemDetailModal";
 import PublishMenuItemModal from "./PublishMenuItemModal";
 import PublishedMenuItemsTable from "./PublishedMenuItemsTable";
-import AdvancedFilterModal from "./AdvancedFilterModal";
-
-type Tab = "FOODS" | "WEBSITE";
 
 type Notice = {
   type: "success" | "error";
   text: string;
 } | null;
 
-function matchesFood(item: FoodRecord, search: string) {
-  const query = search.trim().toLowerCase();
-
-  if (!query) return true;
-
-  return [
-    item.canonicalName,
-    item.localName,
-    item.description,
-    item.category?.name,
-    item.categoryName,
-    item.cuisine?.name,
-    item.cuisineName,
-  ].some((value) =>
-    String(value ?? "")
-      .toLowerCase()
-      .includes(query),
-  );
-}
-
-function matchesMenuItem(item: MenuItemRecord, search: string) {
-  const query = search.trim().toLowerCase();
-
-  if (!query) return true;
-
-  return [
-    item.name,
-    item.description,
-    item.store?.storeName,
-    item.store?.name,
-    item.food?.canonicalName,
-    item.food?.localName,
-    item.availabilityStatus,
-  ].some((value) =>
-    String(value ?? "")
-      .toLowerCase()
-      .includes(query),
-  );
-}
-
 export default function MenuItemsManager({
   initialTab = "WEBSITE",
   catalogType = "ALL",
 }: {
-  initialTab?: Tab;
+  initialTab?: "FOODS" | "WEBSITE";
   catalogType?: "FOOD" | "DRINK" | "ALL";
 }) {
-  const [tab, setTab] = useState<Tab>(initialTab);
+  const isCatalogMode = catalogType === "FOOD" || catalogType === "DRINK";
   const [search, setSearch] = useState("");
+  const [selectedStoreUuid, setSelectedStoreUuid] = useState("");
+  const [selectedCategoryUuid, setSelectedCategoryUuid] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [sortOrder, setSortOrder] = useState<"NEWEST" | "PRICE_ASC" | "PRICE_DESC">("NEWEST");
   const [notice, setNotice] = useState<Notice>(null);
 
   const [foodModalOpen, setFoodModalOpen] = useState(false);
@@ -128,13 +87,13 @@ export default function MenuItemsManager({
 
   const foodsQuery = useGetManagedFoodsQuery({
     page: 0,
-    size: 100,
+    size: 200,
     sort: "createdAt,desc",
   });
 
   const menuItemsQuery = useGetPublishedMenuItemsQuery({
     page: 0,
-    size: 100,
+    size: 200,
     sort: "createdAt,desc",
   });
 
@@ -150,44 +109,41 @@ export default function MenuItemsManager({
   const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 });
   const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 });
 
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [advancedFilters, setAdvancedFilters] = useState<AdvancedMenuItemSearchRequest>({});
-  const [isAdvancedFilterActive, setIsAdvancedFilterActive] = useState(false);
+  const [createFood, { isLoading: creatingFood }] = useCreateManagedFoodMutation();
+  const [updateFood, { isLoading: updatingFood }] = useUpdateManagedFoodMutation();
+  const [deleteFood, { isLoading: deletingFoodRequest }] = useDeleteManagedFoodMutation();
 
-  const [searchAdvancedItems, { data: discoveryData, isLoading: discoveryLoading }] =
-    useSearchAdvancedMenuItemsMutation();
-
-  const [createFood, { isLoading: creatingFood }] =
-    useCreateManagedFoodMutation();
-
-  const [updateFood, { isLoading: updatingFood }] =
-    useUpdateManagedFoodMutation();
-
-  const [deleteFood, { isLoading: deletingFoodRequest }] =
-    useDeleteManagedFoodMutation();
-
-  const [createMenuItem, { isLoading: creatingMenuItem }] =
-    useCreateStoreMenuItemMutation();
-
-  const [updateMenuItem, { isLoading: updatingMenuItem }] =
-    useUpdateStoreMenuItemMutation();
-
-  const [deleteMenuItem, { isLoading: deletingMenuItemRequest }] =
-    useDeleteStoreMenuItemMutation();
+  const [createMenuItem, { isLoading: creatingMenuItem }] = useCreateStoreMenuItemMutation();
+  const [updateMenuItem, { isLoading: updatingMenuItem }] = useUpdateStoreMenuItemMutation();
+  const [deleteMenuItem, { isLoading: deletingMenuItemRequest }] = useDeleteStoreMenuItemMutation();
 
   const foods = foodsQuery.data?.content ?? [];
   const menuItems = menuItemsQuery.data?.content ?? [];
+  const stores = storesQuery.data ?? [];
+  const allCategories = categoriesQuery.data ?? [];
 
+  // Filter categories relevant to the current catalog mode
+  const relevantCategories = useMemo(() => {
+    if (catalogType === "DRINK") {
+      return allCategories.filter((c) => isDrinkCategory(c, allCategories) && Boolean(c.parentCategoryUuid));
+    }
+    if (catalogType === "FOOD") {
+      return allCategories.filter((c) => isFoodCategory(c, allCategories) && Boolean(c.parentCategoryUuid));
+    }
+    return allCategories.filter((c) => Boolean(c.parentCategoryUuid));
+  }, [allCategories, catalogType]);
+
+  // Catalog Foods filtered by FOOD vs DRINK mode
   const displayFoods = useMemo(() => {
     if (catalogType === "DRINK") {
       return foods.filter((item) => {
-        const cat = categoriesQuery.data?.find(
+        const cat = allCategories.find(
           (c) =>
             c.uuid === item.category?.uuid ||
             c.name === item.category?.name ||
             c.name === item.categoryName,
         );
-        if (cat) return isDrinkCategory(cat, categoriesQuery.data ?? []);
+        if (cat) return isDrinkCategory(cat, allCategories);
         const catName = (item.category?.name ?? item.categoryName ?? "").toLowerCase();
         return DRINK_KEYWORDS.some((kw) => catName.includes(kw));
       });
@@ -195,99 +151,132 @@ export default function MenuItemsManager({
 
     if (catalogType === "FOOD") {
       return foods.filter((item) => {
-        const cat = categoriesQuery.data?.find(
+        const cat = allCategories.find(
           (c) =>
             c.uuid === item.category?.uuid ||
             c.name === item.category?.name ||
             c.name === item.categoryName,
         );
-        if (cat) return isFoodCategory(cat, categoriesQuery.data ?? []);
+        if (cat) return isFoodCategory(cat, allCategories);
         const catName = (item.category?.name ?? item.categoryName ?? "").toLowerCase();
         return !DRINK_KEYWORDS.some((kw) => catName.includes(kw));
       });
     }
 
     return foods;
-  }, [foods, catalogType, categoriesQuery.data]);
+  }, [foods, catalogType, allCategories]);
 
-  const filteredFoods = useMemo(
-    () => displayFoods.filter((item) => matchesFood(item, search)),
-    [displayFoods, search],
+  // Search & Filter Foods Catalog
+  const filteredFoods = useMemo(() => {
+    let result = displayFoods;
+
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      result = result.filter((item) =>
+        [
+          item.canonicalName,
+          item.localName,
+          item.description,
+          item.category?.name,
+          item.categoryName,
+          item.cuisine?.name,
+          item.cuisineName,
+        ].some((val) => String(val ?? "").toLowerCase().includes(q)),
+      );
+    }
+
+    if (selectedCategoryUuid) {
+      result = result.filter(
+        (item) =>
+          item.category?.uuid === selectedCategoryUuid ||
+          item.categoryUuid === selectedCategoryUuid,
+      );
+    }
+
+    if (selectedStatus) {
+      const wantActive = selectedStatus === "ACTIVE";
+      result = result.filter(
+        (item) => (item.isActive ?? (item as any).active ?? true) === wantActive,
+      );
+    }
+
+    return result;
+  }, [displayFoods, search, selectedCategoryUuid, selectedStatus]);
+
+  // Search & Filter Published Menu Items
+  const filteredMenuItems = useMemo(() => {
+    let result = menuItems;
+
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      result = result.filter((item) =>
+        [
+          item.name,
+          item.description,
+          item.store?.storeName,
+          item.store?.name,
+          item.food?.canonicalName,
+          item.food?.localName,
+          item.availabilityStatus,
+        ].some((val) => String(val ?? "").toLowerCase().includes(q)),
+      );
+    }
+
+    if (selectedStoreUuid) {
+      result = result.filter(
+        (item) =>
+          item.store?.uuid === selectedStoreUuid ||
+          item.storeUuid === selectedStoreUuid ||
+          (item as any).store?.id === selectedStoreUuid,
+      );
+    }
+
+    if (selectedCategoryUuid) {
+      result = result.filter(
+        (item) =>
+          item.food?.category?.uuid === selectedCategoryUuid ||
+          item.food?.categoryUuid === selectedCategoryUuid ||
+          (item.food?.category as any)?.id === selectedCategoryUuid,
+      );
+    }
+
+    if (selectedStatus) {
+      result = result.filter((item) => item.availabilityStatus === selectedStatus);
+    }
+
+    if (sortOrder === "PRICE_ASC") {
+      result = [...result].sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+    } else if (sortOrder === "PRICE_DESC") {
+      result = [...result].sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+    }
+
+    return result;
+  }, [menuItems, search, selectedStoreUuid, selectedCategoryUuid, selectedStatus, sortOrder]);
+
+  const hasActiveFilters = Boolean(
+    search || selectedStoreUuid || selectedCategoryUuid || selectedStatus || sortOrder !== "NEWEST",
   );
 
-  const filteredMenuItems = useMemo(
-    () => menuItems.filter((item) => matchesMenuItem(item, search)),
-    [menuItems, search],
-  );
+  const resetAllFilters = () => {
+    setSearch("");
+    setSelectedStoreUuid("");
+    setSelectedCategoryUuid("");
+    setSelectedStatus("");
+    setSortOrder("NEWEST");
+  };
 
+  // Titles and Labels
   const pageTitle = useMemo(() => {
     if (catalogType === "DRINK") return "ភេសជ្ជៈ";
     if (catalogType === "FOOD") return "ម្ហូប";
-    return initialTab === "WEBSITE" ? "មីនុយ" : "ម្ហូបអាហារ";
-  }, [catalogType, initialTab]);
+    return "មីនុយ";
+  }, [catalogType]);
 
   const pageSubtitle = useMemo(() => {
-    if (catalogType === "DRINK") return "គ្រប់គ្រងបញ្ជីភេសជ្ជៈក្នុង Catalog";
-    if (catalogType === "FOOD") return "គ្រប់គ្រងបញ្ជីមុខម្ហូបក្នុង Catalog";
-    return initialTab === "WEBSITE"
-      ? "គ្រប់គ្រង និង បង្កើត Menu Items សម្រាប់ Store"
-      : "គ្រប់គ្រងបញ្ជីមុខម្ហូបក្នុង Catalog";
-  }, [catalogType, initialTab]);
-
-  const foodCatalogStatLabel = useMemo(() => {
-    if (catalogType === "DRINK") return "ភេសជ្ជៈសម្រាប់ Store";
-    if (catalogType === "FOOD") return "មុខម្ហូបសម្រាប់ Store";
-    return "មុខម្ហូបសម្រាប់ Store";
+    if (catalogType === "DRINK") return "គ្រប់គ្រងបញ្ជីភេសជ្ជៈក្នុង Catalog សម្រាប់ Store ជ្រើសរើស";
+    if (catalogType === "FOOD") return "គ្រប់គ្រងបញ្ជីមុខម្ហូបក្នុង Catalog សម្រាប់ Store ជ្រើសរើស";
+    return "គ្រប់គ្រងមុខម្ហូបរបស់ហាង (Store Menu Items) លើ Website";
   }, [catalogType]);
-
-  const foodTabButtonLabel = useMemo(() => {
-    if (catalogType === "DRINK") return "ភេសជ្ជៈសម្រាប់ Store";
-    if (catalogType === "FOOD") return "មុខម្ហូបសម្រាប់ Store";
-    return "សម្រាប់ Store";
-  }, [catalogType]);
-
-  const primaryAddButtonLabel = useMemo(() => {
-    if (catalogType === "DRINK") return "បន្ថែមភេសជ្ជៈ";
-    if (catalogType === "FOOD") return "បន្ថែមមុខម្ហូប";
-    return "បន្ថែមមុខម្ហូប";
-  }, [catalogType]);
-
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    if (advancedFilters.query) count++;
-    if (advancedFilters.categoryUuids?.length) count += advancedFilters.categoryUuids.length;
-    if (advancedFilters.cuisineUuids?.length) count += advancedFilters.cuisineUuids.length;
-    if (advancedFilters.mealTypeUuids?.length) count += advancedFilters.mealTypeUuids.length;
-    if (advancedFilters.dietaryTypeUuids?.length) count += advancedFilters.dietaryTypeUuids.length;
-    if (advancedFilters.excludeAllergenUuids?.length) count += advancedFilters.excludeAllergenUuids.length;
-    if (advancedFilters.seasonUuids?.length) count += advancedFilters.seasonUuids.length;
-    if (advancedFilters.eventUuids?.length) count += advancedFilters.eventUuids.length;
-    if (advancedFilters.minimumPrice !== undefined || advancedFilters.maximumPrice !== undefined) count++;
-    if (advancedFilters.minimumSpiceLevel !== undefined || advancedFilters.maximumSpiceLevel !== undefined) count++;
-    if (advancedFilters.openNow) count++;
-    if (advancedFilters.featuredOnly) count++;
-    if (advancedFilters.hasImage) count++;
-    return count;
-  }, [advancedFilters]);
-
-  const handleApplyAdvancedFilters = async (filters: AdvancedMenuItemSearchRequest) => {
-    setAdvancedFilters(filters);
-    setIsAdvancedFilterActive(true);
-    setTab("WEBSITE");
-    try {
-      await searchAdvancedItems({
-        params: { page: 0, size: 20, sort: filters.sort ?? "FOODHUB_RATING_DESC" },
-        body: filters,
-      }).unwrap();
-    } catch (err) {
-      console.error("[ADVANCED DISCOVERY SEARCH ERROR]", err);
-    }
-  };
-
-  const handleResetAdvancedFilters = () => {
-    setAdvancedFilters({});
-    setIsAdvancedFilterActive(false);
-  };
 
   const busy =
     creatingFood ||
@@ -297,11 +286,8 @@ export default function MenuItemsManager({
     updatingMenuItem ||
     deletingMenuItemRequest;
 
-  const currentLoading =
-    tab === "FOODS" ? foodsQuery.isLoading : menuItemsQuery.isLoading;
-
-  const currentError =
-    tab === "FOODS" ? foodsQuery.error : menuItemsQuery.error;
+  const currentLoading = isCatalogMode ? foodsQuery.isLoading : menuItemsQuery.isLoading;
+  const currentError = isCatalogMode ? foodsQuery.error : menuItemsQuery.error;
 
   const refreshAll = async () => {
     await Promise.all([foodsQuery.refetch(), menuItemsQuery.refetch()]);
@@ -336,16 +322,13 @@ export default function MenuItemsManager({
 
       setFoodModalOpen(false);
       setEditingFood(null);
-
       await refreshAll();
     } catch (error) {
       const message = getMenuManagementApiError(error);
-
       setNotice({
         type: "error",
         text: message,
       });
-
       throw new Error(message);
     }
   };
@@ -376,7 +359,6 @@ export default function MenuItemsManager({
             text: "បានកែប្រែ Menu Item ដោយជោគជ័យ។",
           });
         } catch (updateErr: any) {
-          // If update returns 404 (item not yet created as store menu item), create it!
           if (
             updateErr?.status === 404 ||
             updateErr?.data?.status === 404 ||
@@ -405,40 +387,35 @@ export default function MenuItemsManager({
 
         setNotice({
           type: "success",
-          text: "បាន Publish Menu Item ទៅ Store ដោយជោគជ័យ។",
+          text: "បានបង្កើត និង Publish Menu Item សម្រាប់ Store ដោយជោគជ័យ។",
         });
       }
 
       setMenuModalOpen(false);
       setEditingMenu(null);
-      setTab("WEBSITE");
-
       await refreshAll();
     } catch (error) {
       const message = getMenuManagementApiError(error);
-
       setNotice({
         type: "error",
         text: message,
       });
-
       throw new Error(message);
     }
   };
 
   const confirmDeleteFood = async () => {
     if (!deletingFood) return;
-
     try {
+      setNotice(null);
       await deleteFood(deletingFood.uuid).unwrap();
-
-      setDeletingFood(null);
-
       setNotice({
         type: "success",
-        text: "បានប្តូរ Food Catalog ទៅជា 'អសកម្ម' (Inactive) ដោយជោគជ័យ។",
+        text: `បានប្តូរស្ថានភាព "${
+          deletingFood.localName || deletingFood.canonicalName
+        }" ទៅជា 'អសកម្ម' (Inactive)។`,
       });
-
+      setDeletingFood(null);
       await refreshAll();
     } catch (error) {
       setNotice({
@@ -450,17 +427,19 @@ export default function MenuItemsManager({
 
   const confirmDeleteMenu = async () => {
     if (!deletingMenu) return;
-
     try {
-      await deleteMenuItem(deletingMenu.uuid).unwrap();
+      setNotice(null);
+      const targetUuid =
+        deletingMenu.uuid ||
+        (deletingMenu as any).menuItemUuid ||
+        (deletingMenu as any).id;
 
-      setDeletingMenu(null);
-
+      await deleteMenuItem(String(targetUuid)).unwrap();
       setNotice({
         type: "success",
-        text: "បានលុប Menu Item។",
+        text: `បានលុប Menu Item "${deletingMenu.name}" ដោយជោគជ័យ។`,
       });
-
+      setDeletingMenu(null);
       await refreshAll();
     } catch (error) {
       setNotice({
@@ -471,140 +450,200 @@ export default function MenuItemsManager({
   };
 
   return (
-    <div className="space-y-5">
-      <div className="rounded-[28px] bg-gradient-to-br from-[#137A3D] to-[#0f8e48] p-6 text-white shadow-sm sm:p-7">
-        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
-              <Utensils size={23} />
+    <div className="space-y-6">
+      {/* Top Banner Header */}
+      <div className="relative overflow-hidden rounded-[28px] bg-linear-to-r from-[#137A3D] via-[#15803d] to-[#166534] p-6 text-white shadow-xl sm:p-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-md ring-1 ring-white/20 shadow-inner">
+              {isCatalogMode ? <Layers size={32} /> : <Utensils size={32} />}
             </div>
 
             <div>
-              <h1 className="text-3xl font-black sm:text-4xl">
-                {pageTitle}
-              </h1>
-              <p className="mt-1 text-sm text-white/75">
-                {pageSubtitle}
-              </p>
+              <h1 className="text-3xl font-black tracking-tight">{pageTitle}</h1>
+              <p className="mt-1 text-sm font-medium text-emerald-100/90">{pageSubtitle}</p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            {initialTab === "WEBSITE" && catalogType === "ALL" ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingMenu(null);
-                  setMenuModalOpen(true);
-                }}
-                className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#137A3D] shadow-sm hover:bg-emerald-50 transition"
-              >
-                <Plus size={18} />
-                បង្កើត Menu Item
-              </button>
-            ) : (
+          <div className="flex items-center gap-3">
+            {isCatalogMode ? (
               <button
                 type="button"
                 onClick={() => {
                   setEditingFood(null);
                   setFoodModalOpen(true);
                 }}
-                className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#137A3D] shadow-sm hover:bg-emerald-50 transition"
+                className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#137A3D] shadow-md hover:bg-emerald-50 transition active:scale-95"
               >
                 <Plus size={18} />
-                {primaryAddButtonLabel}
+                {catalogType === "DRINK" ? "បន្ថែមភេសជ្ជៈ" : "បន្ថែមមុខម្ហូប"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingMenu(null);
+                  setMenuModalOpen(true);
+                }}
+                className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#137A3D] shadow-md hover:bg-emerald-50 transition active:scale-95"
+              >
+                <Plus size={18} />
+                បង្កើត Menu Item
               </button>
             )}
           </div>
         </div>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Stat
-            icon={<Store size={20} />}
-            label={foodCatalogStatLabel}
-            value={displayFoods.length}
-          />
-
-          <Stat
-            icon={<Globe2 size={20} />}
-            label="Menu Items លើ Website"
-            value={menuItems.length}
-          />
+        {/* Quick Stats Grid */}
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {isCatalogMode ? (
+            <>
+              <Stat
+                icon={<Layers size={20} />}
+                label={catalogType === "DRINK" ? "ភេសជ្ជៈក្នុង Catalog" : "មុខម្ហូបក្នុង Catalog"}
+                value={displayFoods.length}
+              />
+              <Stat
+                icon={<Store size={20} />}
+                label="ប្រភេទសរុប"
+                value={relevantCategories.length}
+              />
+            </>
+          ) : (
+            <>
+              <Stat
+                icon={<Globe2 size={20} />}
+                label="Menu Items លើ Website"
+                value={menuItems.length}
+              />
+              <Stat
+                icon={<Store size={20} />}
+                label="ហាងសរុប"
+                value={stores.length}
+              />
+              <Stat
+                icon={<Layers size={20} />}
+                label="Food Catalog សម្រាប់ Store"
+                value={foods.length}
+              />
+            </>
+          )}
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        <div className="inline-flex w-fit rounded-2xl border border-gray-100 bg-white p-1 shadow-sm">
-          <TabButton active={tab === "FOODS"} onClick={() => setTab("FOODS")}>
-            <Store size={16} />
-            {foodTabButtonLabel}
-            <Count>{displayFoods.length}</Count>
-          </TabButton>
-
-          <TabButton
-            active={tab === "WEBSITE"}
-            onClick={() => setTab("WEBSITE")}
-          >
-            <Globe2 size={16} />
-            Website
-            <Count>{menuItems.length}</Count>
-          </TabButton>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="relative">
+      {/* Clean, Horizontal Inline Filter Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">
+        <div className="flex flex-1 flex-wrap items-center gap-3">
+          {/* Search Box */}
+          <div className="relative min-w-[220px] flex-1 sm:max-w-xs">
             <Search
-              size={18}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              size={17}
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
             />
-
             <input
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="ស្វែងរក..."
-              className="h-12 w-full min-w-[280px] rounded-2xl border border-gray-200 bg-white pl-11 pr-4 text-sm outline-none focus:border-[#137A3D] focus:ring-4 focus:ring-emerald-50 sm:w-[360px]"
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={isCatalogMode ? "ស្វែងរកមុខម្ហូប..." : "ស្វែងរកតាមឈ្មោះ, ហាង..."}
+              className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50/50 pl-10 pr-4 text-sm font-medium outline-none focus:border-[#137A3D] focus:bg-white focus:ring-3 focus:ring-emerald-50 transition"
             />
           </div>
 
-          <button
-            type="button"
-            onClick={() => setFilterModalOpen(true)}
-            className={`flex h-12 items-center gap-2 rounded-2xl border px-4 text-xs font-bold transition shadow-xs ${
-              isAdvancedFilterActive
-                ? "border-emerald-600 bg-emerald-700 text-white"
-                : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            <Sliders size={16} />
-            <span>តម្រងកម្រិតខ្ពស់</span>
-            {activeFilterCount > 0 && (
-              <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-extrabold text-white">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
+          {/* Store Filter (For Menu Items Page Only) */}
+          {!isCatalogMode && stores.length > 0 && (
+            <select
+              value={selectedStoreUuid}
+              onChange={(e) => setSelectedStoreUuid(e.target.value)}
+              className="h-10 rounded-xl border border-gray-200 bg-gray-50/50 px-3 text-xs font-bold text-gray-700 outline-none focus:border-[#137A3D] focus:bg-white focus:ring-3 focus:ring-emerald-50 transition"
+            >
+              <option value="">ហាងទាំងអស់</option>
+              {stores.map((s) => (
+                <option key={s.uuid} value={s.uuid}>
+                  {s.storeName || s.name || s.localName || s.uuid}
+                </option>
+              ))}
+            </select>
+          )}
 
-          <button
-            type="button"
-            disabled={foodsQuery.isFetching || menuItemsQuery.isFetching || discoveryLoading}
-            onClick={() => void refreshAll()}
-            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+          {/* Category Filter */}
+          <select
+            value={selectedCategoryUuid}
+            onChange={(e) => setSelectedCategoryUuid(e.target.value)}
+            className="h-10 rounded-xl border border-gray-200 bg-gray-50/50 px-3 text-xs font-bold text-gray-700 outline-none focus:border-[#137A3D] focus:bg-white focus:ring-3 focus:ring-emerald-50 transition"
           >
-            <RefreshCw
-              size={18}
-              className={
-                foodsQuery.isFetching || menuItemsQuery.isFetching || discoveryLoading
-                  ? "animate-spin"
-                  : ""
-              }
-            />
-          </button>
+            <option value="">ប្រភេទទាំងអស់</option>
+            {relevantCategories.map((c) => (
+              <option key={c.uuid} value={c.uuid}>
+                {extractKhmerOnlyName(c.name)}
+              </option>
+            ))}
+          </select>
+
+          {/* Status Filter */}
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="h-10 rounded-xl border border-gray-200 bg-gray-50/50 px-3 text-xs font-bold text-gray-700 outline-none focus:border-[#137A3D] focus:bg-white focus:ring-3 focus:ring-emerald-50 transition"
+          >
+            <option value="">ស្ថានភាពទាំងអស់</option>
+            {isCatalogMode ? (
+              <>
+                <option value="ACTIVE">សកម្ម (Active)</option>
+                <option value="INACTIVE">អសកម្ម (Inactive)</option>
+              </>
+            ) : (
+              <>
+                <option value="AVAILABLE">មានលក់ (Available)</option>
+                <option value="OUT_OF_STOCK">អស់ (Out of Stock)</option>
+                <option value="ARCHIVED">ផ្អាកលក់ (Archived)</option>
+              </>
+            )}
+          </select>
+
+          {/* Sort Order (For Menu Items) */}
+          {!isCatalogMode && (
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as any)}
+              className="h-10 rounded-xl border border-gray-200 bg-gray-50/50 px-3 text-xs font-bold text-gray-700 outline-none focus:border-[#137A3D] focus:bg-white focus:ring-3 focus:ring-emerald-50 transition"
+            >
+              <option value="NEWEST">ថ្មីបំផុត</option>
+              <option value="PRICE_ASC">តម្លៃ: ទាប ទៅ ខ្ពស់</option>
+              <option value="PRICE_DESC">តម្លៃ: ខ្ពស់ ទៅ ទាប</option>
+            </select>
+          )}
+
+          {/* Reset Filters Button */}
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={resetAllFilters}
+              className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-gray-100 px-3 text-xs font-bold text-gray-600 hover:bg-gray-200 transition active:scale-95"
+            >
+              <X size={14} />
+              កំណត់ឡើងវិញ
+            </button>
+          )}
         </div>
+
+        {/* Refresh Button */}
+        <button
+          type="button"
+          disabled={foodsQuery.isFetching || menuItemsQuery.isFetching}
+          onClick={() => void refreshAll()}
+          title="Refresh Data"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 transition active:scale-95"
+        >
+          <RefreshCw
+            size={16}
+            className={foodsQuery.isFetching || menuItemsQuery.isFetching ? "animate-spin" : ""}
+          />
+        </button>
       </div>
 
+      {/* Alert Notice Banner */}
       {notice && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm ${
+          className={`rounded-2xl border px-4 py-3 text-sm font-medium ${
             notice.type === "success"
               ? "border-emerald-100 bg-emerald-50 text-emerald-700"
               : "border-red-100 bg-red-50 text-red-600"
@@ -614,6 +653,7 @@ export default function MenuItemsManager({
         </div>
       )}
 
+      {/* Data Table Section */}
       <section className="overflow-hidden rounded-[26px] border border-gray-100 bg-white shadow-sm">
         {currentLoading ? (
           <div className="flex min-h-[360px] items-center justify-center">
@@ -629,7 +669,7 @@ export default function MenuItemsManager({
               {getMenuManagementApiError(currentError)}
             </p>
           </div>
-        ) : tab === "FOODS" ? (
+        ) : isCatalogMode ? (
           <FoodCatalogTable
             items={filteredFoods}
             busy={busy}
@@ -641,8 +681,8 @@ export default function MenuItemsManager({
           />
         ) : (
           <PublishedMenuItemsTable
-            items={isAdvancedFilterActive ? (discoveryData?.contents ?? []) : filteredMenuItems}
-            busy={busy || discoveryLoading}
+            items={filteredMenuItems}
+            busy={busy}
             onView={(item) => setDetailUuid(item.uuid)}
             onEdit={(item) => {
               setEditingMenu(item);
@@ -653,6 +693,7 @@ export default function MenuItemsManager({
         )}
       </section>
 
+      {/* Food Creation & Edit Modal */}
       <FoodFormModal
         open={foodModalOpen}
         item={editingFood}
@@ -674,6 +715,7 @@ export default function MenuItemsManager({
         onSubmit={saveFood}
       />
 
+      {/* Menu Item Publish Modal */}
       <PublishMenuItemModal
         open={menuModalOpen}
         item={editingMenu}
@@ -693,6 +735,7 @@ export default function MenuItemsManager({
         onSubmit={saveMenuItem}
       />
 
+      {/* Delete / Deactivate Confirmations */}
       <DeleteConfirmModal
         open={Boolean(deletingFood)}
         title="បិទដំណើរការ Food Catalog (Deactivate)?"
@@ -717,18 +760,10 @@ export default function MenuItemsManager({
         onConfirm={() => void confirmDeleteMenu()}
       />
 
+      {/* Detail View Modal */}
       <MenuItemDetailModal
         uuid={detailUuid}
         onClose={() => setDetailUuid(null)}
-      />
-
-      <AdvancedFilterModal
-        isOpen={filterModalOpen}
-        onClose={() => setFilterModalOpen(false)}
-        onApply={handleApplyAdvancedFilters}
-        onReset={handleResetAdvancedFilters}
-        currentFilters={advancedFilters}
-        activeFilterCount={activeFilterCount}
       />
     </div>
   );
@@ -744,42 +779,12 @@ function Stat({
   value: number;
 }) {
   return (
-    <div className="rounded-2xl bg-white/10 p-4">
+    <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/10 backdrop-blur-xs">
       <div className="flex items-center gap-2 text-white/80">
         {icon}
         <span className="text-sm font-bold">{label}</span>
       </div>
       <p className="mt-2 text-3xl font-black">{value}</p>
     </div>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-black transition ${
-        active ? "bg-[#137A3D] text-white" : "text-gray-500 hover:bg-gray-50"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function Count({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="rounded-full bg-black/10 px-2 py-0.5 text-xs">
-      {children}
-    </span>
   );
 }
