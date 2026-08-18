@@ -32,9 +32,11 @@ function getMenuItemImage(item: MenuItemRecord): string | null {
 export default function StoreMenuItemsSection({
   storeUuid,
   onViewItem,
+  onAddMenuItem,
 }: {
   storeUuid: string;
   onViewItem?: (item: MenuItemRecord) => void;
+  onAddMenuItem?: () => void;
 }) {
   const { data, isLoading, isFetching } = useGetPublishedMenuItemsQuery(
     {
@@ -63,13 +65,14 @@ export default function StoreMenuItemsSection({
           )}
         </div>
 
-        <Link
-          href="/menu-items"
-          className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50/70 px-3 py-1.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100"
+        <button
+          type="button"
+          onClick={onAddMenuItem}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50/70 px-3.5 py-1.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100 active:scale-95"
         >
           <Plus size={14} />
-          គ្រប់គ្រង Menu
-        </Link>
+          + បន្ថែម Menu Item
+        </button>
       </div>
 
       {isLoading ? (
@@ -88,15 +91,16 @@ export default function StoreMenuItemsSection({
             មិនទាន់មាន Menu Item ទេ
           </p>
           <p className="mt-1 max-w-sm text-xs text-gray-400">
-            ហាងនេះមិនទាន់មានមុខម្ហូបណាមួយត្រូវបាន Publish ចូលក្នុង Website នៅឡើយទេ។
+            ហាងនេះមិនទាន់មានមុខម្ហូបណាមួយត្រូវបានដាក់លក់លើ Website នៅឡើយទេ។
           </p>
-          <Link
-            href="/menu-items"
-            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-[#137A3D] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#0f6833]"
+          <button
+            type="button"
+            onClick={onAddMenuItem}
+            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-[#137A3D] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#0f6833] active:scale-95"
           >
             <Plus size={14} />
-            Publish Menu Item ដំបូង
-          </Link>
+            + បន្ថែម Menu Item សម្រាប់ហាងនេះ
+          </button>
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">

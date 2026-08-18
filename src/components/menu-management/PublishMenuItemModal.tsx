@@ -95,6 +95,7 @@ export default function PublishMenuItemModal({
   dietaryTypes = [],
   allergens = [],
   saving,
+  fixedStoreUuid,
   onClose,
   onSubmit,
 }: {
@@ -106,6 +107,7 @@ export default function PublishMenuItemModal({
   dietaryTypes?: DietaryType[];
   allergens?: Allergen[];
   saving: boolean;
+  fixedStoreUuid?: string;
   onClose: () => void;
   onSubmit: (
     storeUuid: string,
@@ -125,7 +127,10 @@ export default function PublishMenuItemModal({
     if (!open) return;
 
     if (!item) {
-      setValues(EMPTY);
+      setValues({
+        ...EMPTY,
+        storeUuid: fixedStoreUuid || "",
+      });
       setIngredientRows([]);
       setDietaryTypeRows([]);
       setAllergenRows([]);
@@ -346,7 +351,15 @@ export default function PublishMenuItemModal({
     try {
       setError(null);
 
-      if (!item && !values.storeUuid) {
+      const targetStoreUuid = (
+        fixedStoreUuid ||
+        values.storeUuid ||
+        item?.storeUuid ||
+        item?.store?.uuid ||
+        ""
+      ).trim();
+
+      if (!item && !targetStoreUuid) {
         throw new Error("សូមជ្រើសរើស Store (Store is required).");
       }
 
@@ -414,41 +427,33 @@ export default function PublishMenuItemModal({
         allergenDeclarations: allergenPayload,
       };
 
-      await onSubmit(
-        values.storeUuid,
-        payload,
-        images,
-      );
+      await onSubmit(targetStoreUuid, payload, images);
     } catch (submitError) {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : "Could not save Menu Item.",
+          : "Could not publish Menu Item.",
       );
     }
   };
 
   if (!open) return null;
 
+  const effectiveStoreUuid = fixedStoreUuid || values.storeUuid;
+
   return (
-    <div className="fixed inset-0 z-[140] overflow-y-auto bg-black/50 p-4 backdrop-blur-sm">
-      <div className="mx-auto my-6 w-full max-w-5xl rounded-[30px] bg-white shadow-2xl">
-        {/* Header */}
+    <div className="fixed inset-0 z-[140] overflow-y-auto bg-black/45 p-4 backdrop-blur-[2px]">
+      <div className="mx-auto my-6 w-full max-w-4xl rounded-[30px] bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#137A3D]/10 text-[#137A3D]">
-              <Utensils size={22} />
-            </div>
-            <div>
-              <h2 className="text-2xl font-black text-gray-900">
-                {item
-                  ? "កែប្រែ Menu Item"
-                  : "Publish Menu Item ទៅ Website"}
-              </h2>
-              <p className="mt-0.5 text-xs text-gray-500">
-                ជ្រើស Store និង Food Catalog រួចកំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីផ្សាយលើ Website
-              </p>
-            </div>
+          <div>
+            <h2 className="text-2xl font-black text-gray-900">
+              {item ? "កែប្រែ Menu Item" : "បង្កើត Menu Item សម្រាប់ Store"}
+            </h2>
+            <p className="mt-1 text-sm text-gray-400">
+              {fixedStoreUuid
+                ? "ជ្រើស Food Catalog កំណត់តម្លៃ និងរូបភាពដើម្បីដាក់លក់ក្នុងហាងនេះ"
+                : "ជ្រើស Store និង Food Catalog រួចកំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីផ្សាយលើ Website"}
+            </p>
           </div>
 
           <button
@@ -467,8 +472,8 @@ export default function PublishMenuItemModal({
             <label>
               <Label>ហាង *</Label>
               <select
-                disabled={Boolean(item)}
-                value={values.storeUuid}
+                disabled={Boolean(item) || Boolean(fixedStoreUuid)}
+                value={effectiveStoreUuid}
                 onChange={(event) =>
                   setValues((current) => ({
                     ...current,

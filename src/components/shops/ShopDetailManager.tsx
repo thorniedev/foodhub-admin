@@ -31,6 +31,20 @@ import StoreRatingsSection from "./detail/StoreRatingsSection";
 import StoreSocialLinksSection from "./detail/StoreSocialLinksSection";
 import StoreSystemInfoSection from "./detail/StoreSystemInfoSection";
 import MenuItemDetailModal from "../menu-management/MenuItemDetailModal";
+import PublishMenuItemModal from "../menu-management/PublishMenuItemModal";
+
+import {
+  useCreateStoreMenuItemMutation,
+  useGetManagedFoodsQuery,
+  useGetManagedIngredientsQuery,
+  useUpdateStoreMenuItemMutation,
+} from "@/src/app/store/menuManagementApi";
+import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
+import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
+import type {
+  MenuItemRecord,
+  MenuItemWritePayload,
+} from "@/src/types/menu-management";
 
 interface ShopDetailManagerProps {
   storeUuid?: string;
@@ -131,6 +145,18 @@ export default function ShopDetailManager({
   const [hoursOpen, setHoursOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedMenuUuid, setSelectedMenuUuid] = useState<string | null>(null);
+  const [publishModalOpen, setPublishModalOpen] = useState(false);
+  const [editingMenuItem, setEditingMenuItem] = useState<MenuItemRecord | null>(null);
+
+  const foodsQuery = useGetManagedFoodsQuery({ page: 0, size: 200 });
+  const ingredientsQuery = useGetManagedIngredientsQuery();
+  const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 });
+  const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 });
+
+  const [createStoreMenuItem, { isLoading: creatingMenuItem }] =
+    useCreateStoreMenuItemMutation();
+  const [updateStoreMenuItem, { isLoading: updatingMenuItem }] =
+    useUpdateStoreMenuItemMutation();
 
   const [statusAction, setStatusAction] = useState<StoreStatusAction>("REVIEW");
 
@@ -317,6 +343,49 @@ export default function ShopDetailManager({
     }
   };
 
+  /* =======================================================
+     PUBLISH MENU ITEM FOR THIS STORE
+  ======================================================= */
+  const handlePublishMenuItem = async (
+    targetStoreUuid: string,
+    payload: MenuItemWritePayload,
+    images: File[],
+  ) => {
+    try {
+      if (editingMenuItem) {
+        await updateStoreMenuItem({
+          uuid: editingMenuItem.uuid,
+          payload,
+          images,
+        }).unwrap();
+        setNotice({
+          type: "success",
+          text: "បានកែប្រែ Menu Item ដោយជោគជ័យ។",
+        });
+      } else {
+        await createStoreMenuItem({
+          storeUuid: targetStoreUuid || resolvedStoreUuid,
+          payload,
+          images,
+        }).unwrap();
+        setNotice({
+          type: "success",
+          text: "បានបង្កើត Menu Item សម្រាប់ហាងនេះដោយជោគជ័យ។",
+        });
+      }
+      setPublishModalOpen(false);
+      setEditingMenuItem(null);
+    } catch (publishError: any) {
+      setNotice({
+        type: "error",
+        text:
+          publishError?.message ||
+          publishError?.data?.message ||
+          "Could not save Menu Item.",
+      });
+    }
+  };
+
   const busy = updatingStore || deletingStore || storeFetching;
 
   /* =======================================================
@@ -409,6 +478,10 @@ export default function ShopDetailManager({
           <StoreMenuItemsSection
             storeUuid={resolvedStoreUuid}
             onViewItem={(item) => setSelectedMenuUuid(item.uuid)}
+            onAddMenuItem={() => {
+              setEditingMenuItem(null);
+              setPublishModalOpen(true);
+            }}
           />
         </div>
 
@@ -498,6 +571,39 @@ export default function ShopDetailManager({
         <MenuItemDetailModal
           uuid={selectedMenuUuid}
           onClose={() => setSelectedMenuUuid(null)}
+        />
+      )}
+
+      {/* =================================================
+          PUBLISH MENU ITEM MODAL FOR THIS STORE
+      ================================================== */}
+      {publishModalOpen && (
+        <PublishMenuItemModal
+          open={publishModalOpen}
+          item={editingMenuItem}
+          foods={foodsQuery.data?.content ?? []}
+          stores={
+            store
+              ? [
+                  {
+                    uuid: store.uuid,
+                    name: store.storeName,
+                    storeName: store.storeName,
+                    localName: store.storeName,
+                  },
+                ]
+              : []
+          }
+          ingredients={ingredientsQuery.data ?? []}
+          dietaryTypes={dietaryTypesQuery.data?.contents ?? []}
+          allergens={allergensQuery.data?.contents ?? []}
+          fixedStoreUuid={resolvedStoreUuid}
+          saving={creatingMenuItem || updatingMenuItem}
+          onClose={() => {
+            setPublishModalOpen(false);
+            setEditingMenuItem(null);
+          }}
+          onSubmit={handlePublishMenuItem}
         />
       )}
     </div>

@@ -476,7 +476,7 @@ export default function MenuItemsManager({
                 className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#137A3D] shadow-md hover:bg-emerald-50 transition active:scale-95"
               >
                 <Plus size={18} />
-                {catalogType === "DRINK" ? "បន្ថែមភេសជ្ជៈ" : "បន្ថែមមុខម្ហូប"}
+                {catalogType === "DRINK" ? "បន្ថែមភេសជ្ជៈថ្មី" : "បន្ថែមមុខម្ហូបថ្មី"}
               </button>
             ) : (
               <button

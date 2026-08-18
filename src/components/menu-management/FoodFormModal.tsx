@@ -370,19 +370,19 @@ export default function FoodFormModal({
 
   const modalTitle = useMemo(() => {
     if (catalogType === "DRINK") {
-      return item ? "កែប្រែ Drink Catalog" : "បន្ថែម Drink Catalog";
+      return item ? "កែប្រែព័ត៌មានភេសជ្ជៈ" : "បន្ថែមភេសជ្ជៈថ្មី";
     }
     if (catalogType === "FOOD") {
-      return item ? "កែប្រែ Food Catalog" : "បន្ថែម Food Catalog";
+      return item ? "កែប្រែព័ត៌មានមុខម្ហូប" : "បន្ថែមមុខម្ហូបថ្មី";
     }
-    return item ? "កែប្រែ Food Catalog" : "បន្ថែម Food Catalog";
+    return item ? "កែប្រែព័ត៌មានមុខម្ហូប" : "បន្ថែមមុខម្ហូបថ្មី";
   }, [item, catalogType]);
 
   const modalSubtitle = useMemo(() => {
     if (catalogType === "DRINK") {
-      return "Drink នេះអាចឱ្យ Store ជ្រើសយកទៅបង្កើត Menu Item។";
+      return "ភេសជ្ជៈនេះអាចឱ្យ Store ជ្រើសយកទៅដាក់លក់ក្នុង Menu Item។";
     }
-    return "Food នេះអាចឱ្យ Store ជ្រើសយកទៅបង្កើត Menu Item។";
+    return "មុខម្ហូបនេះអាចឱ្យ Store ជ្រើសយកទៅដាក់លក់ក្នុង Menu Item។";
   }, [catalogType]);
 
   const submit = async () => {
