@@ -41,7 +41,16 @@ export const dashboardNav: NavItem[] = [
   {
     label: "ម្ហូបអាហារ",
     icon: Layers,
-    href: "/food-catalog",
+    children: [
+      {
+        label: "ម្ហូប (Food)",
+        href: "/food-catalog/foods",
+      },
+      {
+        label: "ភេសជ្ជៈ (Drink)",
+        href: "/food-catalog/drinks",
+      },
+    ],
   },
   // {
   //   label: "ប្រភេទអាហារ",

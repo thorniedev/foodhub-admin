@@ -40,6 +40,7 @@ import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
 import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
 
 import { getMenuManagementApiError } from "@/src/lib/menuManagementApiError";
+import { isDrinkCategory, isFoodCategory, DRINK_KEYWORDS } from "@/src/lib/catalogCategoryHelper";
 
 import type {
   FoodRecord,
@@ -105,8 +106,10 @@ function matchesMenuItem(item: MenuItemRecord, search: string) {
 
 export default function MenuItemsManager({
   initialTab = "WEBSITE",
+  catalogType = "ALL",
 }: {
   initialTab?: Tab;
+  catalogType?: "FOOD" | "DRINK" | "ALL";
 }) {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [search, setSearch] = useState("");
@@ -175,15 +178,79 @@ export default function MenuItemsManager({
   const foods = foodsQuery.data?.content ?? [];
   const menuItems = menuItemsQuery.data?.content ?? [];
 
+  const displayFoods = useMemo(() => {
+    if (catalogType === "DRINK") {
+      return foods.filter((item) => {
+        const cat = categoriesQuery.data?.find(
+          (c) =>
+            c.uuid === item.category?.uuid ||
+            c.name === item.category?.name ||
+            c.name === item.categoryName,
+        );
+        if (cat) return isDrinkCategory(cat, categoriesQuery.data ?? []);
+        const catName = (item.category?.name ?? item.categoryName ?? "").toLowerCase();
+        return DRINK_KEYWORDS.some((kw) => catName.includes(kw));
+      });
+    }
+
+    if (catalogType === "FOOD") {
+      return foods.filter((item) => {
+        const cat = categoriesQuery.data?.find(
+          (c) =>
+            c.uuid === item.category?.uuid ||
+            c.name === item.category?.name ||
+            c.name === item.categoryName,
+        );
+        if (cat) return isFoodCategory(cat, categoriesQuery.data ?? []);
+        const catName = (item.category?.name ?? item.categoryName ?? "").toLowerCase();
+        return !DRINK_KEYWORDS.some((kw) => catName.includes(kw));
+      });
+    }
+
+    return foods;
+  }, [foods, catalogType, categoriesQuery.data]);
+
   const filteredFoods = useMemo(
-    () => foods.filter((item) => matchesFood(item, search)),
-    [foods, search],
+    () => displayFoods.filter((item) => matchesFood(item, search)),
+    [displayFoods, search],
   );
 
   const filteredMenuItems = useMemo(
     () => menuItems.filter((item) => matchesMenuItem(item, search)),
     [menuItems, search],
   );
+
+  const pageTitle = useMemo(() => {
+    if (catalogType === "DRINK") return "ភេសជ្ជៈ (Drink)";
+    if (catalogType === "FOOD") return "ម្ហូប (Food)";
+    return initialTab === "WEBSITE" ? "មីនុយ" : "ម្ហូបអាហារ";
+  }, [catalogType, initialTab]);
+
+  const pageSubtitle = useMemo(() => {
+    if (catalogType === "DRINK") return "គ្រប់គ្រងបញ្ជីភេសជ្ជៈក្នុង Catalog (Drink Catalog)";
+    if (catalogType === "FOOD") return "គ្រប់គ្រងបញ្ជីមុខម្ហូបក្នុង Catalog (Food Catalog)";
+    return initialTab === "WEBSITE"
+      ? "គ្រប់គ្រង និង បង្កើត Menu Items សម្រាប់ Store"
+      : "គ្រប់គ្រងបញ្ជីម្ហូបអាហារក្នុង Catalog (Food Catalog)";
+  }, [catalogType, initialTab]);
+
+  const foodCatalogStatLabel = useMemo(() => {
+    if (catalogType === "DRINK") return "Drink Catalog សម្រាប់ Store";
+    if (catalogType === "FOOD") return "Food Catalog សម្រាប់ Store";
+    return "Food Catalog សម្រាប់ Store";
+  }, [catalogType]);
+
+  const foodTabButtonLabel = useMemo(() => {
+    if (catalogType === "DRINK") return "សម្រាប់ Store (Drink)";
+    if (catalogType === "FOOD") return "សម្រាប់ Store (Food)";
+    return "សម្រាប់ Store";
+  }, [catalogType]);
+
+  const primaryAddButtonLabel = useMemo(() => {
+    if (catalogType === "DRINK") return "បន្ថែម Drink Catalog";
+    if (catalogType === "FOOD") return "បន្ថែម Food Catalog";
+    return "បន្ថែម Food Catalog";
+  }, [catalogType]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -414,18 +481,16 @@ export default function MenuItemsManager({
 
             <div>
               <h1 className="text-3xl font-black sm:text-4xl">
-                {initialTab === "WEBSITE" ? "មីនុយ" : "ម្ហូបអាហារ"}
+                {pageTitle}
               </h1>
               <p className="mt-1 text-sm text-white/75">
-                {initialTab === "WEBSITE"
-                  ? "គ្រប់គ្រង និង បង្កើត Menu Items សម្រាប់ Store"
-                  : "គ្រប់គ្រងបញ្ជីម្ហូបអាហារក្នុង Catalog (Food Catalog)"}
+                {pageSubtitle}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            {initialTab === "WEBSITE" ? (
+            {initialTab === "WEBSITE" && catalogType === "ALL" ? (
               <button
                 type="button"
                 onClick={() => {
@@ -447,7 +512,7 @@ export default function MenuItemsManager({
                 className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#137A3D] shadow-sm hover:bg-emerald-50 transition"
               >
                 <Plus size={18} />
-                បន្ថែម Food Catalog
+                {primaryAddButtonLabel}
               </button>
             )}
           </div>
@@ -456,8 +521,8 @@ export default function MenuItemsManager({
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <Stat
             icon={<Store size={20} />}
-            label="Food Catalog សម្រាប់ Store"
-            value={foods.length}
+            label={foodCatalogStatLabel}
+            value={displayFoods.length}
           />
 
           <Stat
@@ -472,8 +537,8 @@ export default function MenuItemsManager({
         <div className="inline-flex w-fit rounded-2xl border border-gray-100 bg-white p-1 shadow-sm">
           <TabButton active={tab === "FOODS"} onClick={() => setTab("FOODS")}>
             <Store size={16} />
-            សម្រាប់ Store
-            <Count>{foods.length}</Count>
+            {foodTabButtonLabel}
+            <Count>{displayFoods.length}</Count>
           </TabButton>
 
           <TabButton
@@ -600,6 +665,7 @@ export default function MenuItemsManager({
         ageGroups={ageGroupsQuery.data?.contents ?? []}
         dietaryTypes={dietaryTypesQuery.data?.contents ?? []}
         saving={creatingFood || updatingFood}
+        catalogType={catalogType}
         onClose={() => {
           if (creatingFood || updatingFood) return;
           setFoodModalOpen(false);

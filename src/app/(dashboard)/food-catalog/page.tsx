@@ -1,5 +1,5 @@
-import MenuItemsManager from "@/src/components/menu-management/MenuItemsManager";
+import { redirect } from "next/navigation";
 
-export default function FoodCatalogPage() {
-  return <MenuItemsManager initialTab="FOODS" />;
+export default function FoodCatalogIndexPage() {
+  redirect("/food-catalog/foods");
 }

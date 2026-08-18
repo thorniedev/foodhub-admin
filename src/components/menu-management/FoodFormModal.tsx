@@ -4,6 +4,7 @@ import { Loader2, Plus, Save, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import ImagePicker from "./ImagePicker";
+import { isDrinkCategory, isFoodCategory } from "@/src/lib/catalogCategoryHelper";
 
 import type {
   CuisineOption,
@@ -74,6 +75,7 @@ export default function FoodFormModal({
   ageGroups = [],
   dietaryTypes = [],
   saving,
+  catalogType = "ALL",
   onClose,
   onSubmit,
 }: {
@@ -88,6 +90,7 @@ export default function FoodFormModal({
   ageGroups?: AgeGroup[];
   dietaryTypes?: DietaryType[];
   saving: boolean;
+  catalogType?: "FOOD" | "DRINK" | "ALL";
   onClose: () => void;
   onSubmit: (
     payload: FoodWritePayload,
@@ -344,8 +347,37 @@ export default function FoodFormModal({
   ]);
 
   const activeCategories = useMemo(() => {
-    return categories.filter((category) => category.isActive !== false);
-  }, [categories]);
+    const list = categories.filter((category) => category.isActive !== false);
+
+    if (catalogType === "DRINK") {
+      const drinks = list.filter((c) => isDrinkCategory(c, categories));
+      return drinks.length > 0 ? drinks : list;
+    }
+
+    if (catalogType === "FOOD") {
+      const foods = list.filter((c) => isFoodCategory(c, categories));
+      return foods.length > 0 ? foods : list;
+    }
+
+    return list;
+  }, [categories, catalogType]);
+
+  const modalTitle = useMemo(() => {
+    if (catalogType === "DRINK") {
+      return item ? "កែប្រែ Drink Catalog" : "បន្ថែម Drink Catalog";
+    }
+    if (catalogType === "FOOD") {
+      return item ? "កែប្រែ Food Catalog" : "បន្ថែម Food Catalog";
+    }
+    return item ? "កែប្រែ Food Catalog" : "បន្ថែម Food Catalog";
+  }, [item, catalogType]);
+
+  const modalSubtitle = useMemo(() => {
+    if (catalogType === "DRINK") {
+      return "Drink នេះអាចឱ្យ Store ជ្រើសយកទៅបង្កើត Menu Item។";
+    }
+    return "Food នេះអាចឱ្យ Store ជ្រើសយកទៅបង្កើត Menu Item។";
+  }, [catalogType]);
 
   const submit = async () => {
     try {
@@ -443,10 +475,10 @@ export default function FoodFormModal({
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
           <div>
             <h2 className="text-2xl font-black text-gray-900">
-              {item ? "កែប្រែ Food Catalog" : "បន្ថែម Food Catalog"}
+              {modalTitle}
             </h2>
             <p className="mt-1 text-sm text-gray-400">
-              Food នេះអាចឱ្យ Store ជ្រើសយកទៅបង្កើត Menu Item។
+              {modalSubtitle}
             </p>
           </div>
 
