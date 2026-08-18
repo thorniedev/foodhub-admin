@@ -1,5 +1,3 @@
-
-
 import Link from "next/link";
 
 import { Eye, MapPin, Pencil, Settings2, Trash2 } from "lucide-react";
@@ -82,7 +80,7 @@ export default function ShopsTable({
               className="
                 px-6
                 py-4
-                text-xl
+                text-xl min-w-[160px]
                 font-semibold
                 text-primary-800
               "
@@ -225,10 +223,6 @@ export default function ShopsTable({
                       >
                         {store.storeName}
                       </p>
-
-                   
-
-                    
                     </div>
                   </Link>
                 </td>

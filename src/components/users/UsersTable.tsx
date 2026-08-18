@@ -1,10 +1,19 @@
 import Link from "next/link";
 
-import { AlertOctagon, CheckCircle, Eye, Pencil, RotateCcw, Trash2, XCircle } from "lucide-react";
+import {
+  AlertOctagon,
+  Ban,
+  CheckCircle,
+  Eye,
+  Pencil,
+  RotateCcw,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 
 import type { AdminUser } from "@/src/types/userProfile";
 
-import { displayName, initials } from "@/src/lib/userProfileFormat";
+import { displayName } from "@/src/lib/userProfileFormat";
 import UserAvatar from "./UserAvatar";
 
 interface UsersTableProps {
@@ -32,10 +41,6 @@ export default function UsersTable({
             <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               អ្នកប្រើ
             </th>
-
-            {/* <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-              Email
-            </th> */}
 
             <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               Verified
@@ -75,10 +80,17 @@ export default function UsersTable({
               user.image ||
               user.avatar;
 
+            const isDisabledOrDeleted =
+              user.status === "DISABLED" || user.status === "DELETED";
+
             return (
               <tr
                 key={user.uuid}
-                className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
+                className={`border-b border-gray-100 transition-colors duration-150 last:border-b-0 ${
+                  isDisabledOrDeleted
+                    ? "bg-red-50/20 hover:bg-red-50/40"
+                    : "bg-white hover:bg-gray-50/70"
+                }`}
               >
                 <td className="px-6 py-4">
                   <Link
@@ -106,12 +118,6 @@ export default function UsersTable({
                   </Link>
                 </td>
 
-                {/* <td className="max-w-[320px] px-6 py-4">
-                  <p className="truncate text-lg text-gray-500">
-                    {user.primaryEmail ?? "—"}
-                  </p>
-                </td> */}
-
                 <td className="px-6 py-4">
                   {user.emailVerified ? (
                     <span className="inline-flex items-center gap-2 rounded-full bg-primary-50 px-3.5 py-1.5 text-lg font-medium text-primary-700 ring-1 ring-inset ring-primary-100">
@@ -134,53 +140,60 @@ export default function UsersTable({
                   <div className="flex items-center justify-end gap-2">
                     <Link
                       href={detailHref}
-                      title="View user profiles"
+                      title="មើលព័ត៌មាន និង Profiles"
                       className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100"
                     >
                       <Eye size={20} />
                     </Link>
 
-                    <button
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => onStatusEdit(user)}
-                      title="Change status"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <Pencil size={20} />
-                    </button>
-
-                    {onRestore && user.status !== "ACTIVE" && (
+                    {!isDisabledOrDeleted && (
                       <button
                         type="button"
                         disabled={disabled}
-                        onClick={() => onRestore(user)}
-                        title="ស្តារឡើងវិញ (Restore)"
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        onClick={() => onStatusEdit(user)}
+                        title="កែប្រែស្ថានភាព"
+                        className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
                       >
-                        <RotateCcw size={20} />
+                        <Pencil size={20} />
                       </button>
                     )}
 
-                    <button
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => onDelete(user)}
-                      title=" បញ្ឈប់"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <Trash2 size={20} />
-                    </button>
+                    {isDisabledOrDeleted ? (
+                      <>
+                        {onRestore && (
+                          <button
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => onRestore(user)}
+                            title="ស្តារអ្នកប្រើឡើងវិញ"
+                            className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            <RotateCcw size={20} />
+                          </button>
+                        )}
 
-                    {onHardDelete && (
+                        {onHardDelete && (
+                          <button
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => onHardDelete(user)}
+                            title="លុបជាអចិន្ត្រៃយ៍"
+                            className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            {/* <AlertOctagon size={20} /> */}​{" "}
+                            <Trash2 size={20} />
+                          </button>
+                        )}
+                      </>
+                    ) : (
                       <button
                         type="button"
                         disabled={disabled}
-                        onClick={() => onHardDelete(user)}
-                        title="លុប (Permanent)"
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        onClick={() => onDelete(user)}
+                        title="បញ្ឈប់អ្នកប្រើ"
+                        className="flex h-10 w-10 items-center justify-center rounded-xl text-secondary-600 transition hover:bg-secondary-50 focus:outline-none focus:ring-4 focus:ring-secondary-100 disabled:cursor-not-allowed disabled:opacity-40"
                       >
-                        <AlertOctagon size={20} />
+                        <Ban size={20} />
                       </button>
                     )}
                   </div>
@@ -191,7 +204,7 @@ export default function UsersTable({
 
           {users.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-6 py-16 text-center">
+              <td colSpan={4} className="px-6 py-16 text-center">
                 <p className="text-lg font-medium text-gray-500">
                   មិនមានអ្នកប្រើប្រាស់
                 </p>
@@ -234,7 +247,7 @@ export function StatusBadge({ status }: { status: string }) {
       ? "សកម្ម"
       : normalized === "SUSPENDED"
         ? "SUSPENDED"
-        : normalized === "DISABLED"
+        : normalized === "DISABLED" || normalized === "DELETED"
           ? "DISABLED"
           : normalized;
 

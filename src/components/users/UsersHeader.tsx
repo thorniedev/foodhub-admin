@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import {
+  Ban,
   UserPlus,
   Users,
   UserRoundCheck,
@@ -11,6 +12,7 @@ interface UsersHeaderProps {
   total: number;
   activeCount: number;
   suspendedCount: number;
+  disabledCount: number;
   onCreate: () => void;
 }
 
@@ -18,6 +20,7 @@ export default function UsersHeader({
   total,
   activeCount,
   suspendedCount,
+  disabledCount,
   onCreate,
 }: UsersHeaderProps) {
   return (
@@ -26,7 +29,7 @@ export default function UsersHeader({
       <div className="pointer-events-none absolute -bottom-24 right-20 h-64 w-64 rounded-full bg-white/5" />
 
       <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
               <Users size={25} />
@@ -37,14 +40,14 @@ export default function UsersHeader({
                 គ្រប់គ្រងអ្នកប្រើប្រាស់
               </p>
 
-              <p className="mt-6 max-w-2xl text-xl text-white/85">
-                គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ ស្ថានភាពគណនី និងពិនិត្យ <br className="md:block max-md:hidden" /> Profile
+              <p className="mt-6 max-w-3xl text-xl leading-9 text-white/85">
+                គ្រប់គ្រងគណនី ស្ថានភាព បញ្ឈប់ ស្តារឡើងវិញ និងពិនិត្យ Profile
                 របស់អ្នកប្រើនីមួយៗក្នុង FoodHub។
               </p>
             </div>
           </div>
 
-          <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <Stat
               icon={<Users size={20} />}
               label="អ្នកប្រើសរុប"
@@ -53,14 +56,20 @@ export default function UsersHeader({
 
             <Stat
               icon={<UserRoundCheck size={20} />}
-              label="សកម្ម ក្នុងទំព័រ"
+              label="សកម្ម"
               value={activeCount}
             />
 
             <Stat
               icon={<UserRoundX size={20} />}
-              label="Suspended ក្នុងទំព័រ"
+              label="Suspended"
               value={suspendedCount}
+            />
+
+            <Stat
+              icon={<Ban size={20} />}
+              label="Disabled"
+              value={disabledCount}
             />
           </div>
         </div>
