@@ -3,9 +3,7 @@
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
-import {
-  resolveFoodHubCatalogImageUrl,
-} from "@/src/lib/resolveFoodHubImageUrl";
+import FoodAvatar from "./FoodAvatar";
 
 import type {
   FoodRecord,
@@ -42,56 +40,7 @@ function cuisineName(
   );
 }
 
-function imageUrl(
-  item: FoodRecord,
-): string | null {
-  const raw =
-    item.thumbnail ||
-    item.imageUrl ||
-    item.primaryMediaUuid ||
-    item.thumbnailMediaUuid ||
-    item.primaryMediaUrls?.[0] ||
-    item.primaryMediaUuids?.[0] ||
-    item.images?.[0] ||
-    item.gallery?.[0] ||
-    item.galleryMediaUuids?.[0] ||
-    (item as any).mediaUuid ||
-    null;
 
-  return resolveFoodHubCatalogImageUrl(
-    raw,
-  );
-}
-
-function TableAvatar({
-  src,
-  alt,
-  fallbackEmoji,
-}: {
-  src: string | null;
-  alt: string;
-  fallbackEmoji: string;
-}) {
-  const [error, setError] = useState(false);
-
-  if (!src || error) {
-    return (
-      <div className="flex h-full w-full items-center justify-center text-lg text-gray-300">
-        {fallbackEmoji}
-      </div>
-    );
-  }
-
-  return (
-    <img
-      src={src}
-      alt={alt}
-      className="h-full w-full object-cover"
-      loading="lazy"
-      onError={() => setError(true)}
-    />
-  );
-}
 
 export default function FoodCatalogTable({
   items,
@@ -144,23 +93,16 @@ export default function FoodCatalogTable({
         </thead>
 
         <tbody>
-          {items.map(
-            (item) => {
-              const image =
-                imageUrl(item);
-
-              return (
-                <tr
-                  key={
-                    item.uuid
-                  }
-                  className="border-b border-gray-50 last:border-b-0"
-                >
+          {items.map((item) => (
+            <tr
+              key={item.uuid}
+              className="border-b border-gray-50 last:border-b-0"
+            >
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                        <TableAvatar
-                          src={image}
+                        <FoodAvatar
+                          item={item}
                           alt={foodName(item)}
                           fallbackEmoji="🍽️"
                         />
@@ -252,9 +194,7 @@ export default function FoodCatalogTable({
                     </div>
                   </td>
                 </tr>
-              );
-            },
-          )}
+              ))}
         </tbody>
       </table>
     </div>
