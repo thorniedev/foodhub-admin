@@ -99,24 +99,9 @@ export async function uploadMenuItemMediaFile(
   };
 }
 
+import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
+
 export function normalizeCatalogAssetUrl(value?: string | null): string | null {
-  const trimmed = value?.trim();
-
-  if (!trimmed) {
-    return null;
-  }
-
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-    return trimmed;
-  }
-
-  if (trimmed.startsWith("/api/v1/catalog/")) {
-    return trimmed.replace("/api/v1/catalog/", "/api/catalog/");
-  }
-
-  if (trimmed.startsWith("/")) {
-    return trimmed;
-  }
-
-  return `/${trimmed}`;
+  return resolveFoodHubCatalogImageUrl(value);
 }
+

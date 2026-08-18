@@ -28,13 +28,24 @@ function getMenuItemImage(item: MenuItemRecord): string | null {
   const raw =
     item.thumbnail ||
     item.imageUrl ||
+    (item as any).primaryMediaUuid ||
     item.primaryMediaUrls?.[0] ||
+    item.primaryMediaUuids?.[0] ||
     item.images?.[0] ||
     item.gallery?.[0] ||
+    item.thumbnailMediaUuid ||
+    item.food?.thumbnail ||
+    item.food?.imageUrl ||
+    (item.food as any)?.primaryMediaUuid ||
+    item.food?.primaryMediaUrls?.[0] ||
+    item.food?.primaryMediaUuids?.[0] ||
+    item.food?.images?.[0] ||
+    item.food?.gallery?.[0] ||
     null;
 
   return resolveFoodHubCatalogImageUrl(raw);
 }
+
 
 /* =========================================================
    COMPONENT

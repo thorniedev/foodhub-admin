@@ -36,15 +36,39 @@ export default function MenuItemDetailModal({
   if (!uuid) return null;
 
   // Extract images
-  const images = (
+  const rawList = (
     data?.primaryMediaUrls?.length
       ? data.primaryMediaUrls
       : data?.images?.length
       ? data.images
       : data?.gallery?.length
       ? data.gallery
-      : [data?.thumbnail || data?.imageUrl].filter(Boolean)
+      : data?.primaryMediaUuids?.length
+      ? data.primaryMediaUuids
+      : (data as any)?.primaryMediaUuid
+      ? [(data as any).primaryMediaUuid]
+      : data?.thumbnailMediaUuid
+      ? [data.thumbnailMediaUuid]
+      : data?.food?.primaryMediaUrls?.length
+      ? data.food.primaryMediaUrls
+      : data?.food?.images?.length
+      ? data.food.images
+      : data?.food?.primaryMediaUuids?.length
+      ? data.food.primaryMediaUuids
+      : (data?.food as any)?.primaryMediaUuid
+      ? [(data?.food as any).primaryMediaUuid]
+      : [
+          data?.thumbnail,
+          data?.imageUrl,
+          data?.food?.thumbnail,
+          data?.food?.imageUrl,
+        ].filter(Boolean)
   ) as string[];
+
+  const images = rawList
+    .map((img) => resolveFoodHubCatalogImageUrl(img))
+    .filter(Boolean) as string[];
+
 
   return (
     <div className="fixed inset-0 z-[150] overflow-y-auto bg-black/50 p-4 backdrop-blur-sm">

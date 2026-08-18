@@ -150,8 +150,11 @@ export default function PublishMenuItemModal({
         ? item.gallery
         : item.primaryMediaUrls?.length
           ? item.primaryMediaUrls
-          : [item.thumbnail || item.imageUrl].filter(Boolean);
+          : item.primaryMediaUuids?.length
+            ? item.primaryMediaUuids
+            : [(item as any).primaryMediaUuid || item.thumbnail || item.imageUrl].filter(Boolean);
     setExistingImages(list as string[]);
+
 
     const matchedStoreUuid =
       item.storeUuid ||

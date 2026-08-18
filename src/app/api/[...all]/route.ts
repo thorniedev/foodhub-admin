@@ -95,7 +95,21 @@ async function forwardRequest(
     );
   }
 
-  const backendPath = all.join("/");
+  // Normalize if path begins with 'v1'
+  const segments = all[0]?.toLowerCase() === "v1" ? all.slice(1) : all;
+
+  if (!segments.length) {
+    return NextResponse.json(
+      {
+        message: "API endpoint is required.",
+      },
+      {
+        status: 400,
+      },
+    );
+  }
+
+  const backendPath = segments.join("/");
 
   /*
    * First check exact route.
@@ -109,7 +123,7 @@ async function forwardRequest(
    * profiles/{uuid}/safety/allergies
    * uses "profiles"
    */
-  const routeRule = allowedRoutes[backendPath] ?? allowedRoutes[all[0]];
+  const routeRule = allowedRoutes[backendPath] ?? allowedRoutes[segments[0]];
 
   if (!routeRule) {
     console.error("[FOODHUB PROXY] Route is not allowed:", backendPath);
@@ -149,11 +163,12 @@ async function forwardRequest(
   /*
    * Encode every individual path segment.
    */
-  const safeBackendPath = all
+  const safeBackendPath = segments
     .map((segment) => encodeURIComponent(segment))
     .join("/");
 
   const targetUrl = new URL(`${backendApiUrl}/${safeBackendPath}`);
+
 
   /*
    * Preserve:

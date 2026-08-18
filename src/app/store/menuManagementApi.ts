@@ -1315,29 +1315,63 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
     >({
       async queryFn(params) {
         const p = (params ?? {}) as PublicMenuItemListParams;
-        const query = makeQuery({
-          page: p.page ?? 0,
-          size: p.size ?? 20,
-          sort: p.sort ?? "createdAt,desc",
-          query: p.query,
-          rootCategoryCode: p.rootCategoryCode,
-          storeUuid: p.storeUuid,
-          foodUuid: p.foodUuid,
-          availabilityStatus: p.availabilityStatus,
-          featured: p.featured !== undefined ? String(p.featured) : undefined,
-        });
 
-        const result = await browserRequest<unknown>(
-          `/api/catalog/menu-items${query}`,
-        );
+        // 1. If storeUuid is provided, use catalog store menu items endpoint
+        if (p.storeUuid) {
+          const query = makeQuery({
+            page: p.page ?? 0,
+            size: p.size ?? 100,
+            sort: p.sort,
+          });
+          const result = await browserRequest<unknown>(
+            `/api/catalog/stores/${encodeURIComponent(p.storeUuid)}/menu-items${query}`,
+          );
 
-        if ("error" in result) {
+          if (!("error" in result)) {
+            const page = normalizePage<MenuItemRecord>(result.data as never);
+            page.content = page.content.map((item: any) => ({
+              ...item,
+              uuid: item.uuid || item.menuItemUuid,
+              menuItemUuid: item.menuItemUuid || item.uuid,
+            }));
+            return { data: page };
+          }
+
           return result;
         }
 
-        return {
-          data: normalizePage<MenuItemRecord>(result.data as never),
-        };
+        // 2. For website menu items, use discovery search endpoint with clean body
+        const discoveryQuery = makeQuery({
+          page: p.page ?? 0,
+          size: p.size ?? 100,
+        });
+
+        const body: Record<string, unknown> = {};
+        if (p.query) body.query = p.query;
+        if (p.featured !== undefined) body.featuredOnly = Boolean(p.featured);
+
+        const discoveryResult = await browserRequest<unknown>(
+          `/api/discovery/menu-items/search${discoveryQuery}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          },
+        );
+
+        if (!("error" in discoveryResult)) {
+          const page = normalizePage<MenuItemRecord>(discoveryResult.data as never);
+          page.content = page.content.map((item: any) => ({
+            ...item,
+            uuid: item.uuid || item.menuItemUuid,
+            menuItemUuid: item.menuItemUuid || item.uuid,
+          }));
+          return {
+            data: page,
+          };
+        }
+
+        return discoveryResult;
       },
     }),
 

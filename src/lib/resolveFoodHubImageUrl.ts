@@ -1,57 +1,9 @@
-// export function resolveFoodHubCatalogImageUrl(
-//   value?: string | null,
-// ): string | null {
-//   const url = String(value ?? "").trim();
+const UUID_REGEX =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
-//   if (!url) {
-//     return null;
-//   }
+const MEDIA_PATH_REGEX =
+  /^(?:\/?api)?(?:\/v1)?\/media\/([0-9a-fA-F-]+)(?:\/(file|access-url|download))?$/i;
 
-//   // Already a complete remote URL.
-//   if (
-//     url.startsWith("http://") ||
-//     url.startsWith("https://") ||
-//     url.startsWith("blob:") ||
-//     url.startsWith("data:")
-//   ) {
-//     return url;
-//   }
-
-//   /*
-//    * Backend list/detail responses currently return image paths like:
-//    *
-//    * /api/v1/catalog/menu-items/{uuid}/images/1
-//    * /api/v1/catalog/foods/{uuid}/images/1
-//    *
-//    * The Admin app does NOT expose /api/v1/catalog/*.
-//    * It exposes /api/catalog/* through:
-//    *
-//    * src/app/api/catalog/[...path]/route.ts
-//    *
-//    * Therefore rewrite backend-relative paths to the local Next.js proxy.
-//    */
-//   if (url.startsWith("/api/v1/catalog/")) {
-//     return url.replace(
-//       "/api/v1/catalog/",
-//       "/api/catalog/",
-//     );
-//   }
-
-//   if (url.startsWith("api/v1/catalog/")) {
-//     return `/${url.replace(
-//       "api/v1/catalog/",
-//       "api/catalog/",
-//     )}`;
-//   }
-
-//   if (url.startsWith("/api/catalog/")) {
-//     return url;
-//   }
-
-//   return url.startsWith("/")
-//     ? url
-//     : `/${url}`;
-// }
 export function resolveFoodHubCatalogImageUrl(
   value?: string | null,
 ): string | null {
@@ -61,7 +13,7 @@ export function resolveFoodHubCatalogImageUrl(
     return null;
   }
 
-  // Already a complete remote URL.
+  // Already a complete remote URL or browser-local blob/data URL.
   if (
     url.startsWith("http://") ||
     url.startsWith("https://") ||
@@ -71,38 +23,35 @@ export function resolveFoodHubCatalogImageUrl(
     return url;
   }
 
-  /*
-   * Backend list/detail responses currently return image paths like:
-   *
-   * /api/v1/catalog/menu-items/{uuid}/images/1
-   * /api/v1/catalog/foods/{uuid}/images/1
-   *
-   * The Admin app does NOT expose /api/v1/catalog/*.
-   * It exposes /api/catalog/* through:
-   *
-   * src/app/api/catalog/[...path]/route.ts
-   *
-   * Therefore rewrite backend-relative paths to the local Next.js proxy.
-   */
+  // Handle /api/v1/media/{uuid} or /api/media/{uuid} (with optional sub-path)
+  const mediaMatch = url.match(MEDIA_PATH_REGEX);
+  if (mediaMatch) {
+    const uuid = mediaMatch[1];
+    const action = mediaMatch[2]?.toLowerCase();
+    if (action === "access-url") {
+      return `/api/media/${uuid}/access-url`;
+    }
+    return `/api/media/${uuid}/file`;
+  }
+
+  // Handle direct UUID strings
+  if (UUID_REGEX.test(url)) {
+    return `/api/media/${url}/file`;
+  }
+
+  // Handle backend-relative catalog paths
   if (url.startsWith("/api/v1/catalog/")) {
-    return url.replace(
-      "/api/v1/catalog/",
-      "/api/catalog/",
-    );
+    return url.replace("/api/v1/catalog/", "/api/catalog/");
   }
 
   if (url.startsWith("api/v1/catalog/")) {
-    return `/${url.replace(
-      "api/v1/catalog/",
-      "api/catalog/",
-    )}`;
+    return `/${url.replace("api/v1/catalog/", "api/catalog/")}`;
   }
 
   if (url.startsWith("/api/catalog/")) {
     return url;
   }
 
-  return url.startsWith("/")
-    ? url
-    : `/${url}`;
+  return url.startsWith("/") ? url : `/${url}`;
 }
+

@@ -24,13 +24,24 @@ function imageUrl(item: MenuItemRecord): string | null {
   const raw =
     item.thumbnail ||
     item.imageUrl ||
+    (item as any).primaryMediaUuid ||
     item.primaryMediaUrls?.[0] ||
+    item.primaryMediaUuids?.[0] ||
     item.images?.[0] ||
     item.gallery?.[0] ||
+    item.thumbnailMediaUuid ||
+    item.food?.thumbnail ||
+    item.food?.imageUrl ||
+    (item.food as any)?.primaryMediaUuid ||
+    item.food?.primaryMediaUrls?.[0] ||
+    item.food?.primaryMediaUuids?.[0] ||
+    item.food?.images?.[0] ||
+    item.food?.gallery?.[0] ||
     null;
 
   return resolveFoodHubCatalogImageUrl(raw);
 }
+
 
 function formatPrice(item: MenuItemRecord): string {
   const price = Number(item.price ?? 0);
@@ -154,7 +165,7 @@ export default function PublishedMenuItemsTable({
 
             return (
               <tr
-                key={item.uuid}
+                key={item.uuid || (item as any).menuItemUuid}
                 className="
                     border-b
                     border-gray-100
@@ -174,16 +185,24 @@ export default function PublishedMenuItemsTable({
                     {/* Image */}
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-primary-50 text-primary-800">
                       {image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={image}
                           alt={item.name || "Menu item"}
                           className="h-full w-full object-cover"
                           loading="lazy"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.display = "none";
+                            const fallback = e.currentTarget.parentElement?.querySelector(".img-fallback");
+                            if (fallback) fallback.classList.remove("hidden");
+                          }}
                         />
-                      ) : (
+                      ) : null}
+                      <div className={`img-fallback flex h-full w-full items-center justify-center ${image ? "hidden" : ""}`}>
                         <ImageIcon size={24} />
-                      )}
+                      </div>
                     </div>
+
 
                     {/* Name */}
                     <div className="min-w-0 flex-1">

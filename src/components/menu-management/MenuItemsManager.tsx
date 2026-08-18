@@ -580,7 +580,7 @@ export default function MenuItemsManager() {
           <PublishedMenuItemsTable
             items={isAdvancedFilterActive ? (discoveryData?.contents ?? []) : filteredMenuItems}
             busy={busy || discoveryLoading}
-            onView={(item) => setDetailUuid(item.uuid)}
+            onView={(item) => setDetailUuid(item.uuid || (item as any).menuItemUuid)}
             onEdit={(item) => {
               setEditingMenu(item);
               setMenuModalOpen(true);
