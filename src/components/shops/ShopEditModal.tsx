@@ -22,7 +22,6 @@ import type {
 } from "@/src/types/shop";
 
 import { imageUrlOrNull } from "@/src/lib/shopFormat";
-import StoreMediaImage from "./detail/StoreMediaImage";
 import StoreMediaUploader from "./StoreMediaUploader";
 import StoreSelect from "./StoreSelect";
 import StoreSocialLinksEditor, {
@@ -537,47 +536,29 @@ export default function ShopEditModal({
           {/* ================= MEDIA ================= */}
           <Section icon={<ImageIcon size={22} />} title="រូបភាពហាង">
             <div className="grid gap-5 lg:grid-cols-2">
-              {/* Current logo + update control */}
-              <div className="space-y-4">
-                <CurrentStoreImage
-                  label="រូបសញ្ញាបច្ចុប្បន្ន"
-                  mediaUuid={values.logoMediaUuid}
-                  fallbackUrl={
-                    store.logoMediaUuid ? null : imageUrlOrNull(store.logoUrl)
-                  }
-                  variant="logo"
-                />
+              <StoreMediaUploader
+                label="រូបសញ្ញាហាង (Logo)"
+                purpose="STORE_LOGO"
+                mediaUuid={values.logoMediaUuid}
+                fallbackUrl={
+                  store.logoMediaUuid ? null : imageUrlOrNull(store.logoUrl)
+                }
+                onMediaUuidChange={(uuid) => set("logoMediaUuid", uuid)}
+                variant="logo"
+              />
 
-                <StoreMediaUploader
-                  label="កែប្រែរូបសញ្ញា"
-                  purpose="STORE_LOGO"
-                  mediaUuid={values.logoMediaUuid}
-                  onMediaUuidChange={(uuid) => set("logoMediaUuid", uuid)}
-                  variant="logo"
-                />
-              </div>
-
-              {/* Current cover + update control */}
-              <div className="space-y-4">
-                <CurrentStoreImage
-                  label="រូបគម្របបច្ចុប្បន្ន"
-                  mediaUuid={values.coverMediaUuid}
-                  fallbackUrl={
-                    store.coverMediaUuid
-                      ? null
-                      : imageUrlOrNull(store.coverImageUrl)
-                  }
-                  variant="cover"
-                />
-
-                <StoreMediaUploader
-                  label="កែប្រែរូបគម្រប"
-                  purpose="STORE_COVER"
-                  mediaUuid={values.coverMediaUuid}
-                  onMediaUuidChange={(uuid) => set("coverMediaUuid", uuid)}
-                  variant="cover"
-                />
-              </div>
+              <StoreMediaUploader
+                label="រូបគម្របហាង (Cover Banner)"
+                purpose="STORE_COVER"
+                mediaUuid={values.coverMediaUuid}
+                fallbackUrl={
+                  store.coverMediaUuid
+                    ? null
+                    : imageUrlOrNull(store.coverImageUrl)
+                }
+                onMediaUuidChange={(uuid) => set("coverMediaUuid", uuid)}
+                variant="cover"
+              />
             </div>
           </Section>
 
@@ -683,119 +664,7 @@ export default function ShopEditModal({
   );
 }
 
-/* =========================================================
-   CURRENT STORE IMAGE
-========================================================= */
 
-function CurrentStoreImage({
-  label,
-  mediaUuid,
-  fallbackUrl,
-  variant,
-}: {
-  label: string;
-  mediaUuid: string;
-  fallbackUrl: string | null;
-  variant: "logo" | "cover";
-}) {
-  const hasMediaUuid = Boolean(mediaUuid.trim());
-
-  const previewHeight = variant === "logo" ? "h-48" : "h-56";
-
-  return (
-    <div
-      className="
-        overflow-hidden
-        rounded-2xl
-        border border-gray-100
-        bg-white
-      "
-    >
-      <div
-        className="
-          border-b
-          border-gray-100
-          px-5 py-4
-        "
-      >
-        <p
-          className="
-            text-lg
-            font-semibold
-            text-primary-800
-          "
-        >
-          {label}
-        </p>
-
-        <p
-          className="
-            mt-1
-            text-base
-            text-gray-400
-          "
-        >
-          រូបភាពដែលកំពុងប្រើនៅលើហាង
-        </p>
-      </div>
-
-      <div
-        className={`
-          flex
-          ${previewHeight}
-          items-center
-          justify-center
-          overflow-hidden
-          bg-gray-50
-        `}
-      >
-        {hasMediaUuid ? (
-          <StoreMediaImage
-            mediaUuid={mediaUuid}
-            alt={label}
-            className={
-              variant === "logo"
-                ? "h-full w-full object-contain p-5"
-                : "h-full w-full object-cover"
-            }
-          />
-        ) : fallbackUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={fallbackUrl}
-            alt={label}
-            className={
-              variant === "logo"
-                ? "h-full w-full object-contain p-5"
-                : "h-full w-full object-cover"
-            }
-          />
-        ) : (
-          <div className="text-center">
-            <ImageIcon
-              size={40}
-              className="
-                mx-auto
-                text-gray-300
-              "
-            />
-
-            <p
-              className="
-                mt-3
-                text-lg
-                font-medium
-                text-gray-400
-              "
-            >
-              មិនមានរូបភាព
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 /* =========================================================
    SECTION
