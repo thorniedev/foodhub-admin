@@ -106,6 +106,7 @@ export interface StorePage {
 
 export interface GetAdminStoresParams {
   query?: string;
+  reviewStatus?: StoreReviewStatus | "ALL";
   page?: number;
   size?: number;
 }

@@ -62,9 +62,30 @@ export default function ShopsManager() {
 
   const { data, error, isLoading, isFetching, refetch } = useGetShopsQuery({
     query: serverQuery || undefined,
+    reviewStatus: filter,
     page,
     size,
   });
+
+  const { data: allCountData } = useGetShopsQuery(
+    { query: serverQuery || undefined, size: 1 },
+  );
+  const { data: pendingCountData } = useGetShopsQuery(
+    { query: serverQuery || undefined, reviewStatus: "PENDING", size: 1 },
+  );
+  const { data: approvedCountData } = useGetShopsQuery(
+    { query: serverQuery || undefined, reviewStatus: "APPROVED", size: 1 },
+  );
+  const { data: rejectedCountData } = useGetShopsQuery(
+    { query: serverQuery || undefined, reviewStatus: "REJECTED", size: 1 },
+  );
+
+  const counts = {
+    all: allCountData?.totalElements ?? data?.totalElements ?? 0,
+    pending: pendingCountData?.totalElements ?? 0,
+    approved: approvedCountData?.totalElements ?? 0,
+    rejected: rejectedCountData?.totalElements ?? 0,
+  };
 
   const { data: suggestionData, isFetching: suggestionsLoading } =
     useGetShopsQuery(
@@ -110,20 +131,7 @@ export default function ShopsManager() {
   }, [searchInput, suggestionSelected]);
 
   const stores = data?.contents ?? [];
-
-  const counts = {
-    all: stores.length,
-    pending: stores.filter((store) => store.reviewStatus === "PENDING").length,
-    approved: stores.filter((store) => store.reviewStatus === "APPROVED")
-      .length,
-    rejected: stores.filter((store) => store.reviewStatus === "REJECTED")
-      .length,
-  };
-
-  const filteredStores =
-    filter === "ALL"
-      ? stores
-      : stores.filter((store) => store.reviewStatus === filter);
+  const filteredStores = stores;
 
   const sortedStores = [...filteredStores].sort((first, second) => {
     switch (sortBy) {
