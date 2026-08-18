@@ -1529,7 +1529,7 @@
 
 "use client";
 
-import { Check, Loader2, Save, Trash2, X } from "lucide-react";
+import { Check, Loader2, Save, Search, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import ImagePicker from "./ImagePicker";
@@ -2198,8 +2198,7 @@ export default function FoodFormModal({
                 <OptionPills
                   options={activeCategories.map((category) => ({
                     value: category.uuid,
-                    // label: `${category.name} (${category.code})`,
-                      label: `${category.name} `,
+                    label: category.name,
                   }))}
                   selectedValues={
                     values.categoryUuid ? [values.categoryUuid] : []
@@ -2207,7 +2206,8 @@ export default function FoodFormModal({
                   onToggle={(value) =>
                     setValues((current) => ({
                       ...current,
-                      categoryUuid: current.categoryUuid === value ? "" : value,
+                      categoryUuid:
+                        current.categoryUuid === value ? "" : value,
                     }))
                   }
                   emptyText="មិនមាន Category សម្រាប់ជ្រើសរើស។"

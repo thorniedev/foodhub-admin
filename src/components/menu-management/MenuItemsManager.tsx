@@ -50,6 +50,7 @@ import type {
 } from "@/src/types/menu-management";
 
 import DeleteConfirmModal from "./DeleteConfirmModal";
+import HardDeleteFoodConfirmModal from "./HardDeleteFoodConfirmModal";
 import FoodCatalogTable from "./FoodCatalogTable";
 import FoodFormModal from "./FoodFormModal";
 import MenuItemDetailModal from "./MenuItemDetailModal";
@@ -171,9 +172,14 @@ export default function MenuItemsManager() {
   const foods = foodsQuery.data?.content ?? [];
   const menuItems = menuItemsQuery.data?.content ?? [];
 
+  const activeFoods = useMemo(
+    () => foods.filter((item) => item.isActive !== false),
+    [foods],
+  );
+
   const filteredFoods = useMemo(
-    () => foods.filter((item) => matchesFood(item, search)),
-    [foods, search],
+    () => activeFoods.filter((item) => matchesFood(item, search)),
+    [activeFoods, search],
   );
 
   const filteredMenuItems = useMemo(
@@ -359,7 +365,7 @@ export default function MenuItemsManager() {
 
       setNotice({
         type: "success",
-        text: "បានប្តូរ Food Catalog ទៅជា 'អសកម្ម' (Inactive) ដោយជោគជ័យ។",
+        text: "បានលុប Food Catalog ជាអចិន្ត្រៃយ៍ដោយជោគជ័យ។",
       });
 
       await refreshAll();
@@ -426,7 +432,7 @@ export default function MenuItemsManager() {
               <Stat
                 icon={<Store size={20} />}
                 label="Food Catalog សម្រាប់ហាង"
-                value={foods.length}
+                value={activeFoods.length}
               />
 
               <Stat
@@ -475,7 +481,7 @@ export default function MenuItemsManager() {
           <TabButton active={tab === "FOODS"} onClick={() => setTab("FOODS")}>
             <Store size={19} />
             សម្រាប់ហាង
-            <Count active={tab === "FOODS"}>{foods.length}</Count>
+            <Count active={tab === "FOODS"}>{activeFoods.length}</Count>
           </TabButton>
 
           <TabButton
@@ -666,20 +672,13 @@ export default function MenuItemsManager() {
       />
 
       {/* =====================================================
-          DELETE FOOD CONFIRMATION
+          HARD DELETE FOOD CONFIRMATION
       ====================================================== */}
-      <DeleteConfirmModal
-        open={Boolean(deletingFood)}
-        title="បិទដំណើរការ Food Catalog (Deactivate)?"
-        description={
-          deletingFood
-            ? `Food "${deletingFood.localName || deletingFood.canonicalName
-            }" នឹងត្រូវប្តូរស្ថានភាពទៅជា 'អសកម្ម' (Inactive)។`
-            : ""
-        }
+      <HardDeleteFoodConfirmModal
+        food={deletingFood}
         deleting={deletingFoodRequest}
         onClose={() => setDeletingFood(null)}
-        onConfirm={() => void confirmDeleteFood()}
+        onConfirm={confirmDeleteFood}
       />
 
       {/* =====================================================

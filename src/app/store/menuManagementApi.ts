@@ -1195,7 +1195,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
         const p = (params ?? {}) as ListParams;
         const query = makeQuery({
           page: p.page ?? 0,
-          size: p.size ?? 100,
+          size: p.size ?? 200,
           sort: p.sort ?? "createdAt,desc",
           query: p.query,
         });
@@ -1212,6 +1212,16 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           data: normalizePage<FoodRecord>(result.data as never),
         };
       },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.content.map(({ uuid }) => ({
+                type: "Food" as const,
+                id: uuid,
+              })),
+              { type: "Food" as const, id: "LIST" },
+            ]
+          : [{ type: "Food" as const, id: "LIST" }],
     }),
 
     getManagedFood: builder.query<FoodRecord, string>({
@@ -1228,6 +1238,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           data: unwrap<FoodRecord>(result.data as never),
         };
       },
+      providesTags: (_result, _error, uuid) => [{ type: "Food", id: uuid }],
     }),
 
     createManagedFood: builder.mutation<
@@ -1261,6 +1272,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           data: unwrap<FoodRecord>(result.data as never),
         };
       },
+      invalidatesTags: [{ type: "Food", id: "LIST" }],
     }),
 
     updateManagedFood: builder.mutation<
@@ -1288,6 +1300,10 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           data: unwrap<FoodRecord>(result.data as never),
         };
       },
+      invalidatesTags: (_result, _error, { uuid }) => [
+        { type: "Food", id: uuid },
+        { type: "Food", id: "LIST" },
+      ],
     }),
 
     deleteManagedFood: builder.mutation<void, string>({
@@ -1304,9 +1320,13 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
         }
 
         return {
-          data: undefined,
+          data: null as unknown as void,
         };
       },
+      invalidatesTags: (_result, _error, uuid) => [
+        { type: "Food", id: uuid },
+        { type: "Food", id: "LIST" },
+      ],
     }),
 
     getPublishedMenuItems: builder.query<
@@ -1589,7 +1609,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
         }
 
         return {
-          data: undefined,
+          data: null as unknown as void,
         };
       },
     }),

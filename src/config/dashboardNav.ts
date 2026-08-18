@@ -39,24 +39,11 @@ export const dashboardNav: NavItem[] = [
     icon: Utensils,
     href: "/menu-items",
   },
-  // {
-  //   label: "ប្រភេទអាហារ",
-  //   icon: Layers,
-  //   children: [
-  //     {
-  //       label: "ចំណីអាហារ",
-  //       href: "/food-types/dishes",
-  //     },
-  //     {
-  //       label: "ភេសជ្ជៈ",
-  //       href: "/food-types/drinks",
-  //     },
-  //     {
-  //       label: "អាហាររូបត្ថម្ភ",
-  //       href: "/food-types/nutritions",
-  //     },
-  //   ],
-  // },
+  {
+    label: "ប្រភេទម្ហូប",
+    icon: Layers,
+    href: "/filter/food-categories",
+  },
   {
     label: "មាតិកាដែលប្រែប្រួល",
     icon: Globe,
@@ -83,10 +70,10 @@ export const dashboardNav: NavItem[] = [
     label: "ចម្រោះទិន្នន័យ",
     icon: SlidersHorizontal,
     children: [
-      {
-        label: "ប្រភេទម្ហូប",
-        href: "/filter/food-categories",
-      },
+      // {
+      //   label: "ប្រភេទម្ហូប",
+      //   href: "/filter/food-categories",
+      // },
       {
         label: "ម្ហូបតាមប្រទេស",
         href: "/filter/cuisines",
