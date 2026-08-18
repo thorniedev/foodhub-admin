@@ -51,8 +51,11 @@ async function handleProxy(
     headers.set("Accept", request.headers.get("accept") ?? "application/json");
 
     const authHeader = request.headers.get("authorization");
+    const cookieToken = request.cookies.get("foodhub_access_token")?.value;
     if (authHeader) {
       headers.set("Authorization", authHeader);
+    } else if (cookieToken) {
+      headers.set("Authorization", `Bearer ${cookieToken}`);
     }
 
     const contentType = request.headers.get("content-type");
