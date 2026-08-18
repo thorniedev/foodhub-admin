@@ -43,11 +43,11 @@ export const dashboardNav: NavItem[] = [
     icon: Layers,
     children: [
       {
-        label: "ម្ហូប (Food)",
+        label: "ម្ហូប",
         href: "/food-catalog/foods",
       },
       {
-        label: "ភេសជ្ជៈ (Drink)",
+        label: "ភេសជ្ជៈ",
         href: "/food-catalog/drinks",
       },
     ],

@@ -221,35 +221,35 @@ export default function MenuItemsManager({
   );
 
   const pageTitle = useMemo(() => {
-    if (catalogType === "DRINK") return "ភេសជ្ជៈ (Drink)";
-    if (catalogType === "FOOD") return "ម្ហូប (Food)";
+    if (catalogType === "DRINK") return "ភេសជ្ជៈ";
+    if (catalogType === "FOOD") return "ម្ហូប";
     return initialTab === "WEBSITE" ? "មីនុយ" : "ម្ហូបអាហារ";
   }, [catalogType, initialTab]);
 
   const pageSubtitle = useMemo(() => {
-    if (catalogType === "DRINK") return "គ្រប់គ្រងបញ្ជីភេសជ្ជៈក្នុង Catalog (Drink Catalog)";
-    if (catalogType === "FOOD") return "គ្រប់គ្រងបញ្ជីមុខម្ហូបក្នុង Catalog (Food Catalog)";
+    if (catalogType === "DRINK") return "គ្រប់គ្រងបញ្ជីភេសជ្ជៈក្នុង Catalog";
+    if (catalogType === "FOOD") return "គ្រប់គ្រងបញ្ជីមុខម្ហូបក្នុង Catalog";
     return initialTab === "WEBSITE"
       ? "គ្រប់គ្រង និង បង្កើត Menu Items សម្រាប់ Store"
-      : "គ្រប់គ្រងបញ្ជីម្ហូបអាហារក្នុង Catalog (Food Catalog)";
+      : "គ្រប់គ្រងបញ្ជីមុខម្ហូបក្នុង Catalog";
   }, [catalogType, initialTab]);
 
   const foodCatalogStatLabel = useMemo(() => {
-    if (catalogType === "DRINK") return "Drink Catalog សម្រាប់ Store";
-    if (catalogType === "FOOD") return "Food Catalog សម្រាប់ Store";
-    return "Food Catalog សម្រាប់ Store";
+    if (catalogType === "DRINK") return "ភេសជ្ជៈសម្រាប់ Store";
+    if (catalogType === "FOOD") return "មុខម្ហូបសម្រាប់ Store";
+    return "មុខម្ហូបសម្រាប់ Store";
   }, [catalogType]);
 
   const foodTabButtonLabel = useMemo(() => {
-    if (catalogType === "DRINK") return "សម្រាប់ Store (Drink)";
-    if (catalogType === "FOOD") return "សម្រាប់ Store (Food)";
+    if (catalogType === "DRINK") return "ភេសជ្ជៈសម្រាប់ Store";
+    if (catalogType === "FOOD") return "មុខម្ហូបសម្រាប់ Store";
     return "សម្រាប់ Store";
   }, [catalogType]);
 
   const primaryAddButtonLabel = useMemo(() => {
-    if (catalogType === "DRINK") return "បន្ថែម Drink Catalog";
-    if (catalogType === "FOOD") return "បន្ថែម Food Catalog";
-    return "បន្ថែម Food Catalog";
+    if (catalogType === "DRINK") return "បន្ថែមភេសជ្ជៈ";
+    if (catalogType === "FOOD") return "បន្ថែមមុខម្ហូប";
+    return "បន្ថែមមុខម្ហូប";
   }, [catalogType]);
 
   const activeFilterCount = useMemo(() => {
@@ -500,7 +500,7 @@ export default function MenuItemsManager({
                 className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#137A3D] shadow-sm hover:bg-emerald-50 transition"
               >
                 <Plus size={18} />
-                បង្កើត មីនុយ (Menu Item)
+                បង្កើត Menu Item
               </button>
             ) : (
               <button

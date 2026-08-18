@@ -161,7 +161,7 @@ export default function MenuItemDetailModal({
               <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
                 <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
                   <Store size={15} />
-                  <span>Store (ហាងបម្រើ)</span>
+                  <span>ហាង</span>
                 </div>
                 <p className="mt-1 text-sm font-bold text-gray-800">
                   {data.store?.storeName || data.store?.name || data.store?.localName || data.storeUuid || "—"}
@@ -174,7 +174,7 @@ export default function MenuItemDetailModal({
               <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
                 <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
                   <Utensils size={15} />
-                  <span>Food Catalog (មុខម្ហូបមេ)</span>
+                  <span>មុខម្ហូបមេ</span>
                 </div>
                 <p className="mt-1 text-sm font-bold text-gray-800">
                   {data.food?.localName || data.food?.canonicalName || data.foodUuid || "—"}
@@ -190,7 +190,7 @@ export default function MenuItemDetailModal({
               <div className="rounded-2xl border border-gray-100 p-4">
                 <div className="flex items-center gap-2 text-sm font-black text-gray-800">
                   <Sparkles size={16} className="text-[#137A3D]" />
-                  <span>គ្រឿងផ្សំ (Recipe Ingredients) ({data.ingredients.length})</span>
+                  <span>គ្រឿងផ្សំ ({data.ingredients.length})</span>
                 </div>
 
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -221,7 +221,7 @@ export default function MenuItemDetailModal({
               <div className="rounded-2xl border border-gray-100 p-4">
                 <div className="flex items-center gap-2 text-sm font-black text-gray-800">
                   <Heart size={16} className="text-emerald-600" />
-                  <span>របបអាហារ (Dietary Types)</span>
+                  <span>របបអាហារ</span>
                 </div>
                 <div className="mt-2.5 space-y-1.5">
                   {Array.isArray(data.dietaryTypes) && data.dietaryTypes.length > 0 ? (
@@ -246,7 +246,7 @@ export default function MenuItemDetailModal({
               <div className="rounded-2xl border border-gray-100 p-4">
                 <div className="flex items-center gap-2 text-sm font-black text-gray-800">
                   <ShieldAlert size={16} className="text-amber-600" />
-                  <span>អាឡែហ្ស៊ី (Allergen Declarations)</span>
+                  <span>ប្រតិកម្មអាឡែហ្ស៊ី</span>
                 </div>
                 <div className="mt-2.5 space-y-1.5">
                   {Array.isArray(data.allergenDeclarations) && data.allergenDeclarations.length > 0 ? (
@@ -271,7 +271,7 @@ export default function MenuItemDetailModal({
             {/* Gallery images if more than 1 */}
             {images.length > 1 && (
               <div className="rounded-2xl border border-gray-100 p-4">
-                <p className="text-xs font-bold text-gray-400">រូបភាពបន្ថែម (Gallery)</p>
+                <p className="text-xs font-bold text-gray-400">រូបភាពបន្ថែម</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {images.map((img, idx) => (
                     <img

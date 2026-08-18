@@ -523,7 +523,7 @@ export default function FoodFormModal({
             />
 
             <label>
-              <Label>Category (ប្រភេទម្ហូប) *</Label>
+              <Label>ប្រភេទម្ហូប *</Label>
               <select
                 value={values.categoryUuid}
                 onChange={(event) =>
@@ -534,7 +534,7 @@ export default function FoodFormModal({
                 }
                 className={inputClass}
               >
-                <option value="">ជ្រើស Category</option>
+                <option value="">ជ្រើសប្រភេទម្ហូប</option>
                 {activeCategories.map((category) => (
                   <option key={category.uuid} value={category.uuid}>
                     {extractKhmerOnlyName(category.name)}
@@ -544,7 +544,7 @@ export default function FoodFormModal({
             </label>
 
             <label>
-              <Label>Cuisine (ម្ហូបតាមប្រទេស) *</Label>
+              <Label>ម្ហូបតាមប្រទេស *</Label>
               <select
                 value={values.cuisineUuid}
                 onChange={(event) =>
@@ -555,19 +555,19 @@ export default function FoodFormModal({
                 }
                 className={inputClass}
               >
-                <option value="">ជ្រើស Cuisine</option>
+                <option value="">ជ្រើសម្ហូបតាមប្រទេស</option>
                 {cuisines
                   .filter((cuisine) => cuisine.isActive !== false)
                   .map((cuisine) => (
                     <option key={cuisine.uuid} value={cuisine.uuid}>
-                      {cuisine.name}
+                      {extractKhmerOnlyName(cuisine.name)}
                     </option>
                   ))}
               </select>
             </label>
 
             <Field
-              label="Spice level"
+              label="កម្រិតហឹរ"
               type="number"
               value={values.defaultSpiceLevel}
               onChange={(value) =>
@@ -594,7 +594,7 @@ export default function FoodFormModal({
             </label>
 
             <label className="md:col-span-2">
-              <Label>Description</Label>
+              <Label>ការពិពណ៌នា</Label>
               <textarea
                 rows={3}
                 value={values.description}
@@ -652,7 +652,7 @@ export default function FoodFormModal({
           <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-gray-900">របបអាហារ (Dietary Types)</h3>
+                <h3 className="font-black text-gray-900">របបអាហារ</h3>
                 <p className="text-xs text-gray-400">កំណត់របបអាហារដែលត្រូវគ្នា (Gluten Free, Vegan, Halal, etc.)</p>
               </div>
               <button
@@ -716,7 +716,7 @@ export default function FoodFormModal({
           <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-gray-900">ពេលទទួលទាន (Meal Types)</h3>
+                <h3 className="font-black text-gray-900">ពេលទទួលទាន</h3>
                 <p className="text-xs text-gray-400">កំណត់ពេលទទួលទាន (Breakfast, Lunch, Dinner, etc.)</p>
               </div>
               <button
@@ -791,7 +791,7 @@ export default function FoodFormModal({
           <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-gray-900">ក្រុមអាយុ (Age Rules)</h3>
+                <h3 className="font-black text-gray-900">ក្រុមអាយុ</h3>
                 <p className="text-xs text-gray-400">កំណត់លក្ខខណ្ឌសាកសមសម្រាប់ក្រុមអាយុ</p>
               </div>
               <button
@@ -882,7 +882,7 @@ export default function FoodFormModal({
           <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-gray-900">រដូវកាល (Seasons)</h3>
+                <h3 className="font-black text-gray-900">រដូវកាល</h3>
                 <p className="text-xs text-gray-400">កំណត់រដូវកាលដែលសាកសមសម្រាប់ម្ហូបនេះ</p>
               </div>
               <button
@@ -970,7 +970,7 @@ export default function FoodFormModal({
           <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-gray-900">ព្រឹត្តិការណ៍ / បុណ្យទាន (Events)</h3>
+                <h3 className="font-black text-gray-900">ព្រឹត្តិការណ៍ / បុណ្យទាន</h3>
                 <p className="text-xs text-gray-400">កំណត់ពិធីបុណ្យ ឬព្រឹត្តិការណ៍ដែលពាក់ព័ន្ធ</p>
               </div>
               <button
@@ -1058,7 +1058,7 @@ export default function FoodFormModal({
           <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-gray-900">ស្ថានភាពអាកាសធាតុ (Weather Conditions)</h3>
+                <h3 className="font-black text-gray-900">ស្ថានភាពអាកាសធាតុ</h3>
                 <p className="text-xs text-gray-400">កំណត់អាកាសធាតុដែលសាកសមសម្រាប់ម្ហូបនេះ</p>
               </div>
               <button

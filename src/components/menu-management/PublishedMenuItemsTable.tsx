@@ -73,19 +73,19 @@ export default function PublishedMenuItemsTable({
             </th>
 
             <th className="px-5 py-4">
-              Store
+              ហាង
             </th>
 
             <th className="px-5 py-4">
-              Food
+              មុខម្ហូបមេ
             </th>
 
             <th className="px-5 py-4">
-              Price
+              តម្លៃ
             </th>
 
             <th className="px-5 py-4">
-              Availability
+              ស្ថានភាព
             </th>
 
             <th className="px-5 py-4 text-right">

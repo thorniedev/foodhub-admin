@@ -177,7 +177,7 @@ export default function AdvancedFilterModal({
               {filterOptions?.categories && filterOptions.categories.length > 0 && (
                 <div>
                   <label className="mb-2 block font-bold text-gray-900">
-                    ប្រភេទម្ហូបអាហារ (Categories)
+                    ប្រភេទម្ហូប
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {filterOptions.categories.map((cat) => {
@@ -208,7 +208,7 @@ export default function AdvancedFilterModal({
               {filterOptions?.cuisines && filterOptions.cuisines.length > 0 && (
                 <div>
                   <label className="mb-2 block font-bold text-gray-900">
-                    តំបន់ម្ហូប (Cuisines)
+                    ម្ហូបតាមប្រទេស
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {filterOptions.cuisines.map((c) => {
@@ -242,7 +242,7 @@ export default function AdvancedFilterModal({
                   <div className="flex items-center justify-between mb-2">
                     <label className="font-bold text-gray-900 flex items-center gap-1.5">
                       <DollarSign size={16} className="text-emerald-600" />
-                      កម្រិតតម្លៃ (Price Range)
+                      កម្រិតតម្លៃ
                     </label>
                     <span className="text-xs font-semibold text-emerald-800">
                       ${form.minimumPrice ?? filterOptions?.priceRanges?.min ?? 0} - ${form.maximumPrice ?? filterOptions?.priceRanges?.max ?? 100}
@@ -288,7 +288,7 @@ export default function AdvancedFilterModal({
                   <div className="flex items-center justify-between mb-2">
                     <label className="font-bold text-gray-900 flex items-center gap-1.5">
                       <Flame size={16} className="text-red-500" />
-                      កម្រិតហិរ (Spice Level 0-5)
+                      កម្រិតហឹរ (០-៥)
                     </label>
                     <span className="text-xs font-semibold text-red-600">
                       Level {form.minimumSpiceLevel ?? 0} - {form.maximumSpiceLevel ?? 5}
@@ -336,7 +336,7 @@ export default function AdvancedFilterModal({
               {filterOptions?.dietaryTypes && filterOptions.dietaryTypes.length > 0 && (
                 <div>
                   <label className="mb-2 block font-bold text-gray-900">
-                    របបអាហារ (Dietary Preferences)
+                    របបអាហារ
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {filterOptions.dietaryTypes.map((dt) => {
@@ -368,7 +368,7 @@ export default function AdvancedFilterModal({
                 <div>
                   <label className="mb-2 block font-bold text-gray-900 flex items-center gap-1.5">
                     <ShieldAlert size={16} className="text-orange-500" />
-                    ជៀសវាងសារធាតុប្រតិកម្ម (Exclude Allergens)
+                    ជៀសវាងសារធាតុប្រតិកម្មអាឡែហ្ស៊ី
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {filterOptions.allergens.map((alg) => {
@@ -401,7 +401,7 @@ export default function AdvancedFilterModal({
                 {filterOptions?.seasons && filterOptions.seasons.length > 0 && (
                   <div>
                     <label className="mb-1.5 block font-semibold text-gray-800">
-                      រដូវកាល (Seasons)
+                      រដូវកាល
                     </label>
                     <div className="flex flex-wrap gap-1.5">
                       {filterOptions.seasons.map((s) => {
@@ -431,7 +431,7 @@ export default function AdvancedFilterModal({
                 {filterOptions?.events && filterOptions.events.length > 0 && (
                   <div>
                     <label className="mb-1.5 block font-semibold text-gray-800">
-                      កម្មវិធី/ពិធីបុណ្យ (Events)
+                      ព្រឹត្តិការណ៍ / បុណ្យទាន
                     </label>
                     <div className="flex flex-wrap gap-1.5">
                       {filterOptions.events.map((ev) => {
@@ -461,7 +461,7 @@ export default function AdvancedFilterModal({
                 {/* Store Price Level */}
                 <div>
                   <label className="mb-1.5 block font-semibold text-gray-800">
-                    កម្រិតតម្លៃហាង (Store Price Level)
+                    កម្រិតតម្លៃហាង
                   </label>
                   <div className="flex gap-1.5">
                     {[1, 2, 3, 4].map((level) => {
@@ -503,7 +503,7 @@ export default function AdvancedFilterModal({
                     }
                     className="w-full rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-emerald-600"
                   >
-                    <option value="">ទាំងអស់ (All Ratings)</option>
+                    <option value="">ទាំងអស់</option>
                     <option value="4.5">⭐ 4.5+ Stars</option>
                     <option value="4.0">⭐ 4.0+ Stars</option>
                     <option value="3.5">⭐ 3.5+ Stars</option>
@@ -547,7 +547,7 @@ export default function AdvancedFilterModal({
                     className="h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
                   />
                   <span className="font-semibold text-gray-800">
-                    🟢 បើកដំណើរការឥឡូវនេះ (Open Now)
+                    🟢 បើកដំណើរការឥឡូវនេះ
                   </span>
                 </label>
 

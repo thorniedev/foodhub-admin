@@ -442,11 +442,11 @@ export default function PublishMenuItemModal({
             <div>
               <h2 className="text-2xl font-black text-gray-900">
                 {item
-                  ? "កែប្រែ Menu Item (Edit Menu Item)"
+                  ? "កែប្រែ Menu Item"
                   : "Publish Menu Item ទៅ Website"}
               </h2>
               <p className="mt-0.5 text-xs text-gray-500">
-                ជ្រើស Store + Food Catalog រួចកំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីផ្សាយលើ Website
+                ជ្រើស Store និង Food Catalog រួចកំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីផ្សាយលើ Website
               </p>
             </div>
           </div>
@@ -465,7 +465,7 @@ export default function PublishMenuItemModal({
           {/* Main Info */}
           <div className="grid gap-4 md:grid-cols-2">
             <label>
-              <Label>Store (ហាងបម្រើ) *</Label>
+              <Label>ហាង *</Label>
               <select
                 disabled={Boolean(item)}
                 value={values.storeUuid}
@@ -477,7 +477,7 @@ export default function PublishMenuItemModal({
                 }
                 className={inputClass}
               >
-                <option value="">ជ្រើសរើស Store</option>
+                <option value="">ជ្រើសរើសហាង</option>
                 {stores.map((store) => (
                   <option key={store.uuid} value={store.uuid}>
                     {storeLabel(store)}
@@ -487,13 +487,13 @@ export default function PublishMenuItemModal({
             </label>
 
             <label>
-              <Label>Food Catalog (មុខម្ហូបមេ) *</Label>
+              <Label>មុខម្ហូបមេ *</Label>
               <select
                 value={values.foodUuid}
                 onChange={(event) => handleFoodSelect(event.target.value)}
                 className={inputClass}
               >
-                <option value="">ជ្រើសរើស Food Catalog</option>
+                <option value="">ជ្រើសរើសមុខម្ហូបមេ</option>
                 {activeFoods.map((food) => (
                   <option key={food.uuid} value={food.uuid}>
                     {foodLabel(food)}
@@ -503,7 +503,7 @@ export default function PublishMenuItemModal({
             </label>
 
             <Field
-              label="ឈ្មោះ Menu Item (Website Name) *"
+              label="ឈ្មោះ Menu Item *"
               value={values.name}
               placeholder="ឧទាហរណ៍៖ សម្លកកូរពិសេស ឬ Phnom Penh Noodle Soup"
               onChange={(value) =>
@@ -515,7 +515,7 @@ export default function PublishMenuItemModal({
             />
 
             <Field
-              label="តម្លៃ (Price) *"
+              label="តម្លៃ *"
               type="number"
               value={values.price}
               placeholder="3.50"
@@ -528,7 +528,7 @@ export default function PublishMenuItemModal({
             />
 
             <Field
-              label="រូបិយប័ណ្ណ (Currency)"
+              label="រូបិយប័ណ្ណ"
               value={values.currencyCode}
               placeholder="USD"
               onChange={(value) =>
@@ -540,7 +540,7 @@ export default function PublishMenuItemModal({
             />
 
             <Field
-              label="រយៈពេលធ្វើ (Preparation minutes)"
+              label="រយៈពេលធ្វើ (នាទី)"
               type="number"
               value={values.preparationTimeMinutes}
               placeholder="10"
@@ -564,15 +564,15 @@ export default function PublishMenuItemModal({
                 }
                 className={inputClass}
               >
-                <option value="AVAILABLE">AVAILABLE (មានលក់)</option>
-                <option value="UNAVAILABLE">UNAVAILABLE (មិនមានលក់)</option>
-                <option value="SOLD_OUT">SOLD_OUT (អស់ស្តុក)</option>
-                <option value="HIDDEN">HIDDEN (លាក់ទុក)</option>
+                <option value="AVAILABLE">មានលក់</option>
+                <option value="UNAVAILABLE">មិនមានលក់</option>
+                <option value="SOLD_OUT">អស់ស្តុក</option>
+                <option value="HIDDEN">លាក់ទុក</option>
               </select>
             </label>
 
             <label>
-              <Label>ទិន្នន័យគ្រឿងផ្សំ (Ingredient Data Status)</Label>
+              <Label>ទិន្នន័យគ្រឿងផ្សំ</Label>
               <select
                 value={values.ingredientDataStatus}
                 onChange={(event) =>
@@ -583,15 +583,15 @@ export default function PublishMenuItemModal({
                 }
                 className={inputClass}
               >
-                <option value="COMPLETE">COMPLETE (ពេញលេញ)</option>
-                <option value="VERIFIED">VERIFIED (បានផ្ទៀងផ្ទាត់)</option>
-                <option value="PARTIAL">PARTIAL (ផ្នែកខ្លះ)</option>
-                <option value="UNKNOWN">UNKNOWN (មិនច្បាស់)</option>
+                <option value="COMPLETE">ពេញលេញ</option>
+                <option value="VERIFIED">បានផ្ទៀងផ្ទាត់</option>
+                <option value="PARTIAL">ផ្នែកខ្លះ</option>
+                <option value="UNKNOWN">មិនច្បាស់</option>
               </select>
             </label>
 
             <label className="md:col-span-2">
-              <Label>ការពិពណ៌នា (Description)</Label>
+              <Label>ការពិពណ៌នា</Label>
               <textarea
                 rows={3}
                 value={values.description}
@@ -614,7 +614,7 @@ export default function PublishMenuItemModal({
                 <Sparkles size={18} className="text-[#137A3D]" />
                 <div>
                   <h3 className="font-black text-gray-900">
-                    គ្រឿងផ្សំ (Ingredients Recipe)
+                    គ្រឿងផ្សំ
                   </h3>
                   <p className="mt-0.5 text-xs text-gray-400">
                     កំណត់គ្រឿងផ្សំ បរិមាណ និងខ្នាតសម្រាប់មុខម្ហូបនេះ។
@@ -732,7 +732,7 @@ export default function PublishMenuItemModal({
                 <Heart size={18} className="text-emerald-600" />
                 <div>
                   <h3 className="font-black text-gray-900">
-                    របបអាហារ (Dietary Types)
+                    របបអាហារ
                   </h3>
                   <p className="mt-0.5 text-xs text-gray-400">
                     សម្គាល់របបអាហារ (Vegan, Halal, Keto, etc.)
@@ -835,7 +835,7 @@ export default function PublishMenuItemModal({
                 <ShieldAlert size={18} className="text-amber-600" />
                 <div>
                   <h3 className="font-black text-gray-900">
-                    ប្រតិកម្មអាឡែហ្ស៊ី (Allergen Declarations)
+                    ប្រតិកម្មអាឡែហ្ស៊ី
                   </h3>
                   <p className="mt-0.5 text-xs text-gray-400">
                     ប្រកាសសារធាតុបង្កអាឡែហ្ស៊ី និងកម្រិតហានិភ័យសម្រាប់សុវត្ថិភាពអតិថិជន។
@@ -896,8 +896,8 @@ export default function PublishMenuItemModal({
                     }
                     className={inputClass}
                   >
-                    <option value="MAY_CONTAIN">MAY_CONTAIN (អាចមាន)</option>
-                    <option value="CONTAINS">CONTAINS (មានផ្ទុក)</option>
+                    <option value="MAY_CONTAIN">អាចមាន</option>
+                    <option value="CONTAINS">មានផ្ទុក</option>
                   </select>
 
                   <select
@@ -1001,7 +1001,7 @@ export default function PublishMenuItemModal({
               ) : (
                 <Save size={16} />
               )}
-              {item ? "រក្សាទុក (Save Changes)" : "Publish ទៅ Website"}
+              {item ? "រក្សាទុក" : "Publish ទៅ Website"}
             </button>
           </div>
         </div>

@@ -70,19 +70,19 @@ export default function FoodCatalogTable({
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-xs font-black uppercase tracking-wide text-gray-400">
             <th className="px-5 py-4">
-              ម្ហូប
+              មុខម្ហូប
             </th>
 
             <th className="px-5 py-4">
-              Category
+              ប្រភេទម្ហូប
             </th>
 
             <th className="px-5 py-4">
-              Cuisine
+              ម្ហូបតាមប្រទេស
             </th>
 
             <th className="px-5 py-4">
-              Status
+              ស្ថានភាព
             </th>
 
             <th className="px-5 py-4 text-right">
