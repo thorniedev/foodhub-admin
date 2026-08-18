@@ -23,13 +23,70 @@ export const DRINK_KEYWORDS = [
   "ទឹកដោះគោ",
 ];
 
+export function extractKhmerOnlyName(name: string): string {
+  if (!name) return "";
+
+  // 1. Remove text inside parentheses (e.g. "(Khmer Coffee)", "(Drink)", "(Food)")
+  const withoutParens = name.replace(/\s*\([^)]*\)/g, "").trim();
+
+  // 2. Extract Khmer character segments if present
+  const khmerRegex = /[\u1780-\u17FF\u19E0-\u19FF\s&,]+/g;
+  const khmerMatches = withoutParens.match(khmerRegex);
+  if (khmerMatches && khmerMatches.length > 0) {
+    const khmerText = khmerMatches.join(" ").replace(/\s+/g, " ").trim();
+    if (khmerText.length > 0) {
+      return khmerText;
+    }
+  }
+
+  return withoutParens || name.trim();
+}
+
+export function isParentCategory(
+  category: FoodCategoryOption,
+  allCategories: FoodCategoryOption[] = [],
+): boolean {
+  if (!category) return false;
+
+  // A category without parentCategoryUuid is a top-level parent
+  if (!category.parentCategoryUuid) {
+    return true;
+  }
+
+  const code = (category.code ?? "").toUpperCase().trim();
+  if (code === "DRINK" || code === "FOOD" || code === "ROOT") {
+    return true;
+  }
+
+  // If other categories declare this category as their parent
+  const hasChildren = allCategories.some(
+    (c) => c.uuid !== category.uuid && c.parentCategoryUuid === category.uuid,
+  );
+  if (hasChildren) {
+    return true;
+  }
+
+  return false;
+}
+
+export function isSubCategory(
+  category: FoodCategoryOption,
+  allCategories: FoodCategoryOption[] = [],
+): boolean {
+  return !isParentCategory(category, allCategories);
+}
+
 export function isDrinkCategory(
   category: FoodCategoryOption,
   allCategories: FoodCategoryOption[] = [],
 ): boolean {
   if (!category) return false;
 
-  // 1. Check direct parent category name
+  const code = (category.code ?? "").toUpperCase().trim();
+  if (code.startsWith("DRINK")) return true;
+  if (code.startsWith("FOOD")) return false;
+
+  // Check parent category name
   const parentName = (category.parentCategoryName ?? "").toLowerCase().trim();
   if (parentName) {
     if (DRINK_KEYWORDS.some((kw) => parentName.includes(kw))) {
@@ -37,23 +94,23 @@ export function isDrinkCategory(
     }
   }
 
-  // 2. Check parent category object if parentCategoryUuid is set
+  // Check parent category object in list
   if (category.parentCategoryUuid) {
     const parent = allCategories.find((c) => c.uuid === category.parentCategoryUuid);
     if (parent) {
       const pName = (parent.name ?? "").toLowerCase();
-      const pCode = (parent.code ?? "").toLowerCase();
-      if (DRINK_KEYWORDS.some((kw) => pName.includes(kw) || pCode.includes(kw))) {
+      const pCode = (parent.code ?? "").toUpperCase();
+      if (pCode.startsWith("DRINK") || DRINK_KEYWORDS.some((kw) => pName.includes(kw))) {
         return true;
+      }
+      if (pCode.startsWith("FOOD")) {
+        return false;
       }
     }
   }
 
-  // 3. Check category own name and code
   const name = (category.name ?? "").toLowerCase().trim();
-  const code = (category.code ?? "").toLowerCase().trim();
-
-  return DRINK_KEYWORDS.some((kw) => name.includes(kw) || code.includes(kw));
+  return DRINK_KEYWORDS.some((kw) => name.includes(kw));
 }
 
 export function isFoodCategory(
@@ -61,4 +118,18 @@ export function isFoodCategory(
   allCategories: FoodCategoryOption[] = [],
 ): boolean {
   return !isDrinkCategory(category, allCategories);
+}
+
+export function isDrinkSubCategory(
+  category: FoodCategoryOption,
+  allCategories: FoodCategoryOption[] = [],
+): boolean {
+  return isSubCategory(category, allCategories) && isDrinkCategory(category, allCategories);
+}
+
+export function isFoodSubCategory(
+  category: FoodCategoryOption,
+  allCategories: FoodCategoryOption[] = [],
+): boolean {
+  return isSubCategory(category, allCategories) && isFoodCategory(category, allCategories);
 }

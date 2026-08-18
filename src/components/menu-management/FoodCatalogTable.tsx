@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
 import FoodAvatar from "./FoodAvatar";
+import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 
 import type {
   FoodRecord,
@@ -23,11 +24,9 @@ function foodName(
 function categoryName(
   item: FoodRecord,
 ): string {
-  return (
-    item.category?.name ||
-    item.categoryName ||
-    "—"
-  );
+  const raw = item.category?.name || item.categoryName || "";
+  if (!raw) return "—";
+  return extractKhmerOnlyName(raw);
 }
 
 function cuisineName(

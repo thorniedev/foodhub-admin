@@ -4,7 +4,12 @@ import { Loader2, Plus, Save, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import ImagePicker from "./ImagePicker";
-import { isDrinkCategory, isFoodCategory } from "@/src/lib/catalogCategoryHelper";
+import {
+  extractKhmerOnlyName,
+  isDrinkSubCategory,
+  isFoodSubCategory,
+  isSubCategory,
+} from "@/src/lib/catalogCategoryHelper";
 
 import type {
   CuisineOption,
@@ -350,16 +355,17 @@ export default function FoodFormModal({
     const list = categories.filter((category) => category.isActive !== false);
 
     if (catalogType === "DRINK") {
-      const drinks = list.filter((c) => isDrinkCategory(c, categories));
-      return drinks.length > 0 ? drinks : list;
+      const drinks = list.filter((c) => isDrinkSubCategory(c, categories));
+      return drinks;
     }
 
     if (catalogType === "FOOD") {
-      const foods = list.filter((c) => isFoodCategory(c, categories));
-      return foods.length > 0 ? foods : list;
+      const foods = list.filter((c) => isFoodSubCategory(c, categories));
+      return foods;
     }
 
-    return list;
+    const subCategories = list.filter((c) => isSubCategory(c, categories));
+    return subCategories.length > 0 ? subCategories : list;
   }, [categories, catalogType]);
 
   const modalTitle = useMemo(() => {
@@ -531,7 +537,7 @@ export default function FoodFormModal({
                 <option value="">ជ្រើស Category</option>
                 {activeCategories.map((category) => (
                   <option key={category.uuid} value={category.uuid}>
-                    {category.name} ({category.code})
+                    {extractKhmerOnlyName(category.name)}
                   </option>
                 ))}
               </select>
