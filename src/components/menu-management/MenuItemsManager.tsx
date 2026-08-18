@@ -12,7 +12,7 @@ import {
   Utensils,
 } from "lucide-react";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useSearchAdvancedMenuItemsMutation } from "@/src/app/store/discoveryApi";
@@ -55,7 +55,6 @@ import FoodFormModal from "./FoodFormModal";
 import MenuItemDetailModal from "./MenuItemDetailModal";
 import PublishMenuItemModal from "./PublishMenuItemModal";
 import PublishedMenuItemsTable from "./PublishedMenuItemsTable";
-import AdvancedFilterModal from "./AdvancedFilterModal";
 
 type Tab = "FOODS" | "WEBSITE";
 
@@ -145,7 +144,6 @@ export default function MenuItemsManager() {
   const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 });
   const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 });
 
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedMenuItemSearchRequest>({});
   const [isAdvancedFilterActive, setIsAdvancedFilterActive] = useState(false);
 
@@ -193,6 +191,8 @@ export default function MenuItemsManager() {
     if (advancedFilters.excludeAllergenUuids?.length) count += advancedFilters.excludeAllergenUuids.length;
     if (advancedFilters.seasonUuids?.length) count += advancedFilters.seasonUuids.length;
     if (advancedFilters.eventUuids?.length) count += advancedFilters.eventUuids.length;
+    if (advancedFilters.weatherConditionUuids?.length) count += advancedFilters.weatherConditionUuids.length;
+    if (advancedFilters.ageGroupUuids?.length) count += advancedFilters.ageGroupUuids.length;
     if (advancedFilters.minimumPrice !== undefined || advancedFilters.maximumPrice !== undefined) count++;
     if (advancedFilters.minimumSpiceLevel !== undefined || advancedFilters.maximumSpiceLevel !== undefined) count++;
     if (advancedFilters.openNow) count++;
@@ -215,9 +215,28 @@ export default function MenuItemsManager() {
     }
   };
 
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("foodhub_advanced_filters");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Object.keys(parsed).length > 0) {
+          handleApplyAdvancedFilters(parsed);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const handleResetAdvancedFilters = () => {
     setAdvancedFilters({});
     setIsAdvancedFilterActive(false);
+    try {
+      sessionStorage.removeItem("foodhub_advanced_filters");
+    } catch {
+      // ignore
+    }
   };
 
   const busy =
@@ -486,16 +505,17 @@ export default function MenuItemsManager() {
 
           <button
             type="button"
-            onClick={() => setFilterModalOpen(true)}
-            className={`flex h-12 items-center gap-2 rounded-2xl border px-4 text-xs font-bold transition shadow-xs ${isAdvancedFilterActive
+            onClick={() => router.push("/menu-items/filter")}
+            className={`flex h-12 items-center gap-2 rounded-2xl border px-5 text-lg font-bold transition shadow-xs ${
+              isAdvancedFilterActive
                 ? "border-emerald-600 bg-emerald-700 text-white"
                 : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-              }`}
+            }`}
           >
-            <Sliders size={16} />
+            <Sliders size={20} />
             <span>តម្រងកម្រិតខ្ពស់</span>
             {activeFilterCount > 0 && (
-              <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-extrabold text-white">
+              <span className="rounded-full bg-orange-500 px-2.5 py-0.5 text-base font-extrabold text-white">
                 {activeFilterCount}
               </span>
             )}
@@ -680,15 +700,6 @@ export default function MenuItemsManager() {
       <MenuItemDetailModal
         uuid={detailUuid}
         onClose={() => setDetailUuid(null)}
-      />
-
-      <AdvancedFilterModal
-        isOpen={filterModalOpen}
-        onClose={() => setFilterModalOpen(false)}
-        onApply={handleApplyAdvancedFilters}
-        onReset={handleResetAdvancedFilters}
-        currentFilters={advancedFilters}
-        activeFilterCount={activeFilterCount}
       />
     </div>
   );
