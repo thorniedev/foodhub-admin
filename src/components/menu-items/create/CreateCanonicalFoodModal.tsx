@@ -201,7 +201,7 @@ export default function CreateCanonicalFoodModal({
               Food Catalog
             </p>
             <h2 className="mt-1 text-2xl font-black text-gray-900 sm:text-3xl">
-              បង្កើត Food សម្រាប់ Store ជ្រើសយក
+              បន្ថែមមុខម្ហូបថ្មី
             </h2>
           </div>
 
