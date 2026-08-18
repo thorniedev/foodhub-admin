@@ -1448,7 +1448,23 @@ export const menuManagementApi =
           async queryFn(params) {
             const p = (params ?? {}) as PublicMenuItemListParams;
 
-            // 1. Primary: Discovery Search API (POST /api/discovery/menu-items/search)
+            // 1. If storeUuid is provided, first try GET /api/catalog/stores/{storeUuid}/menu-items
+            if (p.storeUuid) {
+              const catalogStoreRes = await browserRequest<unknown>(
+                `/api/catalog/stores/${encodeURIComponent(
+                  p.storeUuid,
+                )}/menu-items?page=${p.page ?? 0}&size=${p.size ?? 100}`,
+              );
+
+              if (!("error" in catalogStoreRes)) {
+                const norm = normalizePage<MenuItemRecord>(catalogStoreRes.data as never);
+                if (norm.content && norm.content.length > 0) {
+                  return { data: norm };
+                }
+              }
+            }
+
+            // 2. Discovery Search API (POST /api/discovery/menu-items/search)
             let result = await browserRequest<unknown>(
               `/api/discovery/menu-items/search?page=${p.page ?? 0}&size=${
                 p.size ?? 100
@@ -1464,7 +1480,7 @@ export const menuManagementApi =
               },
             );
 
-            // 2. Fallback: GET /api/menu-items
+            // 3. Fallback: GET /api/catalog/menu-items
             if ("error" in result) {
               const query = makeQuery({
                 page: p.page ?? 0,
@@ -1475,7 +1491,7 @@ export const menuManagementApi =
               });
 
               result = await browserRequest<unknown>(
-                `/api/menu-items${query}`,
+                `/api/catalog/menu-items${query}`,
               );
             }
 

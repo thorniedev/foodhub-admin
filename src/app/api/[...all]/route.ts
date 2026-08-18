@@ -170,10 +170,15 @@ async function forwardRequest(
 
   const incomingUrl = new URL(request.url);
 
+  let normalizedPath = all;
+  if (all[0] === "menu-items") {
+    normalizedPath = ["catalog", "menu-items", ...all.slice(1)];
+  }
+
   /*
    * Encode every individual path segment.
    */
-  const safeBackendPath = all
+  const safeBackendPath = normalizedPath
     .map((segment) => encodeURIComponent(segment))
     .join("/");
 
