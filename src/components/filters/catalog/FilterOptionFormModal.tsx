@@ -332,52 +332,19 @@ export default function FilterOptionFormModal({
           "
         >
           {/* Names */}
-          <div
-            className="
-              grid
-              gap-4
-              sm:grid-cols-2
-            "
-          >
+          {/* Name */}
+          <div>
             <Field
-              label="ឈ្មោះសម្រាប់បង្ហាញ"
-              value={
-                form.localName
-              }
-              onChange={(
-                value,
-              ) =>
-                setForm(
-                  (
-                    previous,
-                  ) => ({
-                    ...previous,
-                    localName:
-                      value,
-                  }),
-                )
+              label={`ឈ្មោះ ${group.labelKm}`}
+              value={form.name || form.localName}
+              onChange={(value) =>
+                setForm((previous) => ({
+                  ...previous,
+                  name: value,
+                  localName: value,
+                }))
               }
               placeholder={`ឧ. បញ្ចូលឈ្មោះ ${group.labelKm}`}
-            />
-
-            <Field
-              label="English name"
-              value={
-                form.name
-              }
-              onChange={(
-                value,
-              ) =>
-                setForm(
-                  (
-                    previous,
-                  ) => ({
-                    ...previous,
-                    name: value,
-                  }),
-                )
-              }
-              placeholder={`e.g. Enter ${group.labelEn}`}
             />
           </div>
 

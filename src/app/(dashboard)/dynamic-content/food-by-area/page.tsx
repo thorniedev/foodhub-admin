@@ -21,8 +21,8 @@ const sortOptions: Array<{ value: SortMode; label: string }> = [
 export default function FoodByAreaPage() {
   const { data: areas = [] } = useGetFoodByAreasQuery();
   const [deleteArea] = useDeleteFoodByAreaMutation();
-  const [addArea] = useAddFoodByAreaMutation();
-  const [updateArea] = useUpdateFoodByAreaMutation();
+  const [addArea, { isLoading: isAdding }] = useAddFoodByAreaMutation();
+  const [updateArea, { isLoading: isUpdating }] = useUpdateFoodByAreaMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<FoodByAreaImage | null>(null);
@@ -87,9 +87,12 @@ export default function FoodByAreaPage() {
     });
   }, [areas, search, statusFilter, sortMode]);
 
-  const handleSubmit = async (values: Omit<FoodByAreaImage, "id">) => {
-    if (editingItem) await updateArea({ id: editingItem.id, changes: values });
-    else await addArea(values);
+  const handleSubmit = async (values: any) => {
+    if (editingItem) {
+      await updateArea({ id: editingItem.id, changes: values }).unwrap();
+    } else {
+      await addArea(values).unwrap();
+    }
     setIsModalOpen(false);
   };
 

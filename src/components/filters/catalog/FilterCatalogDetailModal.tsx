@@ -373,20 +373,11 @@ export default function FilterCatalogDetailModal({
           </div>
         ) : (
           <div className="space-y-4 p-6 sm:p-7">
-            {/* Names */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <FieldLabel>ឈ្មោះសម្រាប់បង្ហាញ</FieldLabel>
-                <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
-                  {displayItem?.localName || "—"}
-                </div>
-              </div>
-
-              <div>
-                <FieldLabel>English name</FieldLabel>
-                <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
-                  {displayItem?.name || "—"}
-                </div>
+            {/* Name */}
+            <div>
+              <FieldLabel>ឈ្មោះ</FieldLabel>
+              <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                {displayItem?.localName || displayItem?.name || "—"}
               </div>
             </div>
 

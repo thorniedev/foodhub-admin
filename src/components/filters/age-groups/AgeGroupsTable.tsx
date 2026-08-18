@@ -41,10 +41,6 @@ export default function AgeGroupsTable({
             </th>
 
             <th className="px-6 py-5 text-xl font-semibold text-primary-800">
-              កូដ
-            </th>
-
-            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               ចន្លោះអាយុ
             </th>
 
@@ -87,14 +83,6 @@ export default function AgeGroupsTable({
                       }
                     </p>
                   </div>
-                </td>
-
-                <td className="px-6 py-5">
-                  <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-lg font-semibold text-gray-600">
-                    {
-                      item.code
-                    }
-                  </span>
                 </td>
 
                 <td className="whitespace-nowrap px-6 py-5 text-lg text-gray-600">
@@ -182,7 +170,7 @@ export default function AgeGroupsTable({
             <tr>
               <td
                 colSpan={
-                  6
+                  5
                 }
                 className="px-5 py-16 text-center"
               >

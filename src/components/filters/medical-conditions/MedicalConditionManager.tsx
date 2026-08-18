@@ -554,19 +554,22 @@ export default function MedicalConditionManager() {
         });
 
         setHardDeletingItem(null);
-
         await refetch();
-      } catch (
-      hardDeleteError
-      ) {
-        setMessage({
-          type: "error",
-
-          text:
-            getApiErrorMessage(
-              hardDeleteError,
-            ),
-        });
+      } catch (hardDeleteError) {
+        try {
+          await deleteItem(hardDeletingItem.code).unwrap();
+          setMessage({
+            type: "success",
+            text: `បានបិទដំណើរការស្ថានភាពសុខភាព "${hardDeletingItem.name}" ទៅជាអសកម្មដោយជោគជ័យ (ដោយសារមានមុខម្ហូបកំពុងប្រើប្រាស់)។`,
+          });
+          setHardDeletingItem(null);
+          await refetch();
+        } catch {
+          setMessage({
+            type: "error",
+            text: getApiErrorMessage(hardDeleteError),
+          });
+        }
       }
     };
 

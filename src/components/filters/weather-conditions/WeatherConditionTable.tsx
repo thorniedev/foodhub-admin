@@ -68,19 +68,11 @@ export default function WeatherConditionTable({
         <thead className="border-b border-gray-100 bg-gray-50/70">
           <tr>
             <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-              Weather
+              ឈ្មោះស្ថានភាពអាកាសធាតុ
             </th>
 
             <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-              Code
-            </th>
-
-            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-              Local name
-            </th>
-
-            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-              Description
+              ការពិពណ៌នា
             </th>
 
             <th className="px-6 py-4 text-xl font-semibold text-primary-800">
@@ -110,7 +102,7 @@ export default function WeatherConditionTable({
                 >
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-primary-800">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-primary-800">
                         <CloudRain
                           size={
                             20
@@ -118,25 +110,12 @@ export default function WeatherConditionTable({
                         />
                       </div>
 
-                      <p className="text-lg font-black text-gray-900">
+                      <p className="text-lg font-semibold text-gray-900">
                         {
-                          item.name
+                          item.localName || item.name
                         }
                       </p>
                     </div>
-                  </td>
-
-                  <td className="px-6 py-5">
-                    <span className="inline-flex rounded-lg bg-gray-50 px-3 py-1.5 font-mono text-lg font-medium text-gray-600">
-                      {
-                        item.code
-                      }
-                    </span>
-                  </td>
-
-                  <td className="px-6 py-5 text-lg font-semibold text-gray-600">
-                    {item.localName ||
-                      "—"}
                   </td>
 
                   <td className="max-w-[320px] px-6 py-5 text-lg text-gray-500">

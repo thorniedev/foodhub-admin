@@ -21,8 +21,8 @@ const sortOptions: Array<{ value: SortMode; label: string }> = [
 export default function SeasonalFoodPage() {
   const { data: seasonal = [] } = useGetSeasonalFoodsQuery();
   const [deleteSeasonal] = useDeleteSeasonalFoodMutation();
-  const [addSeasonal] = useAddSeasonalFoodMutation();
-  const [updateSeasonal] = useUpdateSeasonalFoodMutation();
+  const [addSeasonal, { isLoading: isAdding }] = useAddSeasonalFoodMutation();
+  const [updateSeasonal, { isLoading: isUpdating }] = useUpdateSeasonalFoodMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SeasonalFoodImage | null>(null);
@@ -86,9 +86,12 @@ export default function SeasonalFoodPage() {
     });
   }, [seasonal, search, statusFilter, sortMode]);
 
-  const handleSubmit = async (values: Omit<SeasonalFoodImage, "id">) => {
-    if (editingItem) await updateSeasonal({ id: editingItem.id, changes: values });
-    else await addSeasonal(values);
+  const handleSubmit = async (values: any) => {
+    if (editingItem) {
+      await updateSeasonal({ id: editingItem.id, changes: values }).unwrap();
+    } else {
+      await addSeasonal(values).unwrap();
+    }
     setIsModalOpen(false);
   };
 

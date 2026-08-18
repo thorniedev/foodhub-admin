@@ -21,6 +21,7 @@ import {
   useHardDeleteAdminProfileMutation,
   useHardDeleteAdminUserMutation,
   useRestoreAdminProfileMutation,
+  useRestoreAdminUserMutation,
   useUpdateAdminUserStatusMutation,
 } from "@/src/app/store/userProfileApi";
 
@@ -152,6 +153,9 @@ export default function UserDetailManager({
 
   const [restoreAdminProfile, { isLoading: restoringProfile }] =
     useRestoreAdminProfileMutation();
+
+  const [restoreAdminUser, { isLoading: restoringUser }] =
+    useRestoreAdminUserMutation();
 
   const handleStatusUpdate = async (
     status: MutableAdminUserStatus,
@@ -324,8 +328,25 @@ export default function UserDetailManager({
     );
   }
 
+  const handleRestoreUser = async () => {
+    if (!user) return;
+    try {
+      await restoreAdminUser(user.uuid).unwrap();
+      setNotice({
+        type: "success",
+        text: "បានស្តារ User ឡើងវិញដោយជោគជ័យ។",
+      });
+      await refetchUser();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAdminApiErrorMessage(requestError),
+      });
+    }
+  };
+
   const profileBusy = deletingProfile || restoringProfile || hardDeletingProfile;
-  const userBusy = updatingStatus || deletingUser || hardDeletingUser;
+  const userBusy = updatingStatus || deletingUser || hardDeletingUser || restoringUser;
 
   return (
     <div className="w-full min-w-0 max-w-full space-y-5">
@@ -335,6 +356,7 @@ export default function UserDetailManager({
         onStatusEdit={() => setStatusUser(user)}
         onDelete={() => setDeleteUser(user)}
         onHardDelete={() => setHardDeleteUser(user)}
+        onRestore={handleRestoreUser}
       />
 
       {notice && (

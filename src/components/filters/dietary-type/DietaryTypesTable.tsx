@@ -55,10 +55,6 @@ export default function DietaryTypesTable({
             </th>
 
             <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-              កូដ
-            </th>
-
-            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               ប្រភេទ
             </th>
 
@@ -100,13 +96,6 @@ export default function DietaryTypesTable({
                     {item.name}
                   </p>
                 </div>
-              </td>
-
-              {/* Code */}
-              <td className="px-6 py-5">
-                <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1.5 font-mono text-lg font-medium text-gray-600">
-                  {item.code}
-                </span>
               </td>
 
               {/* Category */}
@@ -208,7 +197,7 @@ export default function DietaryTypesTable({
           {items.length === 0 && (
             <tr>
               <td
-                colSpan={7}
+                colSpan={6}
                 className="px-6 py-16 text-center"
               >
                 <Salad

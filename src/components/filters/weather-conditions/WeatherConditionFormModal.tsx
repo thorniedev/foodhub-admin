@@ -1,5 +1,6 @@
 "use client";
 
+import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
 import type {
   CreateWeatherConditionPayload,
   UpdateWeatherConditionPayload,
@@ -95,25 +96,21 @@ export default function WeatherConditionFormModal({
     try {
       setError(null);
 
-      const code = values.code
-        .trim()
-        .toUpperCase()
-        .replace(/\s+/g, "_");
+      const enteredName = values.name.trim() || values.localName.trim();
 
-      const name = values.name.trim();
-
-      if (!code) {
-        throw new Error("សូមបញ្ចូល Code ស្ថានភាពអាកាសធាតុ។");
+      if (!enteredName) {
+        throw new Error("សូមបញ្ចូលឈ្មោះស្ថានភាពអាកាសធាតុ។");
       }
 
-      if (!name) {
-        throw new Error("សូមបញ្ចូលឈ្មោះ English name។");
-      }
+      const code =
+        item?.code?.trim() ||
+        values.code.trim().toUpperCase().replace(/\s+/g, "_") ||
+        createCodeFromLabel(enteredName);
 
       await onSubmit({
         code,
-        name,
-        localName: values.localName.trim() || null,
+        name: enteredName,
+        localName: enteredName,
         description: values.description.trim() || null,
         isActive: values.isActive,
       });
@@ -247,52 +244,19 @@ export default function WeatherConditionFormModal({
             sm:p-7
           "
         >
-          {/* Names */}
-          <div
-            className="
-              grid
-              gap-4
-              sm:grid-cols-2
-            "
-          >
-            <Field
-              label="ឈ្មោះសម្រាប់បង្ហាញ"
-              value={values.localName}
-              onChange={(value) =>
-                setValues((previous) => ({
-                  ...previous,
-                  localName: value,
-                }))
-              }
-              placeholder="ឧ. ភ្លៀង"
-            />
-
-            <Field
-              label="English name"
-              value={values.name}
-              required
-              onChange={(value) =>
-                setValues((previous) => ({
-                  ...previous,
-                  name: value,
-                }))
-              }
-              placeholder="e.g. Rainy"
-            />
-          </div>
-
-          {/* Code */}
+          {/* Name */}
           <Field
-            label="កូដ (Code)"
-            value={values.code}
+            label="ឈ្មោះស្ថានភាពអាកាសធាតុ"
+            value={values.localName || values.name}
             required
             onChange={(value) =>
               setValues((previous) => ({
                 ...previous,
-                code: value,
+                name: value,
+                localName: value,
               }))
             }
-            placeholder="RAINY"
+            placeholder="ឧ. ភ្លៀង / មានពពក"
           />
 
           {/* Description */}

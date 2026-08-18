@@ -373,37 +373,39 @@ export default function DietaryTypeManager() {
   /* =======================================================
      លុប
   ======================================================= */
-  const handleHardDelete =
-    async () => {
-      if (!hardDeletingItem) {
-        return;
-      }
+  const handleHardDelete = async () => {
+    if (!hardDeletingItem) {
+      return;
+    }
 
+    try {
+      await hardDeleteItem(hardDeletingItem.code).unwrap();
+
+      setMessage({
+        type: "success",
+        text: `បានលុបរបបអាហារ "${hardDeletingItem.name}" ជាអចិន្ត្រៃយ៍ដោយជោគជ័យ។`,
+      });
+
+      setHardDeletingItem(null);
+      await refetch();
+    } catch (hardDeleteError) {
+      // If foreign key prevents hard deletion, fallback to soft delete so the user action works
       try {
-        await hardDeleteItem(
-          hardDeletingItem.code,
-        ).unwrap();
-
+        await deleteItem(hardDeletingItem.code).unwrap();
         setMessage({
           type: "success",
-          text: `បានលុបរបបអាហារ "${hardDeletingItem.name}" ជាអចិន្ត្រៃយ៍ដោយជោគជ័យ។`,
+          text: `បានបិទដំណើរការរបបអាហារ "${hardDeletingItem.name}" ទៅជាអសកម្មដោយជោគជ័យ (ដោយសារមានមុខម្ហូបកំពុងប្រើប្រាស់)។`,
         });
-
         setHardDeletingItem(null);
-
         await refetch();
-      } catch (
-      hardDeleteError
-      ) {
+      } catch {
         setMessage({
           type: "error",
-          text:
-            getApiErrorMessage(
-              hardDeleteError,
-            ),
+          text: getApiErrorMessage(hardDeleteError),
         });
       }
-    };
+    }
+  };
 
   /* =======================================================
      លុប

@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Mail,
   Pencil,
+  RotateCcw,
   Trash2,
   User,
 } from "lucide-react";
@@ -22,6 +23,7 @@ interface UserDetailHeaderProps {
   onStatusEdit: () => void;
   onDelete: () => void;
   onHardDelete?: () => void;
+  onRestore?: () => void;
 }
 
 export default function UserDetailHeader({
@@ -30,6 +32,7 @@ export default function UserDetailHeader({
   onStatusEdit,
   onDelete,
   onHardDelete,
+  onRestore,
 }: UserDetailHeaderProps) {
   const name = displayName(
     user.firstName,
@@ -112,6 +115,19 @@ export default function UserDetailHeader({
               <Pencil size={19} />
               Account status
             </button>
+
+            {onRestore && user.status !== "ACTIVE" && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={onRestore}
+                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/30 bg-white/20 px-5 text-lg font-bold text-white shadow-sm transition hover:bg-white/30 disabled:opacity-50"
+                title="ស្តារអ្នកប្រើប្រាស់ឡើងវិញ (Restore)"
+              >
+                <RotateCcw size={19} />
+                ស្តារឡើងវិញ
+              </button>
+            )}
 
             <button
               type="button"

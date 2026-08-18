@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { AlertOctagon, CheckCircle, Eye, Pencil, Trash2, XCircle } from "lucide-react";
+import { AlertOctagon, CheckCircle, Eye, Pencil, RotateCcw, Trash2, XCircle } from "lucide-react";
 
 import type { AdminUser } from "@/src/types/userProfile";
 
@@ -13,6 +13,7 @@ interface UsersTableProps {
   onStatusEdit: (user: AdminUser) => void;
   onDelete: (user: AdminUser) => void;
   onHardDelete?: (user: AdminUser) => void;
+  onRestore?: (user: AdminUser) => void;
 }
 
 export default function UsersTable({
@@ -21,6 +22,7 @@ export default function UsersTable({
   onStatusEdit,
   onDelete,
   onHardDelete,
+  onRestore,
 }: UsersTableProps) {
   return (
     <div className="w-full min-w-0 max-w-full overflow-x-auto">
@@ -147,6 +149,18 @@ export default function UsersTable({
                     >
                       <Pencil size={20} />
                     </button>
+
+                    {onRestore && user.status !== "ACTIVE" && (
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => onRestore(user)}
+                        title="ស្តារឡើងវិញ (Restore)"
+                        className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <RotateCcw size={20} />
+                      </button>
+                    )}
 
                     <button
                       type="button"

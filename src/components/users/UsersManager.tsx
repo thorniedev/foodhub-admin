@@ -491,6 +491,22 @@ export default function UsersManager() {
     }
   };
 
+  const handleRestoreDirect = async (target: AdminUser) => {
+    try {
+      await restoreAdminUser(target.uuid).unwrap();
+      setNotice({
+        type: "success",
+        text: `បានស្តារអ្នកប្រើប្រាស់ "${displayName(target.firstName, target.lastName, target.username)}" ឡើងវិញដោយជោគជ័យ។`,
+      });
+      await refetch();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAdminApiErrorMessage(requestError),
+      });
+    }
+  };
+
   const busy = creating || updatingStatus || deleting || hardDeleting || restoring;
 
   /* =======================================================
@@ -862,6 +878,7 @@ export default function UsersManager() {
             onStatusEdit={setStatusUser}
             onDelete={setDeleteUser}
             onHardDelete={setHardDeleteUser}
+            onRestore={handleRestoreDirect}
           />
         )}
 

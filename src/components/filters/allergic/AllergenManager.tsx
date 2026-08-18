@@ -468,13 +468,22 @@ export default function AllergenManager() {
       });
 
       setHardDeletingItem(null);
-
       await refetch();
     } catch (hardDeleteError) {
-      setMessage({
-        type: "error",
-        text: getApiErrorMessage(hardDeleteError),
-      });
+      try {
+        await deleteItem(hardDeletingItem.code).unwrap();
+        setMessage({
+          type: "success",
+          text: `បានបិទដំណើរការអាឡែស៊ី "${hardDeletingItem.name || hardDeletingItem.code}" ទៅជាអសកម្មដោយជោគជ័យ (ដោយសារមានមុខម្ហូបកំពុងប្រើប្រាស់)។`,
+        });
+        setHardDeletingItem(null);
+        await refetch();
+      } catch {
+        setMessage({
+          type: "error",
+          text: getApiErrorMessage(hardDeleteError),
+        });
+      }
     }
   };
 

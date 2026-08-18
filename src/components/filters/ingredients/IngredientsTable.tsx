@@ -79,10 +79,6 @@ export default function IngredientsTable({
             </th>
 
             <th className="px-6 py-5 text-xl font-semibold text-primary-800">
-              កូដ
-            </th>
-
-            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               ការពិពណ៌នា
             </th>
 
@@ -127,16 +123,6 @@ export default function IngredientsTable({
                       }
                     </p>
                   </div>
-                </td>
-
-                {/* CODE */}
-
-                <td className="px-6 py-5">
-                  <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-lg font-semibold text-gray-600">
-                    {
-                      item.code
-                    }
-                  </span>
                 </td>
 
                 {/* DESCRIPTION */}
@@ -261,7 +247,7 @@ export default function IngredientsTable({
             0 && (
             <tr>
               <td
-                colSpan={6}
+                colSpan={5}
                 className="px-5 py-16 text-center"
               >
                 <Leaf

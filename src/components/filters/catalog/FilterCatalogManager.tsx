@@ -784,10 +784,6 @@ function CatalogTable({
               </th>
 
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-                Code
-              </th>
-
-              <th className="px-6 py-4 text-xl font-semibold text-primary-800">
                 ស្ថានភាព
               </th>
 
@@ -815,13 +811,6 @@ function CatalogTable({
                   <p className="line-clamp-2 text-lg text-gray-500">
                     {item.description || "—"}
                   </p>
-                </td>
-
-                {/* Code */}
-                <td className="px-6 py-5">
-                  <span className="inline-flex rounded-lg bg-gray-50 px-3 py-1.5 font-mono text-lg font-medium text-gray-600">
-                    {item.code}
-                  </span>
                 </td>
 
                 {/* Status */}
@@ -876,7 +865,7 @@ function CatalogTable({
 
             {items.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-6 py-16 text-center">
+                <td colSpan={4} className="px-6 py-16 text-center">
                   <Search size={34} className="mx-auto text-gray-300" />
 
                   <p className="mt-3 text-lg font-medium text-gray-500">

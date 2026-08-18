@@ -105,10 +105,8 @@ export default function AllergensTable({
                     </div>
 
                     <div className="min-w-0">
-                      <p className=" test-lg text-gray-800">
-                        {
-                          item.code
-                        }
+                      <p className="text-lg font-medium text-gray-800">
+                        {item.name || item.code}
                       </p>
                     </div>
                   </div>

@@ -202,28 +202,11 @@ export default function WeatherConditionDetailModal({
           </div>
         ) : data ? (
           <div className="space-y-4 p-6 sm:p-7">
-            {/* Names */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <FieldLabel>ឈ្មោះសម្រាប់បង្ហាញ</FieldLabel>
-                <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
-                  {data.localName || "—"}
-                </div>
-              </div>
-
-              <div>
-                <FieldLabel>English name</FieldLabel>
-                <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
-                  {data.name || "—"}
-                </div>
-              </div>
-            </div>
-
-            {/* Code */}
+            {/* Name */}
             <div>
-              <FieldLabel>កូដ (Code)</FieldLabel>
-              <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 font-mono text-lg font-medium text-gray-800">
-                {data.code || "—"}
+              <FieldLabel>ឈ្មោះ</FieldLabel>
+              <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                {data.localName || data.name || "—"}
               </div>
             </div>
 

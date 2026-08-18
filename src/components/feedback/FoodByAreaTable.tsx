@@ -75,7 +75,17 @@ export default function FoodByAreaTable({
                 <td className="px-6 py-4 text-center">
                   <button
                     type="button"
-                    onClick={() => updateItem({ id: item.id, changes: { ...item, isdisplay: !item.isdisplay } })}
+                    onClick={() =>
+                      updateItem({
+                        id: item.id,
+                        changes: {
+                          location: item.location,
+                          name: item.name,
+                          description: item.description,
+                          isdisplay: !item.isdisplay,
+                        },
+                      })
+                    }
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                       item.isdisplay ? "bg-[#136C34]" : "bg-gray-300"
                     }`}

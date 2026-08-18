@@ -69,7 +69,17 @@ export default function SeasonalFoodTable({
                 <td className="px-6 py-4 text-center">
                   <button
                     type="button"
-                    onClick={() => updateItem({ id: item.id, changes: { ...item, isdisplay: !item.isdisplay } })}
+                    onClick={() =>
+                      updateItem({
+                        id: item.id,
+                        changes: {
+                          name: item.name,
+                          season: item.season,
+                          order: item.order,
+                          isdisplay: !item.isdisplay,
+                        },
+                      })
+                    }
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                       item.isdisplay ? "bg-[#136C34]" : "bg-gray-300"
                     }`}
