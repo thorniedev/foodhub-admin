@@ -693,48 +693,71 @@ function unwrap<T>(
   return value as T;
 }
 
+function normalizeMenuItemEntity<T>(item: T): T {
+  if (!item || typeof item !== "object") return item;
+  const anyItem = item as Record<string, unknown>;
+  const store = anyItem.store as Record<string, unknown> | undefined;
+  const food = anyItem.food as Record<string, unknown> | undefined;
+  return {
+    ...anyItem,
+    uuid: anyItem.uuid || anyItem.menuItemUuid || anyItem.id?.toString(),
+    storeUuid: anyItem.storeUuid || store?.uuid,
+    foodUuid: anyItem.foodUuid || food?.uuid,
+  } as T;
+}
+
 function normalizePage<T>(
   value:
     | BackendEnvelope<
         Partial<ApiPage<T>> & {
           contents?: T[];
+          items?: T[];
+          pageNumber?: number;
+          pageSize?: number;
+          hasNext?: boolean;
         }
       >
     | (Partial<ApiPage<T>> & {
         contents?: T[];
+        items?: T[];
+        pageNumber?: number;
+        pageSize?: number;
+        hasNext?: boolean;
       })
     | T[],
 ): ApiPage<T> {
-  const raw = unwrap(value);
+  const raw = unwrap(value) as any;
 
   if (Array.isArray(raw)) {
+    const list = raw.map((it) => normalizeMenuItemEntity(it));
     return {
-      content: raw,
+      content: list,
       number: 0,
-      size: raw.length,
-      numberOfElements: raw.length,
-      totalElements: raw.length,
+      size: list.length,
+      numberOfElements: list.length,
+      totalElements: list.length,
       totalPages: 1,
       first: true,
       last: true,
-      empty: raw.length === 0,
+      empty: list.length === 0,
     };
   }
 
-  const content = raw.content ?? raw.contents ?? [];
+  const rawList = raw?.content ?? raw?.contents ?? raw?.items ?? [];
+  const content = rawList.map((it: any) => normalizeMenuItemEntity(it));
 
   return {
     content,
-    number: raw.number ?? 0,
-    size: raw.size ?? content.length,
+    number: raw?.number ?? raw?.pageNumber ?? 0,
+    size: raw?.size ?? raw?.pageSize ?? content.length,
     numberOfElements:
-      raw.numberOfElements ?? content.length,
+      raw?.numberOfElements ?? content.length,
     totalElements:
-      raw.totalElements ?? content.length,
-    totalPages: Math.max(raw.totalPages ?? 1, 1),
-    first: raw.first ?? true,
-    last: raw.last ?? true,
-    empty: raw.empty ?? content.length === 0,
+      raw?.totalElements ?? (raw?.totalElements !== undefined ? raw.totalElements : content.length),
+    totalPages: Math.max(raw?.totalPages ?? 1, 1),
+    first: raw?.first ?? ((raw?.pageNumber ?? 0) === 0),
+    last: raw?.last ?? (raw?.hasNext !== undefined ? !raw.hasNext : true),
+    empty: raw?.empty ?? content.length === 0,
   };
 }
 
@@ -1433,13 +1456,11 @@ export const menuManagementApi =
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(
-                  p.query
-                    ? { query: p.query }
-                    : p.rootCategoryCode
-                    ? { categoryUuids: [p.rootCategoryCode] }
-                    : {},
-                ),
+                body: JSON.stringify({
+                  ...(p.query ? { query: p.query } : {}),
+                  ...(p.storeUuid ? { storeUuid: p.storeUuid } : {}),
+                  ...(p.rootCategoryCode ? { categoryUuids: [p.rootCategoryCode] } : {}),
+                }),
               },
             );
 
