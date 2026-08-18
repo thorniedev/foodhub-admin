@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   AlertTriangle,
@@ -42,16 +42,21 @@ import UsersHeader from "./UsersHeader";
 import UsersPagination from "./UsersPagination";
 import UsersTable from "./UsersTable";
 import UsersTabs from "./UsersTabs";
+import {
+  mergeUsersWithDisabledCache,
+  readDisabledUserCache,
+  writeDisabledUserCache,
+} from "./disabledUserCache";
 
 type Notice =
   | {
-    type: "success";
-    text: string;
-  }
+      type: "success";
+      text: string;
+    }
   | {
-    type: "error";
-    text: string;
-  }
+      type: "error";
+      text: string;
+    }
   | null;
 
 type UserSort = "A_Z" | "Z_A" | "NEWEST" | "OLDEST";
@@ -105,7 +110,26 @@ export default function UsersManager() {
     null,
   );
 
+  const [locallyDisabledUsers, setLocallyDisabledUsers] = useState<AdminUser[]>(
+    [],
+  );
+
+  const [disabledCacheReady, setDisabledCacheReady] = useState(false);
+
   const [notice, setNotice] = useState<Notice>(null);
+
+  useEffect(() => {
+    setLocallyDisabledUsers(readDisabledUserCache());
+    setDisabledCacheReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!disabledCacheReady) {
+      return;
+    }
+
+    writeDisabledUserCache(locallyDisabledUsers);
+  }, [disabledCacheReady, locallyDisabledUsers]);
 
   /* =======================================================
      MAIN QUERY
@@ -156,9 +180,46 @@ export default function UsersManager() {
      DATA
   ======================================================= */
 
-  const users = data?.contents ?? [];
+  const apiUsers = data?.contents ?? [];
 
-  const suggestionUsers = suggestionData?.contents ?? [];
+  const apiSuggestionUsers = suggestionData?.contents ?? [];
+
+  /*
+   * The backend may hide soft-disabled users from the normal users list.
+   * Keep a small admin-side cache so they remain visible in the Disabled tab
+   * and can still be restored from this browser.
+   */
+  const users = useMemo(
+    () => mergeUsersWithDisabledCache(apiUsers, locallyDisabledUsers),
+    [apiUsers, locallyDisabledUsers],
+  );
+
+  const suggestionUsers = useMemo(
+    () => mergeUsersWithDisabledCache(apiSuggestionUsers, locallyDisabledUsers),
+    [apiSuggestionUsers, locallyDisabledUsers],
+  );
+
+  useEffect(() => {
+    if (!disabledCacheReady || apiUsers.length === 0) {
+      return;
+    }
+
+    const visibleActiveUserIds = new Set(
+      apiUsers
+        .filter(
+          (user) => user.status !== "DISABLED" && user.status !== "DELETED",
+        )
+        .map((user) => user.uuid),
+    );
+
+    if (visibleActiveUserIds.size === 0) {
+      return;
+    }
+
+    setLocallyDisabledUsers((current) =>
+      current.filter((user) => !visibleActiveUserIds.has(user.uuid)),
+    );
+  }, [apiUsers, disabledCacheReady]);
 
   /* =======================================================
      COUNTS
@@ -172,7 +233,9 @@ export default function UsersManager() {
 
       suspended: users.filter((user) => user.status === "SUSPENDED").length,
 
-      disabled: users.filter((user) => user.status === "DISABLED").length,
+      disabled: users.filter(
+        (user) => user.status === "DISABLED" || user.status === "DELETED",
+      ).length,
     }),
     [users],
   );
@@ -247,7 +310,10 @@ export default function UsersManager() {
   const filteredUsers = useMemo(() => {
     return searchSource.filter((user) => {
       const statusMatches =
-        statusFilter === "ALL" || user.status === statusFilter;
+        statusFilter === "ALL" ||
+        (statusFilter === "DISABLED"
+          ? user.status === "DISABLED" || user.status === "DELETED"
+          : user.status === statusFilter);
 
       if (!statusMatches) {
         return false;
@@ -318,23 +384,23 @@ export default function UsersManager() {
     value: UserSort;
     label: string;
   }> = [
-      {
-        value: "A_Z",
-        label: "A → Z",
-      },
-      {
-        value: "Z_A",
-        label: "Z → A",
-      },
-      {
-        value: "NEWEST",
-        label: "ថ្មីបំផុត",
-      },
-      {
-        value: "OLDEST",
-        label: "ចាស់បំផុត",
-      },
-    ];
+    {
+      value: "A_Z",
+      label: "A → Z",
+    },
+    {
+      value: "Z_A",
+      label: "Z → A",
+    },
+    {
+      value: "NEWEST",
+      label: "ថ្មីបំផុត",
+    },
+    {
+      value: "OLDEST",
+      label: "ចាស់បំផុត",
+    },
+  ];
 
   /* =======================================================
      CREATE
@@ -413,13 +479,30 @@ export default function UsersManager() {
     try {
       await deleteAdminUser(target.uuid).unwrap();
 
-      setDeleteUser(null);
+      const disabledUser: AdminUser = {
+        ...target,
+        status: "DISABLED" as AdminUser["status"],
+      };
 
-      setRecentlyDeleted(target);
+      setLocallyDisabledUsers((current) => [
+        disabledUser,
+        ...current.filter((user) => user.uuid !== target.uuid),
+      ]);
+
+      setDeleteUser(null);
+      setRecentlyDeleted(disabledUser);
+
+      // Move the admin directly to the place where the user can be restored.
+      setStatusFilter("DISABLED");
+      setPage(0);
 
       setNotice({
         type: "success",
-        text: "បាន soft-delete អ្នកប្រើ។ អ្នកអាច Undo មុនពេលចាកចេញពីទំព័រនេះ។",
+        text: `បានបញ្ឈប់អ្នកប្រើ "${displayName(
+          target.firstName,
+          target.lastName,
+          target.username,
+        )}"។ អ្នកអាចស្តារឡើងវិញពីផ្ទាំង Disabled។`,
       });
 
       await refetch();
@@ -447,11 +530,23 @@ export default function UsersManager() {
     try {
       await hardDeleteAdminUser(target.uuid).unwrap();
 
+      setLocallyDisabledUsers((current) =>
+        current.filter((user) => user.uuid !== target.uuid),
+      );
+
+      if (recentlyDeleted?.uuid === target.uuid) {
+        setRecentlyDeleted(null);
+      }
+
       setHardDeleteUser(null);
 
       setNotice({
         type: "success",
-        text: "បាន hard-delete អ្នកប្រើប្រាស់ជាអចិន្ត្រៃយ៍។",
+        text: `បានលុបអ្នកប្រើ "${displayName(
+          target.firstName,
+          target.lastName,
+          target.username,
+        )}" ជាអចិន្ត្រៃយ៍។`,
       });
 
       await refetch();
@@ -473,13 +568,19 @@ export default function UsersManager() {
     }
 
     try {
-      await restoreAdminUser(recentlyDeleted.uuid).unwrap();
+      const restoredUuid = recentlyDeleted.uuid;
+
+      await restoreAdminUser(restoredUuid).unwrap();
+
+      setLocallyDisabledUsers((current) =>
+        current.filter((user) => user.uuid !== restoredUuid),
+      );
 
       setRecentlyDeleted(null);
 
       setNotice({
         type: "success",
-        text: "បាន Restore អ្នកប្រើដោយជោគជ័យ។",
+        text: "បានស្តារអ្នកប្រើឡើងវិញដោយជោគជ័យ។",
       });
 
       await refetch();
@@ -491,7 +592,40 @@ export default function UsersManager() {
     }
   };
 
-  const busy = creating || updatingStatus || deleting || hardDeleting || restoring;
+  const handleRestoreUser = async (user: AdminUser) => {
+    setNotice(null);
+
+    try {
+      await restoreAdminUser(user.uuid).unwrap();
+
+      setLocallyDisabledUsers((current) =>
+        current.filter((item) => item.uuid !== user.uuid),
+      );
+
+      if (recentlyDeleted?.uuid === user.uuid) {
+        setRecentlyDeleted(null);
+      }
+
+      setNotice({
+        type: "success",
+        text: `បានស្តារអ្នកប្រើ "${displayName(
+          user.firstName,
+          user.lastName,
+          user.username,
+        )}" ដោយជោគជ័យ។`,
+      });
+
+      await refetch();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAdminApiErrorMessage(requestError),
+      });
+    }
+  };
+
+  const busy =
+    creating || updatingStatus || deleting || hardDeleting || restoring;
 
   /* =======================================================
      UI
@@ -500,9 +634,10 @@ export default function UsersManager() {
   return (
     <div className="space-y-5">
       <UsersHeader
-        total={data?.totalElements ?? 0}
+        total={Math.max(data?.totalElements ?? 0, users.length)}
         activeCount={counts.active}
         suspendedCount={counts.suspended}
+        disabledCount={counts.disabled}
         onCreate={() => {
           setNotice(null);
           setCreateOpen(true);
@@ -644,14 +779,15 @@ export default function UsersManager() {
                             </div>
 
                             <span
-                              className={`shrink-0 rounded-full px-2.5 py-1 text-sm ${user.status === "ACTIVE"
+                              className={`shrink-0 rounded-full px-2.5 py-1 text-sm ${
+                                user.status === "ACTIVE"
                                   ? "bg-primary-50 text-primary-700"
                                   : user.status === "SUSPENDED"
                                     ? "bg-secondary-50 text-secondary-600"
                                     : user.status === "DELETED"
                                       ? "bg-red-50 text-red-700"
                                       : "bg-gray-100 text-gray-500"
-                                }`}
+                              }`}
                             >
                               {user.status}
                             </span>
@@ -677,17 +813,19 @@ export default function UsersManager() {
 
                 setShowSuggestions(false);
               }}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${sizeOpen
+              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${
+                sizeOpen
                   ? "border-primary-600 ring-2 ring-primary-100"
                   : "border-gray-200 hover:border-primary-600/50"
-                }`}
+              }`}
             >
               <span className="text-gray-700">{size} / ទំព័រ</span>
 
               <ChevronDown
                 size={17}
-                className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
-                  }`}
+                className={`text-gray-400 transition-transform duration-200 ${
+                  sizeOpen ? "rotate-180" : ""
+                }`}
               />
             </button>
 
@@ -711,10 +849,11 @@ export default function UsersManager() {
 
                         setSizeOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
+                        selected
                           ? "bg-primary-50 text-primary-700"
                           : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
-                        }`}
+                      }`}
                     >
                       <span>{value} / ទំព័រ</span>
 
@@ -740,10 +879,11 @@ export default function UsersManager() {
 
                 setShowSuggestions(false);
               }}
-              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen
+              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
+                sortOpen
                   ? "border-primary-600 bg-primary-50 text-primary-700"
                   : "border-gray-200 bg-white text-gray-600 hover:border-primary-600 hover:bg-primary-50 hover:text-primary-700"
-                }`}
+              }`}
               aria-label="Sort users"
               title="Sort users"
             >
@@ -768,10 +908,11 @@ export default function UsersManager() {
 
                         setSortOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
+                        selected
                           ? "bg-primary-50 text-primary-700"
                           : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
-                        }`}
+                      }`}
                     >
                       <span>{option.label}</span>
 
@@ -793,10 +934,11 @@ export default function UsersManager() {
 
       {notice && (
         <div
-          className={`flex flex-col gap-3 rounded-2xl border px-4 py-3 text-base sm:flex-row sm:items-center sm:justify-between ${notice.type === "success"
+          className={`flex flex-col gap-3 rounded-2xl border px-4 py-3 text-base sm:flex-row sm:items-center sm:justify-between ${
+            notice.type === "success"
               ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
-            }`}
+          }`}
         >
           <span>{notice.text}</span>
 
@@ -862,18 +1004,22 @@ export default function UsersManager() {
             onStatusEdit={setStatusUser}
             onDelete={setDeleteUser}
             onHardDelete={setHardDeleteUser}
+            onRestore={handleRestoreUser}
           />
         )}
 
-        {!isLoading && !error && !normalizedSearch && (
-          <UsersPagination
-            page={data?.pageNumber ?? page}
-            totalPages={data?.totalPages ?? 0}
-            totalElements={data?.totalElements ?? 0}
-            disabled={isFetching}
-            onPageChange={setPage}
-          />
-        )}
+        {!isLoading &&
+          !error &&
+          !normalizedSearch &&
+          statusFilter !== "DISABLED" && (
+            <UsersPagination
+              page={data?.pageNumber ?? page}
+              totalPages={data?.totalPages ?? 0}
+              totalElements={data?.totalElements ?? 0}
+              disabled={isFetching}
+              onPageChange={setPage}
+            />
+          )}
       </section>
 
       {/* =================================================

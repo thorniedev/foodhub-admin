@@ -20,17 +20,15 @@ export default function HardDeleteUserConfirmModal({
 }: HardDeleteUserConfirmModalProps) {
   if (!user) return null;
 
-  const name = displayName(
-    user.firstName,
-    user.lastName,
-    user.username,
-  );
+  const name = displayName(user.firstName, user.lastName, user.username);
 
   return (
     <div
       className="fixed inset-0 z-[140] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[3px] animate-in fade-in duration-200"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !deleting) onClose();
+      onClick={(event) => {
+        if (event.target === event.currentTarget && !deleting) {
+          onClose();
+        }
       }}
     >
       <div className="w-full max-w-lg rounded-[30px] border border-red-100 bg-white p-6 shadow-2xl sm:p-7">
@@ -50,14 +48,19 @@ export default function HardDeleteUserConfirmModal({
           </button>
         </div>
 
-        <div className="mt-5">
-         
+        <p className="mt-5 text-2xl font-semibold text-gray-900 sm:text-3xl">
+          លុបអ្នកប្រើជាអចិន្ត្រៃយ៍?
+        </p>
 
-          <h3 className="mt-2 text-2xl font-black text-gray-900 sm:text-3xl">
-            លុបអ្នកប្រើប្រាស់?
-          </h3>
+        <p className="mt-3 text-lg leading-8 text-gray-500">
+          អ្នកប្រើ <span className="font-semibold text-gray-800">{name}</span>{" "}
+          នឹងត្រូវបានលុបចេញពីប្រព័ន្ធទាំងស្រុង។
+        </p>
+
+        <div className="mt-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-base leading-7 text-red-600">
+          សកម្មភាពនេះមិនអាច Restore វិញបានទេ។ ប្រើវាតែពេល Admin ប្រាកដថាមិនត្រូវការ
+          account នេះទៀត។
         </div>
-
 
         <div className="mt-6 grid grid-cols-2 gap-3">
           <button

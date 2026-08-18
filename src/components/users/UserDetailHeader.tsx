@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Mail,
   Pencil,
+  RotateCcw,
   Trash2,
   User,
 } from "lucide-react";
@@ -22,6 +23,7 @@ interface UserDetailHeaderProps {
   onStatusEdit: () => void;
   onDelete: () => void;
   onHardDelete?: () => void;
+  onRestore?: () => void;
 }
 
 export default function UserDetailHeader({
@@ -30,6 +32,7 @@ export default function UserDetailHeader({
   onStatusEdit,
   onDelete,
   onHardDelete,
+  onRestore,
 }: UserDetailHeaderProps) {
   const name = displayName(
     user.firstName,
@@ -50,6 +53,9 @@ export default function UserDetailHeader({
     user.imageUrl ||
     user.image ||
     user.avatar;
+
+  const isDisabledOrDeleted =
+    user.status === "DISABLED" || user.status === "DELETED";
 
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
@@ -103,37 +109,56 @@ export default function UserDetailHeader({
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={onStatusEdit}
-              className="inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-5 text-lg font-medium text-primary-800 transition hover:bg-primary-50 disabled:opacity-50"
-            >
-              <Pencil size={19} />
-              Account status
-            </button>
-
-            <button
-              type="button"
-              disabled={busy}
-              onClick={onDelete}
-              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-200/30 bg-red-500/15 px-5 text-lg font-medium text-white transition hover:bg-red-500/25 disabled:opacity-50"
-              title=" បញ្ឈប់ user"
-            >
-              <Trash2 size={19} />
-              បញ្ឈប់
-            </button>
-
-            {onHardDelete && (
+            {!isDisabledOrDeleted && (
               <button
                 type="button"
                 disabled={busy}
-                onClick={onHardDelete}
-                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-300 bg-red-600 px-5 text-lg font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
-                title="Permanently លុប user"
+                onClick={onStatusEdit}
+                className="inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-5 text-lg font-medium text-primary-800 transition hover:bg-primary-50 disabled:opacity-50"
               >
-                <AlertOctagon size={19} />
-                លុប
+                <Pencil size={19} />
+                Account status
+              </button>
+            )}
+
+            {isDisabledOrDeleted ? (
+              <>
+                {onRestore && (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={onRestore}
+                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-500 px-5 text-lg font-medium text-white shadow-sm transition hover:bg-emerald-600 disabled:opacity-50"
+                    title="ស្តារ user"
+                  >
+                    <RotateCcw size={19} />
+                    ស្តារឡើងវិញ
+                  </button>
+                )}
+
+                {onHardDelete && (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={onHardDelete}
+                    className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-300 bg-red-600 px-5 text-lg font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+                    title="លុប user ជាអចិន្ត្រៃយ៍"
+                  >
+                    <AlertOctagon size={19} />
+                    លុបជាអចិន្ត្រៃយ៍
+                  </button>
+                )}
+              </>
+            ) : (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={onDelete}
+                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-secondary-200/40 bg-secondary-500/20 px-5 text-lg font-medium text-white transition hover:bg-secondary-500/30 disabled:opacity-50"
+                title="បញ្ឈប់ user"
+              >
+                <Trash2 size={19} />
+                បញ្ឈប់
               </button>
             )}
           </div>

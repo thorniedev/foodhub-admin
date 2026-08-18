@@ -21,6 +21,7 @@ import {
   useHardDeleteAdminProfileMutation,
   useHardDeleteAdminUserMutation,
   useRestoreAdminProfileMutation,
+  useRestoreAdminUserMutation,
   useUpdateAdminUserStatusMutation,
 } from "@/src/app/store/userProfileApi";
 
@@ -32,6 +33,7 @@ import type {
 } from "@/src/types/userProfile";
 
 import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
+import { displayName } from "@/src/lib/userProfileFormat";
 
 import DeleteUserConfirmModal from "./DeleteUserConfirmModal";
 import HardDeleteProfileConfirmModal from "./HardDeleteProfileConfirmModal";
@@ -41,6 +43,10 @@ import ProfileDetailPanel from "./ProfileDetailPanel";
 import RelatedProfilesPanel from "./RelatedProfilesPanel";
 import UserDetailHeader from "./UserDetailHeader";
 import UserEditModal from "./UserEditModal";
+import {
+  removeDisabledUserCache,
+  upsertDisabledUserCache,
+} from "./disabledUserCache";
 
 type Notice =
   | { type: "success"; text: string }
@@ -144,6 +150,9 @@ export default function UserDetailManager({
   const [hardDeleteAdminUser, { isLoading: hardDeletingUser }] =
     useHardDeleteAdminUserMutation();
 
+  const [restoreAdminUser, { isLoading: restoringUser }] =
+    useRestoreAdminUserMutation();
+
   const [deleteAdminProfile, { isLoading: deletingProfile }] =
     useDeleteAdminProfileMutation();
 
@@ -192,11 +201,12 @@ export default function UserDetailManager({
     try {
       await deleteAdminUser(target.uuid).unwrap();
 
+      upsertDisabledUserCache(target);
       setDeleteUser(null);
 
       setNotice({
         type: "success",
-        text: "User ត្រូវបាន soft-delete។ កំពុងត្រឡប់ទៅ User list...",
+        text: "User ត្រូវបានបញ្ឈប់។ អ្នកអាច Restore វិញពីផ្ទាំង Disabled។",
       });
 
       router.replace("/users");
@@ -219,6 +229,7 @@ export default function UserDetailManager({
     try {
       await hardDeleteAdminUser(target.uuid).unwrap();
 
+      removeDisabledUserCache(target.uuid);
       setHardDeleteUser(null);
 
       setNotice({
@@ -228,6 +239,34 @@ export default function UserDetailManager({
 
       router.replace("/users");
       router.refresh();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAdminApiErrorMessage(requestError),
+      });
+    }
+  };
+
+  const handleRestoreUser = async () => {
+    if (!user) {
+      return;
+    }
+
+    try {
+      await restoreAdminUser(user.uuid).unwrap();
+
+      removeDisabledUserCache(user.uuid);
+
+      setNotice({
+        type: "success",
+        text: `គណនី "${displayName(
+          user.firstName,
+          user.lastName,
+          user.username,
+        )}" ត្រូវបានស្តារឡើងវិញដោយជោគជ័យ។`,
+      });
+
+      await refetchUser();
     } catch (requestError) {
       setNotice({
         type: "error",
@@ -325,7 +364,7 @@ export default function UserDetailManager({
   }
 
   const profileBusy = deletingProfile || restoringProfile || hardDeletingProfile;
-  const userBusy = updatingStatus || deletingUser || hardDeletingUser;
+  const userBusy = updatingStatus || deletingUser || hardDeletingUser || restoringUser;
 
   return (
     <div className="w-full min-w-0 max-w-full space-y-5">
@@ -335,6 +374,7 @@ export default function UserDetailManager({
         onStatusEdit={() => setStatusUser(user)}
         onDelete={() => setDeleteUser(user)}
         onHardDelete={() => setHardDeleteUser(user)}
+        onRestore={handleRestoreUser}
       />
 
       {notice && (
