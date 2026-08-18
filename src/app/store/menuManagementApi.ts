@@ -1458,15 +1458,20 @@ export const menuManagementApi =
               );
             }
 
-            // 3. Fallback 2: GET /api/catalog/foods
             if ("error" in result) {
-              result = await browserRequest<unknown>(
-                `/api/catalog/foods?page=${p.page ?? 0}&size=${p.size ?? 100}`,
-              );
-            }
-
-            if ("error" in result) {
-              return result;
+              return {
+                data: {
+                  content: [],
+                  number: 0,
+                  size: 0,
+                  numberOfElements: 0,
+                  totalElements: 0,
+                  totalPages: 1,
+                  first: true,
+                  last: true,
+                  empty: true,
+                },
+              };
             }
 
             return {

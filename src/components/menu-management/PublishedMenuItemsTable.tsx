@@ -57,8 +57,16 @@ export default function PublishedMenuItemsTable({
 }) {
   if (!items.length) {
     return (
-      <div className="px-6 py-20 text-center text-gray-400">
-        មិនទាន់មាន Menu Item ដែលបង្ហាញលើវេបសាយទេ។
+      <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-[#137A3D]">
+          <Eye size={28} />
+        </div>
+        <h3 className="mt-4 text-base font-bold text-gray-800">
+          មិនទាន់មាន Menu Item លើ Website នៅឡើយទេ
+        </h3>
+        <p className="mt-1.5 max-w-sm text-xs text-gray-400 leading-5">
+          សូមចុចប៊ូតុង <strong className="text-emerald-700 font-bold">+ បង្កើត Menu Item</strong> ខាងលើ ដើម្បីជ្រើសរើសមុខម្ហូបពី Catalog កំណត់ហាង និងដាក់លក់លើ Website។
+        </p>
       </div>
     );
   }
