@@ -86,12 +86,35 @@ export default function ShopEditModal({
         })),
     );
 
+    const addressText = store.addressLine ?? "";
+    let autoCity = store.city ?? "";
+    let autoProvince = store.province ?? "";
+
+    if (!autoCity || !autoProvince) {
+      if (/Phnom\s*Penh|ភ្នំពេញ/i.test(addressText)) {
+        if (!autoCity) autoCity = "Phnom Penh";
+        if (!autoProvince) autoProvince = "Phnom Penh";
+      } else if (/Siem\s*Reap|សៀមរាប/i.test(addressText)) {
+        if (!autoCity) autoCity = "Siem Reap";
+        if (!autoProvince) autoProvince = "Siem Reap";
+      } else if (/Battambang|បាត់ដំបង/i.test(addressText)) {
+        if (!autoCity) autoCity = "Battambang";
+        if (!autoProvince) autoProvince = "Battambang";
+      } else if (/Sihanouk|ព្រះសីហនុ/i.test(addressText)) {
+        if (!autoCity) autoCity = "Preah Sihanouk";
+        if (!autoProvince) autoProvince = "Preah Sihanouk";
+      } else if (/Kampot|កំពត/i.test(addressText)) {
+        if (!autoCity) autoCity = "Kampot";
+        if (!autoProvince) autoProvince = "Kampot";
+      }
+    }
+
     setValues({
       storeName: store.storeName ?? "",
       description: store.description ?? "",
       addressLine: store.addressLine ?? "",
-      city: store.city ?? "",
-      province: store.province ?? "",
+      city: autoCity,
+      province: autoProvince,
       countryCode: store.countryCode ?? "KH",
       timezone: store.timezone ?? "Asia/Phnom_Penh",
       latitude: String(store.latitude ?? ""),

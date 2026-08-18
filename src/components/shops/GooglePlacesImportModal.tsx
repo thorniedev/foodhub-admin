@@ -442,12 +442,39 @@ export default function GooglePlacesImportModal({
     try {
       setError(null);
 
+      const previewAddress = String(
+        preview?.address ??
+          preview?.formattedAddress ??
+          preview?.shortFormattedAddress ??
+          preview?.vicinity ??
+          "",
+      );
+
+      let autoCity = "Phnom Penh";
+      let autoProvince = "Phnom Penh";
+
+      if (/Siem\s*Reap|សៀមរាប/i.test(previewAddress)) {
+        autoCity = "Siem Reap";
+        autoProvince = "Siem Reap";
+      } else if (/Battambang|បាត់ដំបង/i.test(previewAddress)) {
+        autoCity = "Battambang";
+        autoProvince = "Battambang";
+      } else if (/Sihanouk|ព្រះសីហនុ/i.test(previewAddress)) {
+        autoCity = "Preah Sihanouk";
+        autoProvince = "Preah Sihanouk";
+      } else if (/Kampot|កំពត/i.test(previewAddress)) {
+        autoCity = "Kampot";
+        autoProvince = "Kampot";
+      }
+
       const store =
         await createStoreFromGoogle({
           placeId:
             selectedPlaceId,
 
           overrides: {
+            city: autoCity,
+            province: autoProvince,
             timezone:
               timezone.trim(),
 

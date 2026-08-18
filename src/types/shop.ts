@@ -175,6 +175,8 @@ export interface ReplaceStoreHoursPayload {
 export interface CreateStoreFromGooglePayload {
   placeId: string;
   overrides: {
+    city?: string | null;
+    province?: string | null;
     timezone: string;
     logoMediaUuid?: string | null;
     coverMediaUuid?: string | null;
