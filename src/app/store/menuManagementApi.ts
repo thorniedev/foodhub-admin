@@ -950,10 +950,18 @@ export const menuManagementApi =
         builder.query<StoreOption[], void>({
           async queryFn() {
             const result = await browserRequest<unknown>(
-              "/api/admin/stores?page=0&size=1000",
+              "/api/admin/stores?page=0&size=100",
             );
 
             if ("error" in result) {
+              const fallback = await browserRequest<unknown>(
+                "/api/catalog/stores?page=0&size=100",
+              );
+              if (!("error" in fallback)) {
+                return {
+                  data: normalizePage<StoreOption>(fallback.data as never).content,
+                };
+              }
               return result;
             }
 
