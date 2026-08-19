@@ -35,7 +35,6 @@ import {
 } from "@/src/types/safetyResource";
 
 import DeleteMedicalConditionConfirmModal from "./DeleteMedicalConditionConfirmModal";
-import HardDeleteMedicalConditionConfirmModal from "./HardDeleteMedicalConditionConfirmModal";
 import MedicalConditionDetailModal from "./MedicalConditionDetailModal";
 import MedicalConditionFormModal from "./MedicalConditionFormModal";
 import MedicalConditionsHeader from "./MedicalConditionsHeader";
@@ -123,11 +122,6 @@ export default function MedicalConditionManager() {
       null,
     );
 
-  const [hardDeletingItem, setHardDeletingItem] =
-    useState<MedicalCondition | null>(
-      null,
-    );
-
   const [message, setMessage] =
     useState<ApiMessage | null>(
       null,
@@ -180,12 +174,6 @@ export default function MedicalConditionManager() {
     { isLoading: isDeleting },
   ] =
     useDeleteMedicalConditionMutation();
-
-  const [
-    hardDeleteItem,
-    { isLoading: isHardDeleting },
-  ] =
-    useHardDeleteMedicalConditionMutation();
 
   const [
     restoreItem,
@@ -530,46 +518,6 @@ export default function MedicalConditionManager() {
               deleteError,
             ),
         });
-      }
-    };
-
-  /* =======================================================
-     លុប
-  ======================================================= */
-
-  const handleHardDelete =
-    async () => {
-      if (!hardDeletingItem) {
-        return;
-      }
-
-      try {
-        await hardDeleteItem(
-          hardDeletingItem.code,
-        ).unwrap();
-
-        setMessage({
-          type: "success",
-          text: `បានលុបស្ថានភាពសុខភាព "${hardDeletingItem.name}" ជាអចិន្ត្រៃយ៍ដោយជោគជ័យ។`,
-        });
-
-        setHardDeletingItem(null);
-        await refetch();
-      } catch (hardDeleteError) {
-        try {
-          await deleteItem(hardDeletingItem.code).unwrap();
-          setMessage({
-            type: "success",
-            text: `បានបិទដំណើរការស្ថានភាពសុខភាព "${hardDeletingItem.name}" ទៅជាអសកម្មដោយជោគជ័យ (ដោយសារមានមុខម្ហូបកំពុងប្រើប្រាស់)។`,
-          });
-          setHardDeletingItem(null);
-          await refetch();
-        } catch {
-          setMessage({
-            type: "error",
-            text: getApiErrorMessage(hardDeleteError),
-          });
-        }
       }
     };
 
@@ -1142,13 +1090,6 @@ export default function MedicalConditionManager() {
                 item,
               )
             }
-            onHardDelete={(
-              item,
-            ) =>
-              setHardDeletingItem(
-                item,
-              )
-            }
             onEdit={(
               item,
             ) => {
@@ -1251,29 +1192,6 @@ export default function MedicalConditionManager() {
         }}
         onConfirm={
           handleDelete
-        }
-      />
-
-      {/* =================================================
-          លុប
-      ================================================== */}
-
-      <HardDeleteMedicalConditionConfirmModal
-        item={hardDeletingItem}
-        deleting={
-          isHardDeleting
-        }
-        onClose={() => {
-          if (
-            !isHardDeleting
-          ) {
-            setHardDeletingItem(
-              null,
-            );
-          }
-        }}
-        onConfirm={
-          handleHardDelete
         }
       />
 

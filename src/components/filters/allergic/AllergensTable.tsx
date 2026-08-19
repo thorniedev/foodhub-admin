@@ -27,10 +27,6 @@ type Props = {
     item: Allergen,
   ) => void;
 
-  onHardDelete?: (
-    item: Allergen,
-  ) => void;
-
   onRestore: (
     item: Allergen,
   ) => void;
@@ -42,7 +38,6 @@ export default function AllergensTable({
   onView,
   onEdit,
   onDelete,
-  onHardDelete,
   onRestore,
 }: Props) {
   return (
@@ -229,20 +224,6 @@ export default function AllergensTable({
                         <RotateCcw
                           size={20}
                         />
-                      </button>
-                    )}
-
-                    {/* លុប */}
-
-                    {onHardDelete && (
-                      <button
-                        type="button"
-                        disabled={disabled}
-                        onClick={() => onHardDelete(item)}
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:opacity-40"
-                        title="លុបជាអចិន្ត្រៃយ៍ (លុប)"
-                      >
-                        <AlertOctagon size={20} />
                       </button>
                     )}
                   </div>

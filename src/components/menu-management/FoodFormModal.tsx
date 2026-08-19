@@ -756,6 +756,47 @@ export default function FoodFormModal({
     (row) => row.weatherConditionUuid,
   );
 
+  const activeDietaryTypes = useMemo(() => {
+    return dietaryTypes.filter(
+      (item) => item.active !== false || selectedDietaryCodes.includes(item.code),
+    );
+  }, [dietaryTypes, selectedDietaryCodes]);
+
+  const activeMealTypes = useMemo(() => {
+    return mealTypes.filter(
+      (item) =>
+        item.isActive !== false || selectedMealTypeUuids.includes(item.uuid),
+    );
+  }, [mealTypes, selectedMealTypeUuids]);
+
+  const activeAgeGroups = useMemo(() => {
+    return ageGroups.filter(
+      (item) =>
+        item.isActive !== false || selectedAgeGroupUuids.includes(item.uuid),
+    );
+  }, [ageGroups, selectedAgeGroupUuids]);
+
+  const activeSeasons = useMemo(() => {
+    return seasons.filter(
+      (item) =>
+        item.isActive !== false || selectedSeasonUuids.includes(item.uuid),
+    );
+  }, [seasons, selectedSeasonUuids]);
+
+  const activeEvents = useMemo(() => {
+    return events.filter(
+      (item) =>
+        item.isActive !== false || selectedEventUuids.includes(item.uuid),
+    );
+  }, [events, selectedEventUuids]);
+
+  const activeWeatherConditions = useMemo(() => {
+    return weatherConditions.filter(
+      (item) =>
+        item.isActive !== false || selectedWeatherUuids.includes(item.uuid),
+    );
+  }, [weatherConditions, selectedWeatherUuids]);
+
   if (!open) return null;
 
   return (
@@ -1048,7 +1089,7 @@ export default function FoodFormModal({
             selectedCount={dietaryTypeRows.length}
           >
             <OptionPills
-              options={dietaryTypes.map((dietaryType) => ({
+              options={activeDietaryTypes.map((dietaryType) => ({
                 value: dietaryType.code,
                 label: `${dietaryType.name} `,
               }))}
@@ -1067,7 +1108,7 @@ export default function FoodFormModal({
             selectedCount={mealTypeRows.length}
           >
             <OptionPills
-              options={mealTypes.map((mealType) => ({
+              options={activeMealTypes.map((mealType) => ({
                 value: mealType.uuid,
                 label: `${mealType.name} `,
               }))}
@@ -1123,7 +1164,7 @@ export default function FoodFormModal({
             selectedCount={ageRuleRows.length}
           >
             <OptionPills
-              options={ageGroups.map((ageGroup) => ({
+              options={activeAgeGroups.map((ageGroup) => ({
                 value: ageGroup.uuid,
                 label: `${ageGroup.name} `,
               }))}
@@ -1224,7 +1265,7 @@ export default function FoodFormModal({
             selectedCount={seasonRows.length}
           >
             <OptionPills
-              options={seasons.map((season) => ({
+              options={activeSeasons.map((season) => ({
                 value: season.uuid,
                 label: `${season.name}${
                   season.localName ? ` (${season.localName})` : ""
@@ -1303,7 +1344,7 @@ export default function FoodFormModal({
             selectedCount={eventRows.length}
           >
             <OptionPills
-              options={events.map((eventOption) => ({
+              options={activeEvents.map((eventOption) => ({
                 value: eventOption.uuid,
                 label: `${eventOption.name}${
                   eventOption.localName ? ` (${eventOption.localName})` : ""
@@ -1382,7 +1423,7 @@ export default function FoodFormModal({
             selectedCount={weatherRows.length}
           >
             <OptionPills
-              options={weatherConditions.map((weather) => ({
+              options={activeWeatherConditions.map((weather) => ({
                 value: weather.uuid,
                 label: `${weather.name}${
                   weather.localName ? ` (${weather.localName})` : ""

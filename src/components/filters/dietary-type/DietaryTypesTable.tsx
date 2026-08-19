@@ -25,9 +25,6 @@ type Props = {
   onDelete: (
     item: DietaryType,
   ) => void;
-  onHardDelete?: (
-    item: DietaryType,
-  ) => void;
   onRestore: (
     item: DietaryType,
   ) => void;
@@ -39,7 +36,6 @@ export default function DietaryTypesTable({
   onView,
   onEdit,
   onDelete,
-  onHardDelete,
   onRestore,
 }: Props) {
   return (
@@ -174,18 +170,6 @@ export default function DietaryTypesTable({
                       title="ស្ដារ"
                     >
                       <RotateCcw size={20} />
-                    </button>
-                  )}
-
-                  {onHardDelete && (
-                    <button
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => onHardDelete(item)}
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
-                      title="លុបជាអចិន្ត្រៃយ៍ (លុប)"
-                    >
-                      <AlertOctagon size={20} />
                     </button>
                   )}
                 </div>

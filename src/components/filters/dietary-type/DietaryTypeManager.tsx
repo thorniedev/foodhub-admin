@@ -41,7 +41,6 @@ import DietaryTypesHeader from "./DietaryTypesHeader";
 import DietaryTypesPagination from "./DietaryTypesPagination";
 import DietaryTypesTable from "./DietaryTypesTable";
 import DietaryTypesTabs from "./DietaryTypesTabs";
-import HardDeleteDietaryTypeConfirmModal from "./HardDeleteDietaryTypeConfirmModal";
 
 /* =========================================================
    SORT
@@ -99,14 +98,6 @@ export default function DietaryTypeManager() {
   const [deleting, setDeleting] = useState<DietaryType | null>(null);
 
   const [
-    hardDeletingItem,
-    setHardDeletingItem,
-  ] =
-    useState<DietaryType | null>(
-      null,
-    );
-
-  const [
     message,
     setMessage,
   ] =
@@ -143,15 +134,6 @@ export default function DietaryTypeManager() {
 
   const [deleteItem, { isLoading: isDeleting }] =
     useDeleteDietaryTypeMutation();
-
-  const [
-    hardDeleteItem,
-    {
-      isLoading:
-      isHardDeleting,
-    },
-  ] =
-    useHardDeleteDietaryTypeMutation();
 
   const [
     restoreItem,
@@ -282,7 +264,6 @@ export default function DietaryTypeManager() {
     isCreating ||
     isUpdating ||
     isDeleting ||
-    isHardDeleting ||
     isRestoring;
 
   /* =======================================================
@@ -371,44 +352,7 @@ export default function DietaryTypeManager() {
   };
 
   /* =======================================================
-     លុប
-  ======================================================= */
-  const handleHardDelete = async () => {
-    if (!hardDeletingItem) {
-      return;
-    }
-
-    try {
-      await hardDeleteItem(hardDeletingItem.code).unwrap();
-
-      setMessage({
-        type: "success",
-        text: `បានលុបរបបអាហារ "${hardDeletingItem.name}" ជាអចិន្ត្រៃយ៍ដោយជោគជ័យ។`,
-      });
-
-      setHardDeletingItem(null);
-      await refetch();
-    } catch (hardDeleteError) {
-      // If foreign key prevents hard deletion, fallback to soft delete so the user action works
-      try {
-        await deleteItem(hardDeletingItem.code).unwrap();
-        setMessage({
-          type: "success",
-          text: `បានបិទដំណើរការរបបអាហារ "${hardDeletingItem.name}" ទៅជាអសកម្មដោយជោគជ័យ (ដោយសារមានមុខម្ហូបកំពុងប្រើប្រាស់)។`,
-        });
-        setHardDeletingItem(null);
-        await refetch();
-      } catch {
-        setMessage({
-          type: "error",
-          text: getApiErrorMessage(hardDeleteError),
-        });
-      }
-    }
-  };
-
-  /* =======================================================
-     លុប
+     RESTORE
   ======================================================= */
   const handleRestore =
     async (
@@ -798,13 +742,6 @@ export default function DietaryTypeManager() {
             onDelete={
               setDeleting
             }
-            onHardDelete={(
-              item,
-            ) =>
-              setHardDeletingItem(
-                item,
-              )
-            }
             onRestore={(
               item,
             ) =>
@@ -857,24 +794,6 @@ export default function DietaryTypeManager() {
         }}
         onConfirm={
           handleDelete
-        }
-      />
-
-      {/* COMPONENT: HardDeleteDietaryTypeConfirmModal */}
-      <HardDeleteDietaryTypeConfirmModal
-        item={hardDeletingItem}
-        deleting={
-          isHardDeleting
-        }
-        onClose={() => {
-          if (!isHardDeleting) {
-            setHardDeletingItem(
-              null,
-            );
-          }
-        }}
-        onConfirm={
-          handleHardDelete
         }
       />
 

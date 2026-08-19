@@ -39,7 +39,6 @@ import AllergensPagination from "./AllergensPagination";
 import AllergensTable from "./AllergensTable";
 import AllergensTabs from "./AllergensTabs";
 import DeleteAllergenConfirmModal from "./DeleteAllergenConfirmModal";
-import HardDeleteAllergenConfirmModal from "./HardDeleteAllergenConfirmModal";
 
 /* =========================================================
    SORT TYPE
@@ -89,10 +88,6 @@ export default function AllergenManager() {
 
   const [deleting, setDeleting] = useState<Allergen | null>(null);
 
-  const [hardDeletingItem, setHardDeletingItem] = useState<Allergen | null>(
-    null,
-  );
-
   const [message, setMessage] = useState<ApiMessage | null>(null);
 
   /* =======================================================
@@ -125,9 +120,6 @@ export default function AllergenManager() {
   const [updateItem, { isLoading: isUpdating }] = useUpdateAllergenMutation();
 
   const [deleteItem, { isLoading: isDeleting }] = useDeleteAllergenMutation();
-
-  const [hardDeleteItem, { isLoading: isHardDeleting }] =
-    useHardDeleteAllergenMutation();
 
   const [restoreItem, { isLoading: isRestoring }] =
     useRestoreAllergenMutation();
@@ -300,7 +292,6 @@ export default function AllergenManager() {
     isCreating ||
     isUpdating ||
     isDeleting ||
-    isHardDeleting ||
     isRestoring;
 
   /* =======================================================
@@ -447,43 +438,6 @@ export default function AllergenManager() {
         type: "error",
         text: getApiErrorMessage(restoreError),
       });
-    }
-  };
-
-  /* =======================================================
-     លុប
-  ======================================================= */
-
-  const handleHardDelete = async () => {
-    if (!hardDeletingItem) {
-      return;
-    }
-
-    try {
-      await hardDeleteItem(hardDeletingItem.code).unwrap();
-
-      setMessage({
-        type: "success",
-        text: `បានលុបអាឡែស៊ី "${hardDeletingItem.name || hardDeletingItem.code}" ជាអចិន្ត្រៃយ៍ដោយជោគជ័យ។`,
-      });
-
-      setHardDeletingItem(null);
-      await refetch();
-    } catch (hardDeleteError) {
-      try {
-        await deleteItem(hardDeletingItem.code).unwrap();
-        setMessage({
-          type: "success",
-          text: `បានបិទដំណើរការអាឡែស៊ី "${hardDeletingItem.name || hardDeletingItem.code}" ទៅជាអសកម្មដោយជោគជ័យ (ដោយសារមានមុខម្ហូបកំពុងប្រើប្រាស់)។`,
-        });
-        setHardDeletingItem(null);
-        await refetch();
-      } catch {
-        setMessage({
-          type: "error",
-          text: getApiErrorMessage(hardDeleteError),
-        });
-      }
     }
   };
 
@@ -852,7 +806,6 @@ export default function AllergenManager() {
             setFormOpen(true);
           }}
           onDelete={setDeleting}
-          onHardDelete={(item) => setHardDeletingItem(item)}
           onRestore={(item) => void handleRestore(item)}
         />
 
@@ -900,17 +853,6 @@ export default function AllergenManager() {
           }
         }}
         onConfirm={handleDelete}
-      />
-
-      <HardDeleteAllergenConfirmModal
-        item={hardDeletingItem}
-        deleting={isHardDeleting}
-        onClose={() => {
-          if (!isHardDeleting) {
-            setHardDeletingItem(null);
-          }
-        }}
-        onConfirm={handleHardDelete}
       />
 
       <AllergenDetailModal
