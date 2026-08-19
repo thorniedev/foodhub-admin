@@ -105,18 +105,108 @@ const DRINK_SUBCATEGORIES = [
   { key: "traditionalKhmerDrink", label: "ភេសជ្ជៈប្រពៃណីខ្មែរ", keywords: ["traditional khmer drink", "ប្រពៃណី", "ខ្មែរ"] },
 ];
 
-function isDrinkCategory(catName: string, catCode?: string) {
+function isDrinkCategory(
+  catName: string,
+  catCode?: string,
+  item?: FoodRecord,
+): boolean {
   const code = (catCode || "").toLowerCase();
-  const n = catName.toLowerCase();
-  return (
+  const n = (catName || "").toLowerCase();
+  const itemName = (
+    item ? item.localName || item.canonicalName || item.name || "" : ""
+  ).toLowerCase();
+  const rootCode = (
+    item ? ((item.category as any)?.rootCategoryCode || (item as any)?.rootCategoryCode || "") : ""
+  ).toLowerCase();
+  const parentName = (
+    item ? ((item.category as any)?.parentCategoryName || "") : ""
+  ).toLowerCase();
+
+  // Root or parent indicator
+  if (
+    rootCode.includes("drink") ||
+    rootCode.includes("beverage") ||
+    parentName.includes("ភេសជ្ជៈ") ||
+    parentName.includes("drink")
+  ) {
+    return true;
+  }
+
+  // Category code indicator
+  if (
     code.includes("drink") ||
     code.includes("beverage") ||
+    code.includes("coffee") ||
+    code.includes("tea") ||
+    code.includes("juice") ||
+    code.includes("smoothie") ||
+    code.includes("shake") ||
+    code.includes("milk") ||
+    code.includes("soda") ||
+    code.includes("canned") ||
+    code.includes("cocktail") ||
+    code.includes("mocktail") ||
+    code.includes("water")
+  ) {
+    return true;
+  }
+
+  // Category name indicator
+  if (
     n.includes("ភេសជ្ជៈ") ||
-    n.includes("drink") ||
-    n.includes("ទឹក") ||
     n.includes("កាហ្វេ") ||
-    n.includes("តែ")
-  );
+    n.includes("តែ") ||
+    n.includes("ទឹកផ្លែឈើ") ||
+    n.includes("ស្មូតធី") ||
+    n.includes("ទឹកដោះគោ") ||
+    n.includes("សូកូឡា") ||
+    n.includes("ក្រឡុក") ||
+    n.includes("កំប៉ុង") ||
+    n.includes("drink") ||
+    n.includes("beverage") ||
+    n.includes("coffee") ||
+    n.includes("tea") ||
+    n.includes("smoothie") ||
+    n.includes("juice") ||
+    n.includes("milk") ||
+    n.includes("boba") ||
+    n.includes("latte")
+  ) {
+    return true;
+  }
+
+  // Food item name indicator if category is generic
+  if (itemName) {
+    return (
+      itemName.includes("កាហ្វេ") ||
+      itemName.includes("coffee") ||
+      itemName.includes("frappe") ||
+      itemName.includes("espresso") ||
+      itemName.includes("latte") ||
+      itemName.includes("cappuccino") ||
+      itemName.includes("macchiato") ||
+      itemName.includes("americano") ||
+      itemName.includes("matcha") ||
+      itemName.includes("smoothie") ||
+      itemName.includes("ស្មូតធី") ||
+      itemName.includes("ទឹកក្រឡុក") ||
+      itemName.includes("ទឹកអំពៅ") ||
+      itemName.includes("តែទឹកដោះគោ") ||
+      itemName.includes("តែបៃតង") ||
+      itemName.includes("តែក្រូចឆ្មា") ||
+      itemName.includes("milk tea") ||
+      itemName.includes("bubble tea") ||
+      itemName.includes("juice") ||
+      itemName.includes("soda") ||
+      itemName.includes("coca") ||
+      itemName.includes("pepsi") ||
+      itemName.includes("red bull") ||
+      itemName.includes("sting") ||
+      itemName.includes("ទឹកបរិសុទ្ធ")
+    );
+  }
+
+  return false;
 }
 
 function matchesSubCategory(
@@ -153,7 +243,7 @@ function getSubCategoryLabel(item: FoodRecord): string {
   const code = (item.category?.code || "").toLowerCase();
   const canonical = (item.canonicalName || "").toLowerCase();
   const name = (item.localName || item.name || "").toLowerCase();
-  const isDrink = isDrinkCategory(cat, code);
+  const isDrink = isDrinkCategory(cat, code, item);
 
   const list = isDrink ? DRINK_SUBCATEGORIES : FOOD_SUBCATEGORIES;
   const found = list.find((s) => {
@@ -237,13 +327,13 @@ export default function FoodCategoriesManager({
       list = list.filter((item) => {
         const cat = categoryName(item);
         const code = item.category?.code || "";
-        return !isDrinkCategory(cat, code);
+        return !isDrinkCategory(cat, code, item);
       });
     } else if (selectedTab === "DRINK") {
       list = list.filter((item) => {
         const cat = categoryName(item);
         const code = item.category?.code || "";
-        return isDrinkCategory(cat, code);
+        return isDrinkCategory(cat, code, item);
       });
     }
 
@@ -275,7 +365,7 @@ export default function FoodCategoriesManager({
   const drinkCount = useMemo(
     () =>
       activeFoods.filter((item) =>
-        isDrinkCategory(categoryName(item), item.category?.code || ""),
+        isDrinkCategory(categoryName(item), item.category?.code || "", item),
       ).length,
     [activeFoods],
   );
@@ -287,11 +377,11 @@ export default function FoodCategoriesManager({
     const list = isDrinkMode ? DRINK_SUBCATEGORIES : FOOD_SUBCATEGORIES;
     const sourceFoods = isDrinkMode
       ? activeFoods.filter((item) =>
-          isDrinkCategory(categoryName(item), item.category?.code),
+          isDrinkCategory(categoryName(item), item.category?.code, item),
         )
       : activeFoods.filter(
           (item) =>
-            !isDrinkCategory(categoryName(item), item.category?.code),
+            !isDrinkCategory(categoryName(item), item.category?.code, item),
         );
 
     const counts: Record<string, number> = {};
@@ -307,12 +397,12 @@ export default function FoodCategoriesManager({
     if (selectedTab === "FOOD") {
       return activeFoods.filter(
         (item) =>
-          !isDrinkCategory(categoryName(item), item.category?.code || ""),
+          !isDrinkCategory(categoryName(item), item.category?.code || "", item),
       );
     }
     if (selectedTab === "DRINK") {
       return activeFoods.filter((item) =>
-        isDrinkCategory(categoryName(item), item.category?.code || ""),
+        isDrinkCategory(categoryName(item), item.category?.code || "", item),
       );
     }
     return activeFoods;
@@ -485,6 +575,7 @@ export default function FoodCategoriesManager({
                         !isDrinkCategory(
                           categoryName(item),
                           item.category?.code,
+                          item,
                         ),
                     ).length
                   }
@@ -524,6 +615,7 @@ export default function FoodCategoriesManager({
                       isDrinkCategory(
                         categoryName(item),
                         item.category?.code,
+                        item,
                       ),
                     ).length
                   }
@@ -923,7 +1015,7 @@ export default function FoodCategoriesManager({
                   const img = imageUrl(item);
                   const active = item.isActive !== false;
                   const cat = categoryName(item);
-                  const isDrink = isDrinkCategory(cat, item.category?.code);
+                  const isDrink = isDrinkCategory(cat, item.category?.code, item);
 
                   return (
                     <tr

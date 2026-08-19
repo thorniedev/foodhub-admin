@@ -1340,8 +1340,8 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
         if (p.storeUuid) {
           const query = makeQuery({
             page: p.page ?? 0,
-            size: p.size ?? 100,
-            sort: p.sort,
+            size: p.size ?? 200,
+            sort: p.sort ?? "createdAt,desc",
           });
           const result = await browserRequest<unknown>(
             `/api/catalog/stores/${encodeURIComponent(p.storeUuid)}/menu-items${query}`,
@@ -1360,10 +1360,35 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           return result;
         }
 
-        // 2. For website menu items, use discovery search endpoint with clean body
+        // 2. Fetch all catalog published menu items from /api/catalog/menu-items
+        const query = makeQuery({
+          page: p.page ?? 0,
+          size: p.size ?? 200,
+          sort: p.sort ?? "createdAt,desc",
+          query: p.query,
+          foodUuid: p.foodUuid,
+        });
+
+        const catalogResult = await browserRequest<unknown>(
+          `/api/catalog/menu-items${query}`,
+        );
+
+        if (!("error" in catalogResult)) {
+          const page = normalizePage<MenuItemRecord>(catalogResult.data as never);
+          page.content = page.content.map((item: any) => ({
+            ...item,
+            uuid: item.uuid || item.menuItemUuid,
+            menuItemUuid: item.menuItemUuid || item.uuid,
+          }));
+          return {
+            data: page,
+          };
+        }
+
+        // 3. Fallback to discovery search endpoint if needed
         const discoveryQuery = makeQuery({
           page: p.page ?? 0,
-          size: p.size ?? 100,
+          size: p.size ?? 200,
         });
 
         const body: Record<string, unknown> = {};
@@ -1391,7 +1416,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           };
         }
 
-        return discoveryResult;
+        return catalogResult;
       },
     }),
 
