@@ -1391,7 +1391,9 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           size: p.size ?? 200,
         });
 
-        const body: Record<string, unknown> = {};
+        const body: Record<string, unknown> = {
+          availabilityStatuses: ["AVAILABLE", "UNAVAILABLE", "SOLD_OUT"],
+        };
         if (p.query) body.query = p.query;
         if (p.featured !== undefined) body.featuredOnly = Boolean(p.featured);
 
