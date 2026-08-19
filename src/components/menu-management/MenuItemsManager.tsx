@@ -514,7 +514,7 @@ export default function MenuItemsManager({
               <Stat
                 icon={<Globe2 size={20} />}
                 label="Menu Items លើ Website"
-                value={menuItems.length}
+                value={menuItemsQuery.data?.totalElements ?? menuItems.length}
               />
               <Stat
                 icon={<Store size={20} />}
@@ -524,7 +524,7 @@ export default function MenuItemsManager({
               <Stat
                 icon={<Layers size={20} />}
                 label="Food Catalog សម្រាប់ Store"
-                value={foods.length}
+                value={foodsQuery.data?.totalElements ?? foods.length}
               />
             </>
           )}

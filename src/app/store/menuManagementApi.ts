@@ -950,7 +950,7 @@ export const menuManagementApi =
         builder.query<StoreOption[], void>({
           async queryFn() {
             const result = await browserRequest<unknown>(
-              "/api/admin/stores?page=0&size=100",
+              "/api/admin/stores?page=0&size=1000",
             );
 
             if ("error" in result) {
