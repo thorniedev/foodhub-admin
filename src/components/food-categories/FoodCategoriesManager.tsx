@@ -71,8 +71,14 @@ function imageUrl(item: FoodRecord): string | null {
   return resolveFoodHubCatalogImageUrl(raw);
 }
 
-export default function FoodCategoriesManager() {
-  const [selectedTab, setSelectedTab] = useState<FoodFilterTab>("ALL");
+interface FoodCategoriesManagerProps {
+  filterMode?: "ALL" | "FOOD" | "DRINK";
+}
+
+export default function FoodCategoriesManager({
+  filterMode = "ALL",
+}: FoodCategoriesManagerProps) {
+  const [selectedTab, setSelectedTab] = useState<FoodFilterTab>(filterMode);
   const [search, setSearch] = useState("");
   const [notice, setNotice] = useState<{
     type: "success" | "error";
@@ -281,14 +287,28 @@ export default function FoodCategoriesManager() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-white shadow-inner backdrop-blur-md">
-              <Layers size={36} />
+              {filterMode === "FOOD" ? (
+                <Utensils size={36} />
+              ) : filterMode === "DRINK" ? (
+                <Coffee size={36} />
+              ) : (
+                <Layers size={36} />
+              )}
             </div>
             <div>
               <p className="text-3xl font-black text-white sm:text-4xl">
-                ប្រភេទម្ហូប (Food & Drink Catalog)
+                {filterMode === "FOOD"
+                  ? "ប្រភេទម្ហូប - ម្ហូប (Food Catalog)"
+                  : filterMode === "DRINK"
+                    ? "ប្រភេទម្ហូប - ភេសជ្ជៈ (Drink Catalog)"
+                    : "ប្រភេទម្ហូប (Food & Drink Catalog)"}
               </p>
               <p className="mt-1 text-xl font-medium text-emerald-100">
-                បញ្ជីមុខម្ហូប និងភេសជ្ជៈដែលបានបង្កើតក្នុងប្រព័ន្ធ (Store Catalog) ចែកតាមប្រភេទ អាហារ និង ភេសជ្ជៈ។
+                {filterMode === "FOOD"
+                  ? "បញ្ជីមុខម្ហូបដែលបានបង្កើតក្នុងប្រព័ន្ធ (Store Catalog) សម្រាប់ប្រភេទអាហារ និង ម្ហូប។"
+                  : filterMode === "DRINK"
+                    ? "បញ្ជីភេសជ្ជៈដែលបានបង្កើតក្នុងប្រព័ន្ធ (Store Catalog) សម្រាប់ប្រភេទភេសជ្ជៈ។"
+                    : "បញ្ជីមុខម្ហូប និងភេសជ្ជៈដែលបានបង្កើតក្នុងប្រព័ន្ធ (Store Catalog) ចែកតាមប្រភេទ អាហារ និង ភេសជ្ជៈ។"}
               </p>
             </div>
           </div>
@@ -300,38 +320,125 @@ export default function FoodCategoriesManager() {
               className="inline-flex items-center gap-2.5 rounded-full bg-white px-7 py-3.5 text-xl font-black text-[#137A3D] shadow-md transition hover:bg-emerald-50"
             >
               <Plus size={24} />
-              បន្ថែមម្ហូបថ្មី
+              {filterMode === "DRINK" ? "បន្ថែមភេសជ្ជៈថ្មី" : "បន្ថែមម្ហូបថ្មី"}
             </button>
           </div>
         </div>
 
         {/* Stats Row */}
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
-            <div className="flex items-center gap-2 text-emerald-100 text-lg font-semibold">
-              <Layers size={20} />
-              <span>សរុបទាំងអស់ (Total)</span>
-            </div>
-            <p className="mt-1 text-3xl font-black text-white">{totalCount}</p>
-          </div>
+          {filterMode === "FOOD" ? (
+            <>
+              <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
+                <div className="flex items-center gap-2 text-emerald-100 text-lg font-semibold">
+                  <Utensils size={20} />
+                  <span>សរុបម្ហូប (Total Food)</span>
+                </div>
+                <p className="mt-1 text-3xl font-black text-white">
+                  {foodOnlyCount}
+                </p>
+              </div>
 
-          <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
-            <div className="flex items-center gap-2 text-emerald-100 text-lg font-semibold">
-              <Utensils size={20} />
-              <span>អាហារ (Food)</span>
-            </div>
-            <p className="mt-1 text-3xl font-black text-white">
-              {foodOnlyCount}
-            </p>
-          </div>
+              <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
+                <div className="flex items-center gap-2 text-emerald-100 text-lg font-semibold">
+                  <Check size={20} />
+                  <span>សកម្ម (Active)</span>
+                </div>
+                <p className="mt-1 text-3xl font-black text-white">
+                  {
+                    activeFoods.filter(
+                      (item) =>
+                        !isDrinkCategory(
+                          categoryName(item),
+                          item.category?.code,
+                        ),
+                    ).length
+                  }
+                </p>
+              </div>
 
-          <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
-            <div className="flex items-center gap-2 text-emerald-100 text-lg font-semibold">
-              <Coffee size={20} />
-              <span>ភេសជ្ជៈ (Drink)</span>
-            </div>
-            <p className="mt-1 text-3xl font-black text-white">{drinkCount}</p>
-          </div>
+              <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
+                <div className="flex items-center gap-2 text-emerald-100 text-lg font-semibold">
+                  <Layers size={20} />
+                  <span>ប្រភេទ (Categories)</span>
+                </div>
+                <p className="mt-1 text-3xl font-black text-white">
+                  {categories.length}
+                </p>
+              </div>
+            </>
+          ) : filterMode === "DRINK" ? (
+            <>
+              <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
+                <div className="flex items-center gap-2 text-emerald-100 text-lg font-semibold">
+                  <Coffee size={20} />
+                  <span>សរុបភេសជ្ជៈ (Total Drinks)</span>
+                </div>
+                <p className="mt-1 text-3xl font-black text-white">
+                  {drinkCount}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
+                <div className="flex items-center gap-2 text-emerald-100 text-lg font-semibold">
+                  <Check size={20} />
+                  <span>សកម្ម (Active)</span>
+                </div>
+                <p className="mt-1 text-3xl font-black text-white">
+                  {
+                    activeFoods.filter((item) =>
+                      isDrinkCategory(
+                        categoryName(item),
+                        item.category?.code,
+                      ),
+                    ).length
+                  }
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
+                <div className="flex items-center gap-2 text-emerald-100 text-lg font-semibold">
+                  <Layers size={20} />
+                  <span>ប្រភេទ (Categories)</span>
+                </div>
+                <p className="mt-1 text-3xl font-black text-white">
+                  {categories.length}
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
+                <div className="flex items-center gap-2 text-emerald-100 text-lg font-semibold">
+                  <Layers size={20} />
+                  <span>សរុបទាំងអស់ (Total)</span>
+                </div>
+                <p className="mt-1 text-3xl font-black text-white">
+                  {totalCount}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
+                <div className="flex items-center gap-2 text-emerald-100 text-lg font-semibold">
+                  <Utensils size={20} />
+                  <span>អាហារ (Food)</span>
+                </div>
+                <p className="mt-1 text-3xl font-black text-white">
+                  {foodOnlyCount}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
+                <div className="flex items-center gap-2 text-emerald-100 text-lg font-semibold">
+                  <Coffee size={20} />
+                  <span>ភេសជ្ជៈ (Drink)</span>
+                </div>
+                <p className="mt-1 text-3xl font-black text-white">
+                  {drinkCount}
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -356,80 +463,85 @@ export default function FoodCategoriesManager() {
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           {/* Tabs */}
           <div className="flex w-full min-w-0 gap-2 overflow-x-auto pb-1 xl:w-auto">
-            {/* Tab: All */}
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedTab("ALL");
-                setPage(0);
-              }}
-              className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-bold transition ${
-                selectedTab === "ALL"
-                  ? "bg-[#137A3D] text-white shadow-sm"
-                  : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#137A3D]"
-              }`}
-            >
-              ទាំងអស់
-              <span
-                className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-bold ${
+            {filterMode === "ALL" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedTab("ALL");
+                  setPage(0);
+                }}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-bold transition ${
                   selectedTab === "ALL"
-                    ? "bg-white/20 text-white"
-                    : "bg-gray-100 text-gray-600"
+                    ? "bg-[#137A3D] text-white shadow-sm"
+                    : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#137A3D]"
                 }`}
               >
-                {totalCount}
-              </span>
-            </button>
+                ទាំងអស់
+                <span
+                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-bold ${
+                    selectedTab === "ALL"
+                      ? "bg-white/20 text-white"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {totalCount}
+                </span>
+              </button>
+            )}
 
-            {/* Tab: Food */}
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedTab("FOOD");
-                setPage(0);
-              }}
-              className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-bold transition ${
-                selectedTab === "FOOD"
-                  ? "bg-[#137A3D] text-white shadow-sm"
-                  : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#137A3D]"
-              }`}
-            >
-              អាហារ
-              <span
-                className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-bold ${
+            {(filterMode === "ALL" || filterMode === "FOOD") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedTab("FOOD");
+                  setPage(0);
+                }}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-bold transition ${
                   selectedTab === "FOOD"
-                    ? "bg-white/20 text-white"
-                    : "bg-gray-100 text-gray-600"
+                    ? "bg-[#137A3D] text-white shadow-sm"
+                    : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#137A3D]"
                 }`}
               >
-                {foodOnlyCount}
-              </span>
-            </button>
+                <Utensils size={18} />
+                ម្ហូប
+                <span
+                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-bold ${
+                    selectedTab === "FOOD"
+                      ? "bg-white/20 text-white"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {foodOnlyCount}
+                </span>
+              </button>
+            )}
 
-            {/* Tab: Drink */}
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedTab("DRINK");
-                setPage(0);
-              }}
-              className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-bold transition ${
-                selectedTab === "DRINK"
-                  ? "bg-[#137A3D] text-white shadow-sm"
-                  : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#137A3D]"
-              }`}
-            >
-              ភេសជ្ជៈ
-              <span
-                className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-bold ${
+            {(filterMode === "ALL" || filterMode === "DRINK") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedTab("DRINK");
+                  setPage(0);
+                }}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-bold transition ${
                   selectedTab === "DRINK"
-                    ? "bg-white/20 text-white"
-                    : "bg-gray-100 text-gray-600"
+                    ? "bg-[#137A3D] text-white shadow-sm"
+                    : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#137A3D]"
                 }`}
               >
-                {drinkCount}
-              </span>
-            </button>
+                <Coffee size={18} />
+                ភេសជ្ជៈ
+                <span
+                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-bold ${
+                    selectedTab === "DRINK"
+                      ? "bg-white/20 text-white"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {drinkCount}
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Search + Size + Sort */}
@@ -448,7 +560,13 @@ export default function FoodCategoriesManager() {
                   setSearch(e.target.value);
                   setPage(0);
                 }}
-                placeholder="ស្វែងរក ម្ហូប..."
+                placeholder={
+                  filterMode === "FOOD"
+                    ? "ស្វែងរក ម្ហូប..."
+                    : filterMode === "DRINK"
+                      ? "ស្វែងរក ភេសជ្ជៈ..."
+                      : "ស្វែងរក ម្ហូប ឬ ភេសជ្ជៈ..."
+                }
                 className="h-[52px] w-full rounded-full border border-gray-200 bg-gray-50 pl-12 pr-11 text-lg font-medium text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-[#137A3D] focus:bg-white focus:ring-4 focus:ring-emerald-100"
               />
 
@@ -736,7 +854,39 @@ export default function FoodCategoriesManager() {
       {/* =====================================================
           PAGINATION
       ====================================================== */}
-     
+      {totalPages > 1 && (
+        <div className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-lg text-gray-500">
+            Page <span className="font-semibold text-gray-800">{safePage + 1}</span> /{" "}
+            <span className="font-semibold text-gray-800">{totalPages}</span>
+            {" · "}
+            សរុប{" "}
+            <span className="font-semibold text-[#137A3D]">{sortedFoods.length}</span>
+          </p>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={safePage <= 0}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-600 transition hover:border-[#137A3D] hover:bg-emerald-50 hover:text-[#137A3D] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronLeft size={19} />
+              មុន
+            </button>
+
+            <button
+              type="button"
+              disabled={safePage >= totalPages - 1}
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-600 transition hover:border-[#137A3D] hover:bg-emerald-50 hover:text-[#137A3D] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              បន្ទាប់
+              <ChevronRight size={19} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* =====================================================
           FOOD FORM MODAL (CREATE / EDIT)

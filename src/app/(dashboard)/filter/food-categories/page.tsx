@@ -1,5 +1,5 @@
-import FoodCategoriesManager from "@/src/components/food-categories/FoodCategoriesManager";
+import { redirect } from "next/navigation";
 
 export default function FoodCategoriesPage() {
-  return <FoodCategoriesManager />;
+  redirect("/filter/food-categories/food");
 }

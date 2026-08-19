@@ -42,7 +42,16 @@ export const dashboardNav: NavItem[] = [
   {
     label: "ប្រភេទម្ហូប",
     icon: Layers,
-    href: "/filter/food-categories",
+    children: [
+      {
+        label: "ម្ហូប",
+        href: "/filter/food-categories/food",
+      },
+      {
+        label: "ភេសជ្ជៈ",
+        href: "/filter/food-categories/drinks",
+      },
+    ],
   },
   {
     label: "មាតិកាដែលប្រែប្រួល",
@@ -70,10 +79,10 @@ export const dashboardNav: NavItem[] = [
     label: "ចម្រោះទិន្នន័យ",
     icon: SlidersHorizontal,
     children: [
-      // {
-      //   label: "ប្រភេទម្ហូប",
-      //   href: "/filter/food-categories",
-      // },
+      {
+        label: "ប្រភេទម្ហូប",
+        href: "/filter/food-categories",
+      },
       {
         label: "ម្ហូបតាមប្រទេស",
         href: "/filter/cuisines",
