@@ -171,7 +171,25 @@ async function forwardRequest(
   const incomingUrl = new URL(request.url);
 
   let normalizedPath = all;
-  if (all[0] === "menu-items") {
+  let forwardedMethod = request.method;
+  let customRequestBody: ArrayBuffer | undefined = undefined;
+
+  // Transparently route GET /api/menu-items or GET /api/catalog/menu-items to POST /discovery/menu-items/search
+  if (
+    request.method === "GET" &&
+    ((all[0] === "menu-items" && all.length === 1) ||
+      (all[0] === "catalog" && all[1] === "menu-items" && all.length === 2))
+  ) {
+    normalizedPath = ["discovery", "menu-items", "search"];
+    forwardedMethod = "POST";
+    const q = incomingUrl.searchParams.get("query") || undefined;
+    const storeUuid = incomingUrl.searchParams.get("storeUuid") || undefined;
+    const searchBody = JSON.stringify({
+      ...(q ? { query: q } : {}),
+      ...(storeUuid ? { storeUuid, storeUuids: [storeUuid] } : {}),
+    });
+    customRequestBody = new TextEncoder().encode(searchBody).buffer;
+  } else if (all[0] === "menu-items") {
     normalizedPath = ["catalog", "menu-items", ...all.slice(1)];
   }
 
@@ -191,6 +209,12 @@ async function forwardRequest(
    */
   targetUrl.search = incomingUrl.search;
 
+  // Ensure size does not exceed 100 for discovery search
+  if (normalizedPath[0] === "discovery" && incomingUrl.searchParams.has("size")) {
+    const rawSize = parseInt(incomingUrl.searchParams.get("size") || "100", 10);
+    targetUrl.searchParams.set("size", String(Math.min(Math.max(1, rawSize), 100)));
+  }
+
   const requestHeaders = new Headers();
 
   requestHeaders.set(
@@ -202,6 +226,8 @@ async function forwardRequest(
 
   if (contentType) {
     requestHeaders.set("Content-Type", contentType);
+  } else if (forwardedMethod === "POST" && customRequestBody) {
+    requestHeaders.set("Content-Type", "application/json");
   }
 
   /*
@@ -219,9 +245,9 @@ async function forwardRequest(
     requestHeaders.set("Authorization", `Bearer ${accessToken}`);
   }
 
-  const canHaveBody = request.method !== "GET" && request.method !== "HEAD";
+  const canHaveBody = forwardedMethod !== "GET" && forwardedMethod !== "HEAD";
 
-  const requestBody = canHaveBody ? await request.arrayBuffer() : undefined;
+  const requestBody = customRequestBody ?? (canHaveBody ? await request.arrayBuffer() : undefined);
 
   const controller = new AbortController();
 
@@ -231,7 +257,7 @@ async function forwardRequest(
 
   try {
     console.log("[FOODHUB PROXY REQUEST]", {
-      method: request.method,
+      method: forwardedMethod,
       frontendUrl: request.url,
       backendUrl: targetUrl.toString(),
       path: backendPath,
@@ -239,7 +265,7 @@ async function forwardRequest(
     });
 
     const backendResponse = await fetch(targetUrl, {
-      method: request.method,
+      method: forwardedMethod,
 
       headers: requestHeaders,
 

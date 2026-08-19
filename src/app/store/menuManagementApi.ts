@@ -1456,12 +1456,15 @@ export const menuManagementApi =
           async queryFn(params) {
             const p = (params ?? {}) as PublicMenuItemListParams;
 
+            const safeSize = Math.min(Math.max(1, p.size ?? 100), 100);
+            const safePage = Math.max(0, p.page ?? 0);
+
             // 1. If storeUuid is provided, first try GET /api/catalog/stores/{storeUuid}/menu-items
             if (p.storeUuid) {
               const catalogStoreRes = await browserRequest<unknown>(
                 `/api/catalog/stores/${encodeURIComponent(
                   p.storeUuid,
-                )}/menu-items?page=${p.page ?? 0}&size=${p.size ?? 100}`,
+                )}/menu-items?page=${safePage}&size=${safeSize}`,
               );
 
               if (!("error" in catalogStoreRes)) {
@@ -1474,9 +1477,7 @@ export const menuManagementApi =
 
             // 2. Discovery Search API (POST /api/discovery/menu-items/search)
             let result = await browserRequest<unknown>(
-              `/api/discovery/menu-items/search?page=${p.page ?? 0}&size=${
-                p.size ?? 100
-              }&sort=FOODHUB_RATING_DESC`,
+              `/api/discovery/menu-items/search?page=${safePage}&size=${safeSize}&sort=FOODHUB_RATING_DESC`,
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

@@ -87,13 +87,13 @@ export default function MenuItemsManager({
 
   const foodsQuery = useGetManagedFoodsQuery({
     page: 0,
-    size: 200,
+    size: 100,
     sort: "createdAt,desc",
   });
 
   const menuItemsQuery = useGetPublishedMenuItemsQuery({
     page: 0,
-    size: 200,
+    size: 100,
     sort: "createdAt,desc",
   });
 
