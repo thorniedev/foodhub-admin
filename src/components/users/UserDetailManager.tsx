@@ -162,9 +162,6 @@ export default function UserDetailManager({
   const [restoreAdminProfile, { isLoading: restoringProfile }] =
     useRestoreAdminProfileMutation();
 
-  const [restoreAdminUser, { isLoading: restoringUser }] =
-    useRestoreAdminUserMutation();
-
   const handleStatusUpdate = async (
     status: MutableAdminUserStatus,
   ) => {
@@ -365,23 +362,6 @@ export default function UserDetailManager({
       </div>
     );
   }
-
-  const handleRestoreUser = async () => {
-    if (!user) return;
-    try {
-      await restoreAdminUser(user.uuid).unwrap();
-      setNotice({
-        type: "success",
-        text: "បានស្តារ User ឡើងវិញដោយជោគជ័យ។",
-      });
-      await refetchUser();
-    } catch (requestError) {
-      setNotice({
-        type: "error",
-        text: getAdminApiErrorMessage(requestError),
-      });
-    }
-  };
 
   const profileBusy = deletingProfile || restoringProfile || hardDeletingProfile;
   const userBusy = updatingStatus || deletingUser || hardDeletingUser || restoringUser;

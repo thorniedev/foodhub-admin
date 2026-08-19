@@ -78,9 +78,9 @@ export default function FilterOptionFormModal({
       item
         ? {
             localName:
-              item.localName,
+              item.localName || item.name,
             name:
-              item.name,
+              item.localName || item.name,
             description:
               item.description ?? "",
             parentUuid:
@@ -336,7 +336,7 @@ export default function FilterOptionFormModal({
           <div>
             <Field
               label={`ឈ្មោះ ${group.labelKm}`}
-              value={form.name || form.localName}
+              value={form.localName || form.name}
               onChange={(value) =>
                 setForm((previous) => ({
                   ...previous,

@@ -1,4 +1,6 @@
 
+import type { AdminUser } from "@/src/types/userProfile";
+
 const STORAGE_KEY = "foodhub-admin-disabled-users";
 
 function isDisabledUser(user: AdminUser) {
