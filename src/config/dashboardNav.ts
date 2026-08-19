@@ -79,9 +79,17 @@ export const dashboardNav: NavItem[] = [
     label: "ចម្រោះទិន្នន័យ",
     icon: SlidersHorizontal,
     children: [
+      // {
+      //   label: "ប្រភេទម្ហូប",
+      //   href: "/filter/food-categories",
+      // },
       {
-        label: "ប្រភេទម្ហូប",
-        href: "/filter/food-categories",
+        label: "ប្រភេទរងនៃអាហារ",
+        href: "/filter/food-subcategories",
+      },
+      {
+        label: "ប្រភេទរងនៃភេសជ្ជៈ",
+        href: "/filter/drink-subcategories",
       },
       {
         label: "ម្ហូបតាមប្រទេស",

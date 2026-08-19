@@ -4,6 +4,8 @@ export type FilterCatalogSource =
   | "LOCAL"
   | "CUISINE_API"
   | "FOOD_CATEGORY_API"
+  | "FOOD_SUBCATEGORY_API"
+  | "DRINK_SUBCATEGORY_API"
   | "MEAL_TYPE_API"
   | "ALLERGEN_API"
   | "DIETARY_TYPE_API"

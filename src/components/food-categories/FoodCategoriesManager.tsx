@@ -71,6 +71,109 @@ function imageUrl(item: FoodRecord): string | null {
   return resolveFoodHubCatalogImageUrl(raw);
 }
 
+const FOOD_SUBCATEGORIES = [
+  { key: "khmerFood", label: "ម្ហូបខ្មែរ", keywords: ["khmer", "ខ្មែរ", "traditional"] },
+  { key: "rice", label: "ម្ហូបបាយ", keywords: ["rice", "បាយ"] },
+  { key: "noodles", label: "មី និងគុយទាវ", keywords: ["noodle", "kuyteav", "គុយទាវ", "មី", "នំបញ្ចុក"] },
+  { key: "soup", label: "សម្ល និងស៊ុប", keywords: ["soup", "សម្ល", "ស៊ុប", "ស្ងោរ"] },
+  { key: "grilled", label: "ម្ហូបអាំង", keywords: ["grill", "អាំង", "bbq"] },
+  { key: "fried", label: "ម្ហូបចៀន", keywords: ["fry", "fried", "ចៀន", "បំពង"] },
+  { key: "stirFried", label: "ម្ហូបឆា", keywords: ["stir", "stir-fry", "ឆា"] },
+  { key: "seafood", label: "គ្រឿងសមុទ្រ", keywords: ["seafood", "សមុទ្រ", "បង្គា", "ក្តាម", "មឹក", "ត្រី"] },
+  { key: "meat", label: "ម្ហូបសាច់", keywords: ["meat", "សាច់", "គោ", "ជ្រូក", "មាន់"] },
+  { key: "vegetarian", label: "ម្ហូបបួស", keywords: ["vegetarian", "vegan", "បួស"] },
+  { key: "fastFood", label: "អាហាររហ័ស", keywords: ["fast food", "fast", "burger", "pizza", "អាហាររហ័ស"] },
+  { key: "snack", label: "អាហារសម្រន់", keywords: ["snack", "street bites", "សម្រន់", "គ្រឿងក្លែម", "street"] },
+  { key: "dessert", label: "បង្អែម", keywords: ["dessert", "sweet", "បង្អែម"] },
+  { key: "bakery", label: "នំ និងផលិតផលដុត", keywords: ["bakery", "pastry", "bread", "cake", "នំ", "ដុត"] },
+  { key: "breakfast", label: "អាហារពេលព្រឹក", keywords: ["breakfast", "ពេលព្រឹក"] },
+  { key: "salad", label: "សាឡាត់", keywords: ["salad", "សាឡាត់"] },
+];
+
+const DRINK_SUBCATEGORIES = [
+  { key: "water", label: "ទឹក", keywords: ["water", "ទឹក", "បរិសុទ្ធ"] },
+  { key: "cannedDrink", label: "ភេសជ្ជៈកំប៉ុង", keywords: ["canned", "can", "soda", "កំប៉ុង", "សូដា"] },
+  { key: "freshJuice", label: "ទឹកផ្លែឈើស្រស់", keywords: ["juice", "fresh juice", "cane", "ផ្លែឈើ", "ទឹកអំពៅ"] },
+  { key: "smoothie", label: "ស្មូតធី", keywords: ["smoothie", "shake", "ស្មូតធី"] },
+  { key: "coffee", label: "កាហ្វេ", keywords: ["coffee", "កាហ្វេ"] },
+  { key: "tea", label: "តែ", keywords: ["tea", "តែ"] },
+  { key: "milk", label: "ទឹកដោះគោ", keywords: ["milk", "ទឹកដោះគោ"] },
+  { key: "milkTea", label: "តែទឹកដោះគោ", keywords: ["milk tea", "boba", "bubble tea", "តែទឹកដោះគោ"] },
+  { key: "chocolateDrink", label: "ភេសជ្ជៈសូកូឡា", keywords: ["chocolate", "cocoa", "សូកូឡា"] },
+  { key: "energyDrink", label: "ភេសជ្ជៈប៉ូវកម្លាំង", keywords: ["energy", "energy drink", "ប៉ូវកម្លាំង"] },
+  { key: "herbalDrink", label: "ភេសជ្ជៈរុក្ខជាតិ", keywords: ["herbal", "herbal drink", "រុក្ខជាតិ"] },
+  { key: "traditionalKhmerDrink", label: "ភេសជ្ជៈប្រពៃណីខ្មែរ", keywords: ["traditional khmer drink", "ប្រពៃណី", "ខ្មែរ"] },
+];
+
+function isDrinkCategory(catName: string, catCode?: string) {
+  const code = (catCode || "").toLowerCase();
+  const n = catName.toLowerCase();
+  return (
+    code.includes("drink") ||
+    code.includes("beverage") ||
+    n.includes("ភេសជ្ជៈ") ||
+    n.includes("drink") ||
+    n.includes("ទឹក") ||
+    n.includes("កាហ្វេ") ||
+    n.includes("តែ")
+  );
+}
+
+function matchesSubCategory(
+  item: FoodRecord,
+  subcatKey: string,
+  isDrinkMode: boolean,
+): boolean {
+  if (!subcatKey || subcatKey === "ALL") return true;
+  const list = isDrinkMode ? DRINK_SUBCATEGORIES : FOOD_SUBCATEGORIES;
+  const subcat = list.find((s) => s.key === subcatKey);
+  if (!subcat) return true;
+
+  const cat = categoryName(item).toLowerCase();
+  const code = (item.category?.code || "").toLowerCase();
+  const canonical = (item.canonicalName || "").toLowerCase();
+  const name = (item.localName || item.name || "").toLowerCase();
+
+  return (
+    cat === subcat.label.toLowerCase() ||
+    subcat.keywords.some((kw) => {
+      const k = kw.toLowerCase();
+      return (
+        cat.includes(k) ||
+        code.includes(k) ||
+        canonical.includes(k) ||
+        name.includes(k)
+      );
+    })
+  );
+}
+
+function getSubCategoryLabel(item: FoodRecord): string {
+  const cat = categoryName(item);
+  const code = (item.category?.code || "").toLowerCase();
+  const canonical = (item.canonicalName || "").toLowerCase();
+  const name = (item.localName || item.name || "").toLowerCase();
+  const isDrink = isDrinkCategory(cat, code);
+
+  const list = isDrink ? DRINK_SUBCATEGORIES : FOOD_SUBCATEGORIES;
+  const found = list.find((s) => {
+    return (
+      cat.toLowerCase() === s.label.toLowerCase() ||
+      s.keywords.some((kw) => {
+        const k = kw.toLowerCase();
+        return (
+          cat.toLowerCase().includes(k) ||
+          code.includes(k) ||
+          canonical.includes(k) ||
+          name.includes(k)
+        );
+      })
+    );
+  });
+
+  return found?.label || cat;
+}
+
 interface FoodCategoriesManagerProps {
   filterMode?: "ALL" | "FOOD" | "DRINK";
 }
@@ -79,6 +182,7 @@ export default function FoodCategoriesManager({
   filterMode = "ALL",
 }: FoodCategoriesManagerProps) {
   const [selectedTab, setSelectedTab] = useState<FoodFilterTab>(filterMode);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const [notice, setNotice] = useState<{
     type: "success" | "error";
@@ -119,28 +223,15 @@ export default function FoodCategoriesManager({
   const foods = useMemo(() => foodsQuery.data?.content ?? [], [foodsQuery.data]);
   const categories = categoriesQuery.data ?? [];
 
-  const isDrinkCategory = (catName: string, catCode?: string) => {
-    const code = (catCode || "").toLowerCase();
-    const n = catName.toLowerCase();
-    return (
-      code.includes("drink") ||
-      code.includes("beverage") ||
-      n.includes("ភេសជ្ជៈ") ||
-      n.includes("drink") ||
-      n.includes("ទឹក") ||
-      n.includes("កាហ្វេ") ||
-      n.includes("តែ")
-    );
-  };
-
   const activeFoods = useMemo(
     () => foods.filter((item) => item.isActive !== false),
     [foods],
   );
 
-  // Filter Foods by Tab & Search
+  // Filter Foods by Tab, Subcategory, & Search
   const filteredFoods = useMemo(() => {
     let list = activeFoods;
+    const isDrinkMode = selectedTab === "DRINK";
 
     if (selectedTab === "FOOD") {
       list = list.filter((item) => {
@@ -154,6 +245,12 @@ export default function FoodCategoriesManager({
         const code = item.category?.code || "";
         return isDrinkCategory(cat, code);
       });
+    }
+
+    if (selectedSubCategory !== "ALL") {
+      list = list.filter((item) =>
+        matchesSubCategory(item, selectedSubCategory, isDrinkMode),
+      );
     }
 
     const q = search.trim().toLowerCase();
@@ -171,7 +268,55 @@ export default function FoodCategoriesManager({
         cuis.includes(q)
       );
     });
-  }, [activeFoods, selectedTab, search]);
+  }, [activeFoods, selectedTab, selectedSubCategory, search]);
+
+  // Counts
+  const totalCount = activeFoods.length;
+  const drinkCount = useMemo(
+    () =>
+      activeFoods.filter((item) =>
+        isDrinkCategory(categoryName(item), item.category?.code || ""),
+      ).length,
+    [activeFoods],
+  );
+  const foodOnlyCount = totalCount - drinkCount;
+
+  // Subcategory Counts
+  const subCategoryCounts = useMemo(() => {
+    const isDrinkMode = selectedTab === "DRINK";
+    const list = isDrinkMode ? DRINK_SUBCATEGORIES : FOOD_SUBCATEGORIES;
+    const sourceFoods = isDrinkMode
+      ? activeFoods.filter((item) =>
+          isDrinkCategory(categoryName(item), item.category?.code),
+        )
+      : activeFoods.filter(
+          (item) =>
+            !isDrinkCategory(categoryName(item), item.category?.code),
+        );
+
+    const counts: Record<string, number> = {};
+    list.forEach((subcat) => {
+      counts[subcat.key] = sourceFoods.filter((item) =>
+        matchesSubCategory(item, subcat.key, isDrinkMode),
+      ).length;
+    });
+    return counts;
+  }, [activeFoods, selectedTab]);
+
+  const currentTabFoods = useMemo(() => {
+    if (selectedTab === "FOOD") {
+      return activeFoods.filter(
+        (item) =>
+          !isDrinkCategory(categoryName(item), item.category?.code || ""),
+      );
+    }
+    if (selectedTab === "DRINK") {
+      return activeFoods.filter((item) =>
+        isDrinkCategory(categoryName(item), item.category?.code || ""),
+      );
+    }
+    return activeFoods;
+  }, [activeFoods, selectedTab]);
 
   // Sort Foods
   const sortedFoods = useMemo(() => {
@@ -193,17 +338,6 @@ export default function FoodCategoriesManager({
       return sortMode === "NEWEST" ? timeB - timeA : timeA - timeB;
     });
   }, [filteredFoods, sortMode]);
-
-  // Counts
-  const totalCount = activeFoods.length;
-  const drinkCount = useMemo(
-    () =>
-      activeFoods.filter((item) =>
-        isDrinkCategory(categoryName(item), item.category?.code || ""),
-      ).length,
-    [activeFoods],
-  );
-  const foodOnlyCount = totalCount - drinkCount;
 
   // Pagination
   const totalPages = Math.max(Math.ceil(sortedFoods.length / size), 1);
@@ -664,6 +798,70 @@ export default function FoodCategoriesManager({
             </div>
           </div>
         </div>
+
+        {/* Sub-categories Filter Pills Bar */}
+        <div className="flex w-full min-w-0 items-center gap-2 overflow-x-auto rounded-2xl border border-gray-100 bg-white p-3 shadow-xs [scrollbar-width:thin]">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedSubCategory("ALL");
+              setPage(0);
+            }}
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-base font-bold transition ${
+              selectedSubCategory === "ALL"
+                ? "bg-[#137A3D] text-white shadow-sm"
+                : "border border-gray-200 bg-gray-50/70 text-gray-600 hover:border-[#137A3D] hover:bg-emerald-50/50 hover:text-[#137A3D]"
+            }`}
+          >
+            <span>ទាំងអស់</span>
+            <span
+              className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-xs font-bold ${
+                selectedSubCategory === "ALL"
+                  ? "bg-white/20 text-white"
+                  : "bg-gray-200 text-gray-700"
+              }`}
+            >
+              {currentTabFoods.length}
+            </span>
+          </button>
+
+          {(selectedTab === "DRINK"
+            ? DRINK_SUBCATEGORIES
+            : FOOD_SUBCATEGORIES
+          ).map((subcat) => {
+            const count = subCategoryCounts[subcat.key] || 0;
+            const isSelected = selectedSubCategory === subcat.key;
+
+            return (
+              <button
+                key={subcat.key}
+                type="button"
+                onClick={() => {
+                  setSelectedSubCategory(isSelected ? "ALL" : subcat.key);
+                  setPage(0);
+                }}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-base font-bold transition ${
+                  isSelected
+                    ? "bg-[#137A3D] text-white shadow-sm"
+                    : "border border-gray-200 bg-white text-gray-700 hover:border-[#137A3D] hover:bg-emerald-50/50 hover:text-[#137A3D]"
+                }`}
+              >
+                <span>{subcat.label}</span>
+                {count > 0 && (
+                  <span
+                    className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-xs font-bold ${
+                      isSelected
+                        ? "bg-white/20 text-white"
+                        : "bg-emerald-100 text-emerald-800"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </section>
 
       {/* =====================================================
@@ -793,7 +991,7 @@ export default function FoodCategoriesManager({
                           ) : (
                             <Utensils size={16} />
                           )}
-                          {cat}
+                          {getSubCategoryLabel(item)}
                         </span>
                       </td>
 
