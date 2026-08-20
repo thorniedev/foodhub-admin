@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Upload, X } from "lucide-react";
 import Image from "next/image";
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
+import { compressImage } from "@/src/utils/imageCompression";
 
 const ACCEPTED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
@@ -37,7 +38,7 @@ export default function BannerImageUploader({
     };
   }, [previewUrl]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selected = event.target.files?.[0];
     event.target.value = "";
     if (!selected) return;
@@ -48,7 +49,12 @@ export default function BannerImageUploader({
     }
 
     setError(null);
-    onChange(selected);
+    try {
+      const compressed = await compressImage(selected, 1);
+      onChange(compressed);
+    } catch {
+      onChange(selected);
+    }
   };
 
   const displayUrl =

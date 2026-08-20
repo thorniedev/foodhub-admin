@@ -19,6 +19,7 @@ import {
 } from "../../../schemas/banner-schema";
 import BannerImageUploader from "../BannerImageUploader";
 import { resolveBannerFormError } from "../../../lib/bannerFormErrors";
+import { compressImage } from "@/src/utils/imageCompression";
 import {
   useCreateBannerMutation,
   useUpdateBannerMutation,
@@ -121,17 +122,26 @@ export default function BannerFormModal({
     };
 
     try {
+      let imageFile = values.image;
+      if (imageFile instanceof File) {
+        try {
+          imageFile = await compressImage(imageFile, 1);
+        } catch {
+          // Fallback to original if compression fails
+        }
+      }
+
       if (editing) {
         await updateBanner({
           id: editing.id,
           payload,
-          image: values.image ?? null,
+          image: imageFile ?? null,
         }).unwrap();
       } else {
         await createBanner({
           payload,
           // createBannerSchema guarantees `image` is a File at this point.
-          image: values.image as File,
+          image: imageFile as File,
         }).unwrap();
       }
       onClose();

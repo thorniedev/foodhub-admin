@@ -1655,29 +1655,45 @@ export const menuManagementApi =
                 ? "VERIFIED"
                 : payload.menuItem?.ingredientDataStatus || "VERIFIED";
 
-            // 2. Create Core Menu Item strictly matching Postman 04 Request 01 schema
-            const jsonPayload: Record<string, unknown> = {
+            const mediaUuids = primaryMediaUuid ? [primaryMediaUuid] : (payload.primaryMediaUuids ?? []);
+
+            const jsonPayload = {
               foodUuid: payload.foodUuid,
-              name: payload.menuItem?.name,
-              price: Number(payload.menuItem?.price) || 0,
-              currencyCode: payload.menuItem?.currencyCode || "USD",
-              preparationTimeMinutes: Number(payload.menuItem?.preparationTimeMinutes) || 15,
-              availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
-              ingredientDataStatus: normalizedIngredientDataStatus,
-              featured: payload.menuItem?.isFeatured ?? true,
-              source: "ADMIN",
+              menuItem: {
+                name: payload.menuItem?.name,
+                description: payload.menuItem?.description || null,
+                price: Number(payload.menuItem?.price) || 0,
+                currencyCode: payload.menuItem?.currencyCode || "USD",
+                preparationTimeMinutes: Number(payload.menuItem?.preparationTimeMinutes) || 15,
+                availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
+                ingredientDataStatus: normalizedIngredientDataStatus,
+                isFeatured: Boolean(payload.menuItem?.isFeatured),
+                source: payload.menuItem?.source || "ADMIN",
+              },
+              primaryMediaUuids: mediaUuids,
+              ingredients: (payload.ingredients ?? []).map((ing) => ({
+                ingredientUuid: ing.ingredientUuid,
+                quantity: ing.quantity != null ? Number(ing.quantity) : 1,
+                unit: ing.unit || "unit",
+                isOptional: Boolean(ing.isOptional),
+                notes: ing.notes || null,
+              })),
+              dietaryTypes: (payload.dietaryTypes ?? []).map((d) => ({
+                dietaryTypeUuid: d.dietaryTypeUuid,
+                verificationStatus: d.verificationStatus || "VERIFIED",
+                notes: d.notes || null,
+              })),
+              allergenDeclarations: (payload.allergenDeclarations ?? []).map((a) => ({
+                allergenUuid: a.allergenUuid,
+                declarationType: a.declarationType || "MAY_CONTAIN",
+                riskLevel: a.riskLevel || "MEDIUM",
+                verificationStatus: a.verificationStatus || "VERIFIED",
+                notes: a.notes || null,
+              })),
             };
 
-            if (payload.menuItem?.description) {
-              jsonPayload.description = payload.menuItem.description;
-            }
-
-            if (primaryMediaUuid) {
-              jsonPayload.primaryMediaUuid = primaryMediaUuid;
-            }
-
             let result = await browserRequest<unknown>(
-              `/api/admin/stores/${encodeURIComponent(
+              `/api/catalog/stores/${encodeURIComponent(
                 storeUuid,
               )}/menu-items`,
               {
@@ -1694,7 +1710,7 @@ export const menuManagementApi =
               (result.error as { status?: number })?.status === 404
             ) {
               result = await browserRequest<unknown>(
-                `/api/catalog/stores/${encodeURIComponent(
+                `/api/admin/stores/${encodeURIComponent(
                   storeUuid,
                 )}/menu-items`,
                 {
