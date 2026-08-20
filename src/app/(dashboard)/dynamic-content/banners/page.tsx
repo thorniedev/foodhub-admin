@@ -1,5 +1,5 @@
-import DynamicContentDashboard from "../../../../components/dynamic-content/DynamicContentDashboard";
+import BannersManager from "../../../../components/dynamic-content/BannersManager";
 
 export default function BannersPage() {
-  return <DynamicContentDashboard />;
+  return <BannersManager />;
 }
