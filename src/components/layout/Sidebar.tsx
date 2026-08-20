@@ -9,6 +9,8 @@ import { usePathname } from "next/navigation";
 
 import { ChevronDown, LogOut, X } from "lucide-react";
 
+import { markLogoutPending } from "../../lib/redirectToAdminLogin";
+
 import { dashboardNav, type NavItem } from "../../config/dashboardNav";
 
 import { useSidebar } from "../../context/SidebarContext";
@@ -302,7 +304,12 @@ export default function Sidebar() {
         {/* ============================================= */}
 
         <div className="shrink-0 border-t border-gray-100 bg-white p-3">
-          <form action="/api/auth/logout" method="post" className="w-full">
+          <form
+            action="/api/auth/logout"
+            method="post"
+            className="w-full"
+            onSubmit={markLogoutPending}
+          >
             <button
               type="submit"
               className="group flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-gray-600 transition hover:bg-red-50 hover:text-red-600"

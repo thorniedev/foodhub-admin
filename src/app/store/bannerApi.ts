@@ -13,7 +13,7 @@ import type {
  * Content-Type header for FormData bodies — fetchBaseQuery strips it so the
  * browser can generate the multipart boundary.
  */
-function buildBannerFormData(
+export function buildBannerFormData(
   payload: CreateBannerPayload | UpdateBannerPayload,
   image?: File | null,
 ): FormData {
@@ -100,13 +100,60 @@ export const bannerApi = adminBaseApi.injectEndpoints({
 
     updateBannerStatus: builder.mutation<
       AdminBannerResponse,
-      { id: string; isPublished: boolean }
+      {
+        id: string;
+        isPublished: boolean;
+        /** Exact args of the currently rendered list query, for optimistic patching. */
+        listArgs?: GetAdminBannersParams;
+      }
     >({
       query: ({ id, isPublished }) => ({
         url: `/banners/${encodeURIComponent(id)}/status`,
         method: "PATCH",
         body: { isPublished },
       }),
+      // Optimistic update with rollback: flip the switch instantly, then
+      // reconcile with the server. RTK Query's updateQueryData patches are
+      // safely undoable via patch.undo() if the request fails.
+      async onQueryStarted(
+        { id, isPublished, listArgs },
+        { dispatch, queryFulfilled },
+      ) {
+        const patches = [
+          dispatch(
+            bannerApi.util.updateQueryData(
+              "getAdminBannerById",
+              id,
+              (draft) => {
+                draft.isPublished = isPublished;
+              },
+            ),
+          ),
+        ];
+
+        if (listArgs !== undefined) {
+          patches.push(
+            dispatch(
+              bannerApi.util.updateQueryData(
+                "getAdminBanners",
+                listArgs,
+                (draft) => {
+                  const item = draft.contents.find((banner) => banner.id === id);
+                  if (item) {
+                    item.isPublished = isPublished;
+                  }
+                },
+              ),
+            ),
+          );
+        }
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patches.forEach((patch) => patch.undo());
+        }
+      },
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Banner", id },
         { type: "Banner", id: "LIST" },

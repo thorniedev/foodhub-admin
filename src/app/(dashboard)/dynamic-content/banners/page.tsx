@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import BannersManager from "../../../../components/dynamic-content/BannersManager";
 
 export default function BannersPage() {
-  return <BannersManager />;
+  return (
+    <Suspense fallback={null}>
+      <BannersManager />
+    </Suspense>
+  );
 }
