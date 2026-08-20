@@ -1655,57 +1655,22 @@ export const menuManagementApi =
                 ? "VERIFIED"
                 : payload.menuItem?.ingredientDataStatus || "VERIFIED";
 
-            const menuItemObj = {
-              name: payload.menuItem?.name,
-              description: payload.menuItem?.description || null,
-              price: payload.menuItem?.price,
-              currencyCode: payload.menuItem?.currencyCode || "USD",
-              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes ?? 15,
-              availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
-              ingredientDataStatus: normalizedIngredientDataStatus,
-              featured: payload.menuItem?.isFeatured ?? true,
-              isFeatured: payload.menuItem?.isFeatured ?? true,
-              source: "ADMIN",
-            };
-
-            // 2. Create Core Menu Item with both nested menuItem and flat fields for maximum backend compatibility
+            // 2. Create Core Menu Item strictly matching Postman 04 Request 01 schema
             const jsonPayload: Record<string, unknown> = {
               foodUuid: payload.foodUuid,
               name: payload.menuItem?.name,
-              description: payload.menuItem?.description || undefined,
-              price: payload.menuItem?.price,
+              price: Number(payload.menuItem?.price) || 0,
               currencyCode: payload.menuItem?.currencyCode || "USD",
-              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes ?? 15,
+              preparationTimeMinutes: Number(payload.menuItem?.preparationTimeMinutes) || 15,
               availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
               ingredientDataStatus: normalizedIngredientDataStatus,
               featured: payload.menuItem?.isFeatured ?? true,
-              isFeatured: payload.menuItem?.isFeatured ?? true,
               source: "ADMIN",
-              menuItem: menuItemObj,
-              primaryMediaUuids: primaryMediaUuid ? [primaryMediaUuid] : (payload.primaryMediaUuids ?? []),
-              thumbnailMediaUuid: primaryMediaUuid || payload.thumbnailMediaUuid || undefined,
-              galleryMediaUuids: galleryMediaUuids,
-              ingredients: (payload.ingredients ?? []).map((ing) => ({
-                ingredientUuid: ing.ingredientUuid,
-                quantity: ing.quantity ?? 1,
-                unit: ing.unit ?? "unit",
-                isOptional: Boolean(ing.isOptional),
-                optional: Boolean(ing.isOptional),
-                notes: ing.notes || undefined,
-              })),
-              dietaryTypes: (payload.dietaryTypes ?? []).map((d) => ({
-                dietaryTypeUuid: d.dietaryTypeUuid,
-                verificationStatus: d.verificationStatus || "VERIFIED",
-                notes: d.notes || undefined,
-              })),
-              allergenDeclarations: (payload.allergenDeclarations ?? []).map((a) => ({
-                allergenUuid: a.allergenUuid,
-                declarationType: a.declarationType || "MAY_CONTAIN",
-                riskLevel: a.riskLevel || "MEDIUM",
-                verificationStatus: a.verificationStatus || "VERIFIED",
-                notes: a.notes || undefined,
-              })),
             };
+
+            if (payload.menuItem?.description) {
+              jsonPayload.description = payload.menuItem.description;
+            }
 
             if (primaryMediaUuid) {
               jsonPayload.primaryMediaUuid = primaryMediaUuid;
@@ -1888,37 +1853,22 @@ export const menuManagementApi =
                 ? "VERIFIED"
                 : payload.menuItem?.ingredientDataStatus || "VERIFIED";
 
-            const menuItemObj = {
-              name: payload.menuItem?.name,
-              description: payload.menuItem?.description || null,
-              price: payload.menuItem?.price,
-              currencyCode: payload.menuItem?.currencyCode || "USD",
-              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes ?? 15,
-              availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
-              ingredientDataStatus: normalizedIngredientDataStatus,
-              featured: payload.menuItem?.isFeatured ?? true,
-              isFeatured: payload.menuItem?.isFeatured ?? true,
-              source: "ADMIN",
-            };
-
-            // 2. Update Core MenuItem (POSTMAN Collection: PUT /api/v1/admin/menu-items/{uuid})
+            // 2. Update Core MenuItem strictly matching Postman 04 Request 04 schema
             const coreBody: Record<string, unknown> = {
               foodUuid: payload.foodUuid,
               name: payload.menuItem?.name,
-              description: payload.menuItem?.description || undefined,
-              price: payload.menuItem?.price,
+              price: Number(payload.menuItem?.price) || 0,
               currencyCode: payload.menuItem?.currencyCode || "USD",
-              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes ?? 15,
+              preparationTimeMinutes: Number(payload.menuItem?.preparationTimeMinutes) || 15,
               availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
               ingredientDataStatus: normalizedIngredientDataStatus,
               featured: payload.menuItem?.isFeatured ?? true,
-              isFeatured: payload.menuItem?.isFeatured ?? true,
               source: "ADMIN",
-              menuItem: menuItemObj,
-              primaryMediaUuids: primaryMediaUuid ? [primaryMediaUuid] : (payload.primaryMediaUuids ?? []),
-              thumbnailMediaUuid: primaryMediaUuid || payload.thumbnailMediaUuid || undefined,
-              galleryMediaUuids: galleryMediaUuids,
             };
+
+            if (payload.menuItem?.description) {
+              coreBody.description = payload.menuItem.description;
+            }
 
             if (primaryMediaUuid) {
               coreBody.primaryMediaUuid = primaryMediaUuid;
