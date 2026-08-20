@@ -701,9 +701,32 @@ function normalizeMenuItemEntity<T>(item: T): T {
   return {
     ...anyItem,
     uuid: anyItem.uuid || anyItem.menuItemUuid || anyItem.id?.toString(),
+    name: anyItem.name || (anyItem as any).menuItemName || food?.canonicalName || food?.localName || "",
+    description: anyItem.description || food?.description || "",
     storeUuid: anyItem.storeUuid || store?.uuid,
     foodUuid: anyItem.foodUuid || food?.uuid,
+    availabilityStatus: anyItem.availabilityStatus || "AVAILABLE",
+    price: anyItem.price != null ? Number(anyItem.price) : 0,
+    currencyCode: anyItem.currencyCode || "USD",
   } as T;
+}
+
+function extractListFromRaw(raw: any): any[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (Array.isArray(raw.content)) return raw.content;
+  if (Array.isArray(raw.contents)) return raw.contents;
+  if (Array.isArray(raw.items)) return raw.items;
+  if (Array.isArray(raw.menuItems)) return raw.menuItems;
+  if (Array.isArray(raw.results)) return raw.results;
+  if (Array.isArray(raw.data)) return raw.data;
+  if (raw.payload && typeof raw.payload === "object") {
+    return extractListFromRaw(raw.payload);
+  }
+  if (raw.data && typeof raw.data === "object") {
+    return extractListFromRaw(raw.data);
+  }
+  return [];
 }
 
 function normalizePage<T>(
@@ -728,22 +751,7 @@ function normalizePage<T>(
 ): ApiPage<T> {
   const raw = unwrap(value) as any;
 
-  if (Array.isArray(raw)) {
-    const list = raw.map((it) => normalizeMenuItemEntity(it));
-    return {
-      content: list,
-      number: 0,
-      size: list.length,
-      numberOfElements: list.length,
-      totalElements: list.length,
-      totalPages: 1,
-      first: true,
-      last: true,
-      empty: list.length === 0,
-    };
-  }
-
-  const rawList = raw?.content ?? raw?.contents ?? raw?.items ?? [];
+  const rawList = extractListFromRaw(raw);
   const content = rawList.map((it: any) => normalizeMenuItemEntity(it));
 
   return {
@@ -1481,7 +1489,7 @@ export const menuManagementApi =
 
             // 2. Discovery Search API (POST /api/discovery/menu-items/search)
             let result = await browserRequest<unknown>(
-              `/api/discovery/menu-items/search?page=${safePage}&size=${safeSize}&sort=FOODHUB_RATING_DESC`,
+              `/api/discovery/menu-items/search?page=${safePage}&size=${safeSize}`,
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -1495,19 +1503,31 @@ export const menuManagementApi =
               },
             );
 
-            // 3. Fallback: GET /api/catalog/menu-items
-            if ("error" in result) {
+            // 3. Fallbacks if discovery search with POST returned error or empty:
+            const rawExtracted = extractListFromRaw(unwrap(result && "data" in result ? result.data : null));
+            if ("error" in result || rawExtracted.length === 0) {
               const query = makeQuery({
-                page: p.page ?? 0,
-                size: p.size ?? 100,
+                page: safePage,
+                size: safeSize,
                 sort: "createdAt,desc",
                 query: p.query,
                 storeUuid: p.storeUuid,
               });
 
-              result = await browserRequest<unknown>(
-                `/api/catalog/menu-items${query}`,
+              const menuItemsRes = await browserRequest<unknown>(
+                `/api/menu-items${query}`,
               );
+
+              if (!("error" in menuItemsRes) && extractListFromRaw(unwrap(menuItemsRes.data)).length > 0) {
+                result = menuItemsRes;
+              } else {
+                const catalogRes = await browserRequest<unknown>(
+                  `/api/catalog/menu-items${query}`,
+                );
+                if (!("error" in catalogRes)) {
+                  result = catalogRes;
+                }
+              }
             }
 
             if ("error" in result) {
@@ -1630,21 +1650,61 @@ export const menuManagementApi =
               }
             }
 
-            // 2. Create Core Menu Item with strict Postman 04 Menu Items Request 01 schema
+            const normalizedIngredientDataStatus =
+              payload.menuItem?.ingredientDataStatus === "COMPLETE"
+                ? "VERIFIED"
+                : payload.menuItem?.ingredientDataStatus || "VERIFIED";
+
+            const menuItemObj = {
+              name: payload.menuItem?.name,
+              description: payload.menuItem?.description || null,
+              price: payload.menuItem?.price,
+              currencyCode: payload.menuItem?.currencyCode || "USD",
+              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes ?? 15,
+              availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
+              ingredientDataStatus: normalizedIngredientDataStatus,
+              featured: payload.menuItem?.isFeatured ?? true,
+              isFeatured: payload.menuItem?.isFeatured ?? true,
+              source: "ADMIN",
+            };
+
+            // 2. Create Core Menu Item with both nested menuItem and flat fields for maximum backend compatibility
             const jsonPayload: Record<string, unknown> = {
               foodUuid: payload.foodUuid,
               name: payload.menuItem?.name,
               description: payload.menuItem?.description || undefined,
               price: payload.menuItem?.price,
               currencyCode: payload.menuItem?.currencyCode || "USD",
-              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes || undefined,
+              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes ?? 15,
               availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
-              ingredientDataStatus:
-                payload.menuItem?.ingredientDataStatus === "COMPLETE"
-                  ? "VERIFIED"
-                  : payload.menuItem?.ingredientDataStatus || "VERIFIED",
+              ingredientDataStatus: normalizedIngredientDataStatus,
               featured: payload.menuItem?.isFeatured ?? true,
+              isFeatured: payload.menuItem?.isFeatured ?? true,
               source: "ADMIN",
+              menuItem: menuItemObj,
+              primaryMediaUuids: primaryMediaUuid ? [primaryMediaUuid] : (payload.primaryMediaUuids ?? []),
+              thumbnailMediaUuid: primaryMediaUuid || payload.thumbnailMediaUuid || undefined,
+              galleryMediaUuids: galleryMediaUuids,
+              ingredients: (payload.ingredients ?? []).map((ing) => ({
+                ingredientUuid: ing.ingredientUuid,
+                quantity: ing.quantity ?? 1,
+                unit: ing.unit ?? "unit",
+                isOptional: Boolean(ing.isOptional),
+                optional: Boolean(ing.isOptional),
+                notes: ing.notes || undefined,
+              })),
+              dietaryTypes: (payload.dietaryTypes ?? []).map((d) => ({
+                dietaryTypeUuid: d.dietaryTypeUuid,
+                verificationStatus: d.verificationStatus || "VERIFIED",
+                notes: d.notes || undefined,
+              })),
+              allergenDeclarations: (payload.allergenDeclarations ?? []).map((a) => ({
+                allergenUuid: a.allergenUuid,
+                declarationType: a.declarationType || "MAY_CONTAIN",
+                riskLevel: a.riskLevel || "MEDIUM",
+                verificationStatus: a.verificationStatus || "VERIFIED",
+                notes: a.notes || undefined,
+              })),
             };
 
             if (primaryMediaUuid) {
@@ -1823,6 +1883,24 @@ export const menuManagementApi =
               }
             }
 
+            const normalizedIngredientDataStatus =
+              payload.menuItem?.ingredientDataStatus === "COMPLETE"
+                ? "VERIFIED"
+                : payload.menuItem?.ingredientDataStatus || "VERIFIED";
+
+            const menuItemObj = {
+              name: payload.menuItem?.name,
+              description: payload.menuItem?.description || null,
+              price: payload.menuItem?.price,
+              currencyCode: payload.menuItem?.currencyCode || "USD",
+              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes ?? 15,
+              availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
+              ingredientDataStatus: normalizedIngredientDataStatus,
+              featured: payload.menuItem?.isFeatured ?? true,
+              isFeatured: payload.menuItem?.isFeatured ?? true,
+              source: "ADMIN",
+            };
+
             // 2. Update Core MenuItem (POSTMAN Collection: PUT /api/v1/admin/menu-items/{uuid})
             const coreBody: Record<string, unknown> = {
               foodUuid: payload.foodUuid,
@@ -1830,14 +1908,16 @@ export const menuManagementApi =
               description: payload.menuItem?.description || undefined,
               price: payload.menuItem?.price,
               currencyCode: payload.menuItem?.currencyCode || "USD",
-              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes || undefined,
+              preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes ?? 15,
               availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
-              ingredientDataStatus:
-                payload.menuItem?.ingredientDataStatus === "COMPLETE"
-                  ? "VERIFIED"
-                  : payload.menuItem?.ingredientDataStatus || "VERIFIED",
+              ingredientDataStatus: normalizedIngredientDataStatus,
               featured: payload.menuItem?.isFeatured ?? true,
+              isFeatured: payload.menuItem?.isFeatured ?? true,
               source: "ADMIN",
+              menuItem: menuItemObj,
+              primaryMediaUuids: primaryMediaUuid ? [primaryMediaUuid] : (payload.primaryMediaUuids ?? []),
+              thumbnailMediaUuid: primaryMediaUuid || payload.thumbnailMediaUuid || undefined,
+              galleryMediaUuids: galleryMediaUuids,
             };
 
             if (primaryMediaUuid) {
