@@ -949,8 +949,12 @@ export const menuManagementApi =
       getManagedStores:
         builder.query<StoreOption[], void>({
           async queryFn() {
+            // Only approved + active stores are offered when creating/assigning
+            // a menu item — a menu item is only ever publicly reachable through
+            // its store, so the store picker should never offer a store that
+            // isn't already public-ready.
             const result = await browserRequest<unknown>(
-              "/api/admin/stores?page=0&size=100",
+              "/api/admin/stores?page=0&size=100&reviewStatus=APPROVED&accountStatus=ACTIVE",
             );
 
             if ("error" in result) {
@@ -1635,7 +1639,10 @@ export const menuManagementApi =
               currencyCode: payload.menuItem?.currencyCode || "USD",
               preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes || undefined,
               availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
-              ingredientDataStatus: payload.menuItem?.ingredientDataStatus || "VERIFIED",
+              ingredientDataStatus:
+                payload.menuItem?.ingredientDataStatus === "COMPLETE"
+                  ? "VERIFIED"
+                  : payload.menuItem?.ingredientDataStatus || "VERIFIED",
               featured: payload.menuItem?.isFeatured ?? true,
               source: "ADMIN",
             };
@@ -1825,7 +1832,10 @@ export const menuManagementApi =
               currencyCode: payload.menuItem?.currencyCode || "USD",
               preparationTimeMinutes: payload.menuItem?.preparationTimeMinutes || undefined,
               availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
-              ingredientDataStatus: payload.menuItem?.ingredientDataStatus || "VERIFIED",
+              ingredientDataStatus:
+                payload.menuItem?.ingredientDataStatus === "COMPLETE"
+                  ? "VERIFIED"
+                  : payload.menuItem?.ingredientDataStatus || "VERIFIED",
               featured: payload.menuItem?.isFeatured ?? true,
               source: "ADMIN",
             };

@@ -36,6 +36,7 @@ import { useGetMealTypesQuery } from "@/src/app/store/mealTypeApi";
 import { useGetAgeGroupsQuery } from "@/src/app/store/ageGroupApi";
 import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
 import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
+import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
 
 import { getMenuManagementApiError } from "@/src/lib/menuManagementApiError";
 import { isDrinkCategory, isFoodCategory, DRINK_KEYWORDS, extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
@@ -101,6 +102,12 @@ export default function MenuItemsManager({
   const cuisinesQuery = useGetManagedCuisinesQuery();
   const ingredientsQuery = useGetManagedIngredientsQuery();
   const storesQuery = useGetManagedStoresQuery();
+  // Real server-side total of approved+active stores, not the length of a
+  // single size-100-capped page — mirrors ShopsManager's total-count pattern.
+  const approvedStoresCountQuery = useGetShopsQuery({
+    reviewStatus: "APPROVED",
+    size: 1,
+  });
   const seasonsQuery = useGetManagedSeasonsQuery();
   const eventsQuery = useGetManagedEventsQuery();
   const weatherQuery = useGetManagedWeatherConditionsQuery();
@@ -518,8 +525,8 @@ export default function MenuItemsManager({
               />
               <Stat
                 icon={<Store size={20} />}
-                label="ហាងសរុប"
-                value={stores.length}
+                label="ហាងសរុប (Approved)"
+                value={approvedStoresCountQuery.data?.totalElements ?? stores.length}
               />
               <Stat
                 icon={<Layers size={20} />}

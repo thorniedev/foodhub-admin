@@ -44,9 +44,9 @@ const EMPTY_FORM: FormState = {
   currencyCode: "USD",
   preparationTimeMinutes: "10",
   availabilityStatus: "AVAILABLE",
-  ingredientDataStatus: "COMPLETE",
+  ingredientDataStatus: "VERIFIED",
   isFeatured: false,
-  source: "MANUAL",
+  source: "ADMIN",
   dietaryTypes: "[]",
   allergenDeclarations: "[]",
 };
@@ -365,9 +365,10 @@ export default function CreateStoreMenuItemModal({
                   onChange={(event) => set("ingredientDataStatus", event.target.value)}
                   className="field-input"
                 >
-                  <option value="COMPLETE">COMPLETE</option>
+                  <option value="VERIFIED">VERIFIED</option>
                   <option value="PARTIAL">PARTIAL</option>
                   <option value="UNKNOWN">UNKNOWN</option>
+                  <option value="COMPLETE">COMPLETE</option>
                 </select>
               </Field>
 

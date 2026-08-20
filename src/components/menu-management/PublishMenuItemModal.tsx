@@ -61,11 +61,11 @@ const EMPTY: FormState = {
   description: "",
   price: "",
   currencyCode: "USD",
-  preparationTimeMinutes: "",
+  preparationTimeMinutes: "15",
   availabilityStatus: "AVAILABLE",
-  ingredientDataStatus: "COMPLETE",
+  ingredientDataStatus: "VERIFIED",
   isFeatured: false,
-  source: "MANUAL",
+  source: "ADMIN",
 };
 
 function storeLabel(store: StoreOption): string {
@@ -199,9 +199,9 @@ export default function PublishMenuItemModal({
       availabilityStatus:
         item.availabilityStatus || "AVAILABLE",
       ingredientDataStatus:
-        item.ingredientDataStatus || "COMPLETE",
+        item.ingredientDataStatus || "VERIFIED",
       isFeatured: Boolean(item.isFeatured),
-      source: item.source || "MANUAL",
+      source: item.source || "ADMIN",
     });
 
     setIngredientRows(
@@ -588,10 +588,10 @@ export default function PublishMenuItemModal({
                 }
                 className={inputClass}
               >
-                <option value="COMPLETE">ពេញលេញ</option>
-                <option value="VERIFIED">បានផ្ទៀងផ្ទាត់</option>
-                <option value="PARTIAL">ផ្នែកខ្លះ</option>
-                <option value="UNKNOWN">មិនច្បាស់</option>
+                <option value="VERIFIED">បានផ្ទៀងផ្ទាត់ (VERIFIED)</option>
+                <option value="PARTIAL">ផ្នែកខ្លះ (PARTIAL)</option>
+                <option value="UNKNOWN">មិនច្បាស់ (UNKNOWN)</option>
+                <option value="COMPLETE">ពេញលេញ (COMPLETE)</option>
               </select>
             </label>
 
