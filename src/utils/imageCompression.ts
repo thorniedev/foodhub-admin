@@ -1,20 +1,16 @@
 export async function compressImage(file: File, maxSizeMB: number = 1): Promise<File> {
   const maxBytes = maxSizeMB * 1024 * 1024;
-  
-  if (file.size <= maxBytes) {
-    return file;
-  }
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
 
     img.onload = () => {
       URL.revokeObjectURL(objectUrl);
-      
+
       const canvas = document.createElement("canvas");
       let { width, height } = img;
-      
+
       // Scale down if image is too large
       const maxDimension = 1920;
       if (width > maxDimension || height > maxDimension) {
@@ -28,16 +24,19 @@ export async function compressImage(file: File, maxSizeMB: number = 1): Promise<
 
       const ctx = canvas.getContext("2d");
       if (!ctx) {
-        resolve(file); // Fallback to original
+        resolve(file);
         return;
       }
 
+      // Draw white background in case PNG had transparency
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Attempt compression with webp or jpeg
-      const type = "image/webp"; // WebP generally provides better compression
-      let quality = 0.8;
-      
+      // Always encode to image/webp for universal backend compatibility
+      const type = "image/webp";
+      let quality = 0.85;
+
       const attemptCompression = () => {
         canvas.toBlob(
           (blob) => {
@@ -45,22 +44,24 @@ export async function compressImage(file: File, maxSizeMB: number = 1): Promise<
               resolve(file);
               return;
             }
-            
+
             if (blob.size <= maxBytes || quality <= 0.2) {
-              // Found a good size, or we can't compress further
-              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
-                type: type,
-                lastModified: Date.now(),
-              });
+              const compressedFile = new File(
+                [blob],
+                file.name.replace(/\.[^/.]+$/, "") + ".webp",
+                {
+                  type: type,
+                  lastModified: Date.now(),
+                },
+              );
               resolve(compressedFile);
             } else {
-              // Still too large, reduce quality and try again
               quality -= 0.1;
               attemptCompression();
             }
           },
           type,
-          quality
+          quality,
         );
       };
 
@@ -69,7 +70,7 @@ export async function compressImage(file: File, maxSizeMB: number = 1): Promise<
 
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      resolve(file); // Fallback to original
+      resolve(file);
     };
 
     img.src = objectUrl;

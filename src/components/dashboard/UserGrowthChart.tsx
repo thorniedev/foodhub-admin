@@ -49,7 +49,7 @@ export default function UserGrowthChart({ data }: { data: UserGrowthPoint[] }) {
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <p className="text-2xl font-semibold text-[#136C34]">
-          ទិន្នន័យអភិវឌ្ឍនៃអ្នកប្រើប្រាស់
+          ទិន្នន័យអភិវឌ្ឍនៃគណនីអ្នកប្រើប្រាស់
         </p>
 
         {/* Custom Dropdown */}

@@ -53,7 +53,7 @@ export default function ShopBasicInfoSection({
         </div>
 
         <p className="text-3xl font-semibold text-primary-800">
-          ព័ត៌មានមូលដ្ឋាន
+          ព័ត៌មានប្រវត្តិរូប
         </p>
       </div>
 

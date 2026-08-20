@@ -6,7 +6,6 @@ export interface UsersTabsProps {
     all: number;
     active: number;
     suspended: number;
-    disabled: number;
   };
   onChange: (status: UserStatusFilter) => void;
 }
@@ -15,11 +14,30 @@ const tabs: Array<{
   value: UserStatusFilter;
   label: string;
   countKey: keyof UsersTabsProps["counts"];
+  activeClass: string;
+  badgeClass: string;
 }> = [
-  { value: "ALL", label: "ទាំងអស់", countKey: "all" },
-  { value: "ACTIVE", label: "សកម្ម", countKey: "active" },
-  { value: "SUSPENDED", label: "Suspended", countKey: "suspended" },
-  { value: "DISABLED", label: "Disabled", countKey: "disabled" },
+  {
+    value: "ALL",
+    label: "ទាំងអស់",
+    countKey: "all",
+    activeClass: "bg-primary-800 text-white shadow-md shadow-primary-900/20",
+    badgeClass: "bg-white/20 text-white",
+  },
+  {
+    value: "ACTIVE",
+    label: "សកម្ម",
+    countKey: "active",
+    activeClass: "bg-emerald-600 text-white shadow-md shadow-emerald-900/20",
+    badgeClass: "bg-white/20 text-white",
+  },
+  {
+    value: "SUSPENDED",
+    label: "ផ្អាកដំណើរការ",
+    countKey: "suspended",
+    activeClass: "bg-amber-500 text-white shadow-md shadow-amber-900/20",
+    badgeClass: "bg-white/20 text-white",
+  },
 ];
 
 export default function UsersTabs({
@@ -28,33 +46,34 @@ export default function UsersTabs({
   onChange,
 }: UsersTabsProps) {
   return (
-    <div className="flex max-w-full items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex max-w-full items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       {tabs.map((tab) => {
         const active = tab.value === value;
+        const count = counts[tab.countKey];
 
         return (
           <button
             key={tab.value}
             type="button"
             onClick={() => onChange(tab.value)}
-            className={`inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-3.5 py-2 text-lg font-medium transition ${
+            className={`group inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
               active
-                ? "bg-primary-800 text-white shadow-sm"
-                : "bg-white text-gray-500 hover:bg-primary-50 hover:text-primary-800"
+                ? tab.activeClass
+                : "bg-white text-gray-500 shadow-sm ring-1 ring-gray-100 hover:bg-gray-50 hover:text-gray-700 hover:shadow-md"
             }`}
           >
             {tab.label}
 
             <span
-              className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-base ${
+              className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-bold transition-all duration-200 ${
                 active
-                  ? "bg-white/20 text-white"
-                  : tab.value === "DISABLED" && counts.disabled > 0
-                    ? "bg-red-50 text-red-600"
-                    : "bg-gray-100 text-gray-500"
+                  ? tab.badgeClass
+                  : tab.value === "SUSPENDED" && count > 0
+                    ? "bg-amber-50 text-amber-600 ring-1 ring-amber-100"
+                    : "bg-gray-100 text-gray-400"
               }`}
             >
-              {counts[tab.countKey]}
+              {count}
             </span>
           </button>
         );

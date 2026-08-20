@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertOctagon, Loader2, X } from "lucide-react";
+import { AlertOctagon, Loader2, Trash2, X } from "lucide-react";
 import type { AdminProfile } from "@/src/types/userProfile";
 
 interface HardDeleteProfileConfirmModalProps {
@@ -25,58 +25,68 @@ export default function HardDeleteProfileConfirmModal({
         if (e.target === e.currentTarget && !deleting) onClose();
       }}
     >
-      <div className="w-full max-w-lg rounded-[30px] border border-red-100 bg-white p-6 shadow-2xl sm:p-7">
-        <div className="flex items-start justify-between">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 text-red-600">
-            <AlertOctagon size={28} />
+      <div className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-red-100 bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+        {/* Close Button */}
+        <button
+          type="button"
+          disabled={deleting}
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute top-4 right-4 z-10 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+        >
+          <X size={18} />
+        </button>
+
+        {/* Top Decorative Banner with Centered Icon */}
+        <div className="flex flex-col items-center justify-center bg-gradient-to-b from-red-500/10 via-red-500/5 to-transparent px-6 pt-8 pb-4 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 text-red-600 shadow-md shadow-red-950/5 ring-4 ring-red-50">
+            <AlertOctagon size={28} className="stroke-[2.2]" />
           </div>
 
-          <button
-            type="button"
-            disabled={deleting}
-            onClick={onClose}
-            aria-label="Close"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
-          >
-            <X size={22} />
-          </button>
+          <h3 className="mt-4 text-2xl font-bold tracking-tight text-gray-900">
+            លុបកម្រងព័ត៌មានជារៀងរហូត?
+          </h3>
         </div>
 
-        <div className="mt-5">
-        
-
-          <h3 className="mt-2 text-2xl font-black text-gray-900 sm:text-3xl">
-            លុប Profile ជាអចិន្ត្រៃយ៍ ?
-          </h3>
-
-          <p className="mt-3 text-lg leading-8 text-gray-500">
-            Profile{" "}
-            <span className="font-bold text-gray-800">
+        {/* Content Body */}
+        <div className="p-6 pt-1 space-y-4 text-center">
+          <p className="text-base leading-relaxed text-gray-600">
+            កម្រងព័ត៌មាន{" "}
+            <span className="inline-block font-bold text-gray-900 rounded-lg bg-gray-100 px-2.5 py-0.5 border border-gray-200">
               {profile.profileName}
             </span>{" "}
-            នឹងត្រូវលុបចេញពីប្រព័ន្ធទាំងស្រុង (លុប) ហើយមិនអាចត្រឡប់ក្រោយវិញបានទេ។
+            នឹងត្រូវបានលុបចេញពីប្រព័ន្ធទាំងស្រុង (Hard Delete) ហើយមិនអាចស្តារឡើងវិញបានឡើយ។
           </p>
-        </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            disabled={deleting}
-            onClick={onClose}
-            className="min-h-12 rounded-full border border-gray-200 px-4 text-lg font-medium text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
-          >
-            បោះបង់
-          </button>
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <button
+              type="button"
+              disabled={deleting}
+              onClick={onClose}
+              className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-600 transition hover:bg-gray-50 active:scale-95 disabled:opacity-50"
+            >
+              បោះបង់
+            </button>
 
-          <button
-            type="button"
-            disabled={deleting}
-            onClick={() => void onConfirm()}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-600 px-4 text-lg font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-60"
-          >
-            {deleting && <Loader2 size={20} className="animate-spin" />}
-            {deleting ? "កំពុងលុប..." : "លុបជាអចិន្ត្រៃយ៍"}
-          </button>
+            <button
+              type="button"
+              disabled={deleting}
+              onClick={() => void onConfirm()}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-red-600 px-5 text-base font-bold text-white shadow-md shadow-red-900/20 transition-all hover:bg-red-700 hover:scale-[1.02] active:scale-95 disabled:opacity-60"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  កំពុងលុប...
+                </>
+              ) : (
+                <>
+                  <Trash2 size={18} />
+                  លុបជាអចិន្ត្រៃយ៍
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

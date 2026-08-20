@@ -1,17 +1,7 @@
-import {
-  Calendar,
-  Globe2,
-  Star,
-  User,
-} from "lucide-react";
+import { Star } from "lucide-react";
 
 import type { AdminProfile } from "@/src/types/userProfile";
-
-import {
-  calculateAge,
-  formatDateOnly,
-  humanizeEnum,
-} from "@/src/lib/userProfileFormat";
+import { formatRelationshipKhmer } from "@/src/lib/userProfileFormat";
 import UserAvatar from "./UserAvatar";
 
 interface ProfileTagCardProps {
@@ -25,71 +15,55 @@ export default function ProfileTagCard({
   selected,
   onSelect,
 }: ProfileTagCardProps) {
-  const age = calculateAge(profile.dateOfBirth);
-
   return (
     <button
       type="button"
       onClick={onSelect}
-      className={`w-full rounded-2xl border p-4 text-left transition focus:outline-none focus:ring-4 focus:ring-primary-100 ${
+      className={`group relative flex w-full items-center gap-3.5 rounded-2xl border p-3.5 text-left transition-all duration-150 focus:outline-none focus:ring-4 focus:ring-primary-100 ${
         selected
-          ? "border-primary-200 bg-primary-50"
-          : "border-gray-100 bg-white hover:border-primary-100 hover:bg-primary-50/40"
+          ? "border-primary-500 bg-primary-50/70 shadow-sm ring-2 ring-primary-500/20"
+          : "border-gray-150 bg-white hover:border-primary-200 hover:bg-primary-50/30 hover:shadow-xs"
       }`}
     >
-      <div className="flex items-start gap-3">
-        <UserAvatar
-          name={profile.profileName}
-          avatarMediaUuid={profile.avatarMediaUuid}
-          containerClassName="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary-800 text-lg font-semibold text-white"
-        />
+      <UserAvatar
+        name={profile.profileName}
+        avatarMediaUuid={profile.avatarMediaUuid}
+        containerClassName="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary-800 text-base font-bold text-white shadow-xs"
+      />
 
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate text-lg font-medium text-gray-900">
-              {profile.profileName}
-            </p>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-2">
+          <p className="truncate text-base font-bold text-gray-900 group-hover:text-primary-800">
+            {profile.profileName}
+          </p>
 
-            {profile.isDefault && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-secondary-50 px-2.5 py-1 text-base font-medium text-secondary-600">
-                <Star size={14} />
-                Default
+          {profile.isActive ? (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              សកម្ម
+            </span>
+          ) : (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700 border border-rose-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+              ផ្អាកដំណើរការ
+            </span>
+          )}
+        </div>
+
+        <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+          <span className="font-medium text-gray-600">
+            {formatRelationshipKhmer(profile.relationship)}
+          </span>
+
+          {profile.isDefault && (
+            <>
+              <span className="text-gray-300">•</span>
+              <span className="inline-flex items-center gap-1 font-semibold text-amber-600">
+                <Star size={11} className="fill-amber-500 text-amber-500" />
+                លំនាំដើម
               </span>
-            )}
-
-            <span
-              className={`rounded-full px-2.5 py-1 text-base font-medium ${
-                profile.isActive
-                  ? "bg-primary-50 text-primary-700"
-                  : "bg-red-50 text-red-600"
-              }`}
-            >
-              {profile.isActive ? "សកម្ម" : "DELETED"}
-            </span>
-          </div>
-
-          <div className="mt-3 grid gap-2 text-base text-gray-500 sm:grid-cols-2">
-            <span className="inline-flex items-center gap-1.5">
-              <User size={16} />
-              {humanizeEnum(profile.relationship)}
-            </span>
-
-            <span className="inline-flex items-center gap-1.5">
-              <Calendar size={16} />
-              {formatDateOnly(profile.dateOfBirth)}
-              {age !== null ? ` · ${age}y` : ""}
-            </span>
-
-            <span className="inline-flex items-center gap-1.5">
-              <Globe2 size={16} />
-              {(profile.preferredLanguage ?? "—").toUpperCase()}
-            </span>
-
-            <span>
-              {profile.ageGroup?.name ??
-                humanizeEnum(profile.ageGroup?.code)}
-            </span>
-          </div>
+            </>
+          )}
         </div>
       </div>
     </button>

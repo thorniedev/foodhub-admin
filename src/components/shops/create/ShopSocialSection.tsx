@@ -52,7 +52,7 @@ export default function ShopSocialSection({
             </p>
 
             <p className="mt-1 text-lg leading-7 text-gray-500">
-              បន្ថែមបណ្ដាញសង្គមរបស់ហាងសម្រាប់បង្ហាញទៅកាន់អ្នកប្រើប្រាស់។
+              បន្ថែមបណ្ដាញសង្គមរបស់ហាងសម្រាប់បង្ហាញទៅកាន់គណនីអ្នកប្រើប្រាស់។
             </p>
           </div>
         </div>

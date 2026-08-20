@@ -30,7 +30,7 @@ export const dashboardNav: NavItem[] = [
   },
 
   {
-    label: "អ្នកប្រើប្រាស់",
+    label: "គណនីអ្នកប្រើប្រាស់",
     icon: Users,
     href: "/users",
   },
