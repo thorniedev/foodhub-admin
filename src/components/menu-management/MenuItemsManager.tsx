@@ -148,11 +148,14 @@ export default function MenuItemsManager() {
   const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 });
   const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 });
 
-  const [advancedFilters, setAdvancedFilters] = useState<AdvancedMenuItemSearchRequest>({});
+  const [advancedFilters, setAdvancedFilters] =
+    useState<AdvancedMenuItemSearchRequest>({});
   const [isAdvancedFilterActive, setIsAdvancedFilterActive] = useState(false);
 
-  const [searchAdvancedItems, { data: discoveryData, isLoading: discoveryLoading }] =
-    useSearchAdvancedMenuItemsMutation();
+  const [
+    searchAdvancedItems,
+    { data: discoveryData, isLoading: discoveryLoading },
+  ] = useSearchAdvancedMenuItemsMutation();
 
   const [createFood, { isLoading: creatingFood }] =
     useCreateManagedFoodMutation();
@@ -193,30 +196,53 @@ export default function MenuItemsManager() {
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (advancedFilters.query) count++;
-    if (advancedFilters.categoryUuids?.length) count += advancedFilters.categoryUuids.length;
-    if (advancedFilters.cuisineUuids?.length) count += advancedFilters.cuisineUuids.length;
-    if (advancedFilters.mealTypeUuids?.length) count += advancedFilters.mealTypeUuids.length;
-    if (advancedFilters.dietaryTypeUuids?.length) count += advancedFilters.dietaryTypeUuids.length;
-    if (advancedFilters.excludeAllergenUuids?.length) count += advancedFilters.excludeAllergenUuids.length;
-    if (advancedFilters.seasonUuids?.length) count += advancedFilters.seasonUuids.length;
-    if (advancedFilters.eventUuids?.length) count += advancedFilters.eventUuids.length;
-    if (advancedFilters.weatherConditionUuids?.length) count += advancedFilters.weatherConditionUuids.length;
-    if (advancedFilters.ageGroupUuids?.length) count += advancedFilters.ageGroupUuids.length;
-    if (advancedFilters.minimumPrice !== undefined || advancedFilters.maximumPrice !== undefined) count++;
-    if (advancedFilters.minimumSpiceLevel !== undefined || advancedFilters.maximumSpiceLevel !== undefined) count++;
+    if (advancedFilters.categoryUuids?.length)
+      count += advancedFilters.categoryUuids.length;
+    if (advancedFilters.cuisineUuids?.length)
+      count += advancedFilters.cuisineUuids.length;
+    if (advancedFilters.mealTypeUuids?.length)
+      count += advancedFilters.mealTypeUuids.length;
+    if (advancedFilters.dietaryTypeUuids?.length)
+      count += advancedFilters.dietaryTypeUuids.length;
+    if (advancedFilters.excludeAllergenUuids?.length)
+      count += advancedFilters.excludeAllergenUuids.length;
+    if (advancedFilters.seasonUuids?.length)
+      count += advancedFilters.seasonUuids.length;
+    if (advancedFilters.eventUuids?.length)
+      count += advancedFilters.eventUuids.length;
+    if (advancedFilters.weatherConditionUuids?.length)
+      count += advancedFilters.weatherConditionUuids.length;
+    if (advancedFilters.ageGroupUuids?.length)
+      count += advancedFilters.ageGroupUuids.length;
+    if (
+      advancedFilters.minimumPrice !== undefined ||
+      advancedFilters.maximumPrice !== undefined
+    )
+      count++;
+    if (
+      advancedFilters.minimumSpiceLevel !== undefined ||
+      advancedFilters.maximumSpiceLevel !== undefined
+    )
+      count++;
     if (advancedFilters.openNow) count++;
     if (advancedFilters.featuredOnly) count++;
     if (advancedFilters.hasImage) count++;
     return count;
   }, [advancedFilters]);
 
-  const handleApplyAdvancedFilters = async (filters: AdvancedMenuItemSearchRequest) => {
+  const handleApplyAdvancedFilters = async (
+    filters: AdvancedMenuItemSearchRequest,
+  ) => {
     setAdvancedFilters(filters);
     setIsAdvancedFilterActive(true);
     setTab("WEBSITE");
     try {
       await searchAdvancedItems({
-        params: { page: 0, size: 20, sort: filters.sort ?? "FOODHUB_RATING_DESC" },
+        params: {
+          page: 0,
+          size: 20,
+          sort: filters.sort ?? "FOODHUB_RATING_DESC",
+        },
         body: filters,
       }).unwrap();
     } catch (err) {
@@ -425,7 +451,9 @@ export default function MenuItemsManager() {
                 </p>
 
                 <p className="mt-6 max-w-3xl text-xl leading-7 text-white/85">
-                  Food Catalog សម្រាប់ហាង និង <br className="md:block max-md:hidden" /> Menu Items សម្រាប់ វែបសាយ
+                  Food Catalog សម្រាប់ហាង និង{" "}
+                  <br className="md:block max-md:hidden" /> Menu Items សម្រាប់
+                  វែបសាយ
                 </p>
               </div>
             </div>
@@ -448,7 +476,7 @@ export default function MenuItemsManager() {
 
           {/* Header actions */}
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <button
+            {/* <button
               type="button"
               onClick={() => {
                 setEditingFood(null);
@@ -458,7 +486,7 @@ export default function MenuItemsManager() {
             >
               <Plus size={20} />
               បន្ថែមមីនុយ
-            </button>
+            </button> */}
 
             <button
               type="button"
@@ -479,11 +507,11 @@ export default function MenuItemsManager() {
           TABS + SEARCH + REFRESH
           Same compact toolbar concept as UsersManager
       ====================================================== */}
-      <div className="flex w-full flex-nowrap items-center justify-between gap-4 overflow-x-auto pb-1">
+      <div className="flex w-full flex-nowrap items-center justify-between gap-4 overflow-x-auto overflow-y-hidden overscroll-x-contain scroll-smooth pb-2 [scrollbar-color:#d1d5db_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 hover:[&::-webkit-scrollbar-thumb]:bg-primary-500">
         <div className="flex shrink-0 items-center gap-2">
           <TabButton active={tab === "FOODS"} onClick={() => setTab("FOODS")}>
             <Store size={19} />
-            សម្រាប់ហាង
+            Food & Drink សរុប
             <Count active={tab === "FOODS"}>{activeFoods.length}</Count>
           </TabButton>
 
@@ -492,7 +520,7 @@ export default function MenuItemsManager() {
             onClick={() => setTab("WEBSITE")}
           >
             <Globe2 size={19} />
-            វែបសាយ
+            មុខម្ហូបដែរបង្ហាញនៅគេហទំព័រ​ (Front page)
             <Count active={tab === "WEBSITE"}>{menuItems.length}</Count>
           </TabButton>
         </div>
@@ -532,7 +560,11 @@ export default function MenuItemsManager() {
 
           <button
             type="button"
-            disabled={foodsQuery.isFetching || menuItemsQuery.isFetching || discoveryLoading}
+            disabled={
+              foodsQuery.isFetching ||
+              menuItemsQuery.isFetching ||
+              discoveryLoading
+            }
             onClick={() => void refreshAll()}
             aria-label="Refresh"
             className="flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
@@ -540,7 +572,9 @@ export default function MenuItemsManager() {
             <RefreshCw
               size={19}
               className={
-                foodsQuery.isFetching || menuItemsQuery.isFetching || discoveryLoading
+                foodsQuery.isFetching ||
+                menuItemsQuery.isFetching ||
+                discoveryLoading
                   ? "animate-spin"
                   : ""
               }
@@ -554,10 +588,11 @@ export default function MenuItemsManager() {
       ====================================================== */}
       {notice && (
         <div
-          className={`rounded-2xl border px-5 py-4 text-lg leading-7 ${notice.type === "success"
+          className={`rounded-2xl border px-5 py-4 text-lg leading-7 ${
+            notice.type === "success"
               ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
-            }`}
+          }`}
         >
           {notice.text}
         </div>
@@ -609,7 +644,11 @@ export default function MenuItemsManager() {
           />
         ) : (
           <PublishedMenuItemsTable
-            items={isAdvancedFilterActive ? (discoveryData?.contents ?? []) : filteredMenuItems}
+            items={
+              isAdvancedFilterActive
+                ? (discoveryData?.contents ?? [])
+                : filteredMenuItems
+            }
             busy={busy || discoveryLoading}
             onView={(item) =>
               router.push(
@@ -750,10 +789,11 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${active
+      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
+        active
           ? "bg-primary-800 text-white"
           : "bg-white text-gray-500 hover:bg-primary-50 hover:text-primary-800"
-        }`}
+      }`}
     >
       {children}
     </button>
@@ -773,8 +813,9 @@ function Count({
 }) {
   return (
     <span
-      className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
-        }`}
+      className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
+        active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+      }`}
     >
       {children}
     </span>

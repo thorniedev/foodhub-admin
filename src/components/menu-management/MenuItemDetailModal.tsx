@@ -40,29 +40,29 @@ export default function MenuItemDetailModal({
     data?.primaryMediaUrls?.length
       ? data.primaryMediaUrls
       : data?.images?.length
-      ? data.images
-      : data?.gallery?.length
-      ? data.gallery
-      : data?.primaryMediaUuids?.length
-      ? data.primaryMediaUuids
-      : (data as any)?.primaryMediaUuid
-      ? [(data as any).primaryMediaUuid]
-      : data?.thumbnailMediaUuid
-      ? [data.thumbnailMediaUuid]
-      : data?.food?.primaryMediaUrls?.length
-      ? data.food.primaryMediaUrls
-      : data?.food?.images?.length
-      ? data.food.images
-      : data?.food?.primaryMediaUuids?.length
-      ? data.food.primaryMediaUuids
-      : (data?.food as any)?.primaryMediaUuid
-      ? [(data?.food as any).primaryMediaUuid]
-      : [
-          data?.thumbnail,
-          data?.imageUrl,
-          data?.food?.thumbnail,
-          data?.food?.imageUrl,
-        ].filter(Boolean)
+        ? data.images
+        : data?.gallery?.length
+          ? data.gallery
+          : data?.primaryMediaUuids?.length
+            ? data.primaryMediaUuids
+            : (data as any)?.primaryMediaUuid
+              ? [(data as any).primaryMediaUuid]
+              : data?.thumbnailMediaUuid
+                ? [data.thumbnailMediaUuid]
+                : data?.food?.primaryMediaUrls?.length
+                  ? data.food.primaryMediaUrls
+                  : data?.food?.images?.length
+                    ? data.food.images
+                    : data?.food?.primaryMediaUuids?.length
+                      ? data.food.primaryMediaUuids
+                      : (data?.food as any)?.primaryMediaUuid
+                        ? [(data?.food as any).primaryMediaUuid]
+                        : [
+                          data?.thumbnail,
+                          data?.imageUrl,
+                          data?.food?.thumbnail,
+                          data?.food?.imageUrl,
+                        ].filter(Boolean)
   ) as string[];
 
   const images = rawList
@@ -318,7 +318,7 @@ export default function MenuItemDetailModal({
             )}
 
             {/* Raw JSON Accordion */}
-          
+
           </div>
         ) : null}
 
