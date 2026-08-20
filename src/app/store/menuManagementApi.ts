@@ -893,13 +893,22 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           "/api/admin/stores?page=0&size=100",
         );
 
-        if ("error" in result) {
-          return result;
+        if (!("error" in result)) {
+          return {
+            data: normalizePage<StoreOption>(result.data as never).content,
+          };
         }
 
-        return {
-          data: normalizePage<StoreOption>(result.data as never).content,
-        };
+        const fallback = await browserRequest<unknown>(
+          "/api/stores?page=0&size=100",
+        );
+        if (!("error" in fallback)) {
+          return {
+            data: normalizePage<StoreOption>(fallback.data as never).content,
+          };
+        }
+
+        return result;
       },
     }),
 
@@ -1363,7 +1372,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
         // 2. Fetch all catalog published menu items from /api/catalog/menu-items
         const query = makeQuery({
           page: p.page ?? 0,
-          size: p.size ?? 200,
+          size: p.size ?? 100,
           sort: p.sort ?? "createdAt,desc",
           query: p.query,
           foodUuid: p.foodUuid,
@@ -1388,12 +1397,10 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
         // 3. Fallback to discovery search endpoint if needed
         const discoveryQuery = makeQuery({
           page: p.page ?? 0,
-          size: p.size ?? 200,
+          size: p.size ?? 100,
         });
 
-        const body: Record<string, unknown> = {
-          availabilityStatuses: ["AVAILABLE", "UNAVAILABLE", "SOLD_OUT"],
-        };
+        const body: Record<string, unknown> = {};
         if (p.query) body.query = p.query;
         if (p.featured !== undefined) body.featuredOnly = Boolean(p.featured);
 
@@ -1420,6 +1427,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
 
         return catalogResult;
       },
+      providesTags: [{ type: "MenuItem", id: "LIST" }],
     }),
 
     getMenuItem: builder.query<MenuItemRecord, string>({
@@ -1436,6 +1444,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           data: unwrap<MenuItemRecord>(result.data as never),
         };
       },
+      providesTags: (_result, _error, uuid) => [{ type: "MenuItem", id: uuid }],
     }),
 
     getPublishedMenuItemDetail: builder.query<
@@ -1458,6 +1467,14 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
         );
 
         if ("error" in result) {
+          const fallback = await browserRequest<unknown>(
+            `/api/catalog/menu-items/${encodeURIComponent(uuid)}`,
+          );
+          if (!("error" in fallback)) {
+            return {
+              data: unwrap<MenuItemRecord>(fallback.data as never),
+            };
+          }
           return result;
         }
 
@@ -1465,6 +1482,9 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           data: unwrap<MenuItemRecord>(result.data as never),
         };
       },
+      providesTags: (_result, _error, arg) => [
+        { type: "MenuItem", id: typeof arg === "string" ? arg : arg.uuid },
+      ],
     }),
 
     createStoreMenuItem: builder.mutation<
@@ -1519,6 +1539,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           data: unwrap<MenuItemRecord>(result.data as never),
         };
       },
+      invalidatesTags: [{ type: "MenuItem", id: "LIST" }],
     }),
 
     updateStoreMenuItem: builder.mutation<
@@ -1620,6 +1641,10 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           data: unwrap<MenuItemRecord>(coreResult.data as never),
         };
       },
+      invalidatesTags: (_res, _err, { uuid }) => [
+        { type: "MenuItem", id: uuid },
+        { type: "MenuItem", id: "LIST" },
+      ],
     }),
 
     deleteStoreMenuItem: builder.mutation<void, string>({
@@ -1639,6 +1664,10 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           data: null as unknown as void,
         };
       },
+      invalidatesTags: (_res, _err, uuid) => [
+        { type: "MenuItem", id: uuid },
+        { type: "MenuItem", id: "LIST" },
+      ],
     }),
 
     replaceMenuItemIngredients: builder.mutation<

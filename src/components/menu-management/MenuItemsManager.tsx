@@ -91,9 +91,12 @@ function matchesMenuItem(item: MenuItemRecord, search: string) {
 
   return [
     item.name,
+    item.localName,
     item.description,
+    (item as any).localDescription,
     item.store?.storeName,
     item.store?.name,
+    item.store?.localName,
     item.food?.canonicalName,
     item.food?.localName,
     item.availabilityStatus,

@@ -1,6 +1,6 @@
 import type { UserStatusFilter } from "@/src/types/userProfile";
 
-interface UsersTabsProps {
+export interface UsersTabsProps {
   value: UserStatusFilter;
   counts: {
     all: number;
@@ -8,7 +8,7 @@ interface UsersTabsProps {
     suspended: number;
     disabled: number;
   };
-  onChange: (value: UserStatusFilter) => void;
+  onChange: (status: UserStatusFilter) => void;
 }
 
 const tabs: Array<{
