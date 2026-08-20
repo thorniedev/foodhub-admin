@@ -56,9 +56,9 @@ export function useWeatherConditionCatalog() {
       const label = values.name.trim() || values.localName.trim();
 
       await createWeather({
-        code: createCodeFromLabel(label),
+        code: createCodeFromLabel(label, "WEATHER"),
         name: values.name.trim() || values.localName.trim(),
-        localName: values.localName.trim() || null,
+        localName: values.localName.trim() || values.name.trim() || null,
         description: values.description.trim() || null,
         isActive: values.active,
         active: values.active,
@@ -75,7 +75,7 @@ export function useWeatherConditionCatalog() {
         uuid,
         body: {
           name: values.name.trim() || values.localName.trim(),
-          localName: values.localName.trim() || null,
+          localName: values.localName.trim() || values.name.trim() || null,
           description: values.description.trim() || null,
           isActive: values.active,
           active: values.active,

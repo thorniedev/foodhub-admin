@@ -195,7 +195,15 @@ export default function FilterOptionFormModal({
 
       setValidationError("");
 
-      await onSubmit(form);
+      try {
+        await onSubmit(form);
+      } catch (submitError) {
+        setValidationError(
+          submitError instanceof Error
+            ? submitError.message
+            : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។",
+        );
+      }
     };
 
   const isMealType = group.source === "MEAL_TYPE_API";

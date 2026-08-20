@@ -35,6 +35,7 @@ import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
 } from "@/src/types/filterCatalog";
+import { getApiErrorMessage } from "@/src/types/safetyResource";
 
 import FilterOptionFormModal from "./FilterOptionFormModal";
 import FilterCatalogDetailModal from "./FilterCatalogDetailModal";
@@ -264,18 +265,18 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
 
     try {
       if (editing) {
-        updateOption(editing.uuid, values);
+        await updateOption(editing.uuid, values);
       } else {
-        createOption(values);
+        await createOption(values);
       }
 
       setFormOpen(false);
       setEditing(null);
       setPage(0);
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។",
-      );
+      const message = getApiErrorMessage(error);
+      setErrorMessage(message);
+      throw new Error(message);
     } finally {
       setSaving(false);
     }
@@ -377,7 +378,14 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         onView={(item) => setViewing(item)}
         onEdit={openEditModal}
         onDelete={setDeleting}
-        onRestore={(item) => setActive(item.uuid, true)}
+        onRestore={async (item) => {
+          try {
+            setErrorMessage("");
+            await setActive(item.uuid, true);
+          } catch (error) {
+            setErrorMessage(getApiErrorMessage(error));
+          }
+        }}
       />
 
       {/* COMPONENT: CatalogPagination */}
@@ -410,14 +418,19 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
       <DeleteCatalogOptionModal
         item={deleting}
         onClose={() => setDeleting(null)}
-        onConfirm={() => {
+        onConfirm={async () => {
           if (!deleting) {
             return;
           }
 
-          setActive(deleting.uuid, false);
-
-          setDeleting(null);
+          try {
+            setErrorMessage("");
+            await setActive(deleting.uuid, false);
+            setDeleting(null);
+          } catch (error) {
+            setErrorMessage(getApiErrorMessage(error));
+            setDeleting(null);
+          }
         }}
       />
 
@@ -428,7 +441,12 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         initialOption={viewing}
         options={groupOptions}
         onToggleStatus={async (targetUuid, nextActive) => {
-          await setActive(targetUuid, nextActive);
+          try {
+            setErrorMessage("");
+            await setActive(targetUuid, nextActive);
+          } catch (error) {
+            setErrorMessage(getApiErrorMessage(error));
+          }
         }}
         onClose={() => setViewing(null)}
       />

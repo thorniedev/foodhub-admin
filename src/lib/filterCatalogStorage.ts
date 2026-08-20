@@ -89,16 +89,22 @@ export function createClientUuid(): string {
     .slice(2)}`;
 }
 
-export function createCodeFromLabel(value: string): string {
-  const normalized = value
+export function createCodeFromLabel(
+  value: string,
+  prefix = "OPTION",
+): string {
+  const latinOnly = value
     .trim()
     .normalize("NFKD")
-    .replace(/[^\p{L}\p{N}]+/gu, "_")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Za-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "")
     .toUpperCase();
 
-  return (
-    normalized ||
-    `OPTION_${Date.now()}`
-  );
+  if (latinOnly.length > 0) {
+    return latinOnly;
+  }
+
+  return `${prefix}_${Date.now()}`;
 }
+

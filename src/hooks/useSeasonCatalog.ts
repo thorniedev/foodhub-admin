@@ -52,9 +52,9 @@ export function useSeasonCatalog() {
       const label = values.name.trim() || values.localName.trim();
 
       await createSeason({
-        code: createCodeFromLabel(label),
+        code: createCodeFromLabel(label, "SEASON"),
         name: values.name.trim() || values.localName.trim(),
-        localName: values.localName.trim() || null,
+        localName: values.localName.trim() || values.name.trim() || null,
         description: values.description.trim() || null,
         isActive: values.active,
       }).unwrap();
@@ -70,7 +70,7 @@ export function useSeasonCatalog() {
         uuid,
         payload: {
           name: values.name.trim() || values.localName.trim(),
-          localName: values.localName.trim() || null,
+          localName: values.localName.trim() || values.name.trim() || null,
           description: values.description.trim() || null,
           isActive: values.active,
         },
