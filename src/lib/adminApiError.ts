@@ -116,6 +116,10 @@ export function getAdminApiErrorMessage(error: unknown): string {
       return "ប្រតិបត្តិការនេះប៉ះទង្គិចជាមួយទិន្នន័យដែលមានស្រាប់។";
     }
 
+    if (queryError.status === 413) {
+      return "ឯកសារ ឬរូបភាពធំពេក។ សូមជ្រើសរើសរូបភាពតូចជាងនេះ (តូចជាង 4MB)។";
+    }
+
     if (queryError.status === "FETCH_ERROR") {
       return "មិនអាចភ្ជាប់ទៅម៉ាស៊ីនមេបានទេ។ សូមពិនិត្យ backend និង network។";
     }

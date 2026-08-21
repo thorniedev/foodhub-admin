@@ -1657,7 +1657,22 @@ export const menuManagementApi =
 
             const mediaUuids = primaryMediaUuid ? [primaryMediaUuid] : (payload.primaryMediaUuids ?? []);
 
-            const jsonPayload = {
+            // CreateMenuItemRequest (backend) is a nested DTO:
+            // { foodUuid, menuItem: { name, price, ... }, primaryMediaUuids,
+            //   thumbnailMediaUuid, galleryMediaUuids, ingredients, dietaryTypes,
+            //   allergenDeclarations }. The backend's ObjectMapper bean
+            // (JacksonConfig) is a plain `new ObjectMapper()`, which defaults to
+            // FAIL_ON_UNKNOWN_PROPERTIES=true (Spring Boot's autoconfigured
+            // mapper normally disables this, but this custom bean bypasses
+            // that). A flat payload with top-level `name`/`price`/etc. fields
+            // that don't exist on CreateMenuItemRequest throws
+            // UnrecognizedPropertyException -> HttpMessageNotReadableException
+            // -> "Request body is invalid JSON or has invalid field value".
+            // /api/v1/admin/... and /api/v1/catalog/... map to the exact same
+            // controller method (MenuItemController is @RequestMapping({
+            // "/api/v1/catalog", "/api/v1/admin"})), so there is only ever one
+            // correct payload shape — send it once, directly.
+            const requestBody = {
               foodUuid: payload.foodUuid,
               menuItem: {
                 name: payload.menuItem?.name,
@@ -1668,9 +1683,11 @@ export const menuManagementApi =
                 availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
                 ingredientDataStatus: normalizedIngredientDataStatus,
                 isFeatured: Boolean(payload.menuItem?.isFeatured),
-                source: payload.menuItem?.source || "ADMIN",
+                source: "ADMIN",
               },
               primaryMediaUuids: mediaUuids,
+              thumbnailMediaUuid: primaryMediaUuid || null,
+              galleryMediaUuids: galleryMediaUuids,
               ingredients: (payload.ingredients ?? []).map((ing) => ({
                 ingredientUuid: ing.ingredientUuid,
                 quantity: ing.quantity != null ? Number(ing.quantity) : 1,
@@ -1692,8 +1709,8 @@ export const menuManagementApi =
               })),
             };
 
-            let result = await browserRequest<unknown>(
-              `/api/catalog/stores/${encodeURIComponent(
+            const result = await browserRequest<unknown>(
+              `/api/admin/stores/${encodeURIComponent(
                 storeUuid,
               )}/menu-items`,
               {
@@ -1701,27 +1718,9 @@ export const menuManagementApi =
                 headers: {
                   "Content-Type": "application/json",
                 },
-                body: JSON.stringify(jsonPayload),
+                body: JSON.stringify(requestBody),
               },
             );
-
-            if (
-              "error" in result &&
-              (result.error as { status?: number })?.status === 404
-            ) {
-              result = await browserRequest<unknown>(
-                `/api/admin/stores/${encodeURIComponent(
-                  storeUuid,
-                )}/menu-items`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify(jsonPayload),
-                },
-              );
-            }
 
             if ("error" in result) {
               return result;
@@ -1750,7 +1749,7 @@ export const menuManagementApi =
                         ingredientUuid: ing.ingredientUuid,
                         quantity: ing.quantity ?? 1,
                         unit: ing.unit ?? "unit",
-                        optional: (ing as any).optional ?? ing.isOptional ?? false,
+                        isOptional: (ing as any).optional ?? ing.isOptional ?? false,
                         notes: ing.notes || undefined,
                       })),
                     }),
@@ -1834,8 +1833,18 @@ export const menuManagementApi =
                   (payload as any)?.menuItemUuid ||
                   (payload as any)?.id;
 
+            // NOTE: UpdateMenuItemRequest has no media fields (see below), and
+            // there is no backend endpoint to associate already-uploaded media
+            // UUIDs with an existing menu item — MenuItemController.replaceImages
+            // only accepts fresh multipart files. Newly selected `images` are
+            // still uploaded (so they exist as Media records / are visible via
+            // the ImagePicker's own preview), but nothing here can currently
+            // attach them to this menu item; that needs a dedicated backend
+            // endpoint, tracked separately from this fix.
             let primaryMediaUuid = payload.thumbnailMediaUuid || payload.primaryMediaUuids?.[0];
             const galleryMediaUuids: string[] = [...(payload.galleryMediaUuids ?? [])];
+            void primaryMediaUuid;
+            void galleryMediaUuids;
 
             // 1. Upload Images to Media API first if new files provided
             if (Array.isArray(images) && images.length > 0) {
@@ -1869,28 +1878,29 @@ export const menuManagementApi =
                 ? "VERIFIED"
                 : payload.menuItem?.ingredientDataStatus || "VERIFIED";
 
-            // 2. Update Core MenuItem strictly matching Postman 04 Request 04 schema
-            const coreBody: Record<string, unknown> = {
+            // UpdateMenuItemRequest (backend) is `{ foodUuid, menuItem: {...} }`
+            // only — no media fields at all, unlike CreateMenuItemRequest.
+            // Image associations are updated separately via the dedicated
+            // .../images endpoint, not through this call. See the matching
+            // comment on createStoreMenuItem for why the payload must match
+            // the DTO's field names exactly: the backend's ObjectMapper bean
+            // fails on any unrecognized JSON property.
+            const coreBody = {
               foodUuid: payload.foodUuid,
-              name: payload.menuItem?.name,
-              price: Number(payload.menuItem?.price) || 0,
-              currencyCode: payload.menuItem?.currencyCode || "USD",
-              preparationTimeMinutes: Number(payload.menuItem?.preparationTimeMinutes) || 15,
-              availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
-              ingredientDataStatus: normalizedIngredientDataStatus,
-              featured: payload.menuItem?.isFeatured ?? true,
-              source: "ADMIN",
+              menuItem: {
+                name: payload.menuItem?.name,
+                description: payload.menuItem?.description || null,
+                price: Number(payload.menuItem?.price) || 0,
+                currencyCode: payload.menuItem?.currencyCode || "USD",
+                preparationTimeMinutes: Number(payload.menuItem?.preparationTimeMinutes) || 15,
+                availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
+                ingredientDataStatus: normalizedIngredientDataStatus,
+                isFeatured: Boolean(payload.menuItem?.isFeatured),
+                source: "ADMIN",
+              },
             };
 
-            if (payload.menuItem?.description) {
-              coreBody.description = payload.menuItem.description;
-            }
-
-            if (primaryMediaUuid) {
-              coreBody.primaryMediaUuid = primaryMediaUuid;
-            }
-
-            let coreResult = await browserRequest<unknown>(
+            const coreResult = await browserRequest<unknown>(
               `/api/admin/menu-items/${encodeURIComponent(
                 targetUuid,
               )}`,
@@ -1902,27 +1912,6 @@ export const menuManagementApi =
                 body: JSON.stringify(coreBody),
               },
             );
-
-            if (
-              "error" in coreResult &&
-              (coreResult.error as { status?: number })?.status === 404
-            ) {
-              coreResult = await browserRequest<unknown>(
-                `/api/catalog/menu-items/${encodeURIComponent(
-                  targetUuid,
-                )}`,
-                {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    foodUuid: payload.foodUuid,
-                    menuItem: payload.menuItem,
-                  }),
-                },
-              );
-            }
 
             if ("error" in coreResult) {
               return coreResult;
@@ -1944,7 +1933,7 @@ export const menuManagementApi =
                       ingredientUuid: ing.ingredientUuid,
                       quantity: ing.quantity ?? 1,
                       unit: ing.unit ?? "unit",
-                      optional: (ing as any).optional ?? ing.isOptional ?? false,
+                      isOptional: (ing as any).optional ?? ing.isOptional ?? false,
                       notes: ing.notes || undefined,
                     })),
                   }),
