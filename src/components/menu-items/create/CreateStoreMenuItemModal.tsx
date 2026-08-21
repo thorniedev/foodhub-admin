@@ -207,10 +207,7 @@ export default function CreateStoreMenuItemModal({
             notes: item.notes?.trim() || null,
           })),
         dietaryTypes: parseArray(form.dietaryTypes, "Dietary Types"),
-        allergenDeclarations: parseArray(
-          form.allergenDeclarations,
-          "Allergen Declarations",
-        ),
+        allergenDeclarations: [],
       };
 
       await createStoreMenuItem({
@@ -424,16 +421,11 @@ export default function CreateStoreMenuItemModal({
               ទុកជា [] បើមិនមាន។ Fields ទាំងពីរនេះត្រូវបានផ្ញើតាម Store Menu Item endpoint។
             </p>
 
-            <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            <div className="mt-4">
               <JsonField
                 label="Dietary Types"
                 value={form.dietaryTypes}
                 onChange={(value) => set("dietaryTypes", value)}
-              />
-              <JsonField
-                label="Allergen Declarations"
-                value={form.allergenDeclarations}
-                onChange={(value) => set("allergenDeclarations", value)}
               />
             </div>
           </section>

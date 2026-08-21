@@ -215,56 +215,28 @@ export default function MenuItemDetailModal({
               </div>
             )}
 
-            {/* Dietary Types & Allergens */}
-            <div className="grid gap-3 sm:grid-cols-2">
-              {/* Dietary Types */}
-              <div className="rounded-2xl border border-gray-100 p-4">
-                <div className="flex items-center gap-2 text-sm font-black text-gray-800">
-                  <Heart size={16} className="text-emerald-600" />
-                  <span>របបអាហារ</span>
-                </div>
-                <div className="mt-2.5 space-y-1.5">
-                  {Array.isArray(data.dietaryTypes) && data.dietaryTypes.length > 0 ? (
-                    data.dietaryTypes.map((dt: any, idx: number) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between rounded-xl bg-emerald-50/60 px-3 py-1.5 text-xs text-emerald-900"
-                      >
-                        <span className="font-bold">{dt.name || dt.code || dt.dietaryTypeUuid}</span>
-                        <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold">
-                          {dt.verificationStatus || "UNVERIFIED"}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-gray-400">គ្មានទិន្នន័យ Dietary Type</p>
-                  )}
-                </div>
+            {/* Dietary Types */}
+            <div className="rounded-2xl border border-gray-100 p-4">
+              <div className="flex items-center gap-2 text-sm font-black text-gray-800">
+                <Heart size={16} className="text-emerald-600" />
+                <span>របបអាហារ (Dietary Types)</span>
               </div>
-
-              {/* Allergen Declarations */}
-              <div className="rounded-2xl border border-gray-100 p-4">
-                <div className="flex items-center gap-2 text-sm font-black text-gray-800">
-                  <ShieldAlert size={16} className="text-amber-600" />
-                  <span>ប្រតិកម្មអាឡែហ្ស៊ី</span>
-                </div>
-                <div className="mt-2.5 space-y-1.5">
-                  {Array.isArray(data.allergenDeclarations) && data.allergenDeclarations.length > 0 ? (
-                    data.allergenDeclarations.map((al: any, idx: number) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between rounded-xl bg-amber-50/60 px-3 py-1.5 text-xs text-amber-900"
-                      >
-                        <span className="font-bold">{al.name || al.code || al.allergenUuid}</span>
-                        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold">
-                          {al.declarationType || "MAY_CONTAIN"} • {al.riskLevel || "MEDIUM"}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-gray-400">គ្មានការប្រកាស Allergen</p>
-                  )}
-                </div>
+              <div className="mt-2.5 space-y-1.5">
+                {Array.isArray(data.dietaryTypes) && data.dietaryTypes.length > 0 ? (
+                  data.dietaryTypes.map((dt: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between rounded-xl bg-emerald-50/60 px-3 py-1.5 text-xs text-emerald-900"
+                    >
+                      <span className="font-bold">{dt.name || dt.code || dt.dietaryTypeUuid}</span>
+                      <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold">
+                        {dt.verificationStatus || "UNVERIFIED"}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-gray-400">គ្មានទិន្នន័យ Dietary Type</p>
+                )}
               </div>
             </div>
 

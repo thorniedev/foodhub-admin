@@ -154,20 +154,76 @@ export default function PublishMenuItemModal({
       return;
     }
 
-    const list = item.primaryMediaUrls?.length
-      ? item.primaryMediaUrls
-      : item.primaryMediaUuids?.length
-      ? item.primaryMediaUuids
-      : item.primaryMediaUuid
-      ? [item.primaryMediaUuid]
-      : item.images?.length
-      ? item.images
-      : item.gallery?.length
-      ? item.gallery
-      : item.galleryMediaUuids?.length
-      ? item.galleryMediaUuids
-      : [item.thumbnail || item.imageUrl || item.thumbnailMediaUuid].filter(Boolean);
-    setExistingImages(list as string[]);
+    const rawList: string[] = [];
+
+    // 1. Direct URLs
+    if (Array.isArray(item.primaryMediaUrls) && item.primaryMediaUrls.length) {
+      for (const u of item.primaryMediaUrls) {
+        if (typeof u === "string" && u.trim() && !rawList.includes(u.trim())) rawList.push(u.trim());
+      }
+    }
+    if (typeof item.thumbnail === "string" && item.thumbnail.trim() && !rawList.includes(item.thumbnail.trim())) {
+      rawList.push(item.thumbnail.trim());
+    }
+    if (typeof item.imageUrl === "string" && item.imageUrl.trim() && !rawList.includes(item.imageUrl.trim())) {
+      rawList.push(item.imageUrl.trim());
+    }
+    if (Array.isArray(item.images) && item.images.length) {
+      for (const img of item.images) {
+        if (typeof img === "string" && img.trim() && !rawList.includes(img.trim())) rawList.push(img.trim());
+      }
+    }
+    if (Array.isArray(item.gallery) && item.gallery.length) {
+      for (const img of item.gallery) {
+        if (typeof img === "string" && img.trim() && !rawList.includes(img.trim())) rawList.push(img.trim());
+      }
+    }
+
+    // 2. Media UUIDs
+    if (typeof item.thumbnailMediaUuid === "string" && item.thumbnailMediaUuid.trim() && !rawList.includes(item.thumbnailMediaUuid.trim())) {
+      rawList.push(item.thumbnailMediaUuid.trim());
+    }
+    if (typeof item.primaryMediaUuid === "string" && item.primaryMediaUuid.trim() && !rawList.includes(item.primaryMediaUuid.trim())) {
+      rawList.push(item.primaryMediaUuid.trim());
+    }
+    if (Array.isArray(item.primaryMediaUuids)) {
+      for (const u of item.primaryMediaUuids) {
+        if (typeof u === "string" && u.trim() && !rawList.includes(u.trim())) rawList.push(u.trim());
+      }
+    }
+    if (Array.isArray(item.galleryMediaUuids)) {
+      for (const u of item.galleryMediaUuids) {
+        if (typeof u === "string" && u.trim() && !rawList.includes(u.trim())) rawList.push(u.trim());
+      }
+    }
+
+    // 3. Fallback to Food catalog media if menuItem has none
+    if (!rawList.length && item.food) {
+      if (Array.isArray(item.food.primaryMediaUrls) && item.food.primaryMediaUrls.length) {
+        for (const u of item.food.primaryMediaUrls) {
+          if (typeof u === "string" && u.trim() && !rawList.includes(u.trim())) rawList.push(u.trim());
+        }
+      }
+      if (typeof item.food.thumbnail === "string" && item.food.thumbnail.trim()) {
+        rawList.push(item.food.thumbnail.trim());
+      }
+      if (typeof item.food.imageUrl === "string" && item.food.imageUrl.trim()) {
+        rawList.push(item.food.imageUrl.trim());
+      }
+      if (typeof item.food.thumbnailMediaUuid === "string" && item.food.thumbnailMediaUuid.trim()) {
+        rawList.push(item.food.thumbnailMediaUuid.trim());
+      }
+      if (typeof item.food.primaryMediaUuid === "string" && item.food.primaryMediaUuid.trim()) {
+        rawList.push(item.food.primaryMediaUuid.trim());
+      }
+      if (Array.isArray(item.food.primaryMediaUuids)) {
+        for (const u of item.food.primaryMediaUuids) {
+          if (typeof u === "string" && u.trim() && !rawList.includes(u.trim())) rawList.push(u.trim());
+        }
+      }
+    }
+
+    setExistingImages(rawList.filter(Boolean));
 
     const matchedStoreUuid =
       item.storeUuid ||
@@ -473,16 +529,6 @@ export default function PublishMenuItemModal({
           notes: row.notes.trim() || null,
         }));
 
-      const allergenPayload: MenuItemAllergenDeclarationPayload[] = allergenRows
-        .filter((row) => row.allergenUuid)
-        .map((row) => ({
-          allergenUuid: row.allergenUuid,
-          declarationType: row.declarationType || "MAY_CONTAIN",
-          riskLevel: row.riskLevel || "MEDIUM",
-          verificationStatus: row.verificationStatus || "UNVERIFIED",
-          notes: row.notes.trim() || null,
-        }));
-
       const payload: MenuItemWritePayload = {
         foodUuid: values.foodUuid,
         menuItem: {
@@ -503,7 +549,7 @@ export default function PublishMenuItemModal({
         galleryMediaUuids: item?.galleryMediaUuids ?? [],
         ingredients: ingredientPayload,
         dietaryTypes: dietaryTypePayload,
-        allergenDeclarations: allergenPayload,
+        allergenDeclarations: [],
       };
 
       await onSubmit(targetStoreUuid, payload, images);
@@ -854,111 +900,6 @@ export default function PublishMenuItemModal({
 
               {!dietaryTypeRows.length && (
                 <EmptyRowsHint text="មិនទាន់បានកំណត់ Dietary Type ទេ។" />
-              )}
-            </div>
-          </section>
-
-          {/* Allergens */}
-          <section className="rounded-2xl border border-gray-100 p-5">
-            <TabIntro
-              icon={<ShieldAlert size={18} className="text-amber-600" />}
-              title="ប្រតិកម្មអាឡែហ្ស៊ី"
-              description="ប្រកាសសារធាតុបង្កអាឡែហ្ស៊ី និងកម្រិតហានិភ័យសម្រាប់សុវត្ថិភាពអតិថិជន។"
-              onAdd={() =>
-                setAllergenRows((current) => [
-                  ...current,
-                  {
-                    allergenUuid: "",
-                    declarationType: "MAY_CONTAIN",
-                    riskLevel: "MEDIUM",
-                    verificationStatus: "UNVERIFIED",
-                    notes: "",
-                  },
-                ])
-              }
-              addLabel="បន្ថែម Allergen"
-              accent="amber"
-            />
-
-            <div className="mt-4 space-y-3">
-              {allergenRows.map((row, index) => (
-                <div
-                  key={index}
-                  className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[1.8fr_1.2fr_1fr_1fr_1.5fr_auto]"
-                >
-                  <MenuItemSearchableSelect
-                    value={row.allergenUuid}
-                    options={allergenOptions}
-                    onChange={(next) =>
-                      updateAllergenRow(index, { allergenUuid: next })
-                    }
-                    placeholder="ជ្រើស Allergen"
-                    ariaLabel="ជ្រើស Allergen"
-                  />
-
-                  <select
-                    value={row.declarationType}
-                    onChange={(event) =>
-                      updateAllergenRow(index, {
-                        declarationType: event.target.value,
-                      })
-                    }
-                    className={inputClass}
-                  >
-                    <option value="MAY_CONTAIN">អាចមាន</option>
-                    <option value="CONTAINS">មានផ្ទុក</option>
-                  </select>
-
-                  <select
-                    value={row.riskLevel}
-                    onChange={(event) =>
-                      updateAllergenRow(index, {
-                        riskLevel: event.target.value,
-                      })
-                    }
-                    className={inputClass}
-                  >
-                    <option value="LOW">LOW</option>
-                    <option value="MEDIUM">MEDIUM</option>
-                    <option value="HIGH">HIGH</option>
-                  </select>
-
-                  <select
-                    value={row.verificationStatus}
-                    onChange={(event) =>
-                      updateAllergenRow(index, {
-                        verificationStatus: event.target.value,
-                      })
-                    }
-                    className={inputClass}
-                  >
-                    <option value="UNVERIFIED">UNVERIFIED</option>
-                    <option value="VERIFIED">VERIFIED</option>
-                  </select>
-
-                  <input
-                    placeholder="កំណត់ចំណាំ (Notes)"
-                    value={row.notes}
-                    onChange={(event) =>
-                      updateAllergenRow(index, {
-                        notes: event.target.value,
-                      })
-                    }
-                    className={inputClass}
-                  />
-
-                  <RemoveRowButton
-                    onClick={() =>
-                      setAllergenRows((current) =>
-                        current.filter((_, rowIndex) => rowIndex !== index),
-                      )
-                    }
-                  />
-                </div>
-              ))}
-
-              {!allergenRows.length && (
-                <EmptyRowsHint text="មិនទាន់បានប្រកាស Allergen ទេ។" />
               )}
             </div>
           </section>
