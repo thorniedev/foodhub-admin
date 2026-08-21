@@ -1,9 +1,9 @@
 import {
+  CircleMinus,
   Eye,
   Leaf,
   Pencil,
   RotateCcw,
-  Trash2,
 } from "lucide-react";
 
 import type {
@@ -209,25 +209,25 @@ export default function IngredientsTable({
                     </button>
 
                     {item.isActive ? (
-                      <button
-                        type="button"
-                        disabled={
-                          disabled
-                        }
-                        onClick={() =>
-                          onDelete(
-                            item,
-                          )
-                        }
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-400 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
-                        title="បិទ"
-                      >
-                        <Trash2
-                          size={
-                            18
+                        <button
+                          type="button"
+                          disabled={
+                            disabled
                           }
-                        />
-                      </button>
+                          onClick={() =>
+                            onDelete(
+                              item,
+                            )
+                          }
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+                          title="បិទ"
+                        >
+                          <CircleMinus
+                            size={
+                              18
+                            }
+                          />
+                        </button>
                     ) : (
                       <button
                         type="button"

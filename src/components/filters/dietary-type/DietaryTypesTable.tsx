@@ -1,10 +1,10 @@
 import {
   AlertOctagon,
+  CircleMinus,
   Eye,
   Pencil,
   RotateCcw,
   Salad,
-  Trash2,
 } from "lucide-react";
 
 import type { DietaryType } from "@/src/types/dietaryType";
@@ -165,10 +165,10 @@ export default function DietaryTypesTable({
                       onClick={() =>
                         onDelete(item)
                       }
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                       title="បិទ"
                     >
-                      <Trash2 size={20} />
+                      <CircleMinus size={18} />
                     </button>
                   ) : (
                     <button

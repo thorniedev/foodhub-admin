@@ -1,10 +1,10 @@
 import {
   AlertOctagon,
+  CircleMinus,
   Eye,
   HeartPulse,
   Pencil,
   RotateCcw,
-  Trash2,
 } from "lucide-react";
 
 import type { MedicalCondition } from "@/src/types/medicalCondition";
@@ -190,11 +190,11 @@ export default function MedicalConditionsTable({
                             item,
                           )
                         }
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-400 transition hover:bg-red-50 disabled:opacity-40"
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-500 transition hover:bg-red-50 disabled:opacity-40"
                         title="បិទ"
                       >
-                        <Trash2
-                          size={20}
+                        <CircleMinus
+                          size={18}
                         />
                       </button>
                     ) : (

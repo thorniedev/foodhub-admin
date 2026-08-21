@@ -1,10 +1,10 @@
 import {
   AlertOctagon,
+  CircleMinus,
   Eye,
   Pencil,
   RotateCcw,
   ShieldAlert,
-  Trash2,
 } from "lucide-react";
 
 import type { Allergen } from "@/src/types/allergen";
@@ -199,23 +199,23 @@ export default function AllergensTable({
                     {/* DELETE / RESTORE */}
 
                     {item.active ? (
-                      <button
-                        type="button"
-                        disabled={
-                          disabled
-                        }
-                        onClick={() =>
-                          onDelete(
-                            item,
-                          )
-                        }
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 disabled:opacity-40"
-                        title="បិទ"
-                      >
-                        <Trash2
-                          size={20}
-                        />
-                      </button>
+                        <button
+                          type="button"
+                          disabled={
+                            disabled
+                          }
+                          onClick={() =>
+                            onDelete(
+                              item,
+                            )
+                          }
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-500 transition hover:bg-red-50 disabled:opacity-40"
+                          title="បិទ"
+                        >
+                          <CircleMinus
+                            size={18}
+                          />
+                        </button>
                     ) : (
                       <button
                         type="button"

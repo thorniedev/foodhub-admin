@@ -9,13 +9,13 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  CircleMinus,
   Eye,
   Pencil,
   Plus,
   RotateCcw,
   Search,
   SlidersHorizontal,
-  Trash2,
   X,
 } from "lucide-react";
 
@@ -884,9 +884,9 @@ function CatalogTable({
                         type="button"
                         onClick={() => onDelete(item)}
                         title="បិទ"
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
                       >
-                        <Trash2 size={20} />
+                        <CircleMinus size={18} />
                       </button>
                     ) : (
                       <button
@@ -1025,7 +1025,7 @@ function DeleteCatalogOptionModal({
       <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
-            <Trash2 size={24} />
+            <CircleMinus size={24} />
           </div>
 
           <button

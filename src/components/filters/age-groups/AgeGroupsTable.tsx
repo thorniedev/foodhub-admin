@@ -1,7 +1,7 @@
 import {
+  CircleMinus,
   Eye,
   Pencil,
-  Trash2,
   UsersRound,
 } from "lucide-react";
 
@@ -181,11 +181,11 @@ export default function AgeGroupsTable({
                           item,
                         )
                       }
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-red-400 transition hover:bg-red-50 disabled:opacity-40"
+                      className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-500 transition hover:bg-red-50 disabled:opacity-40"
                       title="លុប"
                     >
-                      <Trash2
-                        size={20}
+                      <CircleMinus
+                        size={18}
                       />
                     </button>
                   </div>

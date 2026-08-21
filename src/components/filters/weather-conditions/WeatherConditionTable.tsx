@@ -1,11 +1,11 @@
 "use client";
 
 import {
+  CircleMinus,
   CloudRain,
   Eye,
   Pencil,
   RotateCcw,
-  Trash2,
 } from "lucide-react";
 
 import type {
@@ -209,13 +209,13 @@ export default function WeatherConditionTable({
                               item,
                             )
                           }
-                          className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-400 transition hover:bg-red-50 disabled:opacity-40"
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-500 transition hover:bg-red-50 disabled:opacity-40"
                           title="បិទ (Deactivate)"
                           aria-label="Deactivate"
                         >
-                          <Trash2
+                          <CircleMinus
                             size={
-                              17
+                              18
                             }
                           />
                         </button>
