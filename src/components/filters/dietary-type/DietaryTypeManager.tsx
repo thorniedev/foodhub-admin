@@ -765,6 +765,7 @@ export default function DietaryTypeManager() {
 
       {/* COMPONENT: DietaryTypeFormModal */}
       <DietaryTypeFormModal
+        key={formOpen ? editing?.uuid || "new-dietary" : "closed"}
         open={formOpen}
         item={editing}
         saving={isCreating || isUpdating}

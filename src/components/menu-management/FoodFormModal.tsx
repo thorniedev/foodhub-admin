@@ -2,11 +2,8 @@
 
 import {
   Check,
-  Coffee,
   Loader2,
   Save,
-  Trash2,
-  Utensils,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -32,6 +29,12 @@ import type {
 import type { MealType } from "@/src/types/mealType";
 import type { AgeGroup } from "@/src/types/ageGroup";
 import type { DietaryType } from "@/src/types/dietaryType";
+import type { WeatherCondition } from "@/src/types/weather-condition";
+import {
+  readStoredWeatherConditions,
+  WEATHER_CHANGED_EVENT,
+} from "@/src/lib/weatherConditionStorage";
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
 
 type MainCategoryType = "FOOD" | "DRINK";
 
@@ -165,6 +168,7 @@ function resolveCategoryUuid(
 export default function FoodFormModal({
   open,
   item,
+  defaultMainCategory,
   categories,
   cuisines,
   seasons = [],
@@ -179,6 +183,7 @@ export default function FoodFormModal({
 }: {
   open: boolean;
   item: FoodRecord | null;
+  defaultMainCategory?: MainCategoryType;
   categories: FoodCategoryOption[];
   cuisines: CuisineOption[];
   seasons?: SeasonOption[];
@@ -192,8 +197,12 @@ export default function FoodFormModal({
   onSubmit: (payload: FoodWritePayload, images: File[]) => Promise<void>;
 }) {
   const [values, setValues] = useState<FormState>(EMPTY);
-  const [mainCategory, setMainCategory] = useState<MainCategoryType>("FOOD");
-  const [selectedSubCategoryKey, setSelectedSubCategoryKey] = useState<string | null>(null);
+  const [mainCategory, setMainCategory] = useState<MainCategoryType>(
+    defaultMainCategory ?? "FOOD",
+  );
+  const [selectedSubCategoryKey, setSelectedSubCategoryKey] = useState<
+    string | null
+  >(null);
 
   const [images, setImages] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -208,6 +217,19 @@ export default function FoodFormModal({
     FoodDietaryTypeRelation[]
   >([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [storedWeather, setStoredWeather] = useState<WeatherCondition[]>([]);
+
+  useEffect(() => {
+    const loadWeather = () => {
+      setStoredWeather(readStoredWeatherConditions());
+    };
+    loadWeather();
+
+    window.addEventListener(WEATHER_CHANGED_EVENT, loadWeather);
+    return () => {
+      window.removeEventListener(WEATHER_CHANGED_EVENT, loadWeather);
+    };
+  }, []);
 
   const activeCategories = useMemo(() => {
     return categories.filter((category) => category.isActive !== false);
@@ -217,12 +239,41 @@ export default function FoodFormModal({
     return cuisines.filter((cuisine) => cuisine.isActive !== false);
   }, [cuisines]);
 
+  const handleClose = () => {
+    if (saving) return;
+    setValues(EMPTY);
+    setSelectedSubCategoryKey(null);
+    setImages([]);
+    setExistingImages([]);
+    setSeasonRows([]);
+    setEventRows([]);
+    setWeatherRows([]);
+    setMealTypeRows([]);
+    setAgeRuleRows([]);
+    setDietaryTypeRows([]);
+    setError(null);
+    onClose();
+  };
+
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setValues(EMPTY);
+      setSelectedSubCategoryKey(null);
+      setImages([]);
+      setExistingImages([]);
+      setSeasonRows([]);
+      setEventRows([]);
+      setWeatherRows([]);
+      setMealTypeRows([]);
+      setAgeRuleRows([]);
+      setDietaryTypeRows([]);
+      setError(null);
+      return;
+    }
 
     if (!item) {
       setValues(EMPTY);
-      setMainCategory("FOOD");
+      setMainCategory(defaultMainCategory ?? "FOOD");
       setSelectedSubCategoryKey(null);
       setImages([]);
       setExistingImages([]);
@@ -270,7 +321,7 @@ export default function FoodFormModal({
       "";
 
     // Determine main category and subcategory key
-    let initialMainCategory: MainCategoryType = "FOOD";
+    let initialMainCategory: MainCategoryType = defaultMainCategory ?? "FOOD";
     let initialSubCategoryKey: string | null = null;
 
     if (matchedCategoryUuid) {
@@ -304,6 +355,8 @@ export default function FoodFormModal({
         );
         initialSubCategoryKey = foundFood?.key ?? null;
       }
+    } else if (defaultMainCategory) {
+      initialMainCategory = defaultMainCategory;
     }
 
     setMainCategory(initialMainCategory);
@@ -791,11 +844,23 @@ export default function FoodFormModal({
   }, [events, selectedEventUuids]);
 
   const activeWeatherConditions = useMemo(() => {
-    return weatherConditions.filter(
+    const mergedMap = new Map<string, any>();
+    for (const w of storedWeather) {
+      mergedMap.set(w.uuid, w);
+      if (w.code) mergedMap.set(w.code.toUpperCase(), w);
+    }
+    for (const w of weatherConditions) {
+      mergedMap.set(w.uuid, w);
+      if (w.code) mergedMap.set(w.code.toUpperCase(), w);
+    }
+    const combined: any[] = Array.from(new Set(Array.from(mergedMap.values())));
+
+    return combined.filter(
       (item) =>
-        item.isActive !== false || selectedWeatherUuids.includes(item.uuid),
+        (item.isActive !== false && item.active !== false) ||
+        selectedWeatherUuids.includes(item.uuid),
     );
-  }, [weatherConditions, selectedWeatherUuids]);
+  }, [weatherConditions, storedWeather, selectedWeatherUuids]);
 
   if (!open) return null;
 
@@ -806,7 +871,10 @@ export default function FoodFormModal({
       aria-modal="true"
       aria-labelledby="food-form-title"
     >
-      <div className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-3xl border border-gray-100 bg-white shadow-2xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        onKeyDown={handleFormArrowKeyNavigation}
+        className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-3xl border border-gray-100 bg-white shadow-2xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      >
         {/* =================================================
             STICKY HEADER
         ================================================== */}
@@ -816,18 +884,26 @@ export default function FoodFormModal({
               id="food-form-title"
               className="text-3xl font-semibold text-primary-800"
             >
-              {item ? "កែប្រែមីនុយ" : "បន្ថែមមីនុយ"}
+              {mainCategory === "DRINK"
+                ? item
+                  ? "កែប្រែភេសជ្ជៈ"
+                  : "បន្ថែមភេសជ្ជៈ"
+                : item
+                  ? "កែប្រែម្ហូប"
+                  : "បន្ថែមមីនុយ"}
             </p>
 
             <p className="mt-2 text-lg leading-7 text-gray-500">
-              កំណត់ព័ត៌មានម្ហូប និងជ្រើសលក្ខណៈសមស្របដោយចុចលើជម្រើស។
+              {mainCategory === "DRINK"
+                ? "កំណត់ព័ត៌មានភេសជ្ជៈ និងជ្រើសរើសលក្ខណៈសមស្របដោយចុចលើជម្រើស។"
+                : "កំណត់ព័ត៌មានម្ហូប និងជ្រើសរើសលក្ខណៈសមស្របដោយចុចលើជម្រើស។"}
             </p>
           </div>
 
           <button
             type="button"
             disabled={saving}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="បិទ"
             title="បិទ"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
@@ -848,7 +924,9 @@ export default function FoodFormModal({
               <Field
                 label="Canonical name"
                 value={values.canonicalName}
-                placeholder="ឧ. Beef Lok Lak"
+                placeholder={
+                  mainCategory === "DRINK" ? "ឧ. Iced Latte" : "ឧ. Beef Lok Lak"
+                }
                 required
                 onChange={(value) =>
                   setValues((current) => ({
@@ -861,7 +939,9 @@ export default function FoodFormModal({
               <Field
                 label="ឈ្មោះខ្មែរ"
                 value={values.localName}
-                placeholder="ឧ. ឡុកឡាក់សាច់គោ"
+                placeholder={
+                  mainCategory === "DRINK" ? "ឧ. កាហ្វេឡាតេទឹកកក" : "ឧ. ឡុកឡាក់សាច់គោ"
+                }
                 onChange={(value) =>
                   setValues((current) => ({
                     ...current,
@@ -871,65 +951,30 @@ export default function FoodFormModal({
               />
 
               {/* =================================================
-                  CATEGORY (MAIN CATEGORY + SUB-CATEGORY)
+                  CATEGORY (SUB-CATEGORY)
               ================================================== */}
               <div className="md:col-span-2">
                 <OptionFieldLabel
-                  label="Category (ប្រភេទម្ហូប)"
+                  label={
+                    mainCategory === "DRINK"
+                      ? "Category (ប្រភេទភេសជ្ជៈ)"
+                      : "Category (ប្រភេទម្ហូប)"
+                  }
                   required
-                  description="ជ្រើសរើសប្រភេទធំ (អាហារ ឬ ភេសជ្ជៈ) រួចជ្រើសរើសប្រភេទរងតែមួយ។"
+                  description={
+                    mainCategory === "DRINK"
+                      ? "ជ្រើសរើសប្រភេទរងនៃភេសជ្ជៈតែមួយ។"
+                      : "ជ្រើសរើសប្រភេទរងនៃម្ហូបតែមួយ។"
+                  }
                 />
-
-                {/* 2 Main Parent Categories */}
-                <div className="mb-3 grid grid-cols-2 gap-3 sm:gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setMainCategory("FOOD")}
-                    className={`flex min-h-[54px] items-center justify-center gap-2.5 rounded-2xl border px-4 py-3 text-lg font-bold transition-all duration-200 focus:outline-none focus:ring-4 ${
-                      mainCategory === "FOOD"
-                        ? "border-primary-800 bg-primary-800 text-white shadow-md focus:ring-primary-100"
-                        : "border-gray-200 bg-gray-50/80 text-gray-700 hover:border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
-                    }`}
-                  >
-                    <Utensils
-                      size={20}
-                      className={
-                        mainCategory === "FOOD"
-                          ? "text-white"
-                          : "text-primary-700"
-                      }
-                    />
-                    <span>អាហារ (Food)</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setMainCategory("DRINK")}
-                    className={`flex min-h-[54px] items-center justify-center gap-2.5 rounded-2xl border px-4 py-3 text-lg font-bold transition-all duration-200 focus:outline-none focus:ring-4 ${
-                      mainCategory === "DRINK"
-                        ? "border-primary-800 bg-primary-800 text-white shadow-md focus:ring-primary-100"
-                        : "border-gray-200 bg-gray-50/80 text-gray-700 hover:border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
-                    }`}
-                  >
-                    <Coffee
-                      size={20}
-                      className={
-                        mainCategory === "DRINK"
-                          ? "text-white"
-                          : "text-primary-700"
-                      }
-                    />
-                    <span>ភេសជ្ជៈ (Drink)</span>
-                  </button>
-                </div>
 
                 {/* Sub-categories Pill Selection */}
                 <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
                   <div className="mb-3 flex items-center justify-between">
                     <p className="text-base font-semibold text-primary-800">
-                      {mainCategory === "FOOD"
-                        ? "ប្រភេទរងនៃអាហារ"
-                        : "ប្រភេទរងនៃភេសជ្ជៈ"}
+                      {mainCategory === "DRINK"
+                        ? "ប្រភេទរងនៃភេសជ្ជៈ"
+                        : "ប្រភេទរងនៃម្ហូប"}
                     </p>
                     <span className="text-sm font-medium text-gray-400">
                       ជ្រើសតែមួយ
@@ -937,9 +982,9 @@ export default function FoodFormModal({
                   </div>
 
                   <div className="flex flex-wrap gap-2.5">
-                    {(mainCategory === "FOOD"
-                      ? FOOD_SUBCATEGORIES
-                      : DRINK_SUBCATEGORIES
+                    {(mainCategory === "DRINK"
+                      ? DRINK_SUBCATEGORIES
+                      : FOOD_SUBCATEGORIES
                     ).map((subcat) => {
                       const isSelected = selectedSubCategoryKey === subcat.key;
 
@@ -1104,7 +1149,7 @@ export default function FoodFormModal({
           ================================================== */}
           <PreferenceSection
             title="ពេលទទួលទាន"
-            description="ជ្រើសពេលទទួលទានដែលសមស្រប ហើយកំណត់ពិន្ទុសាកសម។"
+            description="ជ្រើសពេលទទួលទានដែលសមស្រប។"
             selectedCount={mealTypeRows.length}
           >
             <OptionPills
@@ -1116,43 +1161,6 @@ export default function FoodFormModal({
               onToggle={toggleMealType}
               emptyText="មិនមានជម្រើសពេលទទួលទាន។"
             />
-
-            {mealTypeRows.length > 0 && (
-              <div className="mt-5 space-y-4">
-                {mealTypeRows.map((row) => {
-                  const option = mealTypes.find(
-                    (mealType) => mealType.uuid === row.mealTypeUuid,
-                  );
-
-                  if (!option) return null;
-
-                  return (
-                    <SelectedOptionCard
-                      key={row.mealTypeUuid}
-                      title={`${option.name} (${option.code})`}
-                      onRemove={() => toggleMealType(row.mealTypeUuid)}
-                    >
-                      <ScoreField
-                        label="ពិន្ទុសាកសម"
-                        value={row.suitabilityScore ?? 1}
-                        onChange={(value) =>
-                          setMealTypeRows((current) =>
-                            current.map((currentRow) =>
-                              currentRow.mealTypeUuid === row.mealTypeUuid
-                                ? {
-                                    ...currentRow,
-                                    suitabilityScore: value,
-                                  }
-                                : currentRow,
-                            ),
-                          )
-                        }
-                      />
-                    </SelectedOptionCard>
-                  );
-                })}
-              </div>
-            )}
           </PreferenceSection>
 
           {/* =================================================
@@ -1160,7 +1168,7 @@ export default function FoodFormModal({
           ================================================== */}
           <PreferenceSection
             title="ក្រុមអាយុ"
-            description="ជ្រើសក្រុមអាយុ ហើយកំណត់ថា Allowed, Warning ឬ Restricted។"
+            description="ជ្រើសក្រុមអាយុដែលសមស្រប។"
             selectedCount={ageRuleRows.length}
           >
             <OptionPills
@@ -1172,88 +1180,6 @@ export default function FoodFormModal({
               onToggle={toggleAgeGroup}
               emptyText="មិនមានជម្រើសក្រុមអាយុ។"
             />
-
-            {ageRuleRows.length > 0 && (
-              <div className="mt-5 space-y-4">
-                {ageRuleRows.map((row) => {
-                  const option = ageGroups.find(
-                    (ageGroup) => ageGroup.uuid === row.ageGroupUuid,
-                  );
-
-                  if (!option) return null;
-
-                  return (
-                    <SelectedOptionCard
-                      key={row.ageGroupUuid}
-                      title={`${option.name} (${option.code})`}
-                      onRemove={() => toggleAgeGroup(row.ageGroupUuid)}
-                    >
-                      <div className="grid gap-5 lg:grid-cols-[1fr_1.4fr]">
-                        <div>
-                          <Label>លទ្ធផល Rule</Label>
-
-                          <div className="flex flex-wrap gap-3">
-                            {["ALLOWED", "WARNING", "RESTRICTED"].map(
-                              (ruleResult) => {
-                                const selected =
-                                  (row.ruleResult || "ALLOWED") === ruleResult;
-
-                                return (
-                                  <button
-                                    key={ruleResult}
-                                    type="button"
-                                    aria-pressed={selected}
-                                    onClick={() =>
-                                      setAgeRuleRows((current) =>
-                                        current.map((currentRow) =>
-                                          currentRow.ageGroupUuid ===
-                                          row.ageGroupUuid
-                                            ? {
-                                                ...currentRow,
-                                                ruleResult,
-                                              }
-                                            : currentRow,
-                                        ),
-                                      )
-                                    }
-                                    className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border px-5 text-lg font-semibold transition ${
-                                      selected
-                                        ? "border-primary-800 bg-primary-800 text-white shadow-sm"
-                                        : "border-gray-200 bg-white text-gray-700 hover:border-secondary-300 hover:bg-secondary-50 hover:text-secondary-700"
-                                    }`}
-                                  >
-                                    {selected && <Check size={20} />}
-                                    {ruleResult}
-                                  </button>
-                                );
-                              },
-                            )}
-                          </div>
-                        </div>
-
-                        <ReasonField
-                          label="ហេតុផល"
-                          value={row.reasonText ?? ""}
-                          placeholder="ឧ. Suitable as a normal serving."
-                          onChange={(value) =>
-                            setAgeRuleRows((current) =>
-                              current.map((currentRow) =>
-                                currentRow.ageGroupUuid === row.ageGroupUuid
-                                  ? {
-                                      ...currentRow,
-                                      reasonText: value,
-                                    }
-                                  : currentRow,
-                              ),
-                            )
-                          }
-                        />
-                      </div>
-                    </SelectedOptionCard>
-                  );
-                })}
-              </div>
-            )}
           </PreferenceSection>
 
           {/* =================================================
@@ -1267,72 +1193,12 @@ export default function FoodFormModal({
             <OptionPills
               options={activeSeasons.map((season) => ({
                 value: season.uuid,
-                label: `${season.name}${
-                  season.localName ? ` (${season.localName})` : ""
-                }`,
+                label: season.name,
               }))}
               selectedValues={selectedSeasonUuids}
               onToggle={toggleSeason}
               emptyText="មិនមានជម្រើសរដូវកាល។"
             />
-
-            {seasonRows.length > 0 && (
-              <div className="mt-5 space-y-4">
-                {seasonRows.map((row) => {
-                  const option = seasons.find(
-                    (season) => season.uuid === row.seasonUuid,
-                  );
-
-                  if (!option) return null;
-
-                  return (
-                    <SelectedOptionCard
-                      key={row.seasonUuid}
-                      title={`${option.name}${
-                        option.localName ? ` (${option.localName})` : ""
-                      }`}
-                      onRemove={() => toggleSeason(row.seasonUuid)}
-                    >
-                      <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
-                        <ScoreField
-                          label="ពិន្ទុសាកសម"
-                          value={row.suitabilityScore ?? 1}
-                          onChange={(value) =>
-                            setSeasonRows((current) =>
-                              current.map((currentRow) =>
-                                currentRow.seasonUuid === row.seasonUuid
-                                  ? {
-                                      ...currentRow,
-                                      suitabilityScore: value,
-                                    }
-                                  : currentRow,
-                              ),
-                            )
-                          }
-                        />
-
-                        <ReasonField
-                          label="ហេតុផល"
-                          value={row.reasonText ?? ""}
-                          onChange={(value) =>
-                            setSeasonRows((current) =>
-                              current.map((currentRow) =>
-                                currentRow.seasonUuid === row.seasonUuid
-                                  ? {
-                                      ...currentRow,
-                                      reasonText: value,
-                                    }
-                                  : currentRow,
-                              ),
-                            )
-                          }
-                        />
-                      </div>
-                    </SelectedOptionCard>
-                  );
-                })}
-              </div>
-            )}
           </PreferenceSection>
 
           {/* =================================================
@@ -1346,72 +1212,12 @@ export default function FoodFormModal({
             <OptionPills
               options={activeEvents.map((eventOption) => ({
                 value: eventOption.uuid,
-                label: `${eventOption.name}${
-                  eventOption.localName ? ` (${eventOption.localName})` : ""
-                }`,
+                label: eventOption.name,
               }))}
               selectedValues={selectedEventUuids}
               onToggle={toggleEvent}
               emptyText="មិនមានជម្រើសព្រឹត្តិការណ៍។"
             />
-
-            {eventRows.length > 0 && (
-              <div className="mt-5 space-y-4">
-                {eventRows.map((row) => {
-                  const option = events.find(
-                    (eventOption) => eventOption.uuid === row.eventUuid,
-                  );
-
-                  if (!option) return null;
-
-                  return (
-                    <SelectedOptionCard
-                      key={row.eventUuid}
-                      title={`${option.name}${
-                        option.localName ? ` (${option.localName})` : ""
-                      }`}
-                      onRemove={() => toggleEvent(row.eventUuid)}
-                    >
-                      <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
-                        <ScoreField
-                          label="Relevance score"
-                          value={row.relevanceScore ?? 0.9}
-                          onChange={(value) =>
-                            setEventRows((current) =>
-                              current.map((currentRow) =>
-                                currentRow.eventUuid === row.eventUuid
-                                  ? {
-                                      ...currentRow,
-                                      relevanceScore: value,
-                                    }
-                                  : currentRow,
-                              ),
-                            )
-                          }
-                        />
-
-                        <ReasonField
-                          label="ហេតុផល"
-                          value={row.reasonText ?? ""}
-                          onChange={(value) =>
-                            setEventRows((current) =>
-                              current.map((currentRow) =>
-                                currentRow.eventUuid === row.eventUuid
-                                  ? {
-                                      ...currentRow,
-                                      reasonText: value,
-                                    }
-                                  : currentRow,
-                              ),
-                            )
-                          }
-                        />
-                      </div>
-                    </SelectedOptionCard>
-                  );
-                })}
-              </div>
-            )}
           </PreferenceSection>
 
           {/* =================================================
@@ -1425,74 +1231,12 @@ export default function FoodFormModal({
             <OptionPills
               options={activeWeatherConditions.map((weather) => ({
                 value: weather.uuid,
-                label: `${weather.name}${
-                  weather.localName ? ` (${weather.localName})` : ""
-                }`,
+                label: weather.name,
               }))}
               selectedValues={selectedWeatherUuids}
               onToggle={toggleWeather}
               emptyText="មិនមានជម្រើសអាកាសធាតុ។"
             />
-
-            {weatherRows.length > 0 && (
-              <div className="mt-5 space-y-4">
-                {weatherRows.map((row) => {
-                  const option = weatherConditions.find(
-                    (weather) => weather.uuid === row.weatherConditionUuid,
-                  );
-
-                  if (!option) return null;
-
-                  return (
-                    <SelectedOptionCard
-                      key={row.weatherConditionUuid}
-                      title={`${option.name}${
-                        option.localName ? ` (${option.localName})` : ""
-                      }`}
-                      onRemove={() => toggleWeather(row.weatherConditionUuid)}
-                    >
-                      <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
-                        <ScoreField
-                          label="ពិន្ទុសាកសម"
-                          value={row.suitabilityScore ?? 0.8}
-                          onChange={(value) =>
-                            setWeatherRows((current) =>
-                              current.map((currentRow) =>
-                                currentRow.weatherConditionUuid ===
-                                row.weatherConditionUuid
-                                  ? {
-                                      ...currentRow,
-                                      suitabilityScore: value,
-                                    }
-                                  : currentRow,
-                              ),
-                            )
-                          }
-                        />
-
-                        <ReasonField
-                          label="ហេតុផល"
-                          value={row.reasonText ?? ""}
-                          onChange={(value) =>
-                            setWeatherRows((current) =>
-                              current.map((currentRow) =>
-                                currentRow.weatherConditionUuid ===
-                                row.weatherConditionUuid
-                                  ? {
-                                      ...currentRow,
-                                      reasonText: value,
-                                    }
-                                  : currentRow,
-                              ),
-                            )
-                          }
-                        />
-                      </div>
-                    </SelectedOptionCard>
-                  );
-                })}
-              </div>
-            )}
           </PreferenceSection>
 
           {/* =================================================
@@ -1526,7 +1270,7 @@ export default function FoodFormModal({
             <button
               type="button"
               disabled={saving}
-              onClick={onClose}
+              onClick={handleClose}
               className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-medium text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               បោះបង់
@@ -1679,89 +1423,6 @@ function OptionPills({
         })}
       </div>
     </div>
-  );
-}
-
-function SelectedOptionCard({
-  title,
-  onRemove,
-  children,
-}: {
-  title: string;
-  onRemove: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-primary-100 bg-primary-50/30 p-5">
-      <div className="mb-5 flex items-start justify-between gap-4 border-b border-primary-100 pb-4">
-        <div className="min-w-0">
-          <p className="text-xl font-semibold text-primary-800">{title}</p>
-        </div>
-
-        <button
-          type="button"
-          onClick={onRemove}
-          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full px-4 text-lg font-semibold text-red-500 transition hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-4 focus:ring-red-100"
-        >
-          <Trash2 size={20} />
-          លុប
-        </button>
-      </div>
-
-      {children}
-    </div>
-  );
-}
-
-function ScoreField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <label className="block">
-      <Label>{label} (0–1)</Label>
-
-      <input
-        type="number"
-        min="0"
-        max="1"
-        step="0.05"
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className={inputClass}
-      />
-    </label>
-  );
-}
-
-function ReasonField({
-  label,
-  value,
-  onChange,
-  placeholder = "ហេតុផល (Reason)...",
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-}) {
-  return (
-    <label className="block">
-      <Label>{label}</Label>
-
-      <input
-        type="text"
-        value={value}
-        placeholder={placeholder}
-        onChange={(event) => onChange(event.target.value)}
-        className={inputClass}
-      />
-    </label>
   );
 }
 

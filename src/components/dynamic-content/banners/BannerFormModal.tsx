@@ -8,6 +8,7 @@ import {
   useAddBannerMutation,
   useUpdateBannerMutation,
 } from "../../../app/store/bannerApi";
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
 
 interface BannerFormModalProps {
   isOpen: boolean;
@@ -41,6 +42,12 @@ export default function BannerFormModal({
     }
   }, [editing, isOpen]);
 
+  const handleClose = () => {
+    if (isSaving) return;
+    setForm(emptyForm);
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   const handleChange = (
@@ -57,6 +64,7 @@ export default function BannerFormModal({
     } else {
       await addBanner(form);
     }
+    setForm(emptyForm);
     onClose();
   };
 
@@ -74,14 +82,14 @@ export default function BannerFormModal({
           <button
             type="button"
             disabled={isSaving}
-            onClick={onClose}
+            onClick={handleClose}
             className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
           >
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5 p-6">
+        <form onSubmit={handleSubmit} onKeyDown={handleFormArrowKeyNavigation} className="space-y-5 p-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-2 block text-xl font-semibold text-[#F97316]">
@@ -161,7 +169,7 @@ export default function BannerFormModal({
             <button
               type="button"
               disabled={isSaving}
-              onClick={onClose}
+              onClick={handleClose}
               className="rounded-xl border border-gray-200 px-5 py-2.5 text-lg text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
             >
               បោះបង់

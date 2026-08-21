@@ -68,9 +68,9 @@ export function useMealTypeCatalog() {
         values.localName.trim();
 
       await createMealType({
-        code: createCodeFromLabel(
-          label,
-        ),
+        code:
+          values.code?.trim().toUpperCase().replace(/\s+/g, "_") ||
+          createCodeFromLabel(label),
         name: label,
         defaultStartTime: values.startTime || "00:00:00",
         defaultEndTime: values.endTime || "23:59:00",
@@ -95,6 +95,7 @@ export function useMealTypeCatalog() {
       await updateMealType({
         uuid,
         body: {
+          code: values.code?.trim().toUpperCase().replace(/\s+/g, "_"),
           name: label,
           defaultStartTime: values.startTime || "00:00:00",
           defaultEndTime: values.endTime || "23:59:00",

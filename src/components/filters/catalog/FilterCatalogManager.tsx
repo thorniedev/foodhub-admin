@@ -9,13 +9,13 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  CircleMinus,
   Eye,
   Pencil,
   Plus,
   RotateCcw,
   Search,
   SlidersHorizontal,
-  Trash2,
   X,
 } from "lucide-react";
 
@@ -35,6 +35,7 @@ import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
 } from "@/src/types/filterCatalog";
+import { getApiErrorMessage } from "@/src/types/safetyResource";
 
 import FilterOptionFormModal from "./FilterOptionFormModal";
 import FilterCatalogDetailModal from "./FilterCatalogDetailModal";
@@ -264,18 +265,18 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
 
     try {
       if (editing) {
-        updateOption(editing.uuid, values);
+        await updateOption(editing.uuid, values);
       } else {
-        createOption(values);
+        await createOption(values);
       }
 
       setFormOpen(false);
       setEditing(null);
       setPage(0);
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។",
-      );
+      const message = getApiErrorMessage(error);
+      setErrorMessage(message);
+      throw new Error(message);
     } finally {
       setSaving(false);
     }
@@ -377,7 +378,14 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         onView={(item) => setViewing(item)}
         onEdit={openEditModal}
         onDelete={setDeleting}
-        onRestore={(item) => setActive(item.uuid, true)}
+        onRestore={async (item) => {
+          try {
+            setErrorMessage("");
+            await setActive(item.uuid, true);
+          } catch (error) {
+            setErrorMessage(getApiErrorMessage(error));
+          }
+        }}
       />
 
       {/* COMPONENT: CatalogPagination */}
@@ -390,6 +398,7 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
 
       {/* EXISTING COMPONENT: FilterOptionFormModal */}
       <FilterOptionFormModal
+        key={formOpen ? editing?.uuid || "new-filter" : "closed"}
         open={formOpen}
         group={group}
         item={editing}
@@ -410,14 +419,19 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
       <DeleteCatalogOptionModal
         item={deleting}
         onClose={() => setDeleting(null)}
-        onConfirm={() => {
+        onConfirm={async () => {
           if (!deleting) {
             return;
           }
 
-          setActive(deleting.uuid, false);
-
-          setDeleting(null);
+          try {
+            setErrorMessage("");
+            await setActive(deleting.uuid, false);
+            setDeleting(null);
+          } catch (error) {
+            setErrorMessage(getApiErrorMessage(error));
+            setDeleting(null);
+          }
         }}
       />
 
@@ -428,7 +442,12 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         initialOption={viewing}
         options={groupOptions}
         onToggleStatus={async (targetUuid, nextActive) => {
-          await setActive(targetUuid, nextActive);
+          try {
+            setErrorMessage("");
+            await setActive(targetUuid, nextActive);
+          } catch (error) {
+            setErrorMessage(getApiErrorMessage(error));
+          }
         }}
         onClose={() => setViewing(null)}
       />
@@ -790,6 +809,10 @@ function CatalogTable({
               </th>
 
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+                ឈ្មោះជាភាសាអង់គ្លេស
+              </th>
+
+              <th className="px-6 py-4 text-xl font-semibold text-primary-800">
                 ការពិពណ៌នា
               </th>
 
@@ -814,6 +837,13 @@ function CatalogTable({
                   <p className="text-lg font-medium text-gray-800">
                     {item.localName || item.name}
                   </p>
+                </td>
+
+                {/* Code */}
+                <td className="px-6 py-5">
+                  <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-base font-semibold text-gray-700">
+                    {item.code || "—"}
+                  </span>
                 </td>
 
                 {/* Description */}
@@ -854,9 +884,9 @@ function CatalogTable({
                         type="button"
                         onClick={() => onDelete(item)}
                         title="បិទ"
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
                       >
-                        <Trash2 size={20} />
+                        <CircleMinus size={18} />
                       </button>
                     ) : (
                       <button
@@ -995,7 +1025,7 @@ function DeleteCatalogOptionModal({
       <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
-            <Trash2 size={24} />
+            <CircleMinus size={24} />
           </div>
 
           <button

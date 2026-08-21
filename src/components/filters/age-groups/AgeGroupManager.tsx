@@ -45,6 +45,8 @@ import AgeGroupsTabs from "./AgeGroupsTabs";
 
 import DeleteAgeGroupConfirmModal from "./DeleteAgeGroupConfirmModal";
 
+import AgeGroupDetailModal from "./AgeGroupDetailModal";
+
 import type { ResourceStatusFilter } from "@/src/types/safetyResource";
 
 type SortMode =
@@ -171,6 +173,14 @@ export default function AgeGroupManager() {
   const [
     editing,
     setEditing,
+  ] =
+    useState<AgeGroup | null>(
+      null,
+    );
+
+  const [
+    viewing,
+    setViewing,
   ] =
     useState<AgeGroup | null>(
       null,
@@ -1091,6 +1101,9 @@ export default function AgeGroupManager() {
             disabled={
               busy
             }
+            onView={
+              setViewing
+            }
             onEdit={(
               item,
             ) => {
@@ -1140,6 +1153,7 @@ export default function AgeGroupManager() {
 
       {/* FORM */}
       <AgeGroupFormModal
+        key={formOpen ? editing?.uuid || "new-age" : "closed"}
         open={
           formOpen
         }
@@ -1190,6 +1204,18 @@ export default function AgeGroupManager() {
         }}
         onConfirm={
           handleDelete
+        }
+      />
+
+      {/* DETAIL */}
+      <AgeGroupDetailModal
+        item={
+          viewing
+        }
+        onClose={() =>
+          setViewing(
+            null,
+          )
         }
       />
     </div>

@@ -19,12 +19,14 @@ import type {
   FilterCatalogOptionFormValues,
   FilterGroupDefinition,
 } from "@/src/types/filterCatalog";
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
 
 /* =========================================================
    DEFAULT FORM VALUES
 ========================================================= */
 
 const EMPTY_FORM: FilterCatalogOptionFormValues = {
+  code: "",
   localName: "",
   name: "",
   description: "",
@@ -71,12 +73,15 @@ export default function FilterOptionFormModal({
 
   useEffect(() => {
     if (!open) {
+      setForm(EMPTY_FORM);
+      setValidationError("");
       return;
     }
 
     setForm(
       item
         ? {
+            code: item.code ?? "",
             localName:
               item.localName || item.name,
             name:
@@ -105,6 +110,13 @@ export default function FilterOptionFormModal({
 
     setValidationError("");
   }, [open, item]);
+
+  const handleClose = () => {
+    if (saving) return;
+    setForm(EMPTY_FORM);
+    setValidationError("");
+    onClose();
+  };
 
   /* =======================================================
      LOCK BACKGROUND SCROLL
@@ -195,7 +207,15 @@ export default function FilterOptionFormModal({
 
       setValidationError("");
 
-      await onSubmit(form);
+      try {
+        await onSubmit(form);
+      } catch (submitError) {
+        setValidationError(
+          submitError instanceof Error
+            ? submitError.message
+            : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។",
+        );
+      }
     };
 
   const isMealType = group.source === "MEAL_TYPE_API";
@@ -293,7 +313,7 @@ export default function FilterOptionFormModal({
           <button
             type="button"
             disabled={saving}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close"
             className="
               flex
@@ -325,12 +345,28 @@ export default function FilterOptionFormModal({
           onSubmit={
             handleSubmit
           }
+          onKeyDown={handleFormArrowKeyNavigation}
           className="
             space-y-4
             p-6
             sm:p-7
           "
         >
+          {/* Code (English Name) */}
+          <div>
+            <Field
+              label="ឈ្មោះជាភាសាអង់គ្លេស"
+              value={form.code ?? ""}
+              onChange={(value) =>
+                setForm((previous) => ({
+                  ...previous,
+                  code: value,
+                }))
+              }
+              placeholder="ឧ. DRY_SEASON"
+            />
+          </div>
+
           {/* Names */}
           {/* Name */}
           <div>
@@ -679,7 +715,7 @@ export default function FilterOptionFormModal({
             <button
               type="button"
               disabled={saving}
-              onClick={onClose}
+              onClick={handleClose}
               className="
                 inline-flex
                 min-h-12

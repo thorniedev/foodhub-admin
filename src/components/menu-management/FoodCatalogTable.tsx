@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageIcon, Pencil, Trash2, Utensils } from "lucide-react";
+import { Eye, ImageIcon, Pencil, Trash2, Utensils } from "lucide-react";
 
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
 
@@ -45,11 +45,13 @@ function imageUrl(item: FoodRecord): string | null {
 export default function FoodCatalogTable({
   items,
   busy,
+  onView,
   onEdit,
   onDelete,
 }: {
   items: FoodRecord[];
   busy: boolean;
+  onView?: (item: FoodRecord) => void;
   onEdit: (item: FoodRecord) => void;
   onDelete: (item: FoodRecord) => void;
 }) {
@@ -194,6 +196,34 @@ export default function FoodCatalogTable({
                   ========================================== */}
                 <td className="px-6 py-5">
                   <div className="flex items-center justify-end gap-2">
+                    {onView && (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => onView(item)}
+                        aria-label="View food detail"
+                        title="មើលលម្អិត"
+                        className="
+                            flex
+                            h-10
+                            w-10
+                            items-center
+                            justify-center
+                            rounded-xl
+                            text-primary-700
+                            transition
+                            hover:bg-primary-50
+                            focus:outline-none
+                            focus:ring-4
+                            focus:ring-primary-100
+                            disabled:cursor-not-allowed
+                            disabled:opacity-40
+                          "
+                      >
+                        <Eye size={20} />
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       disabled={busy}

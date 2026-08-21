@@ -31,6 +31,7 @@ import type {
   MenuItemWritePayload,
   StoreOption,
 } from "@/src/types/menu-management";
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
 
 type IngredientRow = {
   ingredientUuid: string;
@@ -447,7 +448,10 @@ export default function PublishMenuItemModal({
 
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[3px]">
-      <div className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-3xl border border-gray-100 bg-white shadow-2xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        onKeyDown={handleFormArrowKeyNavigation}
+        className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-3xl border border-gray-100 bg-white shadow-2xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      >
         {/* =================================================
             STICKY HEADER
         ================================================== */}

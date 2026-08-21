@@ -6,6 +6,7 @@ import Image from "next/image";
 import type { Season, SeasonalFoodImage } from "@/src/types/seasonalFood";
 import type { SeasonalBannerPayload } from "@/src/app/store/seasonalFoodApi";
 import { getValidImageUrl } from "@/src/utils/imageUrl";
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
 
 interface SeasonalFoodFormModalProps {
   open: boolean;
@@ -59,6 +60,18 @@ export default function SeasonalFoodFormModal({
     }
     setError(null);
   }, [initialData, open]);
+
+  const handleClose = () => {
+    if (saving) return;
+    setName("");
+    setSeason("rainy");
+    setOrder(1);
+    setIsdisplay(true);
+    setPreviewUrl("");
+    setImageFile(null);
+    setError(null);
+    onClose();
+  };
 
   if (!open) return null;
 
@@ -117,7 +130,7 @@ export default function SeasonalFoodFormModal({
           <button
             type="button"
             disabled={saving}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close modal"
             className="flex h-10 w-10 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
           >
@@ -126,7 +139,7 @@ export default function SeasonalFoodFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5 p-6">
+        <form onSubmit={handleSubmit} onKeyDown={handleFormArrowKeyNavigation} className="space-y-5 p-6">
           {error && (
             <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-lg font-medium text-red-600">
               {error}
@@ -245,7 +258,7 @@ export default function SeasonalFoodFormModal({
             <button
               type="button"
               disabled={saving}
-              onClick={onClose}
+              onClick={handleClose}
               className="rounded-xl border border-gray-200 px-6 py-2.5 text-lg font-medium text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
             >
               បោះបង់

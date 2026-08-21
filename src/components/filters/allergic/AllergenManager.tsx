@@ -635,8 +635,8 @@ export default function AllergenManager() {
 
                           <span
                             className={`shrink-0 rounded-full px-2 py-1 text-lg font-bold ${item.active
-                                ? "bg-primary-50 text-primary-700"
-                                : "bg-gray-100 text-gray-500"
+                              ? "bg-primary-50 text-primary-700"
+                              : "bg-gray-100 text-gray-500"
                               }`}
                           >
                             {item.active ? "សកម្ម" : "អសកម្ម"}
@@ -659,8 +659,8 @@ export default function AllergenManager() {
               type="button"
               onClick={() => setSizeOpen((current) => !current)}
               className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${sizeOpen
-                  ? "border-primary-800 ring-2 ring-primary-100"
-                  : "border-gray-200 hover:border-primary-800/50"
+                ? "border-primary-800 ring-2 ring-primary-100"
+                : "border-gray-200 hover:border-primary-800/50"
                 }`}
             >
               <span className="text-gray-700">{size} / ទំព័រ</span>
@@ -691,8 +691,8 @@ export default function AllergenManager() {
                         setSizeOpen(false);
                       }}
                       className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${selected
-                          ? "bg-primary-50 text-primary-800"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
+                        ? "bg-primary-50 text-primary-800"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
                         }`}
                     >
                       <span>{value} / ទំព័រ</span>
@@ -716,8 +716,8 @@ export default function AllergenManager() {
               type="button"
               onClick={() => setSortOpen((current) => !current)}
               className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen
-                  ? "border-primary-800 bg-primary-50 text-primary-800"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
+                ? "border-primary-800 bg-primary-50 text-primary-800"
+                : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
                 }`}
               aria-label="Sort allergens"
               title="Sort allergens"
@@ -748,8 +748,8 @@ export default function AllergenManager() {
                         setSortOpen(false);
                       }}
                       className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${selected
-                          ? "bg-primary-50 text-primary-800"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
+                        ? "bg-primary-50 text-primary-800"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
                         }`}
                     >
                       <span>{option.label}</span>
@@ -773,8 +773,8 @@ export default function AllergenManager() {
       {message && (
         <div
           className={`rounded-2xl border px-4 py-3 text-lg ${message.type === "success"
-              ? "border-primary-100 bg-primary-50 text-primary-700"
-              : "border-red-100 bg-red-50 text-red-600"
+            ? "border-primary-100 bg-primary-50 text-primary-700"
+            : "border-red-100 bg-red-50 text-red-600"
             }`}
         >
           {message.text}
@@ -825,6 +825,7 @@ export default function AllergenManager() {
       ================================================== */}
 
       <AllergenFormModal
+        key={formOpen ? editing?.uuid || "new-allergen" : "closed"}
         open={formOpen}
         allergen={editing}
         saving={isCreating || isUpdating}

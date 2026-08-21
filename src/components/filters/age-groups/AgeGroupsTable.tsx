@@ -1,6 +1,7 @@
 import {
+  CircleMinus,
+  Eye,
   Pencil,
-  Trash2,
   UsersRound,
 } from "lucide-react";
 
@@ -12,6 +13,10 @@ type Props = {
   items: AgeGroup[];
 
   disabled?: boolean;
+
+  onView?: (
+    item: AgeGroup,
+  ) => void;
 
   onEdit: (
     item: AgeGroup,
@@ -27,6 +32,8 @@ export default function AgeGroupsTable({
 
   disabled = false,
 
+  onView,
+
   onEdit,
 
   onDelete,
@@ -38,6 +45,10 @@ export default function AgeGroupsTable({
           <tr className="border-b border-gray-100 bg-gray-50/50">
             <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               ក្រុមអាយុ
+            </th>
+
+            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
+              ឈ្មោះជាភាសាអង់គ្លេស
             </th>
 
             <th className="px-6 py-5 text-xl font-semibold text-primary-800">
@@ -85,6 +96,12 @@ export default function AgeGroupsTable({
                   </div>
                 </td>
 
+                <td className="px-6 py-5">
+                  <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-base font-semibold text-gray-700">
+                    {item.code || "—"}
+                  </span>
+                </td>
+
                 <td className="whitespace-nowrap px-6 py-5 text-lg text-gray-600">
                   {
                     item.minAge
@@ -124,6 +141,18 @@ export default function AgeGroupsTable({
 
                 <td className="px-6 py-5">
                   <div className="flex justify-end gap-2">
+                    {onView && (
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => onView(item)}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 disabled:opacity-40"
+                        title="មើលលម្អិត"
+                      >
+                        <Eye size={20} />
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       disabled={
@@ -152,11 +181,11 @@ export default function AgeGroupsTable({
                           item,
                         )
                       }
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-red-400 transition hover:bg-red-50 disabled:opacity-40"
+                      className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-500 transition hover:bg-red-50 disabled:opacity-40"
                       title="លុប"
                     >
-                      <Trash2
-                        size={20}
+                      <CircleMinus
+                        size={18}
                       />
                     </button>
                   </div>

@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Coffee,
+  Eye,
   ImageIcon,
   Layers,
   Loader2,
@@ -41,6 +42,7 @@ import type { FoodRecord, FoodWritePayload } from "@/src/types/menu-management";
 
 import FoodFormModal from "../menu-management/FoodFormModal";
 import HardDeleteFoodConfirmModal from "../menu-management/HardDeleteFoodConfirmModal";
+import FoodDetailModal from "./FoodDetailModal";
 
 type FoodFilterTab = "ALL" | "FOOD" | "DRINK";
 type SortMode = "A_Z" | "Z_A" | "NEWEST" | "OLDEST";
@@ -370,6 +372,7 @@ export default function FoodCategoriesManager({
   const [foodModalOpen, setFoodModalOpen] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodRecord | null>(null);
   const [deletingFood, setDeletingFood] = useState<FoodRecord | null>(null);
+  const [viewingFood, setViewingFood] = useState<FoodRecord | null>(null);
 
   // Queries
   const foodsQuery = useGetManagedFoodsQuery({ size: 200 });
@@ -1128,6 +1131,15 @@ export default function FoodCategoriesManager({
                         <div className="flex items-center justify-end gap-2">
                           <button
                             type="button"
+                            onClick={() => setViewingFood(item)}
+                            title="មើលលម្អិត"
+                            className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-100"
+                          >
+                            <Eye size={20} />
+                          </button>
+
+                          <button
+                            type="button"
                             onClick={() => handleEditFood(item)}
                             title="កែប្រែ"
                             className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
@@ -1198,8 +1210,12 @@ export default function FoodCategoriesManager({
           FOOD FORM MODAL (CREATE / EDIT)
       ====================================================== */}
       <FoodFormModal
+        key={foodModalOpen ? editingFood?.uuid || "new-food" : "closed"}
         open={foodModalOpen}
         item={editingFood}
+        defaultMainCategory={
+          filterMode === "DRINK" || selectedTab === "DRINK" ? "DRINK" : "FOOD"
+        }
         saving={creatingFood || updatingFood}
         categories={categories}
         cuisines={cuisinesQuery.data ?? []}
@@ -1224,6 +1240,18 @@ export default function FoodCategoriesManager({
         deleting={deletingFoodRequest}
         onClose={() => setDeletingFood(null)}
         onConfirm={confirmDeleteFood}
+      />
+
+      {/* =====================================================
+          FOOD DETAIL MODAL
+      ====================================================== */}
+      <FoodDetailModal
+        food={viewingFood}
+        onClose={() => setViewingFood(null)}
+        onEdit={(item) => {
+          setViewingFood(null);
+          handleEditFood(item);
+        }}
       />
     </div>
   );

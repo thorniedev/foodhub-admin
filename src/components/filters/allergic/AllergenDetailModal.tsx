@@ -188,19 +188,30 @@ export default function AllergenDetailModal({
           <div className="mt-6 space-y-5">
             {/* Core Info Grid */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {/* Code */}
+              {/* Name */}
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
+                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
+                  <ShieldAlert size={14} />
+                  ឈ្មោះអាឡែស៊ី
+                </span>
+                <p className="mt-2 text-base font-bold text-gray-900">
+                  {displayItem.name || displayItem.code || "—"}
+                </p>
+              </div>
+
+              {/* English Name / Code */}
               <div className="relative rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
                     <Tag size={14} />
-                    Code / អាឡែស៊ី
+                    ឈ្មោះជាភាសាអង់គ្លេស
                   </span>
                   {displayItem.code && (
                     <button
                       type="button"
                       onClick={() => copyToClipboard(displayItem.code, "code")}
                       className="rounded p-1 text-gray-400 hover:bg-white hover:text-gray-700 transition"
-                      title="Copy Code"
+                      title="Copy English Name / Code"
                     >
                       {copiedKey === "code" ? (
                         <Check size={14} className="text-emerald-600" />
@@ -211,12 +222,14 @@ export default function AllergenDetailModal({
                   )}
                 </div>
                 <p className="mt-2 font-mono text-base font-bold text-gray-900">
-                  {displayItem.code || "—"}
+                  <span className="inline-flex rounded-lg bg-gray-200/80 px-2.5 py-0.5 font-mono text-base font-semibold text-gray-800">
+                    {displayItem.code || "—"}
+                  </span>
                 </p>
               </div>
 
               {/* Status */}
-              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50 sm:col-span-2">
                 <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
                   <Sparkles size={14} />
                   ស្ថានភាព (Status)
@@ -225,18 +238,6 @@ export default function AllergenDetailModal({
                   {isActive ? "ACTIVE (បើកដំណើរការ)" : "INACTIVE (បិទដំណើរការ)"}
                 </p>
               </div>
-
-              {/* Name */}
-              {displayItem.name && displayItem.name !== displayItem.code && (
-                <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50 sm:col-span-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                    ឈ្មោះអាឡែស៊ី (Name)
-                  </span>
-                  <p className="mt-2 text-base font-bold text-gray-900">
-                    {displayItem.name}
-                  </p>
-                </div>
-              )}
             </div>
 
             {/* Description */}

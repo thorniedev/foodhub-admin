@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { AlertTriangle, CalendarRange, Loader2, Users, X } from "lucide-react";
 
 import type { AgeGroup, AgeGroupFormValues } from "@/src/types/ageGroup";
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
 
 /* =========================================================
    DEFAULT VALUES
@@ -63,6 +64,8 @@ export default function AgeGroupFormModal({
 
   useEffect(() => {
     if (!open) {
+      setForm(EMPTY_FORM);
+      setValidationError("");
       return;
     }
 
@@ -81,6 +84,13 @@ export default function AgeGroupFormModal({
 
     setValidationError("");
   }, [open, item]);
+
+  const handleClose = () => {
+    if (saving) return;
+    setForm(EMPTY_FORM);
+    setValidationError("");
+    onClose();
+  };
 
   /* =======================================================
      LOCK PAGE SCROLL
@@ -120,7 +130,7 @@ export default function AgeGroupFormModal({
     const maxAge = Number(form.maxAge);
 
     if (!code || !name || !form.minAge.trim() || !form.maxAge.trim()) {
-      setValidationError("សូមបំពេញ កូដ ឈ្មោះ អាយុអប្បបរមា និងអាយុអតិបរមា។");
+      setValidationError("សូមបំពេញ ឈ្មោះជាភាសាអង់គ្លេស ឈ្មោះ អាយុអប្បបរមា និងអាយុអតិបរមា។");
 
       return;
     }
@@ -175,7 +185,7 @@ export default function AgeGroupFormModal({
         className="
           max-h-[94vh]
           w-full
-          max-w-2xl
+          max-w-3xl
           overflow-y-auto
           rounded-3xl
           border
@@ -252,7 +262,7 @@ export default function AgeGroupFormModal({
           <button
             type="button"
             disabled={saving}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close"
             className="
               flex
@@ -282,6 +292,7 @@ export default function AgeGroupFormModal({
         ================================================== */}
         <form
           onSubmit={handleSubmit}
+          onKeyDown={handleFormArrowKeyNavigation}
           className="
             space-y-6
             p-6
@@ -301,7 +312,7 @@ export default function AgeGroupFormModal({
               "
             >
               <Field
-                label="កូដ"
+                label="ឈ្មោះជាភាសាអង់គ្លេស"
                 value={form.code}
                 onChange={(value) =>
                   setForm((previous) => ({
@@ -539,7 +550,7 @@ export default function AgeGroupFormModal({
             <button
               type="button"
               disabled={saving}
-              onClick={onClose}
+              onClick={handleClose}
               className="
                 inline-flex
                 min-h-12

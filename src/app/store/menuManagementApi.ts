@@ -818,6 +818,37 @@ function makeQuery(
   return value ? `?${value}` : "";
 }
 
+function sanitizeFoodPayload(
+  payload: Partial<FoodWritePayload>,
+): Record<string, unknown> {
+  const allowedKeys = [
+    "canonicalName",
+    "localName",
+    "description",
+    "categoryUuid",
+    "cuisineUuid",
+    "primaryMediaUuids",
+    "defaultSpiceLevel",
+    "nutritionData",
+    "mealTypes",
+    "ageRules",
+    "dietaryTypes",
+    "seasons",
+    "events",
+    "suitableWeather",
+    "isActive",
+  ];
+
+  const clean: Record<string, unknown> = {};
+  for (const key of allowedKeys) {
+    if (key in payload && (payload as any)[key] !== undefined) {
+      clean[key] = (payload as any)[key];
+    }
+  }
+
+  return clean;
+}
+
 function makeMultipart(
   key: "food" | "request",
   payload: unknown,
@@ -994,6 +1025,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           {
             uuid: string;
             payload: {
+              code?: string;
               name?: string;
               localName?: string | null;
               description?: string | null;
@@ -1072,6 +1104,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
       {
         uuid: string;
         payload: {
+          code?: string;
           name?: string;
           localName?: string | null;
           description?: string | null;
@@ -1258,18 +1291,19 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
       }
     >({
       async queryFn({ payload, images }) {
+        const cleanPayload = sanitizeFoodPayload(payload);
         const hasImages = Array.isArray(images) && images.length > 0;
         const result = await browserRequest<unknown>("/api/catalog/foods", {
           method: "POST",
           ...(hasImages
             ? {
-                body: makeMultipart("food", payload, images),
+                body: makeMultipart("food", cleanPayload, images),
               }
             : {
                 headers: {
                   "Content-Type": "application/json",
                 },
-                body: JSON.stringify(payload),
+                body: JSON.stringify(cleanPayload),
               }),
         });
 
@@ -1293,11 +1327,12 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
       }
     >({
       async queryFn({ uuid, payload, images }) {
+        const cleanPayload = sanitizeFoodPayload(payload);
         const result = await browserRequest<unknown>(
           `/api/catalog/foods/${encodeURIComponent(uuid)}`,
           {
             method: "PATCH",
-            body: makeMultipart("food", payload, images ?? []),
+            body: makeMultipart("food", cleanPayload, images ?? []),
           },
         );
 

@@ -127,7 +127,9 @@ export function useDrinkSubCategoryCatalog() {
       const label = values.localName.trim() || values.name.trim();
 
       await createFoodCategory({
-        code: createCodeFromLabel(label),
+        code:
+          values.code?.trim().toUpperCase().replace(/\s+/g, "_") ||
+          createCodeFromLabel(label),
         name: label,
         description: values.description.trim() || null,
         isActive: values.active,
@@ -142,11 +144,12 @@ export function useDrinkSubCategoryCatalog() {
   const updateOption = useCallback(
     async (uuid: string, values: FilterCatalogOptionFormValues) => {
       const label = values.localName.trim() || values.name.trim();
+      const code = values.code?.trim().toUpperCase().replace(/\s+/g, "_");
 
       if (uuid.startsWith("preset-")) {
         // Create as real category in API if editing preset
         await createFoodCategory({
-          code: createCodeFromLabel(label),
+          code: code || createCodeFromLabel(label),
           name: label,
           description: values.description.trim() || null,
           isActive: values.active,
@@ -156,6 +159,7 @@ export function useDrinkSubCategoryCatalog() {
         await updateFoodCategory({
           uuid,
           body: {
+            code,
             name: label,
             description: values.description.trim() || null,
             isActive: values.active,

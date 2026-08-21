@@ -19,6 +19,7 @@ import type {
   Ingredient,
   IngredientFormValues,
 } from "@/src/types/ingredient";
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
 
 interface Props {
   open: boolean;
@@ -55,7 +56,11 @@ export default function IngredientFormModal({
   ] = useState("");
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setValues(emptyValues);
+      setValidationError("");
+      return;
+    }
 
     setValidationError("");
 
@@ -72,6 +77,13 @@ export default function IngredientFormModal({
         : emptyValues,
     );
   }, [open, item]);
+
+  const handleClose = () => {
+    if (saving) return;
+    setValues(emptyValues);
+    setValidationError("");
+    onClose();
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -109,7 +121,7 @@ export default function IngredientFormModal({
 
       if (!code) {
         setValidationError(
-          "សូមបំពេញកូដគ្រឿងផ្សំ។",
+          "សូមបំពេញឈ្មោះជាភាសាអង់គ្លេស។",
         );
         return;
       }
@@ -123,7 +135,7 @@ export default function IngredientFormModal({
 
       if (code.length > 80) {
         setValidationError(
-          "កូដមិនអាចលើស 80 តួអក្សរ។",
+          "ឈ្មោះជាភាសាអង់គ្លេសមិនអាចលើស 80 តួអក្សរ។",
         );
         return;
       }
@@ -164,7 +176,7 @@ export default function IngredientFormModal({
               </p>
 
               <p className="mt-1 text-lg leading-7 text-gray-500">
-                បំពេញព័ត៌មានគ្រឿងផ្សំសម្រាប់ប្រើនៅពេលបង្កើតម្ហូប។
+                គ្រប់គ្រងទិន្នន័យគ្រឿងផ្សំសម្រាប់ប្រើប្រាស់ក្នុងមុខម្ហូប និងអាហារូបត្ថម្ភ។
               </p>
             </div>
           </div>
@@ -172,7 +184,7 @@ export default function IngredientFormModal({
           <button
             type="button"
             disabled={saving}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -182,6 +194,7 @@ export default function IngredientFormModal({
 
         <form
           onSubmit={handleSubmit}
+          onKeyDown={handleFormArrowKeyNavigation}
           className="space-y-6 p-6 sm:p-8"
         >
           <Section
@@ -190,7 +203,7 @@ export default function IngredientFormModal({
           >
             <div className="grid gap-5 sm:grid-cols-2">
               <Field
-                label="កូដ"
+                label="ឈ្មោះជាភាសាអង់គ្លេស"
                 value={values.code}
                 onChange={(value) =>
                   setValues(
@@ -309,7 +322,7 @@ export default function IngredientFormModal({
             <button
               type="button"
               disabled={saving}
-              onClick={onClose}
+              onClick={handleClose}
               className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-medium text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               បោះបង់

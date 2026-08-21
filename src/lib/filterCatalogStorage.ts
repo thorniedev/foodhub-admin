@@ -43,7 +43,32 @@ export function readFilterCatalog(): FilterCatalogOption[] {
       return cloneSeeds();
     }
 
-    return parsed as FilterCatalogOption[];
+    const current = parsed as FilterCatalogOption[];
+    const seeds = cloneSeeds();
+
+    let hasNewSeeds = false;
+    const existingUuids = new Set(current.map((item) => item.uuid));
+    const existingGroupCodes = new Set(
+      current.map((item) => `${item.groupCode}:${item.code}`),
+    );
+
+    const merged = [...current];
+    for (const seedItem of seeds) {
+      const key = `${seedItem.groupCode}:${seedItem.code}`;
+      if (!existingUuids.has(seedItem.uuid) && !existingGroupCodes.has(key)) {
+        merged.push(seedItem);
+        hasNewSeeds = true;
+      }
+    }
+
+    if (hasNewSeeds) {
+      window.localStorage.setItem(
+        FILTER_CATALOG_STORAGE_KEY,
+        JSON.stringify(merged),
+      );
+    }
+
+    return merged;
   } catch {
     return cloneSeeds();
   }
@@ -89,16 +114,22 @@ export function createClientUuid(): string {
     .slice(2)}`;
 }
 
-export function createCodeFromLabel(value: string): string {
-  const normalized = value
+export function createCodeFromLabel(
+  value: string,
+  prefix = "OPTION",
+): string {
+  const latinOnly = value
     .trim()
     .normalize("NFKD")
-    .replace(/[^\p{L}\p{N}]+/gu, "_")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Za-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "")
     .toUpperCase();
 
-  return (
-    normalized ||
-    `OPTION_${Date.now()}`
-  );
+  if (latinOnly.length > 0) {
+    return latinOnly;
+  }
+
+  return `${prefix}_${Date.now()}`;
 }
+

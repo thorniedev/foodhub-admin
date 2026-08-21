@@ -42,6 +42,7 @@ export interface FilterCatalogOption {
 }
 
 export interface FilterCatalogOptionFormValues {
+  code?: string;
   localName: string;
   name: string;
   description: string;

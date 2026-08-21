@@ -1145,6 +1145,7 @@ export default function MedicalConditionManager() {
       ================================================== */}
 
       <MedicalConditionFormModal
+        key={formOpen ? editing?.uuid || "new-med" : "closed"}
         open={formOpen}
         item={editing}
         saving={

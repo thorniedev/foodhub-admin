@@ -73,9 +73,9 @@ export function useCuisineCatalog() {
         values.localName.trim();
 
       await createCuisine({
-        code: createCodeFromLabel(
-          label,
-        ),
+        code:
+          values.code?.trim().toUpperCase().replace(/\s+/g, "_") ||
+          createCodeFromLabel(label),
         name:
           values.name.trim() ||
           values.localName.trim(),
@@ -102,6 +102,7 @@ export function useCuisineCatalog() {
       await updateCuisine({
         uuid,
         body: {
+          code: values.code?.trim().toUpperCase().replace(/\s+/g, "_"),
           name:
             values.name.trim() ||
             values.localName.trim(),

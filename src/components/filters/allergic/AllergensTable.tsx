@@ -1,10 +1,10 @@
 import {
   AlertOctagon,
+  CircleMinus,
   Eye,
   Pencil,
   RotateCcw,
   ShieldAlert,
-  Trash2,
 } from "lucide-react";
 
 import type { Allergen } from "@/src/types/allergen";
@@ -49,10 +49,12 @@ export default function AllergensTable({
 
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/50 text-left">
-            {/* code displayed as Allergen */}
-
             <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               អាឡែស៊ី
+            </th>
+
+            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
+              ឈ្មោះជាភាសាអង់គ្លេស
             </th>
 
             <th className="px-6 py-5 text-xl font-semibold text-primary-800">
@@ -86,9 +88,6 @@ export default function AllergensTable({
               >
                 {/* =======================================
                     ALLERGEN
-
-                    UI label: Allergen
-                    Backend data: item.code
                 ======================================== */}
 
                 <td className="px-6 py-5">
@@ -105,6 +104,16 @@ export default function AllergensTable({
                       </p>
                     </div>
                   </div>
+                </td>
+
+                {/* =======================================
+                    CODE
+                ======================================== */}
+
+                <td className="px-6 py-5">
+                  <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-base font-semibold text-gray-700">
+                    {item.code || "—"}
+                  </span>
                 </td>
 
                 {/* =======================================
@@ -190,23 +199,23 @@ export default function AllergensTable({
                     {/* DELETE / RESTORE */}
 
                     {item.active ? (
-                      <button
-                        type="button"
-                        disabled={
-                          disabled
-                        }
-                        onClick={() =>
-                          onDelete(
-                            item,
-                          )
-                        }
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 disabled:opacity-40"
-                        title="បិទ"
-                      >
-                        <Trash2
-                          size={20}
-                        />
-                      </button>
+                        <button
+                          type="button"
+                          disabled={
+                            disabled
+                          }
+                          onClick={() =>
+                            onDelete(
+                              item,
+                            )
+                          }
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-500 transition hover:bg-red-50 disabled:opacity-40"
+                          title="បិទ"
+                        >
+                          <CircleMinus
+                            size={18}
+                          />
+                        </button>
                     ) : (
                       <button
                         type="button"

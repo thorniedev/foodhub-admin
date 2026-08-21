@@ -695,8 +695,8 @@ export interface MenuItemDietaryTypeRecord {
 
 export interface MenuItemAllergenDeclarationPayload {
   allergenUuid: string;
-  declarationType?: "CONTAINS" | "MAY_CONTAIN" | string;
-  riskLevel?: "LOW" | "MEDIUM" | "HIGH" | string;
+  declarationType: "CONTAINS" | "MAY_CONTAIN" | string;
+  riskLevel: "LOW" | "MEDIUM" | "HIGH" | string;
   verificationStatus?: "VERIFIED" | "UNVERIFIED" | string;
   notes?: string | null;
 }

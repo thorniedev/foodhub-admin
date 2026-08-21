@@ -26,6 +26,8 @@ const EMPTY_FORM: AllergenFormValues = {
   active: true,
 };
 
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
+
 type Props = {
   open: boolean;
   allergen: Allergen | null;
@@ -64,18 +66,15 @@ export default function AllergenFormModal({
   onClose,
   onSubmit,
 }: Props) {
-  const [form, setForm] =
-    useState<AllergenFormValues>(
-      EMPTY_FORM,
-    );
-
-  const [
-    validationError,
-    setValidationError,
-  ] = useState("");
+  const [form, setForm] = useState<AllergenFormValues>(EMPTY_FORM);
+  const [validationError, setValidationError] = useState("");
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setForm(EMPTY_FORM);
+      setValidationError("");
+      return;
+    }
 
     setForm(
       allergen
@@ -93,6 +92,13 @@ export default function AllergenFormModal({
 
     setValidationError("");
   }, [open, allergen]);
+
+  const handleClose = () => {
+    if (saving) return;
+    setForm(EMPTY_FORM);
+    setValidationError("");
+    onClose();
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -121,25 +127,26 @@ export default function AllergenFormModal({
       event.preventDefault();
 
       const code =
-        form.code.trim();
+        form.code.trim().toUpperCase().replace(/\s+/g, "_");
+
+      const name =
+        form.name.trim() ||
+        createInternalName(code);
 
       if (!code) {
         setValidationError(
-          "សូមបំពេញអាឡែស៊ី។",
+          "សូមបំពេញឈ្មោះជាភាសាអង់គ្លេស។",
         );
 
         return;
       }
-
-      const generatedName =
-        createInternalName(code);
 
       setValidationError("");
 
       await onSubmit({
         ...form,
         code,
-        name: generatedName,
+        name,
         description:
           form.description.trim(),
       });
@@ -163,7 +170,7 @@ export default function AllergenFormModal({
               </p>
 
               <p className="mt-1 text-lg leading-7 text-gray-500">
-                គ្រប់គ្រងព័ត៌មានអាឡែស៊ីដែលប្រើសម្រាប់សុវត្ថិភាពអាហារ។
+                គ្រប់គ្រងទិន្នន័យអាឡែស៊ីសម្រាប់ប្រព័ន្ធសុវត្ថិភាពម្ហូបអាហារ។
               </p>
             </div>
           </div>
@@ -171,7 +178,7 @@ export default function AllergenFormModal({
           <button
             type="button"
             disabled={saving}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -181,6 +188,7 @@ export default function AllergenFormModal({
 
         <form
           onSubmit={handleSubmit}
+          onKeyDown={handleFormArrowKeyNavigation}
           className="space-y-6 p-6 sm:p-8"
         >
           <Section
@@ -192,7 +200,7 @@ export default function AllergenFormModal({
             }
           >
             <Field
-              label="ឈ្មោះអាឡែស៊ី"
+              label="ឈ្មោះជាភាសាអង់គ្លេស"
               value={form.code}
               onChange={(value) =>
                 setForm(
@@ -202,9 +210,25 @@ export default function AllergenFormModal({
                   }),
                 )
               }
-              placeholder="ឧ. សណ្ដែកដី"
+              placeholder="ឧ. PEANUTS"
               required
             />
+
+            <div className="mt-4">
+              <Field
+                label="ឈ្មោះអាឡែស៊ី"
+                value={form.name}
+                onChange={(value) =>
+                  setForm(
+                    (previous) => ({
+                      ...previous,
+                      name: value,
+                    }),
+                  )
+                }
+                placeholder="ឧ. សណ្ដែកដី / Peanuts"
+              />
+            </div>
 
             <label className="mt-5 block">
               <FieldLabel>
@@ -271,7 +295,7 @@ export default function AllergenFormModal({
             <button
               type="button"
               disabled={saving}
-              onClick={onClose}
+              onClick={handleClose}
               className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-medium text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               បោះបង់
