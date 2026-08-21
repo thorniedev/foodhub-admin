@@ -625,11 +625,7 @@ export default function FoodCategoriesManager({
                   ) : (
                     <Utensils size={20} />
                   )}
-                  <span>
-                    {filterMode === "DRINK"
-                      ? "Food Catalog សម្រាប់ហាង (ភេសជ្ជៈ)"
-                      : "Food Catalog សម្រាប់ហាង"}
-                  </span>
+                  <span>{filterMode === "DRINK" ? "ភេសជ្ជៈ" : "អាហារ"}</span>
                 </div>
                 <p className="mt-1 text-2xl font-bold text-white">
                   {filterMode === "DRINK" ? drinkCount : foodOnlyCount}
@@ -639,7 +635,7 @@ export default function FoodCategoriesManager({
               <div className="rounded-3xl bg-white/20 px-5 py-4">
                 <div className="flex items-center gap-2 text-xl text-white/80">
                   <Check size={20} />
-                  <span>សកម្ម (Active)</span>
+                  <span>សកម្ម</span>
                 </div>
                 <p className="mt-1 text-2xl font-bold text-white">
                   {
@@ -663,7 +659,7 @@ export default function FoodCategoriesManager({
               <div className="rounded-3xl bg-white/20 px-5 py-4">
                 <div className="flex items-center gap-2 text-xl text-white/80">
                   <Layers size={20} />
-                  <span>ប្រភេទ (Categories)</span>
+                  <span>ប្រភេទ </span>
                 </div>
                 <p className="mt-1 text-2xl font-bold text-white">
                   {categories.length}

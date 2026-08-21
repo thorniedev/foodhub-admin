@@ -159,6 +159,8 @@ async function fetchUserAvatarMediaUuid(userUuid: string): Promise<string | null
   return promise;
 }
 
+export const DEFAULT_AVATAR_IMAGE = "/Image/no-profile.jpg";
+
 export interface UserAvatarProps {
   name?: string | null;
   userUuid?: string | null;
@@ -168,6 +170,7 @@ export interface UserAvatarProps {
   className?: string;
   textClassName?: string;
   containerClassName?: string;
+  fallbackImageUrl?: string;
 }
 
 export default function UserAvatar({
@@ -179,6 +182,7 @@ export default function UserAvatar({
   className = "h-full w-full object-cover",
   textClassName = "",
   containerClassName = "flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-lg font-semibold text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100",
+  fallbackImageUrl = DEFAULT_AVATAR_IMAGE,
 }: UserAvatarProps) {
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(() => {
     if (imageUrl) {
@@ -191,21 +195,22 @@ export default function UserAvatar({
   });
 
   const [hasError, setHasError] = useState(false);
+  const [fallbackHasError, setFallbackHasError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+    setHasError(false);
+    setFallbackHasError(false);
 
     if (imageUrl) {
       const resolved = resolveFoodHubCatalogImageUrl(imageUrl) || imageUrl;
       setResolvedUrl(resolved);
-      setHasError(false);
       return;
     }
 
     if (avatarMediaUuid) {
       if (mediaUrlCache.has(avatarMediaUuid)) {
         setResolvedUrl(mediaUrlCache.get(avatarMediaUuid)!);
-        setHasError(false);
         return;
       }
 
@@ -213,7 +218,6 @@ export default function UserAvatar({
         if (!cancelled) {
           if (url) {
             setResolvedUrl(url);
-            setHasError(false);
           } else {
             setResolvedUrl(null);
           }
@@ -238,7 +242,6 @@ export default function UserAvatar({
           foundAvatar.startsWith("/")
         ) {
           setResolvedUrl(foundAvatar);
-          setHasError(false);
           return;
         }
 
@@ -246,7 +249,6 @@ export default function UserAvatar({
         if (!cancelled) {
           if (accessUrl) {
             setResolvedUrl(accessUrl);
-            setHasError(false);
           } else {
             setResolvedUrl(null);
           }
@@ -256,7 +258,6 @@ export default function UserAvatar({
     }
 
     setResolvedUrl(null);
-    setHasError(false);
 
     return () => {
       cancelled = true;
@@ -264,15 +265,22 @@ export default function UserAvatar({
   }, [avatarMediaUuid, imageUrl, userUuid]);
 
   const displayInitials = initials(name || "User");
+  const activeImageUrl = !hasError && resolvedUrl ? resolvedUrl : fallbackImageUrl;
 
   return (
     <div className={containerClassName}>
-      {resolvedUrl && !hasError ? (
+      {activeImageUrl && !fallbackHasError ? (
         <img
-          src={resolvedUrl}
+          src={activeImageUrl}
           alt={alt || name || "User avatar"}
           className={className}
-          onError={() => setHasError(true)}
+          onError={() => {
+            if (!hasError && resolvedUrl) {
+              setHasError(true);
+            } else {
+              setFallbackHasError(true);
+            }
+          }}
           loading="lazy"
         />
       ) : (

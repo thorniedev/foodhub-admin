@@ -6,29 +6,13 @@ import { formatDateTime } from "@/src/lib/userProfileFormat";
 
 import { Section } from "./BasicInfoSection";
 
+
 export default function SystemInfoSection({
-  profile,
+  profile: _profile,
 }: {
   profile: AdminProfile;
 }) {
-  return (
-    <Section title="System information" icon={<Info size={22} />}>
-      <div className="space-y-3">
-
-        <Row
-          label="Created at"
-          value={formatDateTime(profile.createdAt)}
-          icon={<Clock3 size={20} />}
-        />
-
-        <Row
-          label="Updated at"
-          value={formatDateTime(profile.updatedAt)}
-          icon={<Clock3 size={20} />}
-        />
-      </div>
-    </Section>
-  );
+  return null;
 }
 
 function Row({

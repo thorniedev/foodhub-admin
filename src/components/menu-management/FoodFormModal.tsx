@@ -841,7 +841,7 @@ export default function FoodFormModal({
               BASIC INFORMATION
           ================================================== */}
           <FormSection
-            title="ព័ត៌មានមូលដ្ឋាន"
+            title="ព័ត៌មានលម្អិត"
             description="បញ្ចូលព័ត៌មានសំខាន់ៗរបស់ម្ហូប និងជ្រើស Category និង Cuisine។"
           >
             <div className="grid gap-5 md:grid-cols-2">

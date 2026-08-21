@@ -25,6 +25,32 @@ function readMessage(data: unknown): string | null {
   return null;
 }
 
+function translateBackendMessage(message: string): string {
+  const clean = message.trim();
+
+  if (clean.includes("User cannot be permanently deleted because the account is referenced by existing records")) {
+    return "មិនអាចលុបគណនីអ្នកប្រើប្រាស់នេះចេញពីប្រព័ន្ធបានទេ ពីព្រោះមានទិន្នន័យពាក់ព័ន្ធ (កម្រងព័ត៌មាន/Profiles)។ សូមលុបកម្រងព័ត៌មានជាមុនសិន ឬបើក Cascade delete ក្នុង Backend។";
+  }
+
+  if (clean.includes("Email is already used") || clean.includes("email already exists")) {
+    return "អ៊ីមែលនេះត្រូវបានប្រើប្រាស់រួចហើយ។ សូមប្រើអ៊ីមែលផ្សេងទៀត។";
+  }
+
+  if (clean.includes("Username is already used") || clean.includes("username already exists")) {
+    return "ឈ្មោះគណនី (Username) នេះត្រូវបានប្រើប្រាស់រួចហើយ។";
+  }
+
+  if (clean.includes("User not found")) {
+    return "រកមិនឃើញគណនីគណនីអ្នកប្រើប្រាស់នេះទេ។";
+  }
+
+  if (clean.includes("Profile not found")) {
+    return "រកមិនឃើញកម្រងព័ត៌មាននេះទេ។";
+  }
+
+  return clean;
+}
+
 export function getAdminApiErrorMessage(error: unknown): string {
   if (!error) {
     return "មានបញ្ហាមិនស្គាល់។ សូមសាកល្បងម្តងទៀត។";
@@ -35,7 +61,7 @@ export function getAdminApiErrorMessage(error: unknown): string {
     const backendMessage = "data" in queryError ? readMessage(queryError.data) : null;
 
     if (backendMessage) {
-      return backendMessage;
+      return translateBackendMessage(backendMessage);
     }
 
     if (queryError.status === 400) {
