@@ -72,6 +72,7 @@ export default function ShopBasicInfoSection({
         <Field
           label="Price level"
           type="number"
+          min={0}
           value={values.priceLevel}
           onChange={(value) => onChange("priceLevel", value)}
         />
@@ -79,6 +80,7 @@ export default function ShopBasicInfoSection({
         <Field
           label="Hygiene rating"
           type="number"
+          min={0}
           step="0.1"
           value={values.hygieneRating}
           onChange={(value) => onChange("hygieneRating", value)}
@@ -108,6 +110,7 @@ function Field({
   type = "text",
   required = false,
   step,
+  min,
 }: {
   label: string;
   value: string;
@@ -115,6 +118,7 @@ function Field({
   type?: string;
   required?: boolean;
   step?: string;
+  min?: string | number;
 }) {
   return (
     <label>
@@ -122,9 +126,19 @@ function Field({
       <input
         type={type}
         step={step}
+        min={min}
         required={required}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onKeyDown={(event) => {
+          if (type === "number" && min !== undefined && Number(min) >= 0 && (event.key === "-" || event.key === "e")) {
+            event.preventDefault();
+          }
+        }}
+        onChange={(event) => {
+          const val = event.target.value;
+          if (type === "number" && min !== undefined && Number(min) >= 0 && Number(val) < 0) return;
+          onChange(val);
+        }}
         className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
       />
     </label>

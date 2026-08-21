@@ -765,8 +765,14 @@ export default function FoodFormModal({
                       max="1"
                       placeholder="Suitability Score (0-1)"
                       value={row.suitabilityScore ?? 1.0}
+                      onKeyDown={(e) => {
+                        if (e.key === "-" || e.key === "e") {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => {
                         const val = Number(e.target.value);
+                        if (val < 0) return;
                         setMealTypeRows((prev) =>
                           prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
                         );
@@ -931,8 +937,14 @@ export default function FoodFormModal({
                       max="1"
                       placeholder="Score (0-1)"
                       value={row.suitabilityScore ?? 1.0}
+                      onKeyDown={(e) => {
+                        if (e.key === "-" || e.key === "e") {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => {
                         const val = Number(e.target.value);
+                        if (val < 0) return;
                         setSeasonRows((prev) =>
                           prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
                         );
@@ -1019,8 +1031,14 @@ export default function FoodFormModal({
                       max="1"
                       placeholder="Score (0-1)"
                       value={row.relevanceScore ?? 0.9}
+                      onKeyDown={(e) => {
+                        if (e.key === "-" || e.key === "e") {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => {
                         const val = Number(e.target.value);
+                        if (val < 0) return;
                         setEventRows((prev) =>
                           prev.map((r, i) => (i === idx ? { ...r, relevanceScore: val } : r)),
                         );
@@ -1107,8 +1125,14 @@ export default function FoodFormModal({
                       max="1"
                       placeholder="Score (0-1)"
                       value={row.suitabilityScore ?? 0.8}
+                      onKeyDown={(e) => {
+                        if (e.key === "-" || e.key === "e") {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => {
                         const val = Number(e.target.value);
+                        if (val < 0) return;
                         setWeatherRows((prev) =>
                           prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
                         );
@@ -1210,21 +1234,34 @@ function Field({
   value,
   onChange,
   type = "text",
+  min = 0,
+  step,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
+  min?: number | string;
+  step?: number | string;
 }) {
   return (
     <label>
       <Label>{label}</Label>
       <input
         type={type}
+        min={type === "number" ? min : undefined}
+        step={step}
         value={value}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
+        onKeyDown={(e) => {
+          if (type === "number" && (e.key === "-" || e.key === "e")) {
+            e.preventDefault();
+          }
+        }}
+        onChange={(event) => {
+          const val = event.target.value;
+          if (type === "number" && Number(val) < 0) return;
+          onChange(val);
+        }}
         className={inputClass}
       />
     </label>

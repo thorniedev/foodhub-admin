@@ -627,6 +627,8 @@ export default function PublishMenuItemModal({
             <Field
               label="រយៈពេលធ្វើ (នាទី)"
               type="number"
+              min={0}
+              step={1}
               value={values.preparationTimeMinutes}
               placeholder="10"
               onChange={(value) =>
@@ -731,13 +733,22 @@ export default function PublishMenuItemModal({
 
                   <input
                     type="number"
+                    min="0"
+                    step="any"
                     placeholder="បរិមាណ (Qty)"
                     value={row.quantity}
-                    onChange={(event) =>
+                    onKeyDown={(e) => {
+                      if (e.key === "-" || e.key === "e") {
+                        e.preventDefault();
+                      }
+                    }}
+                    onChange={(event) => {
+                      const val = event.target.value;
+                      if (Number(val) < 0) return;
                       updateIngredientRow(index, {
-                        quantity: event.target.value,
-                      })
-                    }
+                        quantity: val,
+                      });
+                    }}
                     className={inputClass}
                   />
 

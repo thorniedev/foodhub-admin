@@ -276,7 +276,16 @@ export default function CreateCanonicalFoodModal({
                   min="0"
                   max="5"
                   value={form.defaultSpiceLevel}
-                  onChange={(event) => set("defaultSpiceLevel", event.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => {
+                    const val = event.target.value;
+                    if (Number(val) < 0) return;
+                    set("defaultSpiceLevel", val);
+                  }}
                   className="field-input"
                 />
               </Field>
@@ -406,7 +415,16 @@ function NumberField({
         min="0"
         step="0.01"
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "-" || e.key === "e") {
+            e.preventDefault();
+          }
+        }}
+        onChange={(event) => {
+          const val = event.target.value;
+          if (Number(val) < 0) return;
+          onChange(val);
+        }}
         className="h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 outline-none focus:border-emerald-500 focus:bg-white"
       />
     </Field>

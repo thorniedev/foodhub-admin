@@ -143,7 +143,16 @@ function SeasonalFoodFormContent({
                 min={1}
                 required
                 value={form.order}
-                onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
+                onKeyDown={(e) => {
+                  if (e.key === "-" || e.key === "e") {
+                    e.preventDefault();
+                  }
+                }}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  if (val < 0) return;
+                  setForm({ ...form, order: val });
+                }}
                 className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
               />
             </div>

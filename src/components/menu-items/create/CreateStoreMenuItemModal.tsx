@@ -346,9 +346,16 @@ export default function CreateStoreMenuItemModal({
                   type="number"
                   min="0"
                   value={form.preparationTimeMinutes}
-                  onChange={(event) =>
-                    set("preparationTimeMinutes", event.target.value)
-                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => {
+                    const val = event.target.value;
+                    if (Number(val) < 0) return;
+                    set("preparationTimeMinutes", val);
+                  }}
                   className="field-input"
                 />
               </Field>

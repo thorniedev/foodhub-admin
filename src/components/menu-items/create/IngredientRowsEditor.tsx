@@ -107,11 +107,18 @@ export default function IngredientRowsEditor({
                 min="0"
                 step="0.01"
                 value={row.quantity}
-                onChange={(event) =>
+                onKeyDown={(e) => {
+                  if (e.key === "-" || e.key === "e") {
+                    e.preventDefault();
+                  }
+                }}
+                onChange={(event) => {
+                  const val = Number(event.target.value || 0);
+                  if (val < 0) return;
                   updateRow(index, {
-                    quantity: Number(event.target.value || 0),
-                  })
-                }
+                    quantity: val,
+                  });
+                }}
                 placeholder="Quantity"
                 className="h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-emerald-500"
               />

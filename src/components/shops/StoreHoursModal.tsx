@@ -816,11 +816,18 @@ function ScheduleCard({
             type="number"
             min="1"
             value={hour.intervalOrder}
-            onChange={(event) =>
+            onKeyDown={(e) => {
+              if (e.key === "-" || e.key === "e") {
+                e.preventDefault();
+              }
+            }}
+            onChange={(event) => {
+              const val = Number(event.target.value);
+              if (val < 1) return;
               patch(index, {
-                intervalOrder: Number(event.target.value) || 1,
-              })
-            }
+                intervalOrder: val,
+              });
+            }}
             className={inputClassName}
           />
         </FieldLabel>

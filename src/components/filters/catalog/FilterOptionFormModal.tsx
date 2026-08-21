@@ -1044,16 +1044,22 @@ function Field({
 
       <input
         type={type}
+        min={type === "number" ? "0" : undefined}
         step={step}
         required={required}
         value={value}
+        onKeyDown={(event) => {
+          if (type === "number" && (event.key === "-" || event.key === "e")) {
+            event.preventDefault();
+          }
+        }}
         onChange={(
           event,
-        ) =>
-          onChange(
-            event.target.value,
-          )
-        }
+        ) => {
+          const val = event.target.value;
+          if (type === "number" && Number(val) < 0) return;
+          onChange(val);
+        }}
         placeholder={
           placeholder
         }

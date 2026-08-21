@@ -6,7 +6,7 @@ export const metadata = {
   description: "Manage marketing and dynamic banners across FoodHub apps",
 };
 
-export default function DynamicContentBannersPage() {
+export default function DashboardAdminBannersPage() {
   return (
     <Suspense fallback={null}>
       <BannersView />
