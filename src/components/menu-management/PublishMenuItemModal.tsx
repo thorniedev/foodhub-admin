@@ -89,6 +89,68 @@ function foodLabel(food: FoodRecord): string {
   return local || canonical || food.uuid;
 }
 
+function extractAllMenuItemImages(item: MenuItemRecord): {
+  thumbnail: string | null;
+  gallery: string[];
+} {
+  const allCandidates: string[] = [];
+
+  const add = (val: unknown) => {
+    if (typeof val === "string") {
+      const trimmed = val.trim();
+      if (
+        trimmed &&
+        trimmed !== "null" &&
+        trimmed !== "undefined" &&
+        !allCandidates.includes(trimmed)
+      ) {
+        allCandidates.push(trimmed);
+      }
+    }
+  };
+
+  // 1. Primary / Thumbnail direct fields
+  add(item.thumbnailMediaUuid);
+  add(item.thumbnail);
+  add(item.imageUrl);
+  add(item.primaryMediaUuid);
+  if (Array.isArray(item.primaryMediaUrls)) item.primaryMediaUrls.forEach(add);
+  if (Array.isArray(item.primaryMediaUuids)) item.primaryMediaUuids.forEach(add);
+
+  // 2. Gallery / Media arrays
+  if (Array.isArray(item.galleryMediaUuids)) item.galleryMediaUuids.forEach(add);
+  if (Array.isArray(item.gallery)) item.gallery.forEach(add);
+  if (Array.isArray(item.images)) item.images.forEach(add);
+  if (Array.isArray((item as any).media)) {
+    (item as any).media.forEach((m: any) => {
+      if (typeof m === "string") add(m);
+      else if (m && typeof m === "object") {
+        add(m.uuid);
+        add(m.url);
+        add(m.accessUrl);
+      }
+    });
+  }
+
+  // 3. Fallback to Food catalog media if menuItem has no images
+  if (allCandidates.length === 0 && item.food) {
+    add(item.food.thumbnailMediaUuid);
+    add(item.food.thumbnail);
+    add(item.food.imageUrl);
+    add(item.food.primaryMediaUuid);
+    if (Array.isArray(item.food.primaryMediaUrls)) item.food.primaryMediaUrls.forEach(add);
+    if (Array.isArray(item.food.primaryMediaUuids)) item.food.primaryMediaUuids.forEach(add);
+    if (Array.isArray(item.food.galleryMediaUuids)) item.food.galleryMediaUuids.forEach(add);
+    if (Array.isArray(item.food.gallery)) item.food.gallery.forEach(add);
+    if (Array.isArray(item.food.images)) item.food.images.forEach(add);
+  }
+
+  const thumbnail = allCandidates.length > 0 ? allCandidates[0] : null;
+  const gallery = allCandidates.length > 1 ? allCandidates.slice(1, 5) : [];
+
+  return { thumbnail, gallery };
+}
+
 export default function PublishMenuItemModal({
   open,
   item,
@@ -146,72 +208,10 @@ export default function PublishMenuItemModal({
       return;
     }
 
-    // 1. Resolve Primary/Thumbnail image
-    const thumbCandidate =
-      item.thumbnailMediaUuid ||
-      item.thumbnail ||
-      item.imageUrl ||
-      item.primaryMediaUrls?.[0] ||
-      item.primaryMediaUuid ||
-      item.primaryMediaUuids?.[0] ||
-      item.food?.thumbnailMediaUuid ||
-      item.food?.thumbnail ||
-      item.food?.imageUrl ||
-      item.food?.primaryMediaUuid ||
-      item.food?.primaryMediaUrls?.[0] ||
-      null;
-
-    const cleanThumb =
-      thumbCandidate && String(thumbCandidate).trim() !== "null" && String(thumbCandidate).trim() !== "undefined"
-        ? String(thumbCandidate).trim()
-        : null;
-
-    setExistingThumbnail(cleanThumb);
+    const { thumbnail, gallery } = extractAllMenuItemImages(item);
+    setExistingThumbnail(thumbnail);
     setThumbnailFile(null);
-
-    // 2. Resolve Gallery images
-    const galleryList: string[] = [];
-    const candidates = [
-      ...(Array.isArray(item.galleryMediaUuids) ? item.galleryMediaUuids : []),
-      ...(Array.isArray(item.gallery) ? item.gallery : []),
-      ...(Array.isArray(item.images) ? item.images : []),
-      ...(Array.isArray(item.primaryMediaUrls) ? item.primaryMediaUrls.slice(1) : []),
-      ...(Array.isArray(item.primaryMediaUuids) ? item.primaryMediaUuids.slice(1) : []),
-    ];
-
-    for (const c of candidates) {
-      if (
-        typeof c === "string" &&
-        c.trim() &&
-        c.trim() !== "null" &&
-        c.trim() !== "undefined" &&
-        c.trim() !== cleanThumb &&
-        !galleryList.includes(c.trim())
-      ) {
-        galleryList.push(c.trim());
-      }
-    }
-
-    if (!galleryList.length && item.food) {
-      const foodCandidates = [
-        ...(Array.isArray(item.food.galleryMediaUuids) ? item.food.galleryMediaUuids : []),
-        ...(Array.isArray(item.food.gallery) ? (item.food.gallery as string[]) : []),
-        ...(Array.isArray(item.food.primaryMediaUrls) ? item.food.primaryMediaUrls.slice(1) : []),
-      ];
-      for (const fc of foodCandidates) {
-        if (
-          typeof fc === "string" &&
-          fc.trim() &&
-          fc.trim() !== "null" &&
-          fc.trim() !== cleanThumb &&
-          !galleryList.includes(fc.trim())
-        ) {
-          galleryList.push(fc.trim());
-        }
-      }
-    }
-
-    setExistingGallery(galleryList);
+    setExistingGallery(gallery);
     setGalleryFiles([]);
 
     const matchedStoreUuid =

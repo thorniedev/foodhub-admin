@@ -28,16 +28,19 @@ export default function ThumbnailImagePicker({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [resolvedExistingUrl, setResolvedExistingUrl] = useState<string | null>(null);
   const [loadingExisting, setLoadingExisting] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // 1. Handle newly selected File object URL
   useEffect(() => {
     if (!value) {
       setPreviewUrl(null);
+      setImgError(false);
       return;
     }
     const objectUrl = URL.createObjectURL(value);
     setPreviewUrl(objectUrl);
+    setImgError(false);
     return () => {
       URL.revokeObjectURL(objectUrl);
     };
@@ -50,8 +53,11 @@ export default function ThumbnailImagePicker({
     if (!trimmed || trimmed === "null" || trimmed === "undefined") {
       setResolvedExistingUrl(null);
       setLoadingExisting(false);
+      setImgError(false);
       return;
     }
+
+    setImgError(false);
 
     const UUID_REGEX =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -108,11 +114,13 @@ export default function ThumbnailImagePicker({
     }
 
     setError(null);
+    setImgError(false);
     onChange(file);
   };
 
   const handleRemove = () => {
     onChange(null);
+    setImgError(false);
     if (onExistingChange) {
       onExistingChange(null);
     }
@@ -148,11 +156,21 @@ export default function ThumbnailImagePicker({
         <div className="relative flex flex-col items-center gap-4 sm:flex-row">
           {/* Thumbnail preview image */}
           <div className="group relative h-40 w-40 shrink-0 overflow-hidden rounded-2xl border-2 border-emerald-500 bg-gray-100 shadow-sm">
-            <img
-              src={activeDisplayUrl}
-              alt="Thumbnail preview"
-              className="h-full w-full object-cover transition group-hover:scale-105"
-            />
+            {imgError ? (
+              <div className="flex h-full w-full flex-col items-center justify-center bg-gray-50 p-2 text-center text-gray-400">
+                <span className="text-3xl">🍜</span>
+                <span className="mt-1.5 text-[10px] font-bold text-gray-400 leading-tight">
+                  មិនអាចទាញយករូបភាព
+                </span>
+              </div>
+            ) : (
+              <img
+                src={activeDisplayUrl}
+                alt="Thumbnail preview"
+                className="h-full w-full object-cover transition group-hover:scale-105"
+                onError={() => setImgError(true)}
+              />
+            )}
             <span className="absolute left-2 top-2 rounded-md bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white shadow">
               {previewUrl ? "រូបថ្មី (New)" : "Thumbnail"}
             </span>
@@ -161,7 +179,11 @@ export default function ThumbnailImagePicker({
           {/* Action buttons */}
           <div className="flex flex-1 flex-col justify-center gap-2.5">
             <p className="text-xs font-semibold text-gray-700">
-              {previewUrl ? "បានជ្រើសរូបភាពថ្មីរួចរាល់" : "រូបភាព Thumbnail បច្ចុប្បន្ន"}
+              {previewUrl
+                ? "បានជ្រើសរូបភាពថ្មីរួចរាល់"
+                : imgError
+                ? "រូបភាពបច្ចុប្បន្នមានបញ្ហា សូមផ្លាស់ប្តូររូបថ្មី"
+                : "រូបភាព Thumbnail បច្ចុប្បន្ន"}
             </p>
             <div className="flex flex-wrap items-center gap-2">
               <button
