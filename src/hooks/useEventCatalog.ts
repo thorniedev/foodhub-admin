@@ -52,7 +52,9 @@ export function useEventCatalog() {
       const label = values.name.trim() || values.localName.trim();
 
       await createEvent({
-        code: createCodeFromLabel(label, "EVENT"),
+        code:
+          values.code?.trim().toUpperCase().replace(/\s+/g, "_") ||
+          createCodeFromLabel(label, "EVENT"),
         name: values.name.trim() || values.localName.trim(),
         localName: values.localName.trim() || values.name.trim() || null,
         description: values.description.trim() || null,
@@ -69,6 +71,7 @@ export function useEventCatalog() {
       await updateEvent({
         uuid,
         payload: {
+          code: values.code?.trim().toUpperCase().replace(/\s+/g, "_"),
           name: values.name.trim() || values.localName.trim(),
           localName: values.localName.trim() || values.name.trim() || null,
           description: values.description.trim() || null,

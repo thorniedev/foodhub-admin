@@ -93,7 +93,7 @@ export default function DietaryTypeFormModal({
     const category = values.category.trim();
 
     if (!code) {
-      setLocalError("សូមបញ្ចូលកូដរបបអាហារ។");
+      setLocalError("សូមបញ្ចូលឈ្មោះជាភាសាអង់គ្លេស។");
       return;
     }
 
@@ -160,7 +160,7 @@ export default function DietaryTypeFormModal({
           {/* Code + Name */}
           <div className="grid gap-5 sm:grid-cols-2">
             <Field
-              label="កូដ"
+              label="ឈ្មោះជាភាសាអង់គ្លេស"
               value={values.code}
               onChange={(value) =>
                 setValues((previous) => ({

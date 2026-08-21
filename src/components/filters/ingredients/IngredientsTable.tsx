@@ -79,6 +79,10 @@ export default function IngredientsTable({
             </th>
 
             <th className="px-6 py-5 text-xl font-semibold text-primary-800">
+              ឈ្មោះជាភាសាអង់គ្លេស
+            </th>
+
+            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               ការពិពណ៌នា
             </th>
 
@@ -123,6 +127,14 @@ export default function IngredientsTable({
                       }
                     </p>
                   </div>
+                </td>
+
+                {/* CODE */}
+
+                <td className="px-6 py-5">
+                  <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-base font-semibold text-gray-700">
+                    {item.code || "—"}
+                  </span>
                 </td>
 
                 {/* DESCRIPTION */}

@@ -51,6 +51,10 @@ export default function DietaryTypesTable({
             </th>
 
             <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+              ឈ្មោះជាភាសាអង់គ្លេស
+            </th>
+
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               ប្រភេទ
             </th>
 
@@ -92,6 +96,13 @@ export default function DietaryTypesTable({
                     {item.name}
                   </p>
                 </div>
+              </td>
+
+              {/* Code */}
+              <td className="px-6 py-5">
+                <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-base font-semibold text-gray-700">
+                  {item.code || "—"}
+                </span>
               </td>
 
               {/* Category */}

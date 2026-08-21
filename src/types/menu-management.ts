@@ -654,6 +654,13 @@ export interface FoodRecord {
   events?: unknown[];
   suitableWeather?: unknown[];
 
+  tastes?: string[];
+  textures?: string[];
+  healthGoals?: string[];
+  foodStyles?: string[];
+  cookingMethods?: string[];
+  distance?: string | null;
+
   isActive?: boolean;
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -695,8 +702,8 @@ export interface MenuItemDietaryTypeRecord {
 
 export interface MenuItemAllergenDeclarationPayload {
   allergenUuid: string;
-  declarationType?: "CONTAINS" | "MAY_CONTAIN" | string;
-  riskLevel?: "LOW" | "MEDIUM" | "HIGH" | string;
+  declarationType: "CONTAINS" | "MAY_CONTAIN" | string;
+  riskLevel: "LOW" | "MEDIUM" | "HIGH" | string;
   verificationStatus?: "VERIFIED" | "UNVERIFIED" | string;
   notes?: string | null;
 }
@@ -774,6 +781,12 @@ export interface FoodWritePayload {
   seasons: FoodSeasonRelation[];
   events: FoodEventRelation[];
   suitableWeather: FoodWeatherRelation[];
+  tastes?: string[];
+  textures?: string[];
+  healthGoals?: string[];
+  foodStyles?: string[];
+  cookingMethods?: string[];
+  distance?: string | null;
   isActive: boolean;
 }
 

@@ -74,9 +74,9 @@ export function useFoodCategoryCatalog() {
         values.localName.trim();
 
       await createFoodCategory({
-        code: createCodeFromLabel(
-          label,
-        ),
+        code:
+          values.code?.trim().toUpperCase().replace(/\s+/g, "_") ||
+          createCodeFromLabel(label),
         name:
           values.name.trim() ||
           values.localName.trim(),
@@ -105,6 +105,7 @@ export function useFoodCategoryCatalog() {
       await updateFoodCategory({
         uuid,
         body: {
+          code: values.code?.trim().toUpperCase().replace(/\s+/g, "_"),
           name:
             values.name.trim() ||
             values.localName.trim(),

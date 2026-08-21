@@ -25,6 +25,7 @@ import type {
 ========================================================= */
 
 const EMPTY_FORM: FilterCatalogOptionFormValues = {
+  code: "",
   localName: "",
   name: "",
   description: "",
@@ -77,6 +78,7 @@ export default function FilterOptionFormModal({
     setForm(
       item
         ? {
+            code: item.code ?? "",
             localName:
               item.localName || item.name,
             name:
@@ -339,6 +341,21 @@ export default function FilterOptionFormModal({
             sm:p-7
           "
         >
+          {/* Code (English Name) */}
+          <div>
+            <Field
+              label="ឈ្មោះជាភាសាអង់គ្លេស"
+              value={form.code ?? ""}
+              onChange={(value) =>
+                setForm((previous) => ({
+                  ...previous,
+                  code: value,
+                }))
+              }
+              placeholder="ឧ. DRY_SEASON"
+            />
+          </div>
+
           {/* Names */}
           {/* Name */}
           <div>

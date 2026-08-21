@@ -808,6 +808,10 @@ function CatalogTable({
               </th>
 
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+                ឈ្មោះជាភាសាអង់គ្លេស
+              </th>
+
+              <th className="px-6 py-4 text-xl font-semibold text-primary-800">
                 ការពិពណ៌នា
               </th>
 
@@ -832,6 +836,13 @@ function CatalogTable({
                   <p className="text-lg font-medium text-gray-800">
                     {item.localName || item.name}
                   </p>
+                </td>
+
+                {/* Code */}
+                <td className="px-6 py-5">
+                  <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-base font-semibold text-gray-700">
+                    {item.code || "—"}
+                  </span>
                 </td>
 
                 {/* Description */}

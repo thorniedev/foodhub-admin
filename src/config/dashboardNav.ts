@@ -80,7 +80,7 @@ export const dashboardNav: NavItem[] = [
     icon: SlidersHorizontal,
     children: [
       // {
-      //   label: "ប្រភេទម្ហូប",
+      //   label: "ប្រភេទម្ហូប"
       //   href: "/filter/food-categories",
       // },
       {
@@ -116,40 +116,12 @@ export const dashboardNav: NavItem[] = [
         href: "/filter/medical-conditions",
       },
       {
-        label: "កម្រិតហឹរ",
-        href: "/filter/spice-levels",
-      },
-      {
         label: "ពេលចម្អិន",
         href: "/filter/preparation-times",
       },
       {
-        label: "ចម្ងាយ",
-        href: "/filter/distances",
-      },
-      {
-        label: "វិធីចម្អិន",
-        href: "/filter/cooking-methods",
-      },
-      {
-        label: "លក្ខណៈម្ហូប",
-        href: "/filter/food-styles",
-      },
-      {
-        label: "គោលដៅសុខភាព",
-        href: "/filter/health-goals",
-      },
-      {
         label: "តំបន់",
         href: "/filter/regions",
-      },
-      {
-        label: "រសជាតិ",
-        href: "/filter/tastes",
-      },
-      {
-        label: "វាយនភាព",
-        href: "/filter/textures",
       },
       {
         label: "គ្រឿងផ្សំ",
@@ -158,14 +130,6 @@ export const dashboardNav: NavItem[] = [
       {
         label: "សារធាតុចិញ្ចឹម",
         href: "/filter/nutrition",
-      },
-      {
-        label: "តម្លៃ",
-        href: "/filter/price-levels",
-      },
-      {
-        label: "ការវាយតម្លៃ",
-        href: "/filter/ratings",
       },
       {
         label: "កម្រិតណែនាំ AI",

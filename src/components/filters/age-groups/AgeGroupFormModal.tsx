@@ -120,7 +120,7 @@ export default function AgeGroupFormModal({
     const maxAge = Number(form.maxAge);
 
     if (!code || !name || !form.minAge.trim() || !form.maxAge.trim()) {
-      setValidationError("សូមបំពេញ កូដ ឈ្មោះ អាយុអប្បបរមា និងអាយុអតិបរមា។");
+      setValidationError("សូមបំពេញ ឈ្មោះជាភាសាអង់គ្លេស ឈ្មោះ អាយុអប្បបរមា និងអាយុអតិបរមា។");
 
       return;
     }
@@ -175,7 +175,7 @@ export default function AgeGroupFormModal({
         className="
           max-h-[94vh]
           w-full
-          max-w-2xl
+          max-w-3xl
           overflow-y-auto
           rounded-3xl
           border
@@ -301,7 +301,7 @@ export default function AgeGroupFormModal({
               "
             >
               <Field
-                label="កូដ"
+                label="ឈ្មោះជាភាសាអង់គ្លេស"
                 value={form.code}
                 onChange={(value) =>
                   setForm((previous) => ({

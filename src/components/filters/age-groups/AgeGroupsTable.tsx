@@ -41,6 +41,10 @@ export default function AgeGroupsTable({
             </th>
 
             <th className="px-6 py-5 text-xl font-semibold text-primary-800">
+              ឈ្មោះជាភាសាអង់គ្លេស
+            </th>
+
+            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               ចន្លោះអាយុ
             </th>
 
@@ -83,6 +87,12 @@ export default function AgeGroupsTable({
                       }
                     </p>
                   </div>
+                </td>
+
+                <td className="px-6 py-5">
+                  <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-base font-semibold text-gray-700">
+                    {item.code || "—"}
+                  </span>
                 </td>
 
                 <td className="whitespace-nowrap px-6 py-5 text-lg text-gray-600">

@@ -52,7 +52,9 @@ export function useSeasonCatalog() {
       const label = values.name.trim() || values.localName.trim();
 
       await createSeason({
-        code: createCodeFromLabel(label, "SEASON"),
+        code:
+          values.code?.trim().toUpperCase().replace(/\s+/g, "_") ||
+          createCodeFromLabel(label, "SEASON"),
         name: values.name.trim() || values.localName.trim(),
         localName: values.localName.trim() || values.name.trim() || null,
         description: values.description.trim() || null,
@@ -69,6 +71,7 @@ export function useSeasonCatalog() {
       await updateSeason({
         uuid,
         payload: {
+          code: values.code?.trim().toUpperCase().replace(/\s+/g, "_"),
           name: values.name.trim() || values.localName.trim(),
           localName: values.localName.trim() || values.name.trim() || null,
           description: values.description.trim() || null,

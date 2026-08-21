@@ -103,8 +103,8 @@ export default function WeatherConditionFormModal({
       }
 
       const code =
-        item?.code?.trim() ||
         values.code.trim().toUpperCase().replace(/\s+/g, "_") ||
+        item?.code?.trim() ||
         createCodeFromLabel(enteredName);
 
       await onSubmit({
@@ -244,6 +244,19 @@ export default function WeatherConditionFormModal({
             sm:p-7
           "
         >
+          {/* Code (English Name) */}
+          <Field
+            label="ឈ្មោះជាភាសាអង់គ្លេស"
+            value={values.code}
+            onChange={(value) =>
+              setValues((previous) => ({
+                ...previous,
+                code: value,
+              }))
+            }
+            placeholder="ឧ. RAINY / HOT"
+          />
+
           {/* Name */}
           <Field
             label="ឈ្មោះស្ថានភាពអាកាសធាតុ"

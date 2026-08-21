@@ -121,25 +121,26 @@ export default function AllergenFormModal({
       event.preventDefault();
 
       const code =
-        form.code.trim();
+        form.code.trim().toUpperCase().replace(/\s+/g, "_");
+
+      const name =
+        form.name.trim() ||
+        createInternalName(code);
 
       if (!code) {
         setValidationError(
-          "សូមបំពេញអាឡែស៊ី។",
+          "សូមបំពេញឈ្មោះជាភាសាអង់គ្លេស។",
         );
 
         return;
       }
-
-      const generatedName =
-        createInternalName(code);
 
       setValidationError("");
 
       await onSubmit({
         ...form,
         code,
-        name: generatedName,
+        name,
         description:
           form.description.trim(),
       });
@@ -163,7 +164,7 @@ export default function AllergenFormModal({
               </p>
 
               <p className="mt-1 text-lg leading-7 text-gray-500">
-                គ្រប់គ្រងព័ត៌មានអាឡែស៊ីដែលប្រើសម្រាប់សុវត្ថិភាពអាហារ។
+                គ្រប់គ្រងទិន្នន័យអាឡែស៊ីសម្រាប់ប្រព័ន្ធសុវត្ថិភាពម្ហូបអាហារ។
               </p>
             </div>
           </div>
@@ -192,7 +193,7 @@ export default function AllergenFormModal({
             }
           >
             <Field
-              label="ឈ្មោះអាឡែស៊ី"
+              label="ឈ្មោះជាភាសាអង់គ្លេស"
               value={form.code}
               onChange={(value) =>
                 setForm(
@@ -202,9 +203,25 @@ export default function AllergenFormModal({
                   }),
                 )
               }
-              placeholder="ឧ. សណ្ដែកដី"
+              placeholder="ឧ. PEANUTS"
               required
             />
+
+            <div className="mt-4">
+              <Field
+                label="ឈ្មោះអាឡែស៊ី"
+                value={form.name}
+                onChange={(value) =>
+                  setForm(
+                    (previous) => ({
+                      ...previous,
+                      name: value,
+                    }),
+                  )
+                }
+                placeholder="ឧ. សណ្ដែកដី / Peanuts"
+              />
+            </div>
 
             <label className="mt-5 block">
               <FieldLabel>

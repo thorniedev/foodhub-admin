@@ -77,7 +77,6 @@ const DEFAULT_CLASSIFICATIONS: ClassificationSelections =
     INGREDIENT: [],
     NUTRITION: [],
     PRICE_LEVEL: [],
-    RATING: [],
     AI_SCORE: [],
   };
 

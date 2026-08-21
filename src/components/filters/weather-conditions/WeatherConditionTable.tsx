@@ -72,6 +72,10 @@ export default function WeatherConditionTable({
             </th>
 
             <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+              ឈ្មោះជាភាសាអង់គ្លេស
+            </th>
+
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               ការពិពណ៌នា
             </th>
 
@@ -116,6 +120,12 @@ export default function WeatherConditionTable({
                         }
                       </p>
                     </div>
+                  </td>
+
+                  <td className="px-6 py-5">
+                    <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-base font-semibold text-gray-700">
+                      {item.code || "—"}
+                    </span>
                   </td>
 
                   <td className="max-w-[320px] px-6 py-5 text-lg text-gray-500">

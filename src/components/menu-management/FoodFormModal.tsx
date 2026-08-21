@@ -75,6 +75,71 @@ const DRINK_SUBCATEGORIES: SubCategoryConfig[] = [
   { key: "traditionalKhmerDrink", label: "ភេសជ្ជៈប្រពៃណីខ្មែរ", keywords: ["traditional khmer drink", "ប្រពៃណី", "ខ្មែរ"] },
 ];
 
+/* =========================================================
+   STATIC FILTER CATEGORIES (5 PAGES DATA)
+========================================================= */
+
+export const STATIC_TASTES = [
+  { code: "SWEET", label: "ផ្អែម", english: "Sweet" },
+  { code: "SALTY", label: "ប្រៃ", english: "Salty" },
+  { code: "SOUR", label: "ជូរ", english: "Sour" },
+  { code: "SPICY", label: "ហឹរ", english: "Spicy" },
+  { code: "BITTER", label: "ល្វីង", english: "Bitter" },
+  { code: "UMAMI", label: "អ៊ូម៉ាមី", english: "Umami" },
+  { code: "ASTRINGENT", label: "ចត់", english: "Astringent" },
+];
+
+export const STATIC_TEXTURES = [
+  { code: "CRISPY", label: "ស្រួយ", english: "Crispy" },
+  { code: "SOFT", label: "ទន់", english: "Soft" },
+  { code: "CHEWY", label: "ស្វិត", english: "Chewy" },
+  { code: "CREAMY", label: "ខាប់ទន់", english: "Creamy" },
+  { code: "CRUNCHY", label: "ស្រួយរឹង", english: "Crunchy" },
+  { code: "LIQUID", label: "រាវ", english: "Smooth / Liquid" },
+];
+
+export const STATIC_HEALTH_GOALS = [
+  { code: "HIGH_PROTEIN", label: "ប្រូតេអ៊ីនខ្ពស់", english: "High Protein" },
+  { code: "LOW_SUGAR", label: "ស្ករទាប", english: "Low Sugar" },
+  { code: "LOW_SODIUM", label: "សូដ្យូមទាប", english: "Low Sodium" },
+  { code: "LOW_CALORIE", label: "កាឡូរីទាប", english: "Low Calorie" },
+  { code: "WEIGHT_LOSS", label: "សម្រកទម្ងន់", english: "Weight Loss" },
+  { code: "MUSCLE_GAIN", label: "បង្កើនសាច់ដុំ", english: "Muscle Gain" },
+  { code: "ENERGY_BOOST", label: "បង្កើនថាមពល", english: "Energy Boost" },
+  { code: "DIGESTION_HEALTH", label: "សុខភាពប្រព័ន្ធរំលាយអាហារ", english: "Digestive Health" },
+];
+
+export const STATIC_FOOD_STYLES = [
+  { code: "TRADITIONAL", label: "ម្ហូបប្រពៃណី", english: "Traditional" },
+  { code: "STREET_FOOD", label: "អាហារតាមផ្លូវ", english: "Street Food" },
+  { code: "HEALTHY", label: "អាហារសុខភាព", english: "Healthy" },
+  { code: "FAST_FOOD", label: "អាហាររហ័ស", english: "Fast Food" },
+  { code: "HOMEMADE", label: "ម្ហូបធ្វើនៅផ្ទះ", english: "Homemade" },
+  { code: "FUSION", label: "អាហារបែបទំនើប / Fusion", english: "Modern / Fusion" },
+];
+
+export const STATIC_DISTANCES = [
+  { code: "DISTANCE_1KM", label: "ក្រោម 1 km", english: "Within 1 km" },
+  { code: "DISTANCE_2KM", label: "ក្រោម 2 km", english: "Within 2 km" },
+  { code: "DISTANCE_3KM", label: "ក្រោម 3 km", english: "Within 3 km" },
+  { code: "DISTANCE_5KM", label: "ក្រោម 5 km", english: "Within 5 km" },
+  { code: "DISTANCE_10KM", label: "ក្រោម 10 km", english: "Within 10 km" },
+];
+
+export const STATIC_COOKING_METHODS = [
+  { code: "FRIED", label: "ចៀន", english: "Fried" },
+  { code: "DEEP_FRIED", label: "បំពង", english: "Deep Fried" },
+  { code: "GRILLED", label: "អាំង", english: "Grilled / BBQ" },
+  { code: "STIR_FRIED", label: "ឆា", english: "Stir-fried" },
+  { code: "STEAMED", label: "ចំហុយ", english: "Steamed" },
+  { code: "BOILED", label: "ស្ងោរ", english: "Boiled / Soup" },
+  { code: "BAKED", label: "ដុត", english: "Baked" },
+  { code: "ROASTED", label: "ខ្វៃ", english: "Roasted" },
+  { code: "STEWED", label: "ខ / រម្ងាស់", english: "Stewed / Braised" },
+  { code: "RAW", label: "ឆៅ / ញាំ", english: "Raw / Fresh" },
+  { code: "SMOKED", label: "ឆ្អើរ", english: "Smoked" },
+];
+
 type FormState = {
   canonicalName: string;
   localName: string;
@@ -209,6 +274,16 @@ export default function FoodFormModal({
   >([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
 
+  // Static filter states (Tastes, Textures, Health Goals, Food Styles, Distances, Cooking Methods)
+  const [selectedTastes, setSelectedTastes] = useState<string[]>([]);
+  const [selectedTextures, setSelectedTextures] = useState<string[]>([]);
+  const [selectedHealthGoals, setSelectedHealthGoals] = useState<string[]>([]);
+  const [selectedFoodStyles, setSelectedFoodStyles] = useState<string[]>([]);
+  const [selectedCookingMethods, setSelectedCookingMethods] = useState<string[]>(
+    [],
+  );
+  const [selectedDistance, setSelectedDistance] = useState<string>("");
+
   const activeCategories = useMemo(() => {
     return categories.filter((category) => category.isActive !== false);
   }, [categories]);
@@ -232,6 +307,12 @@ export default function FoodFormModal({
       setMealTypeRows([]);
       setAgeRuleRows([]);
       setDietaryTypeRows([]);
+      setSelectedTastes([]);
+      setSelectedTextures([]);
+      setSelectedHealthGoals([]);
+      setSelectedFoodStyles([]);
+      setSelectedCookingMethods([]);
+      setSelectedDistance("");
       setError(null);
       return;
     }
@@ -482,6 +563,53 @@ export default function FoodFormModal({
         .filter((d) => Boolean(d.code)),
     );
 
+    setSelectedTastes(
+      Array.isArray(item.tastes)
+        ? (item.tastes as string[])
+        : Array.isArray((item as any).tastePreferences)
+          ? ((item as any).tastePreferences as string[])
+          : [],
+    );
+
+    setSelectedTextures(
+      Array.isArray(item.textures)
+        ? (item.textures as string[])
+        : Array.isArray((item as any).texturePreferences)
+          ? ((item as any).texturePreferences as string[])
+          : [],
+    );
+
+    setSelectedHealthGoals(
+      Array.isArray(item.healthGoals)
+        ? (item.healthGoals as string[])
+        : Array.isArray((item as any).healthGoalPreferences)
+          ? ((item as any).healthGoalPreferences as string[])
+          : [],
+    );
+
+    setSelectedFoodStyles(
+      Array.isArray(item.foodStyles)
+        ? (item.foodStyles as string[])
+        : Array.isArray((item as any).foodStylePreferences)
+          ? ((item as any).foodStylePreferences as string[])
+          : [],
+    );
+
+    setSelectedCookingMethods(
+      Array.isArray(item.cookingMethods)
+        ? (item.cookingMethods as string[])
+        : Array.isArray((item as any).cookingMethodPreferences)
+          ? ((item as any).cookingMethodPreferences as string[])
+          : [],
+    );
+
+    setSelectedDistance(
+      item.distance ||
+        (item as any).distancePreference ||
+        (item as any).deliveryDistance ||
+        "",
+    );
+
     setImages([]);
     setError(null);
   }, [
@@ -620,6 +748,12 @@ export default function FoodFormModal({
             ruleResult: r.ruleResult || "ALLOWED",
             reasonText: r.reasonText?.trim() || "Suitable as a normal serving.",
           })),
+        tastes: selectedTastes,
+        textures: selectedTextures,
+        healthGoals: selectedHealthGoals,
+        foodStyles: selectedFoodStyles,
+        cookingMethods: selectedCookingMethods,
+        distance: selectedDistance || null,
         isActive: values.isActive,
       };
 
@@ -1129,7 +1263,7 @@ export default function FoodFormModal({
                   return (
                     <SelectedOptionCard
                       key={row.mealTypeUuid}
-                      title={`${option.name} (${option.code})`}
+                      title={option.name}
                       onRemove={() => toggleMealType(row.mealTypeUuid)}
                     >
                       <ScoreField
@@ -1185,7 +1319,7 @@ export default function FoodFormModal({
                   return (
                     <SelectedOptionCard
                       key={row.ageGroupUuid}
-                      title={`${option.name} (${option.code})`}
+                      title={option.name}
                       onRemove={() => toggleAgeGroup(row.ageGroupUuid)}
                     >
                       <div className="grid gap-5 lg:grid-cols-[1fr_1.4fr]">
@@ -1267,9 +1401,7 @@ export default function FoodFormModal({
             <OptionPills
               options={activeSeasons.map((season) => ({
                 value: season.uuid,
-                label: `${season.name}${
-                  season.localName ? ` (${season.localName})` : ""
-                }`,
+                label: season.name,
               }))}
               selectedValues={selectedSeasonUuids}
               onToggle={toggleSeason}
@@ -1288,9 +1420,7 @@ export default function FoodFormModal({
                   return (
                     <SelectedOptionCard
                       key={row.seasonUuid}
-                      title={`${option.name}${
-                        option.localName ? ` (${option.localName})` : ""
-                      }`}
+                      title={option.name}
                       onRemove={() => toggleSeason(row.seasonUuid)}
                     >
                       <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
@@ -1346,9 +1476,7 @@ export default function FoodFormModal({
             <OptionPills
               options={activeEvents.map((eventOption) => ({
                 value: eventOption.uuid,
-                label: `${eventOption.name}${
-                  eventOption.localName ? ` (${eventOption.localName})` : ""
-                }`,
+                label: eventOption.name,
               }))}
               selectedValues={selectedEventUuids}
               onToggle={toggleEvent}
@@ -1367,9 +1495,7 @@ export default function FoodFormModal({
                   return (
                     <SelectedOptionCard
                       key={row.eventUuid}
-                      title={`${option.name}${
-                        option.localName ? ` (${option.localName})` : ""
-                      }`}
+                      title={option.name}
                       onRemove={() => toggleEvent(row.eventUuid)}
                     >
                       <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
@@ -1425,9 +1551,7 @@ export default function FoodFormModal({
             <OptionPills
               options={activeWeatherConditions.map((weather) => ({
                 value: weather.uuid,
-                label: `${weather.name}${
-                  weather.localName ? ` (${weather.localName})` : ""
-                }`,
+                label: weather.name,
               }))}
               selectedValues={selectedWeatherUuids}
               onToggle={toggleWeather}
@@ -1446,9 +1570,7 @@ export default function FoodFormModal({
                   return (
                     <SelectedOptionCard
                       key={row.weatherConditionUuid}
-                      title={`${option.name}${
-                        option.localName ? ` (${option.localName})` : ""
-                      }`}
+                      title={option.name}
                       onRemove={() => toggleWeather(row.weatherConditionUuid)}
                     >
                       <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
@@ -1493,6 +1615,152 @@ export default function FoodFormModal({
                 })}
               </div>
             )}
+          </PreferenceSection>
+
+          {/* =================================================
+              COOKING METHODS (វិធីចម្អិន)
+          ================================================== */}
+          <PreferenceSection
+            title="វិធីចម្អិន"
+            description="ជ្រើសរើសវិធីចម្អិនសម្រាប់មុខម្ហូប/ភេសជ្ជៈនេះ (អាចជ្រើសលើសពីមួយ)។"
+            selectedCount={selectedCookingMethods.length}
+          >
+            <OptionPills
+              options={STATIC_COOKING_METHODS.map((method) => ({
+                value: method.code,
+                label: method.label,
+              }))}
+              selectedValues={selectedCookingMethods}
+              onToggle={(value) =>
+                setSelectedCookingMethods((prev) =>
+                  prev.includes(value)
+                    ? prev.filter((v) => v !== value)
+                    : [...prev, value],
+                )
+              }
+              emptyText="មិនមានជម្រើសវិធីចម្អិន។"
+            />
+          </PreferenceSection>
+
+          {/* =================================================
+              TASTES (រសជាតិ)
+          ================================================== */}
+          <PreferenceSection
+            title="រសជាតិ"
+            description="ជ្រើសរើសរសជាតិនៃមុខម្ហូប/ភេសជ្ជៈនេះ។"
+            selectedCount={selectedTastes.length}
+          >
+            <OptionPills
+              options={STATIC_TASTES.map((taste) => ({
+                value: taste.code,
+                label: taste.label,
+              }))}
+              selectedValues={selectedTastes}
+              onToggle={(value) =>
+                setSelectedTastes((prev) =>
+                  prev.includes(value)
+                    ? prev.filter((v) => v !== value)
+                    : [...prev, value],
+                )
+              }
+              emptyText="មិនមានជម្រើសរសជាតិ។"
+            />
+          </PreferenceSection>
+
+          {/* =================================================
+              TEXTURES (វាយនភាព)
+          ================================================== */}
+          <PreferenceSection
+            title="វាយនភាព"
+            description="ជ្រើសរើសលក្ខណៈវាយនភាពនៃមុខម្ហូប/ភេសជ្ជៈ។"
+            selectedCount={selectedTextures.length}
+          >
+            <OptionPills
+              options={STATIC_TEXTURES.map((texture) => ({
+                value: texture.code,
+                label: texture.label,
+              }))}
+              selectedValues={selectedTextures}
+              onToggle={(value) =>
+                setSelectedTextures((prev) =>
+                  prev.includes(value)
+                    ? prev.filter((v) => v !== value)
+                    : [...prev, value],
+                )
+              }
+              emptyText="មិនមានជម្រើសវាយនភាព។"
+            />
+          </PreferenceSection>
+
+          {/* =================================================
+              HEALTH GOALS (គោលដៅសុខភាព)
+          ================================================== */}
+          <PreferenceSection
+            title="គោលដៅសុខភាព"
+            description="ជ្រើសរើសគោលដៅសុខភាពដែលសាកសមសម្រាប់ម្ហូប/ភេសជ្ជៈនេះ។"
+            selectedCount={selectedHealthGoals.length}
+          >
+            <OptionPills
+              options={STATIC_HEALTH_GOALS.map((goal) => ({
+                value: goal.code,
+                label: goal.label,
+              }))}
+              selectedValues={selectedHealthGoals}
+              onToggle={(value) =>
+                setSelectedHealthGoals((prev) =>
+                  prev.includes(value)
+                    ? prev.filter((v) => v !== value)
+                    : [...prev, value],
+                )
+              }
+              emptyText="មិនមានជម្រើសគោលដៅសុខភាព។"
+            />
+          </PreferenceSection>
+
+          {/* =================================================
+              FOOD STYLES (លក្ខណៈម្ហូប)
+          ================================================== */}
+          <PreferenceSection
+            title="លក្ខណៈម្ហូប"
+            description="ជ្រើសរើសលក្ខណៈ ឬទម្រង់ម្ហូប/ភេសជ្ជៈ។"
+            selectedCount={selectedFoodStyles.length}
+          >
+            <OptionPills
+              options={STATIC_FOOD_STYLES.map((style) => ({
+                value: style.code,
+                label: style.label,
+              }))}
+              selectedValues={selectedFoodStyles}
+              onToggle={(value) =>
+                setSelectedFoodStyles((prev) =>
+                  prev.includes(value)
+                    ? prev.filter((v) => v !== value)
+                    : [...prev, value],
+                )
+              }
+              emptyText="មិនមានជម្រើសលក្ខណៈម្ហូប។"
+            />
+          </PreferenceSection>
+
+          {/* =================================================
+              DISTANCES (ចម្ងាយ)
+          ================================================== */}
+          <PreferenceSection
+            title="ចម្ងាយ"
+            description="ជ្រើសរើសកម្រិតចម្ងាយសមស្រប។"
+            selectedCount={selectedDistance ? 1 : 0}
+          >
+            <OptionPills
+              options={STATIC_DISTANCES.map((dist) => ({
+                value: dist.code,
+                label: dist.label,
+              }))}
+              selectedValues={selectedDistance ? [selectedDistance] : []}
+              onToggle={(value) =>
+                setSelectedDistance((prev) => (prev === value ? "" : value))
+              }
+              emptyText="មិនមានជម្រើសចម្ងាយ។"
+            />
           </PreferenceSection>
 
           {/* =================================================

@@ -109,7 +109,7 @@ export default function IngredientFormModal({
 
       if (!code) {
         setValidationError(
-          "សូមបំពេញកូដគ្រឿងផ្សំ។",
+          "សូមបំពេញឈ្មោះជាភាសាអង់គ្លេស។",
         );
         return;
       }
@@ -123,7 +123,7 @@ export default function IngredientFormModal({
 
       if (code.length > 80) {
         setValidationError(
-          "កូដមិនអាចលើស 80 តួអក្សរ។",
+          "ឈ្មោះជាភាសាអង់គ្លេសមិនអាចលើស 80 តួអក្សរ។",
         );
         return;
       }
@@ -164,7 +164,7 @@ export default function IngredientFormModal({
               </p>
 
               <p className="mt-1 text-lg leading-7 text-gray-500">
-                បំពេញព័ត៌មានគ្រឿងផ្សំសម្រាប់ប្រើនៅពេលបង្កើតម្ហូប។
+                គ្រប់គ្រងទិន្នន័យគ្រឿងផ្សំសម្រាប់ប្រើប្រាស់ក្នុងមុខម្ហូប និងអាហារូបត្ថម្ភ។
               </p>
             </div>
           </div>
@@ -190,7 +190,7 @@ export default function IngredientFormModal({
           >
             <div className="grid gap-5 sm:grid-cols-2">
               <Field
-                label="កូដ"
+                label="ឈ្មោះជាភាសាអង់គ្លេស"
                 value={values.code}
                 onChange={(value) =>
                   setValues(

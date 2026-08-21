@@ -994,6 +994,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
           {
             uuid: string;
             payload: {
+              code?: string;
               name?: string;
               localName?: string | null;
               description?: string | null;
@@ -1072,6 +1073,7 @@ export const menuManagementApi = adminBaseApi.injectEndpoints({
       {
         uuid: string;
         payload: {
+          code?: string;
           name?: string;
           localName?: string | null;
           description?: string | null;

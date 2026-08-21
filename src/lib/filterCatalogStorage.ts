@@ -43,7 +43,32 @@ export function readFilterCatalog(): FilterCatalogOption[] {
       return cloneSeeds();
     }
 
-    return parsed as FilterCatalogOption[];
+    const current = parsed as FilterCatalogOption[];
+    const seeds = cloneSeeds();
+
+    let hasNewSeeds = false;
+    const existingUuids = new Set(current.map((item) => item.uuid));
+    const existingGroupCodes = new Set(
+      current.map((item) => `${item.groupCode}:${item.code}`),
+    );
+
+    const merged = [...current];
+    for (const seedItem of seeds) {
+      const key = `${seedItem.groupCode}:${seedItem.code}`;
+      if (!existingUuids.has(seedItem.uuid) && !existingGroupCodes.has(key)) {
+        merged.push(seedItem);
+        hasNewSeeds = true;
+      }
+    }
+
+    if (hasNewSeeds) {
+      window.localStorage.setItem(
+        FILTER_CATALOG_STORAGE_KEY,
+        JSON.stringify(merged),
+      );
+    }
+
+    return merged;
   } catch {
     return cloneSeeds();
   }

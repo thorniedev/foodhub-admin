@@ -106,7 +106,7 @@ export default function MedicalConditionFormModal({
 
       if (!code || !name) {
         setValidationError(
-          "សូមបំពេញកូដ និងឈ្មោះស្ថានភាពសុខភាព។",
+          "សូមបំពេញឈ្មោះជាភាសាអង់គ្លេស និងឈ្មោះស្ថានភាពសុខភាព។",
         );
 
         return;
@@ -170,7 +170,7 @@ export default function MedicalConditionFormModal({
           >
             <div className="grid gap-5 sm:grid-cols-2">
               <Field
-                label="កូដ"
+                label="ឈ្មោះជាភាសាអង់គ្លេស"
                 value={form.code}
                 onChange={(value) =>
                   setForm(
