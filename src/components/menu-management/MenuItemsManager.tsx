@@ -671,6 +671,7 @@ export default function MenuItemsManager() {
           FOOD CREATE / EDIT MODAL
       ====================================================== */}
       <FoodFormModal
+        key={foodModalOpen ? editingFood?.uuid || "new-food" : "closed"}
         open={foodModalOpen}
         item={editingFood}
         defaultMainCategory="FOOD"
@@ -698,6 +699,7 @@ export default function MenuItemsManager() {
           PUBLISH / EDIT MENU ITEM MODAL
       ====================================================== */}
       <PublishMenuItemModal
+        key={menuModalOpen ? editingMenu?.uuid || "new-menu" : "closed"}
         open={menuModalOpen}
         item={editingMenu}
         foods={foods}

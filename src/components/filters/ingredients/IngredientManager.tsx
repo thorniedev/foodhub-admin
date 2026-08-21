@@ -1229,6 +1229,7 @@ const {
       {/* CREATE / EDIT */}
 
       <IngredientFormModal
+        key={formOpen ? editing?.uuid || "new-ingredient" : "closed"}
         open={
           formOpen
         }

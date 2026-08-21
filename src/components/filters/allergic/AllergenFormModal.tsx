@@ -26,6 +26,8 @@ const EMPTY_FORM: AllergenFormValues = {
   active: true,
 };
 
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
+
 type Props = {
   open: boolean;
   allergen: Allergen | null;
@@ -64,18 +66,15 @@ export default function AllergenFormModal({
   onClose,
   onSubmit,
 }: Props) {
-  const [form, setForm] =
-    useState<AllergenFormValues>(
-      EMPTY_FORM,
-    );
-
-  const [
-    validationError,
-    setValidationError,
-  ] = useState("");
+  const [form, setForm] = useState<AllergenFormValues>(EMPTY_FORM);
+  const [validationError, setValidationError] = useState("");
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setForm(EMPTY_FORM);
+      setValidationError("");
+      return;
+    }
 
     setForm(
       allergen
@@ -93,6 +92,13 @@ export default function AllergenFormModal({
 
     setValidationError("");
   }, [open, allergen]);
+
+  const handleClose = () => {
+    if (saving) return;
+    setForm(EMPTY_FORM);
+    setValidationError("");
+    onClose();
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -172,7 +178,7 @@ export default function AllergenFormModal({
           <button
             type="button"
             disabled={saving}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -182,6 +188,7 @@ export default function AllergenFormModal({
 
         <form
           onSubmit={handleSubmit}
+          onKeyDown={handleFormArrowKeyNavigation}
           className="space-y-6 p-6 sm:p-8"
         >
           <Section
@@ -288,7 +295,7 @@ export default function AllergenFormModal({
             <button
               type="button"
               disabled={saving}
-              onClick={onClose}
+              onClick={handleClose}
               className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-medium text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               បោះបង់

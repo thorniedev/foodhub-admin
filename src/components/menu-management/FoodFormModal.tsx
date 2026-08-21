@@ -34,6 +34,7 @@ import {
   readStoredWeatherConditions,
   WEATHER_CHANGED_EVENT,
 } from "@/src/lib/weatherConditionStorage";
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
 
 type MainCategoryType = "FOOD" | "DRINK";
 
@@ -238,8 +239,37 @@ export default function FoodFormModal({
     return cuisines.filter((cuisine) => cuisine.isActive !== false);
   }, [cuisines]);
 
+  const handleClose = () => {
+    if (saving) return;
+    setValues(EMPTY);
+    setSelectedSubCategoryKey(null);
+    setImages([]);
+    setExistingImages([]);
+    setSeasonRows([]);
+    setEventRows([]);
+    setWeatherRows([]);
+    setMealTypeRows([]);
+    setAgeRuleRows([]);
+    setDietaryTypeRows([]);
+    setError(null);
+    onClose();
+  };
+
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setValues(EMPTY);
+      setSelectedSubCategoryKey(null);
+      setImages([]);
+      setExistingImages([]);
+      setSeasonRows([]);
+      setEventRows([]);
+      setWeatherRows([]);
+      setMealTypeRows([]);
+      setAgeRuleRows([]);
+      setDietaryTypeRows([]);
+      setError(null);
+      return;
+    }
 
     if (!item) {
       setValues(EMPTY);
@@ -841,7 +871,10 @@ export default function FoodFormModal({
       aria-modal="true"
       aria-labelledby="food-form-title"
     >
-      <div className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-3xl border border-gray-100 bg-white shadow-2xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        onKeyDown={handleFormArrowKeyNavigation}
+        className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-3xl border border-gray-100 bg-white shadow-2xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      >
         {/* =================================================
             STICKY HEADER
         ================================================== */}
@@ -870,7 +903,7 @@ export default function FoodFormModal({
           <button
             type="button"
             disabled={saving}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="បិទ"
             title="បិទ"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
@@ -1237,7 +1270,7 @@ export default function FoodFormModal({
             <button
               type="button"
               disabled={saving}
-              onClick={onClose}
+              onClick={handleClose}
               className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-medium text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               បោះបង់

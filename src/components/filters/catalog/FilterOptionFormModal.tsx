@@ -19,6 +19,7 @@ import type {
   FilterCatalogOptionFormValues,
   FilterGroupDefinition,
 } from "@/src/types/filterCatalog";
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
 
 /* =========================================================
    DEFAULT FORM VALUES
@@ -72,6 +73,8 @@ export default function FilterOptionFormModal({
 
   useEffect(() => {
     if (!open) {
+      setForm(EMPTY_FORM);
+      setValidationError("");
       return;
     }
 
@@ -107,6 +110,13 @@ export default function FilterOptionFormModal({
 
     setValidationError("");
   }, [open, item]);
+
+  const handleClose = () => {
+    if (saving) return;
+    setForm(EMPTY_FORM);
+    setValidationError("");
+    onClose();
+  };
 
   /* =======================================================
      LOCK BACKGROUND SCROLL
@@ -303,7 +313,7 @@ export default function FilterOptionFormModal({
           <button
             type="button"
             disabled={saving}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close"
             className="
               flex
@@ -335,6 +345,7 @@ export default function FilterOptionFormModal({
           onSubmit={
             handleSubmit
           }
+          onKeyDown={handleFormArrowKeyNavigation}
           className="
             space-y-4
             p-6
@@ -704,7 +715,7 @@ export default function FilterOptionFormModal({
             <button
               type="button"
               disabled={saving}
-              onClick={onClose}
+              onClick={handleClose}
               className="
                 inline-flex
                 min-h-12

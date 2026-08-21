@@ -1153,6 +1153,7 @@ export default function AgeGroupManager() {
 
       {/* FORM */}
       <AgeGroupFormModal
+        key={formOpen ? editing?.uuid || "new-age" : "closed"}
         open={
           formOpen
         }

@@ -1210,6 +1210,7 @@ export default function FoodCategoriesManager({
           FOOD FORM MODAL (CREATE / EDIT)
       ====================================================== */}
       <FoodFormModal
+        key={foodModalOpen ? editingFood?.uuid || "new-food" : "closed"}
         open={foodModalOpen}
         item={editingFood}
         defaultMainCategory={

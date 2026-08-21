@@ -19,6 +19,8 @@ const initialValues: DietaryTypeFormValues = {
   active: true,
 };
 
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
+
 interface DietaryTypeFormModalProps {
   open: boolean;
   item: DietaryType | null;
@@ -43,7 +45,11 @@ export default function DietaryTypeFormModal({
   ========================================================= */
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setValues(initialValues);
+      setLocalError(null);
+      return;
+    }
 
     setValues(
       item
@@ -59,6 +65,13 @@ export default function DietaryTypeFormModal({
 
     setLocalError(null);
   }, [open, item]);
+
+  const handleClose = () => {
+    if (saving) return;
+    setValues(initialValues);
+    setLocalError(null);
+    onClose();
+  };
 
   /* =========================================================
      LOCK PAGE SCROLL
@@ -145,7 +158,7 @@ export default function DietaryTypeFormModal({
           <button
             type="button"
             disabled={saving}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -156,7 +169,7 @@ export default function DietaryTypeFormModal({
         {/* =================================================
             FORM
         ================================================== */}
-        <form onSubmit={handleSubmit} className="space-y-6 p-6 sm:p-8">
+        <form onSubmit={handleSubmit} onKeyDown={handleFormArrowKeyNavigation} className="space-y-6 p-6 sm:p-8">
           {/* Code + Name */}
           <div className="grid gap-5 sm:grid-cols-2">
             <Field
@@ -290,7 +303,7 @@ export default function DietaryTypeFormModal({
             <button
               type="button"
               disabled={saving}
-              onClick={onClose}
+              onClick={handleClose}
               className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-medium text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               បោះបង់

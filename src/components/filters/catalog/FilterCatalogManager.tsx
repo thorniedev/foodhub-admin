@@ -398,6 +398,7 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
 
       {/* EXISTING COMPONENT: FilterOptionFormModal */}
       <FilterOptionFormModal
+        key={formOpen ? editing?.uuid || "new-filter" : "closed"}
         open={formOpen}
         group={group}
         item={editing}

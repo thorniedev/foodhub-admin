@@ -19,6 +19,8 @@ import {
   type ReactNode,
 } from "react";
 
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
+
 type FormState = {
   code: string;
   name: string;
@@ -56,7 +58,11 @@ export default function WeatherConditionFormModal({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setValues(EMPTY);
+      setError(null);
+      return;
+    }
 
     if (!item) {
       setValues(EMPTY);
@@ -74,6 +80,13 @@ export default function WeatherConditionFormModal({
 
     setError(null);
   }, [item, open]);
+
+  const handleClose = () => {
+    if (saving) return;
+    setValues(EMPTY);
+    setError(null);
+    onClose();
+  };
 
   /* Lock background scroll while modal is open */
   useEffect(() => {
@@ -210,7 +223,7 @@ export default function WeatherConditionFormModal({
           <button
             type="button"
             disabled={saving}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close"
             className="
               flex
@@ -238,6 +251,7 @@ export default function WeatherConditionFormModal({
         {/* ================= FORM ================= */}
         <form
           onSubmit={handleSubmit}
+          onKeyDown={handleFormArrowKeyNavigation}
           className="
             space-y-4
             p-6
@@ -439,7 +453,7 @@ export default function WeatherConditionFormModal({
             <button
               type="button"
               disabled={saving}
-              onClick={onClose}
+              onClick={handleClose}
               className="
                 inline-flex
                 min-h-12

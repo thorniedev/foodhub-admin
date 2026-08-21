@@ -6,6 +6,7 @@ import Image from "next/image";
 import type { Area, FoodByAreaImage } from "@/src/types/foodByArea";
 import type { FoodByAreaPayload } from "@/src/app/store/foodByAreaApi";
 import { getValidImageUrl } from "@/src/utils/imageUrl";
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
 
 interface FoodByAreaFormModalProps {
   open: boolean;
@@ -132,7 +133,7 @@ export default function FoodByAreaFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5 p-6">
+        <form onSubmit={handleSubmit} onKeyDown={handleFormArrowKeyNavigation} className="space-y-5 p-6">
           {error && (
             <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-lg font-medium text-red-600">
               {error}

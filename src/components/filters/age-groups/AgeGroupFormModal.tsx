@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { AlertTriangle, CalendarRange, Loader2, Users, X } from "lucide-react";
 
 import type { AgeGroup, AgeGroupFormValues } from "@/src/types/ageGroup";
+import { handleFormArrowKeyNavigation } from "@/src/lib/formKeyboardNavigation";
 
 /* =========================================================
    DEFAULT VALUES
@@ -63,6 +64,8 @@ export default function AgeGroupFormModal({
 
   useEffect(() => {
     if (!open) {
+      setForm(EMPTY_FORM);
+      setValidationError("");
       return;
     }
 
@@ -81,6 +84,13 @@ export default function AgeGroupFormModal({
 
     setValidationError("");
   }, [open, item]);
+
+  const handleClose = () => {
+    if (saving) return;
+    setForm(EMPTY_FORM);
+    setValidationError("");
+    onClose();
+  };
 
   /* =======================================================
      LOCK PAGE SCROLL
@@ -252,7 +262,7 @@ export default function AgeGroupFormModal({
           <button
             type="button"
             disabled={saving}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close"
             className="
               flex
@@ -282,6 +292,7 @@ export default function AgeGroupFormModal({
         ================================================== */}
         <form
           onSubmit={handleSubmit}
+          onKeyDown={handleFormArrowKeyNavigation}
           className="
             space-y-6
             p-6
@@ -539,7 +550,7 @@ export default function AgeGroupFormModal({
             <button
               type="button"
               disabled={saving}
-              onClick={onClose}
+              onClick={handleClose}
               className="
                 inline-flex
                 min-h-12

@@ -825,6 +825,7 @@ export default function AllergenManager() {
       ================================================== */}
 
       <AllergenFormModal
+        key={formOpen ? editing?.uuid || "new-allergen" : "closed"}
         open={formOpen}
         allergen={editing}
         saving={isCreating || isUpdating}

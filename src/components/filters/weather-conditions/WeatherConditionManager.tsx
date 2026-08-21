@@ -723,6 +723,7 @@ export default function WeatherConditionManager() {
       </section>
 
       <WeatherConditionFormModal
+        key={formOpen ? editingItem?.uuid || "new-weather" : "closed"}
         open={
           formOpen
         }
