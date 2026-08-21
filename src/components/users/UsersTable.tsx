@@ -10,7 +10,6 @@ import {
   Shield,
   AlertTriangle,
   Trash2,
-  User as UserIcon,
   XCircle,
 } from "lucide-react";
 
@@ -38,34 +37,31 @@ export default function UsersTable({
   onRestore,
 }: UsersTableProps) {
   return (
-    <div className="w-full min-w-0 max-w-full">
-      {/* Table header */}
-      <div className="border-b border-gray-100 bg-gray-50/60 px-6 py-3">
-        <div className="grid min-w-[960px] grid-cols-[minmax(260px,1.5fr)_minmax(140px,1fr)_minmax(160px,1.2fr)_140px_140px_160px] items-center gap-4">
-          <span className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-            គណនីគណនីអ្នកប្រើប្រាស់
-          </span>
-          <span className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-            ឈ្មោះគណនី
-          </span>
-          <span className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-            កាលបរិច្ឆេទបង្កើត
-          </span>
-          <span className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-            ផ្ទៀងផ្ទាត់
-          </span>
-          <span className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-            ស្ថានភាព
-          </span>
-          <span className="text-right text-sm font-semibold uppercase tracking-wide text-gray-400 pr-3">
-            សកម្មភាព
-          </span>
-        </div>
-      </div>
+    <div className="w-full overflow-x-auto rounded-3xl border border-gray-100 bg-white shadow-sm">
+      <table className="w-full border-collapse text-left">
+        {/* ================= HEAD ================= */}
+        <thead>
+          <tr className="border-b border-gray-100 bg-gray-50/60">
+            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[280px]">
+              គណនីអ្នកប្រើប្រាស់
+            </th>
+            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[170px]">
+              កាលបរិច្ឆេទបង្កើត
+            </th>
+            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[140px]">
+              ផ្ទៀងផ្ទាត់
+            </th>
+            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[140px]">
+              ស្ថានភាព
+            </th>
+            <th className="whitespace-nowrap px-6 py-4 text-end text-lg font-semibold text-primary-800 min-w-[160px] pr-6">
+              សកម្មភាព
+            </th>
+          </tr>
+        </thead>
 
-      {/* Rows */}
-      <div className="overflow-x-auto">
-        <div className="min-w-[960px] divide-y divide-gray-50">
+        {/* ================= BODY ================= */}
+        <tbody>
           {users.map((user) => {
             const name = displayName(
               user.firstName,
@@ -91,205 +87,183 @@ export default function UsersTable({
 
             const isActive = user.status === "ACTIVE";
             const isSuspended = user.status === "SUSPENDED";
-            const isDeletedOrDisabled =
-              user.status === "DELETED" || user.status === "DISABLED";
-            const isDisabledOrDeleted = isSuspended || isDeletedOrDisabled;
+
+            // Only show one clean subtext (Email or Username) without repetition
+            const subtext = user.primaryEmail || (user.username ? `@${user.username}` : "");
 
             return (
-              <div
+              <tr
                 key={user.uuid}
-                className={`group relative grid grid-cols-[minmax(260px,1.5fr)_minmax(140px,1fr)_minmax(160px,1.2fr)_140px_140px_160px] items-center gap-4 px-6 py-4 transition-all duration-150 ${isDisabledOrDeleted
-                    ? "bg-red-50/30 hover:bg-red-50/50"
-                    : "hover:bg-primary-50/30"
-                  }`}
+                className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
               >
-                {/* Left accent bar on hover */}
-                <span
-                  className={`pointer-events-none absolute inset-y-0 left-0 w-[3px] rounded-r-full opacity-0 transition-opacity duration-150 group-hover:opacity-100 ${isDisabledOrDeleted ? "bg-red-400" : "bg-primary-500"
-                    }`}
-                />
-
-                {/* User info cell */}
-                <Link
-                  href={detailHref}
-                  title={`មើលព័ត៌មាន ${name}`}
-                  className="flex min-w-0 items-center gap-3.5 rounded-2xl outline-none transition focus-visible:ring-4 focus-visible:ring-primary-100"
-                >
-                  <div className="relative shrink-0">
-                    <UserAvatar
-                      name={name}
-                      userUuid={user.uuid}
-                      avatarMediaUuid={avatarMediaUuid}
-                      imageUrl={imageUrl}
-                      containerClassName={`flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border text-base font-bold transition-all duration-150 ${isDisabledOrDeleted
-                          ? "border-red-100 bg-red-50 text-red-400 grayscale"
-                          : "border-primary-100 bg-primary-50 text-primary-700 group-hover:border-primary-200 group-hover:shadow-md"
+                {/* User column */}
+                <td className="px-6 py-3.5">
+                  <Link
+                    href={detailHref}
+                    title={`មើលព័ត៌មាន ${name}`}
+                    className="group flex items-center gap-3.5 rounded-2xl outline-none transition focus-visible:ring-4 focus-visible:ring-primary-100"
+                  >
+                    <div className="relative shrink-0">
+                      <UserAvatar
+                        name={name}
+                        userUuid={user.uuid}
+                        avatarMediaUuid={avatarMediaUuid}
+                        imageUrl={imageUrl}
+                        containerClassName="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100 text-base font-bold"
+                      />
+                      <span
+                        className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${
+                          user.status === "ACTIVE"
+                            ? "bg-emerald-400"
+                            : user.status === "SUSPENDED"
+                              ? "bg-amber-400"
+                              : "bg-red-400"
                         }`}
-                    />
-                    {/* Online / status dot */}
-                    <span
-                      className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${user.status === "ACTIVE"
-                          ? "bg-emerald-400"
-                          : user.status === "SUSPENDED"
-                            ? "bg-amber-400"
-                            : "bg-red-400"
-                        }`}
-                    />
-                  </div>
+                      />
+                    </div>
 
-                  <div className="min-w-0">
-                    <p
-                      className={`truncate text-[15px] font-semibold transition-colors duration-150 ${isDisabledOrDeleted
-                          ? "text-gray-400 line-through"
-                          : "text-gray-800 group-hover:text-primary-700"
-                        }`}
-                    >
-                      {name}
-                    </p>
-
-                    {user.primaryEmail && (
-                      <p className="mt-0.5 flex items-center gap-1.5 truncate text-sm text-gray-400">
-                        <Mail size={12} className="shrink-0" />
-                        {user.primaryEmail}
+                    <div className="min-w-0">
+                      <p className="max-w-[280px] truncate text-base font-semibold text-gray-800 transition group-hover:text-primary-800">
+                        {name}
                       </p>
-                    )}
-                  </div>
-                </Link>
+                      {subtext && (
+                        <p className="max-w-[280px] truncate text-sm text-gray-400">
+                          {subtext}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                </td>
 
-                {/* Username cell */}
-                <div className="min-w-0">
-                  <span className="inline-flex items-center gap-1 rounded-lg bg-gray-50 px-2.5 py-1 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-200/70">
-                    <UserIcon size={12} className="text-gray-400" />
-                    <span className="truncate">@{user.username || "—"}</span>
-                  </span>
-                </div>
-
-                {/* Created Date cell */}
-                <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 text-sm text-gray-600">
-                    <Calendar size={13} className="shrink-0 text-gray-400" />
+                {/* Created Date */}
+                <td className="whitespace-nowrap px-6 py-3.5">
+                  <div className="flex items-center gap-2 text-base font-medium text-gray-500">
+                    <Calendar size={16} className="text-primary-700 shrink-0" />
                     <span>{user.createdAt ? formatDateKhmer(user.createdAt) : "—"}</span>
-                  </p>
-                </div>
+                  </div>
+                </td>
 
-                {/* Verified cell */}
-                <div>
+                {/* Verified */}
+                <td className="whitespace-nowrap px-6 py-3.5">
                   {user.emailVerified ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200">
-                      <CheckCircle size={14} />
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-100">
+                      <CheckCircle size={13} />
                       បានផ្ទៀងផ្ទាត់
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-600 ring-1 ring-inset ring-amber-200">
-                      <XCircle size={14} />
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 border border-amber-100">
+                      <XCircle size={13} />
                       មិនទាន់
                     </span>
                   )}
-                </div>
+                </td>
 
-                {/* Status cell */}
-                <div>
+                {/* Status */}
+                <td className="whitespace-nowrap px-6 py-3.5">
                   <StatusBadge status={user.status} />
-                </div>
+                </td>
 
-                {/* Actions cell */}
-                <div className="flex items-center justify-end gap-1 pr-2">
-                  {/* View — always visible */}
-                  <Link
-                    href={detailHref}
-                    title="មើលព័ត៌មាន និង Profiles"
-                    className="flex h-9 w-9 items-center justify-center rounded-xl text-primary-600 transition hover:bg-primary-100 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100"
-                  >
-                    <Eye size={17} />
-                  </Link>
+                {/* Actions */}
+                <td className="px-6 py-2">
+                  <div className="flex items-center justify-end gap-2 pr-2">
+                    {/* View */}
+                    <Link
+                      href={detailHref}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100"
+                      title="មើលលម្អិត"
+                    >
+                      <Eye size={20} />
+                    </Link>
 
-                  {/* ACTIVE: edit + suspend + hard-delete */}
-                  {isActive && (
-                    <>
-                      <button
-                        type="button"
-                        disabled={disabled}
-                        onClick={() => onProfileEdit(user)}
-                        title="កែប្រែព័ត៌មានគណនី"
-                        className="flex h-9 w-9 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        <Pencil size={17} />
-                      </button>
-
-                      {onSuspend && (
+                    {/* ACTIVE: edit + suspend + delete */}
+                    {isActive && (
+                      <>
                         <button
                           type="button"
                           disabled={disabled}
-                          onClick={() => onSuspend(user)}
-                          title="ផ្អាកដំណើរការ"
-                          className="flex h-9 w-9 items-center justify-center rounded-xl text-amber-500 transition hover:bg-amber-50 hover:text-amber-700 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
+                          onClick={() => onProfileEdit(user)}
+                          className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+                          title="កែប្រែ"
                         >
-                          <AlertTriangle size={17} />
+                          <Pencil size={20} />
                         </button>
-                      )}
 
-                      {onHardDelete && (
-                        <button
-                          type="button"
-                          disabled={disabled}
-                          onClick={() => onHardDelete(user)}
-                          title="លុបចេញពីប្រព័ន្ធ"
-                          className="flex h-9 w-9 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          <Trash2 size={17} />
-                        </button>
-                      )}
-                    </>
-                  )}
+                        {onSuspend && (
+                          <button
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => onSuspend(user)}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-500 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            title="ផ្អាកដំណើរការ"
+                          >
+                            <AlertTriangle size={20} />
+                          </button>
+                        )}
 
-                  {/* SUSPENDED: restore + hard-delete */}
-                  {isSuspended && (
-                    <>
-                      {onRestore && (
-                        <button
-                          type="button"
-                          disabled={disabled}
-                          onClick={() => onRestore(user)}
-                          title="ស្តារឡើងវិញ"
-                          className="flex h-9 w-9 items-center justify-center rounded-xl text-primary-600 transition hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          <RotateCcw size={17} />
-                        </button>
-                      )}
+                        {onHardDelete && (
+                          <button
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => onHardDelete(user)}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            title="លុប"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        )}
+                      </>
+                    )}
 
-                      {onHardDelete && (
-                        <button
-                          type="button"
-                          disabled={disabled}
-                          onClick={() => onHardDelete(user)}
-                          title="លុបចេញពីប្រព័ន្ធ"
-                          className="flex h-9 w-9 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          <Trash2 size={17} />
-                        </button>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
+                    {/* SUSPENDED: restore + delete */}
+                    {isSuspended && (
+                      <>
+                        {onRestore && (
+                          <button
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => onRestore(user)}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            title="ស្តារឡើងវិញ"
+                          >
+                            <RotateCcw size={20} />
+                          </button>
+                        )}
+
+                        {onHardDelete && (
+                          <button
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => onHardDelete(user)}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            title="លុប"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
             );
           })}
 
           {users.length === 0 && (
-            <div className="flex min-h-[280px] flex-col items-center justify-center gap-3 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gray-50">
-                <Shield size={28} className="text-gray-300" />
-              </div>
-              <p className="text-base font-medium text-gray-400">
-                មិនមានគណនីអ្នកប្រើប្រាស់
-              </p>
-              <p className="text-sm text-gray-300">
-                ទិន្នន័យអ្នកប្រើនឹងបង្ហាញនៅទីនេះ
-              </p>
-            </div>
+            <tr>
+              <td colSpan={5} className="py-12 text-center text-gray-400">
+                <div className="flex flex-col items-center justify-center gap-3">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gray-50 text-gray-400">
+                    <Shield size={28} />
+                  </div>
+                  <p className="text-lg font-medium text-gray-500">
+                    មិនមានគណនីអ្នកប្រើប្រាស់
+                  </p>
+                </div>
+              </td>
+            </tr>
           )}
-        </div>
-      </div>
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -299,10 +273,10 @@ export function StatusBadge({ status }: { status: string }) {
 
   const className =
     normalized === "ACTIVE"
-      ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+      ? "bg-emerald-50 text-emerald-700 border-emerald-100"
       : normalized === "SUSPENDED"
-        ? "bg-amber-50 text-amber-600 ring-amber-200"
-        : "bg-gray-100 text-gray-500 ring-gray-200";
+        ? "bg-amber-50 text-amber-700 border-amber-100"
+        : "bg-gray-100 text-gray-500 border-gray-200";
 
   const dotClassName =
     normalized === "ACTIVE"
@@ -320,7 +294,7 @@ export function StatusBadge({ status }: { status: string }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium ring-1 ring-inset ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${className}`}
     >
       <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
       {label}

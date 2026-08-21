@@ -111,19 +111,28 @@ export default function ShopsManager() {
 
   const stores = data?.contents ?? [];
 
+  const resolveStoreReviewStatus = (store: StoreType): "APPROVED" | "PENDING" | "REJECTED" => {
+    const raw = String(store.reviewStatus || "").toUpperCase().trim();
+    if (raw === "APPROVED" || raw === "APPROVE") return "APPROVED";
+    if (raw === "REJECTED" || raw === "REJECT") return "REJECTED";
+    if (raw === "PENDING") return "PENDING";
+    if (store.operatingStatus === "OPEN" || store.accountStatus === "ACTIVE") return "APPROVED";
+    if (store.operatingStatus === "TEMPORARILY_CLOSED" || store.accountStatus === "SUSPENDED") return "PENDING";
+    if (store.operatingStatus === "CLOSED") return "REJECTED";
+    return "APPROVED";
+  };
+
   const counts = {
     all: stores.length,
-    pending: stores.filter((store) => store.reviewStatus === "PENDING").length,
-    approved: stores.filter((store) => store.reviewStatus === "APPROVED")
-      .length,
-    rejected: stores.filter((store) => store.reviewStatus === "REJECTED")
-      .length,
+    pending: stores.filter((store) => resolveStoreReviewStatus(store) === "PENDING").length,
+    approved: stores.filter((store) => resolveStoreReviewStatus(store) === "APPROVED").length,
+    rejected: stores.filter((store) => resolveStoreReviewStatus(store) === "REJECTED").length,
   };
 
   const filteredStores =
     filter === "ALL"
       ? stores
-      : stores.filter((store) => store.reviewStatus === filter);
+      : stores.filter((store) => resolveStoreReviewStatus(store) === filter);
 
   const sortedStores = [...filteredStores].sort((first, second) => {
     switch (sortBy) {
@@ -202,7 +211,7 @@ export default function ShopsManager() {
       setNotice({ type: "success", text: "បានកែប្រែ Store ដោយជោគជ័យ។" });
       await refetch();
     } catch (requestError) {
-      setNotice({ type: "error", text: getShopApiErrorMessage(requestError) });
+      throw requestError;
     }
   };
 
@@ -213,7 +222,7 @@ export default function ShopsManager() {
       setNotice(null);
       await deleteShop(deletingStore.uuid).unwrap();
       setDeletingStore(null);
-      setNotice({ type: "success", text: "បានលុប Store ដោយជោគជ័យ។" });
+      setNotice({ type: "success", text: "បានលុបហាងដោយជោគជ័យ។" });
       await refetch();
     } catch (requestError) {
       setNotice({ type: "error", text: getShopApiErrorMessage(requestError) });
@@ -233,6 +242,7 @@ export default function ShopsManager() {
         total={data?.totalElements ?? 0}
         approved={counts.approved}
         pending={counts.pending}
+        rejected={counts.rejected}
       />
 
       <div className="flex w-full flex-nowrap items-center justify-between gap-4">
@@ -355,18 +365,16 @@ export default function ShopsManager() {
                 setSizeOpen((current) => !current);
                 setSortOpen(false);
               }}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${
-                sizeOpen
-                  ? "border-[#137A3D] ring-2 ring-[#137A3D]/10"
-                  : "border-gray-200 hover:border-[#137A3D]/50"
-              }`}
+              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${sizeOpen
+                ? "border-[#137A3D] ring-2 ring-[#137A3D]/10"
+                : "border-gray-200 hover:border-[#137A3D]/50"
+                }`}
             >
               <span className="text-gray-700">{size} / ទំព័រ</span>
               <ChevronDown
                 size={17}
-                className={`text-gray-400 transition-transform duration-200 ${
-                  sizeOpen ? "rotate-180" : ""
-                }`}
+                className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
@@ -386,11 +394,10 @@ export default function ShopsManager() {
                         setPage(0);
                         setSizeOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
-                        selected
-                          ? "bg-emerald-50 text-[#137A3D]"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
-                      }`}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
+                        ? "bg-emerald-50 text-[#137A3D]"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
+                        }`}
                     >
                       <span>{value} / ទំព័រ</span>
                       {selected && (
@@ -410,11 +417,10 @@ export default function ShopsManager() {
                 setSortOpen((current) => !current);
                 setSizeOpen(false);
               }}
-              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
-                sortOpen
-                  ? "border-[#137A3D] bg-emerald-50 text-[#137A3D]"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-[#137A3D] hover:bg-emerald-50 hover:text-[#137A3D]"
-              }`}
+              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen
+                ? "border-[#137A3D] bg-emerald-50 text-[#137A3D]"
+                : "border-gray-200 bg-white text-gray-600 hover:border-[#137A3D] hover:bg-emerald-50 hover:text-[#137A3D]"
+                }`}
               aria-label="Sort stores"
               title="Sort stores"
             >
@@ -436,11 +442,10 @@ export default function ShopsManager() {
                         setSortBy(option.value);
                         setSortOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${
-                        selected
-                          ? "bg-emerald-50 text-[#137A3D]"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
-                      }`}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
+                        ? "bg-emerald-50 text-[#137A3D]"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
+                        }`}
                     >
                       <span>{option.label}</span>
                       {selected && (
@@ -470,11 +475,10 @@ export default function ShopsManager() {
 
       {notice && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-base ${
-            notice.type === "success"
-              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-              : "border-red-100 bg-red-50 text-red-600"
-          }`}
+          className={`rounded-2xl border px-4 py-3 text-base ${notice.type === "success"
+            ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+            : "border-red-100 bg-red-50 text-red-600"
+            }`}
         >
           {notice.text}
         </div>

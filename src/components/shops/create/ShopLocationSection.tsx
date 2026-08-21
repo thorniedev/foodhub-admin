@@ -20,18 +20,18 @@ export default function ShopLocationSection({
   const fields = [
     [
       "addressLine",
-      "Address line",
+      "អាសយដ្ឋាន",
       "text",
       true,
-      "ឧ. No. 25, Street 360, Phnom Penh",
+      "ឧ. ផ្ទះលេខ ២៥ ផ្លូវលេខ ៣៦០",
     ],
-    ["commune", "Commune", "text", false, "ឧ. Boeng Keng Kang"],
-    ["district", "District", "text", false, "ឧ. Chamkar Mon"],
-    ["city", "City", "text", false, "ឧ. Phnom Penh"],
-    ["province", "Province", "text", false, "ឧ. Phnom Penh"],
-    ["postalCode", "Postal code", "text", false, "ឧ. 120102"],
-    ["latitude", "Latitude", "number", true, "ឧ. 11.5484"],
-    ["longitude", "Longitude", "number", true, "ឧ. 104.9307"],
+    ["commune", "ឃុំ / សង្កាត់", "text", false, "ឧ. បឹងកេងកង"],
+    ["district", "ស្រុក / ខណ្ឌ", "text", false, "ឧ. ចំការមន"],
+    ["city", "រាជធានី / ក្រុង", "text", false, "ឧ. ភ្នំពេញ"],
+    ["province", "ខេត្ត", "text", false, "ឧ. ភ្នំពេញ"],
+    ["postalCode", "លេខកូដប្រៃសណីយ៍", "text", false, "ឧ. 120102"],
+    ["latitude", "រយៈទទឹង", "number", true, "ឧ. 11.5484"],
+    ["longitude", "រយៈបណ្តោយ", "number", true, "ឧ. 104.9307"],
   ] as const;
 
   return (
@@ -57,7 +57,7 @@ export default function ShopLocationSection({
           <MapPinned size={22} />
         </div>
 
-        <p className="text-3xl font-semibold text-primary-800">ទីតាំង Store</p>
+        <p className="text-3xl font-semibold text-primary-800">ទីតាំងហាង</p>
       </div>
 
       {/* =================================================

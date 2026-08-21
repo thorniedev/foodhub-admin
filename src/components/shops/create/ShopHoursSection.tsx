@@ -24,13 +24,13 @@ export default function ShopHoursSection() {
 
         <div className="min-w-0">
           <p className="text-3xl font-semibold text-primary-800">
-            ម៉ោងបើកបិទ
+            ម៉ោងបើក និងបិទហាង
           </p>
 
           <p className="mt-2 max-w-3xl text-lg leading-8 text-gray-500">
-            Hours មិនមែនជាផ្នែកនៃ create payload។
-            បង្កើត Store មុន ហើយចូល detail
-            ដើម្បីកំណត់ម៉ោងបើកបិទ។
+            ម៉ោងបើកបិទមិនមែនជាផ្នែកនៃការបង្កើតដំបូងឡើយ។
+            សូមបង្កើតហាងជាមុនសិន បន្ទាប់មកចូលទៅកាន់ទំព័រព័ត៌មានលម្អិតនៃហាង
+            ដើម្បីកំណត់ម៉ោងបើក និងបិទ។
           </p>
         </div>
       </div>

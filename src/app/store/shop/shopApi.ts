@@ -136,7 +136,7 @@ export const shopApi = adminBaseApi.injectEndpoints({
     >({
       query: ({ storeUuid, body }) => ({
         url: `/stores/${encodeURIComponent(storeUuid)}`,
-        method: "PUT",
+        method: "PATCH",
         body,
       }),
       transformResponse: (r) => normalizeOne<Store>(r),

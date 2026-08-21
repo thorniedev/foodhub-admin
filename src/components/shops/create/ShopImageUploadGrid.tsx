@@ -39,12 +39,11 @@ export default function ShopImageUploadGrid({
 
           <div className="min-w-0">
             <p className="text-3xl font-semibold text-primary-800">
-              Store media
+              រូបភាពហាង
             </p>
 
             <p className="mt-2 max-w-2xl text-lg leading-8 text-gray-500">
-              បន្ថែម Logo និង Cover របស់ហាង ដោយ Upload រូបភាពពីឧបករណ៍ ឬប្រើ
-              Image URL។
+              បន្ថែមរូបសញ្ញា (Logo) និងរូបគម្រប (Cover) របស់ហាង ដោយផ្ទុកឡើងរូបភាពពីឧបករណ៍ ឬប្រើប្រាស់ Image URL។
             </p>
           </div>
         </div>
@@ -69,7 +68,7 @@ export default function ShopImageUploadGrid({
             "
           >
             <Upload size={18} />
-            Upload file
+            ផ្ទុកឡើងឯកសារ
           </div>
 
           <div
@@ -89,7 +88,7 @@ export default function ShopImageUploadGrid({
             "
           >
             <Link2 size={18} />
-            Image URL
+            តំណភ្ជាប់រូបភាព (URL)
           </div>
         </div>
       </div>
@@ -108,16 +107,8 @@ export default function ShopImageUploadGrid({
         {/* STORE LOGO */}
 
         <div className="min-w-0">
-          {/* <div className="mb-3">
-            <p className="text-xl font-semibold text-primary-800">Store logo</p>
-
-            <p className="mt-1 text-lg leading-7 text-gray-500">
-              រូបភាពសម្គាល់ហាង។
-            </p>
-          </div> */}
-
           <StoreMediaUploader
-            label="Store logo"
+            label="រូបសញ្ញាហាង (Logo)"
             purpose="STORE_LOGO"
             mediaUuid={logoMediaUuid}
             onMediaUuidChange={(uuid) => onChange("logoMediaUuid", uuid)}
@@ -128,18 +119,8 @@ export default function ShopImageUploadGrid({
         {/* STORE COVER */}
 
         <div className="min-w-0">
-          {/* <div className="mb-3">
-            <p className="text-xl font-semibold text-primary-800">
-              Store cover
-            </p>
-
-            <p className="mt-1 text-lg leading-7 text-gray-500">
-              រូបភាព Cover សម្រាប់បង្ហាញព័ត៌មានហាង។
-            </p>
-          </div> */}
-
           <StoreMediaUploader
-            label="Store cover"
+            label="រូបគម្របហាង (Cover)"
             purpose="STORE_COVER"
             mediaUuid={coverMediaUuid}
             onMediaUuidChange={(uuid) => onChange("coverMediaUuid", uuid)}

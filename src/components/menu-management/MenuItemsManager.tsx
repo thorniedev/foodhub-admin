@@ -10,10 +10,11 @@ import {
   Sliders,
   Store,
   Utensils,
+  X,
 } from "lucide-react";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { useSearchAdvancedMenuItemsMutation } from "@/src/app/store/discoveryApi";
 import type { AdvancedMenuItemSearchRequest } from "@/src/types/discovery";
@@ -109,9 +110,27 @@ function matchesMenuItem(item: MenuItemRecord, search: string) {
 
 export default function MenuItemsManager() {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("FOODS");
+  const searchParams = useSearchParams();
+  const storeUuidParam = searchParams.get("storeUuid");
+  const tabParam = searchParams.get("tab");
+
+  const [tab, setTab] = useState<Tab>(() =>
+    tabParam === "WEBSITE" || storeUuidParam ? "WEBSITE" : "FOODS",
+  );
+  const [selectedStoreUuid, setSelectedStoreUuid] = useState<string | null>(
+    storeUuidParam,
+  );
   const [search, setSearch] = useState("");
   const [notice, setNotice] = useState<Notice>(null);
+
+  useEffect(() => {
+    if (tabParam === "WEBSITE" || storeUuidParam) {
+      setTab("WEBSITE");
+    }
+    if (storeUuidParam) {
+      setSelectedStoreUuid(storeUuidParam);
+    }
+  }, [tabParam, storeUuidParam]);
 
   const [foodModalOpen, setFoodModalOpen] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodRecord | null>(null);
@@ -147,6 +166,12 @@ export default function MenuItemsManager() {
   const ageGroupsQuery = useGetAgeGroupsQuery({ page: 0, size: 100 });
   const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 });
   const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 });
+
+  const selectedStore = useMemo(
+    () =>
+      (storesQuery.data ?? []).find((s) => s.uuid === selectedStoreUuid),
+    [storesQuery.data, selectedStoreUuid],
+  );
 
   const [advancedFilters, setAdvancedFilters] =
     useState<AdvancedMenuItemSearchRequest>({});
@@ -189,8 +214,18 @@ export default function MenuItemsManager() {
   );
 
   const filteredMenuItems = useMemo(
-    () => menuItems.filter((item) => matchesMenuItem(item, search)),
-    [menuItems, search],
+    () =>
+      menuItems.filter((item) => {
+        if (
+          selectedStoreUuid &&
+          item.store?.uuid !== selectedStoreUuid &&
+          (item as any).storeUuid !== selectedStoreUuid
+        ) {
+          return false;
+        }
+        return matchesMenuItem(item, search);
+      }),
+    [menuItems, search, selectedStoreUuid],
   );
 
   const activeFilterCount = useMemo(() => {
@@ -526,6 +561,27 @@ export default function MenuItemsManager() {
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
+          {selectedStoreUuid && (
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-sm font-semibold text-[#137A3D]">
+              <Store size={16} />
+              <span>
+                ហាង:{" "}
+                {selectedStore?.storeName ||
+                  selectedStore?.name ||
+                  selectedStore?.localName ||
+                  "ហាងដែលបានជ្រើសរើស"}
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedStoreUuid(null)}
+                className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[#137A3D] transition hover:bg-emerald-200"
+                title="បង្ហាញហាងទាំងអស់"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          )}
+
           <div className="relative">
             <Search
               size={19}
@@ -701,6 +757,7 @@ export default function MenuItemsManager() {
         ingredients={ingredientsQuery.data ?? []}
         dietaryTypes={dietaryTypesQuery.data?.contents ?? []}
         allergens={allergensQuery.data?.contents ?? []}
+        defaultStoreUuid={selectedStoreUuid}
         saving={creatingMenuItem || updatingMenuItem}
         onClose={() => {
           if (creatingMenuItem || updatingMenuItem) {
@@ -741,6 +798,11 @@ export default function MenuItemsManager() {
       <MenuItemDetailModal
         uuid={detailUuid}
         onClose={() => setDetailUuid(null)}
+        onEdit={(item) => {
+          setDetailUuid(null);
+          setEditingMenu(item);
+          setMenuModalOpen(true);
+        }}
       />
     </div>
   );

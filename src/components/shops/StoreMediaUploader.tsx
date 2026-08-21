@@ -31,6 +31,7 @@ export default function StoreMediaUploader({
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const [hasLoadError, setHasLoadError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +44,8 @@ export default function StoreMediaUploader({
   }, [objectUrl]);
 
   useEffect(() => {
+    setHasLoadError(false);
+
     if (objectUrl) {
       return;
     }
@@ -127,18 +130,18 @@ export default function StoreMediaUploader({
       {/* =====================================================
           HEADER
       ====================================================== */}
-      <div className="flex flex-col gap-3 border-b border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-xl font-semibold text-primary-800">{label}</p>
-          <p className="mt-1 text-lg leading-7 text-gray-500">
-            PNG, JPG, GIF or WebP · max 10 MB
+      <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3.5">
+        <div className="min-w-0 flex-1">
+          <p className="text-base font-semibold text-primary-800">{label}</p>
+          <p className="text-xs text-gray-400">
+            PNG, JPG, GIF ឬ WebP · អតិបរមា 10 MB
           </p>
         </div>
 
         {mediaUuid && (
-          <div className="inline-flex min-h-10 w-fit shrink-0 items-center gap-2 rounded-full bg-primary-50 px-4 text-lg font-medium text-primary-700">
-            <CheckCircle2 size={20} />
-            រូបភាពបានភ្ជាប់
+          <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-[#137A3D] whitespace-nowrap">
+            <CheckCircle2 size={14} className="shrink-0" />
+            បានភ្ជាប់រូបភាព
           </div>
         )}
       </div>
@@ -186,12 +189,13 @@ export default function StoreMediaUploader({
             disabled:opacity-70
           `}
         >
-          {previewUrl ? (
+          {previewUrl && !hasLoadError ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewUrl}
                 alt={`${label} preview`}
+                onError={() => setHasLoadError(true)}
                 className={
                   variant === "logo"
                     ? "h-full w-full object-contain p-6"
@@ -214,11 +218,11 @@ export default function StoreMediaUploader({
                 <ImageIcon size={32} />
               </div>
 
-              <p className="mt-4 text-lg font-semibold text-secondary-600">
-                Upload រូបភាព
+              <p className="mt-2 text-base font-semibold text-secondary-600">
+                ផ្ទុកឡើងរូបភាព
               </p>
 
-              <p className="mt-2 text-lg leading-7 text-gray-500">
+              <p className="mt-1 text-xs text-gray-400">
                 ជ្រើសរើសរូបភាពពីឧបករណ៍របស់អ្នក
               </p>
             </div>
@@ -232,11 +236,11 @@ export default function StoreMediaUploader({
           <div className="absolute inset-5 z-20 flex items-center justify-center rounded-2xl bg-white/90 backdrop-blur-sm">
             <div className="text-center">
               <Loader2
-                size={32}
+                size={28}
                 className="mx-auto animate-spin text-primary-700"
               />
-              <p className="mt-3 text-lg font-medium text-gray-600">
-                កំពុង Upload...
+              <p className="mt-2 text-sm font-medium text-gray-600">
+                កំពុងផ្ទុកឡើង...
               </p>
             </div>
           </div>
@@ -249,10 +253,10 @@ export default function StoreMediaUploader({
           <button
             type="button"
             onClick={clearImage}
-            className="absolute right-8 top-8 z-30 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-white px-4 text-lg font-medium text-red-600 shadow-md transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
+            className="absolute right-6 top-6 z-30 inline-flex items-center justify-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-red-600 shadow-md transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
             aria-label={`Remove ${label}`}
           >
-            <Trash2 size={20} />
+            <Trash2 size={15} />
             លុប
           </button>
         )}
@@ -261,16 +265,16 @@ export default function StoreMediaUploader({
       {/* =====================================================
           HELPER / ERROR
       ====================================================== */}
-      <div className="border-t border-gray-100 px-5 py-4">
+      <div className="border-t border-gray-100 px-4 py-2.5">
         {error ? (
-          <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-lg leading-7 text-red-600">
+          <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs leading-5 text-red-600">
             {error}
           </div>
         ) : (
-          <p className="text-lg leading-7 text-gray-500">
+          <p className="text-xs text-gray-400">
             {mediaUuid
               ? "ចុចលើរូបភាព ដើម្បីជ្រើសរើសរូបថ្មីជំនួស។"
-              : "Upload ពី File "}
+              : "ជ្រើសរើសរូបភាពពីឧបករណ៍របស់អ្នក"}
           </p>
         )}
       </div>

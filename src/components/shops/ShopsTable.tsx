@@ -397,7 +397,7 @@ export default function ShopsTable({
                           disabled:cursor-not-allowed
                           disabled:opacity-40
                         "
-                        title="លុប Store"
+                        title="លុបហាង"
                       >
                         <Trash2 size={20} />
                       </button>

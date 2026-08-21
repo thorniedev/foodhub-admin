@@ -48,7 +48,7 @@ export default function ShopSocialSection({
 
           <div className="min-w-0">
             <p className="text-3xl font-semibold text-primary-800">
-              Social links
+              បណ្ដាញសង្គម
             </p>
 
             <p className="mt-1 text-lg leading-7 text-gray-500">
@@ -140,11 +140,11 @@ export default function ShopSocialSection({
             </div>
 
             <p className="mt-3 text-lg font-medium text-gray-600">
-              មិនមាន Social links
+              មិនទាន់មានបណ្ដាញសង្គម
             </p>
 
             <p className="mt-1 text-lg leading-7 text-gray-400">
-              ចុចប៊ូតុង បន្ថែម ដើម្បីបញ្ចូល Social link ថ្មី។
+              ចុចប៊ូតុង "បន្ថែម" ដើម្បីបញ្ចូលបណ្ដាញសង្គមថ្មី។
             </p>
           </div>
         ) : (

@@ -17,9 +17,20 @@ export function formatRating(value: number | null | undefined): string {
 }
 
 export function formatPriceLevel(value: number | string | null | undefined): string {
-  if (value === null || value === undefined || value === "") return "—";
+  if (value === null || value === undefined || value === "") return "មិនបានកំណត់";
   const n = Number(value);
-  return Number.isFinite(n) && n > 0 && n <= 4 ? "$".repeat(n) : String(value);
+  switch (n) {
+    case 1:
+      return "កម្រិតទាប (ថោក)";
+    case 2:
+      return "កម្រិតមធ្យម (សមរម្យ)";
+    case 3:
+      return "កម្រិតខ្ពស់ (ថ្លៃ)";
+    case 4:
+      return "កម្រិតប្រណិត (ថ្លៃខ្លាំង)";
+    default:
+      return String(value);
+  }
 }
 
 export function formatDayOfWeek(day: number | null | undefined): string {
@@ -35,6 +46,213 @@ export function imageUrlOrNull(value: string | null | undefined): string | null 
   if (!trimmed) return null;
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("/")) return trimmed;
   return `/${trimmed}`;
+}
+
+export interface StoreLiveStatusInfo {
+  status: "OPEN" | "CLOSED" | "TEMPORARILY_CLOSED" | "UNKNOWN";
+  label: string;
+  note: string;
+  isPositive: boolean;
+  isWarning: boolean;
+  isDanger: boolean;
+  colorClass: string;
+  bgClass: string;
+}
+
+export function getStoreLiveStatus(store?: {
+  isOpenNow?: boolean | null;
+  operatingStatus?: string | null;
+} | null): StoreLiveStatusInfo {
+  if (!store) {
+    return {
+      status: "UNKNOWN",
+      label: "មិនមានទិន្នន័យ",
+      note: "មិនទាន់កំណត់",
+      isPositive: false,
+      isWarning: false,
+      isDanger: false,
+      colorClass: "text-gray-500",
+      bgClass: "bg-gray-50",
+    };
+  }
+
+  const op = String(store.operatingStatus || "").toUpperCase();
+
+  if (op === "TEMPORARILY_CLOSED") {
+    return {
+      status: "TEMPORARILY_CLOSED",
+      label: "បិទបណ្តោះអាសន្ន",
+      note: "ហាងបិទជាបណ្តោះអាសន្ន",
+      isPositive: false,
+      isWarning: true,
+      isDanger: false,
+      colorClass: "text-amber-600",
+      bgClass: "bg-amber-50",
+    };
+  }
+
+  if (op === "CLOSED") {
+    return {
+      status: "CLOSED",
+      label: "បានបិទ",
+      note: "ហាងបានបិទដំណើរការ",
+      isPositive: false,
+      isWarning: false,
+      isDanger: true,
+      colorClass: "text-red-600",
+      bgClass: "bg-red-50",
+    };
+  }
+
+  if (op === "OPEN") {
+    if (store.isOpenNow === false) {
+      return {
+        status: "CLOSED",
+        label: "បិទពេលនេះ",
+        note: "ក្រៅម៉ោងដំណើរការ (បើកតាមកាលវិភាគ)",
+        isPositive: false,
+        isWarning: true,
+        isDanger: false,
+        colorClass: "text-amber-600",
+        bgClass: "bg-amber-50",
+      };
+    }
+
+    if (store.isOpenNow === true) {
+      return {
+        status: "OPEN",
+        label: "កំពុងបើកដំណើរការ",
+        note: "ហាងកំពុងបើកទទួលការកម្ម៉ង់",
+        isPositive: true,
+        isWarning: false,
+        isDanger: false,
+        colorClass: "text-[#137A3D]",
+        bgClass: "bg-emerald-50",
+      };
+    }
+
+    return {
+      status: "OPEN",
+      label: "បើកដំណើរការ",
+      note: "ហាងបើកដំណើរការធម្មតា",
+      isPositive: true,
+      isWarning: false,
+      isDanger: false,
+      colorClass: "text-[#137A3D]",
+      bgClass: "bg-emerald-50",
+    };
+  }
+
+  return {
+    status: "UNKNOWN",
+    label: "មិនមានទិន្នន័យ",
+    note: "មិនទាន់កំណត់",
+    isPositive: false,
+    isWarning: false,
+    isDanger: false,
+    colorClass: "text-gray-500",
+    bgClass: "bg-gray-50",
+  };
+}
+
+export function getStoreReviewStatus(reviewStatus?: string | null): {
+  status: string;
+  label: string;
+  note: string;
+  isPositive: boolean;
+  isWarning: boolean;
+  isDanger: boolean;
+  colorClass: string;
+  bgClass: string;
+} {
+  const rv = String(reviewStatus || "").toUpperCase();
+
+  if (rv === "APPROVED") {
+    return {
+      status: "APPROVED",
+      label: "បានអនុម័ត",
+      note: "បានអនុម័តដោយ Admin",
+      isPositive: true,
+      isWarning: false,
+      isDanger: false,
+      colorClass: "text-[#137A3D]",
+      bgClass: "bg-emerald-50",
+    };
+  }
+
+  if (rv === "REJECTED") {
+    return {
+      status: "REJECTED",
+      label: "បានបដិសេធ",
+      note: "ពាក្យស្នើសុំត្រូវបានបដិសេធ",
+      isPositive: false,
+      isWarning: false,
+      isDanger: true,
+      colorClass: "text-red-600",
+      bgClass: "bg-red-50",
+    };
+  }
+
+  return {
+    status: "PENDING",
+    label: "កំពុងរង់ចាំ",
+    note: "កំពុងរង់ចាំការពិនិត្យពី Admin",
+    isPositive: false,
+    isWarning: true,
+    isDanger: false,
+    colorClass: "text-amber-600",
+    bgClass: "bg-amber-50",
+  };
+}
+
+export function getStoreAccountStatus(accountStatus?: string | null): {
+  status: string;
+  label: string;
+  note: string;
+  isPositive: boolean;
+  isWarning: boolean;
+  isDanger: boolean;
+  colorClass: string;
+  bgClass: string;
+} {
+  const ac = String(accountStatus || "").toUpperCase();
+
+  if (ac === "SUSPENDED") {
+    return {
+      status: "SUSPENDED",
+      label: "ត្រូវបានផ្អាក",
+      note: "គណនីត្រូវបានផ្អាកដោយ Admin",
+      isPositive: false,
+      isWarning: false,
+      isDanger: true,
+      colorClass: "text-red-600",
+      bgClass: "bg-red-50",
+    };
+  }
+
+  if (ac === "INACTIVE") {
+    return {
+      status: "INACTIVE",
+      label: "អសកម្ម",
+      note: "គណនីបិទជាបណ្តោះអាសន្ន",
+      isPositive: false,
+      isWarning: false,
+      isDanger: false,
+      colorClass: "text-gray-600",
+      bgClass: "bg-gray-100",
+    };
+  }
+
+  return {
+    status: "ACTIVE",
+    label: "សកម្ម",
+    note: "គណនីកំពុងដំណើរការធម្មតា",
+    isPositive: true,
+    isWarning: false,
+    isDanger: false,
+    colorClass: "text-[#137A3D]",
+    bgClass: "bg-emerald-50",
+  };
 }
 
 export function extractGooglePlaceId(value: unknown): string | null {

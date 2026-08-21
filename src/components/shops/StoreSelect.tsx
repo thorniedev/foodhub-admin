@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 
 type Option = {
@@ -28,10 +28,31 @@ export default function StoreSelect({
   ariaLabel = "Select option",
 }: Props) {
   const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const selected = options.find((option) => option.value === value);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+    };
+  }, [open]);
+
   return (
-    <div className={`relative ${className}`}>
+    <div ref={containerRef} className={`relative ${className}`}>
       <button
         type="button"
         disabled={disabled}
@@ -54,7 +75,7 @@ export default function StoreSelect({
 
       {open && (
         <div
-          className={`absolute left-0 right-0 top-[54px] z-[150] max-h-64 overflow-y-auto rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)] ${menuClassName}`}
+          className={`absolute left-0 right-0 top-[54px] z-[250] max-h-64 overflow-y-auto rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.18)] ${menuClassName}`}
         >
           {options.map((option) => {
             const isSelected = option.value === value;

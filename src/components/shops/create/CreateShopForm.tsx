@@ -12,6 +12,7 @@ import {
   MapPinned,
   Phone,
   Save,
+  Sparkles,
   Store,
 } from "lucide-react";
 
@@ -135,8 +136,8 @@ export default function CreateShopForm() {
       longitude: "104.9307",
       phoneNumber: "+85512345678",
       email: `store.${runId}@example.test`,
-      logoMediaUuid: "5f894f27-af86-44f7-afec-160b0f50bf41",
-      coverMediaUuid: "ba5c0f7a-f86c-4a03-a180-a66ee7ee2e7f",
+      logoMediaUuid: "",
+      coverMediaUuid: "",
       priceLevel: "2",
       hygieneRating: "4.5",
       operatingStatus: "OPEN",
@@ -252,10 +253,10 @@ export default function CreateShopForm() {
 
         <div className="pointer-events-none absolute -bottom-24 right-20 h-64 w-64 rounded-full bg-white/5" />
 
-        <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
+        <div className="relative flex flex-col gap-7 xl:flex-row xl:items-start xl:justify-between">
           {/* Left */}
 
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <Link
               href="/shops"
               className="
@@ -278,7 +279,7 @@ export default function CreateShopForm() {
               "
             >
               <ArrowLeft size={20} />
-              ត្រឡប់ទៅហាង
+              ត្រឡប់ទៅបញ្ជីហាង
             </Link>
 
             <div className="mt-6 flex items-start gap-4">
@@ -288,12 +289,12 @@ export default function CreateShopForm() {
 
               <div className="min-w-0">
                 <p className="text-5xl font-bold text-accent-400">
-                  បង្កើត Store ថ្មី
+                  បង្កើតហាងថ្មី
                 </p>
 
                 <p className="mt-6 max-w-2xl text-xl leading-8 text-white/85">
-                  បំពេញព័ត៌មានហាងដោយដៃ ឬប្រើ Google Places
-                  ដើម្បីនាំចូលព័ត៌មានហាង។
+                  បំពេញព័ត៌មានហាងដោយដៃ ឬប្រើ Google Maps
+                  ដើម្បីនាំចូលព័ត៌មានហាងដោយស្វ័យប្រវត្តិ។
                 </p>
               </div>
             </div>
@@ -301,7 +302,8 @@ export default function CreateShopForm() {
 
           {/* Header Actions */}
 
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+          <div className="flex w-full shrink-0 flex-col gap-3 sm:w-auto sm:flex-row sm:items-center xl:justify-end">
+            {/* Sample Data Button */}
             <button
               type="button"
               onClick={fillSampleData}
@@ -309,27 +311,33 @@ export default function CreateShopForm() {
                 inline-flex
                 min-h-12
                 w-full
+                shrink-0
+                whitespace-nowrap
                 items-center
                 justify-center
                 rounded-full
                 border
-                border-white/20
+                border-white/25
                 bg-white/15
                 px-5
-                text-lg
+                py-2.5
+                text-base
                 font-medium
                 text-white
+                backdrop-blur-sm
                 transition
-                hover:bg-white/20
+                hover:bg-white/25
+                active:scale-95
                 focus:outline-none
                 focus:ring-4
                 focus:ring-white/20
-                sm:w-fit
+                sm:w-auto
               "
             >
               បំពេញទិន្នន័យគំរូ
             </button>
 
+            {/* Google Maps Import Button */}
             <button
               type="button"
               onClick={() => setGoogleOpen(true)}
@@ -337,26 +345,30 @@ export default function CreateShopForm() {
                 inline-flex
                 min-h-12
                 w-full
+                shrink-0
+                whitespace-nowrap
                 items-center
                 justify-center
                 gap-2
                 rounded-full
                 bg-white
                 px-5
-                text-lg
-                font-semibold
+                py-2.5
+                text-base
+                font-bold
                 text-primary-800
                 shadow-sm
                 transition
                 hover:bg-primary-50
+                active:scale-95
                 focus:outline-none
                 focus:ring-4
                 focus:ring-white/20
-                sm:w-fit
+                sm:w-auto
               "
             >
-              <MapPinned size={20} />
-              Import from Google
+              <MapPinned size={20} className="text-primary-700 shrink-0" />
+              ទាញយកទិន្នន័យពី Google Maps
             </button>
           </div>
         </div>
@@ -403,7 +415,7 @@ export default function CreateShopForm() {
               <Phone size={22} />
             </div>
 
-            <p className="text-3xl font-semibold text-primary-800">Contact</p>
+            <p className="text-3xl font-semibold text-primary-800">ទំនាក់ទំនង</p>
           </div>
 
           {/* Fields */}
@@ -414,7 +426,7 @@ export default function CreateShopForm() {
             <label className="block">
               <span className="mb-2 flex items-center gap-2 text-lg font-medium text-primary-800">
                 <Phone size={19} className="text-primary-700" />
-                Phone
+                លេខទូរស័ព្ទ
               </span>
 
               <input
@@ -448,7 +460,7 @@ export default function CreateShopForm() {
             <label className="block">
               <span className="mb-2 flex items-center gap-2 text-lg font-medium text-primary-800">
                 <Mail size={19} className="text-primary-700" />
-                Email
+                អ៊ីមែល
               </span>
 
               <input
@@ -625,7 +637,7 @@ export default function CreateShopForm() {
               <Save size={20} />
             )}
 
-            {isLoading ? "កំពុងបង្កើត..." : "បង្កើត Store"}
+            {isLoading ? "កំពុងបង្កើត..." : "បង្កើតហាង"}
           </button>
         </div>
       </form>

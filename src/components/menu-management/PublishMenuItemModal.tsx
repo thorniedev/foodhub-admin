@@ -103,6 +103,7 @@ export default function PublishMenuItemModal({
   ingredients,
   dietaryTypes = [],
   allergens = [],
+  defaultStoreUuid,
   saving,
   onClose,
   onSubmit,
@@ -114,6 +115,7 @@ export default function PublishMenuItemModal({
   ingredients: IngredientOption[];
   dietaryTypes?: DietaryType[];
   allergens?: Allergen[];
+  defaultStoreUuid?: string | null;
   saving: boolean;
   onClose: () => void;
   onSubmit: (
@@ -134,7 +136,10 @@ export default function PublishMenuItemModal({
     if (!open) return;
 
     if (!item) {
-      setValues(EMPTY);
+      setValues({
+        ...EMPTY,
+        storeUuid: defaultStoreUuid || "",
+      });
       setIngredientRows([]);
       setDietaryTypeRows([]);
       setAllergenRows([]);
@@ -178,7 +183,7 @@ export default function PublishMenuItemModal({
         (f) =>
           (item.food?.canonicalName &&
             f.canonicalName?.toLowerCase() ===
-              item.food.canonicalName?.toLowerCase()) ||
+            item.food.canonicalName?.toLowerCase()) ||
           (item.food?.localName && f.localName === item.food.localName),
       )?.uuid ||
       "";
@@ -493,7 +498,7 @@ export default function PublishMenuItemModal({
 
             <div className="grid gap-5 md:grid-cols-2">
               <label>
-                <Label>Store (ហាងបម្រើ) *</Label>
+                <Label>Store (ហាង) *</Label>
                 <FormSelect
                   disabled={Boolean(item)}
                   value={values.storeUuid}
@@ -1196,18 +1201,16 @@ function FormSelect({
         `}
       >
         <span
-          className={`min-w-0 flex-1 truncate ${
-            selectedOption ? "text-gray-800" : "text-gray-400"
-          }`}
+          className={`min-w-0 flex-1 truncate ${selectedOption ? "text-gray-800" : "text-gray-400"
+            }`}
         >
           {selectedOption?.label ?? placeholder}
         </span>
 
         <ChevronDown
           size={21}
-          className={`shrink-0 text-gray-400 transition-transform ${
-            open ? "rotate-180 text-primary-700" : ""
-          }`}
+          className={`shrink-0 text-gray-400 transition-transform ${open ? "rotate-180 text-primary-700" : ""
+            }`}
         />
       </button>
 
@@ -1258,10 +1261,9 @@ function FormSelect({
                       text-left
                       text-lg
                       transition
-                      ${
-                        selected
-                          ? "bg-primary-50 font-medium text-primary-800"
-                          : "text-gray-700 hover:bg-gray-50"
+                      ${selected
+                        ? "bg-primary-50 font-medium text-primary-800"
+                        : "text-gray-700 hover:bg-gray-50"
                       }
                     `}
                   >

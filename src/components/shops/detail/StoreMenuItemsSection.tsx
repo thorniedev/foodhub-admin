@@ -54,9 +54,11 @@ function getMenuItemImage(item: MenuItemRecord): string | null {
 export default function StoreMenuItemsSection({
   storeUuid,
   onViewItem,
+  onAddMenuItem,
 }: {
   storeUuid: string;
   onViewItem?: (item: MenuItemRecord) => void;
+  onAddMenuItem?: () => void;
 }) {
   const { data, isLoading, isFetching } = useGetPublishedMenuItemsQuery(
     {
@@ -72,88 +74,29 @@ export default function StoreMenuItemsSection({
 
   return (
     <Section
-      title="មុខម្ហូបក្នុងហាង (Menu Items)"
+      title={`មុខម្ហូបក្នុងហាង (${items.length})`}
       icon={<UtensilsCrossed size={22} />}
-    >
-      {/* =================================================
-          TOP ACTIONS
-      ================================================== */}
-
-      <div
-        className="
-          mb-6
-          flex
-          flex-col
-          gap-4
-          sm:flex-row
-          sm:items-center
-          sm:justify-between
-        "
-      >
-        {/* ITEM COUNT */}
-
-        <div className="flex items-center gap-3">
-          <div
-            className="
-              inline-flex
-              min-h-11
-              items-center
-              gap-2
-              rounded-full
-              bg-primary-50
-              px-4
-              text-lg
-              font-medium
-              text-primary-800
-            "
+      action={
+        onAddMenuItem ? (
+          <button
+            type="button"
+            onClick={onAddMenuItem}
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#137A3D] px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-[#0f6833]"
           >
-            <UtensilsCrossed size={19} />
-            {items.length} មុខម្ហូប
-          </div>
-
-          {isFetching && (
-            <Loader2
-              size={22}
-              className="
-                animate-spin
-                text-primary-700
-              "
-            />
-          )}
-        </div>
-
-        {/* MANAGE MENU */}
-
-        <Link
-          href="/menu-items"
-          className="
-            inline-flex
-            min-h-[48px]
-            w-full
-            items-center
-            justify-center
-            gap-2
-            rounded-full
-            border
-            border-primary-200
-            bg-primary-50
-            px-5
-            text-lg
-            font-medium
-            text-primary-800
-            transition
-            hover:border-primary-300
-            hover:bg-primary-100
-            focus:outline-none
-            focus:ring-4
-            focus:ring-primary-100
-            sm:w-fit
-          "
-        >
-          <Plus size={20} />
-          គ្រប់គ្រង Menu
-        </Link>
-      </div>
+            <Plus size={16} />
+            បង្កើត មីនុយ
+          </button>
+        ) : (
+          <Link
+            href={`/menu-items?storeUuid=${storeUuid}&tab=WEBSITE`}
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#137A3D] px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-[#0f6833]"
+          >
+            <Plus size={16} />
+            គ្រប់គ្រង Menu
+          </Link>
+        )
+      }
+    >
 
       {/* =================================================
           LOADING
@@ -242,148 +185,86 @@ export default function StoreMenuItemsSection({
             នៅឡើយទេ។
           </p>
 
-          <Link
-            href="/menu-items"
-            className="
-              mt-5
-              inline-flex
-              min-h-[52px]
-              items-center
-              justify-center
-              gap-2
-              rounded-full
-              bg-primary-800
-              px-6
-              text-lg
-              font-medium
-              text-white
-              transition
-              hover:bg-primary-900
-              focus:outline-none
-              focus:ring-4
-              focus:ring-primary-200
-            "
-          >
-            <Plus size={20} />
-            Publish Menu Item ដំបូង
-          </Link>
+          {onAddMenuItem ? (
+            <button
+              type="button"
+              onClick={onAddMenuItem}
+              className="
+                mt-5
+                inline-flex
+                min-h-[48px]
+                items-center
+                justify-center
+                gap-2
+                rounded-full
+                bg-[#137A3D]
+                px-6
+                text-base
+                font-semibold
+                text-white
+                transition
+                hover:bg-[#0f6833]
+              "
+            >
+              <Plus size={18} />
+              Publish Menu Item ដំបូង
+            </button>
+          ) : (
+            <Link
+              href="/menu-items"
+              className="
+                mt-5
+                inline-flex
+                min-h-[48px]
+                items-center
+                justify-center
+                gap-2
+                rounded-full
+                bg-[#137A3D]
+                px-6
+                text-base
+                font-semibold
+                text-white
+                transition
+                hover:bg-[#0f6833]
+              "
+            >
+              <Plus size={18} />
+              Publish Menu Item ដំបូង
+            </Link>
+          )}
         </div>
       ) : (
         /* =================================================
             MENU ITEM GRID
         ================================================== */
-
-        <div
-          className="
-            grid
-            grid-cols-1
-            gap-5
-            xl:grid-cols-2
-          "
-        >
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {items.map((item) => {
             const image = getMenuItemImage(item);
-
             const available = item.availabilityStatus === "AVAILABLE";
 
             return (
               <div
                 key={item.uuid}
                 onClick={() => onViewItem?.(item)}
-                className="
-                    group
-                    relative
-                    min-w-0
-                    cursor-pointer
-                    overflow-hidden
-                    rounded-2xl
-                    border
-                    border-gray-100
-                    bg-white
-                    p-4
-                    transition
-                    hover:border-primary-200
-                    hover:shadow-md
-                    sm:p-5
-                  "
+                className="group relative min-w-0 cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-2xs transition-all duration-200 hover:border-emerald-200 hover:shadow-md sm:p-4.5"
               >
-                <div
-                  className="
-                      flex
-                      flex-col
-                      gap-4
-                      sm:flex-row
-                    "
-                >
+                <div className="flex flex-col gap-3.5 sm:flex-row">
                   {/* =====================================
-                        IMAGE
+                        IMAGE (Star badge deleted as requested)
                     ====================================== */}
-
-                  <div
-                    className="
-                        relative
-                        h-48
-                        w-full
-                        shrink-0
-                        overflow-hidden
-                        rounded-2xl
-                        bg-gray-100
-                        sm:h-32
-                        sm:w-32
-                      "
-                  >
+                  <div className="relative h-44 w-full shrink-0 overflow-hidden rounded-xl bg-gray-100 sm:h-28 sm:w-28">
                     {image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={image}
                         alt={item.name}
                         loading="lazy"
-                        className="
-                            h-full
-                            w-full
-                            object-cover
-                            transition
-                            duration-300
-                            group-hover:scale-105
-                          "
+                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                       />
                     ) : (
-                      <div
-                        className="
-                            flex
-                            h-full
-                            w-full
-                            items-center
-                            justify-center
-                            bg-primary-50
-                            text-primary-700
-                          "
-                      >
-                        <UtensilsCrossed size={34} />
-                      </div>
-                    )}
-
-                    {/* FEATURED */}
-
-                    {item.isFeatured && (
-                      <div
-                        className="
-                            absolute
-                            left-2
-                            top-2
-                            flex
-                            h-10
-                            w-10
-                            items-center
-                            justify-center
-                            rounded-full
-                            bg-secondary-500
-                            text-white
-                            shadow-sm
-                          "
-                        title="Featured"
-                      >
-                        <Sparkles size={19} />
+                      <div className="flex h-full w-full items-center justify-center bg-emerald-50 text-[#137A3D]">
+                        <UtensilsCrossed size={28} />
                       </div>
                     )}
                   </div>
@@ -391,21 +272,12 @@ export default function StoreMenuItemsSection({
                   {/* =====================================
                         CONTENT
                     ====================================== */}
-
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    {/* NAME + VIEW */}
-
-                    <div className="flex min-w-0 items-start justify-between gap-3">
+                  <div className="flex min-w-0 flex-1 flex-col justify-between">
+                    {/* NAME + VIEW BUTTON */}
+                    <div className="flex min-w-0 items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <p
-                          className="
-                              truncate
-                              text-xl
-                              font-semibold
-                              text-gray-900
-                              transition
-                              group-hover:text-primary-800
-                            "
+                          className="text-base font-bold leading-snug text-gray-900 transition group-hover:text-[#137A3D] line-clamp-2"
                           title={item.name}
                         >
                           {item.name}
@@ -414,12 +286,7 @@ export default function StoreMenuItemsSection({
                         {item.food?.canonicalName &&
                           item.food.canonicalName !== item.name && (
                             <p
-                              className="
-                                  mt-1
-                                  truncate
-                                  text-lg
-                                  text-gray-500
-                                "
+                              className="mt-0.5 text-xs text-gray-500 line-clamp-1"
                               title={item.food.canonicalName}
                             >
                               {item.food.canonicalName}
@@ -431,121 +298,42 @@ export default function StoreMenuItemsSection({
                         type="button"
                         onClick={(event) => {
                           event.stopPropagation();
-
                           onViewItem?.(item);
                         }}
-                        className="
-                            flex
-                            h-11
-                            w-11
-                            shrink-0
-                            items-center
-                            justify-center
-                            rounded-xl
-                            border
-                            border-gray-100
-                            bg-gray-50
-                            text-gray-500
-                            transition
-                            hover:border-primary-200
-                            hover:bg-primary-50
-                            hover:text-primary-800
-                            focus:outline-none
-                            focus:ring-4
-                            focus:ring-primary-100
-                          "
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-[#137A3D]"
                         aria-label="មើលព័ត៌មានលម្អិត"
                         title="មើលព័ត៌មានលម្អិត"
                       >
-                        <Eye size={20} />
+                        <Eye size={16} />
                       </button>
                     </div>
 
-                    {/* =====================================
-                          PRICE
-                      ====================================== */}
-
-                    <div className="mt-4 flex items-center gap-2">
-                      <div
-                        className="
-                            flex
-                            h-10
-                            w-10
-                            shrink-0
-                            items-center
-                            justify-center
-                            rounded-xl
-                            bg-primary-50
-                            text-primary-800
-                          "
-                      >
-                        <DollarSign size={20} />
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="text-lg font-semibold text-primary-800">
-                          {Number(item.price ?? 0).toFixed(2)}{" "}
-                          <span className="font-medium text-gray-500">
-                            {item.currencyCode || "USD"}
-                          </span>
-                        </p>
-                      </div>
+                    {/* PRICE */}
+                    <div className="mt-2 flex items-baseline gap-1.5">
+                      <span className="text-base font-extrabold text-[#137A3D]">
+                        ${Number(item.price ?? 0).toFixed(2)}
+                      </span>
+                      <span className="text-xs font-bold text-secondary-600">
+                        {item.currencyCode || "USD"}
+                      </span>
                     </div>
 
-                    {/* =====================================
-                          META
-                      ====================================== */}
-
-                    <div
-                      className="
-                          mt-auto
-                          flex
-                          flex-wrap
-                          items-center
-                          gap-3
-                          pt-4
-                        "
-                    >
+                    {/* META TAGS (PREP TIME & AVAILABILITY) */}
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
                       {/* PREPARATION TIME */}
-
                       {item.preparationTimeMinutes != null && (
-                        <div
-                          className="
-                              inline-flex
-                              min-h-10
-                              items-center
-                              gap-2
-                              rounded-full
-                              bg-gray-50
-                              px-4
-                              text-lg
-                              font-medium
-                              text-gray-600
-                            "
-                        >
-                          <Clock size={19} />
-                          {item.preparationTimeMinutes} min
+                        <div className="inline-flex items-center gap-1.5 rounded-lg border border-secondary-100 bg-secondary-50 px-2.5 py-1 text-xs font-semibold text-secondary-700">
+                          <Clock size={13} className="text-secondary-500" />
+                          <span>{item.preparationTimeMinutes} min</span>
                         </div>
                       )}
 
                       {/* AVAILABILITY */}
-
                       <div
-                        className={`
-                            inline-flex
-                            min-h-10
-                            items-center
-                            rounded-full
-                            px-4
-                            text-lg
-                            font-medium
-
-                            ${
-                              available
-                                ? "bg-primary-50 text-primary-800"
-                                : "bg-gray-100 text-gray-600"
-                            }
-                          `}
+                        className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold ${available
+                          ? "bg-emerald-50 text-[#137A3D]"
+                          : "bg-gray-100 text-gray-600"
+                          }`}
                       >
                         {(() => {
                           const s = (item.availabilityStatus || "AVAILABLE").toUpperCase();

@@ -370,7 +370,7 @@ export default function DeleteShopConfirmModal({
               <Trash2 size={20} />
             )}
 
-            {loading ? "កំពុងលុប..." : "លុប Store"}
+            {loading ? "កំពុងលុប..." : "លុបហាង"}
           </button>
         </div>
       </div>

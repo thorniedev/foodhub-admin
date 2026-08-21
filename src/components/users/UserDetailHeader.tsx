@@ -85,7 +85,7 @@ export default function UserDetailHeader({
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                <p className="truncate text-4xl font-extrabold text-white drop-shadow-xs sm:text-5xl">
+                <p className="truncate text-4xl font-extrabold text-accent-400 drop-shadow-xs sm:text-5xl">
                   {name}
                 </p>
 

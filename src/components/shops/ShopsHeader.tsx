@@ -1,15 +1,17 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Building2, MapPinned, Plus, ShieldCheck, Store } from "lucide-react";
+import { Building2, MapPinned, Plus, ShieldAlert, ShieldCheck, Store } from "lucide-react";
 
 export default function ShopsHeader({
   total,
   approved,
   pending,
+  rejected = 0,
 }: {
   total: number;
   approved: number;
   pending: number;
+  rejected?: number;
 }) {
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
@@ -25,29 +27,33 @@ export default function ShopsHeader({
 
             <div>
               <p className="text-5xl font-bold text-accent-400">គ្រប់គ្រងហាង</p>
-              <p className="mt-6 max-w-2xl text-xl  text-white/85">
-                គ្រប់គ្រង បន្ថែម កែប្រែ ស្ថានភាព ម៉ោងបើកបិទ{" "}
-                <br className=" md:block max-md:hidden" /> ទីតាំង និង Google
-                Places សម្រាប់ហាងក្នុង FoodHub។
+              <p className="mt-6 max-w-2xl text-xl text-white/85">
+                គ្រប់គ្រង បង្កើតថ្មី កែប្រែស្ថានភាព ម៉ោងបើក និងបិទ  ទីតាំងហាង  {" "}
+                <br className=" md:block max-md:hidden" />និងផែនទី Google នៃបណ្ដាហាងក្នុង ម្ហូបអារហារ។
               </p>
             </div>
           </div>
 
-          <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat
-              icon={<Building2 size={20} />}
+              icon={<Store size={20} />}
               label="ហាងសរុប"
               value={total}
             />
             <Stat
               icon={<ShieldCheck size={20} />}
-              label="Approved ក្នុងទំព័រ"
+              label="បានអនុម័ត"
               value={approved}
             />
             <Stat
               icon={<MapPinned size={20} />}
-              label="Pending ក្នុងទំព័រ"
+              label="រង់ចាំពិនិត្យ"
               value={pending}
+            />
+            <Stat
+              icon={<ShieldAlert size={20} />}
+              label="បានបដិសេធ"
+              value={rejected}
             />
           </div>
         </div>

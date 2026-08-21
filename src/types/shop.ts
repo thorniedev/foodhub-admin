@@ -133,14 +133,17 @@ export interface CreateStorePayload {
   socialLinks?: StoreSocialLink[];
 }
 
-/** Fields demonstrated by the supplied PUT request. */
+/** Fields demonstrated by the supplied PUT request (matches StoreRequest). */
 export interface UpdateStorePayload {
   storeName: string;
   description?: string | null;
   addressLine: string;
+  commune?: string | null;
+  district?: string | null;
   city?: string | null;
   province?: string | null;
   countryCode: string;
+  postalCode?: string | null;
   timezone: string;
   latitude: number;
   longitude: number;

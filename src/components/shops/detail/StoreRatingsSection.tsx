@@ -1,61 +1,63 @@
-import type { ReactNode } from "react";
+"use client";
+
 import { BadgeCheck, MessageSquareText, ShieldCheck, Star } from "lucide-react";
 import type { Store } from "@/src/types/shop";
 import { formatRating } from "@/src/lib/shopFormat";
-import { Section } from "./StoreOverviewSection";
+import { Item, Section } from "./StoreOverviewSection";
 
 export default function StoreRatingsSection({ store }: { store: Store }) {
+  const ratingNum = Number(store.averageRating || 0);
+  const totalReviews = Number(store.totalReviews || 0);
   const reviewStatus = store.reviewStatus || "UNKNOWN";
+  const hygieneRating = Number(store.hygieneRating || 0);
 
   return (
-    <Section title="Ratings & review state" icon={<Star size={24} />}>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {/* Average rating */}
-        <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-          <p className="flex items-center gap-1.5 text-lg font-bold uppercase tracking-wider text-gray-400">
-            <Star size={18} />
-            Average rating
-          </p>
-          <div className="mt-2 flex items-center gap-2">
-            <p className="text-xl font-bold text-amber-600">
-              {formatRating(store.averageRating)}
-            </p>
-            <Star size={20} className="fill-amber-500 text-amber-500" />
-          </div>
-        </div>
+    <Section title="ការវាយតម្លៃ & ស្ថានភាពពិនិត្យ" icon={<Star size={22} />}>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Item
+          label="ពិន្ទុវាយតម្លៃមធ្យម"
+          customValue={
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-bold text-amber-600">
+                {ratingNum > 0 ? ratingNum.toFixed(1) : "0.0"}
+              </span>
+              <div className="flex items-center gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    size={16}
+                    className={
+                      star <= Math.round(ratingNum)
+                        ? "fill-amber-400 text-amber-400"
+                        : "fill-gray-200 text-gray-200"
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+          }
+          icon={<Star size={19} />}
+        />
 
-        {/* Total reviews */}
-        <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-          <p className="flex items-center gap-1.5 text-lg font-bold uppercase tracking-wider text-gray-400">
-            <MessageSquareText size={18} />
-            Total reviews
-          </p>
-          <p className="mt-2 text-xl font-bold text-gray-900">
-            {String(store.totalReviews ?? 0)}
-          </p>
-        </div>
+        <Item
+          label="ចំនួនការវាយតម្លៃសរុប"
+          value={`${totalReviews} មតិ`}
+          icon={<MessageSquareText size={19} />}
+        />
 
-        {/* Hygiene rating */}
-        <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-          <p className="flex items-center gap-1.5 text-lg font-bold uppercase tracking-wider text-gray-400">
-            <ShieldCheck size={18} />
-            Hygiene rating
-          </p>
-          <p className="mt-2 text-xl font-bold text-emerald-700">
-            {formatRating(store.hygieneRating)}
-          </p>
-        </div>
+        <Item
+          label="កម្រិតអនាម័យ"
+          value={hygieneRating > 0 ? `${formatRating(store.hygieneRating)} / 5.0` : "មិនមានកំណត់"}
+          icon={<ShieldCheck size={19} />}
+        />
 
-        {/* Review status */}
-        <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-          <p className="flex items-center gap-1.5 text-lg font-bold uppercase tracking-wider text-gray-400">
-            <BadgeCheck size={18} />
-            Review status
-          </p>
-          <div className="mt-2">
+        <Item
+          label="ស្ថានភាពពិនិត្យ"
+          customValue={
             <ReviewStatusBadge status={reviewStatus} />
-          </div>
-        </div>
+          }
+          icon={<BadgeCheck size={19} />}
+        />
       </div>
     </Section>
   );
@@ -70,20 +72,26 @@ function ReviewStatusBadge({ status }: { status: string }) {
     ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
     : rejected
       ? "bg-red-50 text-red-600 ring-red-100"
-      : "bg-gray-100 text-gray-600 ring-gray-200";
+      : "bg-amber-50 text-amber-700 ring-amber-200";
 
   const dotStyle = approved
     ? "bg-emerald-600"
     : rejected
       ? "bg-red-500"
-      : "bg-gray-400";
+      : "bg-amber-500";
+
+  const labelKhmer = approved
+    ? "បានអនុម័ត"
+    : rejected
+      ? "បានបដិសេធ"
+      : "កំពុងរង់ចាំពិនិត្យ";
 
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-lg font-bold ring-1 ring-inset ${badgeStyle}`}
+      className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-bold ring-1 ring-inset ${badgeStyle}`}
     >
       <span className={`h-2 w-2 shrink-0 rounded-full ${dotStyle}`} />
-      {normalized}
+      {labelKhmer}
     </span>
   );
 }

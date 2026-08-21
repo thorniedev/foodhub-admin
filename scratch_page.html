@@ -1,0 +1,296 @@
+﻿<!DOCTYPE html><html lang="km"><head><script>
+
+
+const kcContext = {
+    "social": {
+        /* class: org.keycloak.forms.login.freemarker.model.IdentityProviderBean */
+        "baseURI": {
+            "path": "\/",
+            "rawPath": "\/",
+            "rawSchemeSpecificPart": "\/?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ&session_code=V-XW_OpfDUL24t4tcsAkzLUBi2L6cy6k_2InxCOeN5M",
+            "opaque": false,
+            "query": "client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ&session_code=V-XW_OpfDUL24t4tcsAkzLUBi2L6cy6k_2InxCOeN5M",
+            "schemeSpecificPart": "\/?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ&session_code=V-XW_OpfDUL24t4tcsAkzLUBi2L6cy6k_2InxCOeN5M",
+            "port": -1,
+            "absolute": false,
+            "rawQuery": "client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ&session_code=V-XW_OpfDUL24t4tcsAkzLUBi2L6cy6k_2InxCOeN5M",
+        },
+        "providers": [
+            {
+                /* class: org.keycloak.forms.login.freemarker.model.IdentityProviderBean$IdentityProvider */
+                "displayName": "Facebook",
+                "providerId": "facebook",
+                "loginUrl": "\/realms/foodhub/broker/facebook/login?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ&session_code=V-XW_OpfDUL24t4tcsAkzLUBi2L6cy6k_2InxCOeN5M",
+                "iconClasses": "fa fa-facebook",
+                "alias": "facebook",
+                "themeConfig": {
+                },
+            },
+            {
+                /* class: org.keycloak.forms.login.freemarker.model.IdentityProviderBean$IdentityProvider */
+                "displayName": "Google",
+                "providerId": "google",
+                "loginUrl": "\/realms/foodhub/broker/google/login?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ&session_code=V-XW_OpfDUL24t4tcsAkzLUBi2L6cy6k_2InxCOeN5M",
+                "iconClasses": "fa fa-google",
+                "alias": "google",
+                "themeConfig": {
+                },
+            },
+        ],
+    },
+    "auth": {
+        /* class: org.keycloak.forms.login.freemarker.model.AuthenticationContextBean */
+        "showResetCredentials": false,
+        "authenticationSelections": [
+            {
+                "helpText": "auth-username-password-form-help-text",
+                "displayName": "auth-username-password-form-display-name",
+                "iconCssClass": "kcAuthenticatorDefaultClass",
+                "authExecId": "ffb3e87a-7da5-4525-81a6-0a0ccfd5e997",
+                /*authenticationExecution: Should not be exposed */
+            },
+        ],
+        "showUsername": false,
+        "showTryAnotherWayLink": false,
+        /*auth.attemptedUsername excluded*/
+    },
+    "title": "Sign in to FoodHub",
+    "login": {
+        /* class: org.keycloak.forms.login.freemarker.model.LoginBean */
+    },
+    "pageId": "login",
+    "url": {
+        /* class: org.keycloak.forms.login.freemarker.model.UrlBean */
+        "oauthAction": "\/realms/foodhub/login-actions/authenticate",
+        "resourcesPath": "\/resources/8aeeb/login/mhoubahar-theme",
+        "loginAction": "https://auth.mhoubahar.store/realms/foodhub/login-actions/authenticate?session_code=V-XW_OpfDUL24t4tcsAkzLUBi2L6cy6k_2InxCOeN5M&execution=ffb3e87a-7da5-4525-81a6-0a0ccfd5e997&client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ",
+        "loginUrl": "\/realms/foodhub/login-actions/authenticate?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ",
+        "resourcesCommonPath": "\/resources/8aeeb/common/keycloak",
+        "firstBrokerLoginUrl": "\/realms/foodhub/login-actions/first-broker-login?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ",
+        "registrationUrl": "\/realms/foodhub/login-actions/registration?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ",
+        "logoutConfirmAction": "\/realms/foodhub/protocol/openid-connect/logout/logout-confirm?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ",
+        "registrationAction": "https://auth.mhoubahar.store/realms/foodhub/login-actions/authenticate?session_code=V-XW_OpfDUL24t4tcsAkzLUBi2L6cy6k_2InxCOeN5M&execution=ffb3e87a-7da5-4525-81a6-0a0ccfd5e997&client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ",
+        "loginResetCredentialsUrl": "\/realms/foodhub/login-actions/reset-credentials?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ",
+        "ssoLoginInOtherTabsUrl": "\/realms/foodhub/login-actions/restart?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ&skip_logout=true",
+        "resourcesUrl": "\/resources/8aeeb?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ/login/mhoubahar-theme",
+        "loginRestartFlowUrl": "\/realms/foodhub/login-actions/restart?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ&skip_logout=false",
+        "resourcesCommonUrl": "\/resources/8aeeb?client_id=mhoubahar-web&tab_id=z7QtMbIUfok&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjayIsInJ0IjoiY29kZSIsInJtIjoicXVlcnkiLCJzdCI6IjlZNWpwNlV1RG1zNm82Q0VWM011WV9uQWQ4U3dpV253Y2ZUaGltMFZrZGMifQ/common/keycloak",
+        "oauth2DeviceVerificationAction": "\/realms/foodhub/login-actions/authenticate",
+    },
+    "authenticationSession": {
+        /* class: org.keycloak.forms.login.freemarker.model.AuthenticationSessionBean */
+        "tabId": "z7QtMbIUfok",
+        "authSessionId": "bdc0hl4S3NaNqNyJ9IlOqvjh",
+        "authSessionIdHash": "Z0IHAOyqqQUdSQqbS1uIE91G7+ws24ktEVVA4MTDybc",
+    },
+    "messagesPerField": {
+        /* class: org.keycloak.theme.beans.MessagesPerFieldBean */
+        "get": function (fieldName) { if(fieldName === 'firstName'){ return ''; } if(fieldName === 'lastName'){ return ''; } if(fieldName === 'email'){ return ''; } if(fieldName === 'username' || fieldName === 'password' ){ return ''; } if(fieldName === 'password-confirm'){ return ''; } if(fieldName === 'global'){ return ''; } if(fieldName === 'totp'){ return ''; } if(fieldName === 'userLabel'){ return ''; } if(fieldName === 'recoveryCodeInput'){ return ''; } if(fieldName === 'termsAccepted'){ return ''; } },
+        "existsError": function (fieldName) { if(fieldName === 'firstName' ){ return false; }if(fieldName === 'lastName' ){ return false; }if(fieldName === 'email' ){ return false; }if(fieldName === 'username' || fieldName === 'password' ){ return false; } if(fieldName === 'password-confirm' ){ return false; }if(fieldName === 'global' ){ return false; }if(fieldName === 'totp' ){ return false; }if(fieldName === 'userLabel' ){ return false; }if(fieldName === 'recoveryCodeInput' ){ return false; }if(fieldName === 'termsAccepted' ){ return false; }},
+    },
+    "templateName": "login.ftl",
+    "client": {
+        /* class: org.keycloak.forms.login.freemarker.model.ClientBean */
+        "clientId": "mhoubahar-web",
+        "description": "Next.js FoodHub frontend",
+        "baseUrl": "https://mhoubahar.store",
+        "name": "FoodHub Web Application",
+        "attributes": {
+            "logout.confirmation.enabled": "false",
+            "id.token.as.detached.signature": "false",
+            "client.secret.creation.time": "1786941328",
+            "client.introspection.response.allow.jwt.claim.enabled": "false",
+            "standard.token.exchange.enabled": "false",
+            "oauth2.jwt.authorization.grant.enabled": "false",
+            "post.logout.redirect.uris": "http://localhost:3000/*##http://localhost:3001/*##https://mhoubahar.store/*",
+            "oauth2.device.authorization.grant.enabled": "false",
+            "backchannel.logout.revoke.offline.tokens": "false",
+            "use.refresh.tokens": "true",
+            "realm_client": "false",
+            "oidc.ciba.grant.enabled": "false",
+            "client.use.lightweight.access.token.enabled": "false",
+            "backchannel.logout.session.required": "false",
+            "request.object.required": "not required",
+            "client_credentials.use_refresh_token": "false",
+            "access.token.header.type.rfc9068": "false",
+            "tls.client.certificate.bound.access.tokens": "false",
+            "require.pushed.authorization.requests": "false",
+            "acr.loa.map": "{}",
+            "display.on.consent.screen": "false",
+            "pkce.code.challenge.method": "S256",
+            "token.response.type.bearer.lower-case": "false",
+            "dpop.bound.access.tokens": "false",
+        },
+    },
+    "passwordPolicies": {
+        /* class: dev.jcputney.keycloak.extensions.theme.login.PasswordPoliciesBean */
+        "notEmail": false,
+        "notUsername": false,
+    },
+    "realm": {
+        /* class: org.keycloak.forms.login.freemarker.model.RealmBean */
+        "displayName": "FoodHub",
+        "registrationAllowed": false,
+        "displayNameHtml": "FoodHub",
+        "resetPasswordAllowed": true,
+        "resetCredentialsActionTokenLifespanMinutes": 5,
+        "password": true,
+        "actionTokenGeneratedByUserLifespanMinutes": 5,
+        "internationalizationEnabled": false,
+        "idpVerifyAccountLinkActionTokenLifespanMinutes": 5,
+        "verifyEmailActionTokenLifespanMinutes": 5,
+        "loginWithEmailAllowed": true,
+        "duplicateEmailsAllowed": false,
+        "editUsernameAllowed": false,
+        "name": "foodhub",
+        "rememberMe": true,
+        "registrationEmailAsUsername": true,
+        "identityFederationEnabled": true,
+    },
+    "darkMode": true,
+    "scripts": [
+    ],
+    "lang": "en",
+    "properties": {
+        "parent": "keycloak",
+        "styles": "css/login.css",
+        "abstract": "true",
+        "stylesCommon": "vendor/patternfly-v4/patternfly.min.css vendor/patternfly-v3/css/patternfly.min.css vendor/patternfly-v3/css/patternfly-additions.min.css lib/pficon/pficon.css",
+        "KEYCLOAKIFY_SPA_DEV_SERVER_PORT": "",
+        "darkMode": "true",
+    },
+};
+kcContext.keycloakifyVersion = "11.15.11";
+kcContext.themeVersion = "1.0.0";
+kcContext.themeType = "login";
+kcContext.themeName = "mhoubahar-theme";
+kcContext.pageId = "login.ftl";
+kcContext.ftlTemplateFileName = "login.ftl";
+
+
+kcContext["x-keycloakify"] = {};
+
+kcContext["x-keycloakify"].resourcesPath = "/resources/8aeeb/login/mhoubahar-theme";
+
+{
+    var messages = {};
+        messages["auth-username-password-form-help-text"] = decodeHtmlEntities("Sign in by entering your username and password.");
+        messages["auth-username-password-form-display-name"] = decodeHtmlEntities("Username and password");
+    kcContext["x-keycloakify"].messages = messages;
+}
+
+if( 
+    kcContext.url instanceof Object &&
+    typeof kcContext.url.resourcesPath === "string"
+){
+    kcContext.url.resourcesCommonPath = kcContext.url.resourcesPath + "/resources-common";
+}
+
+if( kcContext.messagesPerField ){
+    var existsError_singleFieldName = kcContext.messagesPerField.existsError;
+    kcContext.messagesPerField.existsError = function (){
+        for( let i = 0; i < arguments.length; i++ ){
+            if( existsError_singleFieldName(arguments[i]) ){
+                return true;
+            }
+        }
+        return false;
+    };
+    kcContext.messagesPerField.exists = function (fieldName) {
+        return kcContext.messagesPerField.get(fieldName) !== "";
+    };
+    kcContext.messagesPerField.printIfExists = function (fieldName, text) {
+        return kcContext.messagesPerField.exists(fieldName) ? text : undefined;
+    };
+    kcContext.messagesPerField.getFirstError = function () {
+        for( let i = 0; i < arguments.length; i++ ){
+            const fieldName = arguments[i];
+            if( kcContext.messagesPerField.existsError(fieldName) ){
+                return kcContext.messagesPerField.get(fieldName);
+            }
+        }
+    };
+}
+attributes_to_attributesByName: {
+    if( !kcContext.profile ){
+        break attributes_to_attributesByName;
+    }
+    if( !kcContext.profile.attributes ){
+        break attributes_to_attributesByName;
+    }
+    var attributes = kcContext.profile.attributes;
+    delete kcContext.profile.attributes;
+    kcContext.profile.attributesByName = {};
+    attributes.forEach(function(attribute){
+        kcContext.profile.attributesByName[attribute.name] = attribute;
+    });
+}
+
+redirect_to_dev_server: {
+
+    switch(kcContext.themeType){
+        case "login":
+            break redirect_to_dev_server;
+        case "account":
+            if( kcContext.pageId !== "index.ftl" ){
+                break redirect_to_dev_server;
+            }
+            break;
+        case "admin":
+            break;
+        default: 
+            break redirect_to_dev_server;
+    }
+
+    const devSeverPort = kcContext.properties.KEYCLOAKIFY_SPA_DEV_SERVER_PORT;
+
+    if( !devSeverPort ){
+        break redirect_to_dev_server;
+    }
+
+    const redirectUrl = new URL(window.location.href);
+
+    const keycloakServerPort = redirectUrl.port;
+
+    redirectUrl.port = devSeverPort;
+
+    delete kcContext.msgJSON;
+
+    console.log(kcContext);
+
+    redirectUrl.searchParams.set("kcContext", JSON.stringify(kcContext));
+    redirectUrl.searchParams.set("keycloakServerPort", keycloakServerPort);
+
+    window.location.href = redirectUrl.toString();
+
+}
+
+
+window.kcContext = kcContext;
+
+function decodeHtmlEntities(htmlStr){
+    var element = decodeHtmlEntities.element;
+    if (!element) {
+        element = document.createElement("textarea");
+        decodeHtmlEntities.element = element;
+    }
+    element.innerHTML = htmlStr;
+    return element.value;
+}
+
+
+</script>
+<base href="/resources/8aeeb/login/mhoubahar-theme/dist/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="/resources/8aeeb/login/mhoubahar-theme/dist/mhoubahar.jpg">
+    <title>Mhoubahar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <script type="module" crossorigin="" src="/resources/8aeeb/login/mhoubahar-theme/dist/assets/index-DWiQFlXr.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  
+
+</body></html>

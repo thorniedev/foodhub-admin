@@ -419,12 +419,11 @@ export default function GooglePlacesImportModal({
 
             <div className="min-w-0">
               <p className="text-3xl font-semibold text-primary-800">
-                Import from Google Places
+                នាំចូលព័ត៌មានពី Google Maps
               </p>
 
               <p className="mt-1 text-lg leading-7 text-gray-500">
-                Search for a place, review its information, add media if needed,
-                then create the Store.
+                ស្វែងរកទីតាំងហាង ពិនិត្យព័ត៌មាន បន្ថែមរូបភាពបើចាំបាច់ រួចបង្កើតហាងដោយស្វ័យប្រវត្តិ។
               </p>
             </div>
           </div>
@@ -467,7 +466,7 @@ export default function GooglePlacesImportModal({
             gap-6
             p-6
             sm:p-8
-            lg:grid-cols-[0.9fr_1.1fr]
+            lg:grid-cols-12
           "
         >
           {/* =================================================
@@ -483,6 +482,7 @@ export default function GooglePlacesImportModal({
     bg-white
     p-5
     sm:p-6
+    lg:col-span-5
     lg:sticky
     lg:top-[118px]
     lg:self-start
@@ -508,12 +508,12 @@ export default function GooglePlacesImportModal({
                 </div>
 
                 <p className="text-3xl font-semibold text-primary-800">
-                  Search Google Places
+                  ស្វែងរកតាម Google Maps
                 </p>
               </div>
 
               <p className="mt-2 text-lg leading-7 text-gray-500">
-                Search by restaurant, cafe, food store, or business name.
+                ស្វែងរកតាមឈ្មោះហាង ភោជនីយដ្ឋាន ហាងកាហ្វេ ឬអាជីវកម្ម (ឧទាហរណ៍៖ Brown Coffee, Starbucks, Amazon...)។
               </p>
             </div>
 
@@ -535,7 +535,7 @@ export default function GooglePlacesImportModal({
                   <input
                     value={query}
                     autoComplete="off"
-                    placeholder="Search restaurant, cafe, store..."
+                    placeholder="ស្វែងរកឈ្មោះហាង ភោជនីយដ្ឋាន..."
                     onChange={(event) => {
                       setQuery(event.target.value);
                       setSelectedPlaceId(null);
@@ -613,9 +613,16 @@ export default function GooglePlacesImportModal({
                   "
                 >
                   {searching && <Loader2 size={20} className="animate-spin" />}
-                  Search
+                  ស្វែងរក
                 </button>
               </div>
+
+              {/* URL Tip helper */}
+              {(query.includes("maps.app.goo.gl") || query.includes("google.com/maps") || query.includes("http")) && (
+                <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-base leading-6 text-amber-800">
+                  💡 <strong>សម្គាល់៖</strong> Google Maps ស្វែងរកតាម <strong>ឈ្មោះហាង</strong> (ឧទាហរណ៍៖ <em>Brown Coffee</em>, <em>Starbucks BKK</em>)។ សូមបញ្ចូលឈ្មោះហាងជំនួសឱ្យ Link ផែនទី។
+                </div>
+              )}
 
               {/* Suggestions */}
 
@@ -641,7 +648,7 @@ export default function GooglePlacesImportModal({
                         size={20}
                         className="animate-spin text-primary-700"
                       />
-                      Searching Google Places...
+                      កំពុងស្វែងរកពី Google Maps...
                     </div>
                   )}
 
@@ -681,10 +688,9 @@ export default function GooglePlacesImportModal({
                               py-4
                               text-left
                               transition
-                              ${
-                                active
-                                  ? "bg-primary-50"
-                                  : "bg-white hover:bg-gray-50"
+                              ${active
+                                ? "bg-primary-50"
+                                : "bg-white hover:bg-gray-50"
                               }
                             `}
                           >
@@ -697,10 +703,9 @@ export default function GooglePlacesImportModal({
                                 items-center
                                 justify-center
                                 rounded-xl
-                                ${
-                                  active
-                                    ? "bg-primary-800 text-white"
-                                    : "bg-primary-50 text-primary-800"
+                                ${active
+                                  ? "bg-primary-800 text-white"
+                                  : "bg-primary-50 text-primary-800"
                                 }
                               `}
                             >
@@ -750,7 +755,7 @@ export default function GooglePlacesImportModal({
                       </div>
 
                       <p className="mt-3 text-lg font-medium text-gray-600">
-                        No places found
+                        មិនមានទីតាំងត្រូវគ្នាឡើយ
                       </p>
                     </div>
                   )}
@@ -787,8 +792,7 @@ export default function GooglePlacesImportModal({
                   </div>
 
                   <p className="text-lg leading-7 text-gray-500">
-                    Select a Google Place from the search suggestions to load
-                    its Store information.
+                    ជ្រើសរើសទីតាំងហាងពីលទ្ធផលស្វែងរកខាងលើ ដើម្បីផ្ទុកព័ត៌មានលម្អិតរបស់ហាង។
                   </p>
                 </div>
               </div>
@@ -799,7 +803,7 @@ export default function GooglePlacesImportModal({
               RIGHT: PREVIEW + OVERRIDES + MEDIA
           ================================================== */}
 
-          <section className="min-w-0 space-y-6">
+          <section className="min-w-0 space-y-6 lg:col-span-7">
             {/* PREVIEW */}
 
             <div className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
@@ -821,7 +825,7 @@ export default function GooglePlacesImportModal({
                 </div>
 
                 <p className="text-3xl font-semibold text-primary-800">
-                  Preview
+                  ព័ត៌មានមើលជាមុន (Preview)
                 </p>
               </div>
 
@@ -833,7 +837,7 @@ export default function GooglePlacesImportModal({
                   />
 
                   <p className="mt-3 text-lg text-gray-500">
-                    Loading place information...
+                    កំពុងផ្ទុកព័ត៌មានទីតាំង...
                   </p>
                 </div>
               ) : preview ? (
@@ -856,12 +860,11 @@ export default function GooglePlacesImportModal({
                   </div>
 
                   <p className="mt-4 text-lg font-medium text-gray-600">
-                    Select a location
+                    សូមជ្រើសរើសទីតាំង
                   </p>
 
                   <p className="mt-2 max-w-sm text-lg leading-7 text-gray-500">
-                    Search for a restaurant or store, then choose one from the
-                    suggestions to preview its details.
+                    ស្វែងរកឈ្មោះហាង ឬអាជីវកម្ម រួចចុចជ្រើសរើសពីលទ្ធផលដើម្បីមើលព័ត៌មានលម្អិត។
                   </p>
                 </div>
               )}
@@ -888,13 +891,13 @@ export default function GooglePlacesImportModal({
                 </div>
 
                 <p className="text-3xl font-semibold text-primary-800">
-                  Store settings
+                  ការកំណត់បន្ថែម
                 </p>
               </div>
 
               <label className="block">
                 <span className="mb-2 block text-lg font-medium text-primary-800">
-                  Timezone override
+                  តំបន់ពេលវេលា (Timezone)
                 </span>
 
                 <input
@@ -928,7 +931,7 @@ export default function GooglePlacesImportModal({
 
             <div className="grid gap-5 xl:grid-cols-2">
               <StoreMediaUploader
-                label="Store logo"
+                label="រូបសញ្ញាហាង (Logo)"
                 purpose="STORE_LOGO"
                 mediaUuid={logoMediaUuid}
                 onMediaUuidChange={setLogoMediaUuid}
@@ -936,7 +939,7 @@ export default function GooglePlacesImportModal({
               />
 
               <StoreMediaUploader
-                label="Store cover"
+                label="រូបគម្របហាង (Cover)"
                 purpose="STORE_COVER"
                 mediaUuid={coverMediaUuid}
                 onMediaUuidChange={setCoverMediaUuid}
@@ -1020,7 +1023,7 @@ export default function GooglePlacesImportModal({
               sm:w-auto
             "
           >
-            Cancel
+            បោះបង់
           </button>
 
           <button
@@ -1056,7 +1059,7 @@ export default function GooglePlacesImportModal({
               <Store size={20} />
             )}
 
-            {creating ? "Creating..." : "Create Store from Google"}
+            {creating ? "កំពុងបង្កើត..." : "បង្កើតហាងពី Google Maps"}
           </button>
         </div>
       </div>
@@ -1208,7 +1211,7 @@ function GooglePlacePreviewCard({ preview }: { preview: GooglePlacePreview }) {
         {phone && (
           <PreviewInfoRow
             icon={<Phone size={20} />}
-            label="Phone"
+            label="លេខទូរស័ព្ទ"
             value={phone}
           />
         )}
@@ -1282,7 +1285,7 @@ function GooglePlacePreviewCard({ preview }: { preview: GooglePlacePreview }) {
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="text-lg font-medium text-primary-800">Location</p>
+                <p className="text-lg font-medium text-primary-800">កូអរដោនេទីតាំង</p>
 
                 <p className="mt-1 break-words text-lg leading-7 text-gray-700">
                   {latitude}, {longitude}
@@ -1307,7 +1310,7 @@ function GooglePlacePreviewCard({ preview }: { preview: GooglePlacePreview }) {
                     "
                   >
                     <MapPin size={19} />
-                    View on Google Maps
+                    មើលនៅលើ Google Maps
                     <ExternalLink size={18} />
                   </a>
                 )}
@@ -1337,7 +1340,7 @@ function GooglePlacePreviewCard({ preview }: { preview: GooglePlacePreview }) {
         "
       >
         <CheckCircle2 size={20} />
-        Location selected
+        បានជ្រើសរើសទីតាំងរួចរាល់
       </div>
     </div>
   );

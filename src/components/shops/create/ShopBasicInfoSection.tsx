@@ -53,7 +53,7 @@ export default function ShopBasicInfoSection({
         </div>
 
         <p className="text-3xl font-semibold text-primary-800">
-          ព័ត៌មានប្រវត្តិរូប
+          ព័ត៌មានហាង
         </p>
       </div>
 
@@ -71,7 +71,7 @@ export default function ShopBasicInfoSection({
         />
 
         <Field
-          label="Country code"
+          label="កូដប្រទេស"
           value={values.countryCode}
           onChange={(value) => onChange("countryCode", value)}
           placeholder="ឧ. KH"
@@ -79,7 +79,7 @@ export default function ShopBasicInfoSection({
         />
 
         <Field
-          label="Timezone"
+          label="តំបន់ពេលវេលា"
           value={values.timezone}
           onChange={(value) => onChange("timezone", value)}
           placeholder="ឧ. Asia/Phnom_Penh"
@@ -91,7 +91,7 @@ export default function ShopBasicInfoSection({
         ================================================ */}
 
         <label className="block">
-          <FieldLabel>Operating status</FieldLabel>
+          <FieldLabel>ស្ថានភាពដំណើរការ</FieldLabel>
 
           <StoreSelect
             value={values.operatingStatus}
@@ -99,35 +99,43 @@ export default function ShopBasicInfoSection({
             options={[
               {
                 value: "OPEN",
-                label: "OPEN",
+                label: "បើកដំណើរការ",
               },
               {
                 value: "CLOSED",
-                label: "CLOSED",
+                label: "បិទដំណើរការ",
               },
               {
                 value: "TEMPORARILY_CLOSED",
-                label: "TEMPORARILY_CLOSED",
+                label: "ផ្អាកដំណើរការបណ្ដោះអាសន្ន",
               },
               {
                 value: "UNKNOWN",
-                label: "UNKNOWN",
+                label: "មិនបានកំណត់",
               },
             ]}
             ariaLabel="Operating status"
           />
         </label>
 
-        <Field
-          label="Price level"
-          type="number"
-          value={values.priceLevel}
-          onChange={(value) => onChange("priceLevel", value)}
-          placeholder="ឧ. 2"
-        />
+        <label className="block">
+          <FieldLabel>កម្រិតតម្លៃ</FieldLabel>
+          <StoreSelect
+            value={values.priceLevel}
+            onChange={(value) => onChange("priceLevel", value)}
+            options={[
+              { value: "", label: "— មិនបានកំណត់" },
+              { value: "1", label: "កម្រិតទាប (ថោក)" },
+              { value: "2", label: "កម្រិតមធ្យម (សមរម្យ)" },
+              { value: "3", label: "កម្រិតខ្ពស់ (ថ្លៃ)" },
+              { value: "4", label: "កម្រិតប្រណិត (ថ្លៃខ្លាំង)" },
+            ]}
+            ariaLabel="Price level"
+          />
+        </label>
 
         <Field
-          label="Hygiene rating"
+          label="កម្រិតអនាម័យ "
           type="number"
           step="0.1"
           value={values.hygieneRating}
