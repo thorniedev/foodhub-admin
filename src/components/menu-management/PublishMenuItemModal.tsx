@@ -3,8 +3,6 @@
 import {
   AlertCircle,
   Heart,
-  Images,
-  Info,
   Loader2,
   Plus,
   Save,
@@ -73,8 +71,6 @@ type FieldErrors = Partial<
   Record<"storeUuid" | "foodUuid" | "name" | "price", string>
 >;
 
-type TabKey = "basic" | "ingredients" | "dietary" | "allergens" | "images";
-
 const EMPTY: FormState = {
   storeUuid: "",
   foodUuid: "",
@@ -86,7 +82,7 @@ const EMPTY: FormState = {
   availabilityStatus: "AVAILABLE",
   ingredientDataStatus: "VERIFIED",
   isFeatured: false,
-  source: "ADMIN",
+  source: "MANUAL",
 };
 
 function storeLabel(store: StoreOption): string {
@@ -131,7 +127,6 @@ export default function PublishMenuItemModal({
     images: File[],
   ) => Promise<void>;
 }) {
-  const [activeTab, setActiveTab] = useState<TabKey>("basic");
   const [values, setValues] = useState<FormState>(EMPTY);
   const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>([]);
   const [dietaryTypeRows, setDietaryTypeRows] = useState<DietaryTypeRow[]>([]);
@@ -143,7 +138,6 @@ export default function PublishMenuItemModal({
 
   useEffect(() => {
     if (!open) return;
-    setActiveTab("basic");
 
     if (!item) {
       setValues({
@@ -221,7 +215,7 @@ export default function PublishMenuItemModal({
       ingredientDataStatus:
         item.ingredientDataStatus || "VERIFIED",
       isFeatured: Boolean(item.isFeatured),
-      source: item.source || "ADMIN",
+      source: item.source || "MANUAL",
     });
 
     setIngredientRows(
@@ -446,7 +440,6 @@ export default function PublishMenuItemModal({
       const nextFieldErrors = validateBasics();
       if (Object.keys(nextFieldErrors).length > 0) {
         setFieldErrors(nextFieldErrors);
-        setActiveTab("basic");
         setError("សូមបំពេញព័ត៌មានចាំបាច់ដែលបានសម្គាល់ខាងក្រោម។");
         return;
       }
@@ -526,46 +519,6 @@ export default function PublishMenuItemModal({
   if (!open) return null;
 
   const effectiveStoreUuid = fixedStoreUuid || values.storeUuid;
-  const totalImageCount = existingImages.length + images.length;
-
-  const tabs: {
-    key: TabKey;
-    label: string;
-    icon: React.ReactNode;
-    badge?: string;
-    hasError?: boolean;
-  }[] = [
-    {
-      key: "basic",
-      label: "ព័ត៌មានមូលដ្ឋាន",
-      icon: <Info size={16} />,
-      hasError: Object.keys(fieldErrors).length > 0,
-    },
-    {
-      key: "ingredients",
-      label: "គ្រឿងផ្សំ",
-      icon: <Sparkles size={16} />,
-      badge: ingredientRows.length ? String(ingredientRows.length) : undefined,
-    },
-    {
-      key: "dietary",
-      label: "របបអាហារ",
-      icon: <Heart size={16} />,
-      badge: dietaryTypeRows.length ? String(dietaryTypeRows.length) : undefined,
-    },
-    {
-      key: "allergens",
-      label: "អាឡែហ្ស៊ី",
-      icon: <ShieldAlert size={16} />,
-      badge: allergenRows.length ? String(allergenRows.length) : undefined,
-    },
-    {
-      key: "images",
-      label: "រូបភាព",
-      icon: <Images size={16} />,
-      badge: `${totalImageCount}/4`,
-    },
-  ];
 
   return (
     <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px]">
@@ -578,7 +531,7 @@ export default function PublishMenuItemModal({
             </h2>
             <p className="mt-1 text-sm text-gray-400">
               {fixedStoreUuid
-                ? "ជ្រើស Food Catalog កំណត់តម្លៃ និងរូបភាពដើម្បីដាក់លក់ក្នុងហាងនេះ"
+                ? "ជ្រើស Food Catalog កំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីដាក់លក់ក្នុងហាងនេះ"
                 : "ជ្រើស Store និង Food Catalog រួចកំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីផ្សាយលើ Website"}
             </p>
           </div>
@@ -593,470 +546,435 @@ export default function PublishMenuItemModal({
           </button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex shrink-0 gap-1.5 overflow-x-auto border-b border-gray-100 px-4 py-2.5">
-          {tabs.map((tab) => {
-            const isActive = tab.key === activeTab;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={`relative flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold transition ${
-                  isActive
-                    ? "bg-[#137A3D] text-white shadow-sm shadow-emerald-700/20"
-                    : "text-gray-500 hover:bg-gray-100"
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-                {tab.badge && (
-                  <span
-                    className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${
-                      isActive ? "bg-white/20" : "bg-gray-200 text-gray-600"
-                    }`}
-                  >
-                    {tab.badge}
-                  </span>
-                )}
-                {tab.hasError && (
-                  <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-red-500" />
-                )}
-              </button>
-            );
-          })}
-        </div>
+        {/* Scrollable body — everything on one page */}
+        <div className="flex-1 space-y-6 overflow-y-auto p-6">
+          {/* Basic info */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <label>
+              <Label required>ហាង</Label>
+              {(Boolean(item) || Boolean(fixedStoreUuid)) && (
+                <p className="mb-1 text-xs text-gray-400">
+                  Store ត្រូវបានកំណត់រួចហើយ មិនអាចប្តូរបានទេ។
+                </p>
+              )}
+              <MenuItemSearchableSelect
+                disabled={Boolean(item) || Boolean(fixedStoreUuid)}
+                value={effectiveStoreUuid}
+                options={storeOptions}
+                onChange={(next) => {
+                  setValues((current) => ({ ...current, storeUuid: next }));
+                  setFieldErrors((current) => ({ ...current, storeUuid: undefined }));
+                }}
+                placeholder="ជ្រើសរើសហាង"
+                invalid={Boolean(fieldErrors.storeUuid)}
+                ariaLabel="ជ្រើសរើសហាង"
+              />
+              <FieldError message={fieldErrors.storeUuid} />
+            </label>
 
-        {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {activeTab === "basic" && (
-            <div className="grid gap-4 md:grid-cols-2">
-              <label>
-                <Label required>ហាង</Label>
-                {disabledStoreSelectHint(Boolean(item) || Boolean(fixedStoreUuid))}
-                <MenuItemSearchableSelect
-                  disabled={Boolean(item) || Boolean(fixedStoreUuid)}
-                  value={effectiveStoreUuid}
-                  options={storeOptions}
-                  onChange={(next) => {
-                    setValues((current) => ({ ...current, storeUuid: next }));
-                    setFieldErrors((current) => ({ ...current, storeUuid: undefined }));
-                  }}
-                  placeholder="ជ្រើសរើសហាង"
-                  invalid={Boolean(fieldErrors.storeUuid)}
-                  ariaLabel="ជ្រើសរើសហាង"
-                />
-                <FieldError message={fieldErrors.storeUuid} />
-              </label>
+            <label>
+              <Label required>មុខម្ហូបមេ</Label>
+              <MenuItemSearchableSelect
+                value={values.foodUuid}
+                options={foodOptions}
+                onChange={handleFoodSelect}
+                placeholder="ជ្រើសរើសមុខម្ហូបមេ"
+                invalid={Boolean(fieldErrors.foodUuid)}
+                ariaLabel="ជ្រើសរើសមុខម្ហូបមេ"
+              />
+              <FieldError message={fieldErrors.foodUuid} />
+            </label>
 
-              <label>
-                <Label required>មុខម្ហូបមេ</Label>
-                <MenuItemSearchableSelect
-                  value={values.foodUuid}
-                  options={foodOptions}
-                  onChange={handleFoodSelect}
-                  placeholder="ជ្រើសរើសមុខម្ហូបមេ"
-                  invalid={Boolean(fieldErrors.foodUuid)}
-                  ariaLabel="ជ្រើសរើសមុខម្ហូបមេ"
-                />
-                <FieldError message={fieldErrors.foodUuid} />
-              </label>
+            <Field
+              label="ឈ្មោះ Menu Item"
+              required
+              value={values.name}
+              placeholder="ឧទាហរណ៍៖ សម្លកកូរពិសេស ឬ Phnom Penh Noodle Soup"
+              invalid={Boolean(fieldErrors.name)}
+              error={fieldErrors.name}
+              onChange={(value) => {
+                setValues((current) => ({ ...current, name: value }));
+                setFieldErrors((current) => ({ ...current, name: undefined }));
+              }}
+            />
 
+            <div className="grid grid-cols-2 gap-3">
               <Field
-                label="ឈ្មោះ Menu Item"
+                label="តម្លៃ"
                 required
-                value={values.name}
-                placeholder="ឧទាហរណ៍៖ សម្លកកូរពិសេស ឬ Phnom Penh Noodle Soup"
-                invalid={Boolean(fieldErrors.name)}
-                error={fieldErrors.name}
+                type="number"
+                value={values.price}
+                placeholder="3.50"
+                invalid={Boolean(fieldErrors.price)}
+                error={fieldErrors.price}
                 onChange={(value) => {
-                  setValues((current) => ({ ...current, name: value }));
-                  setFieldErrors((current) => ({ ...current, name: undefined }));
+                  setValues((current) => ({ ...current, price: value }));
+                  setFieldErrors((current) => ({ ...current, price: undefined }));
                 }}
               />
-
-              <div className="grid grid-cols-2 gap-3">
-                <Field
-                  label="តម្លៃ"
-                  required
-                  type="number"
-                  value={values.price}
-                  placeholder="3.50"
-                  invalid={Boolean(fieldErrors.price)}
-                  error={fieldErrors.price}
-                  onChange={(value) => {
-                    setValues((current) => ({ ...current, price: value }));
-                    setFieldErrors((current) => ({ ...current, price: undefined }));
-                  }}
-                />
-                <Field
-                  label="រូបិយប័ណ្ណ"
-                  value={values.currencyCode}
-                  placeholder="USD"
-                  onChange={(value) =>
-                    setValues((current) => ({
-                      ...current,
-                      currencyCode: value,
-                    }))
-                  }
-                />
-              </div>
-
               <Field
-                label="រយៈពេលធ្វើ (នាទី)"
-                type="number"
-                value={values.preparationTimeMinutes}
-                placeholder="10"
+                label="រូបិយប័ណ្ណ"
+                value={values.currencyCode}
+                placeholder="USD"
                 onChange={(value) =>
                   setValues((current) => ({
                     ...current,
-                    preparationTimeMinutes: value,
+                    currencyCode: value,
                   }))
                 }
               />
-
-              <label>
-                <Label>ស្ថានភាព</Label>
-                <select
-                  value={values.availabilityStatus}
-                  onChange={(event) =>
-                    setValues((current) => ({
-                      ...current,
-                      availabilityStatus: event.target.value,
-                    }))
-                  }
-                  className={inputClass}
-                >
-                  <option value="AVAILABLE">មានលក់</option>
-                  <option value="UNAVAILABLE">មិនមានលក់</option>
-                  <option value="SOLD_OUT">អស់ស្តុក</option>
-                  <option value="HIDDEN">លាក់ទុក</option>
-                </select>
-              </label>
-
-              <label>
-                <Label>ទិន្នន័យគ្រឿងផ្សំ</Label>
-                <select
-                  value={values.ingredientDataStatus}
-                  onChange={(event) =>
-                    setValues((current) => ({
-                      ...current,
-                      ingredientDataStatus: event.target.value,
-                    }))
-                  }
-                  className={inputClass}
-                >
-                  <option value="VERIFIED">បានផ្ទៀងផ្ទាត់ (VERIFIED)</option>
-                  <option value="PARTIAL">ផ្នែកខ្លះ (PARTIAL)</option>
-                  <option value="UNKNOWN">មិនច្បាស់ (UNKNOWN)</option>
-                  <option value="COMPLETE">ពេញលេញ (COMPLETE)</option>
-                </select>
-              </label>
-
-              <label className="md:col-span-2">
-                <Label>ការពិពណ៌នា</Label>
-                <textarea
-                  rows={3}
-                  value={values.description}
-                  placeholder="ការពិពណ៌នាអំពីមុខម្ហូបនេះសម្រាប់អតិថិជន..."
-                  onChange={(event) =>
-                    setValues((current) => ({
-                      ...current,
-                      description: event.target.value,
-                    }))
-                  }
-                  className={`${inputClass} h-auto py-3`}
-                />
-              </label>
             </div>
-          )}
 
-          {activeTab === "ingredients" && (
-            <section>
-              <TabIntro
-                icon={<Sparkles size={18} className="text-[#137A3D]" />}
-                title="គ្រឿងផ្សំ"
-                description="កំណត់គ្រឿងផ្សំ បរិមាណ និងខ្នាតសម្រាប់មុខម្ហូបនេះ។"
-                onAdd={() =>
-                  setIngredientRows((current) => [
-                    ...current,
-                    {
-                      ingredientUuid: "",
-                      quantity: "",
-                      unit: "g",
-                      isOptional: false,
-                      notes: "",
-                    },
-                  ])
-                }
-                addLabel="បន្ថែមគ្រឿងផ្សំ"
-              />
-
-              <div className="mt-4 space-y-3">
-                {ingredientRows.map((row, index) => (
-                  <div
-                    key={index}
-                    className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[2fr_1fr_1fr_auto_auto]"
-                  >
-                    <MenuItemSearchableSelect
-                      value={row.ingredientUuid}
-                      options={ingredientOptions}
-                      onChange={(next) =>
-                        updateIngredientRow(index, { ingredientUuid: next })
-                      }
-                      placeholder="ជ្រើស Ingredient"
-                      ariaLabel="ជ្រើស Ingredient"
-                    />
-
-                    <input
-                      type="number"
-                      placeholder="បរិមាណ (Qty)"
-                      value={row.quantity}
-                      onChange={(event) =>
-                        updateIngredientRow(index, {
-                          quantity: event.target.value,
-                        })
-                      }
-                      className={inputClass}
-                    />
-
-                    <input
-                      placeholder="ខ្នាត (Unit e.g. g, ml)"
-                      value={row.unit}
-                      onChange={(event) =>
-                        updateIngredientRow(index, {
-                          unit: event.target.value,
-                        })
-                      }
-                      className={inputClass}
-                    />
-
-                    <label className="flex items-center gap-2 px-2 text-xs font-bold text-gray-700">
-                      <input
-                        type="checkbox"
-                        checked={row.isOptional}
-                        onChange={(event) =>
-                          updateIngredientRow(index, {
-                            isOptional: event.target.checked,
-                          })
-                        }
-                        className="h-4 w-4 rounded accent-[#137A3D]"
-                      />
-                      Optional
-                    </label>
-
-                    <RemoveRowButton
-                      onClick={() =>
-                        setIngredientRows((current) =>
-                          current.filter((_, rowIndex) => rowIndex !== index),
-                        )
-                      }
-                    />
-                  </div>
-                ))}
-
-                {!ingredientRows.length && (
-                  <EmptyRowsHint text="មិនទាន់បានបន្ថែម Ingredient ទេ។" />
-                )}
-              </div>
-            </section>
-          )}
-
-          {activeTab === "dietary" && (
-            <section>
-              <TabIntro
-                icon={<Heart size={18} className="text-emerald-600" />}
-                title="របបអាហារ"
-                description="សម្គាល់របបអាហារ (Vegan, Halal, Keto, etc.)"
-                onAdd={() =>
-                  setDietaryTypeRows((current) => [
-                    ...current,
-                    {
-                      dietaryTypeUuid: "",
-                      verificationStatus: "UNVERIFIED",
-                      notes: "",
-                    },
-                  ])
-                }
-                addLabel="បន្ថែម Dietary Type"
-              />
-
-              <div className="mt-4 space-y-3">
-                {dietaryTypeRows.map((row, index) => (
-                  <div
-                    key={index}
-                    className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[2fr_1.5fr_2fr_auto]"
-                  >
-                    <MenuItemSearchableSelect
-                      value={row.dietaryTypeUuid}
-                      options={dietaryTypeOptions}
-                      onChange={(next) =>
-                        updateDietaryTypeRow(index, { dietaryTypeUuid: next })
-                      }
-                      placeholder="ជ្រើស Dietary Type"
-                      ariaLabel="ជ្រើស Dietary Type"
-                    />
-
-                    <select
-                      value={row.verificationStatus}
-                      onChange={(event) =>
-                        updateDietaryTypeRow(index, {
-                          verificationStatus: event.target.value,
-                        })
-                      }
-                      className={inputClass}
-                    >
-                      <option value="UNVERIFIED">UNVERIFIED</option>
-                      <option value="VERIFIED">VERIFIED</option>
-                    </select>
-
-                    <input
-                      placeholder="កំណត់ចំណាំ (Notes)"
-                      value={row.notes}
-                      onChange={(event) =>
-                        updateDietaryTypeRow(index, {
-                          notes: event.target.value,
-                        })
-                      }
-                      className={inputClass}
-                    />
-
-                    <RemoveRowButton
-                      onClick={() =>
-                        setDietaryTypeRows((current) =>
-                          current.filter((_, rowIndex) => rowIndex !== index),
-                        )
-                      }
-                    />
-                  </div>
-                ))}
-
-                {!dietaryTypeRows.length && (
-                  <EmptyRowsHint text="មិនទាន់បានកំណត់ Dietary Type ទេ។" />
-                )}
-              </div>
-            </section>
-          )}
-
-          {activeTab === "allergens" && (
-            <section>
-              <TabIntro
-                icon={<ShieldAlert size={18} className="text-amber-600" />}
-                title="ប្រតិកម្មអាឡែហ្ស៊ី"
-                description="ប្រកាសសារធាតុបង្កអាឡែហ្ស៊ី និងកម្រិតហានិភ័យសម្រាប់សុវត្ថិភាពអតិថិជន។"
-                onAdd={() =>
-                  setAllergenRows((current) => [
-                    ...current,
-                    {
-                      allergenUuid: "",
-                      declarationType: "MAY_CONTAIN",
-                      riskLevel: "MEDIUM",
-                      verificationStatus: "UNVERIFIED",
-                      notes: "",
-                    },
-                  ])
-                }
-                addLabel="បន្ថែម Allergen"
-                accent="amber"
-              />
-
-              <div className="mt-4 space-y-3">
-                {allergenRows.map((row, index) => (
-                  <div
-                    key={index}
-                    className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[1.8fr_1.2fr_1fr_1fr_1.5fr_auto]"
-                  >
-                    <MenuItemSearchableSelect
-                      value={row.allergenUuid}
-                      options={allergenOptions}
-                      onChange={(next) =>
-                        updateAllergenRow(index, { allergenUuid: next })
-                      }
-                      placeholder="ជ្រើស Allergen"
-                      ariaLabel="ជ្រើស Allergen"
-                    />
-
-                    <select
-                      value={row.declarationType}
-                      onChange={(event) =>
-                        updateAllergenRow(index, {
-                          declarationType: event.target.value,
-                        })
-                      }
-                      className={inputClass}
-                    >
-                      <option value="MAY_CONTAIN">អាចមាន</option>
-                      <option value="CONTAINS">មានផ្ទុក</option>
-                    </select>
-
-                    <select
-                      value={row.riskLevel}
-                      onChange={(event) =>
-                        updateAllergenRow(index, {
-                          riskLevel: event.target.value,
-                        })
-                      }
-                      className={inputClass}
-                    >
-                      <option value="LOW">LOW</option>
-                      <option value="MEDIUM">MEDIUM</option>
-                      <option value="HIGH">HIGH</option>
-                    </select>
-
-                    <select
-                      value={row.verificationStatus}
-                      onChange={(event) =>
-                        updateAllergenRow(index, {
-                          verificationStatus: event.target.value,
-                        })
-                      }
-                      className={inputClass}
-                    >
-                      <option value="UNVERIFIED">UNVERIFIED</option>
-                      <option value="VERIFIED">VERIFIED</option>
-                    </select>
-
-                    <input
-                      placeholder="កំណត់ចំណាំ (Notes)"
-                      value={row.notes}
-                      onChange={(event) =>
-                        updateAllergenRow(index, {
-                          notes: event.target.value,
-                        })
-                      }
-                      className={inputClass}
-                    />
-
-                    <RemoveRowButton
-                      onClick={() =>
-                        setAllergenRows((current) =>
-                          current.filter((_, rowIndex) => rowIndex !== index),
-                        )
-                      }
-                    />
-                  </div>
-                ))}
-
-                {!allergenRows.length && (
-                  <EmptyRowsHint text="មិនទាន់បានប្រកាស Allergen ទេ។" />
-                )}
-              </div>
-            </section>
-          )}
-
-          {activeTab === "images" && (
-            <ImagePicker
-              value={images}
-              onChange={setImages}
-              existingImages={existingImages}
-              onExistingChange={setExistingImages}
-              label={
-                item
-                  ? "រូបភាព (ទុកទទេ = រក្សារូបចាស់ | រូបទី ១: Thumbnail, រូបបន្ទាប់: Gallery)"
-                  : "រូបភាព Menu Item (អតិបរមា 4 | រូបទី ១: Thumbnail, រូបបន្ទាប់: Gallery)"
+            <Field
+              label="រយៈពេលធ្វើ (នាទី)"
+              type="number"
+              value={values.preparationTimeMinutes}
+              placeholder="10"
+              onChange={(value) =>
+                setValues((current) => ({
+                  ...current,
+                  preparationTimeMinutes: value,
+                }))
               }
             />
-          )}
+
+            <label>
+              <Label>ស្ថានភាព</Label>
+              <select
+                value={values.availabilityStatus}
+                onChange={(event) =>
+                  setValues((current) => ({
+                    ...current,
+                    availabilityStatus: event.target.value,
+                  }))
+                }
+                className={inputClass}
+              >
+                <option value="AVAILABLE">មានលក់</option>
+                <option value="UNAVAILABLE">មិនមានលក់</option>
+                <option value="SOLD_OUT">អស់ស្តុក</option>
+                <option value="DISCONTINUED">ឈប់លក់</option>
+              </select>
+            </label>
+
+            <label>
+              <Label>ទិន្នន័យគ្រឿងផ្សំ</Label>
+              <select
+                value={values.ingredientDataStatus}
+                onChange={(event) =>
+                  setValues((current) => ({
+                    ...current,
+                    ingredientDataStatus: event.target.value,
+                  }))
+                }
+                className={inputClass}
+              >
+                <option value="VERIFIED">បានផ្ទៀងផ្ទាត់ (VERIFIED)</option>
+                <option value="COMPLETE">ពេញលេញ (COMPLETE)</option>
+                <option value="PARTIAL">ផ្នែកខ្លះ (PARTIAL)</option>
+                <option value="UNKNOWN">មិនច្បាស់ (UNKNOWN)</option>
+              </select>
+            </label>
+
+            <label className="md:col-span-2">
+              <Label>ការពិពណ៌នា</Label>
+              <textarea
+                rows={3}
+                value={values.description}
+                placeholder="ការពិពណ៌នាអំពីមុខម្ហូបនេះសម្រាប់អតិថិជន..."
+                onChange={(event) =>
+                  setValues((current) => ({
+                    ...current,
+                    description: event.target.value,
+                  }))
+                }
+                className={`${inputClass} h-auto py-3`}
+              />
+            </label>
+          </div>
+
+          {/* Ingredients */}
+          <section className="rounded-2xl border border-gray-100 p-5">
+            <TabIntro
+              icon={<Sparkles size={18} className="text-[#137A3D]" />}
+              title="គ្រឿងផ្សំ"
+              description="កំណត់គ្រឿងផ្សំ បរិមាណ និងខ្នាតសម្រាប់មុខម្ហូបនេះ។"
+              onAdd={() =>
+                setIngredientRows((current) => [
+                  ...current,
+                  {
+                    ingredientUuid: "",
+                    quantity: "",
+                    unit: "g",
+                    isOptional: false,
+                    notes: "",
+                  },
+                ])
+              }
+              addLabel="បន្ថែមគ្រឿងផ្សំ"
+            />
+
+            <div className="mt-4 space-y-3">
+              {ingredientRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[2fr_1fr_1fr_auto_auto]"
+                >
+                  <MenuItemSearchableSelect
+                    value={row.ingredientUuid}
+                    options={ingredientOptions}
+                    onChange={(next) =>
+                      updateIngredientRow(index, { ingredientUuid: next })
+                    }
+                    placeholder="ជ្រើស Ingredient"
+                    ariaLabel="ជ្រើស Ingredient"
+                  />
+
+                  <input
+                    type="number"
+                    placeholder="បរិមាណ (Qty)"
+                    value={row.quantity}
+                    onChange={(event) =>
+                      updateIngredientRow(index, {
+                        quantity: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  />
+
+                  <input
+                    placeholder="ខ្នាត (Unit e.g. g, ml)"
+                    value={row.unit}
+                    onChange={(event) =>
+                      updateIngredientRow(index, {
+                        unit: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  />
+
+                  <label className="flex items-center gap-2 px-2 text-xs font-bold text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={row.isOptional}
+                      onChange={(event) =>
+                        updateIngredientRow(index, {
+                          isOptional: event.target.checked,
+                        })
+                      }
+                      className="h-4 w-4 rounded accent-[#137A3D]"
+                    />
+                    Optional
+                  </label>
+
+                  <RemoveRowButton
+                    onClick={() =>
+                      setIngredientRows((current) =>
+                        current.filter((_, rowIndex) => rowIndex !== index),
+                      )
+                    }
+                  />
+                </div>
+              ))}
+
+              {!ingredientRows.length && (
+                <EmptyRowsHint text="មិនទាន់បានបន្ថែម Ingredient ទេ។" />
+              )}
+            </div>
+          </section>
+
+          {/* Dietary types */}
+          <section className="rounded-2xl border border-gray-100 p-5">
+            <TabIntro
+              icon={<Heart size={18} className="text-emerald-600" />}
+              title="របបអាហារ"
+              description="សម្គាល់របបអាហារ (Vegan, Halal, Keto, etc.)"
+              onAdd={() =>
+                setDietaryTypeRows((current) => [
+                  ...current,
+                  {
+                    dietaryTypeUuid: "",
+                    verificationStatus: "UNVERIFIED",
+                    notes: "",
+                  },
+                ])
+              }
+              addLabel="បន្ថែម Dietary Type"
+            />
+
+            <div className="mt-4 space-y-3">
+              {dietaryTypeRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[2fr_1.5fr_2fr_auto]"
+                >
+                  <MenuItemSearchableSelect
+                    value={row.dietaryTypeUuid}
+                    options={dietaryTypeOptions}
+                    onChange={(next) =>
+                      updateDietaryTypeRow(index, { dietaryTypeUuid: next })
+                    }
+                    placeholder="ជ្រើស Dietary Type"
+                    ariaLabel="ជ្រើស Dietary Type"
+                  />
+
+                  <select
+                    value={row.verificationStatus}
+                    onChange={(event) =>
+                      updateDietaryTypeRow(index, {
+                        verificationStatus: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  >
+                    <option value="UNVERIFIED">UNVERIFIED</option>
+                    <option value="VERIFIED">VERIFIED</option>
+                  </select>
+
+                  <input
+                    placeholder="កំណត់ចំណាំ (Notes)"
+                    value={row.notes}
+                    onChange={(event) =>
+                      updateDietaryTypeRow(index, {
+                        notes: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  />
+
+                  <RemoveRowButton
+                    onClick={() =>
+                      setDietaryTypeRows((current) =>
+                        current.filter((_, rowIndex) => rowIndex !== index),
+                      )
+                    }
+                  />
+                </div>
+              ))}
+
+              {!dietaryTypeRows.length && (
+                <EmptyRowsHint text="មិនទាន់បានកំណត់ Dietary Type ទេ។" />
+              )}
+            </div>
+          </section>
+
+          {/* Allergens */}
+          <section className="rounded-2xl border border-gray-100 p-5">
+            <TabIntro
+              icon={<ShieldAlert size={18} className="text-amber-600" />}
+              title="ប្រតិកម្មអាឡែហ្ស៊ី"
+              description="ប្រកាសសារធាតុបង្កអាឡែហ្ស៊ី និងកម្រិតហានិភ័យសម្រាប់សុវត្ថិភាពអតិថិជន។"
+              onAdd={() =>
+                setAllergenRows((current) => [
+                  ...current,
+                  {
+                    allergenUuid: "",
+                    declarationType: "MAY_CONTAIN",
+                    riskLevel: "MEDIUM",
+                    verificationStatus: "UNVERIFIED",
+                    notes: "",
+                  },
+                ])
+              }
+              addLabel="បន្ថែម Allergen"
+              accent="amber"
+            />
+
+            <div className="mt-4 space-y-3">
+              {allergenRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[1.8fr_1.2fr_1fr_1fr_1.5fr_auto]"
+                >
+                  <MenuItemSearchableSelect
+                    value={row.allergenUuid}
+                    options={allergenOptions}
+                    onChange={(next) =>
+                      updateAllergenRow(index, { allergenUuid: next })
+                    }
+                    placeholder="ជ្រើស Allergen"
+                    ariaLabel="ជ្រើស Allergen"
+                  />
+
+                  <select
+                    value={row.declarationType}
+                    onChange={(event) =>
+                      updateAllergenRow(index, {
+                        declarationType: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  >
+                    <option value="MAY_CONTAIN">អាចមាន</option>
+                    <option value="CONTAINS">មានផ្ទុក</option>
+                  </select>
+
+                  <select
+                    value={row.riskLevel}
+                    onChange={(event) =>
+                      updateAllergenRow(index, {
+                        riskLevel: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  >
+                    <option value="LOW">LOW</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="HIGH">HIGH</option>
+                  </select>
+
+                  <select
+                    value={row.verificationStatus}
+                    onChange={(event) =>
+                      updateAllergenRow(index, {
+                        verificationStatus: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  >
+                    <option value="UNVERIFIED">UNVERIFIED</option>
+                    <option value="VERIFIED">VERIFIED</option>
+                  </select>
+
+                  <input
+                    placeholder="កំណត់ចំណាំ (Notes)"
+                    value={row.notes}
+                    onChange={(event) =>
+                      updateAllergenRow(index, {
+                        notes: event.target.value,
+                      })
+                    }
+                    className={inputClass}
+                  />
+
+                  <RemoveRowButton
+                    onClick={() =>
+                      setAllergenRows((current) =>
+                        current.filter((_, rowIndex) => rowIndex !== index),
+                      )
+                    }
+                  />
+                </div>
+              ))}
+
+              {!allergenRows.length && (
+                <EmptyRowsHint text="មិនទាន់បានប្រកាស Allergen ទេ។" />
+              )}
+            </div>
+          </section>
+
+          {/* Images */}
+          <ImagePicker
+            value={images}
+            onChange={setImages}
+            existingImages={existingImages}
+            onExistingChange={setExistingImages}
+            label={
+              item
+                ? "រូបភាព (ទុកទទេ = រក្សារូបចាស់ | រូបទី ១: Thumbnail, រូបបន្ទាប់: Gallery)"
+                : "រូបភាព Menu Item (អតិបរមា 4 | រូបទី ១: Thumbnail, រូបបន្ទាប់: Gallery)"
+            }
+          />
         </div>
 
         {/* Footer */}
@@ -1095,15 +1013,6 @@ export default function PublishMenuItemModal({
         </div>
       </div>
     </div>
-  );
-}
-
-function disabledStoreSelectHint(disabled: boolean) {
-  if (!disabled) return null;
-  return (
-    <p className="mb-1 text-xs text-gray-400">
-      Store ត្រូវបានកំណត់រួចហើយ មិនអាចប្តូរបានទេ។
-    </p>
   );
 }
 

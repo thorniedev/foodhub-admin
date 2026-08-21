@@ -1683,7 +1683,10 @@ export const menuManagementApi =
                 availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
                 ingredientDataStatus: normalizedIngredientDataStatus,
                 isFeatured: Boolean(payload.menuItem?.isFeatured),
-                source: "ADMIN",
+                // Backend MenuItemSource enum: MANUAL, GOOGLE_IMPORT,
+                // BULK_IMPORT, API — there is no "ADMIN" value. Admin-created
+                // items are MANUAL (also MenuItemCreationInput's own default).
+                source: "MANUAL",
               },
               primaryMediaUuids: mediaUuids,
               thumbnailMediaUuid: primaryMediaUuid || null,
@@ -1896,7 +1899,10 @@ export const menuManagementApi =
                 availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
                 ingredientDataStatus: normalizedIngredientDataStatus,
                 isFeatured: Boolean(payload.menuItem?.isFeatured),
-                source: "ADMIN",
+                // Backend MenuItemSource enum: MANUAL, GOOGLE_IMPORT,
+                // BULK_IMPORT, API — there is no "ADMIN" value. Admin-created
+                // items are MANUAL (also MenuItemCreationInput's own default).
+                source: "MANUAL",
               },
             };
 
