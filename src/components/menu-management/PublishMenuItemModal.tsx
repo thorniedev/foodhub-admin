@@ -13,17 +13,16 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import ImagePicker from "./ImagePicker";
+import ThumbnailImagePicker from "./ThumbnailImagePicker";
+import GalleryImagePicker from "./GalleryImagePicker";
 import MenuItemSearchableSelect, {
   type SearchableOption,
 } from "./MenuItemSearchableSelect";
 
-import type { Allergen } from "@/src/types/allergen";
 import type { DietaryType } from "@/src/types/dietaryType";
 import type {
   FoodRecord,
   IngredientOption,
-  MenuItemAllergenDeclarationPayload,
   MenuItemDietaryTypePayload,
   MenuItemIngredientPayload,
   MenuItemRecord,
@@ -41,14 +40,6 @@ type IngredientRow = {
 
 type DietaryTypeRow = {
   dietaryTypeUuid: string;
-  verificationStatus: "VERIFIED" | "UNVERIFIED" | string;
-  notes: string;
-};
-
-type AllergenRow = {
-  allergenUuid: string;
-  declarationType: "CONTAINS" | "MAY_CONTAIN" | string;
-  riskLevel: "LOW" | "MEDIUM" | "HIGH" | string;
   verificationStatus: "VERIFIED" | "UNVERIFIED" | string;
   notes: string;
 };
@@ -105,7 +96,6 @@ export default function PublishMenuItemModal({
   stores,
   ingredients,
   dietaryTypes = [],
-  allergens = [],
   saving,
   fixedStoreUuid,
   onClose,
@@ -117,7 +107,7 @@ export default function PublishMenuItemModal({
   stores: StoreOption[];
   ingredients: IngredientOption[];
   dietaryTypes?: DietaryType[];
-  allergens?: Allergen[];
+  allergens?: unknown[];
   saving: boolean;
   fixedStoreUuid?: string;
   onClose: () => void;
@@ -130,9 +120,10 @@ export default function PublishMenuItemModal({
   const [values, setValues] = useState<FormState>(EMPTY);
   const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>([]);
   const [dietaryTypeRows, setDietaryTypeRows] = useState<DietaryTypeRow[]>([]);
-  const [allergenRows, setAllergenRows] = useState<AllergenRow[]>([]);
-  const [existingImages, setExistingImages] = useState<string[]>([]);
-  const [images, setImages] = useState<File[]>([]);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [existingThumbnail, setExistingThumbnail] = useState<string | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [existingGallery, setExistingGallery] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
@@ -146,84 +137,82 @@ export default function PublishMenuItemModal({
       });
       setIngredientRows([]);
       setDietaryTypeRows([]);
-      setAllergenRows([]);
-      setImages([]);
-      setExistingImages([]);
+      setThumbnailFile(null);
+      setExistingThumbnail(null);
+      setGalleryFiles([]);
+      setExistingGallery([]);
       setError(null);
       setFieldErrors({});
       return;
     }
 
-    const rawList: string[] = [];
+    // 1. Resolve Primary/Thumbnail image
+    const thumbCandidate =
+      item.thumbnailMediaUuid ||
+      item.thumbnail ||
+      item.imageUrl ||
+      item.primaryMediaUrls?.[0] ||
+      item.primaryMediaUuid ||
+      item.primaryMediaUuids?.[0] ||
+      item.food?.thumbnailMediaUuid ||
+      item.food?.thumbnail ||
+      item.food?.imageUrl ||
+      item.food?.primaryMediaUuid ||
+      item.food?.primaryMediaUrls?.[0] ||
+      null;
 
-    // 1. Direct URLs
-    if (Array.isArray(item.primaryMediaUrls) && item.primaryMediaUrls.length) {
-      for (const u of item.primaryMediaUrls) {
-        if (typeof u === "string" && u.trim() && !rawList.includes(u.trim())) rawList.push(u.trim());
-      }
-    }
-    if (typeof item.thumbnail === "string" && item.thumbnail.trim() && !rawList.includes(item.thumbnail.trim())) {
-      rawList.push(item.thumbnail.trim());
-    }
-    if (typeof item.imageUrl === "string" && item.imageUrl.trim() && !rawList.includes(item.imageUrl.trim())) {
-      rawList.push(item.imageUrl.trim());
-    }
-    if (Array.isArray(item.images) && item.images.length) {
-      for (const img of item.images) {
-        if (typeof img === "string" && img.trim() && !rawList.includes(img.trim())) rawList.push(img.trim());
-      }
-    }
-    if (Array.isArray(item.gallery) && item.gallery.length) {
-      for (const img of item.gallery) {
-        if (typeof img === "string" && img.trim() && !rawList.includes(img.trim())) rawList.push(img.trim());
+    const cleanThumb =
+      thumbCandidate && String(thumbCandidate).trim() !== "null" && String(thumbCandidate).trim() !== "undefined"
+        ? String(thumbCandidate).trim()
+        : null;
+
+    setExistingThumbnail(cleanThumb);
+    setThumbnailFile(null);
+
+    // 2. Resolve Gallery images
+    const galleryList: string[] = [];
+    const candidates = [
+      ...(Array.isArray(item.galleryMediaUuids) ? item.galleryMediaUuids : []),
+      ...(Array.isArray(item.gallery) ? item.gallery : []),
+      ...(Array.isArray(item.images) ? item.images : []),
+      ...(Array.isArray(item.primaryMediaUrls) ? item.primaryMediaUrls.slice(1) : []),
+      ...(Array.isArray(item.primaryMediaUuids) ? item.primaryMediaUuids.slice(1) : []),
+    ];
+
+    for (const c of candidates) {
+      if (
+        typeof c === "string" &&
+        c.trim() &&
+        c.trim() !== "null" &&
+        c.trim() !== "undefined" &&
+        c.trim() !== cleanThumb &&
+        !galleryList.includes(c.trim())
+      ) {
+        galleryList.push(c.trim());
       }
     }
 
-    // 2. Media UUIDs
-    if (typeof item.thumbnailMediaUuid === "string" && item.thumbnailMediaUuid.trim() && !rawList.includes(item.thumbnailMediaUuid.trim())) {
-      rawList.push(item.thumbnailMediaUuid.trim());
-    }
-    if (typeof item.primaryMediaUuid === "string" && item.primaryMediaUuid.trim() && !rawList.includes(item.primaryMediaUuid.trim())) {
-      rawList.push(item.primaryMediaUuid.trim());
-    }
-    if (Array.isArray(item.primaryMediaUuids)) {
-      for (const u of item.primaryMediaUuids) {
-        if (typeof u === "string" && u.trim() && !rawList.includes(u.trim())) rawList.push(u.trim());
-      }
-    }
-    if (Array.isArray(item.galleryMediaUuids)) {
-      for (const u of item.galleryMediaUuids) {
-        if (typeof u === "string" && u.trim() && !rawList.includes(u.trim())) rawList.push(u.trim());
-      }
-    }
-
-    // 3. Fallback to Food catalog media if menuItem has none
-    if (!rawList.length && item.food) {
-      if (Array.isArray(item.food.primaryMediaUrls) && item.food.primaryMediaUrls.length) {
-        for (const u of item.food.primaryMediaUrls) {
-          if (typeof u === "string" && u.trim() && !rawList.includes(u.trim())) rawList.push(u.trim());
-        }
-      }
-      if (typeof item.food.thumbnail === "string" && item.food.thumbnail.trim()) {
-        rawList.push(item.food.thumbnail.trim());
-      }
-      if (typeof item.food.imageUrl === "string" && item.food.imageUrl.trim()) {
-        rawList.push(item.food.imageUrl.trim());
-      }
-      if (typeof item.food.thumbnailMediaUuid === "string" && item.food.thumbnailMediaUuid.trim()) {
-        rawList.push(item.food.thumbnailMediaUuid.trim());
-      }
-      if (typeof item.food.primaryMediaUuid === "string" && item.food.primaryMediaUuid.trim()) {
-        rawList.push(item.food.primaryMediaUuid.trim());
-      }
-      if (Array.isArray(item.food.primaryMediaUuids)) {
-        for (const u of item.food.primaryMediaUuids) {
-          if (typeof u === "string" && u.trim() && !rawList.includes(u.trim())) rawList.push(u.trim());
+    if (!galleryList.length && item.food) {
+      const foodCandidates = [
+        ...(Array.isArray(item.food.galleryMediaUuids) ? item.food.galleryMediaUuids : []),
+        ...(Array.isArray(item.food.gallery) ? (item.food.gallery as string[]) : []),
+        ...(Array.isArray(item.food.primaryMediaUrls) ? item.food.primaryMediaUrls.slice(1) : []),
+      ];
+      for (const fc of foodCandidates) {
+        if (
+          typeof fc === "string" &&
+          fc.trim() &&
+          fc.trim() !== "null" &&
+          fc.trim() !== cleanThumb &&
+          !galleryList.includes(fc.trim())
+        ) {
+          galleryList.push(fc.trim());
         }
       }
     }
 
-    setExistingImages(rawList.filter(Boolean));
+    setExistingGallery(galleryList);
+    setGalleryFiles([]);
 
     const matchedStoreUuid =
       item.storeUuid ||
@@ -325,30 +314,9 @@ export default function PublishMenuItemModal({
       }).filter((d) => Boolean(d.dietaryTypeUuid)),
     );
 
-    setAllergenRows(
-      (item.allergenDeclarations ?? []).map((raw: any) => {
-        const found = allergens.find(
-          (a) =>
-            a.uuid === raw.allergenUuid ||
-            a.uuid === raw.uuid ||
-            (raw.code && a.code === raw.code) ||
-            (raw.name && a.name === raw.name),
-        );
-        return {
-          allergenUuid:
-            found?.uuid || raw.allergenUuid || raw.uuid || "",
-          declarationType: raw.declarationType || "MAY_CONTAIN",
-          riskLevel: raw.riskLevel || "MEDIUM",
-          verificationStatus: raw.verificationStatus || "UNVERIFIED",
-          notes: raw.notes || "",
-        };
-      }).filter((a) => Boolean(a.allergenUuid)),
-    );
-
-    setImages([]);
     setError(null);
     setFieldErrors({});
-  }, [item, open, stores, foods, ingredients, dietaryTypes, allergens]);
+  }, [item, open, stores, foods, ingredients, dietaryTypes]);
 
   const activeFoods = useMemo(
     () => foods.filter((food) => food.isActive !== false),
@@ -363,11 +331,6 @@ export default function PublishMenuItemModal({
   const activeDietaryTypes = useMemo(
     () => dietaryTypes.filter((dt) => dt.active !== false),
     [dietaryTypes],
-  );
-
-  const activeAllergens = useMemo(
-    () => allergens.filter((al) => al.active !== false),
-    [allergens],
   );
 
   const storeOptions: SearchableOption[] = useMemo(
@@ -402,16 +365,6 @@ export default function PublishMenuItemModal({
         sublabel: d.code,
       })),
     [activeDietaryTypes],
-  );
-
-  const allergenOptions: SearchableOption[] = useMemo(
-    () =>
-      activeAllergens.map((a) => ({
-        value: a.uuid,
-        label: a.name,
-        sublabel: a.code,
-      })),
-    [activeAllergens],
   );
 
   const handleFoodSelect = (selectedUuid: string) => {
@@ -452,17 +405,6 @@ export default function PublishMenuItemModal({
     );
   };
 
-  const updateAllergenRow = (
-    index: number,
-    changes: Partial<AllergenRow>,
-  ) => {
-    setAllergenRows((current) =>
-      current.map((row, rowIndex) =>
-        rowIndex === index ? { ...row, ...changes } : row,
-      ),
-    );
-  };
-
   const validateBasics = (): FieldErrors => {
     const nextErrors: FieldErrors = {};
     const targetStoreUuid = (
@@ -483,8 +425,8 @@ export default function PublishMenuItemModal({
       nextErrors.name = "សូមបញ្ចូលឈ្មោះ Menu Item";
     }
     const price = Number(values.price);
-    if (!values.price.trim() || !Number.isFinite(price) || price < 0) {
-      nextErrors.price = "សូមបញ្ចូលតម្លៃត្រឹមត្រូវ";
+    if (!values.price.trim() || !Number.isFinite(price) || price <= 0) {
+      nextErrors.price = "តម្លៃត្រូវតែធំជាង ០ (Price must be greater than 0)";
     }
     return nextErrors;
   };
@@ -529,6 +471,15 @@ export default function PublishMenuItemModal({
           notes: row.notes.trim() || null,
         }));
 
+      // Combine thumbnail file and gallery files for upload
+      const allImages: File[] = [];
+      if (thumbnailFile) {
+        allImages.push(thumbnailFile);
+      }
+      galleryFiles.forEach((file) => {
+        allImages.push(file);
+      });
+
       const payload: MenuItemWritePayload = {
         foodUuid: values.foodUuid,
         menuItem: {
@@ -544,15 +495,15 @@ export default function PublishMenuItemModal({
           isFeatured: values.isFeatured,
           source: values.source || "MANUAL",
         },
-        primaryMediaUuids: item?.primaryMediaUuids ?? [],
-        thumbnailMediaUuid: item?.thumbnailMediaUuid ?? null,
-        galleryMediaUuids: item?.galleryMediaUuids ?? [],
+        primaryMediaUuids: [],
+        thumbnailMediaUuid: thumbnailFile ? null : (existingThumbnail || null),
+        galleryMediaUuids: existingGallery,
         ingredients: ingredientPayload,
         dietaryTypes: dietaryTypePayload,
         allergenDeclarations: [],
       };
 
-      await onSubmit(targetStoreUuid, payload, images);
+      await onSubmit(targetStoreUuid, payload, allImages);
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -649,6 +600,8 @@ export default function PublishMenuItemModal({
                 label="តម្លៃ"
                 required
                 type="number"
+                min={0.01}
+                step="0.01"
                 value={values.price}
                 placeholder="3.50"
                 invalid={Boolean(fieldErrors.price)}
@@ -904,18 +857,23 @@ export default function PublishMenuItemModal({
             </div>
           </section>
 
-          {/* Images */}
-          <ImagePicker
-            value={images}
-            onChange={setImages}
-            existingImages={existingImages}
-            onExistingChange={setExistingImages}
-            label={
-              item
-                ? "រូបភាព (ទុកទទេ = រក្សារូបចាស់ | រូបទី ១: Thumbnail, រូបបន្ទាប់: Gallery)"
-                : "រូបភាព Menu Item (អតិបរមា 4 | រូបទី ១: Thumbnail, រូបបន្ទាប់: Gallery)"
-            }
-          />
+          {/* Image Upload: 2 Separate Parts (Thumbnail & Gallery) */}
+          <div className="space-y-4">
+            <ThumbnailImagePicker
+              value={thumbnailFile}
+              onChange={setThumbnailFile}
+              existingUrl={existingThumbnail}
+              onExistingChange={setExistingThumbnail}
+            />
+
+            <GalleryImagePicker
+              value={galleryFiles}
+              onChange={setGalleryFiles}
+              existingUrls={existingGallery}
+              onExistingChange={setExistingGallery}
+              maxFiles={4}
+            />
+          </div>
         </div>
 
         {/* Footer */}
@@ -991,6 +949,8 @@ function Field({
   placeholder,
   onChange,
   type = "text",
+  min,
+  step,
   required = false,
   invalid = false,
   error,
@@ -1000,6 +960,8 @@ function Field({
   placeholder?: string;
   onChange: (value: string) => void;
   type?: string;
+  min?: number | string;
+  step?: number | string;
   required?: boolean;
   invalid?: boolean;
   error?: string;
@@ -1009,10 +971,23 @@ function Field({
       <Label required={required}>{label}</Label>
       <input
         type={type}
+        min={min}
+        step={step}
         value={value}
         placeholder={placeholder}
         aria-invalid={invalid}
-        onChange={(event) => onChange(event.target.value)}
+        onKeyDown={(e) => {
+          if (type === "number" && min !== undefined && Number(min) >= 0 && (e.key === "-" || e.key === "e")) {
+            e.preventDefault();
+          }
+        }}
+        onChange={(event) => {
+          const nextVal = event.target.value;
+          if (type === "number" && min !== undefined && Number(min) >= 0 && Number(nextVal) < 0) {
+            return;
+          }
+          onChange(nextVal);
+        }}
         className={`${inputClass} ${
           invalid ? "border-red-300 bg-red-50/40 focus:border-red-400 focus:ring-red-50" : ""
         }`}

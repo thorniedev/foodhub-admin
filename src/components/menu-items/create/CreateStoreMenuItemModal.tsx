@@ -181,8 +181,8 @@ export default function CreateStoreMenuItemModal({
       }
 
       const price = Number(form.price);
-      if (!Number.isFinite(price) || price < 0) {
-        throw new Error("Price មិនត្រឹមត្រូវ។");
+      if (!Number.isFinite(price) || price <= 0) {
+        throw new Error("តម្លៃ (Price) ត្រូវតែធំជាង ០។");
       }
 
       const body: CreateStoreMenuItemPayload = {
@@ -315,10 +315,19 @@ export default function CreateStoreMenuItemModal({
               <Field label="Price *">
                 <input
                   type="number"
-                  min="0"
+                  min="0.01"
                   step="0.01"
                   value={form.price}
-                  onChange={(event) => set("price", event.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => {
+                    const val = event.target.value;
+                    if (Number(val) < 0) return;
+                    set("price", val);
+                  }}
                   className="field-input"
                 />
               </Field>
