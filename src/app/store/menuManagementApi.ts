@@ -1672,7 +1672,7 @@ export const menuManagementApi =
             // controller method (MenuItemController is @RequestMapping({
             // "/api/v1/catalog", "/api/v1/admin"})), so there is only ever one
             // correct payload shape — send it once, directly.
-            const requestBody = {
+            const requestBody: Record<string, unknown> = {
               foodUuid: payload.foodUuid,
               menuItem: {
                 name: payload.menuItem?.name,
@@ -1688,7 +1688,6 @@ export const menuManagementApi =
                 // items are MANUAL (also MenuItemCreationInput's own default).
                 source: "MANUAL",
               },
-              primaryMediaUuids: mediaUuids,
               thumbnailMediaUuid: primaryMediaUuid || null,
               galleryMediaUuids: galleryMediaUuids,
               ingredients: (payload.ingredients ?? []).map((ing) => ({
