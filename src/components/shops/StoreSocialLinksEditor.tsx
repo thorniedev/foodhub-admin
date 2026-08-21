@@ -217,16 +217,9 @@ export default function StoreSocialLinksEditor({
                     min="1"
                     disabled={disabled}
                     value={link.displayOrder}
-                    onKeyDown={(e) => {
-                      if (e.key === "-" || e.key === "e") {
-                        e.preventDefault();
-                      }
-                    }}
-                    onChange={(event) => {
-                      const val = event.target.value;
-                      if (Number(val) < 0) return;
-                      update(index, "displayOrder", val);
-                    }}
+                    onChange={(event) =>
+                      update(index, "displayOrder", event.target.value)
+                    }
                     className="h-11 rounded-xl border border-gray-200 bg-white px-3 text-base outline-none focus:border-[#136C34] disabled:opacity-60"
                   />
 

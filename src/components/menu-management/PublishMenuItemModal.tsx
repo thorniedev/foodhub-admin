@@ -160,6 +160,7 @@ export default function PublishMenuItemModal({
   dietaryTypes = [],
   saving,
   fixedStoreUuid,
+  defaultStoreUuid,
   onClose,
   onSubmit,
 }: {
@@ -172,6 +173,7 @@ export default function PublishMenuItemModal({
   allergens?: unknown[];
   saving: boolean;
   fixedStoreUuid?: string;
+  defaultStoreUuid?: string;
   onClose: () => void;
   onSubmit: (
     storeUuid: string,
@@ -179,6 +181,7 @@ export default function PublishMenuItemModal({
     images: File[],
   ) => Promise<void>;
 }) {
+  const storeFixedId = fixedStoreUuid || defaultStoreUuid;
   const [values, setValues] = useState<FormState>(EMPTY);
   const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>([]);
   const [dietaryTypeRows, setDietaryTypeRows] = useState<DietaryTypeRow[]>([]);
@@ -195,7 +198,7 @@ export default function PublishMenuItemModal({
     if (!item) {
       setValues({
         ...EMPTY,
-        storeUuid: fixedStoreUuid || "",
+        storeUuid: storeFixedId || "",
       });
       setIngredientRows([]);
       setDietaryTypeRows([]);
@@ -408,7 +411,7 @@ export default function PublishMenuItemModal({
   const validateBasics = (): FieldErrors => {
     const nextErrors: FieldErrors = {};
     const targetStoreUuid = (
-      fixedStoreUuid ||
+      storeFixedId ||
       values.storeUuid ||
       item?.storeUuid ||
       item?.store?.uuid ||
@@ -444,7 +447,7 @@ export default function PublishMenuItemModal({
       setFieldErrors({});
 
       const targetStoreUuid = (
-        fixedStoreUuid ||
+        storeFixedId ||
         values.storeUuid ||
         item?.storeUuid ||
         item?.store?.uuid ||
@@ -515,7 +518,7 @@ export default function PublishMenuItemModal({
 
   if (!open) return null;
 
-  const effectiveStoreUuid = fixedStoreUuid || values.storeUuid;
+  const effectiveStoreUuid = storeFixedId || values.storeUuid;
 
   return (
     <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px]">
@@ -527,7 +530,7 @@ export default function PublishMenuItemModal({
               {item ? "កែប្រែ Menu Item" : "បង្កើត Menu Item សម្រាប់ Store"}
             </h2>
             <p className="mt-1 text-sm text-gray-400">
-              {fixedStoreUuid
+              {storeFixedId
                 ? "ជ្រើស Food Catalog កំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីដាក់លក់ក្នុងហាងនេះ"
                 : "ជ្រើស Store និង Food Catalog រួចកំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីផ្សាយលើ Website"}
             </p>
@@ -549,13 +552,13 @@ export default function PublishMenuItemModal({
           <div className="grid gap-4 md:grid-cols-2">
             <label>
               <Label required>ហាង</Label>
-              {(Boolean(item) || Boolean(fixedStoreUuid)) && (
+              {(Boolean(item) || Boolean(storeFixedId)) && (
                 <p className="mb-1 text-xs text-gray-400">
                   Store ត្រូវបានកំណត់រួចហើយ មិនអាចប្តូរបានទេ។
                 </p>
               )}
               <MenuItemSearchableSelect
-                disabled={Boolean(item) || Boolean(fixedStoreUuid)}
+                disabled={Boolean(item) || Boolean(storeFixedId)}
                 value={effectiveStoreUuid}
                 options={storeOptions}
                 onChange={(next) => {

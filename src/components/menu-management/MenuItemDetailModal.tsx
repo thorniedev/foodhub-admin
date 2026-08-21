@@ -20,9 +20,11 @@ import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl"
 export default function MenuItemDetailModal({
   uuid,
   onClose,
+  onEdit,
 }: {
   uuid: string | null;
   onClose: () => void;
+  onEdit?: (item: any) => void;
 }) {
   const [showRawJson, setShowRawJson] = useState(false);
 

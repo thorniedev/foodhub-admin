@@ -50,7 +50,7 @@ export default function OrdersChart({ data }: { data: OrdersPoint[] }) {
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <p className="text-2xl font-semibold text-[#136C34]">
-          កំណើនអ្នកប្រើប្រាស់
+          កំណើនគណនីអ្នកប្រើប្រាស់
         </p>
 
         {/* Filter Dropdown */}

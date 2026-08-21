@@ -1,16 +1,36 @@
-import { Clock3 } from "lucide-react";
+import {
+  Clock3,
+} from "lucide-react";
 
 export default function ShopHoursSection() {
   return (
-    <section className="rounded-[24px] border border-orange-100 bg-orange-50 p-5 sm:p-6">
+    <section className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#F97316]">
+        <div
+          className="
+            flex
+            h-11
+            w-11
+            shrink-0
+            items-center
+            justify-center
+            rounded-xl
+            bg-primary-50
+            text-primary-800
+          "
+        >
           <Clock3 size={22} />
         </div>
-        <div>
-          <p className="text-xl font-semibold text-[#F97316]">ម៉ោងបើកបិទ</p>
-          <p className="mt-1 text-base leading-7 text-orange-800/80">
-            Hours មិនមែនជាផ្នែកនៃ create payload។ បង្កើត Store មុន ហើយចូល detail ដើម្បីកំណត់ម៉ោងបើកបិទ។
+
+        <div className="min-w-0">
+          <p className="text-3xl font-semibold text-primary-800">
+            ម៉ោងបើក និងបិទហាង
+          </p>
+
+          <p className="mt-2 max-w-3xl text-lg leading-8 text-gray-500">
+            ម៉ោងបើកបិទមិនមែនជាផ្នែកនៃការបង្កើតដំបូងឡើយ។
+            សូមបង្កើតហាងជាមុនសិន បន្ទាប់មកចូលទៅកាន់ទំព័រព័ត៌មានលម្អិតនៃហាង
+            ដើម្បីកំណត់ម៉ោងបើក និងបិទ។
           </p>
         </div>
       </div>

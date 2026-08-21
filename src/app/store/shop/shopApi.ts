@@ -112,10 +112,6 @@ export const shopApi = adminBaseApi.injectEndpoints({
           method: "GET",
           params: {
             query: p.query?.trim() || undefined,
-            reviewStatus:
-              p.reviewStatus && p.reviewStatus !== "ALL"
-                ? p.reviewStatus
-                : undefined,
             page: p.page ?? 0,
             size: p.size ?? 20,
           },
@@ -140,7 +136,7 @@ export const shopApi = adminBaseApi.injectEndpoints({
     >({
       query: ({ storeUuid, body }) => ({
         url: `/stores/${encodeURIComponent(storeUuid)}`,
-        method: "PUT",
+        method: "PATCH",
         body,
       }),
       transformResponse: (r) => normalizeOne<Store>(r),

@@ -1,33 +1,28 @@
 "use client";
 
 import { AlertOctagon, Loader2, Trash2, X } from "lucide-react";
-import type { AdminUser } from "@/src/types/userProfile";
-import { displayName } from "@/src/lib/userProfileFormat";
+import type { AdminProfile } from "@/src/types/userProfile";
 
-interface HardDeleteUserConfirmModalProps {
-  user: AdminUser | null;
+interface HardDeleteProfileConfirmModalProps {
+  profile: AdminProfile | null;
   deleting: boolean;
   onClose: () => void;
   onConfirm: () => Promise<void>;
 }
 
-export default function HardDeleteUserConfirmModal({
-  user,
+export default function HardDeleteProfileConfirmModal({
+  profile,
   deleting,
   onClose,
   onConfirm,
-}: HardDeleteUserConfirmModalProps) {
-  if (!user) return null;
-
-  const name = displayName(user.firstName, user.lastName, user.username);
+}: HardDeleteProfileConfirmModalProps) {
+  if (!profile) return null;
 
   return (
     <div
       className="fixed inset-0 z-[140] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[3px] animate-in fade-in duration-200"
-      onClick={(event) => {
-        if (event.target === event.currentTarget && !deleting) {
-          onClose();
-        }
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !deleting) onClose();
       }}
     >
       <div className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-red-100 bg-white shadow-2xl animate-in zoom-in-95 duration-200">
@@ -49,23 +44,19 @@ export default function HardDeleteUserConfirmModal({
           </div>
 
           <h3 className="mt-4 text-2xl font-bold tracking-tight text-gray-900">
-            លុបគណនីជារៀងរហូត?
+            លុបកម្រងព័ត៌មានជារៀងរហូត?
           </h3>
         </div>
 
         {/* Content Body */}
         <div className="p-6 pt-1 space-y-4 text-center">
           <p className="text-base leading-relaxed text-gray-600">
-            គណនីអ្នកប្រើប្រាស់{" "}
+            កម្រងព័ត៌មាន{" "}
             <span className="inline-block font-bold text-gray-900 rounded-lg bg-gray-100 px-2.5 py-0.5 border border-gray-200">
-              {name}
+              {profile.profileName}
             </span>{" "}
-            នឹងត្រូវបានលុបចេញពីប្រព័ន្ធទាំងស្រុង (Keycloak & Database)។
+            នឹងត្រូវបានលុបចេញពីប្រព័ន្ធទាំងស្រុង (Hard Delete) ហើយមិនអាចស្តារឡើងវិញបានឡើយ។
           </p>
-
-          <div className="rounded-2xl border border-red-200/80 bg-red-50/70 p-3.5 text-xs leading-relaxed text-red-700 text-left">
-            ⚠️ សកម្មភាពនេះមិនអាចស្តារឡើងវិញបានឡើយ។ ទិន្នន័យពាក់ព័ន្ធទាំងអស់នឹងត្រូវលុបជាអចិន្ត្រៃយ៍។
-          </div>
 
           <div className="grid grid-cols-2 gap-3 pt-2">
             <button

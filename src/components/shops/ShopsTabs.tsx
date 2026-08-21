@@ -6,9 +6,9 @@ const tabs: Array<{
   key: "all" | "pending" | "approved" | "rejected";
 }> = [
   { value: "ALL", label: "ទាំងអស់", key: "all" },
-  { value: "PENDING", label: "Pending", key: "pending" },
-  { value: "APPROVED", label: "Approved", key: "approved" },
-  { value: "REJECTED", label: "Rejected", key: "rejected" },
+  { value: "APPROVED", label: "បានអនុម័ត", key: "approved" },
+  { value: "PENDING", label: "រង់ចាំពិនិត្យ", key: "pending" },
+  { value: "REJECTED", label: "បានបដិសេធ", key: "rejected" },
 ];
 
 export default function ShopsTabs({

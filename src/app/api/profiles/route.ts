@@ -199,10 +199,14 @@ function getAccessToken(request: NextRequest): string | null {
   return request.cookies.get("foodhub_access_token")?.value ?? null;
 }
 
-import { getBackendApiBaseUrl } from "@/src/lib/backendUrl";
+function getBackendApiUrl(): string | null {
+  const backendApiUrl = process.env.BACKEND_API_URL;
 
-function getBackendApiUrl(): string {
-  return getBackendApiBaseUrl();
+  if (!backendApiUrl) {
+    return null;
+  }
+
+  return normalizeBaseUrl(backendApiUrl);
 }
 
 function configurationError() {

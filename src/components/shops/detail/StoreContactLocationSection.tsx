@@ -1,173 +1,169 @@
-import type { ReactNode } from "react";
+"use client";
 
-import { ExternalLink, Mail, MapPin, Phone } from "lucide-react";
-
+import { useState } from "react";
+import {
+  Building,
+  Check,
+  Compass,
+  Copy,
+  ExternalLink,
+  Mail,
+  MapPin,
+  Navigation,
+  Phone,
+} from "lucide-react";
 import type { Store } from "@/src/types/shop";
-
-import { Section } from "./StoreOverviewSection";
-
-/* =========================================================
-   STORE CONTACT & LOCATION
-========================================================= */
+import { Item, Section } from "./StoreOverviewSection";
 
 export default function StoreContactLocationSection({
   store,
 }: {
   store: Store;
 }) {
+  const [copiedCoords, setCopiedCoords] = useState(false);
+
+  const hasCoords =
+    store.latitude !== null &&
+    store.latitude !== undefined &&
+    store.longitude !== null &&
+    store.longitude !== undefined &&
+    !isNaN(Number(store.latitude)) &&
+    !isNaN(Number(store.longitude)) &&
+    (Number(store.latitude) !== 0 || Number(store.longitude) !== 0);
+
+  const lat = Number(store.latitude);
+  const lng = Number(store.longitude);
+
+  const handleCopyCoordinates = async () => {
+    if (!hasCoords) return;
+    try {
+      await navigator.clipboard.writeText(`${lat}, ${lng}`);
+      setCopiedCoords(true);
+      setTimeout(() => setCopiedCoords(false), 2000);
+    } catch {
+      // ignore
+    }
+  };
+
+  const mapEmbedUrl = hasCoords
+    ? `https://maps.google.com/maps?q=${lat},${lng}&hl=km&z=15&output=embed`
+    : null;
+
   return (
-    <Section title="Contact & location" icon={<MapPin size={22} />}>
-      <div className="space-y-3">
-        <Row
-          label="Address"
-          value={store.addressLine}
-          icon={<MapPin size={19} />}
+    <Section title="ទីតាំង & ទំនាក់ទំនង" icon={<MapPin size={22} />}>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {/* Full Address Banner */}
+        <div className="col-span-full rounded-2xl border border-gray-100 bg-gray-50/60 px-4 py-4 transition hover:border-gray-200 hover:bg-gray-50">
+          <p className="text-lg font-medium text-gray-500">អាសយដ្ឋានពេញលេញ</p>
+          <p className="mt-1 flex items-center gap-2 text-lg font-semibold text-gray-800">
+            <span className="text-primary-700">
+              <MapPin size={19} />
+            </span>
+            {store.addressLine || "មិនមានអាសយដ្ឋានឡើយ"}
+          </p>
+        </div>
+
+        {/* Embedded Interactive Map Preview */}
+        {hasCoords && mapEmbedUrl && (
+          <div className="col-span-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xs">
+            <div className="relative">
+              <iframe
+                title="Store Map"
+                src={mapEmbedUrl}
+                className="h-56 w-full border-0 sm:h-64"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 bg-gray-50/90 px-4 py-3 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                  <Compass size={16} className="text-primary-700" />
+                  <span>
+                    {lat.toFixed(6)}, {lng.toFixed(6)}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCopyCoordinates}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-bold text-gray-700 transition hover:bg-gray-50"
+                  >
+                    {copiedCoords ? (
+                      <>
+                        <Check size={13} className="text-emerald-600" />
+                        <span className="text-emerald-700">បានចម្លង</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={13} />
+                        <span>ចម្លងកូអរដោនេ</span>
+                      </>
+                    )}
+                  </button>
+
+                  <a
+                    href={`https://www.google.com/maps?q=${lat},${lng}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[#136C34] px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#0F5F2E]"
+                  >
+                    <ExternalLink size={13} />
+                    <span>បើកក្នុង Google Maps</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <Item
+          label="សង្កាត់/ឃុំ"
+          value={store.commune}
+          icon={<Building size={19} />}
         />
 
-        <Row label="Commune" value={store.commune ?? "—"} />
+        <Item
+          label="ខណ្ឌ/ស្រុក"
+          value={store.district}
+          icon={<Building size={19} />}
+        />
 
-        <Row label="District" value={store.district ?? "—"} />
+        <Item
+          label="ក្រុង/ទីក្រុង"
+          value={store.city}
+          icon={<Building size={19} />}
+        />
 
-        <Row label="City" value={store.city ?? "—"} />
+        <Item
+          label="រាជធានី/ខេត្ត"
+          value={store.province}
+          icon={<Building size={19} />}
+        />
 
-        <Row label="Province" value={store.province ?? "—"} />
+        <Item
+          label="លេខកូដប្រៃសណីយ៍"
+          value={store.postalCode}
+          icon={<Navigation size={19} />}
+        />
 
-        <Row label="Postal code" value={store.postalCode ?? "—"} />
-
-        <Row
-          label="Phone"
-          value={store.phoneNumber ?? "—"}
+        <Item
+          label="លេខទូរស័ព្ទ"
+          value={store.phoneNumber}
           icon={<Phone size={19} />}
         />
 
-        <Row
-          label="Email"
-          value={store.email ?? "—"}
+        <Item
+          label="អ៊ីមែល"
+          value={store.email}
           icon={<Mail size={19} />}
         />
 
-        <Row
-          label="Coordinates"
-          value={`${store.latitude}, ${store.longitude}`}
-          mono
+        <Item
+          label="កូអរដោនេផែនទី"
+          value={hasCoords ? `${lat.toFixed(5)}, ${lng.toFixed(5)}` : undefined}
+          icon={<Compass size={19} />}
         />
-
-        {/* Google Maps */}
-        <div className="pt-2">
-          <a
-            href={`https://www.google.com/maps?q=${store.latitude},${store.longitude}`}
-            target="_blank"
-            rel="noreferrer"
-            className="
-              inline-flex
-              min-h-12
-              items-center
-              justify-center
-              gap-2
-              rounded-full
-              border
-              border-secondary-200
-              bg-secondary-50
-              px-5
-              text-lg
-              font-medium
-              text-secondary-700
-              transition
-              hover:bg-secondary-100
-              focus:outline-none
-              focus:ring-4
-              focus:ring-secondary-100
-            "
-          >
-            <ExternalLink size={19} />
-            Open coordinates in Google Maps
-          </a>
-        </div>
       </div>
     </Section>
-  );
-}
-
-/* =========================================================
-   ROW
-========================================================= */
-
-function Row({
-  label,
-  value,
-  icon,
-  mono = false,
-}: {
-  label: string;
-  value: string;
-  icon?: ReactNode;
-  mono?: boolean;
-}) {
-  return (
-    <div
-      className="
-        grid
-        min-w-0
-        gap-2
-        rounded-2xl
-        border
-        border-gray-100
-        bg-gray-50/60
-        px-4
-        py-3.5
-        transition
-        hover:border-gray-200
-        hover:bg-gray-50
-        sm:grid-cols-[170px_1fr]
-        sm:items-center
-      "
-    >
-      {/* Label */}
-      <div
-        className="
-          flex
-          items-center
-          gap-2
-          text-lg
-          font-medium
-          text-gray-500
-        "
-      >
-        {icon && (
-          <span
-            className="
-              flex
-              h-8
-              w-8
-              shrink-0
-              items-center
-              justify-center
-              rounded-lg
-              bg-primary-50
-              text-primary-800
-            "
-          >
-            {icon}
-          </span>
-        )}
-
-        <span>{label}</span>
-      </div>
-
-      {/* Value */}
-      <p
-        className={`
-          min-w-0
-          break-words
-          text-lg
-          font-medium
-          text-gray-800
-          ${mono ? "font-mono text-base" : ""}
-        `}
-        title={value}
-      >
-        {value}
-      </p>
-    </div>
   );
 }

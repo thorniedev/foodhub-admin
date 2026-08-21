@@ -107,6 +107,8 @@ export interface StorePage {
 export interface GetAdminStoresParams {
   query?: string;
   reviewStatus?: StoreReviewStatus | "ALL";
+  operatingStatus?: StoreOperatingStatus;
+  accountStatus?: StoreAccountStatus;
   page?: number;
   size?: number;
 }
@@ -134,14 +136,17 @@ export interface CreateStorePayload {
   socialLinks?: StoreSocialLink[];
 }
 
-/** Fields demonstrated by the supplied PUT request. */
+/** Fields demonstrated by the supplied PUT request (matches StoreRequest). */
 export interface UpdateStorePayload {
   storeName: string;
   description?: string | null;
   addressLine: string;
+  commune?: string | null;
+  district?: string | null;
   city?: string | null;
   province?: string | null;
   countryCode: string;
+  postalCode?: string | null;
   timezone: string;
   latitude: number;
   longitude: number;
@@ -175,8 +180,6 @@ export interface ReplaceStoreHoursPayload {
 export interface CreateStoreFromGooglePayload {
   placeId: string;
   overrides: {
-    city?: string | null;
-    province?: string | null;
     timezone: string;
     logoMediaUuid?: string | null;
     coverMediaUuid?: string | null;

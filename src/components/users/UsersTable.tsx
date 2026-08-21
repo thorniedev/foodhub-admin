@@ -1,54 +1,66 @@
 import Link from "next/link";
 
-import { AlertOctagon, CheckCircle, Eye, Pencil, Trash2, XCircle } from "lucide-react";
+import {
+  Calendar,
+  CheckCircle,
+  Eye,
+  Mail,
+  Pencil,
+  RotateCcw,
+  Shield,
+  AlertTriangle,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 
 import type { AdminUser } from "@/src/types/userProfile";
 
-import { displayName, initials } from "@/src/lib/userProfileFormat";
+import { displayName, formatDateKhmer } from "@/src/lib/userProfileFormat";
 import UserAvatar from "./UserAvatar";
 
 interface UsersTableProps {
   users: AdminUser[];
   disabled?: boolean;
-  onStatusEdit: (user: AdminUser) => void;
-  onDelete: (user: AdminUser) => void;
+  onProfileEdit: (user: AdminUser) => void;
+  onSuspend?: (user: AdminUser) => void;
+  onDelete?: (user: AdminUser) => void;
   onHardDelete?: (user: AdminUser) => void;
+  onRestore?: (user: AdminUser) => void;
 }
 
 export default function UsersTable({
   users,
   disabled = false,
-  onStatusEdit,
-  onDelete,
+  onProfileEdit,
+  onSuspend,
   onHardDelete,
+  onRestore,
 }: UsersTableProps) {
   return (
-    <div className="w-full min-w-0 max-w-full overflow-x-auto">
-      <table className="w-full min-w-[1080px] border-collapse text-left">
+    <div className="w-full overflow-x-auto rounded-3xl border border-gray-100 bg-white shadow-sm">
+      <table className="w-full border-collapse text-left">
+        {/* ================= HEAD ================= */}
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/70">
-            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-              អ្នកប្រើ
+          <tr className="border-b border-gray-100 bg-gray-50/60">
+            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[280px]">
+              គណនីអ្នកប្រើប្រាស់
             </th>
-
-            {/* <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-              Email
-            </th> */}
-
-            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-              Verified
+            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[170px]">
+              កាលបរិច្ឆេទបង្កើត
             </th>
-
-            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[140px]">
+              ផ្ទៀងផ្ទាត់
+            </th>
+            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[140px]">
               ស្ថានភាព
             </th>
-
-            <th className="px-6 py-4 text-right text-xl font-semibold text-primary-800">
+            <th className="whitespace-nowrap px-6 py-4 text-end text-lg font-semibold text-primary-800 min-w-[160px] pr-6">
               សកម្មភាព
             </th>
           </tr>
         </thead>
 
+        {/* ================= BODY ================= */}
         <tbody>
           {users.map((user) => {
             const name = displayName(
@@ -73,100 +85,162 @@ export default function UsersTable({
               user.image ||
               user.avatar;
 
+            const isActive = user.status === "ACTIVE";
+            const isSuspended = user.status === "SUSPENDED";
+
+            // Only show one clean subtext (Email or Username) without repetition
+            const subtext = user.primaryEmail || (user.username ? `@${user.username}` : "");
+
             return (
               <tr
                 key={user.uuid}
                 className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
               >
-                <td className="px-6 py-4">
+                {/* User column */}
+                <td className="px-6 py-3.5">
                   <Link
                     href={detailHref}
                     title={`មើលព័ត៌មាន ${name}`}
-                    className="group flex min-w-[260px] items-center gap-4 rounded-2xl outline-none transition focus-visible:ring-4 focus-visible:ring-primary-100"
+                    className="group flex items-center gap-3.5 rounded-2xl outline-none transition focus-visible:ring-4 focus-visible:ring-primary-100"
                   >
-                    <UserAvatar
-                      name={name}
-                      avatarMediaUuid={avatarMediaUuid}
-                      imageUrl={imageUrl}
-                      containerClassName="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-lg font-semibold text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100"
-                    />
+                    <div className="relative shrink-0">
+                      <UserAvatar
+                        name={name}
+                        userUuid={user.uuid}
+                        avatarMediaUuid={avatarMediaUuid}
+                        imageUrl={imageUrl}
+                        containerClassName="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100 text-base font-bold"
+                      />
+                      <span
+                        className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${
+                          user.status === "ACTIVE"
+                            ? "bg-emerald-400"
+                            : user.status === "SUSPENDED"
+                              ? "bg-amber-400"
+                              : "bg-red-400"
+                        }`}
+                      />
+                    </div>
 
                     <div className="min-w-0">
-                      <p className="max-w-[250px] truncate text-lg font-medium text-gray-800 transition group-hover:text-primary-800">
+                      <p className="max-w-[280px] truncate text-base font-semibold text-gray-800 transition group-hover:text-primary-800">
                         {name}
                       </p>
-
-                      <p className="mt-1 truncate text-base text-gray-400">
-                        @{user.username}
-                      </p>
+                      {subtext && (
+                        <p className="max-w-[280px] truncate text-sm text-gray-400">
+                          {subtext}
+                        </p>
+                      )}
                     </div>
                   </Link>
                 </td>
 
-                {/* <td className="max-w-[320px] px-6 py-4">
-                  <p className="truncate text-lg text-gray-500">
-                    {user.primaryEmail ?? "—"}
-                  </p>
-                </td> */}
+                {/* Created Date */}
+                <td className="whitespace-nowrap px-6 py-3.5">
+                  <div className="flex items-center gap-2 text-base font-medium text-gray-500">
+                    <Calendar size={16} className="text-primary-700 shrink-0" />
+                    <span>{user.createdAt ? formatDateKhmer(user.createdAt) : "—"}</span>
+                  </div>
+                </td>
 
-                <td className="px-6 py-4">
+                {/* Verified */}
+                <td className="whitespace-nowrap px-6 py-3.5">
                   {user.emailVerified ? (
-                    <span className="inline-flex items-center gap-2 rounded-full bg-primary-50 px-3.5 py-1.5 text-lg font-medium text-primary-700 ring-1 ring-inset ring-primary-100">
-                      <CheckCircle size={17} />
-                      Yes
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-100">
+                      <CheckCircle size={13} />
+                      បានផ្ទៀងផ្ទាត់
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-2 rounded-full bg-secondary-50 px-3.5 py-1.5 text-lg font-medium text-secondary-600 ring-1 ring-inset ring-secondary-100">
-                      <XCircle size={17} />
-                      No
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 border border-amber-100">
+                      <XCircle size={13} />
+                      មិនទាន់
                     </span>
                   )}
                 </td>
 
-                <td className="px-6 py-4">
+                {/* Status */}
+                <td className="whitespace-nowrap px-6 py-3.5">
                   <StatusBadge status={user.status} />
                 </td>
 
-                <td className="px-6 py-4">
-                  <div className="flex items-center justify-end gap-2">
+                {/* Actions */}
+                <td className="px-6 py-2">
+                  <div className="flex items-center justify-end gap-2 pr-2">
+                    {/* View */}
                     <Link
                       href={detailHref}
-                      title="View user profiles"
                       className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100"
+                      title="មើលលម្អិត"
                     >
                       <Eye size={20} />
                     </Link>
 
-                    <button
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => onStatusEdit(user)}
-                      title="Change status"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <Pencil size={20} />
-                    </button>
+                    {/* ACTIVE: edit + suspend + delete */}
+                    {isActive && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={disabled}
+                          onClick={() => onProfileEdit(user)}
+                          className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+                          title="កែប្រែ"
+                        >
+                          <Pencil size={20} />
+                        </button>
 
-                    <button
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => onDelete(user)}
-                      title="Soft delete"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <Trash2 size={20} />
-                    </button>
+                        {onSuspend && (
+                          <button
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => onSuspend(user)}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-500 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            title="ផ្អាកដំណើរការ"
+                          >
+                            <AlertTriangle size={20} />
+                          </button>
+                        )}
 
-                    {onHardDelete && (
-                      <button
-                        type="button"
-                        disabled={disabled}
-                        onClick={() => onHardDelete(user)}
-                        title="Hard delete (Permanent)"
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        <AlertOctagon size={20} />
-                      </button>
+                        {onHardDelete && (
+                          <button
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => onHardDelete(user)}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            title="លុប"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        )}
+                      </>
+                    )}
+
+                    {/* SUSPENDED: restore + delete */}
+                    {isSuspended && (
+                      <>
+                        {onRestore && (
+                          <button
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => onRestore(user)}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            title="ស្តារឡើងវិញ"
+                          >
+                            <RotateCcw size={20} />
+                          </button>
+                        )}
+
+                        {onHardDelete && (
+                          <button
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => onHardDelete(user)}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            title="លុប"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </td>
@@ -176,14 +250,15 @@ export default function UsersTable({
 
           {users.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-6 py-16 text-center">
-                <p className="text-lg font-medium text-gray-500">
-                  មិនមានអ្នកប្រើប្រាស់
-                </p>
-
-                <p className="mt-1 text-lg text-gray-400">
-                  ទិន្នន័យអ្នកប្រើនឹងបង្ហាញនៅទីនេះ
-                </p>
+              <td colSpan={5} className="py-12 text-center text-gray-400">
+                <div className="flex flex-col items-center justify-center gap-3">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gray-50 text-gray-400">
+                    <Shield size={28} />
+                  </div>
+                  <p className="text-lg font-medium text-gray-500">
+                    មិនមានគណនីអ្នកប្រើប្រាស់
+                  </p>
+                </div>
               </td>
             </tr>
           )}
@@ -198,28 +273,31 @@ export function StatusBadge({ status }: { status: string }) {
 
   const className =
     normalized === "ACTIVE"
-      ? "bg-primary-50 text-primary-700 ring-primary-100"
+      ? "bg-emerald-50 text-emerald-700 border-emerald-100"
       : normalized === "SUSPENDED"
-        ? "bg-secondary-50 text-secondary-600 ring-secondary-100"
-        : normalized === "DELETED" || normalized === "DISABLED"
-          ? "bg-red-50 text-red-600 ring-red-100"
-          : "bg-gray-100 text-gray-600 ring-gray-200";
+        ? "bg-amber-50 text-amber-700 border-amber-100"
+        : "bg-gray-100 text-gray-500 border-gray-200";
 
   const dotClassName =
     normalized === "ACTIVE"
-      ? "bg-primary-600"
+      ? "bg-emerald-500"
       : normalized === "SUSPENDED"
-        ? "bg-secondary-500"
-        : normalized === "DELETED" || normalized === "DISABLED"
-          ? "bg-red-500"
-          : "bg-gray-400";
+        ? "bg-amber-500"
+        : "bg-gray-400";
+
+  const label =
+    normalized === "ACTIVE"
+      ? "សកម្ម"
+      : normalized === "SUSPENDED"
+        ? "ផ្អាកដំណើរការ"
+        : normalized;
 
   return (
     <span
-      className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-lg font-medium ring-1 ring-inset ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${className}`}
     >
       <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
-      {normalized}
+      {label}
     </span>
   );
 }

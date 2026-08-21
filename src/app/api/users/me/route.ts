@@ -1,9 +1,12 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { getBackendApiBaseUrl } from "@/src/lib/backendUrl";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const backendApiUrl = (
+  process.env.BACKEND_API_URL ?? "http://localhost:7070/api/v1"
+).replace(/\/+$/, "");
 
 function getAccessToken(request: NextRequest): string | null {
   return request.cookies.get("foodhub_access_token")?.value ?? null;
@@ -57,8 +60,6 @@ export async function GET(request: NextRequest): Promise<Response> {
     );
   }
 
-  const backendApiUrl = getBackendApiBaseUrl();
-
   try {
     const backendResponse = await fetch(`${backendApiUrl}/users/me`, {
       method: "GET",
@@ -97,8 +98,6 @@ export async function PATCH(request: NextRequest): Promise<Response> {
       },
     );
   }
-
-  const backendApiUrl = getBackendApiBaseUrl();
 
   try {
     const requestBody = await request.text();

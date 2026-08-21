@@ -1,11 +1,5 @@
 import type { ReactNode } from "react";
-
-import {
-  UserPlus,
-  Users,
-  UserRoundCheck,
-  UserRoundX,
-} from "lucide-react";
+import { Plus, UserCheck, UserRoundX, Users } from "lucide-react";
 
 interface UsersHeaderProps {
   total: number;
@@ -33,13 +27,10 @@ export default function UsersHeader({
             </div>
 
             <div>
-              <p className="text-3xl font-bold text-accent-400">
-                គ្រប់គ្រងអ្នកប្រើប្រាស់
-              </p>
-
+              <p className="text-5xl font-bold text-accent-400">គ្រប់គ្រងអ្នកប្រើប្រាស់</p>
               <p className="mt-6 max-w-2xl text-xl text-white/85">
-                គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ ស្ថានភាពគណនី និងពិនិត្យ Profile
-                របស់អ្នកប្រើនីមួយៗក្នុង FoodHub។
+                គ្រប់គ្រង គណនី ស្ថានភាព ផ្អាកដំណើរការ ស្តារឡើងវិញ{" "}
+                <br className="md:block max-md:hidden" />និងពិនិត្យប្រវត្តិរូបគណនីអ្នកប្រើប្រាស់ម្នាក់ៗក្នុង ម្ហូបអារហារ។
               </p>
             </div>
           </div>
@@ -50,27 +41,26 @@ export default function UsersHeader({
               label="អ្នកប្រើសរុប"
               value={total}
             />
-
             <Stat
-              icon={<UserRoundCheck size={20} />}
-              label="Active ក្នុងទំព័រ"
+              icon={<UserCheck size={20} />}
+              label="សកម្ម"
               value={activeCount}
             />
-
             <Stat
               icon={<UserRoundX size={20} />}
-              label="Suspended ក្នុងទំព័រ"
+              label="ផ្អាកដំណើរការ"
               value={suspendedCount}
             />
           </div>
         </div>
 
         <button
+          id="create-user-btn"
           type="button"
           onClick={onCreate}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
         >
-          <UserPlus size={20} />
+          <Plus size={20} />
           បង្កើតអ្នកប្រើថ្មី
         </button>
       </div>
@@ -93,7 +83,6 @@ function Stat({
         {icon}
         <span>{label}</span>
       </div>
-
       <p className="mt-1 text-2xl font-bold">{value}</p>
     </div>
   );

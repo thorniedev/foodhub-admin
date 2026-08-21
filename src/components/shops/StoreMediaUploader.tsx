@@ -1,16 +1,12 @@
 "use client";
 
-import { type ChangeEvent, type DragEvent, useEffect, useRef, useState } from "react";
-import {
-  CheckCircle2,
-  ImageIcon,
-  Loader2,
-  Trash2,
-  UploadCloud,
-} from "lucide-react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
+
+import { CheckCircle2, ImageIcon, Loader2, Trash2, Upload } from "lucide-react";
 
 import { uploadStoreMediaFile } from "@/src/lib/storeMediaClient";
 import { compressImage } from "@/src/utils/imageCompression";
+
 import type { StoreMediaPurpose } from "@/src/types/media";
 
 interface StoreMediaUploaderProps {
@@ -19,7 +15,6 @@ interface StoreMediaUploaderProps {
   mediaUuid: string;
   onMediaUuidChange: (uuid: string) => void;
   variant?: "logo" | "cover";
-  fallbackUrl?: string | null;
 }
 
 const ACCEPTED_TYPES = "image/png,image/jpeg,image/gif,image/webp";
@@ -31,14 +26,13 @@ export default function StoreMediaUploader({
   mediaUuid,
   onMediaUuidChange,
   variant = "cover",
-  fallbackUrl,
 }: StoreMediaUploaderProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const [hasLoadError, setHasLoadError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,37 +44,52 @@ export default function StoreMediaUploader({
   }, [objectUrl]);
 
   useEffect(() => {
+    setHasLoadError(false);
+
+    if (objectUrl) {
+      return;
+    }
+
     if (mediaUuid) {
-      if (!objectUrl) {
-        setPreviewUrl(`/api/media/${mediaUuid}`);
-      }
-    } else if (fallbackUrl) {
-      if (!objectUrl) {
-        setPreviewUrl(fallbackUrl);
-      }
-    } else if (!objectUrl) {
-      setPreviewUrl(null);
-    }
-  }, [mediaUuid, fallbackUrl, objectUrl]);
-
-  const handleUploadFile = async (file: File) => {
-    if (!["image/png", "image/jpeg", "image/gif", "image/webp"].includes(file.type)) {
-      setError("សូមជ្រើសរើសប្រភេទរូបភាព PNG, JPEG, GIF ឬ WebP។");
+      setPreviewUrl(`/api/media/${mediaUuid}`);
       return;
     }
 
-    if (file.size > MAX_BYTES) {
-      setError("ទំហំរូបភាពត្រូវតែតូចជាង ឬស្មើ 10 MB។");
-      return;
-    }
+    setPreviewUrl(null);
+  }, [mediaUuid, objectUrl]);
 
+  const replacePreviewObjectUrl = (url: string | null) => {
     if (objectUrl) {
       URL.revokeObjectURL(objectUrl);
     }
 
+    setObjectUrl(url);
+    setPreviewUrl(url);
+  };
+
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    if (
+      !["image/png", "image/jpeg", "image/gif", "image/webp"].includes(
+        file.type,
+      )
+    ) {
+      setError("Only PNG, JPEG, GIF and WebP images are supported.");
+      return;
+    }
+
+    if (file.size > MAX_BYTES) {
+      setError("Image must be 10 MB or smaller.");
+      return;
+    }
+
     const localPreview = URL.createObjectURL(file);
-    setObjectUrl(localPreview);
-    setPreviewUrl(localPreview);
 
     try {
       setLoading(true);
@@ -89,168 +98,186 @@ export default function StoreMediaUploader({
       const compressedFile = await compressImage(file, 1);
       const media = await uploadStoreMediaFile(compressedFile, purpose);
 
+      replacePreviewObjectUrl(localPreview);
       onMediaUuidChange(media.uuid);
     } catch (uploadError) {
+      URL.revokeObjectURL(localPreview);
       setError(
         uploadError instanceof Error
           ? uploadError.message
-          : "ការផ្ទុករូបភាពឡើងបរាជ័យ។",
+          : "Image upload failed.",
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (file) {
-      void handleUploadFile(file);
-    }
-  };
-
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      void handleUploadFile(file);
-    }
-  };
-
-  const clearImage = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const clearImage = () => {
     if (objectUrl) {
       URL.revokeObjectURL(objectUrl);
     }
+
     setObjectUrl(null);
     setPreviewUrl(null);
     setError(null);
     onMediaUuidChange("");
   };
 
-  const previewHeight = variant === "logo" ? "h-48" : "h-56";
+  const previewHeight = variant === "logo" ? "h-56" : "h-64";
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:border-gray-300">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 bg-gray-50/50">
-        <div>
-          <p className="text-sm font-bold text-gray-800">{label}</p>
-          <p className="text-[11px] text-gray-400">PNG, JPG, GIF or WebP · max 10 MB</p>
+    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+      {/* =====================================================
+          HEADER
+      ====================================================== */}
+      <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3.5">
+        <div className="min-w-0 flex-1">
+          <p className="text-base font-semibold text-primary-800">{label}</p>
+          <p className="text-xs text-gray-400">
+            PNG, JPG, GIF ឬ WebP · អតិបរមា 10 MB
+          </p>
         </div>
 
-        {Boolean(mediaUuid || previewUrl) && (
-          <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700">
-            <CheckCircle2 size={13} />
-            <span>មានរូបភាព</span>
+        {mediaUuid && (
+          <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-[#137A3D] whitespace-nowrap">
+            <CheckCircle2 size={14} className="shrink-0" />
+            បានភ្ជាប់រូបភាព
           </div>
         )}
       </div>
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept={ACCEPTED_TYPES}
-        onChange={handleFileChange}
-        className="hidden"
-      />
+      {/* =====================================================
+          CLICK IMAGE AREA TO UPLOAD / REPLACE
+      ====================================================== */}
+      <div className="relative p-5">
+        <input
+          ref={inputRef}
+          type="file"
+          accept={ACCEPTED_TYPES}
+          onChange={handleFileChange}
+          className="hidden"
+        />
 
-      {/* Image Preview & Drop Area */}
-      <div
-        onClick={() => inputRef.current?.click()}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        className={`group relative flex ${previewHeight} cursor-pointer items-center justify-center overflow-hidden bg-gray-50 transition ${
-          isDragging ? "border-2 border-dashed border-[#137A3D] bg-emerald-50/40" : ""
-        }`}
-      >
-        {previewUrl ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={previewUrl}
-              alt={`${label} preview`}
-              className={
-                variant === "logo"
-                  ? "h-full w-full object-contain p-4 transition duration-300 group-hover:scale-105"
-                  : "h-full w-full object-cover transition duration-300 group-hover:scale-105"
-              }
-            />
-
-            {/* Hover overlay to override */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
-              <UploadCloud size={28} className="text-white drop-shadow" />
-              <span className="mt-1 text-xs font-bold text-white drop-shadow">
-                ចុចដើម្បីប្តូររូបភាពថ្មី
-              </span>
-            </div>
-          </>
-        ) : (
-          <div className="flex flex-col items-center justify-center px-4 text-center text-gray-400">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-[#137A3D] group-hover:scale-110 transition">
-              <UploadCloud size={24} />
-            </div>
-            <p className="mt-2 text-xs font-bold text-gray-700">
-              ចុច ឬទម្លាក់រូបភាពទីនេះ
-            </p>
-            <p className="mt-0.5 text-[11px] text-gray-400">
-              {variant === "logo" ? "រូបសញ្ញា Logo ហាង" : "រូបគម្រប Cover Banner"}
-            </p>
-          </div>
-        )}
-
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-10">
-            <div className="text-center">
-              <Loader2 size={28} className="mx-auto animate-spin text-[#137A3D]" />
-              <p className="mt-2 text-xs font-bold text-gray-600">កំពុង Upload រូបភាព...</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex items-center justify-between gap-2 p-3 bg-white border-t border-gray-100">
         <button
           type="button"
           disabled={loading}
           onClick={() => inputRef.current?.click()}
-          className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-bold text-[#137A3D] transition hover:bg-emerald-100 disabled:opacity-50"
+          aria-label={mediaUuid ? `Replace ${label}` : `Upload ${label}`}
+          className={`
+            group
+            relative
+            flex
+            ${previewHeight}
+            w-full
+            items-center
+            justify-center
+            overflow-hidden
+            rounded-2xl
+            border-2
+            border-dashed
+            border-gray-200
+            bg-gray-50
+            text-center
+            outline-none
+            transition
+            hover:border-secondary-300
+            hover:bg-secondary-50/40
+            focus:border-secondary-400
+            focus:ring-4
+            focus:ring-secondary-100
+            disabled:cursor-not-allowed
+            disabled:opacity-70
+          `}
         >
-          <UploadCloud size={15} />
-          {previewUrl ? "ប្តូររូបភាពថ្មី" : "ជ្រើសរើសរូបភាព"}
+          {previewUrl && !hasLoadError ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewUrl}
+                alt={`${label} preview`}
+                onError={() => setHasLoadError(true)}
+                className={
+                  variant === "logo"
+                    ? "h-full w-full object-contain p-6"
+                    : "h-full w-full object-cover"
+                }
+              />
+
+              <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/40 group-focus:bg-black/40">
+                <div className="translate-y-2 rounded-full bg-white/95 px-5 py-3 text-lg font-semibold text-secondary-700 opacity-0 shadow-lg transition group-hover:translate-y-0 group-hover:opacity-100 group-focus:translate-y-0 group-focus:opacity-100">
+                  <span className="inline-flex items-center gap-2">
+                    <Upload size={20} />
+                    ចុចដើម្បីប្តូររូបភាព
+                  </span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="px-5">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary-50 text-secondary-600 transition group-hover:bg-secondary-100 group-hover:text-secondary-700">
+                <ImageIcon size={32} />
+              </div>
+
+              <p className="mt-2 text-base font-semibold text-secondary-600">
+                ផ្ទុកឡើងរូបភាព
+              </p>
+
+              <p className="mt-1 text-xs text-gray-400">
+                ជ្រើសរើសរូបភាពពីឧបករណ៍របស់អ្នក
+              </p>
+            </div>
+          )}
         </button>
 
-        {Boolean(previewUrl || mediaUuid) && (
+        {/* ===================================================
+            LOADING OVERLAY
+        ==================================================== */}
+        {loading && (
+          <div className="absolute inset-5 z-20 flex items-center justify-center rounded-2xl bg-white/90 backdrop-blur-sm">
+            <div className="text-center">
+              <Loader2
+                size={28}
+                className="mx-auto animate-spin text-primary-700"
+              />
+              <p className="mt-2 text-sm font-medium text-gray-600">
+                កំពុងផ្ទុកឡើង...
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ===================================================
+            REMOVE ACTION
+        ==================================================== */}
+        {mediaUuid && !loading && (
           <button
             type="button"
-            disabled={loading}
             onClick={clearImage}
-            className="inline-flex h-9 items-center justify-center gap-1 rounded-xl border border-red-100 bg-red-50 px-3 text-xs font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-50"
+            className="absolute right-6 top-6 z-30 inline-flex items-center justify-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-red-600 shadow-md transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
+            aria-label={`Remove ${label}`}
           >
-            <Trash2 size={14} />
-            <span>លុប</span>
+            <Trash2 size={15} />
+            លុប
           </button>
         )}
       </div>
 
-      {error && (
-        <div className="m-3 rounded-xl bg-red-50 px-3 py-2 text-xs font-medium leading-5 text-red-600">
-          {error}
-        </div>
-      )}
+      {/* =====================================================
+          HELPER / ERROR
+      ====================================================== */}
+      <div className="border-t border-gray-100 px-4 py-2.5">
+        {error ? (
+          <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs leading-5 text-red-600">
+            {error}
+          </div>
+        ) : (
+          <p className="text-xs text-gray-400">
+            {mediaUuid
+              ? "ចុចលើរូបភាព ដើម្បីជ្រើសរើសរូបថ្មីជំនួស។"
+              : "ជ្រើសរើសរូបភាពពីឧបករណ៍របស់អ្នក"}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

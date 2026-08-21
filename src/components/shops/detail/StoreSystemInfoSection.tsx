@@ -1,34 +1,109 @@
-  import { Fingerprint } from "lucide-react";
+"use client";
 
-  import type { Store } from "@/src/types/shop";
-  import { Section } from "./StoreOverviewSection";
+import { useState } from "react";
+import {
+  Calendar,
+  Check,
+  CheckCircle2,
+  Copy,
+  Fingerprint,
+  Key,
+  ShieldAlert,
+} from "lucide-react";
+import type { Store } from "@/src/types/shop";
+import { Item, Section } from "./StoreOverviewSection";
 
-  export default function StoreSystemInfoSection({ store }: { store: Store }) {
-    const rows = [
-      ["Review status", store.reviewStatus],
-      ["Account status", store.accountStatus],
-      ["Operating status", store.operatingStatus],
-      ...(store.createdAt ? [["Created at", store.createdAt]] : []),
-      ...(store.updatedAt ? [["Updated at", store.updatedAt]] : []),
-    ];
+function formatStatusKhmer(status?: string | null) {
+  if (!status) return "—";
+  const s = status.toUpperCase();
+  if (s === "APPROVED") return "បានអនុម័ត";
+  if (s === "REJECTED") return "បានបដិសេធ";
+  if (s === "PENDING" || s === "IN_REVIEW") return "កំពុងរង់ចាំពិនិត្យ";
+  if (s === "ACTIVE") return "សកម្ម";
+  if (s === "SUSPENDED" || s === "INACTIVE") return "ផ្អាកដំណើរការ";
+  if (s === "OPEN") return "កំពុងបើកដំណើរការ";
+  if (s === "CLOSED") return "បានបិទ";
+  if (s === "TEMPORARILY_CLOSED") return "បិទបណ្តោះអាសន្ន";
+  return status;
+}
 
-    return (
-      <Section title="System information" icon={<Fingerprint size={20} />}>
-        <div className="space-y-3">
-          {rows.map(([label, value]) => (
-            <div
-              key={label}
-              className="grid gap-1 rounded-2xl bg-gray-50 px-4 py-3 sm:grid-cols-[160px_1fr]"
+export default function StoreSystemInfoSection({ store }: { store: Store }) {
+  const [copiedUuid, setCopiedUuid] = useState(false);
+
+  const handleCopyUuid = async () => {
+    if (!store.uuid) return;
+    try {
+      await navigator.clipboard.writeText(store.uuid);
+      setCopiedUuid(true);
+      setTimeout(() => setCopiedUuid(false), 2000);
+    } catch {
+      // ignore
+    }
+  };
+
+  return (
+    <Section title="ព័ត៌មានប្រព័ន្ធ" icon={<Fingerprint size={22} />}>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {/* Copyable Store UUID */}
+        <div className="col-span-full rounded-2xl border border-gray-100 bg-gray-50/60 px-4 py-4 transition hover:border-gray-200 hover:bg-gray-50">
+          <div className="flex items-center justify-between">
+            <p className="text-lg font-medium text-gray-500">
+              លេខសម្គាល់ហាង
+            </p>
+
+            <button
+              type="button"
+              onClick={handleCopyUuid}
+              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-bold text-gray-700 shadow-2xs transition hover:bg-gray-100"
             >
-              <span className="text-lg font-semibold text-[#F97316]">
-                {label}
-              </span>
-              <span className="break-all text-base text-gray-700">
-                {value}
-              </span>
-            </div>
-          ))}
+              {copiedUuid ? (
+                <>
+                  <Check size={13} className="text-emerald-600" />
+                  <span className="text-emerald-700">បានចម្លង</span>
+                </>
+              ) : (
+                <>
+                  <Copy size={13} />
+                  <span>ចម្លង</span>
+                </>
+              )}
+            </button>
+          </div>
+          <p className="mt-1 break-all font-mono text-base font-semibold text-gray-800">
+            {store.uuid || "—"}
+          </p>
         </div>
-      </Section>
-    );
-  }
+
+        <Item
+          label="ស្ថានភាពពិនិត្យ"
+          value={formatStatusKhmer(store.reviewStatus)}
+          icon={<ShieldAlert size={19} />}
+        />
+
+        <Item
+          label="ស្ថានភាពគណនី"
+          value={formatStatusKhmer(store.accountStatus)}
+          icon={<CheckCircle2 size={19} />}
+        />
+
+        <Item
+          label="ស្ថានភាពដំណើរការ"
+          value={formatStatusKhmer(store.operatingStatus)}
+          icon={<CheckCircle2 size={19} />}
+        />
+
+        <Item
+          label="កាលបរិច្ឆេទបង្កើត"
+          value={store.createdAt ? new Date(store.createdAt).toLocaleString("km-KH") : undefined}
+          icon={<Calendar size={19} />}
+        />
+
+        <Item
+          label="កែប្រែចុងក្រោយ"
+          value={store.updatedAt ? new Date(store.updatedAt).toLocaleString("km-KH") : undefined}
+          icon={<Calendar size={19} />}
+        />
+      </div>
+    </Section>
+  );
+}

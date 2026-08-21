@@ -32,7 +32,7 @@ export function getShopApiErrorMessage(error: unknown): string {
       case 401:
         return "Admin session មិនត្រឹមត្រូវ ឬ token បានផុតកំណត់។";
       case 403:
-        return "គណនីនេះមិនមានសិទ្ធិ ADMIN សម្រាប់ Store endpoint នេះទេ។";
+        return "គណនីនេះមិនមានសិទ្ធិ ADMIN សម្រាប់ហាង endpoint នេះទេ។";
       case 404:
         return "រកមិនឃើញ Store ដែលបានស្នើ។";
       case 409:
