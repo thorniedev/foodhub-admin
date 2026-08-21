@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   CloudRain,
   Loader2,
@@ -9,6 +9,7 @@ import {
 import {
   useGetWeatherConditionByUuidQuery,
 } from "@/src/app/store/weatherConditionApi";
+import { readStoredWeatherConditions } from "@/src/lib/weatherConditionStorage";
 
 export default function WeatherConditionDetailModal({
   uuid,
@@ -30,14 +31,25 @@ export default function WeatherConditionDetailModal({
     },
   );
 
+  const storedItem = useMemo(() => {
+    if (!uuid) return null;
+    return (
+      readStoredWeatherConditions().find(
+        (i) => i.uuid === uuid || i.code === uuid,
+      ) ?? null
+    );
+  }, [uuid]);
+
+  const displayItem = data || storedItem;
+
   const [localActive, setLocalActive] = useState<boolean | null>(null);
   const [isToggling, setIsToggling] = useState(false);
 
   useEffect(() => {
-    if (data) {
-      setLocalActive(data.isActive ?? data.active ?? true);
+    if (displayItem) {
+      setLocalActive(displayItem.isActive ?? displayItem.active ?? true);
     }
-  }, [data]);
+  }, [displayItem]);
 
   /* Lock background scroll while modal is open */
   useEffect(() => {
@@ -55,11 +67,11 @@ export default function WeatherConditionDetailModal({
     return null;
   }
 
-  const isActive = localActive ?? (data?.isActive ?? data?.active ?? true);
+  const isActive = localActive ?? (displayItem?.isActive ?? displayItem?.active ?? true);
 
   const handleToggleStatus = async () => {
-    if (!data || isToggling) return;
-    const targetUuid = data.uuid || uuid;
+    if (!displayItem || isToggling) return;
+    const targetUuid = displayItem.uuid || uuid;
     const nextActive = !isActive;
 
     setLocalActive(nextActive);
@@ -187,26 +199,37 @@ export default function WeatherConditionDetailModal({
         </div>
 
         {/* ================= CONTENT ================= */}
-        {isLoading ? (
+        {isLoading && !displayItem ? (
           <div className="flex min-h-[260px] flex-col items-center justify-center gap-3 p-8">
             <Loader2 size={34} className="animate-spin text-primary-800" />
             <p className="text-lg font-medium text-gray-500">
               កំពុងទាញយកព័ត៌មានលម្អិត...
             </p>
           </div>
-        ) : isError ? (
+        ) : isError && !displayItem ? (
           <div className="p-8">
             <div className="rounded-2xl bg-red-50 p-4 text-lg text-red-600">
               មិនអាចទាញយកព័ត៌មានលម្អិត Weather Condition បានទេ។
             </div>
           </div>
-        ) : data ? (
+        ) : displayItem ? (
           <div className="space-y-4 p-6 sm:p-7">
-            {/* Name */}
-            <div>
-              <FieldLabel>ឈ្មោះ</FieldLabel>
-              <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
-                {data.localName || data.name || "—"}
+            {/* Names */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <FieldLabel>ឈ្មោះ</FieldLabel>
+                <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                  {displayItem.localName || displayItem.name || "—"}
+                </div>
+              </div>
+
+              <div>
+                <FieldLabel>ឈ្មោះជាភាសាអង់គ្លេស</FieldLabel>
+                <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                  <span className="inline-flex rounded-lg bg-gray-200/80 px-3 py-1 font-mono text-base font-semibold text-gray-800">
+                    {displayItem.code || displayItem.name || "—"}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -214,7 +237,7 @@ export default function WeatherConditionDetailModal({
             <div>
               <FieldLabel>ការពិពណ៌នា</FieldLabel>
               <div className="min-h-[84px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg leading-8 text-gray-800">
-                {data.description || "គ្មានការពិពណ៌នាឡើយ"}
+                {displayItem.description || "គ្មានការពិពណ៌នាឡើយ"}
               </div>
             </div>
 

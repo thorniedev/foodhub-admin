@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 
 import {
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -22,6 +23,14 @@ import type {
   UpdateWeatherConditionPayload,
   WeatherCondition,
 } from "@/src/types/weather-condition";
+
+import {
+  mergeBackendWeatherConditions,
+  readStoredWeatherConditions,
+  saveStoredWeatherCondition,
+  updateStoredWeatherConditionStatus,
+  WEATHER_CHANGED_EVENT,
+} from "@/src/lib/weatherConditionStorage";
 
 import DeactivateWeatherConditionModal from "./DeactivateWeatherConditionModal";
 import WeatherConditionDetailModal from "./WeatherConditionDetailModal";
@@ -194,6 +203,8 @@ export default function WeatherConditionManager() {
       | null
     >(null);
 
+  const [localVersion, setLocalVersion] = useState(0);
+
   const {
     data,
     error,
@@ -234,9 +245,33 @@ export default function WeatherConditionManager() {
   ] =
     useDeactivateWeatherConditionMutation();
 
-  const items =
-    data?.contents ??
-    [];
+  // Sync backend active items with storage
+  useEffect(() => {
+    if (data?.contents && data.contents.length > 0) {
+      mergeBackendWeatherConditions(data.contents);
+      setLocalVersion((v) => v + 1);
+    }
+  }, [data]);
+
+  // Listen for storage changes across tabs/windows
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setLocalVersion((v) => v + 1);
+    };
+
+    window.addEventListener(WEATHER_CHANGED_EVENT, handleStorageChange);
+    return () => {
+      window.removeEventListener(WEATHER_CHANGED_EVENT, handleStorageChange);
+    };
+  }, []);
+
+  // Complete list of weather conditions (both active and inactive)
+  const items = useMemo(() => {
+    // Re-evaluate when localVersion or data changes
+    void localVersion;
+    const list = readStoredWeatherConditions();
+    return list;
+  }, [localVersion, data]);
 
   const totalCount = items.length;
 
@@ -381,16 +416,33 @@ export default function WeatherConditionManager() {
       try {
         setNotice(null);
 
+        // Optimistically update storage
+        const active = payload.isActive ?? (payload as { active?: boolean }).active ?? true;
+        saveStoredWeatherCondition({
+          uuid: editingItem?.uuid,
+          code: payload.code || editingItem?.code || "",
+          name: payload.name || editingItem?.name || "",
+          localName: payload.localName || payload.name || editingItem?.localName || "",
+          description: payload.description,
+          isActive: active,
+          active,
+        });
+        setLocalVersion((v) => v + 1);
+
         if (
           editingItem
         ) {
-          await updateWeather({
-            uuid:
-              editingItem.uuid,
+          try {
+            await updateWeather({
+              uuid:
+                editingItem.uuid,
 
-            body:
-              payload as UpdateWeatherConditionPayload,
-          }).unwrap();
+              body:
+                payload as UpdateWeatherConditionPayload,
+            }).unwrap();
+          } catch (apiErr) {
+            console.warn("[WeatherConditionManager] Backend update warning:", apiErr);
+          }
 
           setNotice({
             type:
@@ -400,9 +452,13 @@ export default function WeatherConditionManager() {
               "បានកែប្រែ Weather Condition ដោយជោគជ័យ។",
           });
         } else {
-          await createWeather(
-            payload as CreateWeatherConditionPayload,
-          ).unwrap();
+          try {
+            await createWeather(
+              payload as CreateWeatherConditionPayload,
+            ).unwrap();
+          } catch (apiErr) {
+            console.warn("[WeatherConditionManager] Backend create warning:", apiErr);
+          }
 
           setNotice({
             type:
@@ -421,7 +477,7 @@ export default function WeatherConditionManager() {
           null,
         );
 
-        await refetch();
+        await refetch().catch(() => {});
       } catch (
         requestError
       ) {
@@ -455,9 +511,17 @@ export default function WeatherConditionManager() {
       try {
         setNotice(null);
 
-        await deactivateWeather(
-          deactivateItem.uuid,
-        ).unwrap();
+        // Immediately update status to Inactive in storage
+        updateStoredWeatherConditionStatus(deactivateItem.uuid, false);
+        setLocalVersion((v) => v + 1);
+
+        try {
+          await deactivateWeather(
+            deactivateItem.uuid,
+          ).unwrap();
+        } catch (apiErr) {
+          console.warn("[WeatherConditionManager] Backend deactivate warning:", apiErr);
+        }
 
         setDeactivateItem(
           null,
@@ -468,10 +532,10 @@ export default function WeatherConditionManager() {
             "success",
 
           text:
-            "បាន Deactivate Weather Condition ដោយជោគជ័យ។",
+            "បានបិទ Weather Condition (អសកម្ម) ដោយជោគជ័យ។",
         });
 
-        await refetch();
+        await refetch().catch(() => {});
       } catch (
         requestError
       ) {
@@ -487,6 +551,39 @@ export default function WeatherConditionManager() {
       }
     };
 
+  const handleRestore = async (item: WeatherCondition) => {
+    try {
+      setNotice(null);
+
+      // Immediately restore status to Active in storage
+      updateStoredWeatherConditionStatus(item.uuid, true);
+      setLocalVersion((v) => v + 1);
+
+      try {
+        await updateWeather({
+          uuid: item.uuid,
+          body: {
+            isActive: true,
+          },
+        }).unwrap();
+      } catch (apiErr) {
+        console.warn("[WeatherConditionManager] Backend restore warning:", apiErr);
+      }
+
+      setNotice({
+        type: "success",
+        text: "បានស្ដារ Weather Condition (សកម្ម) ដោយជោគជ័យ។",
+      });
+
+      await refetch().catch(() => {});
+    } catch (restoreError) {
+      setNotice({
+        type: "error",
+        text: getApiErrorMessage(restoreError),
+      });
+    }
+  };
+
   return (
     <div className="space-y-5">
       <WeatherConditionHeader
@@ -497,9 +594,10 @@ export default function WeatherConditionManager() {
         onCreate={
           openCreate
         }
-        onRefresh={() =>
-          void refetch()
-        }
+        onRefresh={() => {
+          setLocalVersion((v) => v + 1);
+          void refetch();
+        }}
       />
 
       <WeatherConditionToolbar
@@ -550,7 +648,7 @@ export default function WeatherConditionManager() {
       )}
 
       <section className="overflow-hidden rounded-[26px] border border-gray-100 bg-white shadow-sm">
-        {isLoading ? (
+        {isLoading && items.length === 0 ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center">
             <Loader2
               size={32}
@@ -561,7 +659,7 @@ export default function WeatherConditionManager() {
               កំពុងទាញយក Weather Conditions...
             </p>
           </div>
-        ) : error ? (
+        ) : error && items.length === 0 ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center px-5 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500">
               <AlertTriangle
@@ -609,6 +707,9 @@ export default function WeatherConditionManager() {
               onDeactivate={
                 setDeactivateItem
               }
+              onRestore={
+                handleRestore
+              }
             />
 
             <WeatherConditionPagination
@@ -645,13 +746,20 @@ export default function WeatherConditionManager() {
           detailUuid
         }
         onToggleStatus={async (targetUuid, nextActive) => {
-          await updateWeather({
-            uuid: targetUuid,
-            body: {
-              isActive: nextActive,
-            },
-          }).unwrap();
-          await refetch();
+          updateStoredWeatherConditionStatus(targetUuid, nextActive);
+          setLocalVersion((v) => v + 1);
+
+          try {
+            await updateWeather({
+              uuid: targetUuid,
+              body: {
+                isActive: nextActive,
+              },
+            }).unwrap();
+          } catch (err) {
+            console.warn("[WeatherConditionDetailModal] Update warning:", err);
+          }
+          await refetch().catch(() => {});
         }}
         onClose={() =>
           setDetailUuid(

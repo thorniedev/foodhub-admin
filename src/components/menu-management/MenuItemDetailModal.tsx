@@ -163,8 +163,17 @@ export default function MenuItemDetailModal({
                     {data.name}
                   </h3>
 
+                  {data.localName && data.localName !== data.name && (
+                    <p className="mt-1 text-sm font-medium text-gray-600">
+                      <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs font-bold text-gray-500 mr-1.5">
+                        ឈ្មោះខ្មែរ:
+                      </span>
+                      {data.localName}
+                    </p>
+                  )}
+
                   {data.description && (
-                    <p className="mt-1 text-sm leading-relaxed text-gray-500">
+                    <p className="mt-1.5 text-sm leading-relaxed text-gray-500">
                       {data.description}
                     </p>
                   )}

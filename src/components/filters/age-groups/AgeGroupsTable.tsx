@@ -1,4 +1,5 @@
 import {
+  Eye,
   Pencil,
   Trash2,
   UsersRound,
@@ -13,6 +14,10 @@ type Props = {
 
   disabled?: boolean;
 
+  onView?: (
+    item: AgeGroup,
+  ) => void;
+
   onEdit: (
     item: AgeGroup,
   ) => void;
@@ -26,6 +31,8 @@ export default function AgeGroupsTable({
   items,
 
   disabled = false,
+
+  onView,
 
   onEdit,
 
@@ -134,6 +141,18 @@ export default function AgeGroupsTable({
 
                 <td className="px-6 py-5">
                   <div className="flex justify-end gap-2">
+                    {onView && (
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => onView(item)}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 disabled:opacity-40"
+                        title="មើលលម្អិត"
+                      >
+                        <Eye size={20} />
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       disabled={

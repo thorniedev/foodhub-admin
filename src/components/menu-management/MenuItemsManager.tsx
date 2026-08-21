@@ -53,6 +53,7 @@ import DeleteConfirmModal from "./DeleteConfirmModal";
 import HardDeleteFoodConfirmModal from "./HardDeleteFoodConfirmModal";
 import FoodCatalogTable from "./FoodCatalogTable";
 import FoodFormModal from "./FoodFormModal";
+import FoodDetailModal from "../food-categories/FoodDetailModal";
 import MenuItemDetailModal from "./MenuItemDetailModal";
 import PublishMenuItemModal from "./PublishMenuItemModal";
 import PublishedMenuItemsTable from "./PublishedMenuItemsTable";
@@ -121,6 +122,7 @@ export default function MenuItemsManager() {
 
   const [deletingFood, setDeletingFood] = useState<FoodRecord | null>(null);
   const [deletingMenu, setDeletingMenu] = useState<MenuItemRecord | null>(null);
+  const [viewingFood, setViewingFood] = useState<FoodRecord | null>(null);
 
   const [detailUuid, setDetailUuid] = useState<string | null>(null);
 
@@ -636,6 +638,7 @@ export default function MenuItemsManager() {
           <FoodCatalogTable
             items={filteredFoods}
             busy={busy}
+            onView={setViewingFood}
             onEdit={(item) => {
               setEditingFood(item);
               setFoodModalOpen(true);
@@ -670,6 +673,7 @@ export default function MenuItemsManager() {
       <FoodFormModal
         open={foodModalOpen}
         item={editingFood}
+        defaultMainCategory="FOOD"
         categories={categoriesQuery.data ?? []}
         cuisines={cuisinesQuery.data ?? []}
         seasons={seasonsQuery.data ?? []}
@@ -741,6 +745,19 @@ export default function MenuItemsManager() {
       <MenuItemDetailModal
         uuid={detailUuid}
         onClose={() => setDetailUuid(null)}
+      />
+
+      {/* =====================================================
+          FOOD DETAIL MODAL
+      ====================================================== */}
+      <FoodDetailModal
+        food={viewingFood}
+        onClose={() => setViewingFood(null)}
+        onEdit={(item) => {
+          setViewingFood(null);
+          setEditingFood(item);
+          setFoodModalOpen(true);
+        }}
       />
     </div>
   );

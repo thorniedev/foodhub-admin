@@ -4,6 +4,7 @@ import {
   CloudRain,
   Eye,
   Pencil,
+  RotateCcw,
   Trash2,
 } from "lucide-react";
 
@@ -27,6 +28,7 @@ export default function WeatherConditionTable({
   onView,
   onEdit,
   onDeactivate,
+  onRestore,
 }: {
   items: WeatherCondition[];
   busy: boolean;
@@ -37,6 +39,9 @@ export default function WeatherConditionTable({
     item: WeatherCondition,
   ) => void;
   onDeactivate: (
+    item: WeatherCondition,
+  ) => void;
+  onRestore?: (
     item: WeatherCondition,
   ) => void;
 }) {
@@ -193,26 +198,50 @@ export default function WeatherConditionTable({
                         />
                       </button>
 
-                      <button
-                        type="button"
-                        disabled={
-                          busy ||
-                          !active
-                        }
-                        onClick={() =>
-                          onDeactivate(
-                            item,
-                          )
-                        }
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-400 transition hover:bg-red-50 disabled:opacity-40"
-                        aria-label="Deactivate"
-                      >
-                        <Trash2
-                          size={
-                            17
+                      {active ? (
+                        <button
+                          type="button"
+                          disabled={
+                            busy
                           }
-                        />
-                      </button>
+                          onClick={() =>
+                            onDeactivate(
+                              item,
+                            )
+                          }
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-400 transition hover:bg-red-50 disabled:opacity-40"
+                          title="បិទ (Deactivate)"
+                          aria-label="Deactivate"
+                        >
+                          <Trash2
+                            size={
+                              17
+                            }
+                          />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={
+                            busy
+                          }
+                          onClick={() =>
+                            onRestore &&
+                            onRestore(
+                              item,
+                            )
+                          }
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-emerald-200 text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100 disabled:opacity-40"
+                          title="ស្ដារ (Restore / Activate)"
+                          aria-label="Restore"
+                        >
+                          <RotateCcw
+                            size={
+                              17
+                            }
+                          />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
