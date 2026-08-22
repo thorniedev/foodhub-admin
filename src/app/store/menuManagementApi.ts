@@ -1399,8 +1399,18 @@ export const menuManagementApi =
               }
             }
 
+            const categoryCode =
+              payload.categoryCode ||
+              payload.categoryUuid;
+            const cuisineCode =
+              payload.cuisineCode ||
+              payload.cuisineUuid;
+
             const jsonPayload: Record<string, unknown> = {
               ...payload,
+              categoryCode,
+              cuisineCode,
+              active: payload.isActive ?? (payload as any).active ?? true,
               primaryMediaUuid: primaryMediaUuid || undefined,
               primaryMediaUuids:
                 primaryMediaUuids.length > 0 ? primaryMediaUuids : undefined,
@@ -1477,8 +1487,18 @@ export const menuManagementApi =
               }
             }
 
+            const categoryCode =
+              payload.categoryCode ||
+              payload.categoryUuid;
+            const cuisineCode =
+              payload.cuisineCode ||
+              payload.cuisineUuid;
+
             const jsonPayload: Record<string, unknown> = {
               ...payload,
+              categoryCode,
+              cuisineCode,
+              active: payload.isActive ?? (payload as any).active ?? true,
               primaryMediaUuid: primaryMediaUuid || undefined,
               primaryMediaUuids:
                 primaryMediaUuids.length > 0 ? primaryMediaUuids : undefined,

@@ -768,7 +768,9 @@ export interface FoodWritePayload {
   localName?: string | null;
   description?: string | null;
   categoryUuid: string;
+  categoryCode?: string | null;
   cuisineUuid?: string | null;
+  cuisineCode?: string | null;
   primaryMediaUuid?: string | null;
   primaryMediaUuids?: string[];
   defaultSpiceLevel?: number | null;
@@ -780,6 +782,7 @@ export interface FoodWritePayload {
   events: FoodEventRelation[];
   suitableWeather: FoodWeatherRelation[];
   isActive: boolean;
+  active?: boolean;
 }
 
 export interface MenuItemWritePayload {

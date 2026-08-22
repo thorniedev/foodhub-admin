@@ -424,12 +424,30 @@ export default function FoodFormModal({
 
       const hasImages = Array.isArray(images) && images.length > 0;
 
+      const selectedCategory = categories.find(
+        (c) => c.uuid === values.categoryUuid || c.code === values.categoryUuid,
+      );
+      const selectedCuisine = cuisines.find(
+        (c) => c.uuid === values.cuisineUuid || c.code === values.cuisineUuid,
+      );
+
+      const categoryCode =
+        selectedCategory?.code ||
+        (values.categoryUuid ? values.categoryUuid : "");
+      const cuisineCode =
+        selectedCuisine?.code ||
+        (values.cuisineUuid ? values.cuisineUuid : "");
+
       const payload: FoodWritePayload = {
         canonicalName: values.canonicalName.trim(),
         localName: values.localName.trim() || null,
         description: values.description.trim() || null,
         categoryUuid: values.categoryUuid,
+        categoryCode: categoryCode || values.categoryUuid,
         cuisineUuid: values.cuisineUuid,
+        cuisineCode: cuisineCode || values.cuisineUuid,
+        isActive: values.isActive,
+        active: values.isActive,
         ...(hasImages ? {} : { primaryMediaUuids: item?.primaryMediaUuids ?? [] }),
         defaultSpiceLevel: numberOrNull(values.defaultSpiceLevel) ?? 0,
         nutritionData,
@@ -473,7 +491,6 @@ export default function FoodFormModal({
             ruleResult: r.ruleResult || "ALLOWED",
             reasonText: r.reasonText?.trim() || "Suitable as a normal serving.",
           })),
-        isActive: values.isActive,
       };
 
       await onSubmit(payload, images);
