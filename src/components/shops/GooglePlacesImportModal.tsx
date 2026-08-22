@@ -418,11 +418,11 @@ export default function GooglePlacesImportModal({
             </div>
 
             <div className="min-w-0">
-              <p className="text-3xl font-semibold text-primary-800">
+              <p className="text-2xl font-bold text-[#0F5A2C]">
                 នាំចូលព័ត៌មានពី Google Maps
               </p>
 
-              <p className="mt-1 text-lg leading-7 text-gray-500">
+              <p className="mt-1 text-base leading-relaxed text-gray-500">
                 ស្វែងរកទីតាំងហាង ពិនិត្យព័ត៌មាន បន្ថែមរូបភាពបើចាំបាច់ រួចបង្កើតហាងដោយស្វ័យប្រវត្តិ។
               </p>
             </div>
@@ -507,7 +507,7 @@ export default function GooglePlacesImportModal({
                   <Search size={22} />
                 </div>
 
-                <p className="text-3xl font-semibold text-primary-800">
+                <p className="text-2xl font-bold text-[#0F5A2C]">
                   ស្វែងរកតាម Google Maps
                 </p>
               </div>
@@ -824,7 +824,7 @@ export default function GooglePlacesImportModal({
                   <Store size={22} />
                 </div>
 
-                <p className="text-3xl font-semibold text-primary-800">
+                <p className="text-2xl font-bold text-[#0F5A2C]">
                   ព័ត៌មានមើលជាមុន (Preview)
                 </p>
               </div>
@@ -890,7 +890,7 @@ export default function GooglePlacesImportModal({
                   <Globe2 size={22} />
                 </div>
 
-                <p className="text-3xl font-semibold text-primary-800">
+                <p className="text-2xl font-bold text-[#0F5A2C]">
                   ការកំណត់បន្ថែម
                 </p>
               </div>

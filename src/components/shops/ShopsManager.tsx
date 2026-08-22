@@ -60,10 +60,41 @@ export default function ShopsManager() {
     text: string;
   } | null>(null);
 
+  /* Main paginated list filtered by the active tab */
   const { data, error, isLoading, isFetching, refetch } = useGetShopsQuery({
     query: serverQuery || undefined,
+    reviewStatus:
+      filter === "APPROVED" || filter === "PENDING" || filter === "REJECTED"
+        ? filter
+        : undefined,
+    accountStatus: filter === "APPROVED" ? "ACTIVE" : undefined,
     page,
     size,
+  });
+
+  /* Stable count queries always run, never affected by active tab */
+  const { data: approvedData } = useGetShopsQuery({
+    reviewStatus: "APPROVED",
+    accountStatus: "ACTIVE",
+    page: 0,
+    size: 1,
+  });
+
+  const { data: pendingData } = useGetShopsQuery({
+    reviewStatus: "PENDING",
+    page: 0,
+    size: 1,
+  });
+
+  const { data: rejectedData } = useGetShopsQuery({
+    reviewStatus: "REJECTED",
+    page: 0,
+    size: 1,
+  });
+
+  const { data: allData } = useGetShopsQuery({
+    page: 0,
+    size: 1,
   });
 
   const { data: suggestionData, isFetching: suggestionsLoading } =
@@ -111,28 +142,15 @@ export default function ShopsManager() {
 
   const stores = data?.contents ?? [];
 
-  const resolveStoreReviewStatus = (store: StoreType): "APPROVED" | "PENDING" | "REJECTED" => {
-    const raw = String(store.reviewStatus || "").toUpperCase().trim();
-    if (raw === "APPROVED" || raw === "APPROVE") return "APPROVED";
-    if (raw === "REJECTED" || raw === "REJECT") return "REJECTED";
-    if (raw === "PENDING") return "PENDING";
-    if (store.operatingStatus === "OPEN" || store.accountStatus === "ACTIVE") return "APPROVED";
-    if (store.operatingStatus === "TEMPORARILY_CLOSED" || store.accountStatus === "SUSPENDED") return "PENDING";
-    if (store.operatingStatus === "CLOSED") return "REJECTED";
-    return "APPROVED";
-  };
-
+  /* Stable counts from dedicated queries always correct regardless of active tab */
   const counts = {
-    all: stores.length,
-    pending: stores.filter((store) => resolveStoreReviewStatus(store) === "PENDING").length,
-    approved: stores.filter((store) => resolveStoreReviewStatus(store) === "APPROVED").length,
-    rejected: stores.filter((store) => resolveStoreReviewStatus(store) === "REJECTED").length,
+    all: allData?.totalElements ?? 0,
+    approved: approvedData?.totalElements ?? 0,
+    pending: pendingData?.totalElements ?? 0,
+    rejected: rejectedData?.totalElements ?? 0,
   };
 
-  const filteredStores =
-    filter === "ALL"
-      ? stores
-      : stores.filter((store) => resolveStoreReviewStatus(store) === filter);
+  const filteredStores = stores;
 
   const sortedStores = [...filteredStores].sort((first, second) => {
     switch (sortBy) {
@@ -140,34 +158,22 @@ export default function ShopsManager() {
         return (first.storeName ?? "").localeCompare(
           second.storeName ?? "",
           undefined,
-          {
-            sensitivity: "base",
-          },
+          { sensitivity: "base" },
         );
       case "NAME_DESC":
         return (second.storeName ?? "").localeCompare(
           first.storeName ?? "",
           undefined,
-          {
-            sensitivity: "base",
-          },
+          { sensitivity: "base" },
         );
       case "NEWEST": {
-        const firstTime = first.createdAt
-          ? new Date(first.createdAt).getTime()
-          : 0;
-        const secondTime = second.createdAt
-          ? new Date(second.createdAt).getTime()
-          : 0;
+        const firstTime = first.createdAt ? new Date(first.createdAt).getTime() : 0;
+        const secondTime = second.createdAt ? new Date(second.createdAt).getTime() : 0;
         return secondTime - firstTime;
       }
       case "OLDEST": {
-        const firstTime = first.createdAt
-          ? new Date(first.createdAt).getTime()
-          : 0;
-        const secondTime = second.createdAt
-          ? new Date(second.createdAt).getTime()
-          : 0;
+        const firstTime = first.createdAt ? new Date(first.createdAt).getTime() : 0;
+        const secondTime = second.createdAt ? new Date(second.createdAt).getTime() : 0;
         return firstTime - secondTime;
       }
       default:
@@ -203,7 +209,6 @@ export default function ShopsManager() {
 
   const edit = async (values: UpdateStorePayload) => {
     if (!editingUuid) return;
-
     try {
       setNotice(null);
       await updateShop({ storeUuid: editingUuid, body: values }).unwrap();
@@ -217,7 +222,6 @@ export default function ShopsManager() {
 
   const handleDelete = async () => {
     if (!deletingStore) return;
-
     try {
       setNotice(null);
       await deleteShop(deletingStore.uuid).unwrap();
@@ -230,8 +234,8 @@ export default function ShopsManager() {
   };
 
   const sortOptions: Array<{ value: StoreSort; label: string }> = [
-    { value: "NAME_ASC", label: "A → Z" },
-    { value: "NAME_DESC", label: "Z → A" },
+    { value: "NAME_ASC", label: "A Z" },
+    { value: "NAME_DESC", label: "Z A" },
     { value: "NEWEST", label: "ថ្មីបំផុត" },
     { value: "OLDEST", label: "ចាស់បំផុត" },
   ];
@@ -239,7 +243,7 @@ export default function ShopsManager() {
   return (
     <div className="space-y-5">
       <ShopsHeader
-        total={data?.totalElements ?? 0}
+        total={counts.all}
         approved={counts.approved}
         pending={counts.pending}
         rejected={counts.rejected}
@@ -263,7 +267,6 @@ export default function ShopsManager() {
               size={17}
               className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
             />
-
             <input
               value={searchInput}
               onChange={(event) => {
@@ -285,7 +288,6 @@ export default function ShopsManager() {
               placeholder="ស្វែងរកហាង..."
               className="h-11 w-[500px] rounded-2xl border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-[#137A3D]/10"
             />
-
             {searchInput && (
               <button
                 type="button"
@@ -301,27 +303,19 @@ export default function ShopsManager() {
               <div className="absolute left-0 top-[52px] z-[100] w-[500px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
                 {suggestionsLoading ? (
                   <div className="flex items-center justify-center gap-2 px-5 py-6 text-lg text-gray-500">
-                    <Loader2
-                      size={20}
-                      className="animate-spin text-[#137A3D]"
-                    />
+                    <Loader2 size={20} className="animate-spin text-[#137A3D]" />
                     កំពុងស្វែងរក...
                   </div>
                 ) : suggestions.length === 0 ? (
                   <div className="px-5 py-6 text-center">
                     <Store size={32} className="mx-auto text-[#F97316]" />
-                    <p className="mt-2 text-lg text-[#F97316]">
-                      មិនមានហាងដែលត្រូវគ្នា
-                    </p>
+                    <p className="mt-2 text-lg text-[#F97316]">មិនមានហាងដែលត្រូវគ្នា</p>
                   </div>
                 ) : (
                   <>
                     <div className="border-b border-gray-100 px-5 py-3">
-                      <p className="text-lg uppercase tracking-wide text-[#F97316]">
-                        លទ្ធផលស្វែងរក
-                      </p>
+                      <p className="text-lg uppercase tracking-wide text-[#F97316]">លទ្ធផលស្វែងរក</p>
                     </div>
-
                     <div className="max-h-[340px] overflow-y-auto p-2">
                       {suggestions.map((store) => (
                         <button
@@ -334,18 +328,12 @@ export default function ShopsManager() {
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[#137A3D]">
                             <Store size={24} />
                           </div>
-
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-base font-black text-gray-800">
-                              {store.storeName}
-                            </p>
+                            <p className="truncate text-base font-black text-gray-800">{store.storeName}</p>
                             <p className="mt-1 truncate text-sm text-gray-400">
-                              {[store.addressLine, store.city]
-                                .filter(Boolean)
-                                .join(", ") || "No address"}
+                              {[store.addressLine, store.city].filter(Boolean).join(", ") || "No address"}
                             </p>
                           </div>
-
                           <span className="shrink-0 rounded-full bg-gray-100 px-2 py-1 text-sm font-semibold text-gray-500">
                             {store.reviewStatus || "UNKNOWN"}
                           </span>
@@ -361,48 +349,26 @@ export default function ShopsManager() {
           <div className="relative">
             <button
               type="button"
-              onClick={() => {
-                setSizeOpen((current) => !current);
-                setSortOpen(false);
-              }}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${sizeOpen
-                ? "border-[#137A3D] ring-2 ring-[#137A3D]/10"
-                : "border-gray-200 hover:border-[#137A3D]/50"
-                }`}
+              onClick={() => { setSizeOpen((c) => !c); setSortOpen(false); }}
+              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${sizeOpen ? "border-[#137A3D] ring-2 ring-[#137A3D]/10" : "border-gray-200 hover:border-[#137A3D]/50"}`}
             >
               <span className="text-gray-700">{size} / ទំព័រ</span>
-              <ChevronDown
-                size={17}
-                className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
-                  }`}
-              />
+              <ChevronDown size={17} className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""}`} />
             </button>
-
             {sizeOpen && (
               <div className="absolute right-0 top-[52px] z-[100] w-[160px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg text-[#F97316]">
-                  ចំនួនក្នុងទំព័រ
-                </p>
+                <p className="px-3 pb-2 pt-1 text-lg text-[#F97316]">ចំនួនក្នុងទំព័រ</p>
                 {[10, 20, 50].map((value) => {
                   const selected = size === value;
                   return (
                     <button
                       key={value}
                       type="button"
-                      onClick={() => {
-                        setSize(value);
-                        setPage(0);
-                        setSizeOpen(false);
-                      }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
-                        ? "bg-emerald-50 text-[#137A3D]"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
-                        }`}
+                      onClick={() => { setSize(value); setPage(0); setSizeOpen(false); }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected ? "bg-emerald-50 text-[#137A3D]" : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"}`}
                     >
                       <span>{value} / ទំព័រ</span>
-                      {selected && (
-                        <Check size={16} className="text-[#137A3D]" />
-                      )}
+                      {selected && <Check size={16} className="text-[#137A3D]" />}
                     </button>
                   );
                 })}
@@ -413,44 +379,27 @@ export default function ShopsManager() {
           <div className="relative">
             <button
               type="button"
-              onClick={() => {
-                setSortOpen((current) => !current);
-                setSizeOpen(false);
-              }}
-              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen
-                ? "border-[#137A3D] bg-emerald-50 text-[#137A3D]"
-                : "border-gray-200 bg-white text-gray-600 hover:border-[#137A3D] hover:bg-emerald-50 hover:text-[#137A3D]"
-                }`}
+              onClick={() => { setSortOpen((c) => !c); setSizeOpen(false); }}
+              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen ? "border-[#137A3D] bg-emerald-50 text-[#137A3D]" : "border-gray-200 bg-white text-gray-600 hover:border-[#137A3D] hover:bg-emerald-50 hover:text-[#137A3D]"}`}
               aria-label="Sort stores"
               title="Sort stores"
             >
               <ArrowUpDown size={18} />
             </button>
-
             {sortOpen && (
               <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg uppercase tracking-wide text-[#F97316]">
-                  តម្រៀប
-                </p>
+                <p className="px-3 pb-2 pt-1 text-lg uppercase tracking-wide text-[#F97316]">តម្រៀប</p>
                 {sortOptions.map((option) => {
                   const selected = sortBy === option.value;
                   return (
                     <button
                       key={option.value}
                       type="button"
-                      onClick={() => {
-                        setSortBy(option.value);
-                        setSortOpen(false);
-                      }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
-                        ? "bg-emerald-50 text-[#137A3D]"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
-                        }`}
+                      onClick={() => { setSortBy(option.value); setSortOpen(false); }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected ? "bg-emerald-50 text-[#137A3D]" : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"}`}
                     >
                       <span>{option.label}</span>
-                      {selected && (
-                        <Check size={16} className="text-[#137A3D]" />
-                      )}
+                      {selected && <Check size={16} className="text-[#137A3D]" />}
                     </button>
                   );
                 })}
@@ -462,24 +411,15 @@ export default function ShopsManager() {
 
       {serverQuery && (
         <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-base text-emerald-700">
-          ស្វែងរក: <b>“{serverQuery}”</b>
-          <button
-            type="button"
-            onClick={handleClearSearch}
-            className="ml-3 font-black underline"
-          >
+          ស្វែងរក: <b>"{serverQuery}"</b>
+          <button type="button" onClick={handleClearSearch} className="ml-3 font-black underline">
             សម្អាត
           </button>
         </div>
       )}
 
       {notice && (
-        <div
-          className={`rounded-2xl border px-4 py-3 text-base ${notice.type === "success"
-            ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-            : "border-red-100 bg-red-50 text-red-600"
-            }`}
-        >
+        <div className={`rounded-2xl border px-4 py-3 text-base ${notice.type === "success" ? "border-emerald-100 bg-emerald-50 text-emerald-700" : "border-red-100 bg-red-50 text-red-600"}`}>
           {notice.text}
         </div>
       )}
@@ -493,9 +433,7 @@ export default function ShopsManager() {
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
             <AlertTriangle size={38} className="text-red-400" />
             <p className="mt-4 text-xl font-black text-gray-900">មិនអាចទាញយក Store បានទេ</p>
-            <p className="mt-2 text-base text-gray-500">
-              {getShopApiErrorMessage(error)}
-            </p>
+            <p className="mt-2 text-base text-gray-500">{getShopApiErrorMessage(error)}</p>
             <button
               type="button"
               onClick={() => void refetch()}
@@ -514,10 +452,7 @@ export default function ShopsManager() {
             stores={sortedStores}
             disabled={updating || deleting || isFetching}
             onEdit={(store) => setEditingUuid(store.uuid)}
-            onStatus={(store, action) => {
-              setStatusStore(store);
-              setStatusAction(action);
-            }}
+            onStatus={(store, action) => { setStatusStore(store); setStatusAction(action); }}
             onDelete={(store) => setDeletingStore(store)}
           />
         )}
@@ -533,16 +468,13 @@ export default function ShopsManager() {
         )}
       </section>
 
-      {/* Detail fetch stands in for the edit modal until the store arrives. */}
       {editingUuid && !editingStore && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
           <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-2xl">
             {editingStoreError ? (
               <>
                 <AlertTriangle size={32} className="mx-auto text-red-500" />
-                <p className="mt-4 text-lg text-gray-700">
-                  {getShopApiErrorMessage(editingStoreError)}
-                </p>
+                <p className="mt-4 text-lg text-gray-700">{getShopApiErrorMessage(editingStoreError)}</p>
                 <button
                   type="button"
                   onClick={() => setEditingUuid(null)}
@@ -553,13 +485,8 @@ export default function ShopsManager() {
               </>
             ) : (
               <>
-                <Loader2
-                  size={32}
-                  className="mx-auto animate-spin text-[#137A3D]"
-                />
-                <p className="mt-4 text-lg text-gray-500">
-                  កំពុងទាញយកព័ត៌មានហាង...
-                </p>
+                <Loader2 size={32} className="mx-auto animate-spin text-[#137A3D]" />
+                <p className="mt-4 text-lg text-gray-500">កំពុងទាញយកព័ត៌មានហាង...</p>
               </>
             )}
           </div>
@@ -569,9 +496,7 @@ export default function ShopsManager() {
       <ShopEditModal
         store={editingUuid ? (editingStore ?? null) : null}
         saving={updating || editingStoreLoading}
-        onClose={() => {
-          if (!updating) setEditingUuid(null);
-        }}
+        onClose={() => { if (!updating) setEditingUuid(null); }}
         onSubmit={edit}
       />
 
@@ -579,18 +504,14 @@ export default function ShopsManager() {
         store={statusStore}
         initialAction={statusAction}
         onClose={() => setStatusStore(null)}
-        onChanged={async () => {
-          await refetch();
-        }}
+        onChanged={async () => { await refetch(); }}
       />
 
       <DeleteShopConfirmModal
         store={deletingStore}
         open={Boolean(deletingStore)}
         loading={deleting}
-        onClose={() => {
-          if (!deleting) setDeletingStore(null);
-        }}
+        onClose={() => { if (!deleting) setDeletingStore(null); }}
         onConfirm={handleDelete}
       />
     </div>

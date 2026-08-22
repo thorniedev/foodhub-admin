@@ -70,7 +70,7 @@ export default function UserDetailHeader({
           className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm ring-1 ring-white/20 transition hover:bg-white/25 active:scale-95"
         >
           <ArrowLeft size={16} />
-          ត្រឡប់ទៅបញ្ជីអ្នកប្រើ
+          ត្រឡប់ទៅបញ្ជីគណនីអ្នកប្រើប្រាស់
         </Link>
 
         <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -85,14 +85,14 @@ export default function UserDetailHeader({
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                <p className="truncate text-4xl font-extrabold text-accent-400 drop-shadow-xs sm:text-5xl">
+                <p className="truncate text-[28px] leading-tight font-extrabold text-accent-400 drop-shadow-xs">
                   {name}
                 </p>
 
                 <StatusBadge status={user.status} />
               </div>
 
-              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-base text-white/90">
+              <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-2 text-[18px] text-white/90">
                 <span className="inline-flex items-center gap-2">
                   <Mail size={16} />
                   {user.primaryEmail ?? "គ្មានអ៊ីមែល"}
@@ -115,7 +115,7 @@ export default function UserDetailHeader({
                 className="inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-5 text-base font-bold text-primary-800 shadow-md shadow-black/10 transition-all hover:bg-accent-50 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
               >
                 <Plus size={18} />
-                បង្កើតកម្រងព័ត៌មាន
+                បង្កើតប្រវត្តិរូបថ្មី
               </button>
             )}
 
@@ -181,8 +181,8 @@ function Info({
 }) {
   return (
     <div className="rounded-3xl bg-white/20 px-5 py-4">
-      <p className="text-xl text-white/80">{label}</p>
-      <p className="mt-1 truncate text-lg font-medium text-white">
+      <p className="text-[18px] text-white/80">{label}</p>
+      <p className="mt-1 truncate text-[18px] font-semibold text-white">
         {value}
       </p>
     </div>

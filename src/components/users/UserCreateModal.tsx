@@ -100,7 +100,7 @@ export default function UserCreateModal({
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[3px]">
-      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-gray-100 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-gray-100 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-gradient-to-r from-emerald-50/70 via-white to-emerald-50/40 px-6 py-5 sm:px-8">
           <div className="flex items-center gap-3.5">
@@ -108,11 +108,11 @@ export default function UserCreateModal({
               <UserPlus size={24} />
             </div>
             <div>
-              <p className="text-2xl font-bold tracking-tight text-gray-900">
+              <p className="text-2xl font-bold tracking-tight text-[#0F5A2C]">
                 បង្កើតគណនីអ្នកប្រើប្រាស់ថ្មី
               </p>
               <p className="mt-0.5 text-sm text-gray-500">
-                បញ្ចូលព័ត៌មានដើម្បីបង្កើតគណនីគណនីអ្នកប្រើប្រាស់ក្នុងប្រព័ន្ធ
+                បញ្ចូលព័ត៌មានដើម្បីបង្កើតគណនីអ្នកប្រើប្រាស់ក្នុងប្រព័ន្ធ
               </p>
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function UserCreateModal({
             {/* First Name */}
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">
-                នាមខ្លួន (First Name) <span className="text-red-500">*</span>
+                នាមខ្លួន <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -162,7 +162,7 @@ export default function UserCreateModal({
             {/* Last Name */}
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">
-                នាមត្រកូល (Last Name) <span className="text-red-500">*</span>
+                នាមត្រកូល <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -183,13 +183,13 @@ export default function UserCreateModal({
             {/* Username */}
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">
-                ឈ្មោះគណនី (Username) <span className="text-red-500">*</span>
+                ឈ្មោះគណនី <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 {...register("username")}
                 disabled={isBusy}
-                placeholder="username"
+                placeholder="ឈ្មោះគណនី"
                 className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
                   errors.username
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100"
@@ -204,13 +204,13 @@ export default function UserCreateModal({
             {/* Email */}
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">
-                អ៊ីមែល (Email) <span className="text-red-500">*</span>
+                អ៊ីមែល <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
                 {...register("email")}
                 disabled={isBusy}
-                placeholder="example@gmail.com"
+                placeholder="ឧ. example@gmail.com"
                 className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
                   errors.email
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100"
@@ -225,13 +225,13 @@ export default function UserCreateModal({
             {/* Phone Number */}
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">
-                លេខទូរស័ព្ទ (Phone Number) <span className="text-red-500">*</span>
+                លេខទូរស័ព្ទ <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 {...register("phoneNumber")}
                 disabled={isBusy}
-                placeholder="+85512345678"
+                placeholder="ឧ. +85512345678"
                 className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
                   errors.phoneNumber
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100"
@@ -248,7 +248,7 @@ export default function UserCreateModal({
             {/* Password */}
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">
-                ពាក្យសម្ងាត់ (Password) <span className="text-red-500">*</span>
+                ពាក្យសម្ងាត់ <span className="text-red-500">*</span>
               </label>
               <input
                 type="password"
@@ -269,7 +269,7 @@ export default function UserCreateModal({
             {/* Confirm Password */}
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">
-                បញ្ជាក់ពាក្យសម្ងាត់ (Confirm Password) <span className="text-red-500">*</span>
+                បញ្ជាក់ពាក្យសម្ងាត់ <span className="text-red-500">*</span>
               </label>
               <input
                 type="password"

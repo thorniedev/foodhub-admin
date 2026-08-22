@@ -47,11 +47,11 @@ export default function RelatedProfilesPanel({
           </div>
 
           <div>
-            <p className="text-2xl font-semibold text-primary-800">
+            <p className="text-[20px] font-bold text-primary-800">
               បញ្ជីប្រវត្តិរូប
             </p>
 
-            <p className="mt-1 text-lg text-gray-500">
+            <p className="mt-0.5 text-[18px] text-gray-500">
               {data?.totalElements ?? 0} ប្រវត្តិរូប
             </p>
           </div>

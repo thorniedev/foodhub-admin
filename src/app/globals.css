@@ -294,30 +294,24 @@ body {
   html {
     @apply font-sans;
   }
-}
-
-h1 {
-  @apply text-[68px]  tracking-tight;
-}
-
-h2 {
-  @apply text-5xl  tracking-tight;
-}
-
-h3 {
-  @apply text-3xl ;
-}
-
-h4 {
-  @apply text-2xl ;
-}
-
-h5 {
-  @apply text-xl ;
-}
-
-h6 {
-  @apply text-lg  ;
+  h1 {
+    @apply text-[68px] tracking-tight;
+  }
+  h2 {
+    @apply text-5xl tracking-tight;
+  }
+  h3 {
+    @apply text-3xl;
+  }
+  h4 {
+    @apply text-2xl;
+  }
+  h5 {
+    @apply text-xl;
+  }
+  h6 {
+    @apply text-lg;
+  }
 }
 
 /* Add to your globals.css — hides the scrollbar on the drag track */

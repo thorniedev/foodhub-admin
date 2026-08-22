@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -18,12 +18,13 @@ import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
 import { uploadCatalogMediaFile } from "@/src/lib/catalogMediaClient";
 import { compressImage } from "@/src/utils/imageCompression";
 import UserAvatar from "./UserAvatar";
+import CustomSelect from "../ui/CustomSelect";
 
 const profileEditSchema = z.object({
   profileName: z
     .string()
     .trim()
-    .min(1, "សូមបញ្ចូលឈ្មោះកម្រងព័ត៌មាន")
+    .min(1, "សូមបញ្ចូលឈ្មោះប្រវត្តិរូប")
     .max(50, "ឈ្មោះមិនអាចលើសពី 50 តួអក្សរ"),
   relationship: z.string().min(1, "សូមជ្រើសរើសទំនាក់ទំនង"),
   gender: z.string().min(1, "សូមជ្រើសរើសភេទ"),
@@ -41,18 +42,22 @@ interface ProfileEditModalProps {
 }
 
 const RELATIONSHIPS = [
-  { value: "SELF", label: "ខ្លួនឯង (Self)" },
-  { value: "CHILD", label: "កូន (Child)" },
-  { value: "SPOUSE", label: "ប្តី/ប្រពន្ធ (Spouse)" },
-  { value: "PARENT", label: "ឪពុកម្តាយ (Parent)" },
-  { value: "OTHER", label: "ផ្សេងៗ (Other)" },
+  { value: "SELF", label: "ខ្លួនឯង" },
+  { value: "CHILD", label: "កូន" },
+  { value: "SPOUSE", label: "ប្តី/ប្រពន្ធ" },
+  { value: "PARENT", label: "ឪពុកម្តាយ" },
+  { value: "OTHER", label: "ផ្សេងៗ" },
 ];
 
 const GENDERS = [
-  { value: "MALE", label: "ប្រុស (Male)" },
-  { value: "FEMALE", label: "ស្រី (Female)" },
-  { value: "OTHER", label: "ផ្សេងទៀត (Other)" },
-  { value: "PREFER_NOT_TO_SAY", label: "មិនបញ្ជាក់" },
+  { value: "MALE", label: "ប្រុស" },
+  { value: "FEMALE", label: "ស្រី" },
+  { value: "OTHER", label: "ផ្សេងទៀត" },
+];
+
+const LANGUAGES = [
+  { value: "km", label: "ភាសាខ្មែរ (Khmer)" },
+  { value: "en", label: "English" },
 ];
 
 export default function ProfileEditModal({
@@ -69,6 +74,7 @@ export default function ProfileEditModal({
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -151,7 +157,7 @@ export default function ProfileEditModal({
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[3px]">
-      <div className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-[28px] border border-gray-100 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-[28px] border border-gray-100 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-gradient-to-r from-emerald-50/70 via-white to-emerald-50/40 px-6 py-5 sm:px-8">
           <div className="flex items-center gap-3.5">
@@ -159,8 +165,8 @@ export default function ProfileEditModal({
               <Pencil size={20} />
             </div>
             <div>
-              <p className="text-2xl font-bold tracking-tight text-gray-900">
-                កែប្រែកម្រងព័ត៌មាន
+              <p className="text-2xl font-bold tracking-tight text-[#0F5A2C]">
+                កែប្រែប្រវត្តិរូប
               </p>
               <p className="mt-0.5 text-sm text-gray-500">
                 កែប្រែព័ត៌មានផ្ទាល់ខ្លួនរបស់ Profile
@@ -253,7 +259,7 @@ export default function ProfileEditModal({
             {/* Profile Name */}
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">
-                ឈ្មោះកម្រងព័ត៌មាន (Profile Name) <span className="text-red-500">*</span>
+                ឈ្មោះប្រវត្តិរូប <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -275,23 +281,21 @@ export default function ProfileEditModal({
               {/* Relationship */}
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-700">
-                  ទំនាក់ទំនង (Relationship) <span className="text-red-500">*</span>
+                  ទំនាក់ទំនង <span className="text-red-500">*</span>
                 </label>
-                <select
-                  {...register("relationship")}
-                  disabled={isBusy}
-                  className={`h-12 w-full rounded-2xl border bg-white px-3 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
-                    errors.relationship
-                      ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                      : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
-                  }`}
-                >
-                  {RELATIONSHIPS.map((rel) => (
-                    <option key={rel.value} value={rel.value}>
-                      {rel.label}
-                    </option>
-                  ))}
-                </select>
+                <Controller
+                  control={control}
+                  name="relationship"
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={RELATIONSHIPS}
+                      disabled={isBusy}
+                      error={Boolean(errors.relationship)}
+                    />
+                  )}
+                />
                 {errors.relationship && (
                   <p className="text-xs font-medium text-red-500">{errors.relationship.message}</p>
                 )}
@@ -300,23 +304,21 @@ export default function ProfileEditModal({
               {/* Gender */}
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-700">
-                  ភេទ (Gender) <span className="text-red-500">*</span>
+                  ភេទ <span className="text-red-500">*</span>
                 </label>
-                <select
-                  {...register("gender")}
-                  disabled={isBusy}
-                  className={`h-12 w-full rounded-2xl border bg-white px-3 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
-                    errors.gender
-                      ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                      : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
-                  }`}
-                >
-                  {GENDERS.map((g) => (
-                    <option key={g.value} value={g.value}>
-                      {g.label}
-                    </option>
-                  ))}
-                </select>
+                <Controller
+                  control={control}
+                  name="gender"
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={GENDERS}
+                      disabled={isBusy}
+                      error={Boolean(errors.gender)}
+                    />
+                  )}
+                />
                 {errors.gender && (
                   <p className="text-xs font-medium text-red-500">{errors.gender.message}</p>
                 )}
@@ -327,7 +329,7 @@ export default function ProfileEditModal({
               {/* Date of Birth */}
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-700">
-                  ថ្ងៃខែឆ្នាំកំណើត (DOB) <span className="text-red-500">*</span>
+                  ថ្ងៃខែឆ្នាំកំណើត <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -347,20 +349,21 @@ export default function ProfileEditModal({
               {/* Language */}
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-700">
-                  ភាសា (Language) <span className="text-red-500">*</span>
+                  ភាសា <span className="text-red-500">*</span>
                 </label>
-                <select
-                  {...register("preferredLanguage")}
-                  disabled={isBusy}
-                  className={`h-12 w-full rounded-2xl border bg-white px-3 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
-                    errors.preferredLanguage
-                      ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                      : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
-                  }`}
-                >
-                  <option value="km">ភាសាខ្មែរ (Khmer)</option>
-                  <option value="en">English</option>
-                </select>
+                <Controller
+                  control={control}
+                  name="preferredLanguage"
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={LANGUAGES}
+                      disabled={isBusy}
+                      error={Boolean(errors.preferredLanguage)}
+                    />
+                  )}
+                />
                 {errors.preferredLanguage && (
                   <p className="text-xs font-medium text-red-500">{errors.preferredLanguage.message}</p>
                 )}

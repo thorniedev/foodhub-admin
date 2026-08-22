@@ -112,12 +112,19 @@ export const shopApi = adminBaseApi.injectEndpoints({
           method: "GET",
           params: {
             query: p.query?.trim() || undefined,
+            reviewStatus:
+              p.reviewStatus && p.reviewStatus !== "ALL"
+                ? p.reviewStatus
+                : undefined,
+            operatingStatus: p.operatingStatus || undefined,
+            accountStatus: p.accountStatus || undefined,
             page: p.page ?? 0,
             size: p.size ?? 20,
           },
         };
       },
       transformResponse: normalizeStorePage,
+      providesTags: ["Store", "Shop"],
     }),
     getShopByUuid: builder.query<Store, string>({
       query: (uuid) => ({
@@ -125,10 +132,12 @@ export const shopApi = adminBaseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (r) => normalizeOne<Store>(r),
+      providesTags: ["Store", "Shop"],
     }),
     createShop: builder.mutation<Store, CreateStorePayload>({
       query: (body) => ({ url: "/stores", method: "POST", body }),
       transformResponse: (r) => normalizeOne<Store>(r),
+      invalidatesTags: ["Store", "Shop"],
     }),
     updateShop: builder.mutation<
       Store,
@@ -140,6 +149,7 @@ export const shopApi = adminBaseApi.injectEndpoints({
         body,
       }),
       transformResponse: (r) => normalizeOne<Store>(r),
+      invalidatesTags: ["Store", "Shop"],
     }),
     updateStoreReviewStatus: builder.mutation<
       Store,
@@ -151,6 +161,7 @@ export const shopApi = adminBaseApi.injectEndpoints({
         body,
       }),
       transformResponse: (r) => normalizeOne<Store>(r),
+      invalidatesTags: ["Store", "Shop"],
     }),
     updateStoreAccountStatus: builder.mutation<
       Store,
@@ -162,6 +173,7 @@ export const shopApi = adminBaseApi.injectEndpoints({
         body,
       }),
       transformResponse: (r) => normalizeOne<Store>(r),
+      invalidatesTags: ["Store", "Shop"],
     }),
     updateStoreOperatingStatus: builder.mutation<
       Store,
@@ -173,6 +185,7 @@ export const shopApi = adminBaseApi.injectEndpoints({
         body,
       }),
       transformResponse: (r) => normalizeOne<Store>(r),
+      invalidatesTags: ["Store", "Shop"],
     }),
     getStoreHours: builder.query<StoreHour[], string>({
       query: (uuid) => ({
@@ -223,6 +236,7 @@ export const shopApi = adminBaseApi.injectEndpoints({
     >({
       query: (body) => ({ url: "/stores/from-google", method: "POST", body }),
       transformResponse: (r) => normalizeOne<Store>(r),
+      invalidatesTags: ["Store", "Shop"],
     }),
     deleteShop: builder.mutation<void, string>({
       query: (storeUuid) => ({

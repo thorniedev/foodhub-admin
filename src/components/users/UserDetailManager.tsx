@@ -1,13 +1,17 @@
 "use client";
 
 import {
+  useEffect,
   useMemo,
   useState,
 } from "react";
 
 import {
+  AlertCircle,
   AlertTriangle,
+  CheckCircle2,
   Loader2,
+  X,
 } from "lucide-react";
 
 import { useRouter } from "next/navigation";
@@ -91,6 +95,13 @@ export default function UserDetailManager({
   } | null>(null);
 
   const [notice, setNotice] = useState<Notice>(null);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => {
+      setNotice(null);
+    }, 4500);
+    return () => clearTimeout(timer);
+  }, [notice]);
 
   const {
     data: user,
@@ -146,7 +157,7 @@ export default function UserDetailManager({
 
   const effectiveSelectedProfileUuid =
     selectedProfileUuid &&
-    visibleProfiles.some((profile) => profile.uuid === selectedProfileUuid)
+      visibleProfiles.some((profile) => profile.uuid === selectedProfileUuid)
       ? selectedProfileUuid
       : visibleProfiles[0]?.uuid ?? null;
 
@@ -161,13 +172,13 @@ export default function UserDetailManager({
 
   const selectedProfileDetail: AdminProfileDetail | undefined = selectedProfile
     ? {
-        ...selectedProfile,
-        allergies: selectedProfile.allergies ?? [],
-        dietaryTypes: selectedProfile.dietaryTypes ?? [],
-        medicalConditions: selectedProfile.medicalConditions ?? [],
-        ingredientAvoids: selectedProfile.ingredientAvoids ?? [],
-        preferences: selectedProfile.preferences ?? null,
-      }
+      ...selectedProfile,
+      allergies: selectedProfile.allergies ?? [],
+      dietaryTypes: selectedProfile.dietaryTypes ?? [],
+      medicalConditions: selectedProfile.medicalConditions ?? [],
+      ingredientAvoids: selectedProfile.ingredientAvoids ?? [],
+      preferences: selectedProfile.preferences ?? null,
+    }
     : undefined;
 
   const profileDetailLoading = profileLoading;
@@ -213,7 +224,7 @@ export default function UserDetailManager({
 
       setNotice({
         type: "success",
-        text: `បានបង្កើតកម្រងព័ត៌មាន "${payload.profileName}" ដោយជោគជ័យ។`,
+        text: `បានបង្កើតប្រវត្តិរូប "${payload.profileName}" ដោយជោគជ័យ។`,
       });
 
       await refetchProfiles();
@@ -233,7 +244,7 @@ export default function UserDetailManager({
 
       setNotice({
         type: "success",
-        text: `បានកែប្រែព័ត៌មានកម្រងព័ត៌មាន "${payload.profileName || editProfile.profileName}" ដោយជោគជ័យ។`,
+        text: `បានកែប្រែព័ត៌មានប្រវត្តិរូប "${payload.profileName || editProfile.profileName}" ដោយជោគជ័យ។`,
       });
 
       setEditProfile(null);
@@ -453,15 +464,43 @@ export default function UserDetailManager({
         onRestore={handleRestoreUser}
       />
 
+      {/* =================================================
+          FLOATING TOAST NOTIFICATION (SHADCN STYLE)
+      ================================================== */}
       {notice && (
-        <div
-          className={`rounded-2xl border px-4 py-3 text-base ${
-            notice.type === "success"
-              ? "border-primary-100 bg-primary-50 text-primary-700"
-              : "border-red-100 bg-red-50 text-red-600"
-          }`}
-        >
-          {notice.text}
+        <div className="fixed top-6 right-6 z-[9999] pointer-events-none flex max-w-md animate-in fade-in slide-in-from-top-5 duration-300">
+          <div
+            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-3.5 shadow-2xl backdrop-blur-md transition-all ${notice.type === "success"
+              ? "border-emerald-200 bg-white/95 text-emerald-950 shadow-emerald-500/10"
+              : "border-red-200 bg-white/95 text-red-950 shadow-red-500/10"
+              }`}
+          >
+            <div
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${notice.type === "success"
+                ? "bg-emerald-50 text-emerald-600"
+                : "bg-red-50 text-red-600"
+                }`}
+            >
+              {notice.type === "success" ? (
+                <CheckCircle2 size={20} />
+              ) : (
+                <AlertCircle size={20} />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold leading-relaxed">
+                {notice.text}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setNotice(null)}
+              className="ml-2 flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+              aria-label="Close"
+            >
+              <X size={15} />
+            </button>
+          </div>
         </div>
       )}
 

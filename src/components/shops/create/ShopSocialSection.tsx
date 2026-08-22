@@ -1,8 +1,26 @@
 import { Plus, Share2, Trash2 } from "lucide-react";
 
-import type { StoreSocialLink } from "@/src/types/shop";
+import {
+  MAX_STORE_SOCIAL_LINKS,
+  STORE_SOCIAL_PLATFORMS,
+  type StoreSocialLink,
+  type StoreSocialPlatform,
+} from "@/src/types/shop";
 
-import StoreSocialLinksEditor from "../StoreSocialLinksEditor";
+import { getSocialLinkError } from "../StoreSocialLinksEditor";
+
+const PLACEHOLDERS: Record<StoreSocialPlatform, string> = {
+  FACEBOOK: "https://facebook.com/your-page",
+  INSTAGRAM: "https://instagram.com/your-handle",
+  TIKTOK: "https://tiktok.com/@your-handle",
+  YOUTUBE: "https://youtube.com/@your-channel",
+  TELEGRAM: "https://t.me/your-channel",
+  X: "https://x.com/your-handle",
+};
+
+function isKnownPlatform(value: string): value is StoreSocialPlatform {
+  return (STORE_SOCIAL_PLATFORMS as readonly string[]).includes(value);
+}
 
 export default function ShopSocialSection({
   links,
@@ -11,6 +29,14 @@ export default function ShopSocialSection({
   links: StoreSocialLink[];
   onChange: (value: StoreSocialLink[]) => void;
 }) {
+  const usedPlatforms = new Set(links.map((link) => link.platform));
+
+  const nextAvailablePlatform = (): StoreSocialPlatform =>
+    STORE_SOCIAL_PLATFORMS.find((platform) => !usedPlatforms.has(platform)) ??
+    STORE_SOCIAL_PLATFORMS[0];
+
+  const canAdd = links.length < MAX_STORE_SOCIAL_LINKS;
+
   const update = (index: number, key: keyof StoreSocialLink, value: string) => {
     const next = [...links];
 
@@ -47,12 +73,12 @@ export default function ShopSocialSection({
           </div>
 
           <div className="min-w-0">
-            <p className="text-3xl font-semibold text-primary-800">
+            <p className="text-2xl font-bold text-[#0F5A2C]">
               បណ្ដាញសង្គម
             </p>
 
             <p className="mt-1 text-lg leading-7 text-gray-500">
-              បន្ថែមបណ្ដាញសង្គមរបស់ហាងសម្រាប់បង្ហាញទៅកាន់គណនីអ្នកប្រើប្រាស់។
+              បន្ថែមបណ្ដាញសង្គមរបស់ហាងសម្រាប់បង្ហាញទៅកាន់គណនីអ្នកប្រើប្រាស់ (អតិបរមា {MAX_STORE_SOCIAL_LINKS} links · មួយ platform មួយ link)។
             </p>
           </div>
         </div>
@@ -61,11 +87,12 @@ export default function ShopSocialSection({
 
         <button
           type="button"
+          disabled={!canAdd}
           onClick={() =>
             onChange([
               ...links,
               {
-                platform: "FACEBOOK",
+                platform: nextAvailablePlatform(),
                 profileUrl: "",
                 displayOrder: links.length + 1,
               },
@@ -90,6 +117,8 @@ export default function ShopSocialSection({
             focus:outline-none
             focus:ring-4
             focus:ring-primary-100
+            disabled:cursor-not-allowed
+            disabled:opacity-50
             sm:w-fit
           "
         >
@@ -148,199 +177,225 @@ export default function ShopSocialSection({
             </p>
           </div>
         ) : (
-          links.map((link, index) => (
-            <div
-              key={`${link.platform}-${index}`}
-              className="
-                  rounded-2xl
-                  border
-                  border-gray-100
-                  bg-gray-50/70
-                  p-4
-                  sm:p-5
-                "
-            >
+          links.map((link, index) => {
+            const error = getSocialLinkError(link);
+            const placeholder = isKnownPlatform(link.platform)
+              ? PLACEHOLDERS[link.platform]
+              : "https://...";
+
+            return (
               <div
+                key={`${link.platform}-${index}`}
                 className="
-                    grid
-                    grid-cols-1
-                    gap-5
-                    lg:grid-cols-[1fr_2fr_180px_52px]
-                    lg:items-end
+                    rounded-2xl
+                    border
+                    border-gray-100
+                    bg-gray-50/70
+                    p-4
+                    sm:p-5
                   "
               >
-                {/* =====================================
-                      PLATFORM
-                  ====================================== */}
-
-                <label className="block min-w-0">
-                  <span
-                    className="
-                        mb-2
-                        block
-                        text-lg
-                        font-medium
-                        text-primary-800
-                      "
-                  >
-                    Platform
-                  </span>
-
-                  <input
-                    value={link.platform}
-                    onChange={(event) =>
-                      update(index, "platform", event.target.value)
-                    }
-                    placeholder="ឧ. FACEBOOK"
-                    className="
-                        h-[52px]
-                        w-full
-                        rounded-xl
-                        border
-                        border-gray-200
-                        bg-white
-                        px-4
-                        text-lg
-                        text-gray-800
-                        outline-none
-                        transition
-                        placeholder:text-gray-400
-                        hover:border-gray-300
-                        focus:border-primary-600
-                        focus:ring-4
-                        focus:ring-primary-100
-                      "
-                  />
-                </label>
-
-                {/* =====================================
-                      PROFILE URL
-                  ====================================== */}
-
-                <label className="block min-w-0">
-                  <span
-                    className="
-                        mb-2
-                        block
-                        text-lg
-                        font-medium
-                        text-primary-800
-                      "
-                  >
-                    Profile URL
-                  </span>
-
-                  <input
-                    value={link.profileUrl}
-                    onChange={(event) =>
-                      update(index, "profileUrl", event.target.value)
-                    }
-                    placeholder="https://facebook.com/your-store"
-                    className="
-                        h-[52px]
-                        w-full
-                        rounded-xl
-                        border
-                        border-gray-200
-                        bg-white
-                        px-4
-                        text-lg
-                        text-gray-800
-                        outline-none
-                        transition
-                        placeholder:text-gray-400
-                        hover:border-gray-300
-                        focus:border-primary-600
-                        focus:ring-4
-                        focus:ring-primary-100
-                      "
-                  />
-                </label>
-
-                {/* =====================================
-                      DISPLAY ORDER
-                  ====================================== */}
-
-                <label className="block min-w-0">
-                  <span
-                    className="
-                        mb-2
-                        block
-                        text-lg
-                        font-medium
-                        text-primary-800
-                      "
-                  >
-                    Display order
-                  </span>
-
-                  <input
-                    type="number"
-                    min="1"
-                    value={link.displayOrder}
-                    onChange={(event) =>
-                      update(index, "displayOrder", event.target.value)
-                    }
-                    placeholder="1"
-                    className="
-                        h-[52px]
-                        w-full
-                        rounded-xl
-                        border
-                        border-gray-200
-                        bg-white
-                        px-4
-                        text-lg
-                        text-gray-800
-                        outline-none
-                        transition
-                        placeholder:text-gray-400
-                        hover:border-gray-300
-                        focus:border-primary-600
-                        focus:ring-4
-                        focus:ring-primary-100
-                      "
-                  />
-                </label>
-
-                {/* =====================================
-                      DELETE
-                  ====================================== */}
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    onChange(
-                      links.filter((_, itemIndex) => itemIndex !== index),
-                    )
-                  }
-                  aria-label="Remove social link"
-                  title="លុប Social link"
+                <div
                   className="
-                      flex
-                      h-[52px]
-                      w-full
-                      items-center
-                      justify-center
-                      rounded-xl
-                      border
-                      border-red-100
-                      bg-white
-                      text-red-500
-                      transition
-                      hover:bg-red-50
-                      hover:text-red-600
-                      focus:outline-none
-                      focus:ring-4
-                      focus:ring-red-100
-                      lg:w-[52px]
+                      grid
+                      grid-cols-1
+                      gap-5
+                      lg:grid-cols-[1fr_2fr_180px_52px]
+                      lg:items-end
                     "
                 >
-                  <Trash2 size={21} />
-                </button>
+                  {/* =====================================
+                        PLATFORM
+                    ====================================== */}
+
+                  <label className="block min-w-0">
+                    <span
+                      className="
+                          mb-2
+                          block
+                          text-lg
+                          font-medium
+                          text-primary-800
+                        "
+                    >
+                      Platform
+                    </span>
+
+                    <select
+                      value={link.platform}
+                      onChange={(event) =>
+                        update(index, "platform", event.target.value)
+                      }
+                      className="
+                          h-[52px]
+                          w-full
+                          rounded-xl
+                          border
+                          border-gray-200
+                          bg-white
+                          px-4
+                          text-lg
+                          text-gray-800
+                          outline-none
+                          transition
+                          hover:border-gray-300
+                          focus:border-primary-600
+                          focus:ring-4
+                          focus:ring-primary-100
+                        "
+                    >
+                      {!isKnownPlatform(link.platform) && (
+                        <option value={link.platform}>{link.platform}</option>
+                      )}
+
+                      {STORE_SOCIAL_PLATFORMS.map((platform) => (
+                        <option
+                          key={platform}
+                          value={platform}
+                          disabled={
+                            platform !== link.platform &&
+                            usedPlatforms.has(platform)
+                          }
+                        >
+                          {platform}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  {/* =====================================
+                        PROFILE URL
+                    ====================================== */}
+
+                  <label className="block min-w-0">
+                    <span
+                      className="
+                          mb-2
+                          block
+                          text-lg
+                          font-medium
+                          text-primary-800
+                        "
+                    >
+                      Profile URL
+                    </span>
+
+                    <input
+                      value={link.profileUrl}
+                      onChange={(event) =>
+                        update(index, "profileUrl", event.target.value)
+                      }
+                      placeholder={placeholder}
+                      className="
+                          h-[52px]
+                          w-full
+                          rounded-xl
+                          border
+                          border-gray-200
+                          bg-white
+                          px-4
+                          text-lg
+                          text-gray-800
+                          outline-none
+                          transition
+                          placeholder:text-gray-400
+                          hover:border-gray-300
+                          focus:border-primary-600
+                          focus:ring-4
+                          focus:ring-primary-100
+                        "
+                    />
+                  </label>
+
+                  {/* =====================================
+                        DISPLAY ORDER
+                    ====================================== */}
+
+                  <label className="block min-w-0">
+                    <span
+                      className="
+                          mb-2
+                          block
+                          text-lg
+                          font-medium
+                          text-primary-800
+                        "
+                    >
+                      Display order
+                    </span>
+
+                    <input
+                      type="number"
+                      min="1"
+                      value={link.displayOrder}
+                      onChange={(event) =>
+                        update(index, "displayOrder", event.target.value)
+                      }
+                      placeholder="1"
+                      className="
+                          h-[52px]
+                          w-full
+                          rounded-xl
+                          border
+                          border-gray-200
+                          bg-white
+                          px-4
+                          text-lg
+                          text-gray-800
+                          outline-none
+                          transition
+                          placeholder:text-gray-400
+                          hover:border-gray-300
+                          focus:border-primary-600
+                          focus:ring-4
+                          focus:ring-primary-100
+                        "
+                    />
+                  </label>
+
+                  {/* =====================================
+                        DELETE
+                    ====================================== */}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onChange(
+                        links.filter((_, itemIndex) => itemIndex !== index),
+                      )
+                    }
+                    aria-label="Remove social link"
+                    title="លុប Social link"
+                    className="
+                        flex
+                        h-[52px]
+                        w-full
+                        items-center
+                        justify-center
+                        rounded-xl
+                        border
+                        border-red-100
+                        bg-white
+                        text-red-500
+                        transition
+                        hover:bg-red-50
+                        hover:text-red-600
+                        focus:outline-none
+                        focus:ring-4
+                        focus:ring-red-100
+                        lg:w-[52px]
+                      "
+                  >
+                    <Trash2 size={21} />
+                  </button>
+                </div>
+
+                {link.profileUrl.trim() && error && (
+                  <p className="mt-2 text-base text-red-600">{error}</p>
+                )}
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </section>

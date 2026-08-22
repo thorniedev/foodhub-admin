@@ -84,7 +84,7 @@ export default function StoreMenuItemsSection({
             className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#137A3D] px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-[#0f6833]"
           >
             <Plus size={16} />
-            បង្កើត មីនុយ
+            បង្កើតមីនុយ
           </button>
         ) : (
           <Link

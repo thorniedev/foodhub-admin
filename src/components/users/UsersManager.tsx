@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  AlertCircle,
   AlertTriangle,
   ArrowUpDown,
   Check,
+  CheckCircle2,
   ChevronDown,
   Loader2,
   RotateCcw,
@@ -114,6 +116,13 @@ export default function UsersManager() {
   const [hardDeleteUser, setHardDeleteUser] = useState<AdminUser | null>(null);
 
   const [notice, setNotice] = useState<Notice>(null);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => {
+      setNotice(null);
+    }, 4500);
+    return () => clearTimeout(timer);
+  }, [notice]);
 
   /* =======================================================
      MAIN QUERY
@@ -359,7 +368,7 @@ export default function UsersManager() {
 
       setNotice({
         type: "success",
-        text: "បានបង្កើតអ្នកប្រើថ្មីដោយជោគជ័យ។",
+        text: "បានបង្កើតគណនីថ្មីដោយជោគជ័យ។",
       });
 
       await refetch();
@@ -472,7 +481,7 @@ export default function UsersManager() {
 
       setNotice({
         type: "success",
-        text: `បានផ្អាកដំណើរការអ្នកប្រើ "${displayName(target.firstName, target.lastName, target.username)}"។`,
+        text: `បានផ្អាកដំណើរការគណនី​ "${displayName(target.firstName, target.lastName, target.username)}"ដោយជោគជ័យ។`,
       });
 
       await refetch();
@@ -526,7 +535,7 @@ export default function UsersManager() {
 
       setNotice({
         type: "success",
-        text: `បានលុបអ្នកប្រើ "${displayName(
+        text: `បានលុបគណនី "${displayName(
           target.firstName,
           target.lastName,
           target.username,
@@ -573,7 +582,7 @@ export default function UsersManager() {
 
       setNotice({
         type: "success",
-        text: `បានស្តារអ្នកប្រើ "${displayName(
+        text: `បានស្តារគណនី "${displayName(
           target.firstName,
           target.lastName,
           target.username,
@@ -750,12 +759,12 @@ export default function UsersManager() {
 
                             <span
                               className={`shrink-0 rounded-full px-2.5 py-1 text-sm ${user.status === "ACTIVE"
-                                  ? "bg-primary-50 text-primary-700"
-                                  : user.status === "SUSPENDED"
-                                    ? "bg-secondary-50 text-secondary-600"
-                                    : user.status === "DELETED"
-                                      ? "bg-red-50 text-red-700"
-                                      : "bg-gray-100 text-gray-500"
+                                ? "bg-primary-50 text-primary-700"
+                                : user.status === "SUSPENDED"
+                                  ? "bg-secondary-50 text-secondary-600"
+                                  : user.status === "DELETED"
+                                    ? "bg-red-50 text-red-700"
+                                    : "bg-gray-100 text-gray-500"
                                 }`}
                             >
                               {user.status}
@@ -783,8 +792,8 @@ export default function UsersManager() {
                 setShowSuggestions(false);
               }}
               className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${sizeOpen
-                  ? "border-primary-600 ring-2 ring-primary-100"
-                  : "border-gray-200 hover:border-primary-600/50"
+                ? "border-primary-600 ring-2 ring-primary-100"
+                : "border-gray-200 hover:border-primary-600/50"
                 }`}
             >
               <span className="text-gray-700">{size} / ទំព័រ</span>
@@ -817,8 +826,8 @@ export default function UsersManager() {
                         setSizeOpen(false);
                       }}
                       className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
-                          ? "bg-primary-50 text-primary-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
+                        ? "bg-primary-50 text-primary-700"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
                         }`}
                     >
                       <span>{value} / ទំព័រ</span>
@@ -846,8 +855,8 @@ export default function UsersManager() {
                 setShowSuggestions(false);
               }}
               className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen
-                  ? "border-primary-600 bg-primary-50 text-primary-700"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-primary-600 hover:bg-primary-50 hover:text-primary-700"
+                ? "border-primary-600 bg-primary-50 text-primary-700"
+                : "border-gray-200 bg-white text-gray-600 hover:border-primary-600 hover:bg-primary-50 hover:text-primary-700"
                 }`}
               aria-label="Sort users"
               title="Sort users"
@@ -874,8 +883,8 @@ export default function UsersManager() {
                         setSortOpen(false);
                       }}
                       className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
-                          ? "bg-primary-50 text-primary-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
+                        ? "bg-primary-50 text-primary-700"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
                         }`}
                     >
                       <span>{option.label}</span>
@@ -893,17 +902,43 @@ export default function UsersManager() {
       </div>
 
       {/* =================================================
-          NOTICE
+          FLOATING TOAST NOTIFICATION (SHADCN STYLE)
       ================================================== */}
 
       {notice && (
-        <div
-          className={`rounded-2xl border px-4 py-3 text-base ${notice.type === "success"
-              ? "border-primary-100 bg-primary-50 text-primary-700"
-              : "border-red-100 bg-red-50 text-red-600"
-            }`}
-        >
-          {notice.text}
+        <div className="fixed top-6 right-6 z-[9999] pointer-events-none flex max-w-md animate-in fade-in slide-in-from-top-5 duration-300">
+          <div
+            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-3.5 shadow-2xl backdrop-blur-md transition-all ${notice.type === "success"
+              ? "border-emerald-200 bg-white/95 text-emerald-950 shadow-emerald-500/10"
+              : "border-red-200 bg-white/95 text-red-950 shadow-red-500/10"
+              }`}
+          >
+            <div
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${notice.type === "success"
+                ? "bg-emerald-50 text-emerald-600"
+                : "bg-red-50 text-red-600"
+                }`}
+            >
+              {notice.type === "success" ? (
+                <CheckCircle2 size={20} />
+              ) : (
+                <AlertCircle size={20} />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold leading-relaxed">
+                {notice.text}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setNotice(null)}
+              className="ml-2 flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+              aria-label="Close"
+            >
+              <X size={15} />
+            </button>
+          </div>
         </div>
       )}
 

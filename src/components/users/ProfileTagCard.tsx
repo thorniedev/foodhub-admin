@@ -33,7 +33,7 @@ export default function ProfileTagCard({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-base font-bold text-gray-900 group-hover:text-primary-800">
+          <p className="truncate text-[18px] font-bold text-gray-900 group-hover:text-primary-800">
             {profile.profileName}
           </p>
 
@@ -50,7 +50,7 @@ export default function ProfileTagCard({
           )}
         </div>
 
-        <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+        <div className="mt-1 flex items-center gap-2 text-[16px] text-gray-500">
           <span className="font-medium text-gray-600">
             {formatRelationshipKhmer(profile.relationship)}
           </span>

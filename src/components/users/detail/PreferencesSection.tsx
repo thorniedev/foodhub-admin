@@ -96,20 +96,20 @@ function Tags({
 }) {
   return (
     <div>
-      <p className="mb-2 text-lg font-medium text-gray-500">
+      <p className="mb-2 text-[18px] font-medium text-gray-500">
         {label}
       </p>
 
       <div className="flex flex-wrap gap-2">
         {values.length === 0 ? (
-          <span className="text-lg text-gray-400">
+          <span className="text-[18px] text-gray-400">
             —
           </span>
         ) : (
           values.map((value) => (
             <span
               key={value}
-              className="rounded-full bg-primary-50 px-3.5 py-1.5 text-lg font-medium text-primary-700 ring-1 ring-inset ring-primary-100"
+              className="rounded-full bg-primary-50 px-3.5 py-1.5 text-[18px] font-medium text-primary-700 ring-1 ring-inset ring-primary-100"
             >
               {humanizeEnum(value)}
             </span>
@@ -129,11 +129,11 @@ function Info({
 }) {
   return (
     <div className="rounded-2xl border border-gray-100 bg-gray-50/60 px-4 py-4 transition hover:border-gray-200 hover:bg-gray-50">
-      <p className="text-lg font-medium text-gray-500">
+      <p className="text-[18px] font-medium text-gray-500">
         {label}
       </p>
 
-      <p className="mt-1 text-lg font-semibold text-gray-800">
+      <p className="mt-1 text-[18px] font-semibold text-gray-800">
         {value}
       </p>
     </div>

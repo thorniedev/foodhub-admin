@@ -217,17 +217,24 @@ export default function CreateShopForm() {
         : null,
 
       operatingStatus: values.operatingStatus,
-
-      socialLinks: socialLinks
-        .map((link, index) => ({
-          platform: link.platform.trim(),
-
-          profileUrl: link.profileUrl.trim(),
-
-          displayOrder: Number(link.displayOrder) || index + 1,
-        }))
-        .filter((link) => link.platform && link.profileUrl),
     };
+
+    const cleanedSocialLinks = socialLinks
+      .map((link, index) => ({
+        platform: link.platform.trim(),
+        profileUrl: link.profileUrl.trim(),
+        displayOrder: Number(link.displayOrder) || index + 1,
+      }))
+      .filter((link) => link.platform && link.profileUrl);
+
+    if (cleanedSocialLinks.length > 0) {
+      const socialLinksError = getSocialLinksError(cleanedSocialLinks);
+      if (socialLinksError) {
+        setError(socialLinksError);
+        return;
+      }
+      body.socialLinks = cleanedSocialLinks;
+    }
 
     try {
       const store = await createShop(body).unwrap();
@@ -415,7 +422,7 @@ export default function CreateShopForm() {
               <Phone size={22} />
             </div>
 
-            <p className="text-3xl font-semibold text-primary-800">ទំនាក់ទំនង</p>
+            <p className="text-2xl font-bold text-[#0F5A2C]">ទំនាក់ទំនង</p>
           </div>
 
           {/* Fields */}

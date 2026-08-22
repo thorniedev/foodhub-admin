@@ -57,7 +57,7 @@ export default function ShopLocationSection({
           <MapPinned size={22} />
         </div>
 
-        <p className="text-3xl font-semibold text-primary-800">ទីតាំងហាង</p>
+        <p className="text-2xl font-bold text-[#0F5A2C]">ទីតាំងហាង</p>
       </div>
 
       {/* =================================================

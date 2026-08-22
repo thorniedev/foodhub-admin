@@ -83,16 +83,6 @@ const ACCOUNT_OPTIONS = [
     border: "border-emerald-300",
   },
   {
-    value: "INACTIVE",
-    label: "អសកម្ម",
-    desc: "គណនីហាងត្រូវបានបិទជាបណ្តោះអាសន្ន",
-    dot: "bg-gray-400",
-    ring: "ring-gray-200",
-    bg: "bg-gray-50",
-    text: "text-gray-700",
-    border: "border-gray-300",
-  },
-  {
     value: "SUSPENDED",
     label: "ត្រូវបានផ្អាក",
     desc: "គណនីហាងត្រូវបានផ្អាកដោយអ្នកគ្រប់គ្រង",
@@ -106,7 +96,7 @@ const ACCOUNT_OPTIONS = [
 
 type ReviewValue = "APPROVED" | "REJECTED" | null;
 type OperatingValue = "OPEN" | "TEMPORARILY_CLOSED" | "CLOSED";
-type AccountValue = "ACTIVE" | "INACTIVE" | "SUSPENDED";
+type AccountValue = "ACTIVE" | "SUSPENDED";
 type Step = 1 | 2 | 3;
 
 const STEPS = [
@@ -121,6 +111,7 @@ const STEPS = [
 
 export default function ShopStatusModal({
   store,
+  initialAction,
   onClose,
   onChanged,
 }: {
@@ -144,28 +135,29 @@ export default function ShopStatusModal({
   /* Pre-fill exactly from API */
   useEffect(() => {
     if (!store) return;
+
     setStep(1);
 
-    const rv = String(store.reviewStatus || "").toUpperCase();
+    const rv = String(store.reviewStatus || "").toUpperCase().trim();
     setReview(
-      rv === "APPROVED" ? "APPROVED"
-        : rv === "REJECTED" ? "REJECTED"
-          : null
+      rv === "APPROVED" || rv === "APPROVE"
+        ? "APPROVED"
+        : rv === "REJECTED" || rv === "REJECT"
+          ? "REJECTED"
+          : null,
     );
 
-    const op = String(store.operatingStatus || "").toUpperCase();
+    const op = String(store.operatingStatus || "").toUpperCase().trim();
     setOperating(
-      op === "TEMPORARILY_CLOSED" ? "TEMPORARILY_CLOSED"
-        : op === "CLOSED" ? "CLOSED"
-          : "OPEN"
+      op === "TEMPORARILY_CLOSED"
+        ? "TEMPORARILY_CLOSED"
+        : op === "CLOSED"
+          ? "CLOSED"
+          : "OPEN",
     );
 
-    const ac = String(store.accountStatus || "").toUpperCase();
-    setAccount(
-      ac === "INACTIVE" ? "INACTIVE"
-        : ac === "SUSPENDED" ? "SUSPENDED"
-          : "ACTIVE"
-    );
+    const ac = String(store.accountStatus || "").toUpperCase().trim();
+    setAccount(ac === "SUSPENDED" ? "SUSPENDED" : "ACTIVE");
 
     setNotes("");
     setError(null);

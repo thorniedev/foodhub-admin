@@ -37,12 +37,12 @@ export default function DietarySection({
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-lg font-bold text-gray-900">
+                  <p className="text-[20px] font-bold text-gray-900">
                     {item.name}
                   </p>
 
                   {item.category && (
-                    <p className="mt-1 text-sm font-medium text-gray-500">
+                    <p className="mt-1 text-[18px] font-medium text-gray-500">
                       {formatDietaryCategoryKhmer(item.category)}
                     </p>
                   )}
@@ -54,7 +54,7 @@ export default function DietarySection({
               </div>
 
               {item.notes && (
-                <p className="mt-2.5 text-base leading-7 text-gray-600">
+                <p className="mt-2.5 text-[18px] leading-relaxed text-gray-600">
                   {item.notes}
                 </p>
               )}
@@ -72,7 +72,7 @@ function Empty() {
       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-400">
         <Salad size={16} />
       </div>
-      <p className="mt-2 text-base font-medium text-gray-400">
+      <p className="mt-2 text-[18px] font-medium text-gray-400">
         មិនមានរបបអាហារដែលបានកំណត់ឡើយ
       </p>
     </div>

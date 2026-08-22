@@ -52,7 +52,7 @@ export default function ShopBasicInfoSection({
           <Store size={22} />
         </div>
 
-        <p className="text-3xl font-semibold text-primary-800">
+        <p className="text-2xl font-bold text-[#0F5A2C]">
           ព័ត៌មានហាង
         </p>
       </div>

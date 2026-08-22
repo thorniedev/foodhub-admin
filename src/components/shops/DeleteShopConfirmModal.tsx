@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-
 import { AlertTriangle, Loader2, Trash2, X } from "lucide-react";
-
 import type { Store } from "@/src/types/shop";
 
 export default function DeleteShopConfirmModal({
@@ -20,16 +18,13 @@ export default function DeleteShopConfirmModal({
   onConfirm: () => Promise<void> | void;
 }) {
   /* =========================================================
-     MODAL UX
+     MODAL UX (Lock scroll & Escape key)
   ========================================================= */
 
   useEffect(() => {
-    if (!open) {
-      return;
-    }
+    if (!open) return;
 
     const previousOverflow = document.body.style.overflow;
-
     document.body.style.overflow = "hidden";
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -42,7 +37,6 @@ export default function DeleteShopConfirmModal({
 
     return () => {
       document.body.style.overflow = previousOverflow;
-
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [open, loading, onClose]);
@@ -57,320 +51,88 @@ export default function DeleteShopConfirmModal({
 
   return (
     <div
-      className="
-        fixed
-        inset-0
-        z-[150]
-        flex
-        items-center
-        justify-center
-        bg-black/45
-        p-4
-        backdrop-blur-[3px]
-      "
+      className="fixed inset-0 z-[140] flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !loading) onClose();
+      }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="delete-store-title"
     >
-      <div
-        className="
-          w-full
-          max-w-lg
-          overflow-hidden
-          rounded-3xl
-          border
-          border-gray-100
-          bg-white
-          shadow-2xl
-          animate-in
-          fade-in
-          zoom-in-95
-          duration-150
-        "
-      >
-        {/* =================================================
-            HEADER
-        ================================================== */}
-
-        <div
-          className="
-            flex
-            items-start
-            justify-between
-            gap-4
-            border-b
-            border-gray-100
-            px-6
-            py-5
-            sm:px-8
-          "
+      <div className="relative w-full max-w-[440px] overflow-hidden rounded-[32px] border border-gray-100 bg-white px-6 py-7 shadow-2xl animate-in zoom-in-95 duration-200">
+        {/* Close Button */}
+        <button
+          type="button"
+          disabled={loading}
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
         >
-          <div className="flex items-start gap-4">
-            <div
-              className="
-                flex
-                h-12
-                w-12
-                shrink-0
-                items-center
-                justify-center
-                rounded-xl
-                bg-red-50
-                text-red-600
-              "
-            >
-              <Trash2 size={23} />
-            </div>
+          <X size={17} />
+        </button>
 
-            <div className="min-w-0">
-              <p
-                id="delete-store-title"
-                className="
-                  text-3xl
-                  font-semibold
-                  leading-tight
-                  text-gray-900
-                "
-              >
-                លុប Store
-              </p>
-
-              <p
-                className="
-                  mt-2
-                  text-lg
-                  leading-7
-                  text-gray-500
-                "
-              >
-                សូមពិនិត្យព័ត៌មានឱ្យបានច្បាស់ មុនពេលបញ្ជាក់ការលុប។
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            disabled={loading}
-            onClick={onClose}
-            aria-label="Close"
-            className="
-              flex
-              h-11
-              w-11
-              shrink-0
-              items-center
-              justify-center
-              rounded-xl
-              text-gray-400
-              transition
-              hover:bg-gray-100
-              hover:text-gray-700
-              focus:outline-none
-              focus:ring-4
-              focus:ring-gray-100
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-            "
-          >
-            <X size={22} />
-          </button>
+        {/* Circular Icon with Soft Glow */}
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-600 ring-8 ring-red-50/60">
+          <Trash2 size={26} className="stroke-[2.2]" />
         </div>
 
-        {/* =================================================
-            BODY
-        ================================================== */}
-
-        <div className="space-y-5 p-6 sm:p-8">
-          {/* CONFIRMATION */}
-
-          <div>
-            <p
-              className="
-                text-xl
-                font-semibold
-                leading-8
-                text-gray-900
-              "
-            >
-              តើអ្នកប្រាកដជាចង់លុប Store នេះមែនទេ?
-            </p>
-
-            <p
-              className="
-                mt-2
-                text-lg
-                leading-8
-                text-gray-500
-              "
-            >
-              Store នេះនឹងត្រូវដកចេញពីប្រព័ន្ធ បន្ទាប់ពីអ្នកបញ្ជាក់។
-            </p>
-          </div>
-
-          {/* =================================================
-              STORE INFORMATION
-          ================================================== */}
-
-          <div
-            className="
-              rounded-2xl
-              border
-              border-gray-100
-              bg-gray-50
-              p-5
-            "
+        {/* Header Content */}
+        <div className="mt-5 text-center">
+          <h3
+            id="delete-store-title"
+            className="text-xl font-bold tracking-tight text-gray-900 whitespace-nowrap"
           >
-            <p
-              className="
-                text-xl
-                font-semibold
-                text-primary-800
-              "
-            >
+            លុប Store ជាអចិន្ត្រៃយ៍?
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+            ហាង{" "}
+            <span className="font-bold text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200/80">
               {store.storeName}
-            </p>
-
-            <p
-              className="
-                mt-2
-                text-lg
-                leading-7
-                text-gray-500
-              "
-            >
-              {address}
-            </p>
-          </div>
-
-          {/* =================================================
-              WARNING
-          ================================================== */}
-
-          <div
-            className="
-              flex
-              items-start
-              gap-3
-              rounded-2xl
-              border
-              border-red-100
-              bg-red-50
-              p-4
-            "
-          >
-            <AlertTriangle
-              size={22}
-              className="
-                mt-0.5
-                shrink-0
-                text-red-600
-              "
-            />
-
-            <p
-              className="
-                text-lg
-                leading-8
-                text-red-700
-              "
-            >
-              ទិន្នន័យទាំងអស់របស់ហាងនេះ នឹងត្រូវលុបចេញពីប្រព័ន្ធជាអចិន្ត្រៃយ៍។
-              សកម្មភាពនេះមិនអាច Undo បានទេ។
-            </p>
-          </div>
+            </span>{" "}
+            នឹងត្រូវបានលុបចេញពីប្រព័ន្ធទាំងស្រុង។
+          </p>
         </div>
 
-        {/* =================================================
-            ACTIONS
-        ================================================== */}
+        {/* Store Address Info */}
+        {address && (
+          <div className="mt-3.5 rounded-xl border border-gray-100 bg-gray-50/80 px-3.5 py-2 text-center text-xs text-gray-500 truncate">
+            {address}
+          </div>
+        )}
 
-        <div
-          className="
-            flex
-            flex-col-reverse
-            gap-3
-            border-t
-            border-gray-100
-            bg-white
-            px-6
-            py-5
-            sm:flex-row
-            sm:items-center
-            sm:justify-end
-            sm:px-8
-          "
-        >
-          {/* CANCEL */}
+        {/* Callout Notice */}
+        <div className="mt-4 flex items-start gap-3 rounded-2xl border border-red-200/90 bg-red-50/40 p-4 text-left">
+          <AlertTriangle size={17} className="mt-0.5 shrink-0 text-red-600" />
+          <p className="text-xs font-medium leading-relaxed text-red-800">
+            សកម្មភាពនេះមិនអាចស្តារឡើងវិញបានឡើយ។ ទិន្នន័យទាំងអស់របស់ហាងនេះនឹងត្រូវលុបជាអចិន្ត្រៃយ៍។
+          </p>
+        </div>
 
+        {/* Action Buttons */}
+        <div className="mt-6 grid grid-cols-2 gap-3.5">
           <button
             type="button"
             disabled={loading}
             onClick={onClose}
-            className="
-              inline-flex
-              min-h-[52px]
-              w-full
-              items-center
-              justify-center
-              rounded-full
-              border
-              border-gray-200
-              bg-white
-              px-7
-              text-lg
-              font-medium
-              text-gray-600
-              transition
-              hover:bg-gray-50
-              hover:text-gray-800
-              focus:outline-none
-              focus:ring-4
-              focus:ring-gray-100
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-              sm:w-auto
-            "
+            className="flex h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-base font-bold text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50"
           >
             បោះបង់
           </button>
-
-          {/* DELETE */}
 
           <button
             type="button"
             disabled={loading}
             onClick={() => void onConfirm()}
-            className="
-              inline-flex
-              min-h-[52px]
-              w-full
-              items-center
-              justify-center
-              gap-2
-              rounded-full
-              bg-red-600
-              px-7
-              text-lg
-              font-semibold
-              text-white
-              shadow-sm
-              transition
-              hover:bg-red-700
-              focus:outline-none
-              focus:ring-4
-              focus:ring-red-100
-              disabled:cursor-not-allowed
-              disabled:opacity-60
-              sm:w-auto
-            "
+            className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#990000] px-4 text-base font-bold text-white shadow-md shadow-red-950/20 transition hover:bg-[#800000] active:scale-[0.98] disabled:opacity-60"
           >
             {loading ? (
-              <Loader2 size={20} className="animate-spin" />
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                កំពុងលុប...
+              </>
             ) : (
-              <Trash2 size={20} />
+              "លុបជាអចិន្ត្រៃយ៍"
             )}
-
-            {loading ? "កំពុងលុប..." : "លុបហាង"}
           </button>
         </div>
       </div>
