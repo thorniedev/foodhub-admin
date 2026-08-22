@@ -1024,20 +1024,10 @@ export const menuItemApi =
             arg,
           ) => {
             const body = "body" in arg ? arg.body : arg;
-            const images = "images" in arg && arg.images ? arg.images : [];
             return {
-              url:
-                "/api/catalog/foods",
-
-              method:
-                "POST",
-
-              body:
-                buildMultipartBody(
-                  "food",
-                  body,
-                  images,
-                ),
+              url: "/api/catalog/foods",
+              method: "POST",
+              body,
             };
           },
 

@@ -769,6 +769,7 @@ export interface FoodWritePayload {
   description?: string | null;
   categoryUuid: string;
   cuisineUuid?: string | null;
+  primaryMediaUuid?: string | null;
   primaryMediaUuids?: string[];
   defaultSpiceLevel?: number | null;
   nutritionData?: NutritionData | null;

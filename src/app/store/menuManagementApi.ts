@@ -645,6 +645,7 @@
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 import { adminBaseApi } from "./adminBaseApi";
+import { uploadCatalogMediaFile } from "@/src/lib/catalogMediaClient";
 import { uploadMenuItemMediaFile } from "@/src/lib/menuItemMediaClient";
 
 import type {
@@ -1364,25 +1365,55 @@ export const menuManagementApi =
             payload,
             images,
           }) {
-            const hasImages = Array.isArray(images) && images.length > 0;
+            let primaryMediaUuid =
+              payload.primaryMediaUuid ||
+              (Array.isArray(payload.primaryMediaUuids)
+                ? payload.primaryMediaUuids[0]
+                : undefined);
+            const primaryMediaUuids: string[] = [
+              ...(payload.primaryMediaUuids ?? []),
+            ];
+
+            // 1. Upload Images to Media API first if new files provided
+            if (Array.isArray(images) && images.length > 0) {
+              try {
+                for (const file of images) {
+                  const uploaded = await uploadCatalogMediaFile(
+                    file,
+                    "CATALOG_FOOD_PRIMARY",
+                  );
+                  if (uploaded.uuid) {
+                    if (!primaryMediaUuid) {
+                      primaryMediaUuid = uploaded.uuid;
+                    }
+                    if (!primaryMediaUuids.includes(uploaded.uuid)) {
+                      primaryMediaUuids.push(uploaded.uuid);
+                    }
+                  }
+                }
+              } catch (mediaError) {
+                console.warn(
+                  "[FOOD MEDIA UPLOAD FAILED, CONTINUING WITH CREATION]",
+                  mediaError,
+                );
+              }
+            }
+
+            const jsonPayload: Record<string, unknown> = {
+              ...payload,
+              primaryMediaUuid: primaryMediaUuid || undefined,
+              primaryMediaUuids:
+                primaryMediaUuids.length > 0 ? primaryMediaUuids : undefined,
+            };
+
             const result = await browserRequest<unknown>(
               "/api/catalog/foods",
               {
                 method: "POST",
-                ...(hasImages
-                  ? {
-                      body: makeMultipart(
-                        "food",
-                        payload,
-                        images,
-                      ),
-                    }
-                  : {
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify(payload),
-                    }),
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(jsonPayload),
               },
             );
 
@@ -1412,17 +1443,57 @@ export const menuManagementApi =
             payload,
             images,
           }) {
+            let primaryMediaUuid =
+              payload.primaryMediaUuid ||
+              (Array.isArray(payload.primaryMediaUuids)
+                ? payload.primaryMediaUuids[0]
+                : undefined);
+            const primaryMediaUuids: string[] = [
+              ...(payload.primaryMediaUuids ?? []),
+            ];
+
+            // 1. Upload Images to Media API first if new files provided
+            if (Array.isArray(images) && images.length > 0) {
+              try {
+                for (const file of images) {
+                  const uploaded = await uploadCatalogMediaFile(
+                    file,
+                    "CATALOG_FOOD_PRIMARY",
+                  );
+                  if (uploaded.uuid) {
+                    if (!primaryMediaUuid) {
+                      primaryMediaUuid = uploaded.uuid;
+                    }
+                    if (!primaryMediaUuids.includes(uploaded.uuid)) {
+                      primaryMediaUuids.push(uploaded.uuid);
+                    }
+                  }
+                }
+              } catch (mediaError) {
+                console.warn(
+                  "[FOOD MEDIA UPLOAD FAILED, CONTINUING WITH UPDATE]",
+                  mediaError,
+                );
+              }
+            }
+
+            const jsonPayload: Record<string, unknown> = {
+              ...payload,
+              primaryMediaUuid: primaryMediaUuid || undefined,
+              primaryMediaUuids:
+                primaryMediaUuids.length > 0 ? primaryMediaUuids : undefined,
+            };
+
             const result = await browserRequest<unknown>(
               `/api/catalog/foods/${encodeURIComponent(
                 uuid,
               )}`,
               {
                 method: "PATCH",
-                body: makeMultipart(
-                  "food",
-                  payload,
-                  images ?? [],
-                ),
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(jsonPayload),
               },
             );
 
