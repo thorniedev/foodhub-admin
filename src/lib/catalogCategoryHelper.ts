@@ -133,3 +133,27 @@ export function isFoodSubCategory(
 ): boolean {
   return isSubCategory(category, allCategories) && isFoodCategory(category, allCategories);
 }
+
+/**
+ * Direct children of the category whose Khmer-normalized name exactly
+ * matches `parentName` (e.g. the "ម្ហូបអាហារ" parent for the Create Food
+ * form's category dropdown). Unlike isFoodSubCategory/isDrinkSubCategory,
+ * this does not fall back to the DRINK_KEYWORDS heuristic — it only returns
+ * categories actually declared under that named parent.
+ */
+export function findSubCategoriesByParentName(
+  allCategories: FoodCategoryOption[],
+  parentName: string,
+): FoodCategoryOption[] {
+  const target = extractKhmerOnlyName(parentName).trim();
+  if (!target) return [];
+
+  const parent = allCategories.find(
+    (category) => extractKhmerOnlyName(category.name).trim() === target,
+  );
+  if (!parent) return [];
+
+  return allCategories.filter(
+    (category) => category.parentCategoryUuid === parent.uuid,
+  );
+}

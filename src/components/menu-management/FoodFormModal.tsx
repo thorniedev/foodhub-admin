@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import ImagePicker from "./ImagePicker";
 import {
   extractKhmerOnlyName,
+  findSubCategoriesByParentName,
   isDrinkSubCategory,
   isFoodSubCategory,
   isSubCategory,
@@ -30,6 +31,9 @@ import type {
 import type { MealType } from "@/src/types/mealType";
 import type { AgeGroup } from "@/src/types/ageGroup";
 import type { DietaryType } from "@/src/types/dietaryType";
+
+/** Exact parent category the Create Food form's "ប្រភេទម្ហូប *" field scopes to. */
+const FOOD_PARENT_CATEGORY_NAME = "ម្ហូបអាហារ";
 
 type FormState = {
   canonicalName: string;
@@ -360,8 +364,17 @@ export default function FoodFormModal({
     }
 
     if (catalogType === "FOOD") {
-      const foods = list.filter((c) => isFoodSubCategory(c, categories));
-      return foods;
+      const foodParentChildren = findSubCategoriesByParentName(
+        list,
+        FOOD_PARENT_CATEGORY_NAME,
+      );
+      if (foodParentChildren.length > 0) {
+        return foodParentChildren;
+      }
+
+      // Fall back to the code/keyword heuristic if the "ម្ហូបអាហារ" parent
+      // category isn't present in this data yet, so the form stays usable.
+      return list.filter((c) => isFoodSubCategory(c, categories));
     }
 
     const subCategories = list.filter((c) => isSubCategory(c, categories));
