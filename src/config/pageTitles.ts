@@ -11,6 +11,8 @@ const DEFAULT_TITLE: PageTitleEntry = { title: "ផ្ទាំងគ្រប�
 const SUB_ROUTE_TITLES: Record<string, PageTitleEntry> = {
   "/shops/create": { title: "បន្ថែមហាងថ្មី", parent: "ហាង" },
   "/users/create": { title: "បង្កើតអ្នកប្រើប្រាស់ថ្មី", parent: "អ្នកប្រើប្រាស់" },
+  "/filter/food-sub-categories": { title: "អនុប្រភេទម្ហូប", parent: "ចម្រោះទិន្នន័យ" },
+  "/filter/drink-sub-categories": { title: "អនុប្រភេទភេសជ្ជៈ", parent: "ចម្រោះទិន្នន័យ" },
 };
 
 function buildNavLookup(): Record<string, PageTitleEntry> {

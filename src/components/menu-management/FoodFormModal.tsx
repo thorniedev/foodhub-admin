@@ -352,21 +352,28 @@ export default function FoodFormModal({
   ]);
 
   const activeCategories = useMemo(() => {
-    const list = categories.filter((category) => category.isActive !== false);
-
     if (catalogType === "DRINK") {
-      const drinks = list.filter((c) => isDrinkSubCategory(c, categories));
-      return drinks;
+      return categories.filter(
+        (c) =>
+          (c.isActive !== false || c.uuid === values.categoryUuid) &&
+          isDrinkSubCategory(c, categories),
+      );
     }
 
     if (catalogType === "FOOD") {
-      const foods = list.filter((c) => isFoodSubCategory(c, categories));
-      return foods;
+      return categories.filter(
+        (c) =>
+          (c.isActive !== false || c.uuid === values.categoryUuid) &&
+          isFoodSubCategory(c, categories),
+      );
     }
 
-    const subCategories = list.filter((c) => isSubCategory(c, categories));
-    return subCategories.length > 0 ? subCategories : list;
-  }, [categories, catalogType]);
+    return categories.filter(
+      (c) =>
+        (c.isActive !== false || c.uuid === values.categoryUuid) &&
+        isSubCategory(c, categories),
+    );
+  }, [categories, catalogType, values.categoryUuid]);
 
   const modalTitle = useMemo(() => {
     if (catalogType === "DRINK") {
@@ -418,7 +425,7 @@ export default function FoodFormModal({
         categoryUuid: values.categoryUuid,
         cuisineUuid: values.cuisineUuid,
         ...(hasImages ? {} : { primaryMediaUuids: item?.primaryMediaUuids ?? [] }),
-        defaultSpiceLevel: numberOrNull(values.defaultSpiceLevel) ?? 0,
+        defaultSpiceLevel: Math.min(5, Math.max(0, Math.round(numberOrNull(values.defaultSpiceLevel) ?? 0))),
         nutritionData,
         seasons: seasonRows
           .filter((r) => Boolean(r.seasonUuid))
@@ -523,7 +530,7 @@ export default function FoodFormModal({
             />
 
             <label>
-              <Label>ប្រភេទម្ហូប *</Label>
+              <Label>{catalogType === "DRINK" ? "ប្រភេទភេសជ្ជៈ *" : "ប្រភេទម្ហូប *"}</Label>
               <select
                 value={values.categoryUuid}
                 onChange={(event) =>
@@ -534,10 +541,12 @@ export default function FoodFormModal({
                 }
                 className={inputClass}
               >
-                <option value="">ជ្រើសប្រភេទម្ហូប</option>
+                <option value="">
+                  {catalogType === "DRINK" ? "ជ្រើសប្រភេទភេសជ្ជៈ" : "ជ្រើសប្រភេទម្ហូប"}
+                </option>
                 {activeCategories.map((category) => (
                   <option key={category.uuid} value={category.uuid}>
-                    {extractKhmerOnlyName(category.name)}
+                    {category.name}
                   </option>
                 ))}
               </select>
@@ -566,17 +575,26 @@ export default function FoodFormModal({
               </select>
             </label>
 
-            <Field
-              label="កម្រិតហឹរ"
-              type="number"
-              value={values.defaultSpiceLevel}
-              onChange={(value) =>
-                setValues((current) => ({
-                  ...current,
-                  defaultSpiceLevel: value,
-                }))
-              }
-            />
+            <label>
+              <Label>កម្រិតហឹរ (Spice Level 0-5)</Label>
+              <select
+                value={values.defaultSpiceLevel}
+                onChange={(event) =>
+                  setValues((current) => ({
+                    ...current,
+                    defaultSpiceLevel: event.target.value,
+                  }))
+                }
+                className={inputClass}
+              >
+                <option value="0">0 - មិនហឹរ (Not Spicy)</option>
+                <option value="1">1 - ហឹរតិច (Mild)</option>
+                <option value="2">2 - ហឹរមធ្យម (Medium)</option>
+                <option value="3">3 - ហឹរខ្លាំង (Hot)</option>
+                <option value="4">4 - ហឹរខ្លាំងណាស់ (Very Hot)</option>
+                <option value="5">5 - ហឹរបំផុត (Extreme)</option>
+              </select>
+            </label>
 
             <label className="flex items-center gap-3 pt-7">
               <input

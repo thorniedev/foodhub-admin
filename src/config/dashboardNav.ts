@@ -97,8 +97,12 @@ export const dashboardNav: NavItem[] = [
     icon: SlidersHorizontal,
     children: [
       {
-        label: "ប្រភេទម្ហូប",
+        label: "អនុប្រភេទម្ហូប",
         href: "/filter/food-categories",
+      },
+      {
+        label: "អនុប្រភេទភេសជ្ជៈ",
+        href: "/filter/drink-categories",
       },
       {
         label: "ម្ហូបតាមប្រទេស",

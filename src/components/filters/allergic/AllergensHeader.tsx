@@ -1,10 +1,11 @@
-import { Plus, ShieldAlert } from "lucide-react";
+import { Plus, RotateCcw, ShieldAlert } from "lucide-react";
 
 type Props = {
   total: number;
   activeCount: number;
   inactiveCount: number;
   onAdd: () => void;
+  onRestoreAll?: () => void;
 };
 
 export default function AllergensHeader({
@@ -12,6 +13,7 @@ export default function AllergensHeader({
   activeCount,
   inactiveCount,
   onAdd,
+  onRestoreAll,
 }: Props) {
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
@@ -51,14 +53,27 @@ export default function AllergensHeader({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={onAdd}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
-        >
-          <Plus size={20} />
-          បន្ថែមអាឡែស៊ី
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {inactiveCount > 0 && onRestoreAll && (
+            <button
+              type="button"
+              onClick={onRestoreAll}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-400 px-5 py-3 text-lg font-bold text-gray-900 shadow-sm transition hover:bg-amber-300 sm:w-fit"
+            >
+              <RotateCcw size={20} />
+              ស្ដារទាំងអស់ ({inactiveCount})
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={onAdd}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
+          >
+            <Plus size={20} />
+            បន្ថែមអាឡែស៊ី
+          </button>
+        </div>
       </div>
     </section>
   );

@@ -478,6 +478,26 @@ export default function AllergenManager() {
     }
   };
 
+  const handleRestoreAll = async () => {
+    const inactives = items.filter((item) => !item.active);
+    if (!inactives.length) return;
+    try {
+      for (const item of inactives) {
+        await restoreItem(item.code).unwrap();
+      }
+      setMessage({
+        type: "success",
+        text: `បានស្ដារប្រភេទអាឡែស៊ីអសកម្មទាំងអស់ (${inactives.length}) ដោយជោគជ័យ!`,
+      });
+      await refetch();
+    } catch (restoreError) {
+      setMessage({
+        type: "error",
+        text: getApiErrorMessage(restoreError),
+      });
+    }
+  };
+
   /* =======================================================
      UI
   ======================================================= */
@@ -499,6 +519,7 @@ export default function AllergenManager() {
 
           setFormOpen(true);
         }}
+        onRestoreAll={inactiveCount > 0 ? handleRestoreAll : undefined}
       />
 
       {/* =================================================

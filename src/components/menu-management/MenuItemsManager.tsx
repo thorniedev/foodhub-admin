@@ -88,13 +88,13 @@ export default function MenuItemsManager({
 
   const foodsQuery = useGetManagedFoodsQuery({
     page: 0,
-    size: 100,
+    size: 500,
     sort: "createdAt,desc",
   });
 
   const menuItemsQuery = useGetPublishedMenuItemsQuery({
     page: 0,
-    size: 100,
+    size: 500,
     sort: "createdAt,desc",
   });
 
@@ -129,15 +129,19 @@ export default function MenuItemsManager({
   const stores = storesQuery.data ?? [];
   const allCategories = categoriesQuery.data ?? [];
 
-  // Filter categories relevant to the current catalog mode
+  // Filter categories relevant to the current catalog mode (only active ones)
   const relevantCategories = useMemo(() => {
     if (catalogType === "DRINK") {
-      return allCategories.filter((c) => isDrinkCategory(c, allCategories) && Boolean(c.parentCategoryUuid));
+      return allCategories.filter(
+        (c) => c.isActive !== false && isDrinkCategory(c, allCategories) && Boolean(c.parentCategoryUuid),
+      );
     }
     if (catalogType === "FOOD") {
-      return allCategories.filter((c) => isFoodCategory(c, allCategories) && Boolean(c.parentCategoryUuid));
+      return allCategories.filter(
+        (c) => c.isActive !== false && isFoodCategory(c, allCategories) && Boolean(c.parentCategoryUuid),
+      );
     }
-    return allCategories.filter((c) => Boolean(c.parentCategoryUuid));
+    return allCategories.filter((c) => c.isActive !== false && Boolean(c.parentCategoryUuid));
   }, [allCategories, catalogType]);
 
   // Catalog Foods filtered by FOOD vs DRINK mode
@@ -146,13 +150,15 @@ export default function MenuItemsManager({
       return foods.filter((item) => {
         const cat = allCategories.find(
           (c) =>
+            c.uuid === item.categoryUuid ||
             c.uuid === item.category?.uuid ||
             c.name === item.category?.name ||
             c.name === item.categoryName,
         );
         if (cat) return isDrinkCategory(cat, allCategories);
         const catName = (item.category?.name ?? item.categoryName ?? "").toLowerCase();
-        return DRINK_KEYWORDS.some((kw) => catName.includes(kw));
+        const itemName = `${item.canonicalName ?? ""} ${item.localName ?? ""}`.toLowerCase();
+        return DRINK_KEYWORDS.some((kw) => catName.includes(kw) || itemName.includes(kw));
       });
     }
 
@@ -160,13 +166,15 @@ export default function MenuItemsManager({
       return foods.filter((item) => {
         const cat = allCategories.find(
           (c) =>
+            c.uuid === item.categoryUuid ||
             c.uuid === item.category?.uuid ||
             c.name === item.category?.name ||
             c.name === item.categoryName,
         );
         if (cat) return isFoodCategory(cat, allCategories);
         const catName = (item.category?.name ?? item.categoryName ?? "").toLowerCase();
-        return !DRINK_KEYWORDS.some((kw) => catName.includes(kw));
+        const itemName = `${item.canonicalName ?? ""} ${item.localName ?? ""}`.toLowerCase();
+        return !DRINK_KEYWORDS.some((kw) => catName.includes(kw) || itemName.includes(kw));
       });
     }
 
@@ -179,17 +187,27 @@ export default function MenuItemsManager({
 
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      result = result.filter((item) =>
-        [
+      result = result.filter((item) => {
+        const cat = allCategories.find(
+          (c) => c.uuid === item.categoryUuid || c.uuid === item.category?.uuid,
+        );
+        const cui = (cuisinesQuery.data ?? []).find(
+          (c) => c.uuid === item.cuisineUuid || c.uuid === item.cuisine?.uuid,
+        );
+        return [
           item.canonicalName,
           item.localName,
           item.description,
+          cat?.name,
+          (cat as any)?.localName,
+          cui?.name,
+          (cui as any)?.localName,
           item.category?.name,
           item.categoryName,
           item.cuisine?.name,
           item.cuisineName,
-        ].some((val) => String(val ?? "").toLowerCase().includes(q)),
-      );
+        ].some((val) => String(val ?? "").toLowerCase().includes(q));
+      });
     }
 
     if (selectedCategoryUuid) {
@@ -208,7 +226,7 @@ export default function MenuItemsManager({
     }
 
     return result;
-  }, [displayFoods, search, selectedCategoryUuid, selectedStatus]);
+  }, [displayFoods, search, selectedCategoryUuid, selectedStatus, allCategories, cuisinesQuery.data]);
 
   // Search & Filter Published Menu Items
   const filteredMenuItems = useMemo(() => {
@@ -679,6 +697,8 @@ export default function MenuItemsManager({
         ) : isCatalogMode ? (
           <FoodCatalogTable
             items={filteredFoods}
+            categories={allCategories}
+            cuisines={cuisinesQuery.data ?? []}
             busy={busy}
             onEdit={(item) => {
               setEditingFood(item);
@@ -689,6 +709,7 @@ export default function MenuItemsManager({
         ) : (
           <PublishedMenuItemsTable
             items={filteredMenuItems}
+            foods={foods}
             busy={busy}
             onView={(item) => setDetailUuid(item.uuid)}
             onEdit={(item) => {

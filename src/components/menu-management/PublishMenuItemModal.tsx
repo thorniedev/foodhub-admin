@@ -322,8 +322,15 @@ export default function PublishMenuItemModal({
   }, [item, open, stores, foods, ingredients, dietaryTypes]);
 
   const activeFoods = useMemo(
-    () => foods.filter((food) => food.isActive !== false),
-    [foods],
+    () =>
+      foods.filter(
+        (food) =>
+          food.isActive !== false ||
+          food.uuid === item?.foodUuid ||
+          food.uuid === (item as any)?.food?.uuid ||
+          food.uuid === values.foodUuid,
+      ),
+    [foods, item, values.foodUuid],
   );
 
   const activeIngredients = useMemo(

@@ -1,6 +1,7 @@
 import {
   Leaf,
   Plus,
+  RotateCcw,
 } from "lucide-react";
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
   activeCount: number;
   inactiveCount: number;
   onAdd: () => void;
+  onRestoreAll?: () => void;
 }
 
 export default function IngredientsHeader({
@@ -15,12 +17,12 @@ export default function IngredientsHeader({
   activeCount,
   inactiveCount,
   onAdd,
+  onRestoreAll,
 }: Props) {
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
       {/* Decoration */}
       <div className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full bg-white/5" />
-
       <div className="pointer-events-none absolute -bottom-24 right-20 h-56 w-56 rounded-full bg-white/5" />
 
       <div className="relative z-10">
@@ -41,36 +43,33 @@ export default function IngredientsHeader({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onAdd}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50"
-          >
-            <Plus size={20} />
+          <div className="flex flex-wrap items-center gap-3">
+            {inactiveCount > 0 && onRestoreAll && (
+              <button
+                type="button"
+                onClick={onRestoreAll}
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-amber-400 px-5 py-3 text-lg font-bold text-gray-900 shadow-sm transition hover:bg-amber-300"
+              >
+                <RotateCcw size={20} />
+                ស្ដារទាំងអស់ ({inactiveCount})
+              </button>
+            )}
 
-            បន្ថែមគ្រឿងផ្សំ
-          </button>
+            <button
+              type="button"
+              onClick={onAdd}
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50"
+            >
+              <Plus size={20} />
+              បន្ថែមគ្រឿងផ្សំ
+            </button>
+          </div>
         </div>
 
         <div className="mt-8 grid max-w-[800px] gap-3 sm:grid-cols-3">
-          <StatCard
-            label="គ្រឿងផ្សំសរុប"
-            value={total}
-          />
-
-          <StatCard
-            label="សកម្ម"
-            value={
-              activeCount
-            }
-          />
-
-          <StatCard
-            label="អសកម្ម"
-            value={
-              inactiveCount
-            }
-          />
+          <StatCard label="គ្រឿងផ្សំសរុប" value={total} />
+          <StatCard label="សកម្ម" value={activeCount} />
+          <StatCard label="អសកម្ម" value={inactiveCount} />
         </div>
       </div>
     </section>
@@ -86,13 +85,8 @@ function StatCard({
 }) {
   return (
     <div className="rounded-[22px] bg-white/20 px-6 py-5 backdrop-blur-sm">
-      <p className="text-lg text-white/80">
-        {label}
-      </p>
-
-      <p className="mt-1 text-3xl font-bold">
-        {value}
-      </p>
+      <p className="text-lg text-white/80">{label}</p>
+      <p className="mt-1 text-3xl font-bold">{value}</p>
     </div>
   );
 }

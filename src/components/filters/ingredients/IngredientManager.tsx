@@ -662,6 +662,28 @@ const {
       }
     };
 
+  const handleRestoreAll = async () => {
+    const inactives = items.filter((item) => !item.isActive);
+    if (!inactives.length) return;
+    try {
+      setNotice(null);
+      for (const item of inactives) {
+        await restoreIngredient(item.uuid).unwrap();
+      }
+      setNotice({
+        type: "success",
+        text: `បានស្ដារគ្រឿងផ្សំអសកម្មទាំងអស់ (${inactives.length}) ដោយជោគជ័យ!`,
+      });
+      setPage(0);
+      await refetch();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getIngredientApiErrorMessage(requestError),
+      });
+    }
+  };
+
   return (
     <div className="space-y-5">
       {/* =================================================
@@ -686,6 +708,7 @@ const {
 
           setFormOpen(true);
         }}
+        onRestoreAll={inactiveCount > 0 ? handleRestoreAll : undefined}
       />
 
       {/* =================================================

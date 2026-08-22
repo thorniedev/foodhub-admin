@@ -1,22 +1,23 @@
 import {
   Plus,
+  RotateCcw,
   UsersRound,
 } from "lucide-react";
 
 type Props = {
   total: number;
-
-  currentPageCount: number;
-
+  activeCount: number;
+  inactiveCount: number;
   onAdd: () => void;
+  onRestoreAll?: () => void;
 };
 
 export default function AgeGroupsHeader({
   total,
-
-  currentPageCount,
-
+  activeCount,
+  inactiveCount,
   onAdd,
+  onRestoreAll,
 }: Props) {
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
@@ -26,11 +27,7 @@ export default function AgeGroupsHeader({
         <div className="min-w-0">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
-              <UsersRound
-                size={
-                  25
-                }
-              />
+              <UsersRound size={25} />
             </div>
 
             <div>
@@ -44,46 +41,45 @@ export default function AgeGroupsHeader({
             </div>
           </div>
 
-          <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="rounded-3xl bg-white/20 px-5 py-4">
-              <p className="text-xl text-white/75">
-                ក្រុមអាយុសកម្មសរុប
-              </p>
-
-              <p className="mt-1 text-2xl font-bold">
-                {total}
-              </p>
+              <p className="text-xl text-white/75">សរុប</p>
+              <p className="mt-1 text-2xl font-bold">{total}</p>
             </div>
 
             <div className="rounded-3xl bg-white/20 px-5 py-4">
-              <p className="text-xl text-white/75">
-                ក្នុងទំព័រនេះ
-              </p>
+              <p className="text-xl text-white/75">សកម្ម</p>
+              <p className="mt-1 text-2xl font-bold">{activeCount}</p>
+            </div>
 
-              <p className="mt-1 text-2xl font-bold">
-                {
-                  currentPageCount
-                }
-              </p>
+            <div className="rounded-3xl bg-white/20 px-5 py-4">
+              <p className="text-xl text-white/75">អសកម្ម</p>
+              <p className="mt-1 text-2xl font-bold">{inactiveCount}</p>
             </div>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={
-            onAdd
-          }
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
-        >
-          <Plus
-            size={
-              20
-            }
-          />
+        <div className="flex flex-wrap items-center gap-3">
+          {inactiveCount > 0 && onRestoreAll && (
+            <button
+              type="button"
+              onClick={onRestoreAll}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-400 px-5 py-3 text-lg font-bold text-gray-900 shadow-sm transition hover:bg-amber-300 sm:w-fit"
+            >
+              <RotateCcw size={20} />
+              ស្ដារទាំងអស់ ({inactiveCount})
+            </button>
+          )}
 
-          បន្ថែមក្រុមអាយុ
-        </button>
+          <button
+            type="button"
+            onClick={onAdd}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
+          >
+            <Plus size={20} />
+            បន្ថែមក្រុមអាយុ
+          </button>
+        </div>
       </div>
     </section>
   );

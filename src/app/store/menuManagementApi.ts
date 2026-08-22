@@ -912,6 +912,7 @@ export const menuManagementApi =
                 ).content,
             };
           },
+          providesTags: [{ type: "FoodCategory", id: "LIST" }],
         }),
 
       getManagedCuisines:

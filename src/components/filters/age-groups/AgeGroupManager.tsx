@@ -41,7 +41,11 @@ import AgeGroupsPagination from "./AgeGroupsPagination";
 
 import AgeGroupsTable from "./AgeGroupsTable";
 
+import AgeGroupsTabs from "./AgeGroupsTabs";
+
 import DeleteAgeGroupConfirmModal from "./DeleteAgeGroupConfirmModal";
+
+import type { ResourceStatusFilter } from "@/src/types/safetyResource";
 
 type SortMode =
   | "A_Z"
@@ -142,6 +146,14 @@ export default function AgeGroupManager() {
     showSuggestions,
     setShowSuggestions,
   ] = useState(false);
+
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] =
+    useState<ResourceStatusFilter>(
+      "ALL",
+    );
 
   const [
     sortMode,
@@ -347,28 +359,26 @@ export default function AgeGroupManager() {
      SEARCH RESULTS
   ========================================================= */
 
+  const sourceItems = allSearchItems.length > 0 ? allSearchItems : items;
+  const activeCount = sourceItems.filter((i) => i.isActive !== false).length;
+  const inactiveCount = sourceItems.filter((i) => i.isActive === false).length;
+
   const displayedItems =
     useMemo(() => {
-      if (
-        !normalizedSearch
-      ) {
-        return items;
-      }
+      const base = normalizedSearch
+        ? allSearchItems.filter((item) => matchesSearch(item, normalizedSearch))
+        : sourceItems;
 
-      return allSearchItems.filter(
-        (item) =>
-          matchesSearch(
-            item,
-
-            normalizedSearch,
-          ),
-      );
+      return base.filter((item) => {
+        if (statusFilter === "ACTIVE") return item.isActive !== false;
+        if (statusFilter === "INACTIVE") return item.isActive === false;
+        return true;
+      });
     }, [
       allSearchItems,
-
-      items,
-
+      sourceItems,
       normalizedSearch,
+      statusFilter,
     ]);
 
   const busy =
@@ -513,17 +523,7 @@ export default function AgeGroupManager() {
             "បានលុបក្រុមអាយុដោយជោគជ័យ។",
         });
 
-        if (
-          items.length ===
-            1 &&
-          page > 0
-        ) {
-          setPage(
-            page - 1,
-          );
-        } else {
-          await refetch();
-        }
+        await refetch();
       } catch (
         requestError
       ) {
@@ -539,17 +539,60 @@ export default function AgeGroupManager() {
       }
     };
 
+  const handleRestore = async (item: AgeGroup) => {
+    try {
+      setNotice(null);
+      await updateItem({
+        uuid: item.uuid,
+        body: { isActive: true },
+      }).unwrap();
+      setNotice({
+        type: "success",
+        text: `បានស្ដារក្រុមអាយុ "${item.name}" ដោយជោគជ័យ!`,
+      });
+      await refetch();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAgeGroupApiErrorMessage(requestError),
+      });
+    }
+  };
+
+  const handleRestoreAll = async () => {
+    const inactives = sourceItems.filter((i) => i.isActive === false);
+    if (!inactives.length) return;
+    try {
+      setNotice(null);
+      for (const item of inactives) {
+        await updateItem({
+          uuid: item.uuid,
+          body: { isActive: true },
+        }).unwrap();
+      }
+      setNotice({
+        type: "success",
+        text: `បានស្ដារក្រុមអាយុអសកម្មទាំងអស់ (${inactives.length}) ដោយជោគជ័យ!`,
+      });
+      await refetch();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAgeGroupApiErrorMessage(requestError),
+      });
+    }
+  };
+
   return (
     <div className="space-y-5">
       {/* HEADER */}
       <AgeGroupsHeader
         total={
           data?.totalElements ??
-          0
+          sourceItems.length
         }
-        currentPageCount={
-          items.length
-        }
+        activeCount={activeCount}
+        inactiveCount={inactiveCount}
         onAdd={() => {
           setEditing(
             null,
@@ -563,12 +606,28 @@ export default function AgeGroupManager() {
             true,
           );
         }}
+        onRestoreAll={inactiveCount > 0 ? handleRestoreAll : undefined}
       />
 
-      {/* SEARCH + SIZE + SORT */}
-      <div className="flex w-full items-center justify-end gap-2 overflow-visible">
-        {/* SEARCH */}
-        <div className="relative">
+      {/* TABS + SEARCH + SIZE + SORT */}
+      <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between overflow-visible">
+        {/* TABS */}
+        <div className="shrink-0">
+          <AgeGroupsTabs
+            value={statusFilter}
+            allCount={sourceItems.length}
+            activeCount={activeCount}
+            inactiveCount={inactiveCount}
+            onChange={(value) => {
+              setStatusFilter(value);
+              setPage(0);
+            }}
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {/* SEARCH */}
+          <div className="relative">
           <Search
             size={
               18
@@ -921,6 +980,7 @@ export default function AgeGroupManager() {
             </div>
           )}
         </div>
+        </div>
       </div>
 
       {/* NOTICE */}
@@ -1018,6 +1078,9 @@ export default function AgeGroupManager() {
             }}
             onDelete={
               setDeleting
+            }
+            onRestore={
+              handleRestore
             }
           />
         )}

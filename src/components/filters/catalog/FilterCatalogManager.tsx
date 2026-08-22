@@ -298,6 +298,17 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         active={activeCount}
         inactive={inactiveCount}
         onCreate={openCreateModal}
+        onRestoreAll={
+          inactiveCount > 0
+            ? () => {
+                groupOptions
+                  .filter((item) => item.active === false)
+                  .forEach((item) => {
+                    setActive(item.uuid, true);
+                  });
+              }
+            : undefined
+        }
       />
 
       {/* COMPONENT: CatalogToolbar */}
@@ -434,12 +445,14 @@ function CatalogHeader({
   active,
   inactive,
   onCreate,
+  onRestoreAll,
 }: {
   group: FilterGroup;
   total: number;
   active: number;
   inactive: number;
   onCreate: () => void;
+  onRestoreAll?: () => void;
 }) {
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
@@ -473,14 +486,27 @@ function CatalogHeader({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={onCreate}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
-        >
-          <Plus size={20} />
-          បន្ថែម {group.labelKm}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {inactive > 0 && onRestoreAll && (
+            <button
+              type="button"
+              onClick={onRestoreAll}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-400 px-5 py-3 text-lg font-bold text-gray-900 shadow-sm transition hover:bg-amber-300 sm:w-fit"
+            >
+              <RotateCcw size={20} />
+              ស្ដារទាំងអស់ ({inactive})
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={onCreate}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
+          >
+            <Plus size={20} />
+            បន្ថែម {group.labelKm}
+          </button>
+        </div>
       </div>
     </section>
   );

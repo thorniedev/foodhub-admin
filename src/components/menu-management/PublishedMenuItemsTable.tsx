@@ -26,24 +26,30 @@ function storeName(
 
 function foodName(
   item: MenuItemRecord,
+  foods: FoodRecord[] = [],
 ): string {
+  const matched = foods.find(
+    (f) => f.uuid === item.foodUuid || f.uuid === item.food?.uuid,
+  );
   return (
     item.food?.localName ||
     item.food?.canonicalName ||
+    matched?.localName ||
+    matched?.canonicalName ||
     "—"
   );
 }
 
-
-
 export default function PublishedMenuItemsTable({
   items,
+  foods = [],
   busy,
   onView,
   onEdit,
   onDelete,
 }: {
   items: MenuItemRecord[];
+  foods?: FoodRecord[];
   busy: boolean;
   onView: (
     item: MenuItemRecord,
@@ -143,6 +149,7 @@ export default function PublishedMenuItemsTable({
                   <td className="px-5 py-4 text-sm text-gray-600">
                     {foodName(
                       item,
+                      foods,
                     )}
                   </td>
 
