@@ -14,7 +14,7 @@ function getBackendApiBaseUrl(): string {
   const configured =
     process.env.BACKEND_API_URL ||
     process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "http://localhost:7070/api/v1";
+    "https://api.mhoubahar.store";
 
   const clean = configured.trim().replace(/\/+$/, "");
 

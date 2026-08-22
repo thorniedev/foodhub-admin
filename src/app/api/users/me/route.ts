@@ -4,9 +4,17 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const backendApiUrl = (
-  process.env.BACKEND_API_URL ?? "http://localhost:7070/api/v1"
-).replace(/\/+$/, "");
+function getBackendApiBaseUrl(): string {
+  const configured = (
+    process.env.BACKEND_API_URL ??
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    "https://api.mhoubahar.store"
+  ).replace(/\/+$/, "");
+
+  return /\/api\/v1$/i.test(configured) ? configured : `${configured}/api/v1`;
+}
+
+const backendApiUrl = getBackendApiBaseUrl();
 
 function getAccessToken(request: NextRequest): string | null {
   return request.cookies.get("foodhub_access_token")?.value ?? null;

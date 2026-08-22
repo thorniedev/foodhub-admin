@@ -32,12 +32,12 @@ function getConfig() {
   const backendApiUrl =
     process.env.BACKEND_API_URL ??
     process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "http://localhost:7070/api/v1";
+    "https://api.mhoubahar.store";
 
   const keycloakUrl =
     process.env.KEYCLOAK_URL ??
     process.env.NEXT_PUBLIC_KEYCLOAK_URL ??
-    "https://auth.chanthorndev.site";
+    "https://auth.mhoubahar.store";
 
   const realm =
     process.env.KEYCLOAK_REALM ??
@@ -46,7 +46,8 @@ function getConfig() {
 
   const clientId =
     process.env.KEYCLOAK_CLIENT_ID ??
-    process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID;
+    process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ??
+    "mhoubahar-admin";
 
   const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET;
 
@@ -117,13 +118,18 @@ async function refreshAccessToken(
 function buildBackendUrl(
   request: NextRequest,
   path: string[],
+  useAdminPrefix = true,
 ): URL {
   const { backendApiUrl } = getConfig();
   const safePath = path
     .map((segment) => encodeURIComponent(decodeURIComponent(segment)))
     .join("/");
 
-  const target = new URL(`${backendApiUrl}/admin/${safePath}`);
+  const target = new URL(
+    useAdminPrefix
+      ? `${backendApiUrl}/admin/${safePath}`
+      : `${backendApiUrl}/${safePath}`,
+  );
 
   request.nextUrl.searchParams.forEach((value, key) => {
     target.searchParams.append(key, value);
@@ -243,7 +249,8 @@ async function proxyAdminRequest(
   context: ProxyContext,
 ) {
   const { path } = await context.params;
-  const target = buildBackendUrl(request, path);
+  const isDirectV1Route = path[0] === "banners" || path[0] === "media";
+  let target = buildBackendUrl(request, path, !isDirectV1Route);
   const body = await readRequestBody(request);
 
   let accessToken = request.cookies.get("foodhub_access_token")?.value;
@@ -275,6 +282,23 @@ async function proxyAdminRequest(
       accessToken,
       body,
     );
+
+    // If direct route or admin route failed with 404/500 on banners, try alternate route
+    if (
+      (backendResponse.status === 404 || backendResponse.status === 500) &&
+      path[0] === "banners"
+    ) {
+      const alternateTarget = buildBackendUrl(request, path, isDirectV1Route);
+      const fallbackResponse = await callBackend(
+        request,
+        alternateTarget,
+        accessToken,
+        body,
+      );
+      if (fallbackResponse.ok || fallbackResponse.status < 500) {
+        backendResponse = fallbackResponse;
+      }
+    }
 
     // The access token may have expired between page load and this request.
     // Refresh once and retry the exact backend request.
