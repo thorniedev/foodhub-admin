@@ -23,7 +23,7 @@ export default function ShopHoursSection() {
         </div>
 
         <div className="min-w-0">
-          <p className="text-3xl font-semibold text-primary-800">
+          <p className="text-2xl font-bold text-[#0F5A2C]">
             ម៉ោងបើក និងបិទហាង
           </p>
 

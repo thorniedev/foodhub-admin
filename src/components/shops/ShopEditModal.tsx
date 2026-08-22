@@ -287,7 +287,7 @@ export default function ShopEditModal({
               <Pencil size={20} />
             </div>
             <div className="min-w-0">
-              <p className="text-2xl font-bold text-gray-900">កែប្រែព័ត៌មានហាង</p>
+              <p className="text-2xl font-bold text-[#0F5A2C]">កែប្រែព័ត៌មានហាង</p>
               <p className="mt-0.5 truncate text-base text-gray-400">{store.storeName}</p>
             </div>
           </div>
@@ -829,7 +829,7 @@ function FormSection({
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[#137A3D]">
           {icon}
         </div>
-        <p className="text-lg font-bold text-gray-800">{title}</p>
+        <p className="text-xl font-bold text-[#0F5A2C]">{title}</p>
       </div>
 
       <div className="p-5">{children}</div>

@@ -92,7 +92,7 @@ export default function UserProfileEditModal({
               <UserCog size={22} />
             </div>
             <div>
-              <p className="text-2xl font-bold tracking-tight text-gray-900">
+              <p className="text-2xl font-bold tracking-tight text-[#0F5A2C]">
                 កែប្រែព័ត៌មានគណនី
               </p>
               <p className="mt-0.5 text-sm text-gray-400">@{user.username}</p>
@@ -124,7 +124,7 @@ export default function UserProfileEditModal({
               {/* First Name */}
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-700">
-                  នាមខ្លួន (First Name) <span className="text-red-500">*</span>
+                  នាមខ្លួន <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -145,7 +145,7 @@ export default function UserProfileEditModal({
               {/* Last Name */}
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-700">
-                  នាមត្រកូល (Last Name) <span className="text-red-500">*</span>
+                  នាមត្រកូល <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -167,13 +167,13 @@ export default function UserProfileEditModal({
             {/* Username */}
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">
-                ឈ្មោះគណនី (Username) <span className="text-red-500">*</span>
+                ឈ្មោះគណនី <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 {...register("username")}
                 disabled={isBusy}
-                placeholder="username"
+                placeholder="ឈ្មោះគណនី"
                 className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
                   errors.username
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100"
@@ -188,13 +188,13 @@ export default function UserProfileEditModal({
             {/* Email */}
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-gray-700">
-                អ៊ីមែល (Email) <span className="text-red-500">*</span>
+                អ៊ីមែល <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
                 {...register("email")}
                 disabled={isBusy}
-                placeholder="example@mail.com"
+                placeholder="ឧ. example@mail.com"
                 className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
                   errors.email
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100"

@@ -132,15 +132,15 @@ export default function StoreMediaUploader({
       ====================================================== */}
       <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3.5">
         <div className="min-w-0 flex-1">
-          <p className="text-base font-semibold text-primary-800">{label}</p>
-          <p className="text-xs text-gray-400">
+          <p className="text-lg font-bold text-primary-800">{label}</p>
+          <p className="text-sm text-gray-500">
             PNG, JPG, GIF ឬ WebP · អតិបរមា 10 MB
           </p>
         </div>
 
         {mediaUuid && (
-          <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-[#137A3D] whitespace-nowrap">
-            <CheckCircle2 size={14} className="shrink-0" />
+          <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-[#137A3D] whitespace-nowrap">
+            <CheckCircle2 size={16} className="shrink-0" />
             បានភ្ជាប់រូបភាព
           </div>
         )}
@@ -218,11 +218,11 @@ export default function StoreMediaUploader({
                 <ImageIcon size={32} />
               </div>
 
-              <p className="mt-2 text-base font-semibold text-secondary-600">
+              <p className="mt-2 text-lg font-semibold text-secondary-600">
                 ផ្ទុកឡើងរូបភាព
               </p>
 
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="mt-1 text-sm text-gray-500">
                 ជ្រើសរើសរូបភាពពីឧបករណ៍របស់អ្នក
               </p>
             </div>
@@ -267,11 +267,11 @@ export default function StoreMediaUploader({
       ====================================================== */}
       <div className="border-t border-gray-100 px-4 py-2.5">
         {error ? (
-          <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs leading-5 text-red-600">
+          <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm leading-5 text-red-600">
             {error}
           </div>
         ) : (
-          <p className="text-xs text-gray-400">
+          <p className="text-sm text-gray-500">
             {mediaUuid
               ? "ចុចលើរូបភាព ដើម្បីជ្រើសរើសរូបថ្មីជំនួស។"
               : "ជ្រើសរើសរូបភាពពីឧបករណ៍របស់អ្នក"}

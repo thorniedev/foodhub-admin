@@ -66,7 +66,7 @@ export default function BasicInfoSection({
         />
 
         <Item
-          label="កម្រងព័ត៌មាន"
+          label="ប្រវត្តិរូប"
           customValue={
             profile.isDefault ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-sm font-bold text-amber-800 border border-amber-200 shadow-2xs">
@@ -101,7 +101,7 @@ export function Section({
           {icon}
         </div>
 
-        <p className="text-2xl font-semibold text-primary-800">{title}</p>
+        <p className="text-[20px] font-bold text-primary-800">{title}</p>
       </div>
 
       {children}
@@ -122,12 +122,12 @@ function Item({
 }) {
   return (
     <div className="rounded-2xl border border-gray-100 bg-gray-50/60 px-4 py-4 transition hover:border-gray-200 hover:bg-gray-50">
-      <p className="text-lg font-medium text-gray-500">{label}</p>
+      <p className="text-[18px] font-medium text-gray-500">{label}</p>
 
       {customValue ? (
         <div className="mt-2">{customValue}</div>
       ) : (
-        <p className="mt-1 flex items-center gap-2 break-words text-lg font-semibold text-gray-800">
+        <p className="mt-1 flex items-center gap-2 break-words text-[18px] font-semibold text-gray-800">
           {icon && <span className="text-primary-700">{icon}</span>}
           {value}
         </p>

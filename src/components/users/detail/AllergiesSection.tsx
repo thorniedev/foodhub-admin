@@ -33,7 +33,7 @@ export default function AllergiesSection({
               className="rounded-2xl border border-red-100 bg-red-50/40 p-4 transition hover:border-red-200 hover:bg-red-50/60"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-lg font-bold text-gray-900">
+                <p className="text-[20px] font-bold text-gray-900">
                   {item.name}
                 </p>
 
@@ -43,7 +43,7 @@ export default function AllergiesSection({
               </div>
 
               {item.reactionNotes && (
-                <p className="mt-2.5 text-base leading-7 text-gray-600">
+                <p className="mt-2.5 text-[18px] leading-relaxed text-gray-600">
                   {item.reactionNotes}
                 </p>
               )}
@@ -77,7 +77,7 @@ function Empty() {
       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-400">
         <Shield size={16} />
       </div>
-      <p className="mt-2 text-base font-medium text-gray-400">
+      <p className="mt-2 text-[18px] font-medium text-gray-400">
         មិនមានទិន្នន័យប្រតិកម្មអាលែហ្សីឡើយ
       </p>
     </div>

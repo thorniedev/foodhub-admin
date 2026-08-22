@@ -24,90 +24,89 @@ export default function ProfileActionConfirmModal({
   const isSuspend = action === "DELETE";
 
   return (
-    <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[3px]">
-      <div className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-gray-100 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+    <div
+      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !loading) onClose();
+      }}
+    >
+      <div className="relative w-full max-w-[440px] overflow-hidden rounded-[32px] border border-gray-100 bg-white px-6 py-7 shadow-2xl animate-in zoom-in-95 duration-200">
         {/* Close Button */}
         <button
           type="button"
           disabled={loading}
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-4 right-4 z-10 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+          className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
         >
-          <X size={18} />
+          <X size={17} />
         </button>
 
-        {/* Top Decorative Banner with Centered Icon */}
+        {/* Circular Icon with Soft Glow */}
         <div
-          className={`flex flex-col items-center justify-center px-6 pt-8 pb-4 text-center ${
+          className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full ring-8 ${
             isSuspend
-              ? "bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent"
-              : "bg-gradient-to-b from-emerald-500/10 via-emerald-500/5 to-transparent"
+              ? "bg-amber-50 text-amber-500 ring-amber-50/60"
+              : "bg-emerald-50 text-emerald-600 ring-emerald-50/60"
           }`}
         >
-          <div
-            className={`flex h-16 w-16 items-center justify-center rounded-2xl shadow-md ring-4 ${
-              isSuspend
-                ? "bg-amber-100 text-amber-700 ring-amber-50 shadow-amber-950/5"
-                : "bg-emerald-100 text-emerald-700 ring-emerald-50 shadow-emerald-950/5"
-            }`}
-          >
-            {isSuspend ? (
-              <UserX size={28} className="stroke-[2.2]" />
-            ) : (
-              <UserCheck size={28} className="stroke-[2.2]" />
-            )}
-          </div>
-
-          <h3 className="mt-4 text-2xl font-bold tracking-tight text-gray-900">
-            {isSuspend ? "ផ្អាកដំណើរការកម្រងព័ត៌មាន?" : "បើកដំណើរការកម្រងព័ត៌មានឡើងវិញ?"}
-          </h3>
+          {isSuspend ? (
+            <UserX size={26} className="stroke-[2.2]" />
+          ) : (
+            <UserCheck size={26} className="stroke-[2.2]" />
+          )}
         </div>
 
-        {/* Content Body */}
-        <div className="p-6 pt-1 space-y-5 text-center">
-          <p className="text-base leading-relaxed text-gray-600">
-            កម្រងព័ត៌មាន{" "}
-            <span className="inline-block font-bold text-gray-900 rounded-lg bg-gray-100 px-2.5 py-0.5 border border-gray-200">
+        {/* Header Content */}
+        <div className="mt-5 text-center">
+          <h3 className="text-xl font-bold tracking-tight text-gray-900 whitespace-nowrap">
+            {isSuspend
+              ? "ផ្អាកដំណើរការប្រវត្តិរូប?"
+              : "បើកដំណើរការប្រវត្តិរូបឡើងវិញ?"}
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+            ប្រវត្តិរូប{" "}
+            <span className="font-bold text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200/80">
               {profileName}
             </span>{" "}
             {isSuspend
-              ? "នឹងត្រូវបានផ្អាកដំណើរការជាបណ្តោះអាសន្ន។ អ្នកអាចបើកដំណើរការឡើងវិញបានគ្រប់ពេល។"
-              : "នឹងត្រូវបានបើកឱ្យដំណើរការឡើងវិញជាធម្មតាក្នុងប្រព័ន្ធ។"}
+              ? "នឹងត្រូវបានផ្អាកដំណើរការជាបណ្តោះអាសន្ន។"
+              : "នឹងត្រូវបានបើកឱ្យដំណើរការឡើងវិញជាធម្មតា។"}
           </p>
+        </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <button
-              type="button"
-              disabled={loading}
-              onClick={onClose}
-              className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-600 transition hover:bg-gray-50 active:scale-95 disabled:opacity-50"
-            >
-              បោះបង់
-            </button>
+        {/* Action Buttons */}
+        <div className="mt-6 grid grid-cols-2 gap-3.5">
+          <button
+            type="button"
+            disabled={loading}
+            onClick={onClose}
+            className="flex h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-base font-bold text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50"
+          >
+            បោះបង់
+          </button>
 
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => void onConfirm()}
-              className={`inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-base font-bold shadow-md transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-60 ${
-                isSuspend
-                  ? "bg-amber-400 text-amber-950 shadow-amber-950/10 hover:bg-amber-300"
-                  : "bg-primary-800 text-white shadow-primary-900/20 hover:bg-primary-900"
-              }`}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  {isSuspend ? "កំពុងផ្អាក..." : "កំពុងបើក..."}
-                </>
-              ) : isSuspend ? (
-                "ផ្អាកដំណើរការ"
-              ) : (
-                "បើកដំណើរការ"
-              )}
-            </button>
-          </div>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => void onConfirm()}
+            className={`flex h-12 items-center justify-center gap-2 rounded-2xl px-4 text-base font-bold text-white shadow-md transition active:scale-[0.98] disabled:opacity-60 ${
+              isSuspend
+                ? "bg-[#F59E0B] hover:bg-[#D97706] shadow-amber-900/15"
+                : "bg-[#0F5A2C] hover:bg-[#0C4723] shadow-emerald-950/20"
+            }`}
+          >
+            {loading ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                {isSuspend ? "កំពុងផ្អាក..." : "កំពុងបើក..."}
+              </>
+            ) : isSuspend ? (
+              "ផ្អាកដំណើរការ"
+            ) : (
+              "បើកដំណើរការឡើងវិញ"
+            )}
+          </button>
         </div>
       </div>
     </div>

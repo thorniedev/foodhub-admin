@@ -243,8 +243,8 @@ export default function StoreHoursModal({
             <div className="min-w-0">
               <p
                 className="
-                  text-3xl
-                  font-semibold
+                  text-2xl
+                  font-bold
                   text-primary-800
                 "
               >
@@ -254,8 +254,8 @@ export default function StoreHoursModal({
               <p
                 className="
                   mt-1
-                  text-base
-                  leading-6
+                  text-lg
+                  leading-7
                   text-gray-500
                 "
               >
@@ -319,8 +319,8 @@ export default function StoreHoursModal({
               <div>
                 <p
                   className="
-                    text-3xl
-                    font-semibold
+                    text-2xl
+                    font-bold
                     text-primary-800
                   "
                 >
@@ -330,8 +330,8 @@ export default function StoreHoursModal({
                 <p
                   className="
                     mt-1
-                    text-base
-                    leading-6
+                    text-lg
+                    leading-7
                     text-gray-500
                   "
                 >
@@ -417,8 +417,8 @@ export default function StoreHoursModal({
           >
             <p
               className="
-                text-3xl
-                font-semibold
+                text-2xl
+                font-bold
                 text-primary-800
               "
             >

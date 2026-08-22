@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, UserCheck, X } from "lucide-react";
+import { CheckCircle2, Loader2, UserCheck, X } from "lucide-react";
 import type { AdminUser } from "@/src/types/userProfile";
 import { displayName } from "@/src/lib/userProfileFormat";
 
@@ -23,76 +23,78 @@ export default function RestoreUserConfirmModal({
 
   return (
     <div
-      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[3px] animate-in fade-in duration-200"
+      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs animate-in fade-in duration-200"
       onClick={(event) => {
         if (event.target === event.currentTarget && !restoring) {
           onClose();
         }
       }}
     >
-      <div className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-emerald-100 bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-[440px] overflow-hidden rounded-[32px] border border-gray-100 bg-white px-6 py-7 shadow-2xl animate-in zoom-in-95 duration-200">
         {/* Close Button */}
         <button
           type="button"
           disabled={restoring}
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-4 right-4 z-10 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+          className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
         >
-          <X size={18} />
+          <X size={17} />
         </button>
 
-        {/* Top Decorative Banner with Centered Icon */}
-        <div className="flex flex-col items-center justify-center bg-gradient-to-b from-emerald-500/10 via-emerald-500/5 to-transparent px-6 pt-8 pb-4 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 shadow-md shadow-emerald-950/5 ring-4 ring-emerald-50">
-            <UserCheck size={28} className="stroke-[2.2]" />
-          </div>
-
-          <h3 className="mt-4 text-2xl font-bold tracking-tight text-gray-900">
-            បើកដំណើរការអ្នកប្រើឡើងវិញ?
-          </h3>
+        {/* Circular Icon with Soft Glow */}
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 ring-8 ring-emerald-50/60">
+          <UserCheck size={26} className="stroke-[2.2]" />
         </div>
 
-        {/* Content Body */}
-        <div className="p-6 pt-1 space-y-4 text-center">
-          <p className="text-base leading-relaxed text-gray-600">
-            គណនីអ្នកប្រើប្រាស់{" "}
-            <span className="inline-block font-bold text-gray-900 rounded-lg bg-gray-100 px-2.5 py-0.5 border border-gray-200">
+        {/* Header Content */}
+        <div className="mt-5 text-center">
+          <h3 className="text-xl font-bold tracking-tight text-gray-900 whitespace-nowrap">
+            បើកដំណើរការគណនីនេះឡើងវិញ?
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+            គណនី{" "}
+            <span className="font-bold text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200/80">
               {name}
             </span>{" "}
-            នឹងត្រូវបានស្តារឱ្យមានស្ថានភាព <strong>"សកម្ម" (ACTIVE)</strong> ឡើងវិញ។
+            នឹងត្រូវបានស្តារឱ្យមានស្ថានភាព <strong>"សកម្ម"</strong> ឡើងវិញ។
           </p>
+        </div>
 
-          <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-3.5 text-xs leading-relaxed text-emerald-900 text-left">
-            ✅ បន្ទាប់ពីបើកដំណើរការឡើងវិញ អ្នកប្រើប្រាស់អាច Login ចូលប្រើប្រាស់ និងបញ្ជាទិញអាហារបានជាធម្មតា។
-          </div>
+        {/* Callout Notice */}
+        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-emerald-200/90 bg-emerald-50/40 p-4 text-left">
+          <CheckCircle2 size={17} className="mt-0.5 shrink-0 text-emerald-600" />
+          <p className="text-xs font-medium leading-relaxed text-emerald-900">
+            បន្ទាប់ពីបើកដំណើរការឡើងវិញ អ្នកប្រើប្រាស់អាច Login ចូលប្រើប្រាស់ និងបញ្ជាទិញអាហារបានជាធម្មតា។
+          </p>
+        </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <button
-              type="button"
-              disabled={restoring}
-              onClick={onClose}
-              className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-600 transition hover:bg-gray-50 active:scale-95 disabled:opacity-50"
-            >
-              បោះបង់
-            </button>
+        {/* Action Buttons */}
+        <div className="mt-6 grid grid-cols-2 gap-3.5">
+          <button
+            type="button"
+            disabled={restoring}
+            onClick={onClose}
+            className="flex h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-base font-bold text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50"
+          >
+            បោះបង់
+          </button>
 
-            <button
-              type="button"
-              disabled={restoring}
-              onClick={() => void onConfirm()}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-primary-800 px-5 text-base font-bold text-white shadow-md shadow-primary-900/20 transition-all hover:bg-primary-900 hover:scale-[1.02] active:scale-95 disabled:opacity-60"
-            >
-              {restoring ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  កំពុងស្តារ...
-                </>
-              ) : (
-                "បើកដំណើរការ"
-              )}
-            </button>
-          </div>
+          <button
+            type="button"
+            disabled={restoring}
+            onClick={() => void onConfirm()}
+            className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#0F5A2C] px-4 text-base font-bold text-white shadow-md shadow-emerald-950/20 transition hover:bg-[#0C4723] active:scale-[0.98] disabled:opacity-60"
+          >
+            {restoring ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                កំពុងស្តារ...
+              </>
+            ) : (
+              "បើកដំណើរការឡើងវិញ"
+            )}
+          </button>
         </div>
       </div>
     </div>

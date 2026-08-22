@@ -3,7 +3,7 @@ import type { StoreReviewFilter } from "@/src/types/shop";
 const tabs: Array<{
   value: StoreReviewFilter;
   label: string;
-  key: "all" | "pending" | "approved" | "rejected";
+  key: "all" | "approved" | "pending" | "rejected";
 }> = [
   { value: "ALL", label: "ទាំងអស់", key: "all" },
   { value: "APPROVED", label: "បានអនុម័ត", key: "approved" },
@@ -17,7 +17,12 @@ export default function ShopsTabs({
   onChange,
 }: {
   value: StoreReviewFilter;
-  counts: { all: number; pending: number; approved: number; rejected: number };
+  counts: {
+    all: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+  };
   onChange: (value: StoreReviewFilter) => void;
 }) {
   return (

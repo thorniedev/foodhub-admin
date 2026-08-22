@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, UserX, X } from "lucide-react";
+import { AlertTriangle, Loader2, UserX, X } from "lucide-react";
 import type { AdminUser } from "@/src/types/userProfile";
 import { displayName } from "@/src/lib/userProfileFormat";
 
@@ -23,76 +23,78 @@ export default function SuspendUserConfirmModal({
 
   return (
     <div
-      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[3px] animate-in fade-in duration-200"
+      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs animate-in fade-in duration-200"
       onClick={(event) => {
         if (event.target === event.currentTarget && !suspending) {
           onClose();
         }
       }}
     >
-      <div className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-amber-100 bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-[440px] overflow-hidden rounded-[32px] border border-gray-100 bg-white px-6 py-7 shadow-2xl animate-in zoom-in-95 duration-200">
         {/* Close Button */}
         <button
           type="button"
           disabled={suspending}
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-4 right-4 z-10 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+          className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
         >
-          <X size={18} />
+          <X size={17} />
         </button>
 
-        {/* Top Decorative Banner with Centered Icon */}
-        <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent px-6 pt-8 pb-4 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-md shadow-amber-950/5 ring-4 ring-amber-50">
-            <UserX size={28} className="stroke-[2.2]" />
-          </div>
-
-          <h3 className="mt-4 text-2xl font-bold tracking-tight text-gray-900">
-            ផ្អាកដំណើរការអ្នកប្រើប្រាស់?
-          </h3>
+        {/* Circular Icon with Soft Glow */}
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-500 ring-8 ring-amber-50/60">
+          <UserX size={26} className="stroke-[2.2]" />
         </div>
 
-        {/* Content Body */}
-        <div className="p-6 pt-1 space-y-4 text-center">
-          <p className="text-base leading-relaxed text-gray-600">
-            គណនីអ្នកប្រើប្រាស់{" "}
-            <span className="inline-block font-bold text-gray-900 rounded-lg bg-gray-100 px-2.5 py-0.5 border border-gray-200">
+        {/* Header Content */}
+        <div className="mt-5 text-center">
+          <h3 className="text-xl font-bold tracking-tight text-gray-900 whitespace-nowrap">
+            ផ្អាកដំណើរការគណនីនេះ?
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+            គណនី{" "}
+            <span className="font-bold text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200/80">
               {name}
             </span>{" "}
-            នឹងត្រូវបានផ្អាកដំណើរការជាបណ្តោះអាសន្ន។ អ្នកប្រើនឹងមិនអាច Login ចូលប្រើប្រាស់បានឡើយ។
+            នឹងត្រូវបានផ្អាកជាបណ្តោះអាសន្ន ហើយមិនអាចចូលប្រើប្រាស់បានឡើយ។
           </p>
+        </div>
 
-          <div className="rounded-2xl border border-amber-200/80 bg-amber-50/70 p-3.5 text-xs leading-relaxed text-amber-900 text-left">
-            💡 អ្នកអាចស្វែងរកគណនីនេះនៅផ្ទាំង <strong>"ផ្អាកដំណើរការ"</strong> និងបើកដំណើរការឡើងវិញបានគ្រប់ពេល។
-          </div>
+        {/* Callout Notice */}
+        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-amber-200/90 bg-amber-50/40 p-4 text-left">
+          <AlertTriangle size={17} className="mt-0.5 shrink-0 text-amber-600" />
+          <p className="text-xs font-medium leading-relaxed text-amber-900">
+            អ្នកអាចស្វែងរកគណនីនេះនៅផ្ទាំង <strong>"ផ្អាកដំណើរការ"</strong> និងបើកដំណើរការឡើងវិញបានគ្រប់ពេល។
+          </p>
+        </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <button
-              type="button"
-              disabled={suspending}
-              onClick={onClose}
-              className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-600 transition hover:bg-gray-50 active:scale-95 disabled:opacity-50"
-            >
-              បោះបង់
-            </button>
+        {/* Action Buttons */}
+        <div className="mt-6 grid grid-cols-2 gap-3.5">
+          <button
+            type="button"
+            disabled={suspending}
+            onClick={onClose}
+            className="flex h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-base font-bold text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50"
+          >
+            បោះបង់
+          </button>
 
-            <button
-              type="button"
-              disabled={suspending}
-              onClick={() => void onConfirm()}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-amber-400 px-5 text-base font-bold text-amber-950 shadow-md shadow-amber-950/10 transition-all hover:bg-amber-300 hover:scale-[1.02] active:scale-95 disabled:opacity-60"
-            >
-              {suspending ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  កំពុងផ្អាក...
-                </>
-              ) : (
-                "ផ្អាកដំណើរការ"
-              )}
-            </button>
-          </div>
+          <button
+            type="button"
+            disabled={suspending}
+            onClick={() => void onConfirm()}
+            className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#F59E0B] px-4 text-base font-bold text-white shadow-md shadow-amber-900/15 transition hover:bg-[#D97706] active:scale-[0.98] disabled:opacity-60"
+          >
+            {suspending ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                កំពុងផ្អាក...
+              </>
+            ) : (
+              "ផ្អាកដំណើរការ"
+            )}
+          </button>
         </div>
       </div>
     </div>

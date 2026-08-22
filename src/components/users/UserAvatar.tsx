@@ -33,27 +33,14 @@ async function fetchMediaAccessUrl(mediaUuid: string): Promise<string | null> {
 
   const promise = (async () => {
     try {
-      // 1. Try admin media access-url endpoint
-      let response = await fetch(
-        `/api/admin/media/${encodeURIComponent(mediaUuid)}/access-url`,
+      const response = await fetch(
+        `/api/media/${encodeURIComponent(mediaUuid)}/access-url`,
         {
           method: "GET",
           credentials: "include",
           cache: "no-store",
         },
       );
-
-      // 2. Fallback to standard media access-url endpoint
-      if (!response.ok) {
-        response = await fetch(
-          `/api/media/${encodeURIComponent(mediaUuid)}/access-url`,
-          {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          },
-        );
-      }
 
       if (!response.ok) {
         return null;

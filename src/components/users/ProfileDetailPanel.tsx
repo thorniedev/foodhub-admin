@@ -83,14 +83,14 @@ export default function ProfileDetailPanel({
 
         <p className="mt-4 text-2xl font-bold text-gray-800">
           {!hasProfiles
-            ? "គណនីអ្នកប្រើប្រាស់នេះមិនទាន់មានកម្រងព័ត៌មាននៅឡើយទេ"
-            : "ជ្រើសរើសកម្រងព័ត៌មានមួយ"}
+            ? "គណនីអ្នកប្រើប្រាស់នេះមិនទាន់មានប្រវត្តិរូបនៅឡើយទេ"
+            : "ជ្រើសរើសប្រវត្តិរូបមួយ"}
         </p>
 
         <p className="mt-2 max-w-md text-base leading-7 text-gray-500">
           {!hasProfiles
-            ? "កម្រងព័ត៌មាននឹងបង្ហាញនៅទីនេះ នៅពេលដែលគណនីអ្នកប្រើប្រាស់បង្កើតប្រវត្តិរូបក្នុងកម្មវិធី។"
-            : "ចុចជ្រើសរើសកម្រងព័ត៌មាននៅខាងឆ្វេង ដើម្បីមើលព័ត៌មានលម្អិត។"}
+            ? "ប្រវត្តិរូបនឹងបង្ហាញនៅទីនេះ នៅពេលដែលគណនីអ្នកប្រើប្រាស់បង្កើតប្រវត្តិរូបក្នុងកម្មវិធី។"
+            : "ចុចជ្រើសរើសប្រវត្តិរូបនៅខាងឆ្វេង ដើម្បីមើលព័ត៌មានលម្អិត។"}
         </p>
 
         {!hasProfiles && onCreateProfile && (
@@ -100,7 +100,7 @@ export default function ProfileDetailPanel({
             className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-primary-800 px-6 py-3 text-base font-bold text-white shadow-md shadow-primary-900/20 transition-all hover:bg-primary-900 hover:scale-[1.02] active:scale-95"
           >
             <Plus size={18} />
-            បង្កើតកម្រងព័ត៌មានឥឡូវនេះ
+            បង្កើតប្រវត្តិរូបឥឡូវនេះ
           </button>
         )}
       </section>
@@ -116,7 +116,7 @@ export default function ProfileDetailPanel({
         onSetDefault={onSetDefault}
         onDelete={onDelete}
         onHardDelete={onHardDelete}
-        onបើកដំណើរការឡើងវិញ={onRestore}
+        onRestore={onRestore}
       />
 
       <div className="grid min-w-0 gap-4 2xl:grid-cols-2">

@@ -27,89 +27,36 @@ export default function ShopsTable({
   onDelete?: (store: Store) => void;
 }) {
   return (
-    <div
-      className="
-        w-full
-        min-w-0
-        max-w-full
-        overflow-x-auto
-      "
-    >
-      <table
-        className="
-          w-full
-          min-w-[1100px]
-          border-collapse
-          text-left
-        "
-      >
+    <div className="w-full min-w-0 max-w-full overflow-hidden">
+      <table className="w-full table-auto border-collapse text-left">
         {/* ================= HEADER ================= */}
         <thead>
-          <tr
-            className="
-              border-b
-              border-gray-100
-              bg-gray-50/70
-            "
-          >
-            <th
-              className="
-                px-6
-                py-4
-                text-xl
-                font-semibold
-                text-primary-800
-              "
-            >
+          <tr className="border-b border-gray-100 bg-gray-50/70">
+            <th className="px-4 py-3.5 text-lg font-semibold text-primary-800">
               ហាង
             </th>
 
-            <th
-              className="
-                px-6
-                py-4
-                text-xl
-                font-semibold
-                text-primary-800
-              "
-            >
+            <th className="px-4 py-3.5 text-lg font-semibold text-primary-800">
               ទីតាំង
             </th>
 
-            <th
-              className="
-                px-6
-                py-4
-                text-xl min-w-[160px]
-                font-semibold
-                text-primary-800
-              "
-            >
-              ស្ថានភាពហាង
+            <th className="px-3.5 py-3.5 text-lg font-semibold text-primary-800 text-center">
+              ការពិនិត្យ
             </th>
 
-            <th
-              className="
-                px-6
-                py-4
-                text-xl
-                font-semibold
-                text-primary-800
-              "
-            >
+            <th className="px-3.5 py-3.5 text-lg font-semibold text-primary-800 text-center">
+              គណនី
+            </th>
+
+            <th className="px-3.5 py-3.5 text-lg font-semibold text-primary-800 text-center">
+              ដំណើរការ
+            </th>
+
+            <th className="px-3.5 py-3.5 text-lg font-semibold text-primary-800 text-center">
               បើកឥឡូវ
             </th>
 
-            <th
-              className="
-                px-6
-                py-4
-                text-start
-                text-xl
-                font-semibold
-                text-primary-800
-              "
-            >
+            <th className="px-4 py-3.5 text-center text-lg font-semibold text-primary-800">
               សកម្មភាព
             </th>
           </tr>
@@ -138,17 +85,16 @@ export default function ShopsTable({
                 "
               >
                 {/* ================= STORE PROFILE ================= */}
-                <td className="px-6 py-2">
+                <td className="px-4 py-2.5">
                   <Link
                     href={detailHref}
                     title={`មើលព័ត៌មាន ${store.storeName}`}
                     className="
                       group
                       flex
-                      min-w-[280px]
                       items-center
-                      gap-4
-                      rounded-2xl
+                      gap-3
+                      rounded-xl
                       outline-none
                       transition
                       focus-visible:ring-4
@@ -159,8 +105,8 @@ export default function ShopsTable({
                     <div
                       className="
                         flex
-                        h-14
-                        w-14
+                        h-11
+                        w-11
                         shrink-0
                         items-center
                         justify-center
@@ -199,7 +145,7 @@ export default function ShopsTable({
                       ) : (
                         <span
                           className="
-                            text-lg
+                            text-base
                             font-semibold
                           "
                         >
@@ -212,10 +158,10 @@ export default function ShopsTable({
                     <div className="min-w-0">
                       <p
                         className="
-                          max-w-[260px]
+                          max-w-[220px]
                           truncate
-                          text-lg
-                          font-medium
+                          text-base
+                          font-semibold
                           text-gray-800
                           transition
                           group-hover:text-primary-800
@@ -228,20 +174,19 @@ export default function ShopsTable({
                 </td>
 
                 {/* ================= LOCATION ================= */}
-                <td className="px-6 py-2">
+                <td className="px-4 py-2.5">
                   <div
                     className="
                       flex
-                      max-w-[320px]
-                      items-start
-                      gap-2.5
+                      max-w-[260px]
+                      items-center
+                      gap-2
                     "
                   >
                     <MapPin
-                      size={20}
+                      size={16}
                       strokeWidth={2}
                       className="
-                        mt-1
                         shrink-0
                         text-primary-700
                       "
@@ -249,9 +194,8 @@ export default function ShopsTable({
 
                     <span
                       className="
-                        line-clamp-2
-                        text-lg
-                        leading-7
+                        line-clamp-1
+                        text-sm
                         text-gray-500
                       "
                     >
@@ -260,8 +204,54 @@ export default function ShopsTable({
                   </div>
                 </td>
 
+                {/* ================= REVIEW STATUS ================= */}
+                <td className="px-3 py-2.5 text-center">
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => onStatus(store, "REVIEW")}
+                    className="
+                      rounded-full
+                      transition
+                      focus:outline-none
+                      focus:ring-4
+                      focus:ring-primary-100
+                      disabled:cursor-not-allowed
+                      disabled:opacity-50
+                    "
+                  >
+                    <StatusBadge
+                      value={store.reviewStatus || "APPROVED"}
+                      kind="review"
+                    />
+                  </button>
+                </td>
+
+                {/* ================= ACCOUNT STATUS ================= */}
+                <td className="px-3 py-2.5 text-center">
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => onStatus(store, "ACCOUNT")}
+                    className="
+                      rounded-full
+                      transition
+                      focus:outline-none
+                      focus:ring-4
+                      focus:ring-primary-100
+                      disabled:cursor-not-allowed
+                      disabled:opacity-50
+                    "
+                  >
+                    <StatusBadge
+                      value={store.accountStatus || "ACTIVE"}
+                      kind="account"
+                    />
+                  </button>
+                </td>
+
                 {/* ================= OPERATING STATUS ================= */}
-                <td className="px-6 py-2">
+                <td className="px-3 py-2.5 text-center">
                   <button
                     type="button"
                     disabled={disabled}
@@ -284,17 +274,17 @@ export default function ShopsTable({
                 </td>
 
                 {/* ================= OPEN NOW ================= */}
-                <td className="px-6 py-2">
+                <td className="px-3 py-2.5 text-center">
                   <OpenStatusBadge isOpen={store.isOpenNow} />
                 </td>
 
                 {/* ================= ACTIONS ================= */}
-                <td className="px-6 py-2">
+                <td className="px-4 py-2.5 text-center">
                   <div
                     className="
                       flex
                       items-center
-                      justify-start
+                      justify-center
                       gap-2
                     "
                   >
@@ -485,25 +475,35 @@ export function StatusBadge({
         : "bg-gray-400";
 
   const label =
-    normalized === "OPEN"
-      ? "បើក"
-      : normalized === "CLOSED"
-        ? "បិទ"
-        : normalized === "TEMPORARILY_CLOSED"
-          ? "បិទបណ្តោះអាសន្ន"
-          : normalized;
+    normalized === "APPROVED"
+      ? "បានអនុម័ត"
+      : normalized === "PENDING"
+        ? "រង់ចាំពិនិត្យ"
+        : normalized === "REJECTED"
+          ? "បានបដិសេធ"
+          : normalized === "ACTIVE"
+            ? "សកម្ម"
+            : normalized === "SUSPENDED"
+              ? "ផ្អាក"
+              : normalized === "OPEN"
+                ? "បើក"
+                : normalized === "CLOSED"
+                  ? "បិទ"
+                  : normalized === "TEMPORARILY_CLOSED"
+                    ? "បិទបណ្តោះអាសន្ន"
+                    : normalized;
 
   return (
     <span
       className={`
         inline-flex
         items-center
-        gap-2
+        gap-1.5
         whitespace-nowrap
         rounded-full
-        px-3.5
-        py-1.5
-        text-lg
+        px-3
+        py-1
+        text-base
         font-medium
         ring-1
         ring-inset
@@ -512,8 +512,8 @@ export function StatusBadge({
     >
       <span
         className={`
-          h-2
-          w-2
+          h-1.5
+          w-1.5
           shrink-0
           rounded-full
           ${dotClassName}
@@ -536,12 +536,12 @@ function OpenStatusBadge({ isOpen }: { isOpen: boolean | null | undefined }) {
         className="
           inline-flex
           items-center
-          gap-2
+          gap-1.5
           rounded-full
           bg-primary-50
-          px-3.5
-          py-1.5
-          text-lg
+          px-3
+          py-1
+          text-base
           font-medium
           text-primary-700
           ring-1
@@ -551,8 +551,8 @@ function OpenStatusBadge({ isOpen }: { isOpen: boolean | null | undefined }) {
       >
         <span
           className="
-            h-2
-            w-2
+            h-1.5
+            w-1.5
             rounded-full
             bg-primary-600
           "
@@ -568,12 +568,12 @@ function OpenStatusBadge({ isOpen }: { isOpen: boolean | null | undefined }) {
         className="
           inline-flex
           items-center
-          gap-2
+          gap-1.5
           rounded-full
           bg-red-50
-          px-3.5
-          py-1.5
-          text-lg
+          px-3
+          py-1
+          text-base
           font-medium
           text-red-600
           ring-1
@@ -583,8 +583,8 @@ function OpenStatusBadge({ isOpen }: { isOpen: boolean | null | undefined }) {
       >
         <span
           className="
-            h-2
-            w-2
+            h-1.5
+            w-1.5
             rounded-full
             bg-red-500
           "
@@ -599,12 +599,12 @@ function OpenStatusBadge({ isOpen }: { isOpen: boolean | null | undefined }) {
       className="
         inline-flex
         items-center
-        gap-2
+        gap-1.5
         rounded-full
-        bg-gray-100
-        px-3.5
-        py-1.5
-        text-lg
+        bg-gray-50
+        px-3
+        py-1
+        text-base
         font-medium
         text-gray-500
       "
