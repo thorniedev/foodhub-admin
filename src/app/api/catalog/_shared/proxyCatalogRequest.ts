@@ -295,8 +295,18 @@ export async function proxyCatalogRequest(
   try {
     let backendResponse = await callBackend(target, method, headers, body);
 
-    // Fallback on 404 between admin, catalog, and direct endpoints
-    if (backendResponse.status === 404) {
+    // Fallback between admin, catalog, and direct endpoints on 404 (no
+    // handler for this path at all), and on 405 for GET only: some catalog
+    // resources (e.g. foods, food-categories, cuisines, meal-types) are
+    // registered under /api/v1/admin/{resource} for POST/PATCH mutations
+    // only (see CatalogController) — a GET there is a real path match with
+    // no GET handler, so Spring returns 405, not 404. Only GET is retried
+    // here since a 405 on a mutating request must not be silently replayed
+    // against a different endpoint that may expect a different body shape.
+    if (
+      backendResponse.status === 404 ||
+      (backendResponse.status === 405 && method === "GET")
+    ) {
       const fallbackModes: Array<"admin" | "catalog" | "direct"> =
         resource === "menu-items" ? ["catalog", "admin"] : ["direct", "catalog"];
 
