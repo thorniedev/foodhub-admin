@@ -5,8 +5,6 @@ import { Agent } from "undici";
 export type CatalogProxyContext = {
   params: Promise<{
     path?: string[];
-    part?: string[];
-    [key: string]: unknown;
   }>;
 };
 
@@ -250,11 +248,7 @@ export async function proxyCatalogRequest(
   context: CatalogProxyContext,
   resource: string,
 ) {
-  const rawParams = (await context.params) as {
-    path?: string[];
-    part?: string[];
-  };
-  const path = rawParams.path || rawParams.part || [];
+  const { path = [] } = await context.params;
   const target = buildTargetUrl(request, resource, path);
 
   const headers = new Headers();

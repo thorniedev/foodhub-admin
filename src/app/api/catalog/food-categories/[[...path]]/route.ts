@@ -8,24 +8,24 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const RESOURCE = "cuisines";
+const RESOURCE = "food-categories";
 
-export function GET(request: NextRequest, context: CatalogProxyContext) {
+export async function GET(request: NextRequest, context: CatalogProxyContext) {
   return proxyCatalogRequest(request, context, RESOURCE);
 }
 
-export function POST(request: NextRequest, context: CatalogProxyContext) {
+export async function POST(request: NextRequest, context: CatalogProxyContext) {
   return proxyCatalogRequest(request, context, RESOURCE);
 }
 
-export function PUT(request: NextRequest, context: CatalogProxyContext) {
+export async function PUT(request: NextRequest, context: CatalogProxyContext) {
   return proxyCatalogRequest(request, context, RESOURCE);
 }
 
-export function PATCH(request: NextRequest, context: CatalogProxyContext) {
+export async function PATCH(request: NextRequest, context: CatalogProxyContext) {
   return proxyCatalogRequest(request, context, RESOURCE);
 }
 
-export function DELETE(request: NextRequest, context: CatalogProxyContext) {
+export async function DELETE(request: NextRequest, context: CatalogProxyContext) {
   return proxyCatalogRequest(request, context, RESOURCE);
 }
