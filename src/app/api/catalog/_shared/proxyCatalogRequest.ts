@@ -5,6 +5,8 @@ import { Agent } from "undici";
 export type CatalogProxyContext = {
   params: Promise<{
     path?: string[];
+    part?: string[];
+    [key: string]: unknown;
   }>;
 };
 
@@ -33,7 +35,7 @@ function getConfig() {
   const backendApiUrl =
     process.env.BACKEND_API_URL ??
     process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "http://localhost:7070/api/v1";
+    "https://api.mhoubahar.store";
 
   const keycloakUrl =
     process.env.KEYCLOAK_URL ??
@@ -48,7 +50,7 @@ function getConfig() {
   const clientId =
     process.env.KEYCLOAK_CLIENT_ID ??
     process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ??
-    "foodhub-web";
+    "mhoubahar-admin";
 
   const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET;
 
@@ -126,10 +128,11 @@ async function refreshAccessToken(
   }
 }
 
-function buildTargetUrl(
+export function buildTargetUrl(
   request: NextRequest,
   resource: string,
   path: string[],
+  prefixMode: "admin" | "catalog" | "direct" = "admin",
 ): URL {
   const suffix = path.length
     ? `/${path
@@ -137,9 +140,20 @@ function buildTargetUrl(
         .join("/")}`
     : "";
 
-  const target = new URL(
-    `${getBackendApiBaseUrl()}/catalog/${resource}${suffix}`,
-  );
+  const baseUrl = getBackendApiBaseUrl();
+  let prefix = "";
+
+  if (resource === "menu-items") {
+    prefix = prefixMode === "catalog" ? "catalog/menu-items" : "admin/menu-items";
+  } else if (prefixMode === "admin") {
+    prefix = `admin/${resource}`;
+  } else if (prefixMode === "catalog") {
+    prefix = `catalog/${resource}`;
+  } else {
+    prefix = resource;
+  }
+
+  const target = new URL(`${baseUrl}/${prefix}${suffix}`);
 
   request.nextUrl.searchParams.forEach((value, key) => {
     target.searchParams.append(key, value);
@@ -236,7 +250,11 @@ export async function proxyCatalogRequest(
   context: CatalogProxyContext,
   resource: string,
 ) {
-  const { path = [] } = await context.params;
+  const rawParams = (await context.params) as {
+    path?: string[];
+    part?: string[];
+  };
+  const path = rawParams.path || rawParams.part || [];
   const target = buildTargetUrl(request, resource, path);
 
   const headers = new Headers();
@@ -282,6 +300,25 @@ export async function proxyCatalogRequest(
 
   try {
     let backendResponse = await callBackend(target, method, headers, body);
+
+    // Fallback on 404 between admin, catalog, and direct endpoints
+    if (backendResponse.status === 404) {
+      const fallbackModes: Array<"admin" | "catalog" | "direct"> =
+        resource === "menu-items" ? ["catalog", "admin"] : ["direct", "catalog"];
+
+      for (const mode of fallbackModes) {
+        const altTarget = buildTargetUrl(request, resource, path, mode);
+        if (altTarget.toString() !== target.toString()) {
+          try {
+            const altResponse = await callBackend(altTarget, method, headers, body);
+            if (altResponse.ok || altResponse.status < 400) {
+              backendResponse = altResponse;
+              break;
+            }
+          } catch {}
+        }
+      }
+    }
 
     // If 401 and we have a refresh token, refresh and retry once
     if (backendResponse.status === 401 && refreshToken) {
