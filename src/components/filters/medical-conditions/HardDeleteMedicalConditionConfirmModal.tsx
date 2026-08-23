@@ -60,9 +60,9 @@ export default function HardDeleteMedicalConditionConfirmModal({
             Permanent Action
           </span>
 
-          <h3 className="mt-2 text-2xl font-black text-gray-900 sm:text-3xl">
+          <p className="mt-2 text-2xl font-black text-gray-900 sm:text-3xl">
             លុបស្ថានភាពសុខភាពជាអចិន្ត្រៃយ៍?
-          </h3>
+          </p>
         </div>
 
         <div className="mt-4 rounded-2xl border border-red-100 bg-red-50/70 p-5 text-lg leading-relaxed text-red-800">

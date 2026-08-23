@@ -144,9 +144,9 @@ export default function IngredientDetailModal({
 
             <div>
               <div className="flex items-center gap-2.5">
-                <h2 className="text-2xl font-black text-gray-900 sm:text-3xl">
+                <p className="text-2xl font-black text-gray-900 sm:text-3xl">
                   {displayItem.name}
-                </h2>
+                </p>
                 <span
                   className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-lg font-bold ${
                     isActive

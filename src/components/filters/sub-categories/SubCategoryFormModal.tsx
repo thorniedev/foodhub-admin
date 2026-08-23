@@ -145,7 +145,7 @@ export default function SubCategoryFormModal({
               {isDrink ? <Coffee size={22} /> : <Utensils size={22} />}
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{modalTitle}</h2>
+              <p className="text-2xl font-bold text-gray-900">{modalTitle}</p>
               <p className="text-lg text-gray-400">{modalSubtitle}</p>
             </div>
           </div>

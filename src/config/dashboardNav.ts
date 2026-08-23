@@ -141,32 +141,12 @@ export const dashboardNav: NavItem[] = [
         href: "/filter/distances",
       },
       {
-        label: "គោលដៅសុខភាព",
-        href: "/filter/health-goals",
-      },
-      {
         label: "តំបន់",
         href: "/filter/regions",
       },
       {
         label: "គ្រឿងផ្សំ",
         href: "/filter/ingredients",
-      },
-      {
-        label: "សារធាតុចិញ្ចឹម",
-        href: "/filter/nutrition",
-      },
-      {
-        label: "តម្លៃ",
-        href: "/filter/price-levels",
-      },
-      {
-        label: "ការវាយតម្លៃ",
-        href: "/filter/ratings",
-      },
-      {
-        label: "កម្រិតណែនាំ AI",
-        href: "/filter/ai-scores",
       },
       {
         label: "រដូវកាល",

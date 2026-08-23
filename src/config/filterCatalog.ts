@@ -113,15 +113,6 @@ export const FILTER_GROUPS: FilterGroupDefinition[] = [
     source: "LOCAL",
   },
   {
-    slug: "health-goals",
-    code: "HEALTH_GOAL",
-    labelKm: "គោលដៅសុខភាព",
-    labelEn: "Health goals",
-    descriptionKm: "High protein, low sugar, low sodium និងគោលដៅសុខភាពផ្សេងៗ។",
-    selectionMode: "MULTIPLE",
-    source: "LOCAL",
-  },
-  {
     slug: "regions",
     code: "REGION",
     labelKm: "តំបន់",
@@ -155,43 +146,6 @@ export const FILTER_GROUPS: FilterGroupDefinition[] = [
     labelEn: "Ingredients",
     descriptionKm: "គ្រឿងផ្សំដែលអាចជ្រើសនៅក្នុងម្ហូប។",
     selectionMode: "MULTIPLE",
-    source: "LOCAL",
-  },
-  {
-    slug: "nutrition",
-    code: "NUTRITION",
-    labelKm: "សារធាតុចិញ្ចឹម",
-    labelEn: "Nutrition filters",
-    descriptionKm:
-      "Calories, Protein, Fat, Fiber, Sodium និងជម្រើសអាហារូបត្ថម្ភ។",
-    selectionMode: "MULTIPLE",
-    source: "LOCAL",
-  },
-  {
-    slug: "price-levels",
-    code: "PRICE_LEVEL",
-    labelKm: "តម្លៃ",
-    labelEn: "Price levels",
-    descriptionKm: "កម្រិតតម្លៃ $, $$ និង $$$។",
-    selectionMode: "SINGLE",
-    source: "LOCAL",
-  },
-  {
-    slug: "ratings",
-    code: "RATING",
-    labelKm: "ការវាយតម្លៃ",
-    labelEn: "Ratings",
-    descriptionKm: "កម្រិត Rating សម្រាប់ការត្រងម្ហូប។",
-    selectionMode: "SINGLE",
-    source: "LOCAL",
-  },
-  {
-    slug: "ai-scores",
-    code: "AI_SCORE",
-    labelKm: "កម្រិតណែនាំ AI",
-    labelEn: "AI recommendation scores",
-    descriptionKm: "កម្រិតពិន្ទុណែនាំ AI ដូចជា 80%, 90%, 95%។",
-    selectionMode: "SINGLE",
     source: "LOCAL",
   },
   {
@@ -309,10 +263,6 @@ export const INITIAL_FILTER_OPTIONS: FilterCatalogOption[] = [
   seed("FOOD_STYLE", "STREET_FOOD", "Street food", "អាហារតាមផ្លូវ"),
   seed("FOOD_STYLE", "HEALTHY", "Healthy", "អាហារសុខភាព"),
 
-  seed("HEALTH_GOAL", "HIGH_PROTEIN", "High protein", "ប្រូតេអ៊ីនខ្ពស់"),
-  seed("HEALTH_GOAL", "LOW_SUGAR", "Low sugar", "ស្ករទាប"),
-  seed("HEALTH_GOAL", "LOW_SODIUM", "Low sodium", "សូដ្យូមទាប"),
-
   seed("REGION", "PHNOM_PENH", "Phnom Penh", "ភ្នំពេញ"),
   seed("REGION", "SIEM_REAP", "Siem Reap", "សៀមរាប"),
   seed("REGION", "BATTAMBANG", "Battambang", "បាត់ដំបង"),
@@ -333,45 +283,6 @@ export const INITIAL_FILTER_OPTIONS: FilterCatalogOption[] = [
   seed("INGREDIENT", "BANANA_LEAF", "Banana Leaf"),
   seed("INGREDIENT", "BEAN_SPROUTS", "Bean Sprouts"),
   seed("INGREDIENT", "BEEF", "Beef"),
-
-  seed(
-    "NUTRITION",
-    "CALORIES_400",
-    "Calories under 400",
-    "កាឡូរីក្រោម 400",
-    400,
-    "KCAL",
-  ),
-  seed(
-    "NUTRITION",
-    "PROTEIN_25G",
-    "Protein 25g or more",
-    "ប្រូតេអ៊ីន 25g ឡើង",
-    25,
-    "G",
-  ),
-  seed("NUTRITION", "FAT_10G", "Fat under 10g", "ជាតិខ្លាញ់ក្រោម 10g", 10, "G"),
-  seed("NUTRITION", "FIBER_5G", "Fiber 5g or more", "Fiber 5g ឡើង", 5, "G"),
-  seed(
-    "NUTRITION",
-    "SODIUM_600MG",
-    "Sodium under 600mg",
-    "Sodium ក្រោម 600mg",
-    600,
-    "MG",
-  ),
-
-  seed("PRICE_LEVEL", "PRICE_1", "$", "$", 1, "LEVEL"),
-  seed("PRICE_LEVEL", "PRICE_2", "$$", "$$", 2, "LEVEL"),
-  seed("PRICE_LEVEL", "PRICE_3", "$$$", "$$$", 3, "LEVEL"),
-
-  seed("RATING", "RATING_4_7", "4.7 stars", "4.7 ឡើង", 4.7, "STAR"),
-  seed("RATING", "RATING_4_8", "4.8 stars", "4.8 ឡើង", 4.8, "STAR"),
-  seed("RATING", "RATING_4_9", "4.9 stars", "4.9 ឡើង", 4.9, "STAR"),
-
-  seed("AI_SCORE", "AI_80", "80% or more", "80% ឡើង", 80, "PERCENT"),
-  seed("AI_SCORE", "AI_90", "90% or more", "90% ឡើង", 90, "PERCENT"),
-  seed("AI_SCORE", "AI_95", "95% or more", "95% ឡើង", 95, "PERCENT"),
 ];
 
 export function getFilterGroupBySlug(slug: string) {

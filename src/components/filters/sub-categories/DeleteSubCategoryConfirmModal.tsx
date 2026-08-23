@@ -35,9 +35,9 @@ export default function DeleteSubCategoryConfirmModal({
             <AlertTriangle size={28} />
           </div>
 
-          <h3 className="mt-4 text-2xl font-bold text-gray-900">
+          <p className="mt-4 text-2xl font-bold text-gray-900">
             តើអ្នកពិតជាចង់លុបអនុប្រភេទនេះមែនទេ?
-          </h3>
+          </p>
 
           <div className="mt-3 w-full rounded-2xl bg-gray-50 p-4">
             <p className="text-lg font-bold text-gray-800">{item.name}</p>

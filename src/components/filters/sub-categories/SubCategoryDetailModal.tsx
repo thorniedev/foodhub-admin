@@ -65,7 +65,7 @@ export default function SubCategoryDetailModal({
               {isDrink ? <Coffee size={22} /> : <Utensils size={22} />}
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{item.name}</h2>
+              <p className="text-2xl font-bold text-gray-900">{item.name}</p>
               <p className="font-mono text-lg text-gray-400">{item.code}</p>
             </div>
           </div>
