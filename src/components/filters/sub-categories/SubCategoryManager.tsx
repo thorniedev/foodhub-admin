@@ -368,7 +368,7 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
       {/* Notice Message */}
       {notice && (
         <div
-          className={`flex items-center justify-between rounded-2xl p-4 text-sm font-semibold transition ${
+          className={`flex items-center justify-between rounded-2xl p-4 text-lg font-semibold transition ${
             notice.type === "success"
               ? "border border-emerald-100 bg-emerald-50 text-emerald-800"
               : "border border-red-100 bg-red-50 text-red-700"
@@ -376,9 +376,9 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
         >
           <div className="flex items-center gap-2.5">
             {notice.type === "success" ? (
-              <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+              <CheckCircle2 size={22} className="text-emerald-600 shrink-0" />
             ) : (
-              <AlertTriangle size={18} className="text-red-500 shrink-0" />
+              <AlertTriangle size={22} className="text-red-500 shrink-0" />
             )}
             <span>{notice.text}</span>
           </div>
@@ -387,15 +387,15 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
             onClick={() => setNotice(null)}
             className="rounded-full p-1 text-gray-400 hover:bg-black/5 hover:text-gray-600"
           >
-            <X size={16} />
+            <X size={20} />
           </button>
         </div>
       )}
 
       {/* Fetch Error */}
       {fetchError && (
-        <div className="flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
-          <AlertTriangle size={20} className="shrink-0" />
+        <div className="flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 text-lg text-red-600">
+          <AlertTriangle size={22} className="shrink-0" />
           <p>
             មិនអាចទាញយកបញ្ជីអនុប្រភេទបានទេ។ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត ឬ
             Session ចូលប្រើប្រាស់។
@@ -466,8 +466,8 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
       {/* Loading state */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center rounded-3xl bg-white px-6 py-20 text-center shadow-sm">
-          <Loader2 size={32} className="animate-spin text-primary-600" />
-          <p className="mt-3 text-sm font-semibold text-gray-500">
+          <Loader2 size={36} className="animate-spin text-primary-600" />
+          <p className="mt-3 text-lg font-semibold text-gray-500">
             កំពុងទាញយកទិន្នន័យ...
           </p>
         </div>

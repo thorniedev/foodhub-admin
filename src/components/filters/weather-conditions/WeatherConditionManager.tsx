@@ -440,7 +440,7 @@ export default function WeatherConditionManager() {
       {/* Notice with Optional Restore Button */}
       {notice && (
         <div
-          className={`flex flex-col gap-3 rounded-2xl p-4 text-sm font-semibold sm:flex-row sm:items-center sm:justify-between ${
+          className={`flex flex-col gap-3 rounded-2xl p-5 text-lg font-semibold sm:flex-row sm:items-center sm:justify-between ${
             notice.type === "success"
               ? "border border-emerald-100 bg-emerald-50 text-emerald-800"
               : "border border-red-100 bg-red-50 text-red-700"
@@ -448,9 +448,9 @@ export default function WeatherConditionManager() {
         >
           <div className="flex items-center gap-2.5">
             {notice.type === "success" ? (
-              <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+              <CheckCircle2 size={22} className="text-emerald-600 shrink-0" />
             ) : (
-              <AlertTriangle size={18} className="text-red-500 shrink-0" />
+              <AlertTriangle size={22} className="text-red-500 shrink-0" />
             )}
             <span>{notice.text}</span>
           </div>
@@ -460,9 +460,9 @@ export default function WeatherConditionManager() {
               <button
                 type="button"
                 onClick={notice.action.onClick}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-primary-800 px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-900"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-primary-800 px-4 py-2 text-lg font-bold text-white shadow-sm transition hover:bg-primary-900"
               >
-                <RotateCcw size={14} />
+                <RotateCcw size={18} />
                 <span>{notice.action.label}</span>
               </button>
             )}
@@ -471,7 +471,7 @@ export default function WeatherConditionManager() {
               onClick={() => setNotice(null)}
               className="rounded-full p-1 text-gray-400 hover:bg-black/5 hover:text-gray-600"
             >
-              <X size={16} />
+              <X size={20} />
             </button>
           </div>
         </div>
@@ -483,7 +483,7 @@ export default function WeatherConditionManager() {
           {/* Search bar */}
           <div className="relative flex-1">
             <Search
-              size={18}
+              size={20}
               className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
             />
             <input
@@ -491,7 +491,7 @@ export default function WeatherConditionManager() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ស្វែងរក code, name, local name..."
-              className="h-[48px] w-full rounded-2xl border border-gray-200 bg-gray-50/50 pl-11 pr-10 text-sm text-gray-800 outline-none transition focus:border-primary-500 focus:bg-white focus:ring-4 focus:ring-primary-500/10"
+              className="h-[52px] w-full rounded-2xl border border-gray-200 bg-gray-50/50 pl-11 pr-10 text-lg text-gray-800 outline-none transition focus:border-primary-500 focus:bg-white focus:ring-4 focus:ring-primary-500/10"
             />
             {search && (
               <button
@@ -499,7 +499,7 @@ export default function WeatherConditionManager() {
                 onClick={() => setSearch("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:bg-gray-100"
               >
-                <X size={15} />
+                <X size={18} />
               </button>
             )}
           </div>
@@ -510,7 +510,7 @@ export default function WeatherConditionManager() {
           <button
             type="button"
             onClick={() => setStatusFilter("ALL")}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition ${
+            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-lg font-bold transition ${
               statusFilter === "ALL"
                 ? "bg-primary-800 text-white shadow-sm"
                 : "bg-gray-100/70 text-gray-600 hover:bg-gray-200/70"
@@ -518,7 +518,7 @@ export default function WeatherConditionManager() {
           >
             <span>ទាំងអស់</span>
             <span
-              className={`rounded-lg px-2 py-0.5 text-xs font-black ${
+              className={`rounded-lg px-2.5 py-0.5 text-lg font-black ${
                 statusFilter === "ALL" ? "bg-white/20 text-white" : "bg-gray-200 text-gray-600"
               }`}
             >
@@ -529,7 +529,7 @@ export default function WeatherConditionManager() {
           <button
             type="button"
             onClick={() => setStatusFilter("ACTIVE")}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition ${
+            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-lg font-bold transition ${
               statusFilter === "ACTIVE"
                 ? "bg-primary-800 text-white shadow-sm"
                 : "bg-gray-100/70 text-gray-600 hover:bg-gray-200/70"
@@ -537,7 +537,7 @@ export default function WeatherConditionManager() {
           >
             <span>សកម្ម</span>
             <span
-              className={`rounded-lg px-2 py-0.5 text-xs font-black ${
+              className={`rounded-lg px-2.5 py-0.5 text-lg font-black ${
                 statusFilter === "ACTIVE" ? "bg-white/20 text-white" : "bg-gray-200 text-gray-600"
               }`}
             >
@@ -548,7 +548,7 @@ export default function WeatherConditionManager() {
           <button
             type="button"
             onClick={() => setStatusFilter("INACTIVE")}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition ${
+            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-lg font-bold transition ${
               statusFilter === "INACTIVE"
                 ? "bg-primary-800 text-white shadow-sm"
                 : "bg-gray-100/70 text-gray-600 hover:bg-gray-200/70"
@@ -556,7 +556,7 @@ export default function WeatherConditionManager() {
           >
             <span>អសកម្ម / បានលុប</span>
             <span
-              className={`rounded-lg px-2 py-0.5 text-xs font-black ${
+              className={`rounded-lg px-2.5 py-0.5 text-lg font-black ${
                 statusFilter === "INACTIVE" ? "bg-white/20 text-white" : "bg-gray-200 text-gray-600"
               }`}
             >
@@ -571,7 +571,7 @@ export default function WeatherConditionManager() {
         {isLoading ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
             <Loader2 size={32} className="animate-spin text-primary-800" />
-            <p className="mt-3 text-sm font-semibold text-gray-500">
+            <p className="mt-3 text-lg font-semibold text-gray-500">
               កំពុងទាញយក Weather Conditions...
             </p>
           </div>

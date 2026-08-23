@@ -794,7 +794,7 @@ function CatalogTable({
   return (
     <section className="w-full min-w-0 max-w-full overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
       <div className="w-full max-w-full overflow-x-auto">
-        <table className="w-full min-w-[980px] border-collapse text-left">
+        <table className="w-full min-w-[1000px] border-collapse text-left">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/70">
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
@@ -806,7 +806,7 @@ function CatalogTable({
               </th>
 
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-                Value
+                ការពិពណ៌នា
               </th>
 
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
@@ -825,18 +825,12 @@ function CatalogTable({
                 key={item.uuid}
                 className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
               >
-                {/* Name + description */}
+                {/* Name */}
                 <td className="px-6 py-5">
-                  <div className="min-w-[280px]">
+                  <div className="min-w-[200px]">
                     <p className="text-lg font-medium text-gray-800">
                       {item.localName || item.name}
                     </p>
-
-                    {item.description && (
-                      <p className="mt-1 max-w-[400px] truncate text-lg leading-7 text-gray-400">
-                        {item.description}
-                      </p>
-                    )}
                   </div>
                 </td>
 
@@ -847,9 +841,11 @@ function CatalogTable({
                   </span>
                 </td>
 
-                {/* Numeric value + unit */}
-                <td className="px-6 py-5">
-                  <NumericValue value={item.numericValue} unit={item.unit} />
+                {/* Description */}
+                <td className="max-w-[360px] px-6 py-5">
+                  <p className="line-clamp-2 text-lg leading-7 text-gray-500">
+                    {item.description || "—"}
+                  </p>
                 </td>
 
                 {/* Status */}

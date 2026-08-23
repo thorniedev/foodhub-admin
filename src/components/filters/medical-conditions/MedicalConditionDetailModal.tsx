@@ -148,14 +148,14 @@ export default function MedicalConditionDetailModal({
                   {displayItem.name}
                 </h2>
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-black ${
+                  className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-lg font-bold ${
                     isActive
                       ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
                       : "bg-gray-100 text-gray-500 ring-1 ring-gray-200"
                   }`}
                 >
                   <span
-                    className={`h-1.5 w-1.5 rounded-full ${
+                    className={`h-2 w-2 rounded-full ${
                       isActive ? "bg-emerald-500" : "bg-gray-400"
                     }`}
                   />
@@ -181,7 +181,7 @@ export default function MedicalConditionDetailModal({
         {isLoading && !data ? (
           <div className="flex min-h-[260px] flex-col items-center justify-center gap-3 py-12">
             <Loader2 size={36} className="animate-spin text-primary-800" />
-            <p className="text-base font-semibold text-gray-500">
+            <p className="text-lg font-semibold text-gray-500">
               កំពុងទាញយកព័ត៌មានលម្អិត...
             </p>
           </div>
@@ -190,10 +190,10 @@ export default function MedicalConditionDetailModal({
             {/* Core Info Grid */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {/* Code */}
-              <div className="relative rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
+              <div className="relative rounded-2xl border border-gray-100 bg-gray-50/70 p-5 transition hover:bg-gray-50">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
-                    <Tag size={14} />
+                  <span className="flex items-center gap-1.5 text-lg font-bold uppercase tracking-wider text-gray-400">
+                    <Tag size={18} />
                     Code
                   </span>
                   {displayItem.code && (
@@ -204,51 +204,49 @@ export default function MedicalConditionDetailModal({
                       title="Copy Code"
                     >
                       {copiedKey === "code" ? (
-                        <Check size={14} className="text-emerald-600" />
+                        <Check size={18} className="text-emerald-600" />
                       ) : (
-                        <Copy size={14} />
+                        <Copy size={18} />
                       )}
                     </button>
                   )}
                 </div>
-                <p className="mt-2 font-mono text-base font-bold text-gray-900">
+                <p className="mt-2 font-mono text-xl font-bold text-gray-900">
                   {displayItem.code || "—"}
                 </p>
               </div>
 
               {/* Status */}
-              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
-                  <Sparkles size={14} />
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-5 transition hover:bg-gray-50">
+                <span className="flex items-center gap-1.5 text-lg font-bold uppercase tracking-wider text-gray-400">
+                  <Sparkles size={18} />
                   ស្ថានភាព (Status)
                 </span>
-                <p className="mt-2 text-base font-bold text-gray-900">
+                <p className="mt-2 text-xl font-bold text-gray-900">
                   {isActive ? "ACTIVE (បើកដំណើរការ)" : "INACTIVE (បិទដំណើរការ)"}
                 </p>
               </div>
 
               {/* Name */}
-              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50 sm:col-span-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-5 transition hover:bg-gray-50 sm:col-span-2">
+                <span className="text-lg font-bold uppercase tracking-wider text-gray-400">
                   ឈ្មោះស្ថានភាពសុខភាព (Name)
                 </span>
-                <p className="mt-2 text-base font-bold text-gray-900">
+                <p className="mt-2 text-xl font-bold text-gray-900">
                   {displayItem.name || "—"}
                 </p>
               </div>
             </div>
 
             {/* Description */}
-            <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+            <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-5 transition hover:bg-gray-50">
+              <span className="text-lg font-bold uppercase tracking-wider text-gray-400">
                 ការពិពណ៌នា (Description)
               </span>
-              <p className="mt-2 text-base leading-relaxed text-gray-700">
+              <p className="mt-2 text-lg leading-relaxed text-gray-700">
                 {displayItem.description || "គ្មានការពិពណ៌នាឡើយ"}
               </p>
             </div>
-
-    
           </div>
         )}
 
@@ -257,7 +255,7 @@ export default function MedicalConditionDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="min-h-11 rounded-full bg-gray-900 px-6 text-base font-bold text-white transition hover:bg-black focus:outline-none focus:ring-4 focus:ring-gray-200"
+            className="min-h-12 rounded-full bg-gray-900 px-7 text-lg font-bold text-white transition hover:bg-black focus:outline-none focus:ring-4 focus:ring-gray-200"
           >
             បិទ
           </button>

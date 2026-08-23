@@ -50,6 +50,7 @@ import type {
 
 import DeleteConfirmModal from "./DeleteConfirmModal";
 import FoodCatalogTable from "./FoodCatalogTable";
+import FoodDetailModal from "./FoodDetailModal";
 import FoodFormModal from "./FoodFormModal";
 import MenuItemDetailModal from "./MenuItemDetailModal";
 import PublishMenuItemModal from "./PublishMenuItemModal";
@@ -77,6 +78,7 @@ export default function MenuItemsManager({
 
   const [foodModalOpen, setFoodModalOpen] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodRecord | null>(null);
+  const [foodDetailUuid, setFoodDetailUuid] = useState<string | null>(null);
 
   const [menuModalOpen, setMenuModalOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState<MenuItemRecord | null>(null);
@@ -700,6 +702,7 @@ export default function MenuItemsManager({
             categories={allCategories}
             cuisines={cuisinesQuery.data ?? []}
             busy={busy}
+            onView={(item) => setFoodDetailUuid(item.uuid)}
             onEdit={(item) => {
               setEditingFood(item);
               setFoodModalOpen(true);
@@ -788,10 +791,20 @@ export default function MenuItemsManager({
         onConfirm={() => void confirmDeleteMenu()}
       />
 
-      {/* Detail View Modal */}
+      {/* Detail View Modals */}
       <MenuItemDetailModal
         uuid={detailUuid}
         onClose={() => setDetailUuid(null)}
+      />
+
+      <FoodDetailModal
+        uuid={foodDetailUuid}
+        onClose={() => setFoodDetailUuid(null)}
+        onEdit={(item) => {
+          setFoodDetailUuid(null);
+          setEditingFood(item);
+          setFoodModalOpen(true);
+        }}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import FoodAvatar from "./FoodAvatar";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 
@@ -54,6 +54,7 @@ export default function FoodCatalogTable({
   categories = [],
   cuisines = [],
   busy,
+  onView,
   onEdit,
   onDelete,
 }: {
@@ -61,6 +62,7 @@ export default function FoodCatalogTable({
   categories?: FoodCategoryOption[];
   cuisines?: CuisineOption[];
   busy: boolean;
+  onView?: (item: FoodRecord) => void;
   onEdit: (item: FoodRecord) => void;
   onDelete: (item: FoodRecord) => void;
 }) {
@@ -135,6 +137,17 @@ export default function FoodCatalogTable({
 
               <td className="px-5 py-4">
                 <div className="flex justify-end gap-2">
+                  {onView && (
+                    <button
+                      type="button"
+                      onClick={() => onView(item)}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                      title="មើលព័ត៌មានលម្អិត"
+                    >
+                      <Eye size={16} />
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     disabled={busy}

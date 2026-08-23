@@ -82,7 +82,7 @@ export default function MedicalConditionsTabs({
               }
 
               <span
-                className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base ${
+                className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg ${
                   selected
                     ? "bg-white/20 text-white"
                     : "bg-gray-100 text-gray-500"

@@ -145,8 +145,8 @@ export default function SubCategoryFormModal({
               {isDrink ? <Coffee size={22} /> : <Utensils size={22} />}
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{modalTitle}</h2>
-              <p className="text-xs text-gray-400">{modalSubtitle}</p>
+              <h2 className="text-2xl font-bold text-gray-900">{modalTitle}</h2>
+              <p className="text-lg text-gray-400">{modalSubtitle}</p>
             </div>
           </div>
 
@@ -156,30 +156,30 @@ export default function SubCategoryFormModal({
             onClick={onClose}
             className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5 p-6">
           {error && (
-            <div className="flex items-center gap-2.5 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
-              <AlertTriangle size={18} className="shrink-0" />
+            <div className="flex items-center gap-2.5 rounded-2xl border border-red-100 bg-red-50 p-4 text-lg text-red-600">
+              <AlertTriangle size={20} className="shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Parent Category Informational Banner */}
           <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-800">
-              <Layers size={16} />
+            <div className="flex items-center gap-2 text-lg font-bold uppercase tracking-wider text-emerald-800">
+              <Layers size={18} />
               <span>ប្រភេទមេ (Parent Root Category)</span>
             </div>
             <div className="mt-1.5 flex items-center justify-between">
-              <p className="font-bold text-emerald-950">
+              <p className="text-lg font-bold text-emerald-950">
                 {parentRootName || (isDrink ? "ភេសជ្ជៈ" : "ម្ហូបអាហារ")} ({parentRootCode || prefix})
               </p>
-              <span className="rounded-lg bg-emerald-200/60 px-2 py-0.5 font-mono text-[11px] font-bold text-emerald-900">
+              <span className="rounded-lg bg-emerald-200/60 px-2.5 py-0.5 font-mono text-lg font-bold text-emerald-900">
                 ROOT
               </span>
             </div>
@@ -187,7 +187,7 @@ export default function SubCategoryFormModal({
 
           {/* Name Field */}
           <div className="space-y-1.5">
-            <label className="block text-sm font-bold text-gray-700">
+            <label className="block text-lg font-bold text-gray-700">
               ឈ្មោះអនុប្រភេទ <span className="text-red-500">*</span>
             </label>
             <input
@@ -198,25 +198,25 @@ export default function SubCategoryFormModal({
               placeholder={
                 isDrink ? "ឧ. កាហ្វេបុរាណ, តែទឹកដោះគោ" : "ឧ. សម្ល និងស៊ុប, ម្ហូបឆា"
               }
-              className="h-[48px] w-full rounded-2xl border border-gray-200 bg-gray-50/50 px-4 text-base text-gray-800 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
+              className="h-[52px] w-full rounded-2xl border border-gray-200 bg-gray-50/50 px-4 text-lg text-gray-800 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
             />
           </div>
 
           {/* Code Field */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="block text-sm font-bold text-gray-700">
+              <label className="block text-lg font-bold text-gray-700">
                 កូដ (Code) <span className="text-red-500">*</span>
               </label>
               {!item && (
-                <span className="text-xs text-gray-400">
+                <span className="text-lg text-gray-400">
                   (បង្កើតស្វ័យប្រវត្តិតាមឈ្មោះ)
                 </span>
               )}
             </div>
             <div className="relative">
               <Hash
-                size={18}
+                size={20}
                 className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
               />
               <input
@@ -228,14 +228,14 @@ export default function SubCategoryFormModal({
                   setIsCodeCustom(true);
                 }}
                 placeholder={isDrink ? "DRINK_MILK_TEA" : "FOOD_SOUP"}
-                className="h-[48px] w-full rounded-2xl border border-gray-200 bg-gray-50/50 pl-10 pr-4 font-mono text-sm uppercase text-gray-800 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
+                className="h-[52px] w-full rounded-2xl border border-gray-200 bg-gray-50/50 pl-10 pr-4 font-mono text-lg uppercase text-gray-800 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
               />
             </div>
           </div>
 
           {/* Description Field */}
           <div className="space-y-1.5">
-            <label className="block text-sm font-bold text-gray-700">
+            <label className="block text-lg font-bold text-gray-700">
               ការពិពណ៌នា
             </label>
             <textarea
@@ -243,7 +243,7 @@ export default function SubCategoryFormModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="ព័ត៌មានបន្ថែមអំពីអនុប្រភេទនេះ..."
-              className="w-full rounded-2xl border border-gray-200 bg-gray-50/50 p-4 text-base text-gray-800 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
+              className="w-full rounded-2xl border border-gray-200 bg-gray-50/50 p-4 text-lg text-gray-800 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
             />
           </div>
 
@@ -256,8 +256,8 @@ export default function SubCategoryFormModal({
               className="h-5 w-5 rounded-lg border-gray-300 text-primary-600 focus:ring-primary-500"
             />
             <div>
-              <p className="text-sm font-bold text-gray-800">ដាក់ឱ្យដំណើរការ (Active)</p>
-              <p className="text-xs text-gray-400">
+              <p className="text-lg font-bold text-gray-800">ដាក់ឱ្យដំណើរការ (Active)</p>
+              <p className="text-lg text-gray-400">
                 អនុញ្ញាតឱ្យជ្រើសរើសអនុប្រភេទនេះក្នុងទម្រង់បង្កើតមុខម្ហូប/ភេសជ្ជៈ
               </p>
             </div>
@@ -269,7 +269,7 @@ export default function SubCategoryFormModal({
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="rounded-full border border-gray-200 px-6 py-2.5 text-sm font-bold text-gray-600 transition hover:bg-gray-50 focus:outline-none"
+              className="min-h-12 rounded-full border border-gray-200 px-6 py-2.5 text-lg font-bold text-gray-600 transition hover:bg-gray-50 focus:outline-none"
             >
               បោះបង់
             </button>
@@ -277,7 +277,7 @@ export default function SubCategoryFormModal({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-full bg-primary-800 px-7 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-500/20 disabled:opacity-60"
+              className="inline-flex min-h-12 items-center gap-2 rounded-full bg-primary-800 px-7 py-2.5 text-lg font-bold text-white shadow-sm transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-500/20 disabled:opacity-60"
             >
               {saving && <Loader2 size={16} className="animate-spin" />}
               {item ? "រក្សាទុកការកែប្រែ" : "បង្កើតអនុប្រភេទ"}

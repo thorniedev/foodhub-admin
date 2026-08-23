@@ -141,11 +141,11 @@ function Row({
 }) {
   return (
     <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-      <p className="text-sm font-bold uppercase tracking-wide text-gray-400">
+      <p className="text-lg font-bold uppercase tracking-wide text-gray-400">
         {label}
       </p>
 
-      <p className="mt-1 break-words text-lg font-bold text-gray-800">
+      <p className="mt-1 break-words text-xl font-bold text-gray-800">
         {value}
       </p>
     </div>

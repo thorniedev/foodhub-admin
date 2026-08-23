@@ -10,6 +10,7 @@ import {
 import MenuItemAvatar from "./MenuItemAvatar";
 
 import type {
+  FoodRecord,
   MenuItemRecord,
 } from "@/src/types/menu-management";
 
@@ -24,19 +25,31 @@ function storeName(
   );
 }
 
-function foodName(
+function renderBaseFoodCell(
   item: MenuItemRecord,
   foods: FoodRecord[] = [],
-): string {
+) {
   const matched = foods.find(
     (f) => f.uuid === item.foodUuid || f.uuid === item.food?.uuid,
   );
+  const local = matched?.localName || item.food?.localName;
+  const canonical = matched?.canonicalName || item.food?.canonicalName;
+
+  if (!local && !canonical) {
+    return <span className="text-gray-400">—</span>;
+  }
+
   return (
-    item.food?.localName ||
-    item.food?.canonicalName ||
-    matched?.localName ||
-    matched?.canonicalName ||
-    "—"
+    <div className="min-w-0">
+      <p className="font-semibold text-gray-800 truncate">
+        {local || canonical}
+      </p>
+      {canonical && local && canonical.toLowerCase() !== local.toLowerCase() && (
+        <p className="text-[11px] text-gray-400 truncate">
+          {canonical}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -147,7 +160,7 @@ export default function PublishedMenuItemsTable({
                   </td>
 
                   <td className="px-5 py-4 text-sm text-gray-600">
-                    {foodName(
+                    {renderBaseFoodCell(
                       item,
                       foods,
                     )}

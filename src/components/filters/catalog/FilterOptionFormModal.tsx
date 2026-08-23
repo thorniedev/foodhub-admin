@@ -555,60 +555,25 @@ export default function FilterOptionFormModal({
           </Section>
 
           {/* =================================================
-              SECTION 2: VALUE / UNIT / TIME
+              SECTION 2: TIME (for MEAL_TYPE_API)
           ================================================== */}
-          <Section
-            icon={
-              group.source ===
-              "MEAL_TYPE_API" ? (
-                <Clock3
-                  size={22}
-                />
-              ) : (
-                <Hash
-                  size={22}
-                />
-              )
-            }
-            title={
-              group.source ===
-              "MEAL_TYPE_API"
-                ? "ពេលវេលា និងតម្លៃ"
-                : "តម្លៃ និងឯកតា"
-            }
-          >
-            {/* Meal start/end time */}
-            {group.source ===
-              "MEAL_TYPE_API" && (
-              <div
-                className="
-                  mb-5
-                  grid
-                  gap-5
-                  sm:grid-cols-2
-                "
-              >
+          {group.source === "MEAL_TYPE_API" && (
+            <Section
+              icon={<Clock3 size={22} />}
+              title="ពេលវេលា"
+            >
+              <div className="grid gap-5 sm:grid-cols-2">
                 <Field
                   label="ម៉ោងចាប់ផ្តើម"
                   type="time"
                   step="1"
                   required
-                  value={
-                    form.startTime ||
-                    ""
-                  }
-                  onChange={(
-                    value,
-                  ) =>
-                    setForm(
-                      (
-                        previous,
-                      ) => ({
-                        ...previous,
-                        startTime:
-                          value,
-                      }),
-                    )
+                  value={form.startTime || ""}
+                  onChange={(value) =>
+                    setForm((previous) => ({
+                      ...previous,
+                      startTime: value,
+                    }))
                   }
                 />
 
@@ -617,78 +582,17 @@ export default function FilterOptionFormModal({
                   type="time"
                   step="1"
                   required
-                  value={
-                    form.endTime ||
-                    ""
-                  }
-                  onChange={(
-                    value,
-                  ) =>
-                    setForm(
-                      (
-                        previous,
-                      ) => ({
-                        ...previous,
-                        endTime:
-                          value,
-                      }),
-                    )
+                  value={form.endTime || ""}
+                  onChange={(value) =>
+                    setForm((previous) => ({
+                      ...previous,
+                      endTime: value,
+                    }))
                   }
                 />
               </div>
-            )}
-
-            <div
-              className="
-                grid
-                gap-5
-                sm:grid-cols-2
-              "
-            >
-              <Field
-                label="Numeric value"
-                type="number"
-                step="any"
-                value={
-                  form.numericValue
-                }
-                onChange={(
-                  value,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      numericValue:
-                        value,
-                    }),
-                  )
-                }
-                placeholder="Optional"
-              />
-
-              <Field
-                label="Unit"
-                value={
-                  form.unit
-                }
-                onChange={(
-                  value,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      unit: value,
-                    }),
-                  )
-                }
-                placeholder="MINUTE, KM, G, STAR..."
-              />
-            </div>
-          </Section>
+            </Section>
+          )}
 
           {/* =================================================
               SECTION 3: STATUS

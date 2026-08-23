@@ -43,13 +43,13 @@ export default function WeatherConditionTable({
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[950px]">
-        <thead className="bg-gray-50 text-left text-sm font-black uppercase tracking-wide text-gray-500">
+        <thead className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-semibold text-primary-800">
           <tr>
-            <th className="px-5 py-4">Weather</th>
+            <th className="px-5 py-4">ស្ថានភាពអាកាសធាតុ</th>
             <th className="px-5 py-4">Code</th>
-            <th className="px-5 py-4">Local name</th>
-            <th className="px-5 py-4">Description</th>
-            <th className="px-5 py-4">Status</th>
+            <th className="px-5 py-4">ឈ្មោះជាភាសាខ្មែរ</th>
+            <th className="px-5 py-4">ការពិពណ៌នា</th>
+            <th className="px-5 py-4">ស្ថានភាព</th>
             <th className="px-5 py-4 text-right">សកម្មភាព</th>
           </tr>
         </thead>
@@ -76,7 +76,7 @@ export default function WeatherConditionTable({
                 </td>
 
                 <td className="px-5 py-4">
-                  <span className="rounded-full bg-gray-100 px-3 py-1 font-mono text-sm font-black text-gray-600">
+                  <span className="rounded-full bg-gray-100 px-3 py-1 font-mono text-lg font-black text-gray-600">
                     {item.code}
                   </span>
                 </td>
@@ -91,13 +91,13 @@ export default function WeatherConditionTable({
 
                 <td className="px-5 py-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-sm font-black ${
+                    className={`rounded-full px-3.5 py-1 text-lg font-bold ${
                       active
                         ? "bg-emerald-50 text-emerald-700"
                         : "bg-gray-100 text-gray-500"
                     }`}
                   >
-                    {active ? "ACTIVE" : "INACTIVE"}
+                    {active ? "សកម្ម" : "អសកម្ម"}
                   </span>
                 </td>
 

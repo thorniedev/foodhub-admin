@@ -51,7 +51,7 @@ export default function SubCategoryPagination({
 
   return (
     <div className="flex flex-col items-center justify-between gap-4 rounded-3xl bg-white px-6 py-4 shadow-sm sm:flex-row">
-      <p className="text-sm font-semibold text-gray-500">
+      <p className="text-lg font-semibold text-gray-500">
         បង្ហាញ <span className="font-bold text-gray-800">{start}</span> ដល់{" "}
         <span className="font-bold text-gray-800">{end}</span> នៃ{" "}
         <span className="font-bold text-gray-800">{totalElements}</span> ទិន្នន័យ
@@ -63,9 +63,9 @@ export default function SubCategoryPagination({
           type="button"
           disabled={page === 0}
           onClick={() => onPageChange(page - 1)}
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={18} />
         </button>
 
         {/* Page numbers */}
@@ -73,7 +73,7 @@ export default function SubCategoryPagination({
           typeof p === "string" ? (
             <span
               key={`ellipsis-${index}`}
-              className="flex h-9 w-9 items-center justify-center text-sm font-bold text-gray-400"
+              className="flex h-11 w-11 items-center justify-center text-lg font-bold text-gray-400"
             >
               ...
             </span>
@@ -82,7 +82,7 @@ export default function SubCategoryPagination({
               key={p}
               type="button"
               onClick={() => onPageChange(p)}
-              className={`flex h-9 min-w-[36px] items-center justify-center rounded-xl px-2.5 text-sm font-bold transition ${
+              className={`flex h-11 min-w-[44px] items-center justify-center rounded-xl px-3 text-lg font-bold transition ${
                 page === p
                   ? "bg-primary-800 text-white shadow-sm"
                   : "text-gray-600 hover:bg-gray-100"
@@ -98,9 +98,9 @@ export default function SubCategoryPagination({
           type="button"
           disabled={page >= totalPages - 1}
           onClick={() => onPageChange(page + 1)}
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ChevronRight size={16} />
+          <ChevronRight size={18} />
         </button>
       </div>
     </div>

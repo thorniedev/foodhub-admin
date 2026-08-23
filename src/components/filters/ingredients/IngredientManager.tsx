@@ -890,14 +890,14 @@ const {
                               </p>
 
                               <div className="mt-1 flex items-center gap-2">
-                                <span className="rounded-md bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">
+                                <span className="rounded-md bg-gray-100 px-2.5 py-0.5 font-mono text-lg font-semibold text-gray-500">
                                   {
                                     item.code
                                   }
                                 </span>
 
                                 {item.description && (
-                                  <span className="max-w-[200px] truncate text-xs text-gray-400">
+                                  <span className="max-w-[200px] truncate text-lg text-gray-400">
                                     {
                                       item.description
                                     }
@@ -907,7 +907,7 @@ const {
                             </div>
 
                             <span
-                              className={`shrink-0 rounded-full px-2 py-1 text-xs ${
+                              className={`shrink-0 rounded-full px-3 py-1 text-lg font-bold ${
                                 item.isActive
                                   ? "bg-primary-50 text-primary-700"
                                   : "bg-gray-100 text-gray-500"

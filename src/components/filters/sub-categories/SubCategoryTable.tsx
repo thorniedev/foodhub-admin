@@ -31,8 +31,8 @@ export default function SubCategoryTable({
   if (!items.length) {
     return (
       <div className="flex flex-col items-center justify-center rounded-3xl bg-white px-6 py-20 text-center shadow-sm">
-        <p className="text-lg font-bold text-gray-500">{emptyText}</p>
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="text-xl font-bold text-gray-500">{emptyText}</p>
+        <p className="mt-2 text-lg text-gray-400">
           ចុចប៊ូតុង &quot;បន្ថែមអនុប្រភេទ...&quot; ដើម្បីបង្កើតថ្មី។
         </p>
       </div>
@@ -44,7 +44,7 @@ export default function SubCategoryTable({
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-xs font-black uppercase tracking-wider text-gray-400">
+            <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-semibold text-primary-800">
               <th className="px-6 py-4">ឈ្មោះអនុប្រភេទ</th>
               <th className="px-6 py-4">កូដ</th>
               <th className="px-6 py-4">ប្រភេទមេ</th>
@@ -54,7 +54,7 @@ export default function SubCategoryTable({
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-50 text-sm">
+          <tbody className="divide-y divide-gray-50 text-lg">
             {items.map((item) => {
               const active = item.isActive !== false;
               const parentDisplay =
@@ -72,35 +72,35 @@ export default function SubCategoryTable({
 
                   {/* Code */}
                   <td className="px-6 py-4">
-                    <span className="inline-flex rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-xs font-semibold text-gray-700">
+                    <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-lg font-semibold text-gray-700">
                       {item.code}
                     </span>
                   </td>
 
                   {/* Parent Category */}
                   <td className="px-6 py-4">
-                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-primary-50 px-3 py-1 text-xs font-bold text-primary-800">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary-600" />
+                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-primary-50 px-3.5 py-1 text-lg font-bold text-primary-800">
+                      <span className="h-2 w-2 rounded-full bg-primary-600" />
                       {parentDisplay}
                     </span>
                   </td>
 
                   {/* Description */}
-                  <td className="max-w-xs truncate px-6 py-4 text-gray-500">
+                  <td className="max-w-xs truncate px-6 py-4 text-lg text-gray-500">
                     {item.description || "—"}
                   </td>
 
                   {/* Status */}
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-lg font-bold ${
                         active
                           ? "bg-emerald-50 text-emerald-700"
                           : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       <span
-                        className={`h-1.5 w-1.5 rounded-full ${
+                        className={`h-2 w-2 rounded-full ${
                           active ? "bg-emerald-500" : "bg-gray-400"
                         }`}
                       />
@@ -118,7 +118,7 @@ export default function SubCategoryTable({
                         title="មើលព័ត៌មានលម្អិត"
                         className="rounded-xl p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
                       >
-                        <Eye size={18} />
+                        <Eye size={20} />
                       </button>
 
                       {/* Edit */}
@@ -128,7 +128,7 @@ export default function SubCategoryTable({
                         title="កែប្រែ"
                         className="rounded-xl p-2 text-gray-400 transition hover:bg-primary-50 hover:text-primary-700"
                       >
-                        <Pencil size={18} />
+                        <Pencil size={20} />
                       </button>
 
                       {/* Quick Toggle Active */}
@@ -143,7 +143,7 @@ export default function SubCategoryTable({
                             : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                         }`}
                       >
-                        <Power size={18} />
+                        <Power size={20} />
                       </button>
 
                       {/* Delete */}
@@ -153,7 +153,7 @@ export default function SubCategoryTable({
                         title="លុប"
                         className="rounded-xl p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={20} />
                       </button>
                     </div>
                   </td>

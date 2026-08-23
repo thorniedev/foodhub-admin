@@ -231,14 +231,14 @@ export default function FilterCatalogDetailModal({
                   {displayItem?.localName || displayItem?.name || group.labelKm}
                 </h2>
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-black ${
+                  className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-lg font-bold ${
                     isActive
                       ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
                       : "bg-gray-100 text-gray-500 ring-1 ring-gray-200"
                   }`}
                 >
                   <span
-                    className={`h-1.5 w-1.5 rounded-full ${
+                    className={`h-2 w-2 rounded-full ${
                       isActive ? "bg-emerald-500" : "bg-gray-400"
                     }`}
                   />
@@ -264,7 +264,7 @@ export default function FilterCatalogDetailModal({
         {isLoading && !displayItem ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 py-12">
             <Loader2 size={36} className="animate-spin text-emerald-600" />
-            <p className="text-base font-semibold text-gray-500">
+            <p className="text-lg font-semibold text-gray-500">
               កំពុងទាញយកព័ត៌មានលម្អិត...
             </p>
           </div>
@@ -272,9 +272,9 @@ export default function FilterCatalogDetailModal({
           <div className="mt-6 space-y-5">
             {/* Warning if network fetch failed but fallback is shown */}
             {isError && (
-              <div className="flex items-center justify-between rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <div className="flex items-center justify-between rounded-2xl bg-amber-50 px-5 py-4 text-lg text-amber-800">
                 <div className="flex items-center gap-2">
-                  <Info size={18} className="shrink-0 text-amber-600" />
+                  <Info size={20} className="shrink-0 text-amber-600" />
                   <span>
                     មិនអាចភ្ជាប់ទៅកាន់ API ផ្ទាល់បានទេ ({errorMessage})។ កំពុងបង្ហាញទិន្នន័យពីអង្គចងចាំ។
                   </span>
@@ -285,10 +285,10 @@ export default function FilterCatalogDetailModal({
             {/* Core Info Grid */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {/* Code */}
-              <div className="relative rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
+              <div className="relative rounded-2xl border border-gray-100 bg-gray-50/70 p-5 transition hover:bg-gray-50">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
-                    <Tag size={14} />
+                  <span className="flex items-center gap-1.5 text-lg font-bold uppercase tracking-wider text-gray-400">
+                    <Tag size={18} />
                     Code
                   </span>
                   {displayItem?.code && (
@@ -299,125 +299,59 @@ export default function FilterCatalogDetailModal({
                       title="Copy Code"
                     >
                       {copiedKey === "code" ? (
-                        <Check size={14} className="text-emerald-600" />
+                        <Check size={18} className="text-emerald-600" />
                       ) : (
-                        <Copy size={14} />
+                        <Copy size={18} />
                       )}
                     </button>
                   )}
                 </div>
-                <p className="mt-2 font-mono text-base font-bold text-gray-900">
+                <p className="mt-2 font-mono text-xl font-bold text-gray-900">
                   {displayItem?.code || "—"}
                 </p>
               </div>
 
               {/* Status */}
-              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
-                  <Sparkles size={14} />
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-5 transition hover:bg-gray-50">
+                <span className="flex items-center gap-1.5 text-lg font-bold uppercase tracking-wider text-gray-400">
+                  <Sparkles size={18} />
                   ស្ថានភាព (Status)
                 </span>
-                <p className="mt-2 text-base font-bold text-gray-900">
+                <p className="mt-2 text-xl font-bold text-gray-900">
                   {isActive ? "ACTIVE (បើកដំណើរការ)" : "INACTIVE (បិទដំណើរការ)"}
                 </p>
               </div>
 
               {/* Local Name (Khmer) */}
-              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-5 transition hover:bg-gray-50">
+                <span className="text-lg font-bold uppercase tracking-wider text-gray-400">
                   ឈ្មោះជាភាសាខ្មែរ (Local Name)
                 </span>
-                <p className="mt-2 text-base font-bold text-gray-900">
+                <p className="mt-2 text-xl font-bold text-gray-900">
                   {displayItem?.localName || "—"}
                 </p>
               </div>
 
               {/* English Name */}
-              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-5 transition hover:bg-gray-50">
+                <span className="text-lg font-bold uppercase tracking-wider text-gray-400">
                   ឈ្មោះអន្តរជាតិ (Name)
                 </span>
-                <p className="mt-2 text-base font-bold text-gray-900">
+                <p className="mt-2 text-xl font-bold text-gray-900">
                   {displayItem?.name || "—"}
                 </p>
               </div>
             </div>
 
             {/* Description */}
-            <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+            <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-5 transition hover:bg-gray-50">
+              <span className="text-lg font-bold uppercase tracking-wider text-gray-400">
                 ការពិពណ៌នា (Description)
               </span>
-              <p className="mt-2 text-base leading-relaxed text-gray-700">
+              <p className="mt-2 text-lg leading-relaxed text-gray-700">
                 {displayItem?.description || "គ្មានការពិពណ៌នាឡើយ"}
               </p>
             </div>
-
-            {/* Numeric Value & Unit if exists */}
-            {(displayItem?.numericValue !== null && displayItem?.numericValue !== undefined) && (
-              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                  តម្លៃជាលេខ (Numeric Value)
-                </span>
-                <p className="mt-2 text-base font-bold text-gray-900">
-                  {displayItem.numericValue}{" "}
-                  {displayItem.unit ? (
-                    <span className="text-sm font-normal text-gray-500">
-                      ({displayItem.unit})
-                    </span>
-                  ) : null}
-                </p>
-              </div>
-            )}
-
-            {/* UUID & Timestamp Metadata */}
-            {/* <div className="space-y-2 rounded-2xl border border-gray-100 bg-emerald-50/30 p-4">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-800">
-                  <Hash size={14} />
-                  UUID
-                </span>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(displayItem?.uuid || uuid, "uuid")}
-                  className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 text-xs font-medium text-gray-600 shadow-sm transition hover:bg-gray-50"
-                >
-                  {copiedKey === "uuid" ? (
-                    <>
-                      <Check size={13} className="text-emerald-600" />
-                      <span className="text-emerald-600">បានចម្លង</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy size={13} />
-                      <span>ចម្លង UUID</span>
-                    </>
-                  )}
-                </button>
-              </div>
-              <p className="break-all font-mono text-sm font-semibold text-gray-800">
-                {displayItem?.uuid || uuid}
-              </p>
-
-              {(displayItem?.createdAt || displayItem?.updatedAt) && (
-                <div className="mt-3 grid grid-cols-1 gap-2 pt-2 border-t border-emerald-100/60 sm:grid-cols-2 text-xs text-gray-500">
-                  {displayItem?.createdAt && (
-                    <div className="flex items-center gap-1.5">
-                      <Calendar size={13} className="text-gray-400" />
-                      <span>បង្កើតនៅ: {formatDate(displayItem.createdAt)}</span>
-                    </div>
-                  )}
-                  {displayItem?.updatedAt && (
-                    <div className="flex items-center gap-1.5">
-                      <Clock size={13} className="text-gray-400" />
-                      <span>កែប្រែចុងក្រោយ: {formatDate(displayItem.updatedAt)}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div> */}
-
-       
           </div>
         )}
 
@@ -426,7 +360,7 @@ export default function FilterCatalogDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="min-h-11 rounded-full bg-gray-900 px-6 text-base font-bold text-white transition hover:bg-black focus:outline-none focus:ring-4 focus:ring-gray-200"
+            className="min-h-12 rounded-full bg-gray-900 px-7 text-lg font-bold text-white transition hover:bg-black focus:outline-none focus:ring-4 focus:ring-gray-200"
           >
             បិទ
           </button>

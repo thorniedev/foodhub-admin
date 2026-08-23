@@ -76,19 +76,19 @@ export default function WeatherConditionHeader({
 
       <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-          <p className="text-sm font-semibold text-emerald-50">សរុប (Total)</p>
+          <p className="text-lg font-semibold text-emerald-50">សរុប (Total)</p>
           <p className="mt-1 text-2xl font-black">{total}</p>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-          <p className="text-sm font-semibold text-emerald-50">សកម្ម (Active)</p>
+          <p className="text-lg font-semibold text-emerald-50">សកម្ម (Active)</p>
           <p className="mt-1 text-2xl font-black text-emerald-300">
             {activeCount}
           </p>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-          <p className="text-sm font-semibold text-emerald-50">
+          <p className="text-lg font-semibold text-emerald-50">
             អសកម្ម (Inactive / Deleted)
           </p>
           <p className="mt-1 text-2xl font-black text-amber-200">
