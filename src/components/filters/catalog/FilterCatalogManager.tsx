@@ -9,13 +9,13 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  CircleMinus,
   Eye,
   Pencil,
   Plus,
   RotateCcw,
   Search,
   SlidersHorizontal,
-  Trash2,
   X,
 } from "lucide-react";
 
@@ -298,6 +298,17 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         active={activeCount}
         inactive={inactiveCount}
         onCreate={openCreateModal}
+        onRestoreAll={
+          inactiveCount > 0
+            ? () => {
+                groupOptions
+                  .filter((item) => item.active === false)
+                  .forEach((item) => {
+                    setActive(item.uuid, true);
+                  });
+              }
+            : undefined
+        }
       />
 
       {/* COMPONENT: CatalogToolbar */}
@@ -434,12 +445,14 @@ function CatalogHeader({
   active,
   inactive,
   onCreate,
+  onRestoreAll,
 }: {
   group: FilterGroup;
   total: number;
   active: number;
   inactive: number;
   onCreate: () => void;
+  onRestoreAll?: () => void;
 }) {
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
@@ -454,7 +467,7 @@ function CatalogHeader({
             </div>
 
             <div className="min-w-0">
-              <p className="text-3xl font-bold text-accent-400">
+              <p className="text-5xl font-bold text-accent-400">
                 {group.labelKm}
               </p>
 
@@ -473,14 +486,27 @@ function CatalogHeader({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={onCreate}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
-        >
-          <Plus size={20} />
-          បន្ថែម {group.labelKm}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {inactive > 0 && onRestoreAll && (
+            <button
+              type="button"
+              onClick={onRestoreAll}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-400 px-5 py-3 text-lg font-bold text-gray-900 shadow-sm transition hover:bg-amber-300 sm:w-fit"
+            >
+              <RotateCcw size={20} />
+              ស្ដារទាំងអស់ ({inactive})
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={onCreate}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
+          >
+            <Plus size={20} />
+            បន្ថែម {group.labelKm}
+          </button>
+        </div>
       </div>
     </section>
   );
@@ -574,7 +600,7 @@ function CatalogToolbar({
   ];
 
   return (
-    <section className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-5">
+    <section className="w-full">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         {/* Status tabs */}
         <div className="flex w-full min-w-0 gap-2 overflow-x-auto pb-1 xl:w-auto">
@@ -586,17 +612,17 @@ function CatalogToolbar({
                 key={tab.value}
                 type="button"
                 onClick={() => onStatusChange(tab.value)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
                   active
                     ? "bg-primary-800 text-white"
-                    : "bg-gray-50 text-gray-500 hover:bg-primary-50 hover:text-primary-800"
+                    : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
-                {tab.label}
+                <span>{tab.label}</span>
 
                 <span
-                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
-                    active ? "bg-white/20 text-white" : "bg-white text-gray-500"
+                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
+                    active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
                   }`}
                 >
                   {tab.count}
@@ -619,7 +645,7 @@ function CatalogToolbar({
               onChange={(event) => onSearchChange(event.target.value)}
               onFocus={onSearchFocus}
               placeholder={`ស្វែងរក ${groupLabel}...`}
-              className="h-[52px] w-full rounded-full border border-gray-200 bg-gray-50 pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+              className="h-[52px] w-full rounded-full border border-gray-200 bg-white pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
             />
 
             {search && (
@@ -768,7 +794,7 @@ function CatalogTable({
   return (
     <section className="w-full min-w-0 max-w-full overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
       <div className="w-full max-w-full overflow-x-auto">
-        <table className="w-full min-w-[980px] border-collapse text-left">
+        <table className="w-full min-w-[1000px] border-collapse text-left">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/70">
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
@@ -780,7 +806,7 @@ function CatalogTable({
               </th>
 
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-                Value
+                ការពិពណ៌នា
               </th>
 
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
@@ -799,18 +825,12 @@ function CatalogTable({
                 key={item.uuid}
                 className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
               >
-                {/* Name + description */}
+                {/* Name */}
                 <td className="px-6 py-5">
-                  <div className="min-w-[280px]">
+                  <div className="min-w-[200px]">
                     <p className="text-lg font-medium text-gray-800">
                       {item.localName || item.name}
                     </p>
-
-                    {item.description && (
-                      <p className="mt-1 max-w-[400px] truncate text-lg leading-7 text-gray-400">
-                        {item.description}
-                      </p>
-                    )}
                   </div>
                 </td>
 
@@ -821,9 +841,11 @@ function CatalogTable({
                   </span>
                 </td>
 
-                {/* Numeric value + unit */}
-                <td className="px-6 py-5">
-                  <NumericValue value={item.numericValue} unit={item.unit} />
+                {/* Description */}
+                <td className="max-w-[360px] px-6 py-5">
+                  <p className="line-clamp-2 text-lg leading-7 text-gray-500">
+                    {item.description || "—"}
+                  </p>
                 </td>
 
                 {/* Status */}
@@ -859,7 +881,7 @@ function CatalogTable({
                         title="បិទ"
                         className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
                       >
-                        <Trash2 size={20} />
+                        <CircleMinus size={20} />
                       </button>
                     ) : (
                       <button
@@ -1024,7 +1046,7 @@ function DeleteCatalogOptionModal({
       <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
-            <Trash2 size={24} />
+            <CircleMinus size={26} />
           </div>
 
           <button

@@ -3,6 +3,7 @@
 import {
   AlertCircle,
   Heart,
+  HeartPulse,
   Loader2,
   Plus,
   Save,
@@ -20,6 +21,7 @@ import MenuItemSearchableSelect, {
 } from "./MenuItemSearchableSelect";
 
 import type { DietaryType } from "@/src/types/dietaryType";
+import type { MedicalCondition } from "@/src/types/medicalCondition";
 import type {
   FoodRecord,
   IngredientOption,
@@ -41,6 +43,12 @@ type IngredientRow = {
 type DietaryTypeRow = {
   dietaryTypeUuid: string;
   verificationStatus: "VERIFIED" | "UNVERIFIED" | string;
+  notes: string;
+};
+
+type MedicalConditionRow = {
+  medicalConditionUuid: string;
+  suitabilityStatus: "ALLOWED" | "NOT_RECOMMENDED" | "RESTRICTED" | string;
   notes: string;
 };
 
@@ -158,6 +166,8 @@ export default function PublishMenuItemModal({
   stores,
   ingredients,
   dietaryTypes = [],
+  allergens = [],
+  medicalConditions = [],
   saving,
   fixedStoreUuid,
   defaultStoreUuid,
@@ -171,6 +181,7 @@ export default function PublishMenuItemModal({
   ingredients: IngredientOption[];
   dietaryTypes?: DietaryType[];
   allergens?: unknown[];
+  medicalConditions?: MedicalCondition[];
   saving: boolean;
   fixedStoreUuid?: string;
   defaultStoreUuid?: string;
@@ -185,6 +196,7 @@ export default function PublishMenuItemModal({
   const [values, setValues] = useState<FormState>(EMPTY);
   const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>([]);
   const [dietaryTypeRows, setDietaryTypeRows] = useState<DietaryTypeRow[]>([]);
+  const [medicalConditionRows, setMedicalConditionRows] = useState<MedicalConditionRow[]>([]);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [existingThumbnail, setExistingThumbnail] = useState<string | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
@@ -202,6 +214,7 @@ export default function PublishMenuItemModal({
       });
       setIngredientRows([]);
       setDietaryTypeRows([]);
+      setMedicalConditionRows([]);
       setThumbnailFile(null);
       setExistingThumbnail(null);
       setGalleryFiles([]);
@@ -322,8 +335,15 @@ export default function PublishMenuItemModal({
   }, [item, open, stores, foods, ingredients, dietaryTypes]);
 
   const activeFoods = useMemo(
-    () => foods.filter((food) => food.isActive !== false),
-    [foods],
+    () =>
+      foods.filter(
+        (food) =>
+          food.isActive !== false ||
+          food.uuid === item?.foodUuid ||
+          food.uuid === (item as any)?.food?.uuid ||
+          food.uuid === values.foodUuid,
+      ),
+    [foods, item, values.foodUuid],
   );
 
   const activeIngredients = useMemo(
@@ -368,6 +388,21 @@ export default function PublishMenuItemModal({
         sublabel: d.code,
       })),
     [activeDietaryTypes],
+  );
+
+  const activeMedicalConditions = useMemo(
+    () => (medicalConditions ?? []).filter((m) => m.active !== false),
+    [medicalConditions],
+  );
+
+  const medicalConditionOptions: SearchableOption[] = useMemo(
+    () =>
+      activeMedicalConditions.map((m) => ({
+        value: m.uuid,
+        label: m.name,
+        sublabel: m.code,
+      })),
+    [activeMedicalConditions],
   );
 
   const handleFoodSelect = (selectedUuid: string) => {
@@ -521,15 +556,15 @@ export default function PublishMenuItemModal({
   const effectiveStoreUuid = storeFixedId || values.storeUuid;
 
   return (
-    <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs">
       <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-[30px] bg-white shadow-2xl">
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-7 py-6">
           <div>
-            <h2 className="text-2xl font-black text-gray-900">
+            <p className="text-3xl font-black text-gray-900">
               {item ? "កែប្រែ Menu Item" : "បង្កើត Menu Item សម្រាប់ Store"}
-            </h2>
-            <p className="mt-1 text-sm text-gray-400">
+            </p>
+            <p className="mt-1 text-lg text-gray-500">
               {storeFixedId
                 ? "ជ្រើស Food Catalog កំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីដាក់លក់ក្នុងហាងនេះ"
                 : "ជ្រើស Store និង Food Catalog រួចកំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីផ្សាយលើ Website"}
@@ -540,20 +575,20 @@ export default function PublishMenuItemModal({
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="rounded-full p-2 text-gray-400 hover:bg-gray-100"
+            className="rounded-full p-2.5 text-gray-400 hover:bg-gray-100 transition"
           >
-            <X size={21} />
+            <X size={24} />
           </button>
         </div>
 
         {/* Scrollable body — everything on one page */}
-        <div className="flex-1 space-y-6 overflow-y-auto p-6">
+        <div className="flex-1 space-y-6 overflow-y-auto p-7">
           {/* Basic info */}
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-2">
             <label>
               <Label required>ហាង</Label>
               {(Boolean(item) || Boolean(storeFixedId)) && (
-                <p className="mb-1 text-xs text-gray-400">
+                <p className="mb-1 text-lg text-gray-400">
                   Store ត្រូវបានកំណត់រួចហើយ មិនអាចប្តូរបានទេ។
                 </p>
               )}
@@ -692,16 +727,16 @@ export default function PublishMenuItemModal({
                     description: event.target.value,
                   }))
                 }
-                className={`${inputClass} h-auto py-3`}
+                className={`${inputClass} h-auto py-3.5`}
               />
             </label>
           </div>
 
           {/* Ingredients */}
-          <section className="rounded-2xl border border-gray-100 p-5">
+          <section className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
             <TabIntro
-              icon={<Sparkles size={18} className="text-[#137A3D]" />}
-              title="គ្រឿងផ្សំ"
+              icon={<Sparkles size={22} className="text-[#137A3D]" />}
+              title="គ្រឿងផ្សំ (Ingredients)"
               description="កំណត់គ្រឿងផ្សំ បរិមាណ និងខ្នាតសម្រាប់មុខម្ហូបនេះ។"
               onAdd={() =>
                 setIngredientRows((current) => [
@@ -722,7 +757,7 @@ export default function PublishMenuItemModal({
               {ingredientRows.map((row, index) => (
                 <div
                   key={index}
-                  className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[2fr_1fr_1fr_auto_auto]"
+                  className="grid gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100 md:grid-cols-[2fr_1fr_1fr_auto_auto]"
                 >
                   <MenuItemSearchableSelect
                     value={row.ingredientUuid}
@@ -766,7 +801,7 @@ export default function PublishMenuItemModal({
                     className={inputClass}
                   />
 
-                  <label className="flex items-center gap-2 px-2 text-xs font-bold text-gray-700">
+                  <label className="flex items-center gap-2 px-2 text-lg font-bold text-gray-700">
                     <input
                       type="checkbox"
                       checked={row.isOptional}
@@ -775,7 +810,7 @@ export default function PublishMenuItemModal({
                           isOptional: event.target.checked,
                         })
                       }
-                      className="h-4 w-4 rounded accent-[#137A3D]"
+                      className="h-5 w-5 rounded accent-[#137A3D]"
                     />
                     Optional
                   </label>
@@ -797,10 +832,10 @@ export default function PublishMenuItemModal({
           </section>
 
           {/* Dietary types */}
-          <section className="rounded-2xl border border-gray-100 p-5">
+          <section className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
             <TabIntro
-              icon={<Heart size={18} className="text-emerald-600" />}
-              title="របបអាហារ"
+              icon={<Heart size={22} className="text-emerald-600" />}
+              title="របបអាហារ (Dietary Types)"
               description="សម្គាល់របបអាហារ (Vegan, Halal, Keto, etc.)"
               onAdd={() =>
                 setDietaryTypeRows((current) => [
@@ -819,7 +854,7 @@ export default function PublishMenuItemModal({
               {dietaryTypeRows.map((row, index) => (
                 <div
                   key={index}
-                  className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[2fr_1.5fr_2fr_auto]"
+                  className="grid gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100 md:grid-cols-[2fr_1.5fr_2fr_auto]"
                 >
                   <MenuItemSearchableSelect
                     value={row.dietaryTypeUuid}
@@ -871,8 +906,94 @@ export default function PublishMenuItemModal({
             </div>
           </section>
 
+          {/* Medical conditions */}
+          <section className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
+            <TabIntro
+              icon={<HeartPulse size={22} className="text-emerald-600" />}
+              title="ស្ថានភាពសុខភាព (Medical Conditions)"
+              description="សម្គាល់លក្ខខណ្ឌសុខភាពដែលសាកសម ឬគួរប្រុងប្រយ័ត្ន (Diabetes, Hypertension, etc.)"
+              onAdd={() =>
+                setMedicalConditionRows((current) => [
+                  ...current,
+                  {
+                    medicalConditionUuid: "",
+                    suitabilityStatus: "ALLOWED",
+                    notes: "",
+                  },
+                ])
+              }
+              addLabel="បន្ថែមស្ថានភាពសុខភាព"
+            />
+
+            <div className="mt-4 space-y-3">
+              {medicalConditionRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="grid gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100 md:grid-cols-[2fr_1.5fr_2fr_auto]"
+                >
+                  <MenuItemSearchableSelect
+                    value={row.medicalConditionUuid}
+                    options={medicalConditionOptions}
+                    onChange={(next) =>
+                      setMedicalConditionRows((current) =>
+                        current.map((r, i) =>
+                          i === index ? { ...r, medicalConditionUuid: next } : r,
+                        ),
+                      )
+                    }
+                    placeholder="ជ្រើសស្ថានភាពសុខភាព"
+                    ariaLabel="ជ្រើសស្ថានភាពសុខភាព"
+                  />
+
+                  <select
+                    value={row.suitabilityStatus}
+                    onChange={(event) =>
+                      setMedicalConditionRows((current) =>
+                        current.map((r, i) =>
+                          i === index
+                            ? { ...r, suitabilityStatus: event.target.value }
+                            : r,
+                        ),
+                      )
+                    }
+                    className={inputClass}
+                  >
+                    <option value="ALLOWED">ALLOWED (សមរម្យ)</option>
+                    <option value="NOT_RECOMMENDED">NOT_RECOMMENDED (មិនណែនាំ)</option>
+                    <option value="RESTRICTED">RESTRICTED (ហាមឃាត់)</option>
+                  </select>
+
+                  <input
+                    placeholder="កំណត់ចំណាំ (Notes)"
+                    value={row.notes}
+                    onChange={(event) =>
+                      setMedicalConditionRows((current) =>
+                        current.map((r, i) =>
+                          i === index ? { ...r, notes: event.target.value } : r,
+                        ),
+                      )
+                    }
+                    className={inputClass}
+                  />
+
+                  <RemoveRowButton
+                    onClick={() =>
+                      setMedicalConditionRows((current) =>
+                        current.filter((_, rowIndex) => rowIndex !== index),
+                      )
+                    }
+                  />
+                </div>
+              ))}
+
+              {!medicalConditionRows.length && (
+                <EmptyRowsHint text="មិនទាន់បានកំណត់ស្ថានភាពសុខភាពទេ។" />
+              )}
+            </div>
+          </section>
+
           {/* Image Upload: 2 Separate Parts (Thumbnail & Gallery) */}
-          <div className="space-y-4">
+          <div className="space-y-5">
             <ThumbnailImagePicker
               value={thumbnailFile}
               onChange={setThumbnailFile}
@@ -891,20 +1012,20 @@ export default function PublishMenuItemModal({
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 border-t border-gray-100 px-6 py-4">
+        <div className="shrink-0 border-t border-gray-100 px-7 py-5">
           {error && (
-            <div className="mb-3 flex items-start gap-2 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
-              <AlertCircle size={16} className="mt-0.5 shrink-0" />
+            <div className="mb-4 flex items-start gap-2.5 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg font-semibold text-red-600">
+              <AlertCircle size={22} className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-4">
             <button
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50"
+              className="rounded-2xl border border-gray-200 px-7 py-3.5 text-xl font-bold text-gray-600 hover:bg-gray-50 transition"
             >
               បោះបង់
             </button>
@@ -913,12 +1034,12 @@ export default function PublishMenuItemModal({
               type="button"
               disabled={saving}
               onClick={() => void submit()}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#137A3D] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-700/20 hover:bg-[#0f8e48] disabled:opacity-60 transition"
+              className="inline-flex items-center gap-2.5 rounded-2xl bg-[#137A3D] px-7 py-3.5 text-xl font-bold text-white shadow-md shadow-emerald-700/20 hover:bg-[#0f8e48] disabled:opacity-60 transition active:scale-95"
             >
               {saving ? (
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={22} className="animate-spin" />
               ) : (
-                <Save size={16} />
+                <Save size={22} />
               )}
               {item ? "រក្សាទុក" : "Publish ទៅ Website"}
             </button>
@@ -930,7 +1051,7 @@ export default function PublishMenuItemModal({
 }
 
 const inputClass =
-  "h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm text-gray-800 outline-none transition focus:border-[#137A3D] focus:ring-4 focus:ring-emerald-50";
+  "h-14 w-full rounded-2xl border border-gray-200 bg-gray-50/50 px-4 text-lg font-medium text-gray-800 outline-none transition focus:border-[#137A3D] focus:bg-white focus:ring-4 focus:ring-emerald-50";
 
 function Label({
   children,
@@ -940,9 +1061,9 @@ function Label({
   required?: boolean;
 }) {
   return (
-    <span className="mb-2 block text-sm font-bold text-gray-800">
+    <span className="mb-2.5 block text-xl font-bold text-gray-800">
       {children}
-      {required && <span className="ml-0.5 text-red-500">*</span>}
+      {required && <span className="ml-1 text-red-500">*</span>}
     </span>
   );
 }
@@ -950,8 +1071,8 @@ function Label({
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <p className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-red-500">
-      <AlertCircle size={12} />
+    <p className="mt-1.5 flex items-center gap-1.5 text-lg font-semibold text-red-500">
+      <AlertCircle size={16} />
       {message}
     </p>
   );
@@ -1033,20 +1154,20 @@ function TabIntro({
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {icon}
         <div>
-          <h3 className="font-black text-gray-900">{title}</h3>
-          <p className="mt-0.5 text-xs text-gray-400">{description}</p>
+          <p className="text-2xl font-black text-gray-900">{title}</p>
+          <p className="mt-1 text-lg text-gray-500">{description}</p>
         </div>
       </div>
 
       <button
         type="button"
         onClick={onAdd}
-        className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black transition ${buttonClass}`}
+        className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-lg font-bold transition active:scale-95 ${buttonClass}`}
       >
-        <Plus size={15} />
+        <Plus size={18} />
         {addLabel}
       </button>
     </div>
@@ -1054,7 +1175,7 @@ function TabIntro({
 }
 
 function EmptyRowsHint({ text }: { text: string }) {
-  return <p className="py-4 text-center text-sm text-gray-400">{text}</p>;
+  return <p className="py-5 text-center text-lg text-gray-400">{text}</p>;
 }
 
 function RemoveRowButton({ onClick }: { onClick: () => void }) {
@@ -1062,9 +1183,9 @@ function RemoveRowButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-100 text-red-400 hover:bg-red-50"
+      className="flex h-14 w-14 items-center justify-center rounded-2xl border border-red-100 text-red-400 hover:bg-red-50 transition"
     >
-      <Trash2 size={17} />
+      <Trash2 size={20} />
     </button>
   );
 }

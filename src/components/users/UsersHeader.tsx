@@ -16,6 +16,7 @@ export default function UsersHeader({
 }: UsersHeaderProps) {
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
+      {/* Glow circles */}
       <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full bg-white/5" />
       <div className="pointer-events-none absolute -bottom-24 right-20 h-64 w-64 rounded-full bg-white/5" />
 
@@ -30,12 +31,12 @@ export default function UsersHeader({
               <p className="text-5xl font-bold text-accent-400">គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់</p>
               <p className="mt-6 max-w-2xl text-xl text-white/85">
                 គ្រប់គ្រង គណនី ស្ថានភាព ផ្អាកដំណើរការ ស្តារឡើងវិញ{" "}
-                <br className="md:block max-md:hidden" />និងពិនិត្យប្រវត្តិរូបគណនីអ្នកប្រើប្រាស់ម្នាក់ៗក្នុង ម្ហូបអារហារ។
+                <br className="md:block max-md:hidden" />និងពិនិត្យប្រវត្តិរូបគណនីអ្នកប្រើប្រាស់ម្នាក់ៗក្នុង ម្ហូបអាហារ។
               </p>
             </div>
           </div>
 
-          <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Stat
               icon={<Users size={20} />}
               label="គណនីសរុប"

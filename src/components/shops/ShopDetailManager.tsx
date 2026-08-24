@@ -154,7 +154,7 @@ export default function ShopDetailManager({
   const isMenuModalOpen = createMenuOpen || !!editingMenuItemRecord;
 
   const foodsQuery = useGetManagedFoodsQuery(
-    { page: 0, size: 100 },
+    { page: 0, size: 500 },
     { skip: !isMenuModalOpen },
   );
   const storesQuery = useGetManagedStoresQuery(undefined, {

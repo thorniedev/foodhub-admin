@@ -29,7 +29,7 @@ export default function DietaryTypesToolbar({
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="ស្វែងរកតាមឈ្មោះ កូដ ប្រភេទ ឬការពិពណ៌នា..."
-          className="h-[52px] w-full rounded-full border border-gray-200 bg-gray-50 pl-12 pr-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+          className="h-[52px] w-full rounded-full border border-gray-200 bg-white pl-12 pr-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
         />
       </div>
 

@@ -32,16 +32,14 @@ async function parseBackendResponse(
   }
 }
 
-function getBackendApiUrl(): string | null {
-  const backendApiUrl =
+function getBackendApiUrl(): string {
+  const configured = (
     process.env.BACKEND_API_URL ??
-    process.env.NEXT_PUBLIC_API_BASE_URL;
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    "https://api.mhoubahar.store"
+  ).replace(/\/+$/, "");
 
-  if (!backendApiUrl) {
-    return null;
-  }
-
-  return normalizeBaseUrl(backendApiUrl);
+  return /\/api\/v1$/i.test(configured) ? configured : `${configured}/api/v1`;
 }
 
 function getAccessToken(request: NextRequest): string | null {

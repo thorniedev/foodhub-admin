@@ -54,22 +54,22 @@ export default function StoreSystemInfoSection({ store }: { store: Store }) {
             <button
               type="button"
               onClick={handleCopyUuid}
-              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-bold text-gray-700 shadow-2xs transition hover:bg-gray-100"
+              className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-lg font-bold text-gray-700 shadow-2xs transition hover:bg-gray-100"
             >
               {copiedUuid ? (
                 <>
-                  <Check size={13} className="text-emerald-600" />
+                  <Check size={18} className="text-emerald-600" />
                   <span className="text-emerald-700">បានចម្លង</span>
                 </>
               ) : (
                 <>
-                  <Copy size={13} />
+                  <Copy size={18} />
                   <span>ចម្លង</span>
                 </>
               )}
             </button>
           </div>
-          <p className="mt-1 break-all font-mono text-base font-semibold text-gray-800">
+          <p className="mt-1 break-all font-mono text-lg font-semibold text-gray-800">
             {store.uuid || "—"}
           </p>
         </div>

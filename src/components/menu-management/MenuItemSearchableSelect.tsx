@@ -82,7 +82,7 @@ export default function MenuItemSearchableSelect({
         disabled={disabled}
         aria-label={ariaLabel}
         onClick={() => (open ? close() : setOpen(true))}
-        className={`flex h-12 w-full items-center justify-between gap-3 rounded-xl border bg-gray-50 px-4 text-left text-sm text-gray-800 outline-none transition disabled:cursor-not-allowed disabled:opacity-50 ${
+        className={`flex h-14 w-full items-center justify-between gap-3 rounded-2xl border bg-gray-50/50 px-4 text-left text-lg font-medium text-gray-800 outline-none transition disabled:cursor-not-allowed disabled:opacity-50 ${
           invalid
             ? "border-red-300 bg-red-50/40"
             : open
@@ -95,7 +95,7 @@ export default function MenuItemSearchableSelect({
             <>
               {selected.label}
               {selected.sublabel && (
-                <span className="ml-1.5 text-xs text-gray-400">
+                <span className="ml-2 text-lg text-gray-400">
                   {selected.sublabel}
                 </span>
               )}
@@ -105,7 +105,7 @@ export default function MenuItemSearchableSelect({
           )}
         </span>
 
-        <span className="flex shrink-0 items-center gap-1">
+        <span className="flex shrink-0 items-center gap-1.5">
           {clearable && value && !disabled && (
             <span
               role="button"
@@ -114,13 +114,13 @@ export default function MenuItemSearchableSelect({
                 event.stopPropagation();
                 onChange("");
               }}
-              className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
             >
-              <X size={13} />
+              <X size={18} />
             </span>
           )}
           <ChevronDown
-            size={16}
+            size={20}
             className={`text-gray-400 transition-transform duration-200 ${
               open ? "rotate-180" : ""
             }`}
@@ -129,21 +129,21 @@ export default function MenuItemSearchableSelect({
       </button>
 
       {open && (
-        <div className="absolute left-0 right-0 top-[54px] z-[160] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-          <div className="flex items-center gap-2 border-b border-gray-100 px-3 py-2">
-            <Search size={15} className="shrink-0 text-gray-400" />
+        <div className="absolute left-0 right-0 top-[60px] z-[160] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+          <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-3">
+            <Search size={20} className="shrink-0 text-gray-400" />
             <input
               ref={searchRef}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="ស្វែងរក..."
-              className="h-8 w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
+              className="h-10 w-full bg-transparent text-lg text-gray-800 outline-none placeholder:text-gray-400"
             />
           </div>
 
-          <div className="max-h-56 overflow-y-auto p-1.5">
+          <div className="max-h-64 overflow-y-auto p-2">
             {filtered.length === 0 && (
-              <p className="px-3 py-6 text-center text-sm text-gray-400">
+              <p className="px-4 py-6 text-center text-lg text-gray-400">
                 {emptyLabel}
               </p>
             )}
@@ -159,22 +159,22 @@ export default function MenuItemSearchableSelect({
                     onChange(option.value);
                     close();
                   }}
-                  className={`flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition ${
+                  className={`flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left text-lg font-medium transition ${
                     isSelected
-                      ? "bg-emerald-50 text-[#137A3D]"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
+                      ? "bg-emerald-50 text-[#137A3D] font-bold"
+                      : "text-gray-700 hover:bg-gray-50 hover:text-[#137A3D]"
                   }`}
                 >
                   <span className="min-w-0">
                     <span className="block truncate">{option.label}</span>
                     {option.sublabel && (
-                      <span className="block truncate text-xs font-normal text-gray-400">
+                      <span className="block truncate text-lg font-normal text-gray-400">
                         {option.sublabel}
                       </span>
                     )}
                   </span>
                   {isSelected && (
-                    <Check size={16} className="shrink-0 text-[#137A3D]" />
+                    <Check size={20} className="shrink-0 text-[#137A3D]" />
                   )}
                 </button>
               );

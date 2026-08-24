@@ -32,12 +32,12 @@ function getConfig() {
   const backendApiUrl =
     process.env.BACKEND_API_URL ??
     process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "http://localhost:7070/api/v1";
+    "https://api.mhoubahar.store";
 
   const keycloakUrl =
     process.env.KEYCLOAK_URL ??
     process.env.NEXT_PUBLIC_KEYCLOAK_URL ??
-    "https://auth.chanthorndev.site";
+    "https://auth.mhoubahar.store";
 
   const realm =
     process.env.KEYCLOAK_REALM ??
@@ -46,7 +46,8 @@ function getConfig() {
 
   const clientId =
     process.env.KEYCLOAK_CLIENT_ID ??
-    process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID;
+    process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ??
+    "mhoubahar-admin";
 
   const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET;
 

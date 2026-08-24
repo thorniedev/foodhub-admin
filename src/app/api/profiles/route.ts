@@ -199,14 +199,14 @@ function getAccessToken(request: NextRequest): string | null {
   return request.cookies.get("foodhub_access_token")?.value ?? null;
 }
 
-function getBackendApiUrl(): string | null {
-  const backendApiUrl = process.env.BACKEND_API_URL;
+function getBackendApiUrl(): string {
+  const configured = (
+    process.env.BACKEND_API_URL ??
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    "https://api.mhoubahar.store"
+  ).replace(/\/+$/, "");
 
-  if (!backendApiUrl) {
-    return null;
-  }
-
-  return normalizeBaseUrl(backendApiUrl);
+  return /\/api\/v1$/i.test(configured) ? configured : `${configured}/api/v1`;
 }
 
 function configurationError() {

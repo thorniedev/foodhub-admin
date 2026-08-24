@@ -288,31 +288,6 @@ export default function WeatherConditionFormModal({
                 className={`${inputClass} h-auto py-3`}
               />
             </label>
-
-            <label className="flex items-center gap-3 md:col-span-2">
-              <input
-                type="checkbox"
-                checked={
-                  values.isActive
-                }
-                onChange={(event) =>
-                  setValues(
-                    (
-                      current,
-                    ) => ({
-                      ...current,
-                      isActive:
-                        event.target.checked,
-                    }),
-                  )
-                }
-                className="h-5 w-5 accent-[#137A3D]"
-              />
-
-              <span className="text-lg font-bold text-gray-700">
-                Active
-              </span>
-            </label>
           </div>
 
           {error && (
