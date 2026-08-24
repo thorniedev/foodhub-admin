@@ -79,14 +79,6 @@ export const dashboardNav: NavItem[] = [
         href: "/dynamic-content/banners",
       },
       {
-        label: "រូបអាហារតាមរដូវកាល",
-        href: "/dynamic-content/food-by-season",
-      },
-      {
-        label: "រូបអាហារតាមតំបន់",
-        href: "/dynamic-content/food-by-area",
-      },
-      {
         label: "មតិកែលម្អ",
         href: "/dynamic-content/feedback",
       },

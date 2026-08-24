@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
   Loader2,
-  RotateCcw,
   Search,
   X,
 } from "lucide-react";
@@ -29,12 +28,6 @@ import WeatherConditionDetailModal from "./WeatherConditionDetailModal";
 import WeatherConditionFormModal from "./WeatherConditionFormModal";
 import WeatherConditionHeader from "./WeatherConditionHeader";
 import WeatherConditionTable from "./WeatherConditionTable";
-
-import {
-  mergeWeatherConditions,
-  readLocalWeatherCache,
-  saveLocalWeatherCache,
-} from "@/src/lib/weatherConditionStorage";
 
 function getApiErrorMessage(error: unknown): string {
   if (error && typeof error === "object") {
@@ -81,8 +74,6 @@ export default function WeatherConditionManager() {
   const [editingItem, setEditingItem] = useState<WeatherCondition | null>(null);
   const [detailUuid, setDetailUuid] = useState<string | null>(null);
   const [deactivateItem, setDeactivateItem] = useState<WeatherCondition | null>(null);
-  const [conflictItem, setConflictItem] = useState<WeatherCondition | null>(null);
-  const [localCache, setLocalCache] = useState<WeatherCondition[]>(() => readLocalWeatherCache());
 
   const [notice, setNotice] = useState<{
     type: "success" | "error";
@@ -113,46 +104,16 @@ export default function WeatherConditionManager() {
 
   const serverItems = data?.contents ?? [];
 
-  // Merge server items with local cache
-  const mergedItems = useMemo(() => {
-    const map = new Map<string, WeatherCondition>();
-
-    // 1. Add all from local cache first
-    localCache.forEach((item) => {
-      const key = (item.code || item.uuid).toUpperCase();
-      map.set(key, item);
-    });
-
-    // 2. Overlay server items (which are active)
-    serverItems.forEach((serverItem) => {
-      const key = (serverItem.code || serverItem.uuid).toUpperCase();
-      map.set(key, {
-        ...serverItem,
-        isActive: true,
-        active: true,
-      });
-    });
-
-    return Array.from(map.values());
-  }, [serverItems, localCache]);
-
-  // Sync back to local storage whenever server updates
-  useEffect(() => {
-    if (serverItems.length > 0) {
-      saveLocalWeatherCache(mergedItems);
-    }
-  }, [serverItems, mergedItems]);
-
-  const activeCount = mergedItems.filter(
+  const activeCount = serverItems.filter(
     (item) => (item.isActive ?? item.active) !== false,
   ).length;
-  const inactiveCount = mergedItems.length - activeCount;
+  const inactiveCount = serverItems.length - activeCount;
 
   // Filter by search & status
   const filteredItems = useMemo(() => {
     const query = searchText(search);
 
-    return mergedItems.filter((item) => {
+    return serverItems.filter((item) => {
       const isActive = (item.isActive ?? item.active) !== false;
 
       if (statusFilter === "ACTIVE" && !isActive) return false;
@@ -164,19 +125,17 @@ export default function WeatherConditionManager() {
         (val) => searchText(val).includes(query),
       );
     });
-  }, [mergedItems, search, statusFilter]);
+  }, [serverItems, search, statusFilter]);
 
   const busy = creating || updating || deactivating || restoring;
 
   const openCreate = () => {
     setEditingItem(null);
-    setConflictItem(null);
     setFormOpen(true);
   };
 
   const openEdit = (item: WeatherCondition) => {
     setEditingItem(item);
-    setConflictItem(null);
     setFormOpen(true);
   };
 
@@ -184,7 +143,6 @@ export default function WeatherConditionManager() {
     if (creating || updating) return;
     setFormOpen(false);
     setEditingItem(null);
-    setConflictItem(null);
   };
 
   // Restore single weather condition
@@ -192,39 +150,14 @@ export default function WeatherConditionManager() {
     try {
       setNotice(null);
 
-      // Try server restore / update first
       try {
         await restoreWeatherMutation(item.uuid).unwrap();
       } catch {
-        try {
-          await updateWeather({
-            uuid: item.uuid,
-            body: { isActive: true },
-          }).unwrap();
-        } catch {
-          // If server fails (e.g. seed UUID), recreate on server
-          try {
-            await createWeather({
-              code: item.code,
-              name: item.name,
-              localName: item.localName,
-              description: item.description,
-              isActive: true,
-            }).unwrap();
-          } catch {
-            // Re-create failed
-          }
-        }
+        await updateWeather({
+          uuid: item.uuid,
+          body: { isActive: true },
+        }).unwrap();
       }
-
-      // Update local cache
-      const updated = mergedItems.map((c) =>
-        (c.code === item.code || c.uuid === item.uuid)
-          ? { ...c, isActive: true, active: true }
-          : c,
-      );
-      setLocalCache(updated);
-      saveLocalWeatherCache(updated);
 
       setNotice({
         type: "success",
@@ -242,7 +175,7 @@ export default function WeatherConditionManager() {
 
   // Restore All Inactive items
   const handleRestoreAll = async () => {
-    const inactives = mergedItems.filter(
+    const inactives = serverItems.filter(
       (item) => (item.isActive ?? item.active) === false,
     );
     if (!inactives.length) return;
@@ -269,19 +202,12 @@ export default function WeatherConditionManager() {
   ) => {
     try {
       setNotice(null);
-      setConflictItem(null);
 
       if (editingItem) {
         await updateWeather({
           uuid: editingItem.uuid,
           body: payload as UpdateWeatherConditionPayload,
         }).unwrap();
-
-        const updated = mergedItems.map((c) =>
-          c.uuid === editingItem.uuid ? { ...c, ...payload, isActive: true, active: true } : c,
-        );
-        setLocalCache(updated);
-        saveLocalWeatherCache(updated);
 
         setNotice({
           type: "success",
@@ -290,10 +216,7 @@ export default function WeatherConditionManager() {
       } else {
         const createPayload = payload as CreateWeatherConditionPayload;
         try {
-          const res = await createWeather(createPayload).unwrap();
-          const updated = [...mergedItems, { ...res, isActive: true, active: true }];
-          setLocalCache(updated);
-          saveLocalWeatherCache(updated);
+          await createWeather(createPayload).unwrap();
 
           setNotice({
             type: "success",
@@ -302,14 +225,12 @@ export default function WeatherConditionManager() {
         } catch (createErr) {
           const msg = getApiErrorMessage(createErr);
 
-          // If code already exists on backend (soft deleted item conflict)
           if (msg.toLowerCase().includes("already exists") || (createErr as any)?.status === 409) {
-            const matchingInactive = mergedItems.find(
+            const matchingInactive = serverItems.find(
               (item) => item.code.toUpperCase() === createPayload.code.toUpperCase(),
             );
 
             if (matchingInactive) {
-              setConflictItem(matchingInactive);
               setNotice({
                 type: "error",
                 text: `កូដ "${createPayload.code}" ធ្លាប់បានលុបពីមុន (ស្ថិតក្នុងស្ថានភាពអសកម្ម)។ អ្នកអាចស្ដារវាឡើងវិញបាន។`,
@@ -346,22 +267,7 @@ export default function WeatherConditionManager() {
 
     try {
       setNotice(null);
-
-      // Call backend soft-delete
-      try {
-        await deactivateWeather(deactivateItem.uuid).unwrap();
-      } catch {
-        // Backend deactivation attempted
-      }
-
-      // Mark as inactive in local cache so it does not vanish
-      const updated = mergedItems.map((item) =>
-        (item.uuid === deactivateItem.uuid || item.code === deactivateItem.code)
-          ? { ...item, isActive: false, active: false }
-          : item,
-      );
-      setLocalCache(updated);
-      saveLocalWeatherCache(updated);
+      await deactivateWeather(deactivateItem.uuid).unwrap();
 
       setDeactivateItem(null);
       setNotice({
@@ -382,48 +288,46 @@ export default function WeatherConditionManager() {
     <div className="w-full min-w-0 max-w-full space-y-6">
       {/* Header Banner */}
       <WeatherConditionHeader
-        total={mergedItems.length}
+        total={serverItems.length}
         activeCount={activeCount}
         inactiveCount={inactiveCount}
         refreshing={isFetching}
         onCreate={openCreate}
         onRefresh={() => refetch()}
-        onRestoreAll={handleRestoreAll}
+        onRestoreAll={inactiveCount > 0 ? handleRestoreAll : undefined}
       />
 
       {/* Notice with Optional Restore Button */}
       {notice && (
         <div
-          className={`flex flex-col gap-3 rounded-2xl p-5 text-lg font-semibold sm:flex-row sm:items-center sm:justify-between ${
-            notice.type === "success"
-              ? "border border-emerald-100 bg-emerald-50 text-emerald-800"
-              : "border border-red-100 bg-red-50 text-red-700"
-          }`}
+          className={`flex flex-col gap-3 rounded-2xl p-5 text-lg font-semibold sm:flex-row sm:items-center sm:justify-between ${notice.type === "success"
+            ? "border border-emerald-100 bg-emerald-50 text-emerald-800"
+            : "border border-red-100 bg-red-50 text-red-700"
+            }`}
         >
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             {notice.type === "success" ? (
-              <CheckCircle2 size={22} className="text-emerald-600 shrink-0" />
+              <CheckCircle2 size={24} className="text-emerald-600 shrink-0" />
             ) : (
-              <AlertTriangle size={22} className="text-red-500 shrink-0" />
+              <AlertTriangle size={24} className="text-red-500 shrink-0" />
             )}
             <span>{notice.text}</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {notice.action && (
               <button
                 type="button"
                 onClick={notice.action.onClick}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-primary-800 px-4 py-2 text-lg font-bold text-white shadow-sm transition hover:bg-primary-900"
+                className="rounded-xl bg-red-600 px-4 py-2 text-lg font-bold text-white transition hover:bg-red-700"
               >
-                <RotateCcw size={18} />
-                <span>{notice.action.label}</span>
+                {notice.action.label}
               </button>
             )}
             <button
               type="button"
               onClick={() => setNotice(null)}
-              className="rounded-full p-1 text-gray-400 hover:bg-black/5 hover:text-gray-600"
+              className="rounded-full p-1.5 text-gray-400 hover:bg-black/5 hover:text-gray-600"
             >
               <X size={20} />
             </button>
@@ -431,70 +335,27 @@ export default function WeatherConditionManager() {
         </div>
       )}
 
-      {/* Toolbar & Tabs */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        {/* Status Tabs */}
-        <div className="flex flex-wrap items-center gap-2">
+      {/* Fetch Error Display */}
+      {error && (
+        <div className="flex items-center justify-between rounded-2xl border border-red-100 bg-red-50 p-5 text-lg text-red-700">
+          <div className="flex items-center gap-3">
+            <AlertTriangle size={24} className="shrink-0 text-red-500" />
+            <span>{getApiErrorMessage(error)}</span>
+          </div>
           <button
             type="button"
-            onClick={() => setStatusFilter("ALL")}
-            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
-              statusFilter === "ALL"
-                ? "bg-primary-800 text-white"
-                : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
-            }`}
+            onClick={() => refetch()}
+            className="rounded-xl border border-red-200 bg-white px-4 py-2 text-lg font-bold text-red-700 hover:bg-red-50"
           >
-            <span>ទាំងអស់</span>
-            <span
-              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
-                statusFilter === "ALL" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
-              }`}
-            >
-              {mergedItems.length}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setStatusFilter("ACTIVE")}
-            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
-              statusFilter === "ACTIVE"
-                ? "bg-primary-800 text-white"
-                : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
-            }`}
-          >
-            <span>សកម្ម</span>
-            <span
-              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
-                statusFilter === "ACTIVE" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
-              }`}
-            >
-              {activeCount}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setStatusFilter("INACTIVE")}
-            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
-              statusFilter === "INACTIVE"
-                ? "bg-primary-800 text-white"
-                : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
-            }`}
-          >
-            <span>អសកម្ម / បានលុប</span>
-            <span
-              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
-                statusFilter === "INACTIVE" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
-              }`}
-            >
-              {inactiveCount}
-            </span>
+            ព្យាយាមម្តងទៀត
           </button>
         </div>
+      )}
 
-        {/* Search bar */}
-        <div className="relative w-full lg:w-[420px]">
+      {/* Toolbar: Search + Filter Tabs */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        {/* Search */}
+        <div className="relative w-full sm:max-w-md">
           <Search
             size={20}
             className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -503,41 +364,70 @@ export default function WeatherConditionManager() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="ស្វែងរក code, name, local name..."
-            className="h-[52px] w-full rounded-full border border-gray-200 bg-white pl-11 pr-10 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+            placeholder="ស្វែងរកតាមឈ្មោះ ឬកូដ..."
+            className="h-12 w-full rounded-full border border-gray-200 bg-white pl-12 pr-4 text-lg font-medium text-gray-800 outline-none transition focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
           />
-          {search && (
-            <button
-              type="button"
-              onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:bg-gray-100"
-            >
-              <X size={18} />
-            </button>
-          )}
+        </div>
+
+        {/* Status Filter Tabs */}
+        <div className="flex items-center gap-2">
+          {(["ALL", "ACTIVE", "INACTIVE"] as const).map((tab) => {
+            const isSelected = statusFilter === tab;
+            const count =
+              tab === "ALL"
+                ? serverItems.length
+                : tab === "ACTIVE"
+                  ? activeCount
+                  : inactiveCount;
+
+            const label =
+              tab === "ALL"
+                ? "ទាំងអស់"
+                : tab === "ACTIVE"
+                  ? "សកម្ម"
+                  : "អសកម្ម";
+
+            return (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setStatusFilter(tab)}
+                className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition ${isSelected
+                  ? "bg-primary-800 text-white"
+                  : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
+              >
+                <span>{label}</span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-lg font-normal ${isSelected ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+                    }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Content Table */}
-      <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
-        {isLoading ? (
-          <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
-            <Loader2 size={32} className="animate-spin text-primary-800" />
-            <p className="mt-3 text-lg font-semibold text-gray-500">
-              កំពុងទាញយក Weather Conditions...
-            </p>
-          </div>
-        ) : (
-          <WeatherConditionTable
-            items={filteredItems}
-            busy={busy}
-            onView={(item) => setDetailUuid(item.uuid)}
-            onEdit={openEdit}
-            onDeactivate={(item) => setDeactivateItem(item)}
-            onRestore={handleRestore}
-          />
-        )}
-      </div>
+      {/* Main Table */}
+      {isLoading ? (
+        <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 rounded-3xl border border-gray-100 bg-white p-8">
+          <Loader2 size={36} className="animate-spin text-[#14833E]" />
+          <p className="text-lg font-semibold text-gray-500">
+            កំពុងទាញយកបញ្ជីស្ថានភាពអាកាសធាតុ...
+          </p>
+        </div>
+      ) : (
+        <WeatherConditionTable
+          items={filteredItems}
+          busy={busy}
+          onView={(item) => setDetailUuid(item.uuid)}
+          onEdit={openEdit}
+          onDeactivate={(item) => setDeactivateItem(item)}
+          onRestore={handleRestore}
+        />
+      )}
 
       {/* Create / Edit Form Modal */}
       <WeatherConditionFormModal
@@ -554,7 +444,7 @@ export default function WeatherConditionManager() {
         onClose={() => setDetailUuid(null)}
       />
 
-      {/* Deactivate Modal */}
+      {/* Deactivate Confirmation Modal */}
       <DeactivateWeatherConditionModal
         item={deactivateItem}
         deleting={deactivating}
