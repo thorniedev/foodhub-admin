@@ -130,16 +130,14 @@ export default function FoodCatalogTable({
 
               <td className="px-6 py-5">
                 <span
-                  className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-lg font-medium ring-1 ring-inset ${
-                    item.isActive === false
+                  className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-lg font-medium ring-1 ring-inset ${item.isActive === false
                       ? "bg-gray-100 text-gray-500 ring-gray-200"
                       : "bg-primary-50 text-primary-700 ring-primary-100"
-                  }`}
+                    }`}
                 >
                   <span
-                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-                      item.isActive === false ? "bg-gray-400" : "bg-primary-600"
-                    }`}
+                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.isActive === false ? "bg-gray-400" : "bg-primary-600"
+                      }`}
                   />
                   {item.isActive === false ? "អសកម្ម" : "សកម្ម"}
                 </span>

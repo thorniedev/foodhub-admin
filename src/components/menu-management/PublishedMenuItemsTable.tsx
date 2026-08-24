@@ -110,7 +110,7 @@ export default function PublishedMenuItemsTable({
   onDelete: (
     item: MenuItemRecord,
   ) => void;
-  }) {
+}) {
   if (!items.length) {
     return (
       <div className="flex flex-col items-center justify-center px-6 py-24 text-center">

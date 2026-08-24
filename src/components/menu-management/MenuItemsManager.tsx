@@ -32,10 +32,6 @@ import {
   useUpdateStoreMenuItemMutation,
 } from "@/src/app/store/menuManagementApi";
 import { useGetWeatherConditionsQuery } from "@/src/app/store/weatherConditionApi";
-import {
-  mergeWeatherConditions,
-  readLocalWeatherCache,
-} from "@/src/lib/weatherConditionStorage";
 import { useGetMealTypesQuery } from "@/src/app/store/mealTypeApi";
 import { useGetAgeGroupsQuery } from "@/src/app/store/ageGroupApi";
 import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
@@ -126,10 +122,9 @@ export default function MenuItemsManager({
   const medicalConditionsQuery = useGetMedicalConditionsQuery({ page: 0, size: 100 });
 
   const activeWeatherConditions = useMemo(() => {
-    const server = weatherQuery.data?.contents ?? [];
-    const local = readLocalWeatherCache();
-    const merged = mergeWeatherConditions(server, local);
-    return merged.filter((w) => (w.isActive ?? w.active) !== false);
+    return (weatherQuery.data?.contents ?? []).filter(
+      (w) => (w.isActive ?? w.active) !== false,
+    );
   }, [weatherQuery.data]);
 
   const activeDietaryTypes = useMemo(
@@ -506,9 +501,8 @@ export default function MenuItemsManager({
       await deleteFood(deletingFood.uuid).unwrap();
       setNotice({
         type: "success",
-        text: `បានប្តូរស្ថានភាព "${
-          deletingFood.localName || deletingFood.canonicalName
-        }" ទៅជា 'អសកម្ម' (Inactive)។`,
+        text: `បានប្តូរស្ថានភាព "${deletingFood.localName || deletingFood.canonicalName
+          }" ទៅជា 'អសកម្ម' (Inactive)។`,
       });
       setDeletingFood(null);
       await refreshAll();
@@ -747,11 +741,10 @@ export default function MenuItemsManager({
       {/* Alert Notice Banner */}
       {notice && (
         <div
-          className={`rounded-2xl border px-6 py-4 text-lg font-medium ${
-            notice.type === "success"
+          className={`rounded-2xl border px-6 py-4 text-lg font-medium ${notice.type === "success"
               ? "border-emerald-100 bg-emerald-50 text-emerald-700"
               : "border-red-100 bg-red-50 text-red-600"
-          }`}
+            }`}
         >
           {notice.text}
         </div>
@@ -854,9 +847,8 @@ export default function MenuItemsManager({
         title="បិទដំណើរការ Food Catalog (Deactivate)?"
         description={
           deletingFood
-            ? `Food "${
-                deletingFood.localName || deletingFood.canonicalName
-              }" នឹងត្រូវប្តូរស្ថានភាពទៅជា 'អសកម្ម' (Inactive)។`
+            ? `Food "${deletingFood.localName || deletingFood.canonicalName
+            }" នឹងត្រូវប្តូរស្ថានភាពទៅជា 'អសកម្ម' (Inactive)។`
             : ""
         }
         deleting={deletingFoodRequest}

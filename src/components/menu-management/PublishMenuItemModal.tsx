@@ -252,7 +252,7 @@ export default function PublishMenuItemModal({
         (f) =>
           (item.food?.canonicalName &&
             f.canonicalName?.toLowerCase() ===
-              item.food.canonicalName?.toLowerCase()) ||
+            item.food.canonicalName?.toLowerCase()) ||
           (item.food?.localName && f.localName === item.food.localName),
       )?.uuid ||
       "";
@@ -1123,9 +1123,8 @@ function Field({
           }
           onChange(nextVal);
         }}
-        className={`${inputClass} ${
-          invalid ? "border-red-300 bg-red-50/40 focus:border-red-400 focus:ring-red-50" : ""
-        }`}
+        className={`${inputClass} ${invalid ? "border-red-300 bg-red-50/40 focus:border-red-400 focus:ring-red-50" : ""
+          }`}
       />
       <FieldError message={error} />
     </label>

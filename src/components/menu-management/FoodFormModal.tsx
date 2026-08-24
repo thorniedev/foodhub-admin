@@ -506,9 +506,9 @@ export default function FoodFormModal({
         defaultSpiceLevel: Math.min(5, Math.max(0, Math.round(numberOrNull(values.defaultSpiceLevel) ?? 0))),
         nutritionData,
         seasons: seasonRows
-          .filter((r) => Boolean(r.seasonUuid))
+          .filter((r) => typeof r.seasonUuid === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(r.seasonUuid.trim()))
           .map((r) => ({
-            seasonUuid: r.seasonUuid,
+            seasonUuid: r.seasonUuid.trim(),
             suitabilityScore: r.suitabilityScore ?? 0.95,
             reasonText: r.reasonText?.trim() || null,
           })),
@@ -519,29 +519,29 @@ export default function FoodFormModal({
             name: r.name || r.code,
           })),
         events: eventRows
-          .filter((r) => Boolean(r.eventUuid))
+          .filter((r) => typeof r.eventUuid === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(r.eventUuid.trim()))
           .map((r) => ({
-            eventUuid: r.eventUuid,
+            eventUuid: r.eventUuid.trim(),
             relevanceScore: r.relevanceScore ?? 0.9,
             reasonText: r.reasonText?.trim() || null,
           })),
         suitableWeather: weatherRows
-          .filter((r) => Boolean(r.weatherConditionUuid))
+          .filter((r) => typeof r.weatherConditionUuid === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(r.weatherConditionUuid.trim()))
           .map((r) => ({
-            weatherConditionUuid: r.weatherConditionUuid,
+            weatherConditionUuid: r.weatherConditionUuid.trim(),
             suitabilityScore: r.suitabilityScore ?? 0.95,
             reasonText: r.reasonText?.trim() || null,
           })),
         mealTypes: mealTypeRows
-          .filter((r) => Boolean(r.mealTypeUuid))
+          .filter((r) => typeof r.mealTypeUuid === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(r.mealTypeUuid.trim()))
           .map((r) => ({
-            mealTypeUuid: r.mealTypeUuid,
+            mealTypeUuid: r.mealTypeUuid.trim(),
             suitabilityScore: r.suitabilityScore ?? 1.0,
           })),
         ageRules: ageRuleRows
-          .filter((r) => Boolean(r.ageGroupUuid))
+          .filter((r) => typeof r.ageGroupUuid === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(r.ageGroupUuid.trim()))
           .map((r) => ({
-            ageGroupUuid: r.ageGroupUuid,
+            ageGroupUuid: r.ageGroupUuid.trim(),
             ruleResult: r.ruleResult || "ALLOWED",
             reasonText: r.reasonText?.trim() || "Suitable as a normal serving.",
           })),

@@ -34,16 +34,16 @@ export default function MenuItemDetailModal({
     data?.primaryMediaUrls?.length
       ? data.primaryMediaUrls
       : data?.primaryMediaUuids?.length
-      ? data.primaryMediaUuids
-      : data?.primaryMediaUuid
-      ? [data.primaryMediaUuid]
-      : data?.images?.length
-      ? data.images
-      : data?.gallery?.length
-      ? data.gallery
-      : data?.galleryMediaUuids?.length
-      ? data.galleryMediaUuids
-      : [data?.thumbnail || data?.imageUrl || data?.thumbnailMediaUuid].filter(Boolean)
+        ? data.primaryMediaUuids
+        : data?.primaryMediaUuid
+          ? [data.primaryMediaUuid]
+          : data?.images?.length
+            ? data.images
+            : data?.gallery?.length
+              ? data.gallery
+              : data?.galleryMediaUuids?.length
+                ? data.galleryMediaUuids
+                : [data?.thumbnail || data?.imageUrl || data?.thumbnailMediaUuid].filter(Boolean)
   ) as string[];
 
   return (
@@ -95,12 +95,12 @@ export default function MenuItemDetailModal({
                   {data.availabilityStatus === "AVAILABLE"
                     ? "មានលក់"
                     : data.availabilityStatus === "OUT_OF_STOCK" || data.availabilityStatus === "SOLD_OUT"
-                    ? "អស់ស្តុក"
-                    : data.availabilityStatus === "UNAVAILABLE"
-                    ? "មិនមានលក់"
-                    : data.availabilityStatus === "DISCONTINUED"
-                    ? "ឈប់លក់"
-                    : data.availabilityStatus}
+                      ? "អស់ស្តុក"
+                      : data.availabilityStatus === "UNAVAILABLE"
+                        ? "មិនមានលក់"
+                        : data.availabilityStatus === "DISCONTINUED"
+                          ? "ឈប់លក់"
+                          : data.availabilityStatus}
                 </span>
               )}
               {data.isFeatured && (

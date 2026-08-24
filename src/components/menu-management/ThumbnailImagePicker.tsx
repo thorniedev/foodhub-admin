@@ -182,8 +182,8 @@ export default function ThumbnailImagePicker({
               {previewUrl
                 ? "បានជ្រើសរូបភាពថ្មីរួចរាល់"
                 : imgError
-                ? "រូបភាពបច្ចុប្បន្នមានបញ្ហា សូមផ្លាស់ប្តូររូបថ្មី"
-                : "រូបភាព Thumbnail បច្ចុប្បន្ន"}
+                  ? "រូបភាពបច្ចុប្បន្នមានបញ្ហា សូមផ្លាស់ប្តូររូបថ្មី"
+                  : "រូបភាព Thumbnail បច្ចុប្បន្ន"}
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <button

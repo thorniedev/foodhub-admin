@@ -240,13 +240,12 @@ export default function BannersView() {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-5 py-4 shadow-lg backdrop-blur-md transition-all animate-in slide-in-from-bottom-5 ${
-              toast.type === "success"
+            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-5 py-4 shadow-lg backdrop-blur-md transition-all animate-in slide-in-from-bottom-5 ${toast.type === "success"
                 ? "border-emerald-200 bg-emerald-50/95 text-emerald-900 shadow-emerald-500/10"
                 : toast.type === "error"
-                ? "border-red-200 bg-red-50/95 text-red-900 shadow-red-500/10"
-                : "border-blue-200 bg-blue-50/95 text-blue-900 shadow-blue-500/10"
-            }`}
+                  ? "border-red-200 bg-red-50/95 text-red-900 shadow-red-500/10"
+                  : "border-blue-200 bg-blue-50/95 text-blue-900 shadow-blue-500/10"
+              }`}
           >
             {toast.type === "success" && (
               <CheckCircle2 size={22} className="text-emerald-600 shrink-0" />
@@ -346,17 +345,15 @@ export default function BannersView() {
               setPublishedFilter("ALL");
               setCurrentPage(0);
             }}
-            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
-              publishedFilter === "ALL"
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${publishedFilter === "ALL"
                 ? "bg-primary-800 text-white"
                 : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
-            }`}
+              }`}
           >
             <span>ទាំងអស់</span>
             <span
-              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
-                publishedFilter === "ALL" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
-              }`}
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${publishedFilter === "ALL" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+                }`}
             >
               {totalElements}
             </span>
@@ -368,17 +365,15 @@ export default function BannersView() {
               setPublishedFilter("PUBLISHED");
               setCurrentPage(0);
             }}
-            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
-              publishedFilter === "PUBLISHED"
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${publishedFilter === "PUBLISHED"
                 ? "bg-primary-800 text-white"
                 : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
-            }`}
+              }`}
           >
             <span>បានផ្សាយ</span>
             <span
-              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
-                publishedFilter === "PUBLISHED" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
-              }`}
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${publishedFilter === "PUBLISHED" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+                }`}
             >
               {banners.filter((b) => b.isPublished).length}
             </span>
@@ -390,17 +385,15 @@ export default function BannersView() {
               setPublishedFilter("DRAFT");
               setCurrentPage(0);
             }}
-            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
-              publishedFilter === "DRAFT"
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${publishedFilter === "DRAFT"
                 ? "bg-primary-800 text-white"
                 : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
-            }`}
+              }`}
           >
             <span>ព្រាង</span>
             <span
-              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
-                publishedFilter === "DRAFT" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
-              }`}
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${publishedFilter === "DRAFT" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+                }`}
             >
               {banners.filter((b) => !b.isPublished).length}
             </span>
@@ -623,18 +616,16 @@ export default function BannersView() {
                           type="button"
                           disabled={isToggling}
                           onClick={() => void handleToggleStatus(banner)}
-                          className={`group/toggle relative inline-flex h-8 w-16 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus:outline-none disabled:opacity-60 ${
-                            banner.isPublished
+                          className={`group/toggle relative inline-flex h-8 w-16 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus:outline-none disabled:opacity-60 ${banner.isPublished
                               ? "bg-[#137A3D]"
                               : "bg-gray-300"
-                          }`}
+                            }`}
                         >
                           <span
-                            className={`inline-flex h-6 w-6 transform items-center justify-center rounded-full bg-white shadow-md transition-transform ${
-                              banner.isPublished
+                            className={`inline-flex h-6 w-6 transform items-center justify-center rounded-full bg-white shadow-md transition-transform ${banner.isPublished
                                 ? "translate-x-8"
                                 : "translate-x-1"
-                            }`}
+                              }`}
                           >
                             {isToggling ? (
                               <Loader2

@@ -82,13 +82,12 @@ export default function MenuItemSearchableSelect({
         disabled={disabled}
         aria-label={ariaLabel}
         onClick={() => (open ? close() : setOpen(true))}
-        className={`flex h-14 w-full items-center justify-between gap-3 rounded-2xl border bg-gray-50/50 px-4 text-left text-lg font-medium text-gray-800 outline-none transition disabled:cursor-not-allowed disabled:opacity-50 ${
-          invalid
+        className={`flex h-14 w-full items-center justify-between gap-3 rounded-2xl border bg-gray-50/50 px-4 text-left text-lg font-medium text-gray-800 outline-none transition disabled:cursor-not-allowed disabled:opacity-50 ${invalid
             ? "border-red-300 bg-red-50/40"
             : open
               ? "border-[#137A3D] bg-white ring-4 ring-emerald-50"
               : "border-gray-200 hover:border-[#137A3D]/50"
-        }`}
+          }`}
       >
         <span className={`truncate ${selected ? "" : "text-gray-400"}`}>
           {selected ? (
@@ -121,9 +120,8 @@ export default function MenuItemSearchableSelect({
           )}
           <ChevronDown
             size={20}
-            className={`text-gray-400 transition-transform duration-200 ${
-              open ? "rotate-180" : ""
-            }`}
+            className={`text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""
+              }`}
           />
         </span>
       </button>
@@ -159,11 +157,10 @@ export default function MenuItemSearchableSelect({
                     onChange(option.value);
                     close();
                   }}
-                  className={`flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left text-lg font-medium transition ${
-                    isSelected
+                  className={`flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left text-lg font-medium transition ${isSelected
                       ? "bg-emerald-50 text-[#137A3D] font-bold"
                       : "text-gray-700 hover:bg-gray-50 hover:text-[#137A3D]"
-                  }`}
+                    }`}
                 >
                   <span className="min-w-0">
                     <span className="block truncate">{option.label}</span>
