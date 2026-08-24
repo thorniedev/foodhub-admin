@@ -482,7 +482,7 @@ export default function WeatherConditionManager() {
                 : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
             }`}
           >
-            <span>អសកម្ម / បានលុប</span>
+            <span>អសកម្ម</span>
             <span
               className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
                 statusFilter === "INACTIVE" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"

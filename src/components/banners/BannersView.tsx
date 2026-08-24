@@ -234,13 +234,13 @@ export default function BannersView() {
   };
 
   return (
-    <div className="relative min-h-screen space-y-6 pb-12">
+    <div className="relative min-h-screen space-y-8 p-3 pb-12 sm:p-6">
       {/* Toast notifications container */}
       <div className="fixed bottom-5 right-5 z-[200] flex flex-col gap-2.5 pointer-events-none">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-3 shadow-lg backdrop-blur-md transition-all animate-in slide-in-from-bottom-5 ${
+            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-5 py-4 shadow-lg backdrop-blur-md transition-all animate-in slide-in-from-bottom-5 ${
               toast.type === "success"
                 ? "border-emerald-200 bg-emerald-50/95 text-emerald-900 shadow-emerald-500/10"
                 : toast.type === "error"
@@ -249,21 +249,21 @@ export default function BannersView() {
             }`}
           >
             {toast.type === "success" && (
-              <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+              <CheckCircle2 size={22} className="text-emerald-600 shrink-0" />
             )}
             {toast.type === "error" && (
-              <AlertCircle size={18} className="text-red-600 shrink-0" />
+              <AlertCircle size={22} className="text-red-600 shrink-0" />
             )}
             {toast.type === "info" && (
-              <Info size={18} className="text-blue-600 shrink-0" />
+              <Info size={22} className="text-blue-600 shrink-0" />
             )}
-            <p className="text-sm font-semibold">{toast.message}</p>
+            <p className="text-lg font-semibold">{toast.message}</p>
             <button
               type="button"
               onClick={() => removeToast(toast.id)}
               className="ml-2 text-gray-400 hover:text-gray-700"
             >
-              <X size={14} />
+              <X size={18} />
             </button>
           </div>
         ))}
@@ -474,15 +474,15 @@ export default function BannersView() {
 
       {/* Error Alert Box */}
       {error && (
-        <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-lg font-semibold text-red-700">
           <div className="flex items-center gap-2.5">
-            <AlertCircle size={18} className="shrink-0" />
+            <AlertCircle size={22} className="shrink-0" />
             <span>{error}</span>
           </div>
           <button
             type="button"
             onClick={() => void fetchBanners()}
-            className="rounded-xl border border-red-300 bg-white px-3 py-1 text-xs font-bold text-red-700 hover:bg-red-50"
+            className="rounded-xl border border-red-300 bg-white px-4 py-2 text-lg font-bold text-red-700 hover:bg-red-50"
           >
             ព្យាយាមម្តងទៀត
           </button>
@@ -490,18 +490,18 @@ export default function BannersView() {
       )}
 
       {/* Main Table Card */}
-      <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-xs">
+      <section className="overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-600">
-            <thead className="border-b border-gray-100 bg-gray-50/80 text-xs font-bold uppercase tracking-wider text-gray-500">
-              <tr>
-                <th className="px-6 py-4">ផ្ទាំងរូបភាព (Thumbnail)</th>
-                <th className="px-6 py-4">ចំណងជើង និងការពិពណ៌នា</th>
-                <th className="px-6 py-4">ប្រភេទ (Category)</th>
-                <th className="px-6 py-4">ទីតាំង (Location)</th>
-                <th className="px-6 py-4 text-center">ស្ថានភាពផ្សាយ (Status)</th>
-                <th className="px-6 py-4">កាលបរិច្ឆេទ</th>
-                <th className="px-6 py-4 text-right">សកម្មភាព (Actions)</th>
+          <table className="w-full min-w-[900px] border-collapse text-left">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50/50">
+                <th className="px-6 py-4 text-xl font-bold text-[#136C34]">ផ្ទាំងរូបភាព (Thumbnail)</th>
+                <th className="px-6 py-4 text-xl font-bold text-[#136C34]">ចំណងជើង និងការពិពណ៌នា</th>
+                <th className="px-6 py-4 text-xl font-bold text-[#136C34]">ប្រភេទ (Category)</th>
+                <th className="px-6 py-4 text-xl font-bold text-[#136C34]">ទីតាំង (Location)</th>
+                <th className="px-6 py-4 text-center text-xl font-bold text-[#136C34]">ស្ថានភាពផ្សាយ (Status)</th>
+                <th className="px-6 py-4 text-xl font-bold text-[#136C34]">កាលបរិច្ឆេទ</th>
+                <th className="px-6 py-4 text-right text-xl font-bold text-[#136C34]">សកម្មភាព (Actions)</th>
               </tr>
             </thead>
 
@@ -511,7 +511,7 @@ export default function BannersView() {
                   <td colSpan={7} className="py-20 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <Loader2 size={32} className="animate-spin text-emerald-600" />
-                      <p className="text-sm font-bold text-gray-500">
+                      <p className="text-lg font-bold text-gray-500">
                         កំពុងទាញយកទិន្នន័យបែនណឺ...
                       </p>
                     </div>
@@ -524,10 +524,10 @@ export default function BannersView() {
                       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-400">
                         <ImageIcon size={28} />
                       </div>
-                      <p className="text-base font-bold text-gray-800">
+                      <p className="text-xl font-bold text-gray-800">
                         មិនមានទិន្នន័យផ្ទាំងបែនណឺទេ
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-lg text-gray-400">
                         សូមចុចប៊ូតុង &ldquo;បង្កើតបែនណឺថ្មី&rdquo; ដើម្បីចាប់ផ្តើមបន្ថែម។
                       </p>
                     </div>
@@ -548,13 +548,13 @@ export default function BannersView() {
                   return (
                     <tr
                       key={banner.id}
-                      className="group transition hover:bg-gray-50/70"
+                      className="border-b border-gray-100 last:border-0 hover:bg-gray-50/60 transition"
                     >
                       {/* Image Thumbnail */}
                       <td className="px-6 py-4">
                         <div
                           onClick={() => fullImageUrl && setPreviewImage(fullImageUrl)}
-                          className="group/img relative h-16 w-28 shrink-0 cursor-pointer overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 shadow-2xs transition hover:scale-105"
+                          className="group/img relative h-20 w-36 shrink-0 cursor-pointer overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 shadow-2xs transition hover:scale-105"
                         >
                           {fullImageUrl ? (
                             <img
@@ -567,26 +567,26 @@ export default function BannersView() {
                             />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center text-gray-400">
-                              <ImageIcon size={20} />
+                              <ImageIcon size={24} />
                             </div>
                           )}
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition group-hover/img:opacity-100">
-                            <Eye size={16} className="text-white" />
+                            <Eye size={20} className="text-white" />
                           </div>
                         </div>
                       </td>
 
                       {/* Title & Description */}
-                      <td className="max-w-[280px] px-6 py-4">
-                        <p className="font-bold text-gray-900 line-clamp-1">
+                      <td className="max-w-[320px] px-6 py-4">
+                        <p className="text-lg font-bold text-gray-900 line-clamp-1">
                           {banner.title}
                         </p>
                         {banner.description ? (
-                          <p className="mt-0.5 text-xs text-gray-400 line-clamp-2">
+                          <p className="mt-1 text-lg text-gray-500 line-clamp-2">
                             {banner.description}
                           </p>
                         ) : (
-                          <span className="text-xs italic text-gray-300">
+                          <span className="text-lg italic text-gray-400">
                             គ្មានការពិពណ៌នា
                           </span>
                         )}
@@ -595,10 +595,10 @@ export default function BannersView() {
                       {/* Category Badge */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${categoryStyle.bg}`}
+                          className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-lg font-bold ${categoryStyle.bg}`}
                         >
                           <span
-                            className={`h-1.5 w-1.5 rounded-full ${categoryStyle.dot}`}
+                            className={`h-2.5 w-2.5 rounded-full ${categoryStyle.dot}`}
                           />
                           {BANNER_CATEGORY_LABELS[banner.category] ||
                             banner.category}
@@ -608,12 +608,12 @@ export default function BannersView() {
                       {/* Location */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         {banner.location ? (
-                          <span className="inline-flex items-center gap-1 rounded-xl bg-blue-50/80 px-2.5 py-1 text-xs font-bold text-blue-700">
-                            <MapPin size={13} className="text-blue-500" />
+                          <span className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50/80 px-3.5 py-1.5 text-lg font-bold text-blue-700">
+                            <MapPin size={18} className="text-blue-500" />
                             {banner.location}
                           </span>
                         ) : (
-                          <span className="text-xs text-gray-300">-</span>
+                          <span className="text-lg text-gray-400">-</span>
                         )}
                       </td>
 
@@ -623,58 +623,58 @@ export default function BannersView() {
                           type="button"
                           disabled={isToggling}
                           onClick={() => void handleToggleStatus(banner)}
-                          className={`group/toggle relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus:outline-none disabled:opacity-60 ${
+                          className={`group/toggle relative inline-flex h-8 w-16 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus:outline-none disabled:opacity-60 ${
                             banner.isPublished
                               ? "bg-[#137A3D]"
                               : "bg-gray-300"
                           }`}
                         >
                           <span
-                            className={`inline-flex h-5 w-5 transform items-center justify-center rounded-full bg-white shadow-md transition-transform ${
+                            className={`inline-flex h-6 w-6 transform items-center justify-center rounded-full bg-white shadow-md transition-transform ${
                               banner.isPublished
-                                ? "translate-x-7"
+                                ? "translate-x-8"
                                 : "translate-x-1"
                             }`}
                           >
                             {isToggling ? (
                               <Loader2
-                                size={11}
+                                size={14}
                                 className="animate-spin text-gray-600"
                               />
                             ) : null}
                           </span>
                         </button>
-                        <p className="mt-1 text-[10px] font-bold text-gray-500">
+                        <p className="mt-1 text-lg font-bold text-gray-600">
                           {banner.isPublished ? "បានផ្សាយ" : "ព្រាង (Draft)"}
                         </p>
                       </td>
 
                       {/* Created Date */}
-                      <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-lg text-gray-600">
                         {formatDate(banner.createdAt)}
                       </td>
 
                       {/* Actions */}
                       <td className="px-6 py-4 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-end gap-2">
                           <button
                             type="button"
                             onClick={() => {
                               setEditingBanner(banner);
                               setIsFormModalOpen(true);
                             }}
-                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-2xs transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                            className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-2xs transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
                             title="កែសម្រួល (Edit)"
                           >
-                            <Edit size={15} />
+                            <Edit size={18} />
                           </button>
                           <button
                             type="button"
                             onClick={() => setDeletingBanner(banner)}
-                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-red-500 shadow-2xs transition hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+                            className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-red-500 shadow-2xs transition hover:border-red-300 hover:bg-red-50 hover:text-red-700"
                             title="លុប (Delete)"
                           >
-                            <Trash2 size={15} />
+                            <Trash2 size={18} />
                           </button>
                         </div>
                       </td>
@@ -688,12 +688,12 @@ export default function BannersView() {
 
         {/* Pagination Footer */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-100 bg-gray-50/50 px-6 py-4 sm:flex-row">
-          <div className="flex items-center gap-3 text-xs font-semibold text-gray-500">
+          <div className="flex flex-wrap items-center gap-3 text-lg font-semibold text-gray-600">
             <span>
               បង្ហាញ {filteredBanners.length} នៃ {totalElements} បែនណឺសរុប
             </span>
             <span>•</span>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <span>ទំព័រនីមួយៗ:</span>
               <select
                 value={pageSize}
@@ -701,7 +701,7 @@ export default function BannersView() {
                   setPageSize(Number(e.target.value));
                   setCurrentPage(0);
                 }}
-                className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-bold text-gray-700 outline-none"
+                className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-lg font-bold text-gray-700 outline-none"
               >
                 <option value={10}>10</option>
                 <option value={20}>20</option>
@@ -710,17 +710,17 @@ export default function BannersView() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               disabled={currentPage === 0 || isLoading}
               onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-              className="rounded-xl border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-bold text-gray-700 shadow-2xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg font-bold text-gray-700 shadow-2xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
               ថយក្រោយ (Prev)
             </button>
 
-            <span className="px-3 text-xs font-bold text-gray-700">
+            <span className="px-3 text-lg font-bold text-gray-700">
               ទំព័រ {currentPage + 1} / {totalPages || 1}
             </span>
 
@@ -730,13 +730,13 @@ export default function BannersView() {
               onClick={() =>
                 setCurrentPage((p) => Math.min(totalPages - 1, p + 1))
               }
-              className="rounded-xl border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-bold text-gray-700 shadow-2xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg font-bold text-gray-700 shadow-2xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
               បន្ទាប់ (Next)
             </button>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Form Modal (Create / Edit) */}
       {isFormModalOpen && (
@@ -774,7 +774,7 @@ export default function BannersView() {
               onClick={() => setPreviewImage(null)}
               className="absolute right-4 top-4 rounded-full bg-black/60 p-2 text-white hover:bg-black/90"
             >
-              <X size={20} />
+              <X size={24} />
             </button>
             <img
               src={previewImage}
