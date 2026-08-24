@@ -6,6 +6,7 @@ import {
   Globe,
   SlidersHorizontal,
   Utensils,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -21,6 +22,11 @@ export const dashboardNav: NavItem[] = [
     label: "ផ្ទាំងគ្រប់គ្រង",
     icon: LayoutGrid,
     href: "/",
+  },
+  {
+    label: "អនុសាសន៍ & សវនកម្ម AI",
+    icon: Sparkles,
+    href: "/admin/recommendations",
   },
 
   {

@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-   images: {
+  turbopack: {
+    root: __dirname,
+  },
+  images: {
     remotePatterns: [
       {
         protocol: "https",
