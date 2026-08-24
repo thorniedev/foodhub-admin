@@ -6,7 +6,7 @@ import {
 } from "./adminRecommendationService";
 import { AdminSessionSummary } from "@/src/types/adminRecommendation";
 
-describe("adminRecommendationService", () => {
+describe("adminRecommendationService with Standardized Backend Envelopes", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -59,13 +59,15 @@ describe("adminRecommendationService", () => {
     });
   });
 
-  describe("fetchAdminSessions", () => {
-    it("should fetch and parse sessions from API successfully", async () => {
-      const mockPayload = {
-        payload: {
-          content: [
+  describe("fetchAdminSessions with Standard PageResponse Envelope", () => {
+    it("should parse standard ApiResponse<PageResponse<T>> (data.items)", async () => {
+      const standardizedResponse = {
+        status: 200,
+        message: "Sessions retrieved successfully",
+        data: {
+          items: [
             {
-              uuid: "test-uuid-1",
+              uuid: "test-uuid-standard",
               requestedByUserId: 99,
               mode: "SINGLE",
               status: "READY",
@@ -76,47 +78,74 @@ describe("adminRecommendationService", () => {
               createdAt: "2026-08-24T00:00:00Z",
             },
           ],
+          pageNumber: 0,
+          pageSize: 15,
           totalElements: 1,
           totalPages: 1,
+          isFirst: true,
+          isLast: true,
+          hasNext: false,
+          hasPrevious: false,
         },
+        timestamp: "2026-08-24T08:00:00Z",
       };
 
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => mockPayload,
+        json: async () => standardizedResponse,
       } as Response);
 
-      const result = await fetchAdminSessions({ page: 0, size: 10, mode: "SINGLE", status: "READY" });
+      const result = await fetchAdminSessions({ page: 0, size: 15, mode: "SINGLE", status: "READY" });
 
       expect(global.fetch).toHaveBeenCalled();
       expect(result.content.length).toBe(1);
       expect(result.totalElements).toBe(1);
-      expect(result.content[0].uuid).toBe("test-uuid-1");
+      expect(result.totalPages).toBe(1);
+      expect(result.content[0].uuid).toBe("test-uuid-standard");
     });
   });
 
-  describe("fetchAdminSessionDetail", () => {
-    it("should fetch session metadata, items, and safety checks in parallel", async () => {
-      const mockSession = { uuid: "sess-100", requestedByUserId: 10, mode: "GROUP", status: "READY" };
-      const mockItems = [{ uuid: "item-1", menuItemId: 5, menuItemName: "Amok", rankPosition: 1, finalScore: 0.95 }];
-      const mockSafety = [{ uuid: "check-1", profileId: 10, menuItemId: 5, result: "SAFE", ruleVersion: "v1" }];
+  describe("fetchAdminSessionDetail with Standard ApiResponse<T> Envelope", () => {
+    it("should parse standard ApiResponse<T> (data object and data.items)", async () => {
+      const mockSession = {
+        status: 200,
+        message: "OK",
+        data: { uuid: "sess-100", requestedByUserId: 10, mode: "GROUP", status: "READY" },
+        timestamp: "2026-08-24T08:00:00Z",
+      };
+      const mockItems = {
+        status: 200,
+        message: "OK",
+        data: {
+          items: [{ uuid: "item-1", menuItemId: 5, menuItemName: "Amok", rankPosition: 1, finalScore: 0.95 }],
+        },
+        timestamp: "2026-08-24T08:00:00Z",
+      };
+      const mockSafety = {
+        status: 200,
+        message: "OK",
+        data: {
+          items: [{ uuid: "check-1", profileId: 10, menuItemId: 5, result: "SAFE", ruleVersion: "v1" }],
+        },
+        timestamp: "2026-08-24T08:00:00Z",
+      };
 
       global.fetch = vi.fn().mockImplementation((url: string) => {
         if (url.includes("/items")) {
           return Promise.resolve({
             ok: true,
-            json: async () => ({ payload: mockItems }),
+            json: async () => mockItems,
           });
         }
         if (url.includes("/safety-checks")) {
           return Promise.resolve({
             ok: true,
-            json: async () => ({ payload: mockSafety }),
+            json: async () => mockSafety,
           });
         }
         return Promise.resolve({
           ok: true,
-          json: async () => ({ payload: mockSession }),
+          json: async () => mockSession,
         });
       });
 
