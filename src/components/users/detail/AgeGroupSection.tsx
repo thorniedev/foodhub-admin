@@ -21,7 +21,7 @@ export default function AgeGroupSection({
       ) : (
         <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4 transition hover:border-gray-200 hover:bg-gray-50">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-lg font-bold text-gray-800">
+            <p className="text-[18px] font-bold text-gray-800">
               {formatAgeGroupKhmer(ageGroup.name)}
             </p>
 

@@ -8,11 +8,57 @@ import { AlertCircle, Loader2, Save, UserCog, X } from "lucide-react";
 import type { AdminUser } from "@/src/types/userProfile";
 import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
 
+const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const INVALID_DOMAINS = new Set([
+  "mailinator.com",
+  "10minutemail.com",
+  "tempmail.com",
+  "temp-mail.org",
+  "guerrillamail.com",
+  "trashmail.com",
+  "yopmail.com",
+  "dispostable.com",
+  "fake.com",
+  "test.com",
+  "example.com",
+  "example.org",
+  "sample.com",
+]);
+
+function isRealEmail(email: string): boolean {
+  if (!email) return false;
+  const clean = email.trim().toLowerCase();
+  if (!STRICT_EMAIL_REGEX.test(clean)) return false;
+  if (clean.includes("..")) return false;
+  const parts = clean.split("@");
+  if (parts.length !== 2) return false;
+  const [local, domain] = parts;
+  if (local.length < 3 || domain.length < 4) return false;
+  if (INVALID_DOMAINS.has(domain)) return false;
+
+  // Detect keyboard mashing / fake gibberish patterns (e.g. "lengsasdfsaasdfas@gmail.com")
+  const mashingRegex = /(asdf|sdfa|dfsa|qwer|zxcv|ghjk|jkl;|12345|abcde)/i;
+  if (mashingRegex.test(local) && local.length > 8) {
+    return false;
+  }
+
+  const domainParts = domain.split(".");
+  const tld = domainParts[domainParts.length - 1];
+  if (!tld || tld.length < 2 || !/^[a-z]{2,}$/.test(tld)) return false;
+  return true;
+}
+
 const userProfileEditSchema = z.object({
   firstName: z.string().trim().min(1, "សូមបញ្ចូលនាមខ្លួន"),
   lastName: z.string().trim().min(1, "សូមបញ្ចូលនាមត្រកូល"),
   username: z.string().trim().min(3, "ឈ្មោះគណនីត្រូវមានយ៉ាងហោចណាស់ 3 តួអក្សរ"),
-  email: z.string().trim().email("ទម្រង់អ៊ីមែលមិនត្រឹមត្រូវ"),
+  email: z
+    .string()
+    .trim()
+    .min(1, "សូមបញ្ចូលអ៊ីមែល")
+    .refine(isRealEmail, {
+      message: "សូមបញ្ចូលអ៊ីមែលពិតប្រាកដ និងត្រឹមត្រូវ (ឧ. example@gmail.com)",
+    }),
 });
 
 type UserProfileEditFormData = z.infer<typeof userProfileEditSchema>;

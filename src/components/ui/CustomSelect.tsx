@@ -58,7 +58,7 @@ export default function CustomSelect({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}
-        className={`flex h-12 w-full items-center justify-between rounded-2xl border bg-white px-4 text-left text-base transition outline-none disabled:cursor-not-allowed disabled:bg-gray-50 ${
+        className={`flex h-11 w-full items-center justify-between rounded-2xl border bg-white px-4 text-left text-base font-semibold transition outline-none disabled:cursor-not-allowed disabled:bg-gray-50 ${
           error
             ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
             : open
@@ -67,8 +67,8 @@ export default function CustomSelect({
         }`}
       >
         <span
-          className={`truncate font-medium ${
-            selectedOption ? "text-gray-900" : "text-gray-400"
+          className={`truncate ${
+            selectedOption ? "text-gray-700 font-semibold" : "text-gray-400 font-medium"
           }`}
         >
           {selectedOption ? selectedOption.label : placeholder}

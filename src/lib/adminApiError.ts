@@ -59,9 +59,53 @@ function extractFieldErrors(data: MaybeRecord): string[] {
   return messages;
 }
 
+function translateKnownBackendMessage(msg: string): string {
+  const trimmed = msg.trim();
+
+  if (
+    trimmed.includes("SELF profile already exists") ||
+    trimmed.includes("A SELF profile already exists")
+  ) {
+    return "ប្រវត្តិរូប 'ខ្លួនឯង (SELF)' មានរួចហើយសម្រាប់គណនីនេះ។ មិនអាចបង្កើតប្រវត្តិរូប 'ខ្លួនឯង' ស្ទួនបានទេ! សូមជ្រើសរើសទំនាក់ទំនងផ្សេងទៀត (ដូចជា កូន, ប្តី/ប្រពន្ធ)។";
+  }
+
+  if (
+    trimmed.includes("No active age group is configured for age") ||
+    trimmed.includes("age group is configured") ||
+    trimmed.includes("No active age group")
+  ) {
+    return "មិនទាន់មានការកំណត់ក្រុមអាយុ (Age Group) សម្រាប់អាយុនេះនៅក្នុងប្រព័ន្ធនៅឡើយទេ។ សូមពិនិត្យថ្ងៃខែឆ្នាំកំណើតម្តងទៀត។";
+  }
+
+  if (
+    trimmed.includes("dateOfBirth") ||
+    trimmed.includes("must be a date in the past") ||
+    trimmed.includes("date in the past or in the present")
+  ) {
+    return "ថ្ងៃខែឆ្នាំកំណើតត្រូវតែជាថ្ងៃក្នុងអតីតកាល ឬបច្ចុប្បន្ន (មិនអាចជាថ្ងៃអនាគតបានទេ)។";
+  }
+
+  if (
+    trimmed.includes("referenced by existing records") ||
+    trimmed.includes("cannot be permanently deleted")
+  ) {
+    return "មិនអាចលុបគណនីនេះចេញពីប្រព័ន្ធបានទេ ព្រោះគណនីនេះមានទិន្នន័យផ្សារភ្ជាប់ក្នុងប្រព័ន្ធ (ដូចជា ហាង, ការកុម្ម៉ង់, ឬប្រវត្តិរូប)។ សូមប្រើប្រាស់មុខងារ 'ផ្អាកដំណើរការ (Suspend)' ជំនួសវិញ។";
+  }
+
+  if (trimmed.includes("username") && (trimmed.includes("exists") || trimmed.includes("already"))) {
+    return "ឈ្មោះគណនី (Username) នេះមានគេប្រើប្រាស់រួចហើយ។ សូមជ្រើសរើសឈ្មោះគណនីផ្សេង។";
+  }
+
+  if (trimmed.includes("email") && (trimmed.includes("exists") || trimmed.includes("already"))) {
+    return "អាសយដ្ឋានអ៊ីមែល (Email) នេះមានគេប្រើប្រាស់រួចហើយ។ សូមប្រើប្រាស់អ៊ីមែលផ្សេង។";
+  }
+
+  return trimmed;
+}
+
 function readMessage(data: unknown): string | null {
   if (typeof data === "string" && data.trim()) {
-    return data;
+    return translateKnownBackendMessage(data);
   }
 
   if (!isRecord(data)) {
@@ -76,7 +120,7 @@ function readMessage(data: unknown): string | null {
   for (const key of ["message", "detail", "error", "error_description", "description"]) {
     const value = data[key];
     if (typeof value === "string" && value.trim()) {
-      return value;
+      return translateKnownBackendMessage(value);
     }
   }
 

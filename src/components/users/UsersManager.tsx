@@ -40,6 +40,7 @@ import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
 import HardDeleteUserConfirmModal from "./HardDeleteUserConfirmModal";
 import RestoreUserConfirmModal from "./RestoreUserConfirmModal";
 import SuspendUserConfirmModal from "./SuspendUserConfirmModal";
+import { clearUserAvatarCache } from "./UserAvatar";
 import UserCreateModal from "./UserCreateModal";
 import UserEditModal from "./UserEditModal";
 import UserProfileEditModal from "./UserProfileEditModal";
@@ -373,10 +374,7 @@ export default function UsersManager() {
 
       await refetch();
     } catch (requestError) {
-      setNotice({
-        type: "error",
-        text: getAdminApiErrorMessage(requestError),
-      });
+      throw requestError;
     }
   };
 
@@ -435,6 +433,7 @@ export default function UsersManager() {
         ...payload,
       }).unwrap();
 
+      clearUserAvatarCache(profileEditUser.uuid);
       setProfileEditUser(null);
 
       setNotice({
@@ -531,6 +530,7 @@ export default function UsersManager() {
 
     try {
       await hardDeleteAdminUser(target.uuid).unwrap();
+      clearUserAvatarCache(target.uuid);
       setHardDeleteUser(null);
 
       setNotice({

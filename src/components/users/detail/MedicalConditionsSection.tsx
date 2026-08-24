@@ -33,7 +33,7 @@ export default function MedicalConditionsSection({
               className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4 transition hover:border-gray-200 hover:bg-gray-50"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-[20px] font-bold text-gray-900">
+                <p className="text-[18px] font-bold text-gray-900">
                   {item.name}
                 </p>
 

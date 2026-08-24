@@ -189,6 +189,10 @@ export interface AdminProfile {
   dateOfBirth: string | null;
   preferredLanguage: string | null;
   avatarMediaUuid: string | null;
+  avatarUrl?: string | null;
+  imageUrl?: string | null;
+  profileImage?: string | null;
+  picture?: string | null;
   ageGroup: AgeGroupResponse | null;
   isDefault: boolean | null;
   isActive: boolean | null;

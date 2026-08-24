@@ -380,6 +380,20 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
           }),
         };
       },
+      providesTags: (result, _error, { userUuid }) =>
+        result
+          ? [
+            ...result.contents.map(({ uuid }) => ({
+              type: "AdminProfile" as const,
+              id: uuid,
+            })),
+            { type: "AdminProfile" as const, id: `USER_${userUuid}` },
+            { type: "AdminProfile" as const, id: "LIST" },
+          ]
+          : [
+            { type: "AdminProfile" as const, id: `USER_${userUuid}` },
+            { type: "AdminProfile" as const, id: "LIST" },
+          ],
     }),
 
     getAdminProfile: builder.query<AdminProfile, string>({
@@ -387,6 +401,9 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
         url: `/profiles/${encodeURIComponent(profileUuid)}`,
         method: "GET",
       }),
+      providesTags: (_result, _error, profileUuid) => [
+        { type: "AdminProfile", id: profileUuid },
+      ],
     }),
 
     createAdminProfile: builder.mutation<
@@ -400,7 +417,9 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, { userUuid }) => [
         { type: "AdminProfile", id: "LIST" },
+        { type: "AdminProfile", id: `USER_${userUuid}` },
         { type: "AdminUser", id: userUuid },
+        { type: "AdminUser", id: "LIST" },
       ],
     }),
 
@@ -416,6 +435,7 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
       invalidatesTags: (_result, _error, { profileUuid }) => [
         { type: "AdminProfile", id: profileUuid },
         { type: "AdminProfile", id: "LIST" },
+        { type: "AdminUser" },
       ],
     }),
 
@@ -427,6 +447,7 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
       invalidatesTags: (_result, _error, profileUuid) => [
         { type: "AdminProfile", id: profileUuid },
         { type: "AdminProfile", id: "LIST" },
+        { type: "AdminUser" },
       ],
     }),
 
@@ -438,6 +459,7 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
       invalidatesTags: (_result, _error, profileUuid) => [
         { type: "AdminProfile", id: profileUuid },
         { type: "AdminProfile", id: "LIST" },
+        { type: "AdminUser" },
       ],
     }),
 
@@ -449,6 +471,7 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
       invalidatesTags: (_result, _error, profileUuid) => [
         { type: "AdminProfile", id: profileUuid },
         { type: "AdminProfile", id: "LIST" },
+        { type: "AdminUser" },
       ],
     }),
 
@@ -460,6 +483,7 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
       invalidatesTags: (_result, _error, profileUuid) => [
         { type: "AdminProfile", id: profileUuid },
         { type: "AdminProfile", id: "LIST" },
+        { type: "AdminUser" },
       ],
     }),
   }),

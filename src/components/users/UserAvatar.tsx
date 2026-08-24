@@ -11,6 +11,20 @@ const pendingMediaRequests = new Map<string, Promise<string | null>>();
 const userProfileMediaCache = new Map<string, string | null>();
 const pendingProfileRequests = new Map<string, Promise<string | null>>();
 
+export function clearUserAvatarCache(userUuid?: string, mediaUuid?: string) {
+  if (userUuid) {
+    userProfileMediaCache.delete(userUuid);
+    pendingProfileRequests.delete(userUuid);
+  } else {
+    userProfileMediaCache.clear();
+    pendingProfileRequests.clear();
+  }
+  if (mediaUuid) {
+    mediaUrlCache.delete(mediaUuid);
+    pendingMediaRequests.delete(mediaUuid);
+  }
+}
+
 async function fetchMediaAccessUrl(mediaUuid: string): Promise<string | null> {
   if (!mediaUuid || typeof mediaUuid !== "string") return null;
 

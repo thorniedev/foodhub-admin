@@ -51,6 +51,7 @@ import ProfileCreateModal from "./ProfileCreateModal";
 import ProfileDetailPanel from "./ProfileDetailPanel";
 import ProfileEditModal from "./ProfileEditModal";
 import RelatedProfilesPanel from "./RelatedProfilesPanel";
+import UserAvatar, { clearUserAvatarCache } from "./UserAvatar";
 import UserDetailHeader from "./UserDetailHeader";
 import UserEditModal from "./UserEditModal";
 import {
@@ -155,6 +156,10 @@ export default function UserDetailManager({
     };
   }, [profilePageData, visibleProfiles]);
 
+  const defaultProfile = useMemo(() => {
+    return visibleProfiles.find((p) => p.isDefault) || visibleProfiles[0] || null;
+  }, [visibleProfiles]);
+
   const effectiveSelectedProfileUuid =
     selectedProfileUuid &&
       visibleProfiles.some((profile) => profile.uuid === selectedProfileUuid)
@@ -218,6 +223,8 @@ export default function UserDetailManager({
         body: payload,
       }).unwrap();
 
+      clearUserAvatarCache(userUuid);
+
       if (newProfile?.uuid) {
         setSelectedProfileUuid(newProfile.uuid);
       }
@@ -227,7 +234,7 @@ export default function UserDetailManager({
         text: `បានបង្កើតប្រវត្តិរូប "${payload.profileName}" ដោយជោគជ័យ។`,
       });
 
-      await refetchProfiles();
+      await Promise.all([refetchProfiles(), refetchUser()]);
     } catch (requestError) {
       throw requestError;
     }
@@ -242,13 +249,15 @@ export default function UserDetailManager({
         body: payload,
       }).unwrap();
 
+      clearUserAvatarCache(userUuid);
+
       setNotice({
         type: "success",
         text: `បានកែប្រែព័ត៌មានប្រវត្តិរូប "${payload.profileName || editProfile.profileName}" ដោយជោគជ័យ។`,
       });
 
       setEditProfile(null);
-      await Promise.all([refetchProfiles(), refetchProfile()]);
+      await Promise.all([refetchProfiles(), refetchProfile(), refetchUser()]);
     } catch (requestError) {
       throw requestError;
     }
@@ -259,11 +268,12 @@ export default function UserDetailManager({
     setNotice(null);
     try {
       await setDefaultAdminProfile(selectedProfileDetail.uuid).unwrap();
+      clearUserAvatarCache(userUuid);
       setNotice({
         type: "success",
         text: `បានកំណត់ "${selectedProfileDetail.profileName}" ជាលំនាំដើម ដោយជោគជ័យ។`,
       });
-      await Promise.all([refetchProfiles(), refetchProfile()]);
+      await Promise.all([refetchProfiles(), refetchProfile(), refetchUser()]);
     } catch (requestError) {
       setNotice({
         type: "error",
@@ -367,6 +377,8 @@ export default function UserDetailManager({
     try {
       await hardDeleteAdminProfile(target.uuid).unwrap();
 
+      clearUserAvatarCache(userUuid);
+
       setHardDeleteProfile(null);
       setNotice({
         type: "success",
@@ -374,7 +386,7 @@ export default function UserDetailManager({
       });
 
       setSelectedProfileUuid(null);
-      await refetchProfiles();
+      await Promise.all([refetchProfiles(), refetchUser()]);
     } catch (requestError) {
       setNotice({
         type: "error",
@@ -405,12 +417,13 @@ export default function UserDetailManager({
         });
       }
 
+      clearUserAvatarCache(userUuid);
       setProfileAction(null);
-      await refetchProfiles();
-
-      if (effectiveSelectedProfileUuid) {
-        await refetchProfile();
-      }
+      await Promise.all([
+        refetchProfiles(),
+        refetchUser(),
+        effectiveSelectedProfileUuid ? refetchProfile() : Promise.resolve(),
+      ]);
     } catch (requestError) {
       setNotice({
         type: "error",
@@ -457,6 +470,7 @@ export default function UserDetailManager({
     <div className="w-full min-w-0 max-w-full space-y-5">
       <UserDetailHeader
         user={user}
+        defaultProfile={defaultProfile}
         busy={userBusy}
         onCreateProfile={() => setCreateProfileOpen(true)}
         onStatusEdit={() => setStatusUser(user)}

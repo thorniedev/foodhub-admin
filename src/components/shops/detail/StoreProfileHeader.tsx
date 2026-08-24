@@ -9,6 +9,7 @@ import {
   Phone,
   Settings2,
   ShieldCheck,
+  Store as StoreIcon,
   Trash2,
   UserCheck,
 } from "lucide-react";
@@ -106,8 +107,8 @@ export default function StoreProfileHeader({
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-emerald-50 text-2xl font-black text-[#137A3D]">
-                  {storeInitials(store.storeName)}
+                <div className="flex h-full w-full items-center justify-center bg-emerald-50 text-[#137A3D]">
+                  <StoreIcon size={36} />
                 </div>
               )}
             </div>
@@ -173,36 +174,36 @@ export default function StoreProfileHeader({
             )}
           </div>
 
-          {/* Actions Bar */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          {/* Actions Bar Capsule */}
+          <div className="flex items-center gap-1.5 rounded-2xl border border-white/20 bg-white/10 p-1.5 backdrop-blur-md shadow-lg shadow-black/5 shrink-0">
             <button
               type="button"
               disabled={busy}
               onClick={onEdit}
-              className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/20 bg-white/15 px-4 text-base font-semibold text-white shadow-xs backdrop-blur-sm transition hover:border-white/40 hover:bg-white/25 disabled:opacity-50"
+              title="កែប្រែ"
+              className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/25 active:scale-95 disabled:opacity-50"
             >
-              <Pencil size={16} />
-              កែប្រែ
+              <Pencil size={18} />
             </button>
 
             <button
               type="button"
               disabled={busy}
               onClick={() => onStatus("REVIEW")}
-              className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/20 bg-white/15 px-4 text-base font-semibold text-white shadow-xs backdrop-blur-sm transition hover:border-white/40 hover:bg-white/25 disabled:opacity-50"
+              title="គ្រប់គ្រងស្ថានភាព"
+              className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-amber-200 transition hover:bg-amber-400/30 hover:text-amber-100 active:scale-95 disabled:opacity-50"
             >
-              <Settings2 size={16} />
-              ស្ថានភាព
+              <Settings2 size={18} />
             </button>
 
             <button
               type="button"
               disabled={busy}
               onClick={onHours}
-              className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 text-base font-bold text-[#14833E] shadow-md transition hover:bg-white/90 disabled:opacity-50"
+              title="កំណត់ម៉ោងដំណើរការ"
+              className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-emerald-200 transition hover:bg-emerald-400/30 hover:text-emerald-100 active:scale-95 disabled:opacity-50"
             >
-              <Clock3 size={16} />
-              ម៉ោងដំណើរការ
+              <Clock3 size={18} />
             </button>
 
             {onDelete && (
@@ -210,10 +211,10 @@ export default function StoreProfileHeader({
                 type="button"
                 disabled={busy}
                 onClick={onDelete}
-                className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-red-600 px-4 text-base font-bold text-white shadow-md transition hover:bg-red-700 disabled:opacity-50"
+                title="លុបហាង"
+                className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-rose-200 transition hover:bg-rose-500/30 hover:text-rose-100 active:scale-95 disabled:opacity-50"
               >
-                <Trash2 size={16} />
-                លុបហាង
+                <Trash2 size={18} />
               </button>
             )}
           </div>

@@ -36,7 +36,7 @@ export default function IngredientAvoidsSection({
               className="rounded-2xl border border-secondary-100 bg-secondary-50/40 p-4 transition hover:border-secondary-200 hover:bg-secondary-50/60"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-lg font-bold text-gray-900">
+                <p className="text-[18px] font-bold text-gray-900">
                   {item.name}
                 </p>
 

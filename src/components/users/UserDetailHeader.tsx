@@ -10,7 +10,7 @@ import {
   User,
 } from "lucide-react";
 
-import type { AdminUser } from "@/src/types/userProfile";
+import type { AdminProfile, AdminUser } from "@/src/types/userProfile";
 
 import { displayName, formatDateTime } from "@/src/lib/userProfileFormat";
 
@@ -19,6 +19,7 @@ import UserAvatar from "./UserAvatar";
 
 interface UserDetailHeaderProps {
   user: AdminUser;
+  defaultProfile?: AdminProfile | null;
   busy?: boolean;
   onStatusEdit?: () => void;
   onCreateProfile?: () => void;
@@ -28,6 +29,7 @@ interface UserDetailHeaderProps {
 
 export default function UserDetailHeader({
   user,
+  defaultProfile,
   busy = false,
   onStatusEdit,
   onCreateProfile,
@@ -40,12 +42,15 @@ export default function UserDetailHeader({
     user.username,
   );
 
+  const activeDefault = defaultProfile || user.defaultProfile;
+
   const avatarMediaUuid =
+    activeDefault?.avatarMediaUuid ||
     user.avatarMediaUuid ||
-    user.defaultProfile?.avatarMediaUuid ||
     user.profiles?.[0]?.avatarMediaUuid;
 
   const imageUrl =
+    activeDefault?.avatarUrl ||
     user.avatarUrl ||
     user.profileImage ||
     user.profilePicture ||

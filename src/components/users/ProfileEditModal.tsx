@@ -19,6 +19,7 @@ import { uploadCatalogMediaFile } from "@/src/lib/catalogMediaClient";
 import { compressImage } from "@/src/utils/imageCompression";
 import UserAvatar from "./UserAvatar";
 import CustomSelect from "../ui/CustomSelect";
+import CustomDatePicker from "../ui/CustomDatePicker";
 
 const profileEditSchema = z.object({
   profileName: z
@@ -28,7 +29,17 @@ const profileEditSchema = z.object({
     .max(50, "ឈ្មោះមិនអាចលើសពី 50 តួអក្សរ"),
   relationship: z.string().min(1, "សូមជ្រើសរើសទំនាក់ទំនង"),
   gender: z.string().min(1, "សូមជ្រើសរើសភេទ"),
-  dateOfBirth: z.string().min(1, "សូមជ្រើសរើសថ្ងៃខែឆ្នាំកំណើត"),
+  dateOfBirth: z
+    .string()
+    .min(1, "សូមជ្រើសរើសថ្ងៃខែឆ្នាំកំណើត")
+    .refine((val) => {
+      if (!val) return true;
+      const selected = new Date(val);
+      const today = new Date();
+      return selected <= today;
+    }, {
+      message: "ថ្ងៃខែឆ្នាំកំណើតត្រូវតែជាថ្ងៃក្នុងអតីតកាល ឬបច្ចុប្បន្ន (មិនអាចជាថ្ងៃអនាគតបានទេ)",
+    }),
   preferredLanguage: z.string().min(1, "សូមជ្រើសរើសភាសា"),
 });
 
@@ -36,6 +47,7 @@ type ProfileEditFormData = z.infer<typeof profileEditSchema>;
 
 interface ProfileEditModalProps {
   profile: AdminProfile | null;
+  open?: boolean;
   saving: boolean;
   onClose: () => void;
   onSubmit: (payload: UpdateAdminProfilePayload) => Promise<void>;
@@ -57,11 +69,12 @@ const GENDERS = [
 
 const LANGUAGES = [
   { value: "km", label: "ភាសាខ្មែរ (Khmer)" },
-  { value: "en", label: "English" },
+  { value: "en", label: "ភាសាអង់គ្លេស (English)" },
 ];
 
 export default function ProfileEditModal({
   profile,
+  open,
   saving,
   onClose,
   onSubmit,
@@ -76,35 +89,36 @@ export default function ProfileEditModal({
     register,
     control,
     handleSubmit,
+    setError,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ProfileEditFormData>({
     resolver: zodResolver(profileEditSchema),
     defaultValues: {
-      profileName: "",
-      relationship: "SELF",
-      gender: "MALE",
-      dateOfBirth: "",
-      preferredLanguage: "km",
+      profileName: profile?.profileName || "",
+      relationship: profile?.relationship || "SELF",
+      gender: profile?.gender || "MALE",
+      dateOfBirth: profile?.dateOfBirth || "",
+      preferredLanguage: profile?.preferredLanguage || "km",
     },
   });
 
   useEffect(() => {
     if (profile) {
       reset({
-        profileName: profile.profileName ?? "",
-        relationship: profile.relationship ?? "SELF",
-        gender: profile.gender ?? "MALE",
-        dateOfBirth: profile.dateOfBirth ?? "",
-        preferredLanguage: profile.preferredLanguage ?? "km",
+        profileName: profile.profileName || "",
+        relationship: profile.relationship || "SELF",
+        gender: profile.gender || "MALE",
+        dateOfBirth: profile.dateOfBirth || "",
+        preferredLanguage: profile.preferredLanguage || "km",
       });
-      setAvatarMediaUuid(profile.avatarMediaUuid ?? null);
       setAvatarPreview(null);
+      setAvatarMediaUuid(profile.avatarMediaUuid || null);
       setApiError(null);
     }
   }, [profile, reset]);
 
-  if (!profile) return null;
+  if (!profile || (open !== undefined && !open)) return null;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -123,6 +137,7 @@ export default function ProfileEditModal({
       const msg = err instanceof Error ? err.message : "មិនអាច Upload រូបភាពបានទេ។ សូមព្យាយាមម្តងទៀត។";
       setApiError(msg);
       setAvatarPreview(null);
+      setAvatarMediaUuid(null);
     } finally {
       setUploadingAvatar(false);
     }
@@ -149,7 +164,31 @@ export default function ProfileEditModal({
       });
       onClose();
     } catch (err) {
-      setApiError(getAdminApiErrorMessage(err));
+      const msg = getAdminApiErrorMessage(err);
+      const str = String(JSON.stringify(err) || "");
+
+      if (str.includes("SELF profile") || msg.includes("SELF profile")) {
+        setError("relationship", {
+          type: "server",
+          message: "ប្រវត្តិរូប 'ខ្លួនឯង (SELF)' មានរួចហើយសម្រាប់គណនីនេះ",
+        });
+      }
+
+      if (str.includes("age group") || msg.includes("age group")) {
+        setError("dateOfBirth", {
+          type: "server",
+          message: "មិនទាន់មានការកំណត់ក្រុមអាយុសម្រាប់អាយុនេះក្នុងប្រព័ន្ធនៅឡើយទេ",
+        });
+      }
+
+      if (str.includes("profileName") || msg.includes("profileName")) {
+        setError("profileName", {
+          type: "server",
+          message: "ឈ្មោះប្រវត្តិរូបនេះមានរួចហើយ",
+        });
+      }
+
+      setApiError(msg);
     }
   };
 
@@ -266,11 +305,10 @@ export default function ProfileEditModal({
                 {...register("profileName")}
                 disabled={isBusy}
                 placeholder="ឧ. គណនីផ្ទាល់ខ្លួន ឬ ឈ្មោះកូន"
-                className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
-                  errors.profileName
-                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                    : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
-                }`}
+                className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${errors.profileName
+                  ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                  : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
+                  }`}
               />
               {errors.profileName && (
                 <p className="text-xs font-medium text-red-500">{errors.profileName.message}</p>
@@ -331,15 +369,17 @@ export default function ProfileEditModal({
                 <label className="text-sm font-semibold text-gray-700">
                   ថ្ងៃខែឆ្នាំកំណើត <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="date"
-                  {...register("dateOfBirth")}
-                  disabled={isBusy}
-                  className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
-                    errors.dateOfBirth
-                      ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                      : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
-                  }`}
+                <Controller
+                  control={control}
+                  name="dateOfBirth"
+                  render={({ field }) => (
+                    <CustomDatePicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={isBusy}
+                      error={Boolean(errors.dateOfBirth)}
+                    />
+                  )}
                 />
                 {errors.dateOfBirth && (
                   <p className="text-xs font-medium text-red-500">{errors.dateOfBirth.message}</p>

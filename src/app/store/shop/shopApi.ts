@@ -120,6 +120,7 @@ export const shopApi = adminBaseApi.injectEndpoints({
             accountStatus: p.accountStatus || undefined,
             page: p.page ?? 0,
             size: p.size ?? 20,
+            sort: "createdAt,desc",
           },
         };
       },
@@ -193,6 +194,11 @@ export const shopApi = adminBaseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: normalizeHours,
+      providesTags: (_r, _e, uuid) => [
+        { type: "Store", id: `${uuid}_hours` },
+        "Store",
+        "Shop",
+      ],
     }),
     replaceStoreHours: builder.mutation<
       StoreHour[],
@@ -204,6 +210,12 @@ export const shopApi = adminBaseApi.injectEndpoints({
         body,
       }),
       transformResponse: normalizeHours,
+      invalidatesTags: (_r, _e, { storeUuid }) => [
+        { type: "Store", id: `${storeUuid}_hours` },
+        { type: "Store", id: storeUuid },
+        "Store",
+        "Shop",
+      ],
     }),
     getStoreExternalSources: builder.query<
       StoreExternalSourceMetadata[],
