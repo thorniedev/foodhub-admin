@@ -10,13 +10,26 @@ import {
 } from "@/src/types/adminRecommendation";
 import { getAuthAccessToken } from "@/src/lib/authSession";
 
-const RAW_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  process.env.BACKEND_API_URL ||
-  "https://api.mhoubahar.store";
-
 function getBaseApiUrl(): string {
-  const trimmed = RAW_BASE_URL.replace(/\/+$/, "");
+  if (typeof window !== "undefined") {
+    // In browser: use relative proxy endpoint /api to prevent CORS blocks and leverage httpOnly cookies
+    return "/api";
+  }
+
+  const configured =
+    process.env.BACKEND_API_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "https://api.mhoubahar.store";
+  const trimmed = configured.replace(/\/+$/, "");
+  return /\/api\/v1$/i.test(trimmed) ? trimmed : `${trimmed}/api/v1`;
+}
+
+function getDirectBackendUrl(): string {
+  const configured =
+    process.env.BACKEND_API_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "https://api.mhoubahar.store";
+  const trimmed = configured.replace(/\/+$/, "");
   return /\/api\/v1$/i.test(trimmed) ? trimmed : `${trimmed}/api/v1`;
 }
 
@@ -44,16 +57,33 @@ export async function fetchAdminSessions(
   if (params.userId !== undefined && !isNaN(params.userId)) query.set("userId", params.userId.toString());
   if (params.search && params.search.trim()) query.set("search", params.search.trim());
 
-  const base = getBaseApiUrl();
-  const url = `${base}/recommendations/sessions?${query.toString()}`;
+  const queryString = query.toString();
+  const headers = getHeaders(token);
 
-  const res = await fetch(url, {
-    headers: getHeaders(token),
-    cache: "no-store",
-  });
+  // Try relative proxy first (prevents CORS on admin domain)
+  const proxyBase = getBaseApiUrl();
+  const proxyUrl = `${proxyBase}/recommendations/sessions${queryString ? `?${queryString}` : ""}`;
+
+  let res: Response;
+  try {
+    res = await fetch(proxyUrl, {
+      headers,
+      credentials: "include",
+      cache: "no-store",
+    });
+  } catch (proxyErr) {
+    // If proxy failed (e.g. offline/direct env), try direct backend
+    const directBase = getDirectBackendUrl();
+    const directUrl = `${directBase}/recommendations/sessions${queryString ? `?${queryString}` : ""}`;
+    res = await fetch(directUrl, {
+      headers,
+      credentials: "include",
+      cache: "no-store",
+    });
+  }
 
   if (!res.ok) {
-    throw new Error(`Failed to load recommendation sessions: ${res.status} ${res.statusText}`);
+    throw new Error(`Failed to load recommendation sessions (${res.status} ${res.statusText})`);
   }
 
   const data = await res.json();
@@ -95,20 +125,31 @@ export async function fetchAdminSessionDetail(
 ): Promise<AdminSessionDetail> {
   const base = getBaseApiUrl();
   const headers = getHeaders(token);
+  const safeUuid = encodeURIComponent(sessionUuid);
+
+  const fetchWithFallback = async (endpoint: string): Promise<Response> => {
+    try {
+      const res = await fetch(`${base}${endpoint}`, {
+        headers,
+        credentials: "include",
+        cache: "no-store",
+      });
+      if (res.ok || res.status !== 404) return res;
+      throw new Error(`Status ${res.status}`);
+    } catch {
+      const direct = getDirectBackendUrl();
+      return fetch(`${direct}${endpoint}`, {
+        headers,
+        credentials: "include",
+        cache: "no-store",
+      });
+    }
+  };
 
   const [sessionRes, itemsRes, safetyRes] = await Promise.all([
-    fetch(`${base}/recommendations/sessions/${encodeURIComponent(sessionUuid)}`, {
-      headers,
-      cache: "no-store",
-    }),
-    fetch(`${base}/recommendations/sessions/${encodeURIComponent(sessionUuid)}/items?limit=50`, {
-      headers,
-      cache: "no-store",
-    }),
-    fetch(`${base}/recommendations/sessions/${encodeURIComponent(sessionUuid)}/safety-checks`, {
-      headers,
-      cache: "no-store",
-    }),
+    fetchWithFallback(`/recommendations/sessions/${safeUuid}`),
+    fetchWithFallback(`/recommendations/sessions/${safeUuid}/items?limit=50`),
+    fetchWithFallback(`/recommendations/sessions/${safeUuid}/safety-checks`),
   ]);
 
   if (!sessionRes.ok) {
