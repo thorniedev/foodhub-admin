@@ -126,6 +126,7 @@ export const shopApi = adminBaseApi.injectEndpoints({
       },
       transformResponse: normalizeStorePage,
       providesTags: ["Store", "Shop"],
+      keepUnusedDataFor: 300,
     }),
     getShopByUuid: builder.query<Store, string>({
       query: (uuid) => ({

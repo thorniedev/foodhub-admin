@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 import {
-  AlertTriangle,
   Calendar,
   CheckCircle,
   Eye,
   Mail,
+  MinusCircle,
   MoreVertical,
   Pencil,
   RotateCcw,
@@ -344,7 +344,7 @@ function UserRowActions({
                   }}
                   className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-50"
                 >
-                  <AlertTriangle size={16} />
+                  <MinusCircle size={16} />
                   <span>ផ្អាកដំណើរការ</span>
                 </button>
               )}

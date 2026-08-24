@@ -1,5 +1,5 @@
 import {
-  AlertTriangle,
+  MinusCircle,
   Pencil,
   RotateCcw,
   Star,
@@ -116,7 +116,7 @@ export default function ProfileHeader({
               title="ផ្អាកដំណើរការ"
               className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-amber-200 transition hover:bg-amber-400/30 hover:text-amber-100 active:scale-95 disabled:opacity-50"
             >
-              <AlertTriangle size={18} />
+              <MinusCircle size={18} />
             </button>
           ) : (
             <button

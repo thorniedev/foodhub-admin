@@ -1,12 +1,13 @@
 "use client";
 
-import { CircleMinus, Loader2, X } from "lucide-react";
+import { Loader2, MinusCircle, Trash2, X } from "lucide-react";
 
 export default function DeleteConfirmModal({
   open,
   title,
   description,
   deleting,
+  variant = "soft",
   onClose,
   onConfirm,
 }: {
@@ -14,17 +15,26 @@ export default function DeleteConfirmModal({
   title: string;
   description: string;
   deleting: boolean;
+  variant?: "soft" | "hard";
   onClose: () => void;
   onConfirm: () => void;
 }) {
   if (!open) return null;
 
+  const isHard = variant === "hard";
+
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs">
-      <div className="w-full max-w-lg rounded-[30px] bg-white p-7 shadow-2xl">
+      <div className="w-full max-w-lg rounded-[30px] bg-white p-7 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
         <div className="flex items-start justify-between">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
-            <CircleMinus size={30} />
+          <div
+            className={`flex h-16 w-16 items-center justify-center rounded-2xl ${
+              isHard
+                ? "bg-red-50 text-red-600"
+                : "bg-amber-50 text-amber-600"
+            }`}
+          >
+            {isHard ? <Trash2 size={30} /> : <MinusCircle size={30} />}
           </div>
 
           <button
@@ -59,12 +69,16 @@ export default function DeleteConfirmModal({
             type="button"
             disabled={deleting}
             onClick={onConfirm}
-            className="inline-flex items-center gap-2 rounded-2xl bg-amber-600 px-6 py-3 text-lg font-bold text-white hover:bg-amber-700 disabled:opacity-60 transition active:scale-95"
+            className={`inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-lg font-bold text-white disabled:opacity-60 transition active:scale-95 ${
+              isHard
+                ? "bg-red-600 hover:bg-red-700"
+                : "bg-amber-600 hover:bg-amber-700"
+            }`}
           >
             {deleting && (
               <Loader2 size={20} className="animate-spin" />
             )}
-            យល់ព្រម
+            {isHard ? "លុបចេញពីប្រព័ន្ធ" : "យល់ព្រម"}
           </button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Loader2, Save, UserCog, UserCheck, UserX, X } from "lucide-react";
+import { Check, Loader2, MinusCircle, Save, UserCheck, UserCog, X } from "lucide-react";
 import type { AdminUser, MutableAdminUserStatus } from "@/src/types/userProfile";
 
 interface UserEditModalProps {
@@ -87,7 +87,7 @@ export default function UserEditModal({
                             : "bg-emerald-100 text-emerald-700"
                         }`}
                       >
-                        {isSuspend ? <UserX size={22} /> : <UserCheck size={22} />}
+                        {isSuspend ? <MinusCircle size={22} /> : <UserCheck size={22} />}
                       </div>
                       <span>{option === "ACTIVE" ? "សកម្ម" : "ផ្អាកដំណើរការ"}</span>
                     </div>

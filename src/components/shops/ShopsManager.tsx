@@ -29,8 +29,10 @@ import type {
   UpdateStorePayload,
 } from "@/src/types/shop";
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
+import { imageUrlOrNull } from "@/src/lib/shopFormat";
 import CustomSelect from "../ui/CustomSelect";
 
+import StoreMediaImage from "./detail/StoreMediaImage";
 import DeleteShopConfirmModal from "./DeleteShopConfirmModal";
 import ShopEditModal from "./ShopEditModal";
 import ShopsHeader from "./ShopsHeader";
@@ -128,30 +130,44 @@ export default function ShopsManager() {
     size,
   });
 
-  /* Stable count queries always run, never affected by active tab */
-  const { data: approvedData } = useGetShopsQuery({
-    reviewStatus: "APPROVED",
-    accountStatus: "ACTIVE",
-    page: 0,
-    size: 1,
-  });
+  /* Optimized count queries: skip fetching count for active tab or during search */
+  const isSearching = Boolean(serverQuery);
 
-  const { data: pendingData } = useGetShopsQuery({
-    reviewStatus: "PENDING",
-    page: 0,
-    size: 1,
-  });
+  const { data: approvedData } = useGetShopsQuery(
+    {
+      reviewStatus: "APPROVED",
+      accountStatus: "ACTIVE",
+      page: 0,
+      size: 1,
+    },
+    { skip: isSearching || filter === "APPROVED" },
+  );
 
-  const { data: rejectedData } = useGetShopsQuery({
-    reviewStatus: "REJECTED",
-    page: 0,
-    size: 1,
-  });
+  const { data: pendingData } = useGetShopsQuery(
+    {
+      reviewStatus: "PENDING",
+      page: 0,
+      size: 1,
+    },
+    { skip: isSearching || filter === "PENDING" },
+  );
 
-  const { data: allData } = useGetShopsQuery({
-    page: 0,
-    size: 1,
-  });
+  const { data: rejectedData } = useGetShopsQuery(
+    {
+      reviewStatus: "REJECTED",
+      page: 0,
+      size: 1,
+    },
+    { skip: isSearching || filter === "REJECTED" },
+  );
+
+  const { data: allData } = useGetShopsQuery(
+    {
+      page: 0,
+      size: 1,
+    },
+    { skip: isSearching || filter === "ALL" },
+  );
 
   const { data: suggestionData, isFetching: suggestionsLoading } =
     useGetShopsQuery(
@@ -187,23 +203,25 @@ export default function ShopsManager() {
       if (cleanValue.length < 2) {
         setSuggestionQuery("");
         setShowSuggestions(false);
+        setServerQuery("");
       } else {
         setSuggestionQuery(cleanValue);
         setShowSuggestions(true);
+        setServerQuery(cleanValue);
       }
-    }, 350);
+    }, 450);
 
     return () => window.clearTimeout(timer);
   }, [searchInput, suggestionSelected]);
 
   const stores = data?.contents ?? [];
 
-  /* Stable counts from dedicated queries always correct regardless of active tab */
+  /* Dynamic counts: Uses main query total for active tab and skips duplicate requests */
   const counts = {
-    all: allData?.totalElements ?? 0,
-    approved: approvedData?.totalElements ?? 0,
-    pending: pendingData?.totalElements ?? 0,
-    rejected: rejectedData?.totalElements ?? 0,
+    all: filter === "ALL" ? (data?.totalElements ?? 0) : (allData?.totalElements ?? 0),
+    approved: filter === "APPROVED" ? (data?.totalElements ?? 0) : (approvedData?.totalElements ?? 0),
+    pending: filter === "PENDING" ? (data?.totalElements ?? 0) : (pendingData?.totalElements ?? 0),
+    rejected: filter === "REJECTED" ? (data?.totalElements ?? 0) : (rejectedData?.totalElements ?? 0),
   };
 
   const filteredStores = stores.filter((store) => {
@@ -412,25 +430,44 @@ export default function ShopsManager() {
                         <p className="text-xs font-bold text-gray-500 uppercase">លទ្ធផលស្វែងរក</p>
                       </div>
                       <div className="max-h-[300px] overflow-y-auto p-1.5">
-                        {suggestions.map((store) => (
-                          <button
-                            key={store.uuid}
-                            type="button"
-                            onMouseDown={(event) => event.preventDefault()}
-                            onClick={() => handleSelectSuggestion(store)}
-                            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-emerald-50"
-                          >
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
-                              <Store size={20} />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-bold text-gray-800">{store.storeName}</p>
-                              <p className="truncate text-xs text-gray-400">
-                                {[store.addressLine, store.city].filter(Boolean).join(", ") || "No address"}
-                              </p>
-                            </div>
-                          </button>
-                        ))}
+                        {suggestions.map((store) => {
+                          const fallbackLogo = imageUrlOrNull(store.logoUrl);
+
+                          return (
+                            <button
+                              key={store.uuid}
+                              type="button"
+                              onMouseDown={(event) => event.preventDefault()}
+                              onClick={() => handleSelectSuggestion(store)}
+                              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-emerald-50"
+                            >
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-primary-800">
+                                {store.logoMediaUuid ? (
+                                  <StoreMediaImage
+                                    mediaUuid={store.logoMediaUuid}
+                                    alt={`${store.storeName} logo`}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : fallbackLogo ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={fallbackLogo}
+                                    alt={store.storeName}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <Store size={18} />
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-bold text-gray-800">{store.storeName}</p>
+                                <p className="truncate text-xs text-gray-400">
+                                  {[store.addressLine, store.city].filter(Boolean).join(", ") || "No address"}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                     </>
                   )}
@@ -526,14 +563,7 @@ export default function ShopsManager() {
         </div>
       </div>
 
-      {serverQuery && (
-        <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-base text-emerald-700">
-          ស្វែងរក: <b>"{serverQuery}"</b>
-          <button type="button" onClick={handleClearSearch} className="ml-3 font-black underline">
-            សម្អាត
-          </button>
-        </div>
-      )}
+
 
       {/* FLOATING TOAST NOTIFICATION (MATCHING USER MANAGEMENT) */}
       {notice && (

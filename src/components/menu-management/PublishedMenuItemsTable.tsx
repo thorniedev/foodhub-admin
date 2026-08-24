@@ -1,12 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Eye,
-  Pencil,
-  Trash2,
-} from "lucide-react";
-
+import { useEffect, useRef, useState, useMemo } from "react";
+import { ChevronLeft, ChevronRight, Eye, MinusCircle, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import MenuItemAvatar from "./MenuItemAvatar";
 
 import type {
@@ -14,9 +9,9 @@ import type {
   MenuItemRecord,
 } from "@/src/types/menu-management";
 
-function storeName(
-  item: MenuItemRecord,
-): string {
+const ITEMS_PER_PAGE = 6;
+
+function storeName(item: MenuItemRecord): string {
   return (
     item.store?.storeName ||
     item.store?.name ||
@@ -36,19 +31,130 @@ function renderBaseFoodCell(
   const canonical = matched?.canonicalName || item.food?.canonicalName;
 
   if (!local && !canonical) {
-    return <span className="text-gray-400">—</span>;
+    return <span className="line-clamp-1 text-sm font-medium text-gray-500">—</span>;
   }
 
   return (
     <div className="min-w-0">
-      <p className="text-xl font-bold text-gray-800 truncate">
+      <p className="max-w-[160px] truncate text-base font-semibold text-gray-800">
         {local || canonical}
       </p>
       {canonical && local && canonical.toLowerCase() !== local.toLowerCase() && (
-        <p className="text-lg font-medium text-gray-400 truncate">
+        <p className="max-w-[160px] truncate text-xs font-medium text-gray-400">
           {canonical}
         </p>
       )}
+    </div>
+  );
+}
+
+function MenuItemRowActions({
+  item,
+  disabled,
+  rowIndex = 0,
+  totalRows = 1,
+  onView,
+  onEdit,
+  onSoftDelete,
+  onHardDelete,
+}: {
+  item: MenuItemRecord;
+  disabled: boolean;
+  rowIndex?: number;
+  totalRows?: number;
+  onView: (item: MenuItemRecord) => void;
+  onEdit: (item: MenuItemRecord) => void;
+  onSoftDelete?: (item: MenuItemRecord) => void;
+  onHardDelete: (item: MenuItemRecord) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const openUpward = totalRows > 2 && rowIndex >= totalRows - 2;
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div className="relative flex items-center justify-center gap-2">
+      {/* 1. View Detail (Green Eye) */}
+      <button
+        type="button"
+        onClick={() => onView(item)}
+        className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+        title="មើលព័ត៌មានលម្អិត"
+      >
+        <Eye size={18} />
+      </button>
+
+      {/* 2. Primary Action: Edit (Blue Pencil) */}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onEdit(item)}
+        className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+        title="កែប្រែ"
+      >
+        <Pencil size={18} />
+      </button>
+
+      {/* 3. More (3-dots) for extra actions */}
+      <div className="relative" ref={menuRef}>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setOpen((prev) => !prev)}
+          className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition hover:bg-gray-100 hover:text-gray-800 focus:outline-none ${open ? "bg-gray-200 text-gray-900 ring-2 ring-gray-300/60" : ""
+            }`}
+          title="ផ្សេងទៀត"
+          aria-label="More actions"
+        >
+          <MoreVertical size={18} />
+        </button>
+
+        {open && (
+          <div
+            className={`absolute right-0 z-[100] min-w-[185px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 ${openUpward ? "bottom-full mb-2" : "top-full mt-2"
+              }`}
+          >
+            {/* Soft Delete / Disable */}
+            {onSoftDelete && (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onSoftDelete(item);
+                }}
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-50"
+              >
+                <MinusCircle size={16} />
+                <span>ផ្អាកលក់</span>
+              </button>
+            )}
+
+            {/* Hard Delete */}
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onHardDelete(item);
+              }}
+              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+            >
+              <Trash2 size={16} />
+              <span>លុបចេញពីប្រព័ន្ធ</span>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -57,138 +163,217 @@ export default function PublishedMenuItemsTable({
   items,
   foods = [],
   busy,
+  itemsPerPage = 10,
   onView,
   onEdit,
+  onSoftDelete,
   onDelete,
 }: {
   items: MenuItemRecord[];
   foods?: FoodRecord[];
   busy: boolean;
-  onView: (
-    item: MenuItemRecord,
-  ) => void;
-  onEdit: (
-    item: MenuItemRecord,
-  ) => void;
-  onDelete: (
-    item: MenuItemRecord,
-  ) => void;
+  itemsPerPage?: number;
+  onView: (item: MenuItemRecord) => void;
+  onEdit: (item: MenuItemRecord) => void;
+  onSoftDelete?: (item: MenuItemRecord) => void;
+  onDelete: (item: MenuItemRecord) => void;
 }) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 if items length changes or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [items.length]);
+
+  const totalPages = Math.ceil(items.length / itemsPerPage) || 1;
+
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return items.slice(start, start + itemsPerPage);
+  }, [items, currentPage, itemsPerPage]);
+
   if (!items.length) {
     return (
-      <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-emerald-50 text-[#137A3D]">
-          <Eye size={36} />
-        </div>
-        <p className="mt-5 text-2xl font-bold text-gray-800">
-          មិនទាន់មាន Menu Item លើ Website នៅឡើយទេ
+      <div className="px-6 py-16 text-center">
+        <p className="text-lg font-medium text-gray-500">
+          មិនទាន់មាន ម៉ឺនុយ លើ Website នៅឡើយទេ
         </p>
-        <p className="mt-2 max-w-md text-lg text-gray-500 leading-relaxed">
-          សូមចុចប៊ូតុង <strong className="text-emerald-700 font-bold">+ បង្កើត Menu Item</strong> ខាងលើ ដើម្បីជ្រើសរើសមុខម្ហូបពី Catalog កំណត់ហាង និងដាក់លក់លើ Website។
+        <p className="mt-1 text-base text-gray-400">
+          សូមចុចប៊ូតុង <strong className="text-primary-800 font-semibold">+ បង្កើត ម៉ឺនុយ</strong> ខាងលើ ដើម្បីជ្រើសរើសមុខម្ហូបពី Catalog កំណត់ហាង និងដាក់លក់លើ Website។
         </p>
       </div>
     );
   }
 
   return (
-    <div className="w-full min-w-0 max-w-full overflow-x-auto">
-      <table className="w-full min-w-[1050px] border-collapse text-left">
-        <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/70">
-            <th className="px-6 py-5 text-xl font-bold text-primary-800">Menu Item</th>
-            <th className="px-6 py-5 text-xl font-bold text-primary-800">ហាង</th>
-            <th className="px-6 py-5 text-xl font-bold text-primary-800">មុខម្ហូបមេ</th>
-            <th className="px-6 py-5 text-xl font-bold text-primary-800">តម្លៃ</th>
-            <th className="px-6 py-5 text-xl font-bold text-primary-800">ស្ថានភាព</th>
-            <th className="px-6 py-5 text-right text-xl font-bold text-primary-800">សកម្មភាព</th>
-          </tr>
-        </thead>
+    <div className="space-y-4">
+      <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <table className="w-full table-auto border-collapse text-left">
+          {/* ================= HEADER ================= */}
+          <thead>
+            <tr className="border-b border-gray-100 bg-gray-50/70">
+              <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[140px]">
+                ម៉ឺនុយ
+              </th>
 
-        <tbody>
-          {items.map((item) => (
-            <tr
-              key={item.uuid}
-              className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
-            >
-              <td className="px-6 py-5">
-                <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-gray-100 ring-1 ring-black/5 shadow-xs">
-                    <MenuItemAvatar
-                      item={item}
-                      alt={item.name}
-                      fallbackEmoji="🍜"
-                    />
-                  </div>
+              <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[130px]">
+                ហាង
+              </th>
 
-                  <div className="min-w-0">
-                    <p className="truncate text-xl font-bold text-gray-900">
-                      {item.name}
-                    </p>
+              <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[130px]">
+                មុខម្ហូបមេ
+              </th>
 
-                    {item.isFeatured && (
-                      <span className="mt-1 inline-block rounded-full bg-orange-50 px-3 py-1 text-lg font-bold text-orange-600">
-                        FEATURED
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </td>
+              <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[90px]">
+                តម្លៃ
+              </th>
 
-              <td className="px-6 py-5 text-lg font-medium text-gray-700">
-                {storeName(item)}
-              </td>
+              <th className="whitespace-nowrap px-2 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[95px]">
+                ស្ថានភាព
+              </th>
 
-              <td className="px-6 py-5 text-lg font-medium text-gray-600">
-                {renderBaseFoodCell(item, foods)}
-              </td>
-
-              <td className="px-6 py-5 text-xl font-black text-emerald-800">
-                {Number(item.price ?? 0).toFixed(2)} {item.currencyCode || "USD"}
-              </td>
-
-              <td className="px-6 py-5">
-                <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-emerald-50 px-4 py-1.5 text-lg font-bold text-emerald-700 ring-1 ring-inset ring-emerald-100">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
-                  {item.availabilityStatus || "AVAILABLE"}
-                </span>
-              </td>
-
-              <td className="px-6 py-5">
-                <div className="flex items-center justify-end gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => onView(item)}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100"
-                    title="មើលព័ត៌មានលម្អិត"
-                  >
-                    <Eye size={22} />
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => onEdit(item)}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:opacity-40"
-                    title="កែប្រែ"
-                  >
-                    <Pencil size={22} />
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => onDelete(item)}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:opacity-40"
-                    title="លុប"
-                  >
-                    <Trash2 size={22} />
-                  </button>
-                </div>
-              </td>
+              <th className="whitespace-nowrap px-3 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[110px]">
+                សកម្មភាព
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          {/* ================= BODY ================= */}
+          <tbody>
+            {paginatedItems.map((item, index) => {
+              const isAvailable = item.availabilityStatus !== "UNAVAILABLE";
+
+              return (
+                <tr
+                  key={item.uuid}
+                  className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
+                >
+                  {/* Menu Item Name + Avatar */}
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800">
+                        <MenuItemAvatar
+                          item={item}
+                          alt={item.name}
+                          fallbackEmoji="🍜"
+                        />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="max-w-[160px] truncate text-base font-semibold text-gray-800">
+                          {item.name}
+                        </p>
+
+                        {item.isFeatured && (
+                          <span className="mt-0.5 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 border border-amber-100">
+                            ពិសេស
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Store Name */}
+                  <td className="px-3 py-3">
+                    <span className="line-clamp-1 text-sm font-medium text-gray-500">
+                      {storeName(item)}
+                    </span>
+                  </td>
+
+                  {/* Base Food */}
+                  <td className="px-3 py-3">
+                    {renderBaseFoodCell(item, foods)}
+                  </td>
+
+                  {/* Price */}
+                  <td className="px-3 py-3">
+                    <span className="text-base font-semibold text-emerald-800">
+                      ${Number(item.price ?? 0).toFixed(2)}
+                    </span>
+                  </td>
+
+                  {/* Status Badge */}
+                  <td className="px-2 py-3 text-center">
+                    <span
+                      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${isAvailable
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                        : "bg-red-50 text-red-600 border-red-100"
+                        }`}
+                    >
+                      <span
+                        className={`h-2 w-2 shrink-0 rounded-full ${isAvailable ? "bg-emerald-500" : "bg-red-500"
+                          }`}
+                      />
+                      {isAvailable ? "មានលក់" : "អស់/បិទ"}
+                    </span>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="px-3 py-3">
+                    <MenuItemRowActions
+                      item={item}
+                      disabled={busy}
+                      rowIndex={index}
+                      totalRows={paginatedItems.length}
+                      onView={onView}
+                      onEdit={onEdit}
+                      onSoftDelete={onSoftDelete}
+                      onHardDelete={onDelete}
+                    />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* PAGINATION CONTROLS */}
+      {totalPages > 1 && (
+        <div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50/50 p-3.5 sm:flex-row">
+          <p className="text-sm font-semibold text-gray-500">
+            បង្ហាញ {Math.min((currentPage - 1) * itemsPerPage + 1, items.length)} -{" "}
+            {Math.min(currentPage * itemsPerPage, items.length)} នៃ {items.length} ម៉ឺនុយ
+          </p>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="ទំព័រមុន"
+            >
+              <ChevronLeft size={18} />
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() => setCurrentPage(page)}
+                className={`flex h-9 min-w-[36px] cursor-pointer items-center justify-center rounded-xl px-3 text-sm font-bold transition ${
+                  currentPage === page
+                    ? "bg-primary-800 text-white shadow-xs"
+                    : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="ទំព័របន្ទាប់"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

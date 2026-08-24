@@ -1,7 +1,12 @@
 "use client";
 
 import {
+  AlertCircle,
   AlertTriangle,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  Filter,
   Globe2,
   Loader2,
   Plus,
@@ -13,7 +18,7 @@ import {
   Layers,
 } from "lucide-react";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   useCreateManagedFoodMutation,
@@ -43,9 +48,15 @@ import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
 import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionApi";
 import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
 import { readFilterCatalog } from "@/src/lib/filterCatalogStorage";
+import CustomSelect from "../ui/CustomSelect";
 
 import { getMenuManagementApiError } from "@/src/lib/menuManagementApiError";
-import { isDrinkCategory, isFoodCategory, DRINK_KEYWORDS, extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
+import {
+  isDrinkCategory,
+  isFoodCategory,
+  DRINK_KEYWORDS,
+  extractKhmerOnlyName,
+} from "@/src/lib/catalogCategoryHelper";
 
 import type {
   FoodRecord,
@@ -78,9 +89,26 @@ export default function MenuItemsManager({
   const [search, setSearch] = useState("");
   const [selectedStoreUuid, setSelectedStoreUuid] = useState("");
   const [selectedCategoryUuid, setSelectedCategoryUuid] = useState("");
+  const [selectedCuisineUuid, setSelectedCuisineUuid] = useState("");
+  const [selectedSeasonUuid, setSelectedSeasonUuid] = useState("");
+  const [selectedEventUuid, setSelectedEventUuid] = useState("");
+  const [selectedWeatherUuid, setSelectedWeatherUuid] = useState("");
+  const [selectedAgeGroupUuid, setSelectedAgeGroupUuid] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
-  const [sortOrder, setSortOrder] = useState<"NEWEST" | "PRICE_ASC" | "PRICE_DESC">("NEWEST");
+  const [sortOrder, setSortOrder] = useState<
+    "NEWEST" | "OLDEST" | "NAME_ASC" | "NAME_DESC" | "PRICE_ASC" | "PRICE_DESC"
+  >("NEWEST");
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [sizeOpen, setSizeOpen] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => {
+      setNotice(null);
+    }, 4500);
+    return () => clearTimeout(timer);
+  }, [notice]);
 
   const [foodModalOpen, setFoodModalOpen] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodRecord | null>(null);
@@ -89,47 +117,49 @@ export default function MenuItemsManager({
   const [menuModalOpen, setMenuModalOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState<MenuItemRecord | null>(null);
 
-  const [deletingFood, setDeletingFood] = useState<FoodRecord | null>(null);
-  const [deletingMenu, setDeletingMenu] = useState<MenuItemRecord | null>(null);
+  const [softDeletingFood, setSoftDeletingFood] = useState<FoodRecord | null>(null);
+  const [hardDeletingFood, setHardDeletingFood] = useState<FoodRecord | null>(null);
+
+  const [softDeletingMenu, setSoftDeletingMenu] = useState<MenuItemRecord | null>(null);
+  const [hardDeletingMenu, setHardDeletingMenu] = useState<MenuItemRecord | null>(null);
 
   const [detailUuid, setDetailUuid] = useState<string | null>(null);
 
   const foodsQuery = useGetManagedFoodsQuery({
     page: 0,
-    size: 500,
+    size: 100,
     sort: "createdAt,desc",
   });
 
   const menuItemsQuery = useGetPublishedMenuItemsQuery({
     page: 0,
-    size: 500,
+    size: 100,
     sort: "createdAt,desc",
   });
 
   const categoriesQuery = useGetManagedFoodCategoriesQuery();
   const cuisinesQuery = useGetManagedCuisinesQuery();
-  const ingredientsQuery = useGetManagedIngredientsQuery();
   const storesQuery = useGetManagedStoresQuery();
-  // Real server-side total of approved+active stores, not the length of a
-  // single size-100-capped page — mirrors ShopsManager's total-count pattern.
   const approvedStoresCountQuery = useGetShopsQuery({
     reviewStatus: "APPROVED",
     size: 1,
   });
+
+  // Metadata queries for filtering and form selection
+  const modalActive = foodModalOpen || menuModalOpen;
+  const ingredientsQuery = useGetManagedIngredientsQuery(undefined, { skip: !modalActive });
   const seasonsQuery = useGetManagedSeasonsQuery();
   const eventsQuery = useGetManagedEventsQuery();
   const weatherQuery = useGetWeatherConditionsQuery({ page: 0, size: 100 });
-  const mealTypesQuery = useGetMealTypesQuery({ page: 0, size: 100 });
+  const mealTypesQuery = useGetMealTypesQuery({ page: 0, size: 100 }, { skip: !foodModalOpen });
   const ageGroupsQuery = useGetAgeGroupsQuery({ page: 0, size: 100 });
-  const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 });
-  const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 });
-  const medicalConditionsQuery = useGetMedicalConditionsQuery({ page: 0, size: 100 });
+  const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 }, { skip: !foodModalOpen });
+  const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 }, { skip: !foodModalOpen });
+  const medicalConditionsQuery = useGetMedicalConditionsQuery({ page: 0, size: 100 }, { skip: !foodModalOpen });
 
   const activeWeatherConditions = useMemo(() => {
     const server = weatherQuery.data?.contents ?? [];
-    const local = readLocalWeatherCache();
-    const merged = mergeWeatherConditions(server, local);
-    return merged.filter((w) => (w.isActive ?? w.active) !== false);
+    return server.filter((w) => (w.isActive ?? w.active) !== false);
   }, [weatherQuery.data]);
 
   const activeDietaryTypes = useMemo(
@@ -186,6 +216,8 @@ export default function MenuItemsManager({
     [filterCatalogOptions],
   );
 
+
+
   const [createFood, { isLoading: creatingFood }] = useCreateManagedFoodMutation();
   const [updateFood, { isLoading: updatingFood }] = useUpdateManagedFoodMutation();
   const [deleteFood, { isLoading: deletingFoodRequest }] = useDeleteManagedFoodMutation();
@@ -198,6 +230,85 @@ export default function MenuItemsManager({
   const menuItems = menuItemsQuery.data?.content ?? [];
   const stores = storesQuery.data ?? [];
   const allCategories = categoriesQuery.data ?? [];
+
+  // CustomSelect Options Memoized
+  const storeOptions = useMemo(
+    () => [
+      { value: "", label: "ហាងទាំងអស់" },
+      ...stores.map((s) => ({
+        value: s.uuid,
+        label: s.storeName || s.name || s.localName || s.uuid,
+      })),
+    ],
+    [stores],
+  );
+
+  const cuisineOptions = useMemo(
+    () => [
+      { value: "", label: "វប្បធម៌ម្ហូបទាំងអស់" },
+      ...activeCuisines.map((c) => ({
+        value: c.uuid,
+        label: c.name || (c as any).localName || c.code,
+      })),
+    ],
+    [activeCuisines],
+  );
+
+  const seasonOptions = useMemo(
+    () => [
+      { value: "", label: "រដូវកាលទាំងអស់" },
+      ...activeSeasons.map((s) => ({
+        value: s.uuid,
+        label: s.name || (s as any).localName || s.code,
+      })),
+    ],
+    [activeSeasons],
+  );
+
+  const eventOptions = useMemo(
+    () => [
+      { value: "", label: "ព្រឹត្តិការណ៍ទាំងអស់" },
+      ...activeEvents.map((ev) => ({
+        value: ev.uuid,
+        label: ev.name || (ev as any).localName || ev.code,
+      })),
+    ],
+    [activeEvents],
+  );
+
+  const weatherOptions = useMemo(
+    () => [
+      { value: "", label: "អាកាសធាតុទាំងអស់" },
+      ...activeWeatherConditions.map((w) => ({
+        value: w.uuid || w.code,
+        label: w.name || (w as any).localName || w.code,
+      })),
+    ],
+    [activeWeatherConditions],
+  );
+
+  const ageGroupOptions = useMemo(
+    () => [
+      { value: "", label: "ក្រុមអាយុទាំងអស់" },
+      ...activeAgeGroups.map((a) => ({
+        value: a.uuid || a.code,
+        label: a.name || (a as any).localName || a.code,
+      })),
+    ],
+    [activeAgeGroups],
+  );
+
+  const sortOptions = useMemo(
+    () => [
+      { value: "NEWEST", label: "ថ្មីបំផុត" },
+      { value: "OLDEST", label: "ចាស់បំផុត" },
+      { value: "NAME_ASC", label: "ឈ្មោះ: (A → Z)" },
+      { value: "NAME_DESC", label: "ឈ្មោះ: (Z → A)" },
+      { value: "PRICE_ASC", label: "តម្លៃ: ទាប ទៅ ខ្ពស់" },
+      { value: "PRICE_DESC", label: "តម្លៃ: ខ្ពស់ ទៅ ទាប" },
+    ],
+    [],
+  );
 
   // Filter categories relevant to the current catalog mode (only active ones)
   const relevantCategories = useMemo(() => {
@@ -213,6 +324,17 @@ export default function MenuItemsManager({
     }
     return allCategories.filter((c) => c.isActive !== false && Boolean(c.parentCategoryUuid));
   }, [allCategories, catalogType]);
+
+  const categoryOptions = useMemo(
+    () => [
+      { value: "", label: "ប្រភេទទាំងអស់" },
+      ...relevantCategories.map((c) => ({
+        value: c.uuid,
+        label: extractKhmerOnlyName(c.name),
+      })),
+    ],
+    [relevantCategories],
+  );
 
   // Catalog Foods filtered by FOOD vs DRINK mode
   const displayFoods = useMemo(() => {
@@ -335,27 +457,122 @@ export default function MenuItemsManager({
       );
     }
 
+    if (selectedCuisineUuid) {
+      result = result.filter(
+        (item) =>
+          item.food?.cuisine?.uuid === selectedCuisineUuid ||
+          item.food?.cuisineUuid === selectedCuisineUuid ||
+          (item.food?.cuisine as any)?.id === selectedCuisineUuid,
+      );
+    }
+
+    if (selectedSeasonUuid) {
+      result = result.filter((item) =>
+        item.food?.seasons?.some(
+          (s: any) =>
+            s.uuid === selectedSeasonUuid ||
+            s === selectedSeasonUuid ||
+            s.seasonUuid === selectedSeasonUuid,
+        ),
+      );
+    }
+
+    if (selectedEventUuid) {
+      result = result.filter((item) =>
+        item.food?.events?.some(
+          (e: any) =>
+            e.uuid === selectedEventUuid ||
+            e === selectedEventUuid ||
+            e.eventUuid === selectedEventUuid,
+        ),
+      );
+    }
+
+    if (selectedWeatherUuid) {
+      result = result.filter((item) =>
+        item.food?.suitableWeather?.some(
+          (w: any) =>
+            w.uuid === selectedWeatherUuid ||
+            w === selectedWeatherUuid ||
+            w.weatherUuid === selectedWeatherUuid ||
+            w.code === selectedWeatherUuid,
+        ),
+      );
+    }
+
+    if (selectedAgeGroupUuid) {
+      result = result.filter((item) =>
+        item.food?.ageRules?.some(
+          (a: any) =>
+            a.uuid === selectedAgeGroupUuid ||
+            a === selectedAgeGroupUuid ||
+            a.ageGroupUuid === selectedAgeGroupUuid ||
+            a.code === selectedAgeGroupUuid,
+        ),
+      );
+    }
+
     if (selectedStatus) {
       result = result.filter((item) => item.availabilityStatus === selectedStatus);
     }
 
-    if (sortOrder === "PRICE_ASC") {
+    if (sortOrder === "OLDEST") {
+      result = [...result].reverse();
+    } else if (sortOrder === "NAME_ASC") {
+      result = [...result].sort((a, b) => (a.name || "").localeCompare(b.name || "", "km"));
+    } else if (sortOrder === "NAME_DESC") {
+      result = [...result].sort((a, b) => (b.name || "").localeCompare(a.name || "", "km"));
+    } else if (sortOrder === "PRICE_ASC") {
       result = [...result].sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
     } else if (sortOrder === "PRICE_DESC") {
       result = [...result].sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
     }
 
     return result;
-  }, [menuItems, search, selectedStoreUuid, selectedCategoryUuid, selectedStatus, sortOrder]);
+  }, [
+    menuItems,
+    search,
+    selectedStoreUuid,
+    selectedCategoryUuid,
+    selectedCuisineUuid,
+    selectedSeasonUuid,
+    selectedEventUuid,
+    selectedWeatherUuid,
+    selectedAgeGroupUuid,
+    selectedStatus,
+    sortOrder,
+  ]);
+
+  const menuCounts = useMemo(() => {
+    const all = menuItems.length;
+    const available = menuItems.filter((i) => i.availabilityStatus === "AVAILABLE").length;
+    const outOfStock = menuItems.filter((i) => i.availabilityStatus === "OUT_OF_STOCK" || i.availabilityStatus === "UNAVAILABLE").length;
+    const hidden = menuItems.filter((i) => i.availabilityStatus === "HIDDEN" || i.availabilityStatus === "ARCHIVED").length;
+    return { all, available, outOfStock, hidden };
+  }, [menuItems]);
 
   const hasActiveFilters = Boolean(
-    search || selectedStoreUuid || selectedCategoryUuid || selectedStatus || sortOrder !== "NEWEST",
+    search ||
+      selectedStoreUuid ||
+      selectedCategoryUuid ||
+      selectedCuisineUuid ||
+      selectedSeasonUuid ||
+      selectedEventUuid ||
+      selectedWeatherUuid ||
+      selectedAgeGroupUuid ||
+      selectedStatus ||
+      sortOrder !== "NEWEST",
   );
 
   const resetAllFilters = () => {
     setSearch("");
     setSelectedStoreUuid("");
     setSelectedCategoryUuid("");
+    setSelectedCuisineUuid("");
+    setSelectedSeasonUuid("");
+    setSelectedEventUuid("");
+    setSelectedWeatherUuid("");
+    setSelectedAgeGroupUuid("");
     setSelectedStatus("");
     setSortOrder("NEWEST");
   };
@@ -364,13 +581,13 @@ export default function MenuItemsManager({
   const pageTitle = useMemo(() => {
     if (catalogType === "DRINK") return "ភេសជ្ជៈ";
     if (catalogType === "FOOD") return "ម្ហូប";
-    return "មីនុយ";
+    return "ម៉ឺនុយ";
   }, [catalogType]);
 
   const pageSubtitle = useMemo(() => {
-    if (catalogType === "DRINK") return "គ្រប់គ្រងបញ្ជីភេសជ្ជៈក្នុង Catalog សម្រាប់ Store ជ្រើសរើស";
-    if (catalogType === "FOOD") return "គ្រប់គ្រងបញ្ជីមុខម្ហូបក្នុង Catalog សម្រាប់ Store ជ្រើសរើស";
-    return "គ្រប់គ្រងមុខម្ហូបរបស់ហាង (Store Menu Items) លើ Website";
+    if (catalogType === "DRINK") return "គ្រប់គ្រងបញ្ជីភេសជ្ជៈសម្រាប់ហាងជ្រើសរើស";
+    if (catalogType === "FOOD") return "គ្រប់គ្រងបញ្ជីមុខម្ហូបសម្រាប់ហាងជ្រើសរើស";
+    return "គ្រប់គ្រងម៉ឺនុយមុខម្ហូបរបស់ហាងលើគេហទំព័រ";
   }, [catalogType]);
 
   const busy =
@@ -451,7 +668,7 @@ export default function MenuItemsManager({
 
           setNotice({
             type: "success",
-            text: "បានកែប្រែ Menu Item ដោយជោគជ័យ។",
+            text: "បានកែប្រែ ម៉ឺនុយ ដោយជោគជ័យ។",
           });
         } catch (updateErr: any) {
           if (
@@ -467,7 +684,7 @@ export default function MenuItemsManager({
 
             setNotice({
               type: "success",
-              text: "បាន Publish Menu Item ទៅ Store ដោយជោគជ័យ។",
+              text: "បាន រក្សាទុក ម៉ឺនុយ ទៅហាងដោយជោគជ័យ។",
             });
           } else {
             throw updateErr;
@@ -482,7 +699,7 @@ export default function MenuItemsManager({
 
         setNotice({
           type: "success",
-          text: "បានបង្កើត និង Publish Menu Item សម្រាប់ Store ដោយជោគជ័យ។",
+          text: "បានបង្កើត និង រក្សាទុក ម៉ឺនុយ សម្រាប់ហាងដោយជោគជ័យ។",
         });
       }
 
@@ -499,18 +716,22 @@ export default function MenuItemsManager({
     }
   };
 
-  const confirmDeleteFood = async () => {
-    if (!deletingFood) return;
+  const confirmSoftDeleteFood = async () => {
+    if (!softDeletingFood) return;
     try {
       setNotice(null);
-      await deleteFood(deletingFood.uuid).unwrap();
+      await updateFood({
+        uuid: softDeletingFood.uuid,
+        payload: { isActive: false },
+        images: [],
+      }).unwrap();
+
       setNotice({
         type: "success",
-        text: `បានប្តូរស្ថានភាព "${
-          deletingFood.localName || deletingFood.canonicalName
-        }" ទៅជា 'អសកម្ម' (Inactive)។`,
+        text: `បានប្តូរស្ថានភាព "${softDeletingFood.localName || softDeletingFood.canonicalName
+          }" ទៅជា 'អសកម្ម'។`,
       });
-      setDeletingFood(null);
+      setSoftDeletingFood(null);
       await refreshAll();
     } catch (error) {
       setNotice({
@@ -520,21 +741,85 @@ export default function MenuItemsManager({
     }
   };
 
-  const confirmDeleteMenu = async () => {
-    if (!deletingMenu) return;
+  const confirmHardDeleteFood = async () => {
+    if (!hardDeletingFood) return;
+    try {
+      setNotice(null);
+      await deleteFood(hardDeletingFood.uuid).unwrap();
+      setNotice({
+        type: "success",
+        text: `បានលុប "${hardDeletingFood.localName || hardDeletingFood.canonicalName
+          }" ចេញពីប្រព័ន្ធដោយជោគជ័យ។`,
+      });
+      setHardDeletingFood(null);
+      await refreshAll();
+    } catch (error) {
+      setNotice({
+        type: "error",
+        text: getMenuManagementApiError(error),
+      });
+    }
+  };
+
+  const confirmSoftDeleteMenu = async () => {
+    if (!softDeletingMenu) return;
     try {
       setNotice(null);
       const targetUuid =
-        deletingMenu.uuid ||
-        (deletingMenu as any).menuItemUuid ||
-        (deletingMenu as any).id;
+        softDeletingMenu.uuid ||
+        (softDeletingMenu as any).menuItemUuid ||
+        (softDeletingMenu as any).id;
+
+      await updateMenuItem({
+        uuid: String(targetUuid),
+        payload: {
+          foodUuid: softDeletingMenu.foodUuid || softDeletingMenu.food?.uuid || "",
+          menuItem: {
+            name: softDeletingMenu.name,
+            description: softDeletingMenu.description || undefined,
+            price: Number(softDeletingMenu.price) || 0,
+            currencyCode: softDeletingMenu.currencyCode || "USD",
+            availabilityStatus: "UNAVAILABLE",
+            ingredientDataStatus: "VERIFIED",
+            isFeatured: Boolean(softDeletingMenu.isFeatured),
+            source: "MANUAL",
+          },
+          ingredients: [],
+          dietaryTypes: [],
+          allergenDeclarations: [],
+        },
+        images: [],
+      }).unwrap();
+
+      setNotice({
+        type: "success",
+        text: `បានផ្អាកលក់ ម៉ឺនុយ "${softDeletingMenu.name}" ដោយជោគជ័យ។`,
+      });
+      setSoftDeletingMenu(null);
+      await refreshAll();
+    } catch (error) {
+      setNotice({
+        type: "error",
+        text: getMenuManagementApiError(error),
+      });
+    }
+  };
+
+  const confirmHardDeleteMenu = async () => {
+    if (!hardDeletingMenu) return;
+    try {
+      setNotice(null);
+      const targetUuid =
+        hardDeletingMenu.uuid ||
+        (hardDeletingMenu as any).menuItemUuid ||
+        (hardDeletingMenu as any).id;
 
       await deleteMenuItem(String(targetUuid)).unwrap();
       setNotice({
         type: "success",
-        text: `បានលុប Menu Item "${deletingMenu.name}" ដោយជោគជ័យ។`,
+        text: `បានលុប ម៉ឺនុយ "${hardDeletingMenu.name}" ចេញពីប្រព័ន្ធដោយជោគជ័យ។`,
       });
-      setDeletingMenu(null);
+      setHardDeletingMenu(null);
       await refreshAll();
     } catch (error) {
       setNotice({
@@ -574,7 +859,7 @@ export default function MenuItemsManager({
                 <>
                   <Stat
                     icon={<Layers size={20} />}
-                    label={catalogType === "DRINK" ? "ភេសជ្ជៈក្នុង Catalog" : "មុខម្ហូបក្នុង Catalog"}
+                    label={catalogType === "DRINK" ? "ភេសជ្ជៈសរុប" : "មុខម្ហូបសរុប"}
                     value={displayFoods.length}
                   />
                   <Stat
@@ -587,17 +872,17 @@ export default function MenuItemsManager({
                 <>
                   <Stat
                     icon={<Globe2 size={20} />}
-                    label="Menu Items លើ Website"
+                    label="ម៉ឺនុយលើគេហទំព័រ"
                     value={menuItemsQuery.data?.totalElements ?? menuItems.length}
                   />
                   <Stat
                     icon={<Store size={20} />}
-                    label="ហាងសរុប (Approved)"
+                    label="ហាងបានអនុម័តសរុប"
                     value={approvedStoresCountQuery.data?.totalElements ?? stores.length}
                   />
                   <Stat
                     icon={<Layers size={20} />}
-                    label="Food Catalog សម្រាប់ Store"
+                    label="បញ្ជីមុខម្ហូបសម្រាប់ហាង"
                     value={foodsQuery.data?.totalElements ?? foods.length}
                   />
                 </>
@@ -625,140 +910,267 @@ export default function MenuItemsManager({
                   setEditingMenu(null);
                   setMenuModalOpen(true);
                 }}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit cursor-pointer"
               >
                 <Plus size={20} />
-                បង្កើត Menu Item
+                បង្កើតម៉ឺនុយ
               </button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Clean, Horizontal Inline Filter Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-1 flex-wrap items-center gap-3">
-          {/* Search Box */}
-          <div className="relative min-w-[260px] flex-1 sm:max-w-md">
-            <Search
-              size={20}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={isCatalogMode ? (catalogType === "DRINK" ? "ស្វែងរកភេសជ្ជៈ..." : "ស្វែងរកមុខម្ហូប...") : "ស្វែងរកតាមឈ្មោះ, ហាង..."}
-              className="h-[52px] w-full rounded-full border border-gray-200 bg-white pl-12 pr-4 text-lg font-medium outline-none placeholder:text-gray-400 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100 transition"
-            />
+      {/* 2-ROW TOOLBAR MATCHING SHOPS MANAGER UI */}
+      <div className="space-y-3">
+        {/* ROW 1: Status Tabs (Left) + Search Input (Middle) + Page Size (Right) */}
+        <div className="flex w-full flex-wrap items-center justify-between gap-3">
+          {/* Status Tabs Pills */}
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { id: "", label: "ទាំងអស់", count: menuCounts.all },
+              { id: "AVAILABLE", label: "មានលក់", count: menuCounts.available },
+              { id: "HIDDEN", label: "លាក់ទុក", count: menuCounts.hidden },
+            ].map((tab) => {
+              const active = selectedStatus === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSelectedStatus(tab.id)}
+                  className={`flex h-11 cursor-pointer items-center gap-2 rounded-2xl px-4 text-base font-semibold transition ${
+                    active
+                      ? "bg-primary-800 text-white shadow-xs"
+                      : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                      active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Store Filter (For Menu Items Page Only) */}
-          {!isCatalogMode && stores.length > 0 && (
-            <select
-              value={selectedStoreUuid}
-              onChange={(e) => setSelectedStoreUuid(e.target.value)}
-              className="h-[52px] rounded-full border border-gray-200 bg-white px-5 text-lg font-medium text-gray-700 outline-none focus:border-primary-600 focus:ring-4 focus:ring-primary-100 transition"
-            >
-              <option value="">ហាងទាំងអស់</option>
-              {stores.map((s) => (
-                <option key={s.uuid} value={s.uuid}>
-                  {s.storeName || s.name || s.localName || s.uuid}
-                </option>
-              ))}
-            </select>
-          )}
+          <div className="flex flex-1 items-center justify-end gap-3 min-w-[300px]">
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-[400px]">
+              <Search
+                size={17}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={isCatalogMode ? (catalogType === "DRINK" ? "ស្វែងរកភេសជ្ជៈ..." : "ស្វែងរកមុខម្ហូប...") : "ស្វែងរកម៉ឺនុយ, ហាង..."}
+                className="h-11 w-full rounded-2xl border border-gray-200 bg-white pl-11 pr-9 text-base font-semibold text-gray-700 outline-none placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100 transition"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
 
-          {/* Category Filter */}
-          <select
-            value={selectedCategoryUuid}
-            onChange={(e) => setSelectedCategoryUuid(e.target.value)}
-            className="h-[52px] rounded-full border border-gray-200 bg-white px-5 text-lg font-medium text-gray-700 outline-none focus:border-primary-600 focus:ring-4 focus:ring-primary-100 transition"
-          >
-            <option value="">ប្រភេទទាំងអស់</option>
-            {relevantCategories.map((c) => (
-              <option key={c.uuid} value={c.uuid}>
-                {extractKhmerOnlyName(c.name)}
-              </option>
-            ))}
-          </select>
-
-          {/* Status Filter */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="h-[52px] rounded-full border border-gray-200 bg-white px-5 text-lg font-medium text-gray-700 outline-none focus:border-primary-600 focus:ring-4 focus:ring-primary-100 transition"
-          >
-            <option value="">ស្ថានភាពទាំងអស់</option>
-            {isCatalogMode ? (
-              <>
-                <option value="ACTIVE">សកម្ម (Active)</option>
-                <option value="INACTIVE">អសកម្ម (Inactive)</option>
-              </>
-            ) : (
-              <>
-                <option value="AVAILABLE">មានលក់ (Available)</option>
-                <option value="OUT_OF_STOCK">អស់ (Out of Stock)</option>
-                <option value="ARCHIVED">ផ្អាកលក់ (Archived)</option>
-              </>
-            )}
-          </select>
-
-          {/* Sort Order (For Menu Items) */}
-          {!isCatalogMode && (
-            <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as any)}
-              className="h-[52px] rounded-full border border-gray-200 bg-white px-5 text-lg font-medium text-gray-700 outline-none focus:border-primary-600 focus:ring-4 focus:ring-primary-100 transition"
-            >
-              <option value="NEWEST">ថ្មីបំផុត</option>
-              <option value="PRICE_ASC">តម្លៃ: ទាប ទៅ ខ្ពស់</option>
-              <option value="PRICE_DESC">តម្លៃ: ខ្ពស់ ទៅ ទាប</option>
-            </select>
-          )}
-
-          {/* Reset Filters Button */}
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={resetAllFilters}
-              className="inline-flex h-[52px] items-center gap-2 rounded-full border border-gray-200 bg-white px-5 text-lg font-medium text-gray-600 hover:bg-gray-50 transition"
-            >
-              <X size={18} />
-              កំណត់ឡើងវិញ
-            </button>
-          )}
+            {/* Page Size Select */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setSizeOpen((c) => !c)}
+                className={`flex h-11 min-w-[125px] cursor-pointer items-center justify-between gap-2.5 rounded-2xl border bg-white px-4 text-base font-semibold transition ${
+                  sizeOpen ? "border-primary-600 ring-2 ring-primary-100" : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <span className="text-gray-700">{itemsPerPage} / ទំព័រ</span>
+                <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""}`} />
+              </button>
+              {sizeOpen && (
+                <div className="absolute right-0 top-[48px] z-[110] w-[160px] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl">
+                  <p className="px-3 py-1 text-xs font-semibold text-gray-400">ចំនួនក្នុងទំព័រ</p>
+                  {[10, 20, 50].map((value) => {
+                    const selected = itemsPerPage === value;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => {
+                          setItemsPerPage(value);
+                          setSizeOpen(false);
+                        }}
+                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
+                          selected ? "bg-primary-50 text-primary-800" : "text-gray-700 hover:bg-gray-50"
+                        }`}
+                      >
+                        <span>{value} / ទំព័រ</span>
+                        {selected && <Check size={16} className="text-primary-800" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Refresh Button */}
-        <button
-          type="button"
-          disabled={foodsQuery.isFetching || menuItemsQuery.isFetching}
-          onClick={() => void refreshAll()}
-          title="ទាញយកទិន្នន័យឡើងវិញ"
-          className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-[#137A3D] disabled:opacity-50 transition"
-        >
-          <RefreshCw
-            size={20}
-            className={foodsQuery.isFetching || menuItemsQuery.isFetching ? "animate-spin" : ""}
-          />
-        </button>
+        {/* ROW 2: Filter Controls Card */}
+        <div className="space-y-2.5 rounded-2xl border border-gray-100 bg-white p-3 shadow-xs">
+          {/* Top Line Filters: Store, Category, Cuisine, Season, Event */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex items-center gap-2 px-1 text-base font-semibold text-gray-700 shrink-0">
+              <Filter size={17} className="text-primary-800" />
+              <span>តម្រងស្វែងរក:</span>
+            </div>
+
+            {/* Store Filter */}
+            {!isCatalogMode && stores.length > 0 && (
+              <div className="w-[185px] shrink-0">
+                <CustomSelect
+                  value={selectedStoreUuid}
+                  onChange={(val) => setSelectedStoreUuid(val)}
+                  options={storeOptions}
+                  placeholder="ហាងទាំងអស់"
+                />
+              </div>
+            )}
+
+            {/* Category Filter */}
+            <div className="w-[170px] shrink-0">
+              <CustomSelect
+                value={selectedCategoryUuid}
+                onChange={(val) => setSelectedCategoryUuid(val)}
+                options={categoryOptions}
+                placeholder="ប្រភេទទាំងអស់"
+              />
+            </div>
+
+            {/* Cuisine Filter */}
+            <div className="w-[170px] shrink-0">
+              <CustomSelect
+                value={selectedCuisineUuid}
+                onChange={(val) => setSelectedCuisineUuid(val)}
+                options={cuisineOptions}
+                placeholder="វប្បធម៌ម្ហូបទាំងអស់"
+              />
+            </div>
+
+            {/* Season Filter */}
+            <div className="w-[160px] shrink-0">
+              <CustomSelect
+                value={selectedSeasonUuid}
+                onChange={(val) => setSelectedSeasonUuid(val)}
+                options={seasonOptions}
+                placeholder="រដូវកាលទាំងអស់"
+              />
+            </div>
+
+            {/* Event Filter */}
+            <div className="w-[160px] shrink-0">
+              <CustomSelect
+                value={selectedEventUuid}
+                onChange={(val) => setSelectedEventUuid(val)}
+                options={eventOptions}
+                placeholder="ព្រឹត្តិការណ៍ទាំងអស់"
+              />
+            </div>
+          </div>
+
+          {/* Bottom Line Filters: Weather, Age Group, Clear Button, Sort Order */}
+          <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-gray-100/70">
+            {/* Weather Filter */}
+            <div className="w-[170px] shrink-0">
+              <CustomSelect
+                value={selectedWeatherUuid}
+                onChange={(val) => setSelectedWeatherUuid(val)}
+                options={weatherOptions}
+                placeholder="អាកាសធាតុទាំងអស់"
+              />
+            </div>
+
+            {/* Age Group Filter */}
+            <div className="w-[170px] shrink-0">
+              <CustomSelect
+                value={selectedAgeGroupUuid}
+                onChange={(val) => setSelectedAgeGroupUuid(val)}
+                options={ageGroupOptions}
+                placeholder="ក្រុមអាយុទាំងអស់"
+              />
+            </div>
+
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                className="inline-flex h-11 items-center gap-1.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 text-base font-semibold text-amber-700 transition hover:bg-amber-100 cursor-pointer shrink-0"
+              >
+                <X size={16} />
+                <span>សម្អាតតម្រង</span>
+              </button>
+            )}
+
+            {/* Sort Order (Right Aligned) */}
+            {!isCatalogMode && (
+              <div className="w-[170px] shrink-0 ml-auto">
+                <CustomSelect
+                  value={sortOrder}
+                  onChange={(val) => setSortOrder(val as any)}
+                  options={sortOptions}
+                  placeholder="ថ្មីបំផុត"
+                />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Alert Notice Banner */}
+      {/* FLOATING TOAST NOTIFICATION (MATCHING SHOPS AND USERS) */}
       {notice && (
-        <div
-          className={`rounded-2xl border px-6 py-4 text-lg font-medium ${
-            notice.type === "success"
-              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-              : "border-red-100 bg-red-50 text-red-600"
-          }`}
-        >
-          {notice.text}
+        <div className="fixed top-6 right-6 z-[9999] pointer-events-none flex max-w-md animate-in fade-in slide-in-from-top-5 duration-300">
+          <div
+            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-3.5 shadow-2xl backdrop-blur-md transition-all ${notice.type === "success"
+              ? "border-emerald-200 bg-white/95 text-emerald-950 shadow-emerald-500/10"
+              : "border-red-200 bg-white/95 text-red-950 shadow-red-500/10"
+              }`}
+          >
+            <div
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${notice.type === "success"
+                ? "bg-emerald-50 text-emerald-600"
+                : "bg-red-50 text-red-600"
+                }`}
+            >
+              {notice.type === "success" ? (
+                <CheckCircle2 size={20} />
+              ) : (
+                <AlertCircle size={20} />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold leading-relaxed">
+                {notice.text}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setNotice(null)}
+              className="ml-2 flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+              aria-label="Close"
+            >
+              <X size={15} />
+            </button>
+          </div>
         </div>
       )}
 
       {/* Data Table Section */}
-      <section className="overflow-hidden rounded-[30px] border border-gray-100 bg-white shadow-sm">
+      <section className="overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
         {currentLoading ? (
           <div className="flex min-h-[380px] items-center justify-center">
             <Loader2 size={36} className="animate-spin text-[#137A3D]" />
@@ -784,19 +1196,22 @@ export default function MenuItemsManager({
               setEditingFood(item);
               setFoodModalOpen(true);
             }}
-            onDelete={setDeletingFood}
+            onSoftDelete={setSoftDeletingFood}
+            onDelete={setHardDeletingFood}
           />
         ) : (
           <PublishedMenuItemsTable
             items={filteredMenuItems}
             foods={foods}
             busy={busy}
+            itemsPerPage={itemsPerPage}
             onView={(item) => setDetailUuid(item.uuid)}
             onEdit={(item) => {
               setEditingMenu(item);
               setMenuModalOpen(true);
             }}
-            onDelete={setDeletingMenu}
+            onSoftDelete={setSoftDeletingMenu}
+            onDelete={setHardDeletingMenu}
           />
         )}
       </section>
@@ -848,35 +1263,77 @@ export default function MenuItemsManager({
         onSubmit={saveMenuItem}
       />
 
-      {/* Delete / Deactivate Confirmations */}
+      {/* Food Soft Delete Confirmation */}
       <DeleteConfirmModal
-        open={Boolean(deletingFood)}
-        title="បិទដំណើរការ Food Catalog (Deactivate)?"
+        open={Boolean(softDeletingFood)}
+        variant="soft"
+        title="កំណត់អសកម្មមុខម្ហូប?"
         description={
-          deletingFood
-            ? `Food "${
-                deletingFood.localName || deletingFood.canonicalName
-              }" នឹងត្រូវប្តូរស្ថានភាពទៅជា 'អសកម្ម' (Inactive)។`
+          softDeletingFood
+            ? `មុខម្ហូប "${softDeletingFood.localName || softDeletingFood.canonicalName
+            }" នឹងត្រូវប្តូរស្ថានភាពទៅជា 'អសកម្ម' (Inactive) នៅក្នុង Catalog។ Store មិនអាចជ្រើសរើសបានទៀតទេ។`
+            : ""
+        }
+        deleting={updatingFood}
+        onClose={() => setSoftDeletingFood(null)}
+        onConfirm={() => void confirmSoftDeleteFood()}
+      />
+
+      {/* Food Hard Delete Confirmation */}
+      <DeleteConfirmModal
+        open={Boolean(hardDeletingFood)}
+        variant="hard"
+        title="លុបមុខម្ហូបចេញពីប្រព័ន្ធ?"
+        description={
+          hardDeletingFood
+            ? `មុខម្ហូប "${hardDeletingFood.localName || hardDeletingFood.canonicalName
+            }" នឹងត្រូវលុបចេញពីប្រព័ន្ធរៀងរហូត។ សកម្មភាពនេះមិនអាចត្រឡប់ក្រោយវិញបានទេ។`
             : ""
         }
         deleting={deletingFoodRequest}
-        onClose={() => setDeletingFood(null)}
-        onConfirm={() => void confirmDeleteFood()}
+        onClose={() => setHardDeletingFood(null)}
+        onConfirm={() => void confirmHardDeleteFood()}
       />
 
+      {/* Menu Item Soft Delete Confirmation */}
       <DeleteConfirmModal
-        open={Boolean(deletingMenu)}
-        title="លុប Menu Item?"
-        description={deletingMenu ? `Menu Item: ${deletingMenu.name}.` : ""}
+        open={Boolean(softDeletingMenu)}
+        variant="soft"
+        title="ផ្អាកលក់ ម៉ឺនុយ?"
+        description={
+          softDeletingMenu
+            ? `ម៉ឺនុយ "${softDeletingMenu.name}" នឹងត្រូវប្តូរស្ថានភាពទៅជា 'ផ្អាកលក់' លើគេហទំព័រ។`
+            : ""
+        }
+        deleting={updatingMenuItem}
+        onClose={() => setSoftDeletingMenu(null)}
+        onConfirm={() => void confirmSoftDeleteMenu()}
+      />
+
+      {/* Menu Item Hard Delete Confirmation */}
+      <DeleteConfirmModal
+        open={Boolean(hardDeletingMenu)}
+        variant="hard"
+        title="លុប ម៉ឺនុយ ចេញពីប្រព័ន្ធ?"
+        description={
+          hardDeletingMenu
+            ? `ម៉ឺនុយ "${hardDeletingMenu.name}" នឹងត្រូវលុបចេញពីប្រព័ន្ធរៀងរហូត។ សកម្មភាពនេះមិនអាចត្រឡប់ក្រោយវិញបានទេ។`
+            : ""
+        }
         deleting={deletingMenuItemRequest}
-        onClose={() => setDeletingMenu(null)}
-        onConfirm={() => void confirmDeleteMenu()}
+        onClose={() => setHardDeletingMenu(null)}
+        onConfirm={() => void confirmHardDeleteMenu()}
       />
 
       {/* Detail View Modals */}
       <MenuItemDetailModal
         uuid={detailUuid}
         onClose={() => setDetailUuid(null)}
+        onEdit={(item) => {
+          setDetailUuid(null);
+          setEditingMenu(item);
+          setMenuModalOpen(true);
+        }}
       />
 
       <FoodDetailModal

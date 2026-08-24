@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Loader2, UserX, X } from "lucide-react";
+import { Loader2, MinusCircle, X } from "lucide-react";
 import type { AdminUser } from "@/src/types/userProfile";
 import { displayName } from "@/src/lib/userProfileFormat";
 
@@ -44,7 +44,7 @@ export default function SuspendUserConfirmModal({
 
         {/* Circular Icon with Soft Glow */}
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-500 ring-8 ring-amber-50/60">
-          <UserX size={26} className="stroke-[2.2]" />
+          <MinusCircle size={28} className="stroke-[2.2]" />
         </div>
 
         {/* Header Content */}
@@ -63,7 +63,7 @@ export default function SuspendUserConfirmModal({
 
         {/* Callout Notice */}
         <div className="mt-5 flex items-start gap-3 rounded-2xl border border-amber-200/90 bg-amber-50/40 p-4 text-left">
-          <AlertTriangle size={17} className="mt-0.5 shrink-0 text-amber-600" />
+          <MinusCircle size={17} className="mt-0.5 shrink-0 text-amber-600" />
           <p className="text-xs font-medium leading-relaxed text-amber-900">
             អ្នកអាចស្វែងរកគណនីនេះនៅផ្ទាំង <strong>"ផ្អាកដំណើរការ"</strong> និងបើកដំណើរការឡើងវិញបានគ្រប់ពេល។
           </p>

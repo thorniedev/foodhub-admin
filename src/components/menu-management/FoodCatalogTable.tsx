@@ -1,6 +1,7 @@
 "use client";
 
-import { CircleMinus, Eye, Pencil } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Eye, MinusCircle, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import FoodAvatar from "./FoodAvatar";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 
@@ -49,6 +50,121 @@ function cuisineName(
   return cui?.name || item.cuisine?.name || item.cuisineName || "—";
 }
 
+function FoodRowActions({
+  item,
+  disabled,
+  rowIndex = 0,
+  totalRows = 1,
+  onView,
+  onEdit,
+  onSoftDelete,
+  onHardDelete,
+}: {
+  item: FoodRecord;
+  disabled: boolean;
+  rowIndex?: number;
+  totalRows?: number;
+  onView?: (item: FoodRecord) => void;
+  onEdit: (item: FoodRecord) => void;
+  onSoftDelete?: (item: FoodRecord) => void;
+  onHardDelete: (item: FoodRecord) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const openUpward = totalRows > 2 && rowIndex >= totalRows - 2;
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div className="relative flex items-center justify-center gap-2">
+      {/* 1. View Detail (Green Eye) */}
+      {onView && (
+        <button
+          type="button"
+          onClick={() => onView(item)}
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+          title="មើលព័ត៌មានលម្អិត"
+        >
+          <Eye size={18} />
+        </button>
+      )}
+
+      {/* 2. Primary Action: Edit (Blue Pencil) */}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onEdit(item)}
+        className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+        title="កែប្រែ"
+      >
+        <Pencil size={18} />
+      </button>
+
+      {/* 3. More (3-dots) for extra actions */}
+      <div className="relative" ref={menuRef}>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setOpen((prev) => !prev)}
+          className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition hover:bg-gray-100 hover:text-gray-800 focus:outline-none ${
+            open ? "bg-gray-200 text-gray-900 ring-2 ring-gray-300/60" : ""
+          }`}
+          title="ផ្សេងទៀត"
+          aria-label="More actions"
+        >
+          <MoreVertical size={18} />
+        </button>
+
+        {open && (
+          <div
+            className={`absolute right-0 z-[100] min-w-[185px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 ${
+              openUpward ? "bottom-full mb-2" : "top-full mt-2"
+            }`}
+          >
+            {/* Soft Delete / Disable */}
+            {onSoftDelete && (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onSoftDelete(item);
+                }}
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-50"
+              >
+                <MinusCircle size={16} />
+                <span>កំណត់អសកម្ម</span>
+              </button>
+            )}
+
+            {/* Hard Delete */}
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onHardDelete(item);
+              }}
+              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+            >
+              <Trash2 size={16} />
+              <span>លុបចេញពីប្រព័ន្ធ</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function FoodCatalogTable({
   items,
   categories = [],
@@ -56,6 +172,7 @@ export default function FoodCatalogTable({
   busy,
   onView,
   onEdit,
+  onSoftDelete,
   onDelete,
 }: {
   items: FoodRecord[];
@@ -64,123 +181,133 @@ export default function FoodCatalogTable({
   busy: boolean;
   onView?: (item: FoodRecord) => void;
   onEdit: (item: FoodRecord) => void;
+  onSoftDelete?: (item: FoodRecord) => void;
   onDelete: (item: FoodRecord) => void;
 }) {
   if (!items.length) {
     return (
-      <div className="px-6 py-24 text-center">
-        <p className="text-2xl font-bold text-gray-400">មិនទាន់មានទិន្នន័យ Catalog ទេ</p>
-        <p className="mt-2 text-lg text-gray-400">ទិន្នន័យមុខម្ហូប និងភេសជ្ជៈនឹងបង្ហាញនៅទីនេះ។</p>
+      <div className="px-6 py-16 text-center">
+        <p className="text-lg font-medium text-gray-500">
+          មិនទាន់មានទិន្នន័យ Catalog ទេ
+        </p>
+        <p className="mt-1 text-base text-gray-400">
+          ទិន្នន័យមុខម្ហូប និងភេសជ្ជៈនឹងបង្ហាញនៅទីនេះ។
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="w-full min-w-0 max-w-full overflow-x-auto">
-      <table className="w-full min-w-[1050px] border-collapse text-left">
+    <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <table className="w-full table-auto border-collapse text-left">
+        {/* ================= HEADER ================= */}
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/70">
-            <th className="px-6 py-5 text-xl font-bold text-primary-800">មុខម្ហូប / ភេសជ្ជៈ</th>
-            <th className="px-6 py-5 text-xl font-bold text-primary-800">ប្រភេទ</th>
-            <th className="px-6 py-5 text-xl font-bold text-primary-800">ម្ហូបតាមប្រទេស</th>
-            <th className="px-6 py-5 text-xl font-bold text-primary-800">ស្ថានភាព</th>
-            <th className="px-6 py-5 text-right text-xl font-bold text-primary-800">សកម្មភាព</th>
+            <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[140px]">
+              មុខម្ហូប / ភេសជ្ជៈ
+            </th>
+
+            <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[130px]">
+              ប្រភេទ
+            </th>
+
+            <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[130px]">
+              ម្ហូបតាមប្រទេស
+            </th>
+
+            <th className="whitespace-nowrap px-2 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[95px]">
+              ស្ថានភាព
+            </th>
+
+            <th className="whitespace-nowrap px-3 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[110px]">
+              សកម្មភាព
+            </th>
           </tr>
         </thead>
 
+        {/* ================= BODY ================= */}
         <tbody>
-          {items.map((item) => (
-            <tr
-              key={item.uuid}
-              className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
-            >
-              <td className="px-6 py-5">
-                <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-gray-100 ring-1 ring-black/5 shadow-xs">
-                    <FoodAvatar
-                      item={item}
-                      alt={foodName(item)}
-                      fallbackEmoji="🍽️"
-                    />
-                  </div>
+          {items.map((item, index) => {
+            const active = item.isActive !== false;
 
-                  <div className="min-w-0">
-                    <p className="truncate text-xl font-bold text-gray-900">
-                      {foodName(item)}
-                    </p>
+            return (
+              <tr
+                key={item.uuid}
+                className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
+              >
+                {/* Food Name + Avatar */}
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800">
+                      <FoodAvatar
+                        item={item}
+                        alt={foodName(item)}
+                        fallbackEmoji="🍽️"
+                      />
+                    </div>
 
-                    {item.canonicalName && (
-                      <p className="mt-1 truncate text-lg font-medium text-gray-400">
-                        {item.canonicalName}
+                    <div className="min-w-0">
+                      <p className="max-w-[160px] truncate text-base font-semibold text-gray-800">
+                        {foodName(item)}
                       </p>
-                    )}
+
+                      {item.canonicalName && (
+                        <p className="max-w-[160px] truncate text-xs font-medium text-gray-400">
+                          {item.canonicalName}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </td>
+                </td>
 
-              <td className="px-6 py-5">
-                <span className="inline-flex rounded-full bg-secondary-50 px-4 py-1.5 text-lg font-medium text-secondary-700 ring-1 ring-inset ring-secondary-100">
-                  {categoryName(item, categories)}
-                </span>
-              </td>
+                {/* Category */}
+                <td className="px-3 py-3">
+                  <span className="line-clamp-1 text-sm font-medium text-gray-500">
+                    {categoryName(item, categories)}
+                  </span>
+                </td>
 
-              <td className="px-6 py-5 text-lg font-medium text-gray-600">
-                {cuisineName(item, cuisines)}
-              </td>
+                {/* Cuisine */}
+                <td className="px-3 py-3">
+                  <span className="line-clamp-1 text-sm font-medium text-gray-500">
+                    {cuisineName(item, cuisines)}
+                  </span>
+                </td>
 
-              <td className="px-6 py-5">
-                <span
-                  className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-lg font-medium ring-1 ring-inset ${
-                    item.isActive === false
-                      ? "bg-gray-100 text-gray-500 ring-gray-200"
-                      : "bg-primary-50 text-primary-700 ring-primary-100"
-                  }`}
-                >
+                {/* Status Badge */}
+                <td className="px-2 py-3 text-center">
                   <span
-                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-                      item.isActive === false ? "bg-gray-400" : "bg-primary-600"
+                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${
+                      active
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                        : "bg-gray-50 text-gray-600 border-gray-150"
                     }`}
+                  >
+                    <span
+                      className={`h-2 w-2 shrink-0 rounded-full ${
+                        active ? "bg-emerald-500" : "bg-gray-400"
+                      }`}
+                    />
+                    {active ? "សកម្ម" : "អសកម្ម"}
+                  </span>
+                </td>
+
+                {/* Actions */}
+                <td className="px-3 py-3">
+                  <FoodRowActions
+                    item={item}
+                    disabled={busy}
+                    rowIndex={index}
+                    totalRows={items.length}
+                    onView={onView}
+                    onEdit={onEdit}
+                    onSoftDelete={onSoftDelete}
+                    onHardDelete={onDelete}
                   />
-                  {item.isActive === false ? "អសកម្ម" : "សកម្ម"}
-                </span>
-              </td>
-
-              <td className="px-6 py-5">
-                <div className="flex items-center justify-end gap-2.5">
-                  {onView && (
-                    <button
-                      type="button"
-                      onClick={() => onView(item)}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100"
-                      title="មើលព័ត៌មានលម្អិត"
-                    >
-                      <Eye size={22} />
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => onEdit(item)}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:opacity-40"
-                    title="កែប្រែ"
-                  >
-                    <Pencil size={22} />
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => onDelete(item)}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:opacity-40"
-                    title="បិទ / អសកម្ម"
-                  >
-                    <CircleMinus size={22} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

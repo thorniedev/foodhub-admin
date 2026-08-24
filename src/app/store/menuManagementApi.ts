@@ -1993,6 +1993,42 @@ export const menuManagementApi =
               );
             }
 
+            // 6. Replace Images if new files provided
+            if (Array.isArray(images) && images.length > 0) {
+              try {
+                const imgFormData = new FormData();
+                if (images[0]) {
+                  imgFormData.append("thumbnail", images[0]);
+                  imgFormData.append("file", images[0]);
+                  imgFormData.append("images", images[0]);
+                }
+                for (let i = 1; i < images.length && i < 5; i++) {
+                  imgFormData.append("gallery", images[i]);
+                  imgFormData.append("images", images[i]);
+                }
+
+                let imgResult = await browserRequest<unknown>(
+                  `/api/admin/menu-items/${encodeURIComponent(targetUuid)}/images`,
+                  {
+                    method: "PUT",
+                    body: imgFormData,
+                  },
+                );
+
+                if ("error" in imgResult) {
+                  await browserRequest<unknown>(
+                    `/api/catalog/menu-items/${encodeURIComponent(targetUuid)}/images`,
+                    {
+                      method: "PUT",
+                      body: imgFormData,
+                    },
+                  );
+                }
+              } catch (imgError) {
+                console.warn("[REPLACE MENU ITEM IMAGES FAILED]", imgError);
+              }
+            }
+
             return {
               data: unwrap<MenuItemRecord>(
                 coreResult.data as never,

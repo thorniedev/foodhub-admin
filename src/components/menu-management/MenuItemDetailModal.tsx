@@ -5,6 +5,7 @@ import {
   DollarSign,
   Heart,
   Loader2,
+  Pencil,
   Sparkles,
   Store,
   Utensils,
@@ -46,202 +47,284 @@ export default function MenuItemDetailModal({
       : [data?.thumbnail || data?.imageUrl || data?.thumbnailMediaUuid].filter(Boolean)
   ) as string[];
 
+  const isAvailable = data?.availabilityStatus !== "UNAVAILABLE";
+
   return (
-    <div className="fixed inset-0 z-[150] overflow-y-auto bg-black/60 p-4 backdrop-blur-[4px] animate-in fade-in duration-200">
-      <div className="mx-auto my-6 w-full max-w-4xl overflow-hidden rounded-[32px] bg-white shadow-[0_32px_80px_rgba(0,0,0,0.25)] animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-[28px] bg-white shadow-2xl animate-in zoom-in-95 duration-150">
 
-        {/* ─── HERO BANNER ─── */}
-        <div className="relative bg-gradient-to-br from-[#14833E] via-[#1a9e4d] to-[#0f6b32] px-7 pb-8 pt-7">
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
-          >
-            <X size={18} />
-          </button>
+        {/* ─── COMPACT HERO HEADER ─── */}
+        <div className="relative shrink-0 bg-gradient-to-r from-primary-800 to-primary-700 px-6 py-4 text-white">
+          <div className="absolute right-4 top-4 flex items-center gap-2">
+            {data && onEdit && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onEdit(data);
+                }}
+                className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white/20 px-3.5 text-xs font-semibold text-white transition hover:bg-white/30"
+              >
+                <Pencil size={13} />
+                <span>កែប្រែ</span>
+              </button>
+            )}
 
-          <div className="flex items-center gap-4">
-            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-white/20 shadow-lg shadow-black/10">
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3.5 pr-20">
+            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-white/20 shadow-sm border border-white/20">
               {images[0] ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={resolveFoodHubCatalogImageUrl(images[0]) || images[0]}
                   alt={data?.name || ""}
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-4xl">🍜</div>
+                <div className="flex h-full w-full items-center justify-center text-2xl">🍜</div>
               )}
             </div>
-            <div className="min-w-0 flex-1 pr-10">
-              <p className="truncate text-3xl font-black text-white">
-                {data?.name || "ព័ត៌មាន Menu Item"}
+
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[20px] font-bold text-white">
+                {data?.name || "ព័ត៌មានម៉ឺនុយ"}
               </p>
               {data?.description && (
-                <p className="mt-0.5 line-clamp-2 text-lg text-white/70">{data.description}</p>
+                <p className="mt-0.5 line-clamp-1 truncate text-[18px] text-white/90 font-normal">
+                  {data.description}
+                </p>
+              )}
+
+              {/* Badges row */}
+              {data && (
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-medium">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 font-bold text-white border border-white/20">
+                    <DollarSign size={13} />
+                    {Number(data.price ?? 0).toFixed(2)} USD
+                  </span>
+
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-bold border ${
+                      isAvailable
+                        ? "bg-emerald-500/30 border-emerald-300/40 text-white"
+                        : "bg-red-500/30 border-red-300/40 text-white"
+                    }`}
+                  >
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        isAvailable ? "bg-emerald-300" : "bg-red-300"
+                      }`}
+                    />
+                    {isAvailable ? "មានលក់" : "អស់/បិទ"}
+                  </span>
+
+                  {data.isFeatured && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/30 border border-amber-300/40 px-2.5 py-0.5 font-bold text-white">
+                      ★ ពិសេស
+                    </span>
+                  )}
+
+                  {data.preparationTimeMinutes != null && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/10 border border-white/15 px-2.5 py-0.5 text-white">
+                      <Clock size={12} />
+                      {data.preparationTimeMinutes} នាទី
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           </div>
-
-          {/* Badges + Price row */}
-          {data && (
-            <div className="mt-5 flex flex-wrap items-center gap-2.5">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/20 px-4 py-1.5 text-lg font-bold text-white">
-                <DollarSign size={16} />
-                {Number(data.price ?? 0).toFixed(2)} {data.currencyCode || "USD"}
-              </span>
-              {data.availabilityStatus && (
-                <span className="rounded-full border border-white/20 bg-white/15 px-4 py-1.5 text-lg font-bold text-white">
-                  {data.availabilityStatus}
-                </span>
-              )}
-              {data.isFeatured && (
-                <span className="rounded-full border border-orange-300/50 bg-orange-400/30 px-4 py-1.5 text-lg font-bold text-white">
-                  FEATURED
-                </span>
-              )}
-              {data.preparationTimeMinutes != null && (
-                <span className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-lg font-bold text-white">
-                  <Clock size={15} />
-                  {data.preparationTimeMinutes} នាទី
-                </span>
-              )}
-            </div>
-          )}
         </div>
 
-        {/* ─── BODY ─── */}
-        <div className="p-7">
+        {/* ─── BODY (SCROLL-FREE / COMPACT) ─── */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-3.5 text-gray-800">
           {isLoading ? (
-            <div className="flex min-h-64 flex-col items-center justify-center gap-4">
-              <Loader2 size={40} className="animate-spin text-[#14833E]" />
-              <p className="text-lg font-semibold text-gray-500">កំពុងទាញយកព័ត៌មានលម្អិត...</p>
+            <div className="flex py-12 flex-col items-center justify-center gap-3">
+              <Loader2 size={32} className="animate-spin text-primary-800" />
+              <p className="text-sm font-medium text-gray-500">កំពុងទាញយកព័ត៌មាន...</p>
             </div>
           ) : isError ? (
-            <div className="my-6 rounded-2xl bg-red-50 p-5 text-center text-lg font-semibold text-red-600">
+            <div className="my-4 rounded-xl bg-red-50 p-4 text-center text-sm font-semibold text-red-600">
               មិនអាចទាញយក Detail របស់ Menu Item នេះបានទេ។
             </div>
           ) : data ? (
-            <div className="space-y-4">
+            <>
               {/* Store & Food Reference */}
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-[#14833E]/30 hover:bg-emerald-50/30">
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-[#14833E]/30 transition group-hover:bg-[#14833E]" />
-                  <div className="flex items-center gap-2 pl-2 text-lg font-semibold text-gray-400">
-                    <Store size={16} />
+                <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-3.5">
+                  <div className="flex items-center gap-1.5 text-[18px] font-semibold text-gray-500">
+                    <Store size={18} className="text-primary-800" />
                     <span>ហាង</span>
                   </div>
-                  <p className="mt-2 pl-2 text-xl font-bold text-gray-900">
+                  <p className="mt-1 truncate text-[18px] font-bold text-gray-800">
                     {data.store?.storeName || data.store?.name || data.store?.localName || "—"}
                   </p>
                   {data.store?.city && (
-                    <p className="pl-2 text-lg text-gray-400">ទីតាំង: {data.store.city}</p>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      ទីតាំង: {data.store.city}
+                    </p>
                   )}
                 </div>
 
-                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-amber-200/60 hover:bg-amber-50/30">
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-amber-200 transition group-hover:bg-amber-400" />
-                  <div className="flex items-center gap-2 pl-2 text-lg font-semibold text-gray-400">
-                    <Utensils size={16} />
+                <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-3.5">
+                  <div className="flex items-center gap-1.5 text-[18px] font-semibold text-gray-500">
+                    <Utensils size={18} className="text-primary-800" />
                     <span>មុខម្ហូបមេ</span>
                   </div>
-                  <p className="mt-2 pl-2 text-xl font-bold text-gray-900">
+                  <p className="mt-1 truncate text-[18px] font-bold text-gray-800">
                     {data.food?.localName || data.food?.canonicalName || "—"}
                   </p>
                   {data.food?.categoryName && (
-                    <p className="pl-2 text-lg text-gray-400">ប្រភេទ: {data.food.categoryName}</p>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      ប្រភេទ: {data.food.categoryName}
+                    </p>
                   )}
                 </div>
               </div>
 
               {/* Recipe Ingredients */}
-              {data.ingredients && data.ingredients.length > 0 && (
-                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-violet-200/60 hover:bg-violet-50/20">
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-violet-300 transition group-hover:bg-violet-500" />
-                  <div className="flex items-center gap-2.5 pl-2 text-lg font-semibold text-gray-400">
-                    <Sparkles size={16} className="text-violet-500" />
+              {Array.isArray(data.ingredients) && data.ingredients.length > 0 && (
+                <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-3.5">
+                  <div className="flex items-center gap-1.5 text-[18px] font-semibold text-gray-700 mb-2">
+                    <Sparkles size={18} className="text-primary-800" />
                     <span>គ្រឿងផ្សំ ({data.ingredients.length})</span>
                   </div>
 
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {data.ingredients.map((ig, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between rounded-xl bg-white px-4 py-3 text-lg shadow-sm ring-1 ring-gray-100"
-                      >
-                        <span className="font-bold text-gray-800">
-                          {ig.name || ig.code}
-                          {ig.isOptional && (
-                            <span className="ml-1.5 text-lg text-gray-400">(Optional)</span>
-                          )}
-                        </span>
-                        <span className="font-semibold text-gray-500">
-                          {ig.quantity != null ? `${ig.quantity} ` : ""}
-                          {ig.unit || ""}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {data.ingredients.map((ig: any, idx: number) => {
+                      const igName =
+                        typeof ig === "string"
+                          ? ig
+                          : ig?.localName ||
+                            ig?.name ||
+                            ig?.ingredientLocalName ||
+                            ig?.ingredientName ||
+                            ig?.ingredient?.localName ||
+                            ig?.ingredient?.name ||
+                            ig?.code ||
+                            "គ្រឿងផ្សំ";
+                      const qty = typeof ig === "object" && ig ? ig.quantity ?? ig.amount : null;
+                      const unit = typeof ig === "object" && ig ? ig.unit || ig.measurementUnit || "" : "";
+                      const igQty = qty != null || unit ? `${qty != null ? qty : ""} ${unit}`.trim() : "";
+                      const isOptional = typeof ig === "object" && Boolean(ig?.isOptional);
+
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-sm border border-gray-100"
+                        >
+                          <span className="font-semibold text-gray-800">
+                            {igName}
+                            {isOptional && (
+                              <span className="ml-1 text-xs text-gray-400 font-normal">(ជម្រើស)</span>
+                            )}
+                          </span>
+                          {igQty && <span className="font-medium text-gray-500">{igQty}</span>}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
               {/* Dietary Types */}
-              <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-rose-200/60 hover:bg-rose-50/20">
-                <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-rose-200 transition group-hover:bg-rose-400" />
-                <div className="flex items-center gap-2 pl-2 text-lg font-semibold text-gray-400">
-                  <Heart size={16} />
+              <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-3.5">
+                <div className="flex items-center gap-1.5 text-[18px] font-semibold text-gray-700 mb-2">
+                  <Heart size={18} className="text-primary-800" />
                   <span>របបអាហារ</span>
                 </div>
-                <div className="mt-3 space-y-2">
+                <div>
                   {Array.isArray(data.dietaryTypes) && data.dietaryTypes.length > 0 ? (
-                    data.dietaryTypes.map((dt: any, idx: number) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between rounded-xl bg-white px-4 py-2.5 text-lg shadow-sm ring-1 ring-gray-100"
-                      >
-                        <span className="font-bold text-gray-800">{dt.name || dt.code}</span>
-                        <span className="rounded-lg bg-emerald-100 px-3 py-1 text-lg font-bold text-emerald-800">
-                          {dt.verificationStatus || "UNVERIFIED"}
-                        </span>
-                      </div>
-                    ))
+                    <div className="space-y-1.5">
+                      {data.dietaryTypes.map((dt: any, idx: number) => {
+                        const dtName =
+                          typeof dt === "string"
+                            ? dt
+                            : dt?.localName ||
+                              dt?.name ||
+                              dt?.dietaryTypeLocalName ||
+                              dt?.dietaryTypeName ||
+                              dt?.dietaryType?.localName ||
+                              dt?.dietaryType?.name ||
+                              dt?.code ||
+                              "របបអាហារ";
+
+                        const vStatus = typeof dt === "object" ? dt?.verificationStatus : undefined;
+
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-sm border border-gray-100"
+                          >
+                            <span className="font-semibold text-gray-800">{dtName}</span>
+                            <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-100">
+                              {vStatus === "VERIFIED" ? "បានផ្ទៀងផ្ទាត់" : "មិនទាន់ផ្ទៀងផ្ទាត់"}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   ) : (
-                    <p className="pl-2 text-lg text-gray-400">គ្មានទិន្នន័យ Dietary Type</p>
+                    <p className="text-sm text-gray-400">គ្មានទិន្នន័យរបបអាហារ</p>
                   )}
                 </div>
               </div>
 
               {/* Gallery images if more than 1 */}
               {images.length > 1 && (
-                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-gray-200">
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-gray-200 transition group-hover:bg-gray-400" />
-                  <p className="pl-2 text-lg font-semibold text-gray-400">រូបភាពបន្ថែម</p>
-                  <div className="mt-3 flex flex-wrap gap-3">
+                <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-3">
+                  <p className="text-xs font-semibold text-gray-600 mb-2">រូបភាពបន្ថែម</p>
+                  <div className="flex flex-wrap gap-2">
                     {images.map((img, idx) => (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         key={idx}
                         src={resolveFoodHubCatalogImageUrl(img) || img}
                         alt={`Gallery ${idx + 1}`}
-                        className="h-20 w-20 rounded-2xl border border-gray-200 object-cover shadow-sm"
+                        className="h-14 w-14 rounded-xl border border-gray-200 object-cover shadow-2xs"
                       />
                     ))}
                   </div>
                 </div>
               )}
-            </div>
+            </>
           ) : null}
+        </div>
 
-          {/* Footer */}
-          <div className="mt-6 flex justify-end">
+        {/* ─── FOOTER ACTIONS ─── */}
+        <div className="shrink-0 flex items-center justify-end gap-2.5 border-t border-gray-100 bg-gray-50/50 px-6 py-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-10 items-center rounded-xl border border-gray-200 bg-white px-5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+          >
+            បិទ
+          </button>
+
+          {data && onEdit && (
             <button
               type="button"
-              onClick={onClose}
-              className="inline-flex h-12 items-center rounded-full bg-[#14833E] px-8 text-lg font-bold text-white shadow-lg shadow-[#14833E]/25 transition hover:bg-[#0f6b32] focus:outline-none focus:ring-4 focus:ring-[#14833E]/30"
+              onClick={() => {
+                onClose();
+                onEdit(data);
+              }}
+              className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-primary-800 px-5 text-sm font-semibold text-white shadow-xs transition hover:bg-primary-900 active:scale-95"
             >
-              បិទ
+              <Pencil size={15} />
+              <span>កែប្រែព័ត៌មាន</span>
             </button>
-          </div>
+          )}
         </div>
+
       </div>
     </div>
   );
