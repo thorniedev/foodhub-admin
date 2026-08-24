@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Eye,
   Pencil,
@@ -53,6 +52,44 @@ function renderBaseFoodCell(
   );
 }
 
+function getAvailabilityStatusConfig(status?: string) {
+  switch (status?.toUpperCase()) {
+    case "AVAILABLE":
+    case "":
+    case undefined:
+      return {
+        label: "មានលក់",
+        badgeClass: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+        dotClass: "bg-emerald-600",
+      };
+    case "OUT_OF_STOCK":
+    case "SOLD_OUT":
+      return {
+        label: "អស់ស្តុក",
+        badgeClass: "bg-red-50 text-red-700 ring-red-100",
+        dotClass: "bg-red-600",
+      };
+    case "UNAVAILABLE":
+      return {
+        label: "មិនមានលក់",
+        badgeClass: "bg-gray-100 text-gray-700 ring-gray-200",
+        dotClass: "bg-gray-500",
+      };
+    case "DISCONTINUED":
+      return {
+        label: "ឈប់លក់",
+        badgeClass: "bg-amber-50 text-amber-700 ring-amber-200",
+        dotClass: "bg-amber-500",
+      };
+    default:
+      return {
+        label: status,
+        badgeClass: "bg-gray-100 text-gray-700 ring-gray-200",
+        dotClass: "bg-gray-500",
+      };
+  }
+}
+
 export default function PublishedMenuItemsTable({
   items,
   foods = [],
@@ -73,7 +110,7 @@ export default function PublishedMenuItemsTable({
   onDelete: (
     item: MenuItemRecord,
   ) => void;
-}) {
+  }) {
   if (!items.length) {
     return (
       <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
@@ -95,7 +132,7 @@ export default function PublishedMenuItemsTable({
       <table className="w-full min-w-[1050px] border-collapse text-left">
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/70">
-            <th className="px-6 py-5 text-xl font-bold text-primary-800">Menu Item</th>
+            <th className="px-6 py-5 text-xl font-bold text-primary-800">មុខម្ហូប</th>
             <th className="px-6 py-5 text-xl font-bold text-primary-800">ហាង</th>
             <th className="px-6 py-5 text-xl font-bold text-primary-800">មុខម្ហូបមេ</th>
             <th className="px-6 py-5 text-xl font-bold text-primary-800">តម្លៃ</th>
@@ -105,88 +142,94 @@ export default function PublishedMenuItemsTable({
         </thead>
 
         <tbody>
-          {items.map((item) => (
-            <tr
-              key={item.uuid}
-              className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
-            >
-              <td className="px-6 py-5">
-                <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-gray-100 ring-1 ring-black/5 shadow-xs">
-                    <MenuItemAvatar
-                      item={item}
-                      alt={item.name}
-                      fallbackEmoji="🍜"
-                    />
+          {items.map((item) => {
+            const statusConfig = getAvailabilityStatusConfig(item.availabilityStatus);
+
+            return (
+              <tr
+                key={item.uuid}
+                className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
+              >
+                <td className="px-6 py-5">
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-gray-100 ring-1 ring-black/5 shadow-xs">
+                      <MenuItemAvatar
+                        item={item}
+                        alt={item.name}
+                        fallbackEmoji="🍜"
+                      />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-xl font-bold text-gray-900">
+                        {item.name}
+                      </p>
+
+                      {item.isFeatured && (
+                        <span className="mt-1 inline-block rounded-full bg-orange-50 px-3 py-1 text-lg font-bold text-orange-600">
+                          ពិសេស
+                        </span>
+                      )}
+                    </div>
                   </div>
+                </td>
 
-                  <div className="min-w-0">
-                    <p className="truncate text-xl font-bold text-gray-900">
-                      {item.name}
-                    </p>
+                <td className="px-6 py-5 text-lg font-medium text-gray-700">
+                  {storeName(item)}
+                </td>
 
-                    {item.isFeatured && (
-                      <span className="mt-1 inline-block rounded-full bg-orange-50 px-3 py-1 text-lg font-bold text-orange-600">
-                        FEATURED
-                      </span>
-                    )}
+                <td className="px-6 py-5 text-lg font-medium text-gray-600">
+                  {renderBaseFoodCell(item, foods)}
+                </td>
+
+                <td className="px-6 py-5 text-xl font-black text-emerald-800">
+                  {Number(item.price ?? 0).toFixed(2)} {item.currencyCode || "USD"}
+                </td>
+
+                <td className="px-6 py-5">
+                  <span
+                    className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-lg font-bold ring-1 ring-inset ${statusConfig.badgeClass}`}
+                  >
+                    <span className={`h-2.5 w-2.5 rounded-full ${statusConfig.dotClass}`} />
+                    {statusConfig.label}
+                  </span>
+                </td>
+
+                <td className="px-6 py-5">
+                  <div className="flex items-center justify-end gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => onView(item)}
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100"
+                      title="មើលព័ត៌មានលម្អិត"
+                    >
+                      <Eye size={22} />
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => onEdit(item)}
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:opacity-40"
+                      title="កែប្រែ"
+                    >
+                      <Pencil size={22} />
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => onDelete(item)}
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:opacity-40"
+                      title="លុប"
+                    >
+                      <Trash2 size={22} />
+                    </button>
                   </div>
-                </div>
-              </td>
-
-              <td className="px-6 py-5 text-lg font-medium text-gray-700">
-                {storeName(item)}
-              </td>
-
-              <td className="px-6 py-5 text-lg font-medium text-gray-600">
-                {renderBaseFoodCell(item, foods)}
-              </td>
-
-              <td className="px-6 py-5 text-xl font-black text-emerald-800">
-                {Number(item.price ?? 0).toFixed(2)} {item.currencyCode || "USD"}
-              </td>
-
-              <td className="px-6 py-5">
-                <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-emerald-50 px-4 py-1.5 text-lg font-bold text-emerald-700 ring-1 ring-inset ring-emerald-100">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
-                  {item.availabilityStatus || "AVAILABLE"}
-                </span>
-              </td>
-
-              <td className="px-6 py-5">
-                <div className="flex items-center justify-end gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => onView(item)}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100"
-                    title="មើលព័ត៌មានលម្អិត"
-                  >
-                    <Eye size={22} />
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => onEdit(item)}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:opacity-40"
-                    title="កែប្រែ"
-                  >
-                    <Pencil size={22} />
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => onDelete(item)}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:opacity-40"
-                    title="លុប"
-                  >
-                    <Trash2 size={22} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

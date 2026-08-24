@@ -92,12 +92,20 @@ export default function MenuItemDetailModal({
               </span>
               {data.availabilityStatus && (
                 <span className="rounded-full border border-white/20 bg-white/15 px-4 py-1.5 text-lg font-bold text-white">
-                  {data.availabilityStatus}
+                  {data.availabilityStatus === "AVAILABLE"
+                    ? "មានលក់"
+                    : data.availabilityStatus === "OUT_OF_STOCK" || data.availabilityStatus === "SOLD_OUT"
+                    ? "អស់ស្តុក"
+                    : data.availabilityStatus === "UNAVAILABLE"
+                    ? "មិនមានលក់"
+                    : data.availabilityStatus === "DISCONTINUED"
+                    ? "ឈប់លក់"
+                    : data.availabilityStatus}
                 </span>
               )}
               {data.isFeatured && (
                 <span className="rounded-full border border-orange-300/50 bg-orange-400/30 px-4 py-1.5 text-lg font-bold text-white">
-                  FEATURED
+                  ពិសេស
                 </span>
               )}
               {data.preparationTimeMinutes != null && (
