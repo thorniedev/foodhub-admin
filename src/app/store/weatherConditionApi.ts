@@ -18,19 +18,19 @@ interface ApiResponse<T> {
 type BackendPagedResponse<T> =
   | WeatherConditionPage
   | {
-      content?: T[];
-      contents?: T[];
-      number?: number;
-      pageNumber?: number;
-      size?: number;
-      pageSize?: number;
-      numberOfElements?: number;
-      totalElements?: number;
-      totalPages?: number;
-      first?: boolean;
-      last?: boolean;
-      empty?: boolean;
-    };
+    content?: T[];
+    contents?: T[];
+    number?: number;
+    pageNumber?: number;
+    size?: number;
+    pageSize?: number;
+    numberOfElements?: number;
+    totalElements?: number;
+    totalPages?: number;
+    first?: boolean;
+    last?: boolean;
+    empty?: boolean;
+  };
 
 function unwrapResponse<T>(response: T | ApiResponse<T>): T {
   if (response && typeof response === "object") {
@@ -177,21 +177,21 @@ export const weatherConditionApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.contents.map(({ uuid }) => ({
-                type: "WeatherCondition" as const,
-                id: uuid,
-              })),
-              {
-                type: "WeatherCondition" as const,
-                id: "LIST",
-              },
-            ]
+            ...result.contents.map(({ uuid }) => ({
+              type: "WeatherCondition" as const,
+              id: uuid,
+            })),
+            {
+              type: "WeatherCondition" as const,
+              id: "LIST",
+            },
+          ]
           : [
-              {
-                type: "WeatherCondition" as const,
-                id: "LIST",
-              },
-            ],
+            {
+              type: "WeatherCondition" as const,
+              id: "LIST",
+            },
+          ],
     }),
 
     getWeatherConditionByUuid: builder.query<WeatherCondition, string>({

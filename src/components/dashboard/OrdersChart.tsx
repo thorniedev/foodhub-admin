@@ -74,9 +74,8 @@ export default function OrdersChart({ data }: { data: OrdersPoint[] }) {
 
             <ChevronDown
               size={20}
-              className={`shrink-0 text-gray-400 transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
+              className={`shrink-0 text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
@@ -106,10 +105,9 @@ export default function OrdersChart({ data }: { data: OrdersPoint[] }) {
                       rounded-lg px-3.5 py-2.5
                       text-left text-lg
                       transition-colors duration-150
-                      ${
-                        isSelected
-                          ? "bg-[#136C34]/10 font-semibold text-[#136C34]"
-                          : "font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ${isSelected
+                        ? "bg-[#136C34]/10 font-semibold text-[#136C34]"
+                        : "font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       }
                     `}
                   >

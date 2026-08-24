@@ -1,16 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import {
   useCreateFoodCategoryMutation,
   useGetFoodCategoriesQuery,
   useUpdateFoodCategoryMutation,
 } from "@/src/app/store/foodCategoryApi";
-import {
-  createCodeFromLabel,
-  mergeCatalogWithCache,
-  readCatalogCache,
-  updateCatalogCacheActive,
-} from "@/src/lib/filterCatalogStorage";
+import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
@@ -37,7 +32,7 @@ function toCatalogOption(item: {
     unit: null,
     active: item.isActive,
     createdAt: item.createdAt,
-    updatedAt: item.createdAt, // Fallback since updatedAt isn't clearly always there
+    updatedAt: item.createdAt,
   };
 }
 
@@ -56,29 +51,25 @@ export function useFoodCategoryCatalog() {
 
   const [createFoodCategory] = useCreateFoodCategoryMutation();
   const [updateFoodCategory] = useUpdateFoodCategoryMutation();
-  const [localItems, setLocalItems] = useState<FilterCatalogOption[]>(() =>
-    readCatalogCache("FOOD_CATEGORY"),
-  );
-
-  useEffect(() => {
-    if (data?.contents) {
-      const serverConverted = data.contents.map(toCatalogOption);
-      const merged = mergeCatalogWithCache("FOOD_CATEGORY", serverConverted);
-      setLocalItems(merged);
-    }
-  }, [data]);
 
   const groupOptions = useMemo(() => {
-    if (localItems.length > 0) return localItems;
-    return (data?.contents ?? []).map(toCatalogOption);
-  }, [data, localItems]);
+    const raw = data?.contents ?? [];
+    const map = new Map<string, FilterCatalogOption>();
+    for (const item of raw) {
+      if (item?.uuid) {
+        map.set(item.uuid, toCatalogOption(item));
+      }
+    }
+    return Array.from(map.values());
+  }, [data]);
 
   const createOption = useCallback(
     async (values: FilterCatalogOptionFormValues) => {
       const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase() || createCodeFromLabel(label);
 
       await createFoodCategory({
-        code: createCodeFromLabel(label),
+        code,
         name: values.name.trim() || values.localName.trim(),
         description: values.description.trim() || null,
         isActive: values.active,
@@ -95,28 +86,13 @@ export function useFoodCategoryCatalog() {
       await updateFoodCategory({
         uuid,
         body: {
+          code: values.code?.trim().toUpperCase() || undefined,
           name: values.name.trim() || values.localName.trim(),
           description: values.description.trim() || null,
           isActive: values.active,
           parentCategoryUuid: values.parentUuid || null,
         },
       }).unwrap();
-
-      updateCatalogCacheActive("FOOD_CATEGORY", uuid, values.active);
-      setLocalItems((prev) =>
-        prev.map((item) =>
-          item.uuid === uuid
-            ? {
-                ...item,
-                name: values.name.trim() || values.localName.trim(),
-                localName: values.localName.trim() || values.name.trim(),
-                description: values.description.trim() || null,
-                parentUuid: values.parentUuid || null,
-                active: values.active,
-              }
-            : item,
-        ),
-      );
 
       await refetch();
     },
@@ -125,11 +101,6 @@ export function useFoodCategoryCatalog() {
 
   const setActive = useCallback(
     async (uuid: string, active: boolean) => {
-      updateCatalogCacheActive("FOOD_CATEGORY", uuid, active);
-      setLocalItems((prev) =>
-        prev.map((item) => (item.uuid === uuid ? { ...item, active } : item)),
-      );
-
       try {
         await updateFoodCategory({
           uuid,

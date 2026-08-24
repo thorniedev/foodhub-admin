@@ -4,7 +4,6 @@ import {
   Pencil,
   RotateCcw,
   ShieldAlert,
-  Trash2,
 } from "lucide-react";
 
 import type { Allergen } from "@/src/types/allergen";
@@ -120,11 +119,10 @@ export default function AllergensTable({
 
                 <td className="px-6 py-5">
                   <span
-                    className={`inline-flex rounded-full px-3 py-1 text-lg ${
-                      item.active
+                    className={`inline-flex rounded-full px-3 py-1 text-lg ${item.active
                         ? "bg-primary-50 text-primary-700"
                         : "bg-gray-100 text-gray-500"
-                    }`}
+                      }`}
                   >
                     {item.active
                       ? "សកម្ម"
@@ -221,22 +219,22 @@ export default function AllergensTable({
 
           {allergens.length ===
             0 && (
-            <tr>
-              <td
-                colSpan={4}
-                className="px-5 py-16 text-center"
-              >
-                <ShieldAlert
-                  size={36}
-                  className="mx-auto text-secondary-600"
-                />
+              <tr>
+                <td
+                  colSpan={4}
+                  className="px-5 py-16 text-center"
+                >
+                  <ShieldAlert
+                    size={36}
+                    className="mx-auto text-secondary-600"
+                  />
 
-                <p className="mt-3 text-xl font-semibold text-secondary-600">
-                  មិនមានទិន្នន័យអាឡែស៊ី
-                </p>
-              </td>
-            </tr>
-          )}
+                  <p className="mt-3 text-xl font-semibold text-secondary-600">
+                    មិនមានទិន្នន័យអាឡែស៊ី
+                  </p>
+                </td>
+              </tr>
+            )}
         </tbody>
       </table>
     </div>

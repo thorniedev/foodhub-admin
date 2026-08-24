@@ -41,7 +41,7 @@ export default function FilterTagsSidebarSection() {
             ...group,
             href:
               API_ROUTE_OVERRIDES[
-                group.code
+              group.code
               ] ??
               `/filter-tags/${group.slug}`,
           }),
@@ -70,11 +70,10 @@ export default function FilterTagsSidebarSection() {
 
         <ChevronDown
           size={17}
-          className={`transition-transform ${
-            open
+          className={`transition-transform ${open
               ? "rotate-180"
               : ""
-          }`}
+            }`}
         />
       </button>
 
@@ -84,7 +83,7 @@ export default function FilterTagsSidebarSection() {
             (item) => {
               const active =
                 pathname ===
-                  item.href ||
+                item.href ||
                 pathname.startsWith(
                   `${item.href}/`,
                 );
@@ -97,11 +96,10 @@ export default function FilterTagsSidebarSection() {
                   href={
                     item.href
                   }
-                  className={`block rounded-xl px-3 py-2 text-sm transition ${
-                    active
+                  className={`block rounded-xl px-3 py-2 text-sm transition ${active
                       ? "bg-[#136C34] text-white"
                       : "text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
-                  }`}
+                    }`}
                 >
                   {
                     item.labelKm

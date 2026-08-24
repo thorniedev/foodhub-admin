@@ -1,16 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import {
   useCreateSeasonMutation,
   useGetManagedSeasonsQuery,
   useUpdateSeasonMutation,
 } from "@/src/app/store/menuManagementApi";
-import {
-  createCodeFromLabel,
-  mergeCatalogWithCache,
-  readCatalogCache,
-  updateCatalogCacheActive,
-} from "@/src/lib/filterCatalogStorage";
+import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
@@ -44,29 +39,25 @@ export function useSeasonCatalog() {
 
   const [createSeason] = useCreateSeasonMutation();
   const [updateSeason] = useUpdateSeasonMutation();
-  const [localItems, setLocalItems] = useState<FilterCatalogOption[]>(() =>
-    readCatalogCache("SEASON"),
-  );
-
-  useEffect(() => {
-    if (data) {
-      const serverConverted = data.map(toCatalogOption);
-      const merged = mergeCatalogWithCache("SEASON", serverConverted);
-      setLocalItems(merged);
-    }
-  }, [data]);
 
   const groupOptions = useMemo(() => {
-    if (localItems.length > 0) return localItems;
-    return (data ?? []).map(toCatalogOption);
-  }, [data, localItems]);
+    const raw = data ?? [];
+    const map = new Map<string, FilterCatalogOption>();
+    for (const item of raw) {
+      if (item?.uuid) {
+        map.set(item.uuid, toCatalogOption(item));
+      }
+    }
+    return Array.from(map.values());
+  }, [data]);
 
   const createOption = useCallback(
     async (values: FilterCatalogOptionFormValues) => {
       const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase() || createCodeFromLabel(label);
 
       await createSeason({
-        code: createCodeFromLabel(label),
+        code,
         name: values.name.trim() || values.localName.trim(),
         localName: values.localName.trim() || null,
         description: values.description.trim() || null,
@@ -90,21 +81,6 @@ export function useSeasonCatalog() {
         },
       }).unwrap();
 
-      updateCatalogCacheActive("SEASON", uuid, values.active);
-      setLocalItems((prev) =>
-        prev.map((item) =>
-          item.uuid === uuid
-            ? {
-                ...item,
-                name: values.name.trim() || values.localName.trim(),
-                localName: values.localName.trim() || values.name.trim(),
-                description: values.description.trim() || null,
-                active: values.active,
-              }
-            : item,
-        ),
-      );
-
       await refetch();
     },
     [updateSeason, refetch],
@@ -112,11 +88,6 @@ export function useSeasonCatalog() {
 
   const setActive = useCallback(
     async (uuid: string, active: boolean) => {
-      updateCatalogCacheActive("SEASON", uuid, active);
-      setLocalItems((prev) =>
-        prev.map((item) => (item.uuid === uuid ? { ...item, active } : item)),
-      );
-
       try {
         await updateSeason({
           uuid,

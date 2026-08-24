@@ -597,7 +597,7 @@ export default function ClassificationSection({
               .filter(
                 (item) =>
                   item.groupCode ===
-                    group.code &&
+                  group.code &&
                   item.active,
               )
               .map(
@@ -773,13 +773,13 @@ export default function ClassificationSection({
       [group.code]:
         current.includes(code)
           ? current.filter(
-              (value) =>
-                value !== code,
-            )
+            (value) =>
+              value !== code,
+          )
           : [
-              ...current,
-              code,
-            ],
+            ...current,
+            code,
+          ],
     });
   };
 
@@ -825,12 +825,12 @@ export default function ClassificationSection({
               group={group}
               options={
                 optionMap[
-                  group.code
+                group.code
                 ] ?? []
               }
               selectedCodes={
                 values[
-                  group.code
+                group.code
                 ] ?? []
               }
               onToggle={(code) =>
@@ -883,7 +883,7 @@ function ClassificationGroup({
             option.label,
             option.code,
             option.description ??
-              "",
+            "",
           ].some((value) =>
             String(
               value ?? "",
@@ -917,7 +917,7 @@ function ClassificationGroup({
           <p className="mt-1 text-sm text-gray-400">
             {group.labelEn} ·{" "}
             {group.selectionMode ===
-            "SINGLE"
+              "SINGLE"
               ? "ជ្រើសបាន 1"
               : "ជ្រើសបានច្រើន"}
           </p>
@@ -926,20 +926,19 @@ function ClassificationGroup({
         <div className="flex items-center gap-2">
           {selectedCodes.length >
             0 && (
-            <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-[#136C34] px-2 text-sm text-white">
-              {
-                selectedCodes.length
-              }
-            </span>
-          )}
+              <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-[#136C34] px-2 text-sm text-white">
+                {
+                  selectedCodes.length
+                }
+              </span>
+            )}
 
           <ChevronDown
             size={18}
-            className={`mt-1 text-gray-400 transition-transform ${
-              open
+            className={`mt-1 text-gray-400 transition-transform ${open
                 ? "rotate-180"
                 : ""
-            }`}
+              }`}
           />
         </div>
       </button>
@@ -948,31 +947,31 @@ function ClassificationGroup({
         <div className="mt-4">
           {options.length >
             6 && (
-            <div className="relative mb-3">
-              <Search
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
+              <div className="relative mb-3">
+                <Search
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                />
 
-              <input
-                value={search}
-                onChange={(
-                  event,
-                ) =>
-                  setSearch(
-                    event
-                      .target
-                      .value,
-                  )
-                }
-                placeholder="ស្វែងរក..."
-                className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-[#136C34]"
-              />
-            </div>
-          )}
+                <input
+                  value={search}
+                  onChange={(
+                    event,
+                  ) =>
+                    setSearch(
+                      event
+                        .target
+                        .value,
+                    )
+                  }
+                  placeholder="ស្វែងរក..."
+                  className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-[#136C34]"
+                />
+              </div>
+            )}
 
           {filtered.length ===
-          0 ? (
+            0 ? (
             <div className="rounded-xl border border-dashed border-gray-200 bg-white px-3 py-5 text-center text-sm text-gray-400">
               មិនមានទិន្នន័យសកម្ម
             </div>
@@ -990,22 +989,21 @@ function ClassificationGroup({
                       key={
                         option.uuid
                       }
-                      className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-2.5 transition ${
-                        selected
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-2.5 transition ${selected
                           ? "border-emerald-200 bg-emerald-50"
                           : "border-transparent bg-white hover:border-gray-200"
-                      }`}
+                        }`}
                     >
                       <input
                         type={
                           group.selectionMode ===
-                          "SINGLE"
+                            "SINGLE"
                             ? "radio"
                             : "checkbox"
                         }
                         name={
                           group.selectionMode ===
-                          "SINGLE"
+                            "SINGLE"
                             ? group.code
                             : undefined
                         }

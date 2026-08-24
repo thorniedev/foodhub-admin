@@ -40,12 +40,12 @@ export const seasonalFoodApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({
-                type: "SeasonalFood" as const,
-                id,
-              })),
-              { type: "SeasonalFood" as const, id: "LIST" },
-            ]
+            ...result.map(({ id }) => ({
+              type: "SeasonalFood" as const,
+              id,
+            })),
+            { type: "SeasonalFood" as const, id: "LIST" },
+          ]
           : [{ type: "SeasonalFood" as const, id: "LIST" }],
     }),
 

@@ -84,11 +84,10 @@ export default function AgeGroupsTable({
 
               <td className="px-6 py-5">
                 <span
-                  className={`inline-flex rounded-full px-3 py-1 text-lg font-semibold ${
-                    item.isActive
+                  className={`inline-flex rounded-full px-3 py-1 text-lg font-semibold ${item.isActive
                       ? "bg-primary-50 text-primary-700"
                       : "bg-gray-100 text-gray-500"
-                  }`}
+                    }`}
                 >
                   {item.isActive ? "សកម្ម" : "អសកម្ម"}
                 </span>

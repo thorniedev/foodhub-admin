@@ -20,7 +20,7 @@ export default function AllergensPagination({
   return (
     <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-lg text-gray-500">
-        ទំព័រ <span className="font-semibold text-gray-700">{page + 1}</span> 
+        ទំព័រ <span className="font-semibold text-gray-700">{page + 1}</span>
         នៃ <span className="font-semibold text-gray-700">{safeTotalPages}</span>
         {" · "}សរុប {totalElements}
       </p>

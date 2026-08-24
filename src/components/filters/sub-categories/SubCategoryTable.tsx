@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleMinus, Eye, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import { CircleMinus, Eye, Pencil, RotateCcw } from "lucide-react";
 import type { FoodCategory } from "@/src/types/foodCategory";
 
 type Props = {
@@ -10,7 +10,7 @@ type Props = {
   onView: (item: FoodCategory) => void;
   onEdit: (item: FoodCategory) => void;
   onToggleActive: (item: FoodCategory) => void;
-  onDelete: (item: FoodCategory) => void;
+  onDelete?: (item: FoodCategory) => void;
 };
 
 export default function SubCategoryTable({
@@ -153,16 +153,6 @@ export default function SubCategoryTable({
                           <RotateCcw size={20} />
                         </button>
                       )}
-
-                      {/* Delete */}
-                      <button
-                        type="button"
-                        onClick={() => onDelete(item)}
-                        title="លុប"
-                        className="rounded-xl p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
-                      >
-                        <Trash2 size={20} />
-                      </button>
                     </div>
                   </td>
                 </tr>

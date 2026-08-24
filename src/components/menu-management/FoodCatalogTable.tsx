@@ -10,11 +10,11 @@ import type {
   FoodRecord,
 } from "@/src/types/menu-management";
 
-function foodName(item: FoodRecord): string {
+function foodLocalName(item: FoodRecord): string {
   return (
     item.localName ||
-    item.canonicalName ||
     item.name ||
+    item.canonicalName ||
     "—"
   );
 }
@@ -77,10 +77,11 @@ export default function FoodCatalogTable({
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-x-auto">
-      <table className="w-full min-w-[1050px] border-collapse text-left">
+      <table className="w-full min-w-[1150px] border-collapse text-left">
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/70">
             <th className="px-6 py-5 text-xl font-bold text-primary-800">មុខម្ហូប / ភេសជ្ជៈ</th>
+            <th className="px-6 py-5 text-xl font-bold text-primary-800">ឈ្មោះដើម (Canonical)</th>
             <th className="px-6 py-5 text-xl font-bold text-primary-800">ប្រភេទ</th>
             <th className="px-6 py-5 text-xl font-bold text-primary-800">ម្ហូបតាមប្រទេស</th>
             <th className="px-6 py-5 text-xl font-bold text-primary-800">ស្ថានភាព</th>
@@ -94,55 +95,63 @@ export default function FoodCatalogTable({
               key={item.uuid}
               className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
             >
+              {/* Local / Khmer Name with Image */}
               <td className="px-6 py-5">
                 <div className="flex items-center gap-4">
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-gray-100 ring-1 ring-black/5 shadow-xs">
                     <FoodAvatar
                       item={item}
-                      alt={foodName(item)}
+                      alt={foodLocalName(item)}
                       fallbackEmoji="🍽️"
                     />
                   </div>
 
                   <div className="min-w-0">
                     <p className="truncate text-xl font-bold text-gray-900">
-                      {foodName(item)}
+                      {foodLocalName(item)}
                     </p>
-
-                    {item.canonicalName && (
-                      <p className="mt-1 truncate text-lg font-medium text-gray-400">
-                        {item.canonicalName}
-                      </p>
-                    )}
                   </div>
                 </div>
               </td>
 
+              {/* Canonical Name Column */}
+              <td className="px-6 py-5">
+                <p className="text-lg font-medium text-gray-700 truncate max-w-[240px]">
+                  {item.canonicalName || "—"}
+                </p>
+              </td>
+
+              {/* Category */}
               <td className="px-6 py-5">
                 <span className="inline-flex rounded-full bg-secondary-50 px-4 py-1.5 text-lg font-medium text-secondary-700 ring-1 ring-inset ring-secondary-100">
                   {categoryName(item, categories)}
                 </span>
               </td>
 
+              {/* Cuisine */}
               <td className="px-6 py-5 text-lg font-medium text-gray-600">
                 {cuisineName(item, cuisines)}
               </td>
 
+              {/* Status */}
               <td className="px-6 py-5">
                 <span
-                  className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-lg font-medium ring-1 ring-inset ${item.isActive === false
+                  className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-lg font-medium ring-1 ring-inset ${
+                    item.isActive === false
                       ? "bg-gray-100 text-gray-500 ring-gray-200"
                       : "bg-primary-50 text-primary-700 ring-primary-100"
-                    }`}
+                  }`}
                 >
                   <span
-                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.isActive === false ? "bg-gray-400" : "bg-primary-600"
-                      }`}
+                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                      item.isActive === false ? "bg-gray-400" : "bg-primary-600"
+                    }`}
                   />
                   {item.isActive === false ? "អសកម្ម" : "សកម្ម"}
                 </span>
               </td>
 
+              {/* Actions */}
               <td className="px-6 py-5">
                 <div className="flex items-center justify-end gap-2.5">
                   {onView && (

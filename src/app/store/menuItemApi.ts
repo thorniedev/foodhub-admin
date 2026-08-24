@@ -555,7 +555,7 @@ function normalizePage<T>(
     last:
       page.last ??
       pageNumber >=
-        totalPages - 1,
+      totalPages - 1,
 
     empty:
       page.empty ??
@@ -566,8 +566,8 @@ function normalizePage<T>(
 function normalizePossiblyArrayPage<T>(
   response:
     | ApiEnvelope<
-        PageLike<T> | T[]
-      >
+      PageLike<T> | T[]
+    >
     | PageLike<T>
     | T[],
 ): NormalizedPage<T> {
@@ -740,9 +740,9 @@ export const menuItemApi =
 
                 ...(p.sort
                   ? {
-                      sort:
-                        p.sort,
-                    }
+                    sort:
+                      p.sort,
+                  }
                   : {}),
               },
             };
@@ -752,9 +752,9 @@ export const menuItemApi =
             (
               response:
                 | ApiEnvelope<
-                    | PageLike<FoodCategoryOption>
-                    | FoodCategoryOption[]
-                  >
+                  | PageLike<FoodCategoryOption>
+                  | FoodCategoryOption[]
+                >
                 | PageLike<FoodCategoryOption>
                 | FoodCategoryOption[],
             ) =>
@@ -772,16 +772,16 @@ export const menuItemApi =
           FoodCategoryOption,
           {
             parentCategoryUuid?:
-              | string
-              | null;
+            | string
+            | null;
 
             code: string;
 
             name: string;
 
             description?:
-              | string
-              | null;
+            | string
+            | null;
 
             isActive: boolean;
           }
@@ -840,9 +840,9 @@ export const menuItemApi =
 
                 ...(p.sort
                   ? {
-                      sort:
-                        p.sort,
-                    }
+                    sort:
+                      p.sort,
+                  }
                   : {}),
               },
             };
@@ -852,9 +852,9 @@ export const menuItemApi =
             (
               response:
                 | ApiEnvelope<
-                    | PageLike<CuisineOption>
-                    | CuisineOption[]
-                  >
+                  | PageLike<CuisineOption>
+                  | CuisineOption[]
+                >
                 | PageLike<CuisineOption>
                 | CuisineOption[],
             ) =>
@@ -876,8 +876,8 @@ export const menuItemApi =
             name: string;
 
             description?:
-              | string
-              | null;
+            | string
+            | null;
 
             isActive: boolean;
           }
@@ -940,9 +940,9 @@ export const menuItemApi =
 
                 ...(p.query
                   ? {
-                      query:
-                        p.query,
-                    }
+                    query:
+                      p.query,
+                  }
                   : {}),
               },
             };
@@ -952,9 +952,9 @@ export const menuItemApi =
             (
               response:
                 | ApiEnvelope<
-                    | PageLike<CatalogFood>
-                    | CatalogFood[]
-                  >
+                  | PageLike<CatalogFood>
+                  | CatalogFood[]
+                >
                 | PageLike<CatalogFood>
                 | CatalogFood[],
             ) =>
@@ -967,35 +967,35 @@ export const menuItemApi =
           ) =>
             result
               ? [
-                  ...result.contents.map(
-                    ({
+                ...result.contents.map(
+                  ({
+                    uuid,
+                  }) => ({
+                    type:
+                      "Food" as const,
+
+                    id:
                       uuid,
-                    }) => ({
-                      type:
-                        "Food" as const,
+                  }),
+                ),
 
-                      id:
-                        uuid,
-                    }),
-                  ),
+                {
+                  type:
+                    "Food" as const,
 
-                  {
-                    type:
-                      "Food" as const,
-
-                    id:
-                      "LIST",
-                  },
-                ]
+                  id:
+                    "LIST",
+                },
+              ]
               : [
-                  {
-                    type:
-                      "Food" as const,
+                {
+                  type:
+                    "Food" as const,
 
-                    id:
-                      "LIST",
-                  },
-                ],
+                  id:
+                    "LIST",
+                },
+              ],
         }),
 
       /* =====================================================
@@ -1014,11 +1014,11 @@ export const menuItemApi =
           CatalogFood,
           | CreateCatalogFoodPayload
           | {
-              body:
-                CreateCatalogFoodPayload;
+            body:
+            CreateCatalogFoodPayload;
 
-              images?: File[];
-            }
+            images?: File[];
+          }
         >({
           query: (
             arg,
@@ -1097,16 +1097,16 @@ export const menuItemApi =
 
                 ...(p.foodUuid
                   ? {
-                      foodUuid:
-                        p.foodUuid,
-                    }
+                    foodUuid:
+                      p.foodUuid,
+                  }
                   : {}),
 
                 ...(p.rootCategoryCode
                   ? {
-                      rootCategoryCode:
-                        p.rootCategoryCode,
-                    }
+                    rootCategoryCode:
+                      p.rootCategoryCode,
+                  }
                   : {}),
               },
             };
@@ -1116,9 +1116,9 @@ export const menuItemApi =
             (
               response:
                 | ApiEnvelope<
-                    | PageLike<CatalogMenuItem>
-                    | CatalogMenuItem[]
-                  >
+                  | PageLike<CatalogMenuItem>
+                  | CatalogMenuItem[]
+                >
                 | PageLike<CatalogMenuItem>
                 | CatalogMenuItem[],
             ) =>
@@ -1131,35 +1131,35 @@ export const menuItemApi =
           ) =>
             result
               ? [
-                  {
+                {
+                  type:
+                    "MenuItem" as const,
+
+                  id:
+                    "LIST",
+                },
+
+                ...result.contents.map(
+                  (
+                    item,
+                  ) => ({
                     type:
                       "MenuItem" as const,
 
                     id:
-                      "LIST",
-                  },
-
-                  ...result.contents.map(
-                    (
-                      item,
-                    ) => ({
-                      type:
-                        "MenuItem" as const,
-
-                      id:
-                        item.uuid,
-                    }),
-                  ),
-                ]
+                      item.uuid,
+                  }),
+                ),
+              ]
               : [
-                  {
-                    type:
-                      "MenuItem" as const,
+                {
+                  type:
+                    "MenuItem" as const,
 
-                    id:
-                      "LIST",
-                  },
-                ],
+                  id:
+                    "LIST",
+                },
+              ],
         }),
 
       /* =====================================================
@@ -1198,14 +1198,14 @@ export const menuItemApi =
             _error,
             uuid,
           ) => [
-            {
-              type:
-                "MenuItem",
+              {
+                type:
+                  "MenuItem",
 
-              id:
-                uuid,
-            },
-          ],
+                id:
+                  uuid,
+              },
+            ],
         }),
 
       /* =====================================================
@@ -1219,13 +1219,13 @@ export const menuItemApi =
             uuid: string;
 
             sessionUuid?:
-              string;
+            string;
 
             latitude?:
-              number;
+            number;
 
             longitude?:
-              number;
+            number;
           }
         >({
           query: ({
@@ -1245,22 +1245,22 @@ export const menuItemApi =
             params: {
               ...(sessionUuid
                 ? {
-                    sessionUuid,
-                  }
+                  sessionUuid,
+                }
                 : {}),
 
               ...(typeof latitude ===
-              "number"
+                "number"
                 ? {
-                    latitude,
-                  }
+                  latitude,
+                }
                 : {}),
 
               ...(typeof longitude ===
-              "number"
+                "number"
                 ? {
-                    longitude,
-                  }
+                  longitude,
+                }
                 : {}),
             },
           }),
@@ -1293,13 +1293,13 @@ export const menuItemApi =
           CatalogMenuItem,
           {
             storeUuid:
-              string;
+            string;
 
             body:
-              CreateStoreMenuItemPayload;
+            CreateStoreMenuItemPayload;
 
             images?:
-              File[];
+            File[];
           }
         >({
           query: ({
@@ -1365,7 +1365,7 @@ export const menuItemApi =
               uuid:
                 typeof crypto !==
                   "undefined" &&
-                crypto.randomUUID
+                  crypto.randomUUID
                   ? crypto.randomUUID()
                   : `item-${Date.now()}`,
               legacyId:
@@ -1439,7 +1439,7 @@ const menuItemCompatApi = menuItemApi.injectEndpoints({
           ...payload,
           uuid:
             typeof crypto !== "undefined" &&
-            typeof crypto.randomUUID === "function"
+              typeof crypto.randomUUID === "function"
               ? crypto.randomUUID()
               : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
           createdAt: timestamp,

@@ -1,16 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import {
   useCreateWeatherConditionMutation,
   useGetWeatherConditionsQuery,
   useUpdateWeatherConditionMutation,
 } from "@/src/app/store/weatherConditionApi";
-import {
-  createCodeFromLabel,
-  mergeCatalogWithCache,
-  readCatalogCache,
-  updateCatalogCacheActive,
-} from "@/src/lib/filterCatalogStorage";
+import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
@@ -48,29 +43,25 @@ export function useWeatherConditionCatalog() {
 
   const [createWeather] = useCreateWeatherConditionMutation();
   const [updateWeather] = useUpdateWeatherConditionMutation();
-  const [localItems, setLocalItems] = useState<FilterCatalogOption[]>(() =>
-    readCatalogCache("WEATHER_CONDITION"),
-  );
-
-  useEffect(() => {
-    if (data?.contents) {
-      const serverConverted = data.contents.map(toCatalogOption);
-      const merged = mergeCatalogWithCache("WEATHER_CONDITION", serverConverted);
-      setLocalItems(merged);
-    }
-  }, [data]);
 
   const groupOptions = useMemo(() => {
-    if (localItems.length > 0) return localItems;
-    return (data?.contents ?? []).map(toCatalogOption);
-  }, [data, localItems]);
+    const raw = data?.contents ?? [];
+    const map = new Map<string, FilterCatalogOption>();
+    for (const item of raw) {
+      if (item?.uuid) {
+        map.set(item.uuid, toCatalogOption(item));
+      }
+    }
+    return Array.from(map.values());
+  }, [data]);
 
   const createOption = useCallback(
     async (values: FilterCatalogOptionFormValues) => {
       const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase() || createCodeFromLabel(label);
 
       await createWeather({
-        code: createCodeFromLabel(label),
+        code,
         name: values.name.trim() || values.localName.trim(),
         localName: values.localName.trim() || null,
         description: values.description.trim() || null,
@@ -88,6 +79,7 @@ export function useWeatherConditionCatalog() {
       await updateWeather({
         uuid,
         body: {
+          code: values.code?.trim().toUpperCase() || undefined,
           name: values.name.trim() || values.localName.trim(),
           localName: values.localName.trim() || null,
           description: values.description.trim() || null,
@@ -96,21 +88,6 @@ export function useWeatherConditionCatalog() {
         },
       }).unwrap();
 
-      updateCatalogCacheActive("WEATHER_CONDITION", uuid, values.active);
-      setLocalItems((prev) =>
-        prev.map((item) =>
-          item.uuid === uuid
-            ? {
-                ...item,
-                name: values.name.trim() || values.localName.trim(),
-                localName: values.localName.trim() || values.name.trim(),
-                description: values.description.trim() || null,
-                active: values.active,
-              }
-            : item,
-        ),
-      );
-
       await refetch();
     },
     [updateWeather, refetch],
@@ -118,11 +95,6 @@ export function useWeatherConditionCatalog() {
 
   const setActive = useCallback(
     async (uuid: string, active: boolean) => {
-      updateCatalogCacheActive("WEATHER_CONDITION", uuid, active);
-      setLocalItems((prev) =>
-        prev.map((item) => (item.uuid === uuid ? { ...item, active } : item)),
-      );
-
       try {
         await updateWeather({
           uuid,

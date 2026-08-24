@@ -123,11 +123,10 @@ export default function WeatherConditionDetailModal({
                     ស្ថានភាព
                   </span>
                   <div className="mt-2">
-                    <span className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-lg font-medium ${
-                      isActive
-                        ? "bg-primary-50 text-primary-700"
-                        : "bg-gray-200 text-gray-600"
-                    }`}>
+                    <span className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-lg font-medium ${isActive
+                      ? "bg-primary-50 text-primary-700"
+                      : "bg-gray-200 text-gray-600"
+                      }`}>
                       <span className={`h-2 w-2 rounded-full ${isActive ? "bg-primary-600" : "bg-gray-400"}`} />
                       {isActive ? "សកម្ម (Active)" : "អសកម្ម (Inactive)"}
                     </span>

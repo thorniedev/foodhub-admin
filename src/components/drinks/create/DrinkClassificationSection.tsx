@@ -87,11 +87,10 @@ export default function DrinkClassificationSection({
               <button
                 key={opt.key}
                 onClick={() => onAgeGroupsChange(toggle(ageGroups, opt.key))}
-                className={`px-3.5 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                  active
+                className={`px-3.5 py-1.5 rounded-full text-sm font-medium border transition-colors ${active
                     ? "bg-emerald-600 text-white border-emerald-600"
                     : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 {opt.label}
               </button>
@@ -109,11 +108,10 @@ export default function DrinkClassificationSection({
               <button
                 key={opt}
                 onClick={() => onSugarLevelChange(opt)}
-                className={`px-3.5 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                  active
+                className={`px-3.5 py-1.5 rounded-full text-sm font-medium border transition-colors ${active
                     ? "bg-emerald-600 text-white border-emerald-600"
                     : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 {opt}
               </button>

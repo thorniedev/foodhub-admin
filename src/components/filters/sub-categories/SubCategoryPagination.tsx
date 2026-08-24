@@ -82,11 +82,10 @@ export default function SubCategoryPagination({
               key={p}
               type="button"
               onClick={() => onPageChange(p)}
-              className={`flex h-11 min-w-[44px] items-center justify-center rounded-xl px-3 text-lg font-bold transition ${
-                page === p
+              className={`flex h-11 min-w-[44px] items-center justify-center rounded-xl px-3 text-lg font-bold transition ${page === p
                   ? "bg-primary-800 text-white shadow-sm"
                   : "text-gray-600 hover:bg-gray-100"
-              }`}
+                }`}
             >
               {p + 1}
             </button>

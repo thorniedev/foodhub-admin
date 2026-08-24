@@ -272,7 +272,7 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
         err instanceof Error
           ? err.message
           : (err as any)?.data?.message ||
-            "មិនអាចរក្សាទុកអនុប្រភេទបានទេ សូមព្យាយាមម្តងទៀត។";
+          "មិនអាចរក្សាទុកអនុប្រភេទបានទេ សូមព្យាយាមម្តងទៀត។";
       throw new Error(msg);
     }
   };
@@ -368,11 +368,10 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
       {/* Notice Message */}
       {notice && (
         <div
-          className={`flex items-center justify-between rounded-2xl p-4 text-lg font-semibold transition ${
-            notice.type === "success"
+          className={`flex items-center justify-between rounded-2xl p-4 text-lg font-semibold transition ${notice.type === "success"
               ? "border border-emerald-100 bg-emerald-50 text-emerald-800"
               : "border border-red-100 bg-red-50 text-red-700"
-          }`}
+            }`}
         >
           <div className="flex items-center gap-2.5">
             {notice.type === "success" ? (

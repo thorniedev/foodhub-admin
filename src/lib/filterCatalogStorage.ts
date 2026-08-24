@@ -90,17 +90,26 @@ export function createClientUuid(): string {
 }
 
 export function createCodeFromLabel(value: string): string {
-  const normalized = value
+  const trimmed = value.trim();
+  if (!trimmed) return `OPTION_${Date.now()}`;
+
+  const latinOnly = trimmed
+    .replace(/[^a-zA-Z0-9\s_-]/g, " ")
     .trim()
-    .normalize("NFKD")
-    .replace(/[^\p{L}\p{N}]+/gu, "_")
+    .replace(/\s+/g, "_")
+    .toUpperCase();
+
+  if (latinOnly.length >= 2) {
+    return latinOnly;
+  }
+
+  const clean = trimmed
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
     .replace(/^_+|_+$/g, "")
     .toUpperCase();
 
-  return (
-    normalized ||
-    `OPTION_${Date.now()}`
-  );
+  return clean || `OPTION_${Date.now()}`;
 }
 
 export function readCatalogCache(groupCode: string): FilterCatalogOption[] {
@@ -134,32 +143,26 @@ export function mergeCatalogWithCache(
   const localCache = readCatalogCache(groupCode);
   const map = new Map<string, FilterCatalogOption>();
 
-  // 1. Add all from local cache first (keeps inactive items preserved)
+  // 1. Add all from local cache first (keyed strictly by UUID)
   localCache.forEach((item) => {
-    map.set(item.uuid, item);
-    if (item.code) {
-      map.set(`${groupCode}_${item.code}`, item);
+    if (item.uuid) {
+      map.set(item.uuid, item);
     }
   });
 
-  // 2. Overlay server items (which are active on server)
+  // 2. Overlay server items (keyed strictly by UUID)
   serverItems.forEach((serverItem) => {
-    const keyByCode = serverItem.code ? `${groupCode}_${serverItem.code}` : "";
-    const existing = map.get(serverItem.uuid) || (keyByCode ? map.get(keyByCode) : undefined);
-
-    const merged: FilterCatalogOption = {
-      ...existing,
-      ...serverItem,
-      active: serverItem.active !== false,
-    };
-
-    map.set(serverItem.uuid, merged);
-    if (keyByCode) {
-      map.set(keyByCode, merged);
+    if (serverItem.uuid) {
+      const existing = map.get(serverItem.uuid);
+      map.set(serverItem.uuid, {
+        ...existing,
+        ...serverItem,
+        active: existing && existing.active === false ? false : (serverItem.active !== false),
+      });
     }
   });
 
-  const unique = Array.from(new Set(map.values()));
+  const unique = Array.from(map.values());
   writeCatalogCache(groupCode, unique);
   return unique;
 }

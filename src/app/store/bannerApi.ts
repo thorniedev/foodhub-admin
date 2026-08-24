@@ -54,12 +54,12 @@ export const bannerApi = adminBaseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.contents.map(({ id }) => ({
-                type: "Banner" as const,
-                id,
-              })),
-              { type: "Banner" as const, id: "LIST" },
-            ]
+            ...result.contents.map(({ id }) => ({
+              type: "Banner" as const,
+              id,
+            })),
+            { type: "Banner" as const, id: "LIST" },
+          ]
           : [{ type: "Banner" as const, id: "LIST" }],
     }),
 

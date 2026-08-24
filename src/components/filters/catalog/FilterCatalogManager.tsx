@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleMinus,
+  Clock3,
   Eye,
   Pencil,
   Plus,
@@ -32,6 +33,7 @@ import { useFilterCatalog } from "@/src/hooks/useFilterCatalog";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
+  FilterGroupDefinition,
 } from "@/src/types/filterCatalog";
 
 import FilterOptionFormModal from "./FilterOptionFormModal";
@@ -373,6 +375,7 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
 
       {/* COMPONENT: CatalogTable */}
       <CatalogTable
+        group={group}
         groupLabel={group.labelKm}
         items={pageItems}
         onView={(item) => setViewing(item)}
@@ -601,9 +604,9 @@ function CatalogToolbar({
 
   return (
     <section className="w-full">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Status tabs */}
-        <div className="flex w-full min-w-0 gap-2 overflow-x-auto pb-1 xl:w-auto">
+        <div className="flex flex-wrap items-center gap-2">
           {statusTabs.map((tab) => {
             const active = statusFilter === tab.value;
 
@@ -777,6 +780,7 @@ function ErrorNotice({ message }: { message: string }) {
 ========================================================= */
 
 function CatalogTable({
+  group,
   groupLabel,
   items,
   onView,
@@ -784,6 +788,7 @@ function CatalogTable({
   onDelete,
   onRestore,
 }: {
+  group?: FilterGroupDefinition;
   groupLabel: string;
   items: FilterCatalogOption[];
   onView: (item: FilterCatalogOption) => void;
@@ -791,6 +796,10 @@ function CatalogTable({
   onDelete: (item: FilterCatalogOption) => void;
   onRestore: (item: FilterCatalogOption) => void;
 }) {
+  const isMealType =
+    group?.source === "MEAL_TYPE_API" ||
+    items.some((i) => Boolean(i.startTime || i.endTime));
+
   return (
     <section className="w-full min-w-0 max-w-full overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
       <div className="w-full max-w-full overflow-x-auto">
@@ -802,12 +811,18 @@ function CatalogTable({
               </th>
 
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-                Code
+                កូដ
               </th>
 
-              <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-                ការពិពណ៌នា
-              </th>
+              {isMealType ? (
+                <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+                  ពេលវេលា
+                </th>
+              ) : (
+                <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+                  ការពិពណ៌នា
+                </th>
+              )}
 
               <th className="px-6 py-4 text-xl font-semibold text-primary-800">
                 ស្ថានភាព
@@ -836,17 +851,26 @@ function CatalogTable({
 
                 {/* Code */}
                 <td className="px-6 py-5">
-                  <span className="inline-flex rounded-lg bg-gray-50 px-3 py-1.5 font-mono text-lg font-medium text-gray-600">
+                  <span className="inline-flex items-center rounded-xl bg-gray-100 px-3.5 py-1 text-lg font-semibold text-gray-700">
                     {item.code}
                   </span>
                 </td>
 
-                {/* Description */}
-                <td className="max-w-[360px] px-6 py-5">
-                  <p className="line-clamp-2 text-lg leading-7 text-gray-500">
-                    {item.description || "—"}
-                  </p>
-                </td>
+                {/* Description or Time */}
+                {isMealType ? (
+                  <td className="px-6 py-5">
+                    <span className="inline-flex items-center gap-2 rounded-xl bg-primary-50 px-3.5 py-1.5 text-lg font-medium text-primary-800 ring-1 ring-primary-100">
+                      <Clock3 size={18} className="text-primary-600 shrink-0" />
+                      {item.startTime ? item.startTime.slice(0, 5) : "00:00"} – {item.endTime ? item.endTime.slice(0, 5) : "23:59"}
+                    </span>
+                  </td>
+                ) : (
+                  <td className="max-w-[360px] px-6 py-5">
+                    <p className="line-clamp-2 text-lg leading-7 text-gray-500">
+                      {item.description || "—"}
+                    </p>
+                  </td>
+                )}
 
                 {/* Status */}
                 <td className="px-6 py-5">

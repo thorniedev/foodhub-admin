@@ -78,10 +78,10 @@ export const dashboardNav: NavItem[] = [
         label: "រូបបេណឺ",
         href: "/dynamic-content/banners",
       },
-      {
-        label: "មតិកែលម្អ",
-        href: "/dynamic-content/feedback",
-      },
+      // {
+      //   label: "មតិកែលម្អ",
+      //   href: "/dynamic-content/feedback",
+      // },
     ],
   },
   {

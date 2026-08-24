@@ -33,22 +33,22 @@ function normalizeSearchItem(item: unknown): AdminSearchResultItem | null {
 
   const title = String(
     item.title ||
-      item.name ||
-      item.storeName ||
-      item.canonicalName ||
-      item.username ||
-      item.fullName ||
-      item.email ||
-      "Untitled",
+    item.name ||
+    item.storeName ||
+    item.canonicalName ||
+    item.username ||
+    item.fullName ||
+    item.email ||
+    "Untitled",
   );
 
   const subtitle = String(
     item.subtitle ||
-      item.description ||
-      item.localName ||
-      item.email ||
-      item.addressLine ||
-      "",
+    item.description ||
+    item.localName ||
+    item.email ||
+    item.addressLine ||
+    "",
   );
 
   const imageUrl =

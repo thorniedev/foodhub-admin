@@ -17,6 +17,13 @@ import type {
 } from "@/src/types/filterCatalog";
 import type { MealType } from "@/src/types/mealType";
 
+function formatToBackendTime(t?: string, defaultVal = "00:00:00"): string {
+  if (!t || !t.trim()) return defaultVal;
+  const clean = t.trim();
+  if (clean.length === 5) return `${clean}:00`;
+  return clean;
+}
+
 function toCatalogOption(item: MealType): FilterCatalogOption {
   return {
     uuid: item.uuid,
@@ -29,9 +36,9 @@ function toCatalogOption(item: MealType): FilterCatalogOption {
     unit: null,
     startTime: item.defaultStartTime,
     endTime: item.defaultEndTime,
-    active: item.isActive,
-    createdAt: new Date().toISOString(), // Fallback
-    updatedAt: new Date().toISOString(), // Fallback
+    active: item.isActive !== false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 }
 
@@ -50,6 +57,7 @@ export function useMealTypeCatalog() {
 
   const [createMealType] = useCreateMealTypeMutation();
   const [updateMealType] = useUpdateMealTypeMutation();
+
   const [localItems, setLocalItems] = useState<FilterCatalogOption[]>(() =>
     readCatalogCache("MEAL_TIME"),
   );
@@ -70,12 +78,15 @@ export function useMealTypeCatalog() {
   const createOption = useCallback(
     async (values: FilterCatalogOptionFormValues) => {
       const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase() || createCodeFromLabel(label);
+      const startTime = formatToBackendTime(values.startTime, "00:00:00");
+      const endTime = formatToBackendTime(values.endTime, "23:59:00");
 
       await createMealType({
-        code: createCodeFromLabel(label),
+        code,
         name: label,
-        defaultStartTime: values.startTime || "00:00:00",
-        defaultEndTime: values.endTime || "23:59:00",
+        defaultStartTime: startTime,
+        defaultEndTime: endTime,
         displayOrder: Number(values.numericValue) || 1,
         isActive: values.active,
       }).unwrap();
@@ -88,13 +99,17 @@ export function useMealTypeCatalog() {
   const updateOption = useCallback(
     async (uuid: string, values: FilterCatalogOptionFormValues) => {
       const label = values.name.trim() || values.localName.trim();
+      const updatedCode = values.code?.trim().toUpperCase() || undefined;
+      const startTime = formatToBackendTime(values.startTime, "00:00:00");
+      const endTime = formatToBackendTime(values.endTime, "23:59:00");
 
       await updateMealType({
         uuid,
         body: {
+          code: updatedCode,
           name: label,
-          defaultStartTime: values.startTime || "00:00:00",
-          defaultEndTime: values.endTime || "23:59:00",
+          defaultStartTime: startTime,
+          defaultEndTime: endTime,
           displayOrder: Number(values.numericValue) || 1,
           isActive: values.active,
         },
@@ -106,8 +121,11 @@ export function useMealTypeCatalog() {
           item.uuid === uuid
             ? {
                 ...item,
+                code: updatedCode || item.code,
                 name: label,
                 localName: label,
+                startTime,
+                endTime,
                 active: values.active,
               }
             : item,

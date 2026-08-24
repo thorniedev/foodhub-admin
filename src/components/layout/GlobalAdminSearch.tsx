@@ -256,11 +256,10 @@ export default function GlobalAdminSearch() {
                 key={type}
                 type="button"
                 onClick={() => setSelectedType(type)}
-                className={`rounded-lg px-2.5 py-1 font-semibold transition ${
-                  selectedType === type
+                className={`rounded-lg px-2.5 py-1 font-semibold transition ${selectedType === type
                     ? "bg-emerald-700 text-white shadow-xs"
                     : "text-gray-600 hover:bg-gray-200/70"
-                }`}
+                  }`}
               >
                 {type}
               </button>

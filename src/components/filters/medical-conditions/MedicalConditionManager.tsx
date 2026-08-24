@@ -236,20 +236,20 @@ export default function MedicalConditionManager() {
   const suggestions =
     normalizedSearch
       ? suggestionItems
-          .filter((item) => {
-            return [
-              item.code,
-              item.name,
-              item.description ?? "",
-            ].some((value) =>
-              value
-                .toLowerCase()
-                .includes(
-                  normalizedSearch,
-                ),
-            );
-          })
-          .slice(0, 8)
+        .filter((item) => {
+          return [
+            item.code,
+            item.name,
+            item.description ?? "",
+          ].some((value) =>
+            value
+              .toLowerCase()
+              .includes(
+                normalizedSearch,
+              ),
+          );
+        })
+        .slice(0, 8)
       : [];
 
   /*
@@ -271,7 +271,7 @@ export default function MedicalConditionManager() {
       (item) => {
         const statusMatches =
           statusFilter ===
-            "ALL" ||
+          "ALL" ||
           (statusFilter ===
             "ACTIVE" &&
             item.active) ||
@@ -349,15 +349,15 @@ export default function MedicalConditionManager() {
           const firstTime =
             first.updatedAt
               ? new Date(
-                  first.updatedAt,
-                ).getTime()
+                first.updatedAt,
+              ).getTime()
               : 0;
 
           const secondTime =
             second.updatedAt
               ? new Date(
-                  second.updatedAt,
-                ).getTime()
+                second.updatedAt,
+              ).getTime()
               : 0;
 
           return (
@@ -372,15 +372,15 @@ export default function MedicalConditionManager() {
           const firstTime =
             first.updatedAt
               ? new Date(
-                  first.updatedAt,
-                ).getTime()
+                first.updatedAt,
+              ).getTime()
               : 0;
 
           const secondTime =
             second.updatedAt
               ? new Date(
-                  second.updatedAt,
-                ).getTime()
+                second.updatedAt,
+              ).getTime()
               : 0;
 
           return (
@@ -403,23 +403,23 @@ export default function MedicalConditionManager() {
     value: MedicalConditionSort;
     label: string;
   }[] = [
-    {
-      value: "A_Z",
-      label: "A → Z",
-    },
-    {
-      value: "Z_A",
-      label: "Z → A",
-    },
-    {
-      value: "NEWEST",
-      label: "ថ្មីបំផុត",
-    },
-    {
-      value: "OLDEST",
-      label: "ចាស់បំផុត",
-    },
-  ];
+      {
+        value: "A_Z",
+        label: "A → Z",
+      },
+      {
+        value: "Z_A",
+        label: "Z → A",
+      },
+      {
+        value: "NEWEST",
+        label: "ថ្មីបំផុត",
+      },
+      {
+        value: "OLDEST",
+        label: "ចាស់បំផុត",
+      },
+    ];
 
   /* =======================================================
      BUSY
@@ -442,20 +442,20 @@ export default function MedicalConditionManager() {
 
     try {
       const body: MedicalConditionPayload =
-        {
-          code:
-            values.code,
+      {
+        code:
+          values.code,
 
-          name:
-            values.name,
+        name:
+          values.name,
 
-          description:
-            values.description ||
-            null,
+        description:
+          values.description ||
+          null,
 
-          active:
-            values.active,
-        };
+        active:
+          values.active,
+      };
 
       if (editing) {
         await updateItem({
@@ -557,7 +557,7 @@ export default function MedicalConditionManager() {
 
         await refetch();
       } catch (
-        hardDeleteError
+      hardDeleteError
       ) {
         setHardDeletingItem(null);
         setMessage({
@@ -591,7 +591,7 @@ export default function MedicalConditionManager() {
 
         await refetch();
       } catch (
-        restoreError
+      restoreError
       ) {
         setMessage({
           type: "error",
@@ -718,7 +718,7 @@ export default function MedicalConditionManager() {
                   value
                     .trim()
                     .length >
-                    0,
+                  0,
                 );
               }}
               onFocus={() => {
@@ -787,7 +787,7 @@ export default function MedicalConditionManager() {
               normalizedSearch && (
                 <div className="absolute left-0 top-[52px] z-[100] w-[500px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
                   {suggestions.length ===
-                  0 ? (
+                    0 ? (
                     <div className="px-5 py-6 text-center">
                       <HeartPulse
                         size={32}
@@ -873,11 +873,10 @@ export default function MedicalConditionManager() {
                               {/* STATUS */}
 
                               <span
-                                className={`shrink-0 rounded-full px-2 py-1 text-lg font-bold ${
-                                  item.active
+                                className={`shrink-0 rounded-full px-2 py-1 text-lg font-bold ${item.active
                                     ? "bg-primary-50 text-primary-700"
                                     : "bg-gray-100 text-gray-500"
-                                }`}
+                                  }`}
                               >
                                 {item.active
                                   ? "សកម្ម"
@@ -910,9 +909,8 @@ export default function MedicalConditionManager() {
 
               <ChevronDown
                 size={18}
-                className={`text-gray-400 transition-transform duration-200 ${
-                  sizeOpen ? "rotate-180" : ""
-                }`}
+                className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
@@ -930,11 +928,10 @@ export default function MedicalConditionManager() {
                         setPage(0);
                         setSizeOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg transition ${
-                        selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg transition ${selected
                           ? "bg-primary-50 font-medium text-primary-800"
                           : "text-gray-600 hover:bg-gray-50"
-                      }`}
+                        }`}
                     >
                       <span>{value} / ទំព័រ</span>
 
@@ -983,11 +980,10 @@ export default function MedicalConditionManager() {
                         setSortBy(option.value);
                         setSortOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${
-                        selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${selected
                           ? "bg-primary-50 text-primary-800"
                           : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
-                      }`}
+                        }`}
                     >
                       <span>{option.label}</span>
 
@@ -1009,12 +1005,11 @@ export default function MedicalConditionManager() {
 
       {message && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-lg ${
-            message.type ===
-            "success"
+          className={`rounded-2xl border px-4 py-3 text-lg ${message.type ===
+              "success"
               ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
-          }`}
+            }`}
         >
           {message.text}
         </div>

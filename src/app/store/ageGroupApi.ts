@@ -132,22 +132,22 @@ export const ageGroupApi =
         providesTags: (result) =>
           result
             ? [
-                {
-                  type: "AgeGroup" as const,
-                  id: "LIST",
-                },
+              {
+                type: "AgeGroup" as const,
+                id: "LIST",
+              },
 
-                ...result.contents.map((item) => ({
-                  type: "AgeGroup" as const,
-                  id: item.uuid,
-                })),
-              ]
+              ...result.contents.map((item) => ({
+                type: "AgeGroup" as const,
+                id: item.uuid,
+              })),
+            ]
             : [
-                {
-                  type: "AgeGroup" as const,
-                  id: "LIST",
-                },
-              ],
+              {
+                type: "AgeGroup" as const,
+                id: "LIST",
+              },
+            ],
       }),
 
       /* =====================================================
@@ -179,11 +179,11 @@ export const ageGroupApi =
           _error,
           uuid,
         ) => [
-          {
-            type: "AgeGroup",
-            id: uuid,
-          },
-        ],
+            {
+              type: "AgeGroup",
+              id: uuid,
+            },
+          ],
       }),
 
       /* =====================================================
@@ -254,16 +254,16 @@ export const ageGroupApi =
           _error,
           { uuid },
         ) => [
-          {
-            type: "AgeGroup",
-            id: uuid,
-          },
+            {
+              type: "AgeGroup",
+              id: uuid,
+            },
 
-          {
-            type: "AgeGroup",
-            id: "LIST",
-          },
-        ],
+            {
+              type: "AgeGroup",
+              id: "LIST",
+            },
+          ],
       }),
 
       /* =====================================================
@@ -287,16 +287,16 @@ export const ageGroupApi =
           _error,
           uuid,
         ) => [
-          {
-            type: "AgeGroup",
-            id: uuid,
-          },
+            {
+              type: "AgeGroup",
+              id: uuid,
+            },
 
-          {
-            type: "AgeGroup",
-            id: "LIST",
-          },
-        ],
+            {
+              type: "AgeGroup",
+              id: "LIST",
+            },
+          ],
       }),
     }),
 

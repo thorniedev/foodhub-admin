@@ -732,21 +732,21 @@ function extractListFromRaw(raw: any): any[] {
 function normalizePage<T>(
   value:
     | BackendEnvelope<
-        Partial<ApiPage<T>> & {
-          contents?: T[];
-          items?: T[];
-          pageNumber?: number;
-          pageSize?: number;
-          hasNext?: boolean;
-        }
-      >
-    | (Partial<ApiPage<T>> & {
+      Partial<ApiPage<T>> & {
         contents?: T[];
         items?: T[];
         pageNumber?: number;
         pageSize?: number;
         hasNext?: boolean;
-      })
+      }
+    >
+    | (Partial<ApiPage<T>> & {
+      contents?: T[];
+      items?: T[];
+      pageNumber?: number;
+      pageSize?: number;
+      hasNext?: boolean;
+    })
     | T[],
 ): ApiPage<T> {
   const raw = unwrap(value) as any;
@@ -845,9 +845,9 @@ async function browserRequest<T>(
 function makeQuery(
   params:
     | Record<
-        string,
-        string | number | boolean | undefined
-      >
+      string,
+      string | number | boolean | undefined
+    >
     | undefined,
 ): string {
   if (!params) {
@@ -1095,7 +1095,7 @@ export const menuManagementApi =
             const result = await browserRequest<unknown>(
               `/api/catalog/seasons/${encodeURIComponent(uuid)}`,
               {
-                method: "PATCH",  
+                method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
               },
@@ -1372,18 +1372,18 @@ export const menuManagementApi =
                 method: "POST",
                 ...(hasImages
                   ? {
-                      body: makeMultipart(
-                        "food",
-                        payload,
-                        images,
-                      ),
-                    }
+                    body: makeMultipart(
+                      "food",
+                      payload,
+                      images,
+                    ),
+                  }
                   : {
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify(payload),
-                    }),
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                  }),
               },
             );
 
@@ -1833,8 +1833,8 @@ export const menuManagementApi =
               uuid && String(uuid) !== "undefined"
                 ? String(uuid)
                 : (payload as any)?.uuid ||
-                  (payload as any)?.menuItemUuid ||
-                  (payload as any)?.id;
+                (payload as any)?.menuItemUuid ||
+                (payload as any)?.id;
 
             // NOTE: UpdateMenuItemRequest has no media fields (see below), and
             // there is no backend endpoint to associate already-uploaded media

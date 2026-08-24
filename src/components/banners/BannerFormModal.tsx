@@ -333,8 +333,8 @@ export default function BannerFormModal({
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
                     className={`flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all ${isDragging
-                        ? "border-emerald-500 bg-emerald-50/50"
-                        : "border-gray-300 bg-gray-50/60 hover:border-emerald-400 hover:bg-emerald-50/20"
+                      ? "border-emerald-500 bg-emerald-50/50"
+                      : "border-gray-300 bg-gray-50/60 hover:border-emerald-400 hover:bg-emerald-50/20"
                       }`}
                   >
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">

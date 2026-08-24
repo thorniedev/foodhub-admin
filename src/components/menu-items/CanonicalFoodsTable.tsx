@@ -88,11 +88,10 @@ export default function CanonicalFoodsTable({
                 </td>
                 <td className="px-5 py-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-black ${
-                      active
+                    className={`rounded-full px-3 py-1 text-xs font-black ${active
                         ? "bg-emerald-50 text-emerald-700"
                         : "bg-gray-100 text-gray-500"
-                    }`}
+                      }`}
                   >
                     {active ? "ACTIVE" : "INACTIVE"}
                   </span>

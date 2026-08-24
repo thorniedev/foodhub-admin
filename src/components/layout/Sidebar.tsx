@@ -126,17 +126,15 @@ export default function Sidebar() {
               py-2.5
               transition
 
-              ${
-                active
-                  ? "bg-emerald-50 text-[#136C34]"
-                  : "text-gray-700 hover:bg-gray-50"
+              ${active
+                ? "bg-emerald-50 text-[#136C34]"
+                : "text-gray-700 hover:bg-gray-50"
               }
             `}
           >
             <span
-              className={`flex items-center gap-3 font-medium ${
-                level === 0 ? "text-lg" : "text-sm"
-              }`}
+              className={`flex items-center gap-3 font-medium ${level === 0 ? "text-lg" : "text-sm"
+                }`}
             >
               {Icon && <Icon size={level === 0 ? 22 : 18} />}
 
@@ -145,9 +143,8 @@ export default function Sidebar() {
 
             <ChevronDown
               size={16}
-              className={`shrink-0 transition-transform duration-200 ${
-                isOpenMenu ? "rotate-180" : "rotate-0"
-              }`}
+              className={`shrink-0 transition-transform duration-200 ${isOpenMenu ? "rotate-180" : "rotate-0"
+                }`}
             />
           </button>
 
@@ -179,18 +176,16 @@ export default function Sidebar() {
           py-2.5
           transition
 
-          ${
-            level === 0
-              ? "rounded-full text-lg font-medium"
-              : "rounded-lg text-lg"
+          ${level === 0
+            ? "rounded-full text-lg font-medium"
+            : "rounded-lg text-lg"
           }
 
-          ${
-            isActive
-              ? level === 0
-                ? "bg-[#136C34] text-white"
-                : "bg-emerald-50 font-semibold text-[#136C34]"
-              : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+          ${isActive
+            ? level === 0
+              ? "bg-[#136C34] text-white"
+              : "bg-emerald-50 font-semibold text-[#136C34]"
+            : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
           }
         `}
       >

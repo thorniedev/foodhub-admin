@@ -34,7 +34,7 @@ function toCatalogOption(item: {
     description: item.description,
     numericValue: null,
     unit: null,
-    active: item.isActive,
+    active: item.isActive !== false,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
   };
@@ -55,6 +55,7 @@ export function useCuisineCatalog() {
 
   const [createCuisine] = useCreateCuisineMutation();
   const [updateCuisine] = useUpdateCuisineMutation();
+
   const [localItems, setLocalItems] = useState<FilterCatalogOption[]>(() =>
     readCatalogCache("CUISINE"),
   );
@@ -75,9 +76,10 @@ export function useCuisineCatalog() {
   const createOption = useCallback(
     async (values: FilterCatalogOptionFormValues) => {
       const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase() || createCodeFromLabel(label);
 
       await createCuisine({
-        code: createCodeFromLabel(label),
+        code,
         name: values.name.trim() || values.localName.trim(),
         description: values.description.trim() || null,
         isActive: values.active,
@@ -90,9 +92,12 @@ export function useCuisineCatalog() {
 
   const updateOption = useCallback(
     async (uuid: string, values: FilterCatalogOptionFormValues) => {
+      const updatedCode = values.code?.trim().toUpperCase() || undefined;
+
       await updateCuisine({
         uuid,
         body: {
+          code: updatedCode,
           name: values.name.trim() || values.localName.trim(),
           description: values.description.trim() || null,
           isActive: values.active,
@@ -105,6 +110,7 @@ export function useCuisineCatalog() {
           item.uuid === uuid
             ? {
                 ...item,
+                code: updatedCode || item.code,
                 name: values.name.trim() || values.localName.trim(),
                 localName: values.localName.trim() || values.name.trim(),
                 description: values.description.trim() || null,
@@ -121,11 +127,13 @@ export function useCuisineCatalog() {
 
   const setActive = useCallback(
     async (uuid: string, active: boolean) => {
+      // 1. Immediately preserve in local state & cache so it does not disappear
       updateCatalogCacheActive("CUISINE", uuid, active);
       setLocalItems((prev) =>
         prev.map((item) => (item.uuid === uuid ? { ...item, active } : item)),
       );
 
+      // 2. Call backend update
       try {
         await updateCuisine({
           uuid,
