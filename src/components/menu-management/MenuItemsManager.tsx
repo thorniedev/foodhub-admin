@@ -140,6 +140,7 @@ export default function MenuItemsManager({
   const categoriesQuery = useGetManagedFoodCategoriesQuery();
   const cuisinesQuery = useGetManagedCuisinesQuery();
   const storesQuery = useGetManagedStoresQuery();
+  const allShopsListQuery = useGetShopsQuery({ size: 1000 });
   const approvedStoresCountQuery = useGetShopsQuery({
     reviewStatus: "APPROVED",
     size: 1,
@@ -231,17 +232,31 @@ export default function MenuItemsManager({
   const stores = storesQuery.data ?? [];
   const allCategories = categoriesQuery.data ?? [];
 
-  // CustomSelect Options Memoized
-  const storeOptions = useMemo(
-    () => [
+  // CustomSelect Options Memoized - Combines all stores in the system
+  const storeOptions = useMemo(() => {
+    const list: { value: string; label: string }[] = [];
+    const seen = new Set<string>();
+
+    const addStore = (s: any) => {
+      if (!s) return;
+      const id = String(s.uuid || s.id || "");
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      const name = s.storeName || s.name || s.localName || s.headline || id;
+      list.push({ value: id, label: name });
+    };
+
+    (allShopsListQuery.data?.contents ?? []).forEach(addStore);
+    (storesQuery.data ?? []).forEach(addStore);
+    menuItems.forEach((m) => {
+      if (m.store) addStore(m.store);
+    });
+
+    return [
       { value: "", label: "ហាងទាំងអស់" },
-      ...stores.map((s) => ({
-        value: s.uuid,
-        label: s.storeName || s.name || s.localName || s.uuid,
-      })),
-    ],
-    [stores],
-  );
+      ...list,
+    ];
+  }, [allShopsListQuery.data, storesQuery.data, menuItems]);
 
   const cuisineOptions = useMemo(
     () => [
@@ -417,7 +432,16 @@ export default function MenuItemsManager({
       );
     }
 
-    return result;
+    // Always sort Foods newest first by ID descending then date descending
+    return [...result].sort((a, b) => {
+      const idA = typeof a.id === "number" ? a.id : Number((a as any).foodId || (a as any).id);
+      const idB = typeof b.id === "number" ? b.id : Number((b as any).foodId || (b as any).id);
+      if (Number.isFinite(idA) && Number.isFinite(idB) && idA !== idB) return idB - idA;
+      const timeA = a.createdAt || (a as any).updatedAt ? new Date(a.createdAt || (a as any).updatedAt).getTime() : null;
+      const timeB = b.createdAt || (b as any).updatedAt ? new Date(b.createdAt || (b as any).updatedAt).getTime() : null;
+      if (timeA !== null && timeB !== null && Number.isFinite(timeA) && Number.isFinite(timeB) && timeA !== timeB) return timeB - timeA;
+      return 0;
+    });
   }, [displayFoods, search, selectedCategoryUuid, selectedStatus, allCategories, cuisinesQuery.data]);
 
   // Search & Filter Published Menu Items
@@ -516,8 +540,36 @@ export default function MenuItemsManager({
       result = result.filter((item) => item.availabilityStatus === selectedStatus);
     }
 
-    if (sortOrder === "OLDEST") {
-      result = [...result].reverse();
+    if (sortOrder === "NEWEST") {
+      result = [...result].sort((a, b) => {
+        // 1. Check ID descending (highest numeric ID first)
+        const idA = typeof a.id === "number" ? a.id : (a as any).menuItemId ? Number((a as any).menuItemId) : typeof (a as any).id === "string" && !isNaN(Number((a as any).id)) ? Number((a as any).id) : null;
+        const idB = typeof b.id === "number" ? b.id : (b as any).menuItemId ? Number((b as any).menuItemId) : typeof (b as any).id === "string" && !isNaN(Number((b as any).id)) ? Number((b as any).id) : null;
+        if (idA !== null && idB !== null && Number.isFinite(idA) && Number.isFinite(idB) && idA !== idB) {
+          return idB - idA;
+        }
+        // 2. Check creation date descending (newest timestamp first)
+        const timeA = a.createdAt || (a as any).updatedAt ? new Date(a.createdAt || (a as any).updatedAt).getTime() : null;
+        const timeB = b.createdAt || (b as any).updatedAt ? new Date(b.createdAt || (b as any).updatedAt).getTime() : null;
+        if (timeA !== null && timeB !== null && Number.isFinite(timeA) && Number.isFinite(timeB) && timeA !== timeB) {
+          return timeB - timeA;
+        }
+        return 0;
+      });
+    } else if (sortOrder === "OLDEST") {
+      result = [...result].sort((a, b) => {
+        const idA = typeof a.id === "number" ? a.id : (a as any).menuItemId ? Number((a as any).menuItemId) : typeof (a as any).id === "string" && !isNaN(Number((a as any).id)) ? Number((a as any).id) : null;
+        const idB = typeof b.id === "number" ? b.id : (b as any).menuItemId ? Number((b as any).menuItemId) : typeof (b as any).id === "string" && !isNaN(Number((b as any).id)) ? Number((b as any).id) : null;
+        if (idA !== null && idB !== null && Number.isFinite(idA) && Number.isFinite(idB) && idA !== idB) {
+          return idA - idB;
+        }
+        const timeA = a.createdAt || (a as any).updatedAt ? new Date(a.createdAt || (a as any).updatedAt).getTime() : null;
+        const timeB = b.createdAt || (b as any).updatedAt ? new Date(b.createdAt || (b as any).updatedAt).getTime() : null;
+        if (timeA !== null && timeB !== null && Number.isFinite(timeA) && Number.isFinite(timeB) && timeA !== timeB) {
+          return timeA - timeB;
+        }
+        return 0;
+      });
     } else if (sortOrder === "NAME_ASC") {
       result = [...result].sort((a, b) => (a.name || "").localeCompare(b.name || "", "km"));
     } else if (sortOrder === "NAME_DESC") {
@@ -1124,6 +1176,7 @@ export default function MenuItemsManager({
                   onChange={(val) => setSortOrder(val as any)}
                   options={sortOptions}
                   placeholder="ថ្មីបំផុត"
+                  align="right"
                 />
               </div>
             )}

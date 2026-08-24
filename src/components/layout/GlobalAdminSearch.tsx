@@ -222,7 +222,7 @@ export default function GlobalAdminSearch() {
 
         <input
           type="text"
-          placeholder="ស្វែងរកប្រព័ន្ធ (Stores, Foods, Users, Menu Items)..."
+          placeholder="ស្វែងរកក្នុងប្រព័ន្ធ (ហាង, មុខម្ហូប, អ្នកប្រើប្រាស់, ម៉ឺនុយ)..."
           value={inputQuery}
           onFocus={() => setIsOpen(true)}
           onChange={(e) => {
@@ -251,18 +251,24 @@ export default function GlobalAdminSearch() {
         <div className="absolute left-0 right-0 top-14 z-50 max-h-[480px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl animate-in fade-in duration-150">
           {/* CATEGORY TABS */}
           <div className="flex items-center gap-1 border-b border-gray-100 bg-gray-50 px-3 py-2 text-xs">
-            {(["ALL", "STORE", "FOOD", "USER", "MENU_ITEM"] as const).map((type) => (
+            {[
+              { type: "ALL" as const, label: "ទាំងអស់" },
+              { type: "STORE" as const, label: "ហាង" },
+              { type: "FOOD" as const, label: "មុខម្ហូប" },
+              { type: "USER" as const, label: "អ្នកប្រើប្រាស់" },
+              { type: "MENU_ITEM" as const, label: "ម៉ឺនុយ" },
+            ].map((tab) => (
               <button
-                key={type}
+                key={tab.type}
                 type="button"
-                onClick={() => setSelectedType(type)}
-                className={`rounded-lg px-2.5 py-1 font-semibold transition ${
-                  selectedType === type
+                onClick={() => setSelectedType(tab.type)}
+                className={`rounded-lg px-2.5 py-1 font-semibold transition cursor-pointer ${
+                  selectedType === tab.type
                     ? "bg-emerald-700 text-white shadow-xs"
                     : "text-gray-600 hover:bg-gray-200/70"
                 }`}
               >
-                {type}
+                {tab.label}
               </button>
             ))}
           </div>
@@ -296,8 +302,14 @@ export default function GlobalAdminSearch() {
                           <p className="truncate text-xs font-bold text-gray-800 group-hover:text-emerald-800">
                             {item.title}
                           </p>
-                          <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-600 uppercase">
-                            {item.type}
+                          <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                            {item.type === "STORE"
+                              ? "ហាង"
+                              : item.type === "FOOD"
+                              ? "មុខម្ហូប"
+                              : item.type === "USER"
+                              ? "អ្នកប្រើប្រាស់"
+                              : "ម៉ឺនុយ"}
                           </span>
                         </div>
                         {item.subtitle && (

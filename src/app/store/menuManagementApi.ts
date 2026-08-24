@@ -963,12 +963,12 @@ export const menuManagementApi =
             // its store, so the store picker should never offer a store that
             // isn't already public-ready.
             const result = await browserRequest<unknown>(
-              "/api/admin/stores?page=0&size=100&reviewStatus=APPROVED&accountStatus=ACTIVE",
+              "/api/admin/stores?page=0&size=1000",
             );
 
             if ("error" in result) {
               const fallback = await browserRequest<unknown>(
-                "/api/catalog/stores?page=0&size=100",
+                "/api/catalog/stores?page=0&size=1000",
               );
               if (!("error" in fallback)) {
                 return {
