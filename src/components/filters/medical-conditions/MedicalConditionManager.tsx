@@ -559,6 +559,7 @@ export default function MedicalConditionManager() {
       } catch (
         hardDeleteError
       ) {
+        setHardDeletingItem(null);
         setMessage({
           type: "error",
 
@@ -896,96 +897,53 @@ export default function MedicalConditionManager() {
               PAGE SIZE
           ============================================== */}
 
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => {
-                setSizeOpen(
-                  (
-                    current,
-                  ) =>
-                    !current,
-                );
-
-                setSortOpen(
-                  false,
-                );
+                setSizeOpen((current) => !current);
+                setSortOpen(false);
               }}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${
-                sizeOpen
-                  ? "border-primary-800 ring-2 ring-primary-100"
-                  : "border-gray-200 hover:border-primary-800/50"
-              }`}
+              className="flex h-[52px] min-w-[150px] items-center justify-between gap-3 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-700 transition hover:border-primary-200 hover:bg-primary-50"
             >
-              <span className="text-gray-700">
-                {size} /
-                ទំព័រ
-              </span>
+              <span className="text-gray-700">{size} / ទំព័រ</span>
 
               <ChevronDown
-                size={17}
+                size={18}
                 className={`text-gray-400 transition-transform duration-200 ${
-                  sizeOpen
-                    ? "rotate-180"
-                    : ""
+                  sizeOpen ? "rotate-180" : ""
                 }`}
               />
             </button>
 
             {sizeOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[160px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
-                  ចំនួនក្នុងទំព័រ
-                </p>
+              <div className="absolute right-0 top-[60px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                {[10, 20, 50].map((value) => {
+                  const selected = size === value;
 
-                {[10, 20, 50].map(
-                  (value) => {
-                    const selected =
-                      size ===
-                      value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => {
+                        setSize(value);
+                        setPage(0);
+                        setSizeOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg transition ${
+                        selected
+                          ? "bg-primary-50 font-medium text-primary-800"
+                          : "text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>{value} / ទំព័រ</span>
 
-                    return (
-                      <button
-                        key={
-                          value
-                        }
-                        type="button"
-                        onClick={() => {
-                          setSize(
-                            value,
-                          );
-
-                          setPage(
-                            0,
-                          );
-
-                          setSizeOpen(
-                            false,
-                          );
-                        }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${
-                          selected
-                            ? "bg-primary-50 text-primary-800"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
-                        }`}
-                      >
-                        <span>
-                          {value} /
-                          ទំព័រ
-                        </span>
-
-                        {selected && (
-                          <Check
-                            size={
-                              16
-                            }
-                            className="text-primary-800"
-                          />
-                        )}
-                      </button>
-                    );
-                  },
-                )}
+                      {selected && (
+                        <Check size={18} className="text-primary-800" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -994,87 +952,51 @@ export default function MedicalConditionManager() {
               SORT
           ============================================== */}
 
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => {
-                setSortOpen(
-                  (
-                    current,
-                  ) =>
-                    !current,
-                );
-
-                setSizeOpen(
-                  false,
-                );
+                setSortOpen((current) => !current);
+                setSizeOpen(false);
               }}
-              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
-                sortOpen
-                  ? "border-primary-800 bg-primary-50 text-primary-800"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
-              }`}
+              className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800"
               aria-label="Sort medical conditions"
               title="Sort medical conditions"
             >
-              <ArrowUpDown
-                size={18}
-              />
+              <ArrowUpDown size={20} />
             </button>
 
             {sortOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg uppercase tracking-wide text-secondary-600">
+              <div className="absolute right-0 top-[60px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
                   តម្រៀប
                 </p>
 
-                {sortOptions.map(
-                  (
-                    option,
-                  ) => {
-                    const selected =
-                      sortBy ===
-                      option.value;
+                {sortOptions.map((option) => {
+                  const selected = sortBy === option.value;
 
-                    return (
-                      <button
-                        key={
-                          option.value
-                        }
-                        type="button"
-                        onClick={() => {
-                          setSortBy(
-                            option.value,
-                          );
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setSortBy(option.value);
+                        setSortOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${
+                        selected
+                          ? "bg-primary-50 text-primary-800"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
+                      }`}
+                    >
+                      <span>{option.label}</span>
 
-                          setSortOpen(
-                            false,
-                          );
-                        }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${
-                          selected
-                            ? "bg-primary-50 text-primary-800"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
-                        }`}
-                      >
-                        <span>
-                          {
-                            option.label
-                          }
-                        </span>
-
-                        {selected && (
-                          <Check
-                            size={
-                              16
-                            }
-                            className="text-primary-800"
-                          />
-                        )}
-                      </button>
-                    );
-                  },
-                )}
+                      {selected && (
+                        <Check size={16} className="text-primary-800" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -1164,13 +1086,6 @@ export default function MedicalConditionManager() {
               item,
             ) =>
               setViewing(
-                item,
-              )
-            }
-            onHardDelete={(
-              item,
-            ) =>
-              setHardDeletingItem(
                 item,
               )
             }

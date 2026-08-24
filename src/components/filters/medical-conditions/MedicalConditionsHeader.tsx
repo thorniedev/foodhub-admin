@@ -33,12 +33,12 @@ export default function MedicalConditionsHeader({
             </div>
 
             <div>
-              <p className="text-3xl font-bold text-accent-400">
+              <p className="text-5xl font-bold text-accent-400">
                 គ្រប់គ្រងស្ថានភាពសុខភាព
               </p>
 
-              <p className="mt-2 max-w-2xl text-xl leading-7 text-white/85">
-                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារស្ថានភាពសុខភាពដែលប្រើក្នុងប្រព័ន្ធ MhouBahar។
+              <p className="mt-6 max-w-2xl text-xl text-white/85">
+                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារស្ថានភាពសុខភាពដែលប្រើក្នុងប្រព័ន្ធ ម្ហូបអាហារ។
               </p>
             </div>
           </div>
@@ -46,17 +46,24 @@ export default function MedicalConditionsHeader({
           {/* STATS */}
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="rounded-3xl bg-white/20 px-5 py-4">
-              <p className="text-xl text-white/75">សរុប</p>
+              <div className="flex items-center gap-2 text-xl text-white/80">
+                <HeartPulse size={20} />
+                <span>សរុប</span>
+              </div>
               <p className="mt-1 text-2xl font-bold">{total}</p>
             </div>
 
             <div className="rounded-3xl bg-white/20 px-5 py-4">
-              <p className="text-xl text-white/75">សកម្មក្នុងទំព័រ</p>
+              <div className="flex items-center gap-2 text-xl text-white/80">
+                <span>សកម្មក្នុងទំព័រ</span>
+              </div>
               <p className="mt-1 text-2xl font-bold">{activeCount}</p>
             </div>
 
             <div className="rounded-3xl bg-white/20 px-5 py-4">
-              <p className="text-xl text-white/75">អសកម្មក្នុងទំព័រ</p>
+              <div className="flex items-center gap-2 text-xl text-white/80">
+                <span>អសកម្មក្នុងទំព័រ</span>
+              </div>
               <p className="mt-1 text-2xl font-bold">{inactiveCount}</p>
             </div>
           </div>
@@ -78,7 +85,7 @@ export default function MedicalConditionsHeader({
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
           >
             <Plus size={20} />
             បន្ថែមស្ថានភាពសុខភាព

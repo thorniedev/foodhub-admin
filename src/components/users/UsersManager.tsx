@@ -618,7 +618,7 @@ export default function UsersManager() {
           TABS + TOOLBAR
       ================================================== */}
 
-      <div className="flex w-full flex-nowrap items-center justify-between gap-4">
+      <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
         <div className="shrink-0">
           <UsersTabs
             value={statusFilter}
@@ -631,12 +631,12 @@ export default function UsersManager() {
           />
         </div>
 
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-3">
           {/* SEARCH */}
 
           <div className="relative">
             <Search
-              size={18}
+              size={22}
               className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
             />
 
@@ -665,8 +665,8 @@ export default function UsersManager() {
                   setShowSuggestions(false);
                 }
               }}
-              placeholder="ស្វែងរកឈ្មោះ, គណនីគណនីអ្នកប្រើប្រាស់ ឬ អ៊ីមែល..."
-              className="h-11 w-[430px] rounded-2xl border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              placeholder="ស្វែងរកឈ្មោះ, គណនី ឬ អ៊ីមែល..."
+              className="h-[52px] w-full sm:w-[460px] rounded-full border border-gray-200 bg-white py-2.5 pl-12 pr-11 text-lg font-medium text-gray-800 outline-none transition focus:border-primary-600 focus:ring-4 focus:ring-primary-50"
             />
 
             {search && (
@@ -679,32 +679,32 @@ export default function UsersManager() {
 
                   setPage(0);
                 }}
-                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
+                className="absolute right-3.5 top-1/2 z-10 -translate-y-1/2 rounded-full p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
                 aria-label="Clear search"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             )}
 
             {showSuggestions && normalizedSearch && (
-              <div className="absolute left-0 top-[52px] z-[100] w-[430px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
+              <div className="absolute left-0 top-[60px] z-[100] w-full sm:w-[460px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
                 {suggestions.length === 0 ? (
-                  <div className="px-5 py-6 text-center">
-                    <Users size={32} className="mx-auto text-secondary-500" />
+                  <div className="px-6 py-8 text-center">
+                    <Users size={36} className="mx-auto text-gray-400" />
 
-                    <p className="mt-2 text-lg text-secondary-500">
+                    <p className="mt-3 text-lg font-medium text-gray-500">
                       មិនមានអ្នកប្រើដែលត្រូវគ្នា
                     </p>
                   </div>
                 ) : (
                   <>
-                    <div className="border-b border-gray-100 px-5 py-3">
-                      <p className="text-lg text-secondary-500">
-                        លទ្ធផលស្វែងរក
+                    <div className="border-b border-gray-100 px-5 py-3.5 bg-gray-50/50">
+                      <p className="text-lg font-bold text-gray-700">
+                        លទ្ធផលស្វែងរក ({suggestions.length})
                       </p>
                     </div>
 
-                    <div className="max-h-[340px] overflow-y-auto p-2">
+                    <div className="max-h-[360px] overflow-y-auto p-2">
                       {suggestions.map((user) => {
                         const name = displayName(
                           user.firstName,
@@ -726,33 +726,33 @@ export default function UsersManager() {
 
                               setPage(0);
                             }}
-                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
+                            className="flex w-full items-center gap-3.5 rounded-xl px-3.5 py-3 text-left transition hover:bg-primary-50"
                           >
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
-                              <UserRound size={20} />
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
+                              <UserRound size={24} />
                             </div>
 
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-base font-semibold text-gray-800">
+                              <p className="truncate text-xl font-bold text-gray-900">
                                 {name}
                               </p>
 
-                              <p className="mt-0.5 truncate text-sm text-gray-400">
+                              <p className="mt-0.5 truncate text-lg text-gray-400">
                                 @{user.username}
                               </p>
 
                               {user.primaryEmail && (
-                                <p className="mt-0.5 truncate text-sm text-gray-400">
+                                <p className="mt-0.5 truncate text-lg text-gray-400">
                                   {user.primaryEmail}
                                 </p>
                               )}
                             </div>
 
                             <span
-                              className={`shrink-0 rounded-full px-2.5 py-1 text-sm ${user.status === "ACTIVE"
+                              className={`shrink-0 rounded-full px-3 py-1 text-lg font-bold ${user.status === "ACTIVE"
                                   ? "bg-primary-50 text-primary-700"
                                   : user.status === "SUSPENDED"
-                                    ? "bg-secondary-50 text-secondary-600"
+                                    ? "bg-amber-50 text-amber-700"
                                     : user.status === "DELETED"
                                       ? "bg-red-50 text-red-700"
                                       : "bg-gray-100 text-gray-500"
@@ -782,23 +782,23 @@ export default function UsersManager() {
 
                 setShowSuggestions(false);
               }}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${sizeOpen
-                  ? "border-primary-600 ring-2 ring-primary-100"
-                  : "border-gray-200 hover:border-primary-600/50"
+              className={`flex h-[52px] min-w-[145px] items-center justify-between gap-3 rounded-full border bg-white px-5 text-lg font-medium transition ${sizeOpen
+                  ? "border-primary-600 ring-4 ring-primary-50"
+                  : "border-gray-200 hover:border-gray-300"
                 }`}
             >
-              <span className="text-gray-700">{size} / ទំព័រ</span>
+              <span className="text-gray-800">{size} / ទំព័រ</span>
 
               <ChevronDown
-                size={17}
+                size={18}
                 className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
                   }`}
               />
             </button>
 
             {sizeOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[170px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg text-secondary-500">
+              <div className="absolute right-0 top-[60px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+                <p className="px-3 pb-2 pt-1.5 text-lg font-bold text-gray-400">
                   ចំនួនក្នុងទំព័រ
                 </p>
 
@@ -816,15 +816,15 @@ export default function UsersManager() {
 
                         setSizeOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-left text-lg font-semibold transition ${selected
                           ? "bg-primary-50 text-primary-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-primary-700"
                         }`}
                     >
                       <span>{value} / ទំព័រ</span>
 
                       {selected && (
-                        <Check size={16} className="text-primary-700" />
+                        <Check size={18} className="text-primary-700" />
                       )}
                     </button>
                   );
@@ -845,19 +845,19 @@ export default function UsersManager() {
 
                 setShowSuggestions(false);
               }}
-              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen
+              className={`flex h-[52px] w-[52px] items-center justify-center rounded-full border transition ${sortOpen
                   ? "border-primary-600 bg-primary-50 text-primary-700"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-primary-600 hover:bg-primary-50 hover:text-primary-700"
+                  : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:text-primary-700"
                 }`}
               aria-label="Sort users"
               title="Sort users"
             >
-              <ArrowUpDown size={18} />
+              <ArrowUpDown size={20} />
             </button>
 
             {sortOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg text-secondary-500">
+              <div className="absolute right-0 top-[60px] z-[100] w-[210px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+                <p className="px-3 pb-2 pt-1.5 text-lg font-bold text-gray-400">
                   តម្រៀប
                 </p>
 
@@ -873,15 +873,15 @@ export default function UsersManager() {
 
                         setSortOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-left text-lg font-bold transition ${selected
                           ? "bg-primary-50 text-primary-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-primary-700"
                         }`}
                     >
                       <span>{option.label}</span>
 
                       {selected && (
-                        <Check size={16} className="text-primary-700" />
+                        <Check size={18} className="text-primary-700" />
                       )}
                     </button>
                   );
@@ -898,7 +898,7 @@ export default function UsersManager() {
 
       {notice && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-base ${notice.type === "success"
+          className={`rounded-2xl border px-6 py-4 text-lg font-semibold ${notice.type === "success"
               ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
             }`}
@@ -911,36 +911,36 @@ export default function UsersManager() {
           TABLE
       ================================================== */}
 
-      <section className="w-full min-w-0 max-w-full overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
+      <section className="w-full min-w-0 max-w-full overflow-hidden rounded-[30px] border border-gray-100 bg-white shadow-xs">
         {isLoading ? (
           <div className="flex min-h-[360px] items-center justify-center">
-            <Loader2 size={30} className="animate-spin text-primary-800" />
+            <Loader2 size={36} className="animate-spin text-primary-800" />
           </div>
         ) : error ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
-            <AlertTriangle size={38} className="text-red-400" />
+            <AlertTriangle size={42} className="text-red-400" />
 
-            <p className="mt-4 text-xl font-bold text-gray-800">
+            <p className="mt-4 text-2xl font-bold text-gray-900">
               មិនអាចទាញយកគណនីអ្នកប្រើប្រាស់បានទេ
             </p>
 
-            <p className="mt-2 max-w-lg text-base leading-7 text-gray-500">
+            <p className="mt-2 max-w-lg text-lg leading-relaxed text-gray-500">
               {getAdminApiErrorMessage(error)}
             </p>
 
             <button
               type="button"
               onClick={() => void refetch()}
-              className="mt-5 rounded-full bg-primary-800 px-5 py-2.5 text-lg font-medium text-white transition hover:bg-primary-900"
+              className="mt-6 rounded-full bg-primary-800 px-7 py-3 text-xl font-bold text-white transition hover:bg-primary-900 active:scale-95"
             >
               សាកល្បងម្តងទៀត
             </button>
           </div>
         ) : sortedUsers.length === 0 ? (
           <div className="flex min-h-[340px] flex-col items-center justify-center text-center">
-            <Users size={42} className="text-secondary-500" />
+            <Users size={48} className="text-gray-300" />
 
-            <p className="mt-3 text-lg text-secondary-500">
+            <p className="mt-3 text-2xl font-bold text-gray-400">
               មិនមានអ្នកប្រើត្រូវនឹង filter
             </p>
           </div>

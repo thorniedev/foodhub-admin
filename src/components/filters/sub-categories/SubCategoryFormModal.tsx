@@ -247,21 +247,7 @@ export default function SubCategoryFormModal({
             />
           </div>
 
-          {/* Active Status Checkbox */}
-          <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50/60 p-4 transition hover:bg-gray-100/60">
-            <input
-              type="checkbox"
-              checked={isActive}
-              onChange={(e) => setIsActive(e.target.checked)}
-              className="h-5 w-5 rounded-lg border-gray-300 text-primary-600 focus:ring-primary-500"
-            />
-            <div>
-              <p className="text-lg font-bold text-gray-800">ដាក់ឱ្យដំណើរការ (Active)</p>
-              <p className="text-lg text-gray-400">
-                អនុញ្ញាតឱ្យជ្រើសរើសអនុប្រភេទនេះក្នុងទម្រង់បង្កើតមុខម្ហូប/ភេសជ្ជៈ
-              </p>
-            </div>
-          </label>
+
 
           {/* Footer Actions */}
           <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-4">

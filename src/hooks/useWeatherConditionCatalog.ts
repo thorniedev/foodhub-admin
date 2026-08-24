@@ -1,13 +1,16 @@
-"use client";
-
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   useCreateWeatherConditionMutation,
   useGetWeatherConditionsQuery,
   useUpdateWeatherConditionMutation,
 } from "@/src/app/store/weatherConditionApi";
-import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
+import {
+  createCodeFromLabel,
+  mergeCatalogWithCache,
+  readCatalogCache,
+  updateCatalogCacheActive,
+} from "@/src/lib/filterCatalogStorage";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
@@ -45,11 +48,22 @@ export function useWeatherConditionCatalog() {
 
   const [createWeather] = useCreateWeatherConditionMutation();
   const [updateWeather] = useUpdateWeatherConditionMutation();
-
-  const groupOptions = useMemo(
-    () => (data?.contents ?? []).map(toCatalogOption),
-    [data],
+  const [localItems, setLocalItems] = useState<FilterCatalogOption[]>(() =>
+    readCatalogCache("WEATHER_CONDITION"),
   );
+
+  useEffect(() => {
+    if (data?.contents) {
+      const serverConverted = data.contents.map(toCatalogOption);
+      const merged = mergeCatalogWithCache("WEATHER_CONDITION", serverConverted);
+      setLocalItems(merged);
+    }
+  }, [data]);
+
+  const groupOptions = useMemo(() => {
+    if (localItems.length > 0) return localItems;
+    return (data?.contents ?? []).map(toCatalogOption);
+  }, [data, localItems]);
 
   const createOption = useCallback(
     async (values: FilterCatalogOptionFormValues) => {
@@ -82,6 +96,21 @@ export function useWeatherConditionCatalog() {
         },
       }).unwrap();
 
+      updateCatalogCacheActive("WEATHER_CONDITION", uuid, values.active);
+      setLocalItems((prev) =>
+        prev.map((item) =>
+          item.uuid === uuid
+            ? {
+                ...item,
+                name: values.name.trim() || values.localName.trim(),
+                localName: values.localName.trim() || values.name.trim(),
+                description: values.description.trim() || null,
+                active: values.active,
+              }
+            : item,
+        ),
+      );
+
       await refetch();
     },
     [updateWeather, refetch],
@@ -89,13 +118,22 @@ export function useWeatherConditionCatalog() {
 
   const setActive = useCallback(
     async (uuid: string, active: boolean) => {
-      await updateWeather({
-        uuid,
-        body: {
-          isActive: active,
-          active,
-        },
-      }).unwrap();
+      updateCatalogCacheActive("WEATHER_CONDITION", uuid, active);
+      setLocalItems((prev) =>
+        prev.map((item) => (item.uuid === uuid ? { ...item, active } : item)),
+      );
+
+      try {
+        await updateWeather({
+          uuid,
+          body: {
+            isActive: active,
+            active,
+          },
+        }).unwrap();
+      } catch (err) {
+        console.warn("Could not update weather condition on server:", err);
+      }
 
       await refetch();
     },

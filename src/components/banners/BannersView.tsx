@@ -270,58 +270,165 @@ export default function BannersView() {
       </div>
 
       {/* Header Banner & Stats */}
-      <div className="flex flex-col justify-between gap-4 rounded-3xl bg-gradient-to-r from-[#137A3D] to-[#0E582C] p-6 text-white shadow-xl sm:flex-row sm:items-center">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/20 backdrop-blur-xs">
-              <Sparkles size={18} className="text-yellow-300" />
-            </span>
-            <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-              គ្រប់គ្រងផ្ទាំងបែនណឺ (Banner Management)
-            </h1>
-          </div>
-          <p className="mt-1 text-sm text-emerald-100">
-            គ្រប់គ្រងផ្ទាំងរូបភាពផ្សព្វផ្សាយនៅលើគេហទំព័រ និងកម្មវិធីទូរស័ព្ទ FoodHub
-          </p>
-        </div>
+      <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
+        <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute -bottom-24 right-20 h-64 w-64 rounded-full bg-white/5" />
 
-        <button
-          type="button"
-          onClick={() => {
-            setEditingBanner(null);
-            setIsFormModalOpen(true);
-          }}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-[#137A3D] shadow-md transition hover:bg-emerald-50 active:scale-95"
-        >
-          <Plus size={18} />
-          <span>បង្កើតបែនណឺថ្មី (Create Banner)</span>
-        </button>
-      </div>
+        <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+                <Sparkles size={25} />
+              </div>
+
+              <div>
+                <p className="text-5xl font-bold text-accent-400">
+                  រូបបេណឺ
+                </p>
+                <p className="mt-6 max-w-2xl text-xl text-white/85">
+                  គ្រប់គ្រងផ្ទាំងរូបភាពផ្សព្វផ្សាយនៅលើគេហទំព័រ និងកម្មវិធីទូរស័ព្ទ FoodHub។
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="rounded-3xl bg-white/20 px-5 py-4">
+                <div className="flex items-center gap-2 text-xl text-white/80">
+                  <ImageIcon size={20} />
+                  <span>បែនណឺសរុប</span>
+                </div>
+                <p className="mt-1 text-2xl font-bold">{totalElements}</p>
+              </div>
+
+              <div className="rounded-3xl bg-white/20 px-5 py-4">
+                <div className="flex items-center gap-2 text-xl text-white/80">
+                  <CheckCircle2 size={20} />
+                  <span>បានផ្សាយ</span>
+                </div>
+                <p className="mt-1 text-2xl font-bold">
+                  {banners.filter((b) => b.isPublished).length}
+                </p>
+              </div>
+
+              <div className="rounded-3xl bg-white/20 px-5 py-4">
+                <div className="flex items-center gap-2 text-xl text-white/80">
+                  <Eye size={20} />
+                  <span>មិនទាន់ផ្សាយ</span>
+                </div>
+                <p className="mt-1 text-2xl font-bold">
+                  {banners.filter((b) => !b.isPublished).length}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setEditingBanner(null);
+              setIsFormModalOpen(true);
+            }}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
+          >
+            <Plus size={20} />
+            <span>បង្កើតបែនណឺថ្មី</span>
+          </button>
+        </div>
+      </section>
 
       {/* Filter and Search Controls Bar */}
-      <div className="flex flex-col gap-4 rounded-3xl border border-gray-100 bg-white p-5 shadow-xs lg:flex-row lg:items-center lg:justify-between">
-        {/* Left filters: Search & Category */}
-        <div className="flex flex-1 flex-wrap items-center gap-3">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        {/* Status Tabs */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setPublishedFilter("ALL");
+              setCurrentPage(0);
+            }}
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
+              publishedFilter === "ALL"
+                ? "bg-primary-800 text-white"
+                : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
+            }`}
+          >
+            <span>ទាំងអស់</span>
+            <span
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
+                publishedFilter === "ALL" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {totalElements}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setPublishedFilter("PUBLISHED");
+              setCurrentPage(0);
+            }}
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
+              publishedFilter === "PUBLISHED"
+                ? "bg-primary-800 text-white"
+                : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
+            }`}
+          >
+            <span>បានផ្សាយ</span>
+            <span
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
+                publishedFilter === "PUBLISHED" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {banners.filter((b) => b.isPublished).length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setPublishedFilter("DRAFT");
+              setCurrentPage(0);
+            }}
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
+              publishedFilter === "DRAFT"
+                ? "bg-primary-800 text-white"
+                : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
+            }`}
+          >
+            <span>ព្រាង</span>
+            <span
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
+                publishedFilter === "DRAFT" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {banners.filter((b) => !b.isPublished).length}
+            </span>
+          </button>
+        </div>
+
+        {/* Right filters: Search, Category & Refresh */}
+        <div className="flex flex-wrap items-center gap-3">
           {/* Search bar */}
-          <div className="relative min-w-[240px] flex-1">
+          <div className="relative min-w-[240px] flex-1 sm:max-w-xs">
             <Search
-              size={18}
-              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+              size={20}
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
             />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="ស្វែងរកតាមចំណងជើង ឬទីតាំង..."
-              className="h-11 w-full rounded-2xl border border-gray-200 bg-gray-50/70 pl-10 pr-4 text-sm outline-none transition focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600/10"
+              placeholder="ស្វែងរកតាមចំណងជើង..."
+              className="h-[52px] w-full rounded-full border border-gray-200 bg-white pl-12 pr-10 text-lg font-medium outline-none transition focus:border-primary-600 focus:ring-4 focus:ring-primary-100"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-600"
               >
-                <X size={15} />
+                <X size={18} />
               </button>
             )}
           </div>
@@ -334,9 +441,9 @@ export default function BannersView() {
                 setSelectedCategory(e.target.value as BannerCategory | "ALL");
                 setCurrentPage(0);
               }}
-              className="h-11 appearance-none rounded-2xl border border-gray-200 bg-gray-50/70 px-4 pr-9 text-sm font-bold text-gray-700 outline-none transition focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600/10"
+              className="h-[52px] appearance-none rounded-full border border-gray-200 bg-white px-5 pr-10 text-lg font-medium text-gray-700 outline-none transition focus:border-primary-600 focus:ring-4 focus:ring-primary-100"
             >
-              <option value="ALL">ប្រភេទទាំងអស់ (All Categories)</option>
+              <option value="ALL">ប្រភេទទាំងអស់</option>
               {BANNER_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
                   {BANNER_CATEGORY_LABELS[cat] || cat}
@@ -344,71 +451,23 @@ export default function BannersView() {
               ))}
             </select>
             <Filter
-              size={15}
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={18}
+              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
             />
           </div>
 
-          {/* Published Status Filter */}
-          <div className="flex items-center rounded-2xl border border-gray-200 bg-gray-50/70 p-1">
-            <button
-              type="button"
-              onClick={() => {
-                setPublishedFilter("ALL");
-                setCurrentPage(0);
-              }}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                publishedFilter === "ALL"
-                  ? "bg-white text-gray-900 shadow-xs"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              ទាំងអស់
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setPublishedFilter("PUBLISHED");
-                setCurrentPage(0);
-              }}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                publishedFilter === "PUBLISHED"
-                  ? "bg-emerald-600 text-white shadow-xs"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              បានផ្សាយ (Published)
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setPublishedFilter("DRAFT");
-                setCurrentPage(0);
-              }}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                publishedFilter === "DRAFT"
-                  ? "bg-gray-800 text-white shadow-xs"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              ព្រាង (Draft)
-            </button>
-          </div>
-        </div>
-
-        {/* Refresh button */}
-        <div className="flex items-center gap-2">
+          {/* Refresh button */}
           <button
             type="button"
             onClick={() => void fetchBanners(true)}
             disabled={isLoading || isFetching}
-            className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 shadow-xs transition hover:bg-gray-50 active:scale-95 disabled:opacity-50"
+            title="ទាញយកឡើងវិញ"
+            className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50 hover:text-[#136C34] disabled:opacity-50"
           >
             <RefreshCw
-              size={14}
+              size={20}
               className={isFetching ? "animate-spin text-emerald-600" : ""}
             />
-            <span>ផ្ទុកឡើងវិញ</span>
           </button>
         </div>
       </div>

@@ -30,57 +30,11 @@ import WeatherConditionFormModal from "./WeatherConditionFormModal";
 import WeatherConditionHeader from "./WeatherConditionHeader";
 import WeatherConditionTable from "./WeatherConditionTable";
 
-const LOCAL_STORAGE_KEY = "foodhub-admin-weather-conditions-cache-v1";
-
-const DEFAULT_SEEDS: WeatherCondition[] = [
-  {
-    uuid: "917d5dfb-f0b3-4cd0-9544-6388841498ed",
-    code: "RAINY",
-    name: "រដូវភ្លៀង",
-    localName: "រដូវភ្លៀង",
-    description: "ម្ហូបក្តៅៗ និងអាហារដែលសាកសមសម្រាប់ថ្ងៃភ្លៀង ដូចជា ស៊ុប សម្ល មី និងអាហារចម្អិនក្តៅៗ",
-    isActive: true,
-    active: true,
-    createdAt: "2026-08-14T05:58:08.327371",
-  },
-  {
-    uuid: "seed-weather-hot",
-    code: "HOT",
-    name: "អាកាសធាតុក្តៅ",
-    localName: "ក្តៅ",
-    description: "ភេសជ្ជៈត្រជាក់ៗ ការ៉េម និងអាហារស្រស់ស្រាយសម្រាប់ថ្ងៃក្តៅ",
-    isActive: false,
-    active: false,
-    createdAt: "2026-08-15T00:00:00.000Z",
-  },
-  {
-    uuid: "seed-weather-cold",
-    code: "COLD",
-    name: "អាកាសធាតុត្រជាក់",
-    localName: "ត្រជាក់",
-    description: "ស៊ុបក្តៅៗ ហតផត និងម្ហូបដែលមានជាតិកម្តៅសម្រាប់អាកាសធាតុត្រជាក់",
-    isActive: false,
-    active: false,
-    createdAt: "2026-08-15T00:00:00.000Z",
-  },
-];
-
-function readLocalWeatherCache(): WeatherCondition[] {
-  if (typeof window === "undefined") return DEFAULT_SEEDS;
-  try {
-    const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!raw) return DEFAULT_SEEDS;
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : DEFAULT_SEEDS;
-  } catch {
-    return DEFAULT_SEEDS;
-  }
-}
-
-function saveLocalWeatherCache(items: WeatherCondition[]) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
-}
+import {
+  mergeWeatherConditions,
+  readLocalWeatherCache,
+  saveLocalWeatherCache,
+} from "@/src/lib/weatherConditionStorage";
 
 function getApiErrorMessage(error: unknown): string {
   if (error && typeof error === "object") {
@@ -478,48 +432,22 @@ export default function WeatherConditionManager() {
       )}
 
       {/* Toolbar & Tabs */}
-      <div className="flex flex-col gap-4 rounded-3xl bg-white p-5 shadow-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {/* Search bar */}
-          <div className="relative flex-1">
-            <Search
-              size={20}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="ស្វែងរក code, name, local name..."
-              className="h-[52px] w-full rounded-2xl border border-gray-200 bg-gray-50/50 pl-11 pr-10 text-lg text-gray-800 outline-none transition focus:border-primary-500 focus:bg-white focus:ring-4 focus:ring-primary-500/10"
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:bg-gray-100"
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
-        </div>
-
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Status Tabs */}
-        <div className="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setStatusFilter("ALL")}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-lg font-bold transition ${
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
               statusFilter === "ALL"
-                ? "bg-primary-800 text-white shadow-sm"
-                : "bg-gray-100/70 text-gray-600 hover:bg-gray-200/70"
+                ? "bg-primary-800 text-white"
+                : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
             }`}
           >
             <span>ទាំងអស់</span>
             <span
-              className={`rounded-lg px-2.5 py-0.5 text-lg font-black ${
-                statusFilter === "ALL" ? "bg-white/20 text-white" : "bg-gray-200 text-gray-600"
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
+                statusFilter === "ALL" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
               }`}
             >
               {mergedItems.length}
@@ -529,16 +457,16 @@ export default function WeatherConditionManager() {
           <button
             type="button"
             onClick={() => setStatusFilter("ACTIVE")}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-lg font-bold transition ${
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
               statusFilter === "ACTIVE"
-                ? "bg-primary-800 text-white shadow-sm"
-                : "bg-gray-100/70 text-gray-600 hover:bg-gray-200/70"
+                ? "bg-primary-800 text-white"
+                : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
             }`}
           >
             <span>សកម្ម</span>
             <span
-              className={`rounded-lg px-2.5 py-0.5 text-lg font-black ${
-                statusFilter === "ACTIVE" ? "bg-white/20 text-white" : "bg-gray-200 text-gray-600"
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
+                statusFilter === "ACTIVE" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
               }`}
             >
               {activeCount}
@@ -548,21 +476,45 @@ export default function WeatherConditionManager() {
           <button
             type="button"
             onClick={() => setStatusFilter("INACTIVE")}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-lg font-bold transition ${
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
               statusFilter === "INACTIVE"
-                ? "bg-primary-800 text-white shadow-sm"
-                : "bg-gray-100/70 text-gray-600 hover:bg-gray-200/70"
+                ? "bg-primary-800 text-white"
+                : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
             }`}
           >
             <span>អសកម្ម / បានលុប</span>
             <span
-              className={`rounded-lg px-2.5 py-0.5 text-lg font-black ${
-                statusFilter === "INACTIVE" ? "bg-white/20 text-white" : "bg-gray-200 text-gray-600"
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
+                statusFilter === "INACTIVE" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
               }`}
             >
               {inactiveCount}
             </span>
           </button>
+        </div>
+
+        {/* Search bar */}
+        <div className="relative w-full lg:w-[420px]">
+          <Search
+            size={20}
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="ស្វែងរក code, name, local name..."
+            className="h-[52px] w-full rounded-full border border-gray-200 bg-white pl-11 pr-10 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:bg-gray-100"
+            >
+              <X size={18} />
+            </button>
+          )}
         </div>
       </div>
 

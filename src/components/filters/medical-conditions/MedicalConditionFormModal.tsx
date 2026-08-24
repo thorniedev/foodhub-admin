@@ -160,14 +160,7 @@ export default function MedicalConditionFormModal({
           onSubmit={handleSubmit}
           className="space-y-6 p-6 sm:p-8"
         >
-          <Section
-            title="ព័ត៌មានស្ថានភាពសុខភាព"
-            icon={
-              <HeartPulse
-                size={22}
-              />
-            }
-          >
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
             <div className="grid gap-5 sm:grid-cols-2">
               <Field
                 label="កូដ"
@@ -223,58 +216,7 @@ export default function MedicalConditionFormModal({
                 className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-lg leading-8 text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
               />
             </label>
-          </Section>
-
-          <Section
-            title="ស្ថានភាព"
-            icon={
-              <Settings2
-                size={22}
-              />
-            }
-          >
-            <div className="flex items-center justify-between gap-5 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4">
-              <div className="min-w-0">
-                <p className="text-lg font-medium text-primary-800">
-                  សកម្ម
-                </p>
-
-                <p className="mt-1 text-lg leading-7 text-gray-500">
-                  បើក ដើម្បីឱ្យកំណត់ត្រានេះសកម្មក្នុងប្រព័ន្ធ។
-                </p>
-              </div>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={
-                  form.active
-                }
-                onClick={() =>
-                  setForm(
-                    (previous) => ({
-                      ...previous,
-                      active:
-                        !previous.active,
-                    }),
-                  )
-                }
-                className={`relative h-7 w-12 shrink-0 rounded-full transition focus:outline-none focus:ring-4 focus:ring-primary-100 ${
-                  form.active
-                    ? "bg-primary-700"
-                    : "bg-gray-300"
-                }`}
-              >
-                <span
-                  className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-all ${
-                    form.active
-                      ? "left-6"
-                      : "left-1"
-                  }`}
-                />
-              </button>
-            </div>
-          </Section>
+          </div>
 
           {validationError && (
             <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg leading-7 text-red-600">

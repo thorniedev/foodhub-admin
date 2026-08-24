@@ -1,7 +1,8 @@
 import {
+  CircleMinus,
+  Eye,
   Pencil,
   RotateCcw,
-  Trash2,
   UsersRound,
 } from "lucide-react";
 
@@ -12,6 +13,7 @@ import type {
 type Props = {
   items: AgeGroup[];
   disabled?: boolean;
+  onView: (item: AgeGroup) => void;
   onEdit: (item: AgeGroup) => void;
   onDelete: (item: AgeGroup) => void;
   onRestore: (item: AgeGroup) => void;
@@ -20,6 +22,7 @@ type Props = {
 export default function AgeGroupsTable({
   items,
   disabled = false,
+  onView,
   onEdit,
   onDelete,
   onRestore,
@@ -96,6 +99,16 @@ export default function AgeGroupsTable({
                   <button
                     type="button"
                     disabled={disabled}
+                    onClick={() => onView(item)}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100 disabled:opacity-40"
+                    title="មើលព័ត៌មានលម្អិត"
+                  >
+                    <Eye size={20} />
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={disabled}
                     onClick={() => onEdit(item)}
                     className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 disabled:opacity-40"
                     title="កែប្រែ"
@@ -111,7 +124,7 @@ export default function AgeGroupsTable({
                       className="flex h-10 w-10 items-center justify-center rounded-xl text-red-400 transition hover:bg-red-50 disabled:opacity-40"
                       title="បិទ / លុប"
                     >
-                      <Trash2 size={20} />
+                      <CircleMinus size={20} />
                     </button>
                   ) : (
                     <button

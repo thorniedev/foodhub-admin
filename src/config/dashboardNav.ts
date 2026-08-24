@@ -129,10 +129,6 @@ export const dashboardNav: NavItem[] = [
         href: "/filter/medical-conditions",
       },
       {
-        label: "កម្រិតហឹរ",
-        href: "/filter/spice-levels",
-      },
-      {
         label: "ពេលចម្អិន",
         href: "/filter/preparation-times",
       },

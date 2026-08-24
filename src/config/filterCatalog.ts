@@ -68,15 +68,6 @@ export const FILTER_GROUPS: FilterGroupDefinition[] = [
     source: "MEDICAL_CONDITION_API",
   },
   {
-    slug: "spice-levels",
-    code: "SPICE_LEVEL",
-    labelKm: "កម្រិតហឹរ",
-    labelEn: "Spice levels",
-    descriptionKm: "គ្រប់គ្រងកម្រិតហឹររបស់ម្ហូប។",
-    selectionMode: "SINGLE",
-    source: "LOCAL",
-  },
-  {
     slug: "preparation-times",
     code: "PREPARATION_TIME",
     labelKm: "ពេលចម្អិន",

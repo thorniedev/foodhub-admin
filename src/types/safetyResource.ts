@@ -43,6 +43,17 @@ export function getApiErrorMessage(error: unknown): string {
     return "404 - រកមិនឃើញ API endpoint ដែលបានស្នើ។";
   }
 
+  if (apiError.status === 409) {
+    let detail = "";
+    if (typeof apiError.data === "object" && apiError.data !== null) {
+      const data = apiError.data as Record<string, unknown>;
+      detail = String(data.message || data.error || data.detail || "");
+    } else if (typeof apiError.data === "string") {
+      detail = apiError.data;
+    }
+    return detail || "មិនអាចលុបជាអចិន្ត្រៃយ៍បានទេ ព្រោះទិន្នន័យនេះកំពុងត្រូវបានប្រើប្រាស់ដោយទិន្នន័យផ្សេងទៀតក្នុងប្រព័ន្ធ (ដូចជា Foods, User Profiles)។ សូមប្រើមុខងារ 'បិទដំណើរការ' ជំនួសវិញ។";
+  }
+
   if (apiError.status === "FETCH_ERROR") {
     return `មិនអាចភ្ជាប់ទៅ Backend បានទេ${
       apiError.error ? `: ${apiError.error}` : ""

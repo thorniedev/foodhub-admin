@@ -37,24 +37,24 @@ export default function UsersTable({
   onRestore,
 }: UsersTableProps) {
   return (
-    <div className="w-full overflow-x-auto rounded-3xl border border-gray-100 bg-white shadow-sm">
-      <table className="w-full border-collapse text-left">
+    <div className="w-full min-w-0 max-w-full overflow-x-auto">
+      <table className="w-full min-w-[1050px] border-collapse text-left">
         {/* ================= HEAD ================= */}
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/60">
-            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[280px]">
+          <tr className="border-b border-gray-100 bg-gray-50/70">
+            <th className="whitespace-nowrap px-6 py-5 text-xl font-bold text-primary-800 min-w-[300px]">
               គណនីអ្នកប្រើប្រាស់
             </th>
-            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[170px]">
+            <th className="whitespace-nowrap px-6 py-5 text-xl font-bold text-primary-800 min-w-[180px]">
               កាលបរិច្ឆេទបង្កើត
             </th>
-            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[140px]">
+            <th className="whitespace-nowrap px-6 py-5 text-xl font-bold text-primary-800 min-w-[160px]">
               ផ្ទៀងផ្ទាត់
             </th>
-            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[140px]">
+            <th className="whitespace-nowrap px-6 py-5 text-xl font-bold text-primary-800 min-w-[160px]">
               ស្ថានភាព
             </th>
-            <th className="whitespace-nowrap px-6 py-4 text-end text-lg font-semibold text-primary-800 min-w-[160px] pr-6">
+            <th className="whitespace-nowrap px-6 py-5 text-end text-xl font-bold text-primary-800 min-w-[170px] pr-6">
               សកម្មភាព
             </th>
           </tr>
@@ -97,11 +97,11 @@ export default function UsersTable({
                 className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
               >
                 {/* User column */}
-                <td className="px-6 py-3.5">
+                <td className="px-6 py-5">
                   <Link
                     href={detailHref}
                     title={`មើលព័ត៌មាន ${name}`}
-                    className="group flex items-center gap-3.5 rounded-2xl outline-none transition focus-visible:ring-4 focus-visible:ring-primary-100"
+                    className="group flex items-center gap-4 rounded-2xl outline-none transition focus-visible:ring-4 focus-visible:ring-primary-100"
                   >
                     <div className="relative shrink-0">
                       <UserAvatar
@@ -109,25 +109,25 @@ export default function UsersTable({
                         userUuid={user.uuid}
                         avatarMediaUuid={avatarMediaUuid}
                         imageUrl={imageUrl}
-                        containerClassName="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100 text-base font-bold"
+                        containerClassName="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100 text-xl font-bold ring-1 ring-black/5 shadow-xs"
                       />
                       <span
-                        className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${
+                        className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white ${
                           user.status === "ACTIVE"
-                            ? "bg-emerald-400"
+                            ? "bg-emerald-500"
                             : user.status === "SUSPENDED"
-                              ? "bg-amber-400"
-                              : "bg-red-400"
+                              ? "bg-amber-500"
+                              : "bg-red-500"
                         }`}
                       />
                     </div>
 
                     <div className="min-w-0">
-                      <p className="max-w-[280px] truncate text-base font-semibold text-gray-800 transition group-hover:text-primary-800">
+                      <p className="max-w-[280px] truncate text-xl font-bold text-gray-900 transition group-hover:text-primary-800">
                         {name}
                       </p>
                       {subtext && (
-                        <p className="max-w-[280px] truncate text-sm text-gray-400">
+                        <p className="max-w-[280px] truncate text-lg font-medium text-gray-400">
                           {subtext}
                         </p>
                       )}
@@ -136,43 +136,43 @@ export default function UsersTable({
                 </td>
 
                 {/* Created Date */}
-                <td className="whitespace-nowrap px-6 py-3.5">
-                  <div className="flex items-center gap-2 text-base font-medium text-gray-500">
-                    <Calendar size={16} className="text-primary-700 shrink-0" />
+                <td className="whitespace-nowrap px-6 py-5">
+                  <div className="flex items-center gap-2 text-lg font-medium text-gray-600">
+                    <Calendar size={20} className="text-primary-700 shrink-0" />
                     <span>{user.createdAt ? formatDateKhmer(user.createdAt) : "—"}</span>
                   </div>
                 </td>
 
                 {/* Verified */}
-                <td className="whitespace-nowrap px-6 py-3.5">
+                <td className="whitespace-nowrap px-6 py-5">
                   {user.emailVerified ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-100">
-                      <CheckCircle size={13} />
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-4 py-1.5 text-lg font-bold text-emerald-700 border border-emerald-100">
+                      <CheckCircle size={18} />
                       បានផ្ទៀងផ្ទាត់
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 border border-amber-100">
-                      <XCircle size={13} />
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-4 py-1.5 text-lg font-bold text-amber-700 border border-amber-100">
+                      <XCircle size={18} />
                       មិនទាន់
                     </span>
                   )}
                 </td>
 
                 {/* Status */}
-                <td className="whitespace-nowrap px-6 py-3.5">
+                <td className="whitespace-nowrap px-6 py-5">
                   <StatusBadge status={user.status} />
                 </td>
 
                 {/* Actions */}
-                <td className="px-6 py-2">
-                  <div className="flex items-center justify-end gap-2 pr-2">
+                <td className="px-6 py-5">
+                  <div className="flex items-center justify-end gap-2.5 pr-2">
                     {/* View */}
                     <Link
                       href={detailHref}
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100"
                       title="មើលលម្អិត"
                     >
-                      <Eye size={20} />
+                      <Eye size={22} />
                     </Link>
 
                     {/* ACTIVE: edit + suspend + delete */}
@@ -182,10 +182,10 @@ export default function UsersTable({
                           type="button"
                           disabled={disabled}
                           onClick={() => onProfileEdit(user)}
-                          className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="flex h-11 w-11 items-center justify-center rounded-xl text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
                           title="កែប្រែ"
                         >
-                          <Pencil size={20} />
+                          <Pencil size={22} />
                         </button>
 
                         {onSuspend && (
@@ -193,10 +193,10 @@ export default function UsersTable({
                             type="button"
                             disabled={disabled}
                             onClick={() => onSuspend(user)}
-                            className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-500 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="flex h-11 w-11 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
                             title="ផ្អាកដំណើរការ"
                           >
-                            <AlertTriangle size={20} />
+                            <AlertTriangle size={22} />
                           </button>
                         )}
 
@@ -205,10 +205,10 @@ export default function UsersTable({
                             type="button"
                             disabled={disabled}
                             onClick={() => onHardDelete(user)}
-                            className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="flex h-11 w-11 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                             title="លុប"
                           >
-                            <Trash2 size={20} />
+                            <Trash2 size={22} />
                           </button>
                         )}
                       </>
@@ -222,10 +222,10 @@ export default function UsersTable({
                             type="button"
                             disabled={disabled}
                             onClick={() => onRestore(user)}
-                            className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="flex h-11 w-11 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
                             title="ស្តារឡើងវិញ"
                           >
-                            <RotateCcw size={20} />
+                            <RotateCcw size={22} />
                           </button>
                         )}
 
@@ -234,10 +234,10 @@ export default function UsersTable({
                             type="button"
                             disabled={disabled}
                             onClick={() => onHardDelete(user)}
-                            className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="flex h-11 w-11 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                             title="លុប"
                           >
-                            <Trash2 size={20} />
+                            <Trash2 size={22} />
                           </button>
                         )}
                       </>
@@ -250,12 +250,12 @@ export default function UsersTable({
 
           {users.length === 0 && (
             <tr>
-              <td colSpan={5} className="py-12 text-center text-gray-400">
-                <div className="flex flex-col items-center justify-center gap-3">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gray-50 text-gray-400">
-                    <Shield size={28} />
+              <td colSpan={5} className="py-16 text-center text-gray-400">
+                <div className="flex flex-col items-center justify-center gap-4">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gray-50 text-gray-400">
+                    <Shield size={36} />
                   </div>
-                  <p className="text-lg font-medium text-gray-500">
+                  <p className="text-2xl font-bold text-gray-500">
                     មិនមានគណនីអ្នកប្រើប្រាស់
                   </p>
                 </div>
@@ -294,9 +294,9 @@ export function StatusBadge({ status }: { status: string }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${className}`}
+      className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-lg font-bold border ${className}`}
     >
-      <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
+      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClassName}`} />
       {label}
     </span>
   );

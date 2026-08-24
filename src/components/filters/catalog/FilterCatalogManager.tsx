@@ -9,13 +9,13 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  CircleMinus,
   Eye,
   Pencil,
   Plus,
   RotateCcw,
   Search,
   SlidersHorizontal,
-  Trash2,
   X,
 } from "lucide-react";
 
@@ -467,7 +467,7 @@ function CatalogHeader({
             </div>
 
             <div className="min-w-0">
-              <p className="text-3xl font-bold text-accent-400">
+              <p className="text-5xl font-bold text-accent-400">
                 {group.labelKm}
               </p>
 
@@ -600,7 +600,7 @@ function CatalogToolbar({
   ];
 
   return (
-    <section className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-5">
+    <section className="w-full">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         {/* Status tabs */}
         <div className="flex w-full min-w-0 gap-2 overflow-x-auto pb-1 xl:w-auto">
@@ -612,17 +612,17 @@ function CatalogToolbar({
                 key={tab.value}
                 type="button"
                 onClick={() => onStatusChange(tab.value)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
                   active
                     ? "bg-primary-800 text-white"
-                    : "bg-gray-50 text-gray-500 hover:bg-primary-50 hover:text-primary-800"
+                    : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
-                {tab.label}
+                <span>{tab.label}</span>
 
                 <span
-                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
-                    active ? "bg-white/20 text-white" : "bg-white text-gray-500"
+                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
+                    active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
                   }`}
                 >
                   {tab.count}
@@ -645,7 +645,7 @@ function CatalogToolbar({
               onChange={(event) => onSearchChange(event.target.value)}
               onFocus={onSearchFocus}
               placeholder={`ស្វែងរក ${groupLabel}...`}
-              className="h-[52px] w-full rounded-full border border-gray-200 bg-gray-50 pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+              className="h-[52px] w-full rounded-full border border-gray-200 bg-white pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
             />
 
             {search && (
@@ -881,7 +881,7 @@ function CatalogTable({
                         title="បិទ"
                         className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
                       >
-                        <Trash2 size={20} />
+                        <CircleMinus size={20} />
                       </button>
                     ) : (
                       <button
@@ -1046,7 +1046,7 @@ function DeleteCatalogOptionModal({
       <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
-            <Trash2 size={24} />
+            <CircleMinus size={26} />
           </div>
 
           <button

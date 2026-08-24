@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Pencil, Power, Trash2 } from "lucide-react";
+import { CircleMinus, Eye, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import type { FoodCategory } from "@/src/types/foodCategory";
 
 type Props = {
@@ -131,20 +131,28 @@ export default function SubCategoryTable({
                         <Pencil size={20} />
                       </button>
 
-                      {/* Quick Toggle Active */}
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => onToggleActive(item)}
-                        title={active ? "បិទដំណើរការ" : "បើកដំណើរការ"}
-                        className={`rounded-xl p-2 transition ${
-                          active
-                            ? "text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
-                            : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                        }`}
-                      >
-                        <Power size={20} />
-                      </button>
+                      {/* Toggle Active (CircleMinus / RotateCcw) */}
+                      {active ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => onToggleActive(item)}
+                          title="បិទដំណើរការ (Deactivate)"
+                          className="rounded-xl p-2 text-amber-600 transition hover:bg-amber-50 hover:text-amber-700"
+                        >
+                          <CircleMinus size={20} />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => onToggleActive(item)}
+                          title="ស្ដារឡើងវិញ (Restore)"
+                          className="rounded-xl p-2 text-primary-700 transition hover:bg-primary-50 hover:text-primary-800"
+                        >
+                          <RotateCcw size={20} />
+                        </button>
+                      )}
 
                       {/* Delete */}
                       <button

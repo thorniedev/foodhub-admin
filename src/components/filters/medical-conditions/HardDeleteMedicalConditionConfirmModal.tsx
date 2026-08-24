@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { AlertOctagon, Loader2, X } from "lucide-react";
+import { Loader2, Trash2, X } from "lucide-react";
 
 import type { MedicalCondition } from "@/src/types/medicalCondition";
 
@@ -41,7 +41,7 @@ export default function HardDeleteMedicalConditionConfirmModal({
       <div className="w-full max-w-lg rounded-[30px] border border-red-100 bg-white p-6 shadow-2xl sm:p-7">
         <div className="flex items-start justify-between">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 text-red-600">
-            <AlertOctagon size={28} />
+            <Trash2 size={28} />
           </div>
 
           <button

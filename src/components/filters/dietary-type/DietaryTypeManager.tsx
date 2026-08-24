@@ -577,6 +577,7 @@ export default function DietaryTypeManager() {
       } catch (
         hardDeleteError
       ) {
+        setHardDeletingItem(null);
         setMessage({
           type: "error",
           text:
@@ -758,7 +759,7 @@ export default function DietaryTypeManager() {
                   }
                 }}
                 placeholder="ស្វែងរករបបអាហារ កូដ ប្រភេទ ឬការពិពណ៌នា..."
-                className="h-[52px] w-full rounded-full border border-gray-200 bg-gray-50 pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+                className="h-[52px] w-full rounded-full border border-gray-200 bg-white pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100"
               />
 
               {search && (
@@ -1159,13 +1160,6 @@ export default function DietaryTypeManager() {
             }}
             onDelete={
               setDeleting
-            }
-            onHardDelete={(
-              item,
-            ) =>
-              setHardDeletingItem(
-                item,
-              )
             }
             onRestore={(
               item,

@@ -12,7 +12,6 @@ import {
   Clock3,
   Hash,
   Loader2,
-  Settings2,
   SlidersHorizontal,
   X,
 } from "lucide-react";
@@ -358,14 +357,7 @@ export default function FilterOptionFormModal({
           {/* =================================================
               SECTION 1: BASIC INFORMATION
           ================================================== */}
-          <Section
-            icon={
-              <SlidersHorizontal
-                size={22}
-              />
-            }
-            title="ព័ត៌មានមូលដ្ឋាន"
-          >
+          <Section>
             <p className="mb-5 text-lg leading-7 text-gray-500">
               សូមបំពេញឈ្មោះយ៉ាងហោចណាស់មួយ
               ជាភាសាខ្មែរ ឬភាសាអង់គ្លេស។
@@ -594,109 +586,7 @@ export default function FilterOptionFormModal({
             </Section>
           )}
 
-          {/* =================================================
-              SECTION 3: STATUS
-          ================================================== */}
-          <Section
-            icon={
-              <Settings2
-                size={22}
-              />
-            }
-            title="ស្ថានភាព"
-          >
-            <div
-              className="
-                flex
-                items-center
-                justify-between
-                gap-5
-                rounded-2xl
-                border
-                border-gray-100
-                bg-gray-50
-                px-5
-                py-4
-              "
-            >
-              <div className="min-w-0">
-                <p
-                  className="
-                    text-lg
-                    font-medium
-                    text-primary-800
-                  "
-                >
-                  សកម្ម
-                </p>
 
-                <p
-                  className="
-                    mt-1
-                    text-lg
-                    leading-7
-                    text-gray-500
-                  "
-                >
-                  បើក ដើម្បីឱ្យស្លាកនេះបង្ហាញ
-                  នៅក្នុង Form បង្កើតម្ហូប។
-                </p>
-              </div>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={
-                  form.active
-                }
-                onClick={() =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      active:
-                        !previous.active,
-                    }),
-                  )
-                }
-                className={`
-                  relative
-                  h-7
-                  w-12
-                  shrink-0
-                  rounded-full
-                  transition
-                  focus:outline-none
-                  focus:ring-4
-                  focus:ring-primary-100
-                  ${
-                    form.active
-                      ? "bg-primary-700"
-                      : "bg-gray-300"
-                  }
-                `}
-              >
-                <span
-                  className={`
-                    absolute
-                    top-1
-                    h-5
-                    w-5
-                    rounded-full
-                    bg-white
-                    shadow-sm
-                    transition-all
-                    ${
-                      form.active
-                        ? "left-6"
-                        : "left-1"
-                    }
-                  `}
-                />
-              </button>
-            </div>
-          </Section>
 
           {/* =================================================
               VALIDATION ERROR
@@ -833,8 +723,8 @@ function Section({
   icon,
   children,
 }: {
-  title: string;
-  icon: ReactNode;
+  title?: string;
+  icon?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -848,33 +738,37 @@ function Section({
         sm:p-6
       "
     >
-      <div className="mb-6 flex items-center gap-3">
-        <div
-          className="
-            flex
-            h-11
-            w-11
-            shrink-0
-            items-center
-            justify-center
-            rounded-xl
-            bg-primary-50
-            text-primary-800
-          "
-        >
-          {icon}
-        </div>
+      {title && (
+        <div className="mb-6 flex items-center gap-3">
+          {icon && (
+            <div
+              className="
+                flex
+                h-11
+                w-11
+                shrink-0
+                items-center
+                justify-center
+                rounded-xl
+                bg-primary-50
+                text-primary-800
+              "
+            >
+              {icon}
+            </div>
+          )}
 
-        <p
-          className="
-            text-3xl
-            font-semibold
-            text-primary-800
-          "
-        >
-          {title}
-        </p>
-      </div>
+          <p
+            className="
+              text-3xl
+              font-semibold
+              text-primary-800
+            "
+          >
+            {title}
+          </p>
+        </div>
+      )}
 
       {children}
     </section>

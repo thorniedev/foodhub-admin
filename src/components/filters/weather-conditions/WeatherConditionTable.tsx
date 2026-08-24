@@ -1,6 +1,6 @@
 "use client";
 
-import { CloudRain, Eye, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import { CircleMinus, CloudRain, Eye, Pencil, RotateCcw } from "lucide-react";
 import type { WeatherCondition } from "@/src/types/weather-condition";
 
 function activeOf(item: WeatherCondition): boolean {
@@ -130,7 +130,7 @@ export default function WeatherConditionTable({
                         className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-400 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
                         title="បិទដំណើរការ / លុប (Deactivate)"
                       >
-                        <Trash2 size={17} />
+                        <CircleMinus size={18} />
                       </button>
                     ) : (
                       <button

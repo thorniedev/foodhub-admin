@@ -1,13 +1,16 @@
-"use client";
-
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   useCreateEventMutation,
   useGetManagedEventsQuery,
   useUpdateEventMutation,
 } from "@/src/app/store/menuManagementApi";
-import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
+import {
+  createCodeFromLabel,
+  mergeCatalogWithCache,
+  readCatalogCache,
+  updateCatalogCacheActive,
+} from "@/src/lib/filterCatalogStorage";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
@@ -41,11 +44,22 @@ export function useEventCatalog() {
 
   const [createEvent] = useCreateEventMutation();
   const [updateEvent] = useUpdateEventMutation();
-
-  const groupOptions = useMemo(
-    () => (data ?? []).map(toCatalogOption),
-    [data],
+  const [localItems, setLocalItems] = useState<FilterCatalogOption[]>(() =>
+    readCatalogCache("EVENT"),
   );
+
+  useEffect(() => {
+    if (data) {
+      const serverConverted = data.map(toCatalogOption);
+      const merged = mergeCatalogWithCache("EVENT", serverConverted);
+      setLocalItems(merged);
+    }
+  }, [data]);
+
+  const groupOptions = useMemo(() => {
+    if (localItems.length > 0) return localItems;
+    return (data ?? []).map(toCatalogOption);
+  }, [data, localItems]);
 
   const createOption = useCallback(
     async (values: FilterCatalogOptionFormValues) => {
@@ -76,6 +90,21 @@ export function useEventCatalog() {
         },
       }).unwrap();
 
+      updateCatalogCacheActive("EVENT", uuid, values.active);
+      setLocalItems((prev) =>
+        prev.map((item) =>
+          item.uuid === uuid
+            ? {
+                ...item,
+                name: values.name.trim() || values.localName.trim(),
+                localName: values.localName.trim() || values.name.trim(),
+                description: values.description.trim() || null,
+                active: values.active,
+              }
+            : item,
+        ),
+      );
+
       await refetch();
     },
     [updateEvent, refetch],
@@ -83,12 +112,23 @@ export function useEventCatalog() {
 
   const setActive = useCallback(
     async (uuid: string, active: boolean) => {
-      await updateEvent({
-        uuid,
-        payload: {
-          isActive: active,
-        },
-      }).unwrap();
+      // 1. Instantly update local cache & state so table row updates to Inactive/Active
+      updateCatalogCacheActive("EVENT", uuid, active);
+      setLocalItems((prev) =>
+        prev.map((item) => (item.uuid === uuid ? { ...item, active } : item)),
+      );
+
+      // 2. Call backend update
+      try {
+        await updateEvent({
+          uuid,
+          payload: {
+            isActive: active,
+          },
+        }).unwrap();
+      } catch (err) {
+        console.warn("Could not update event on server:", err);
+      }
 
       await refetch();
     },

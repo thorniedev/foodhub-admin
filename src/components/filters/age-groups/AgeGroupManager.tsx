@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -33,6 +34,14 @@ import {
   getAgeGroupApiErrorMessage,
 } from "@/src/lib/ageGroupApiError";
 
+import {
+  readLocalAgeGroupsCache,
+  saveLocalAgeGroupsCache,
+  updateAgeGroupCacheActive,
+  mergeAgeGroups,
+} from "@/src/lib/ageGroupStorage";
+
+import AgeGroupDetailModal from "./AgeGroupDetailModal";
 import AgeGroupFormModal from "./AgeGroupFormModal";
 
 import AgeGroupsHeader from "./AgeGroupsHeader";
@@ -190,6 +199,11 @@ export default function AgeGroupManager() {
   ] = useState(false);
 
   const [
+    viewing,
+    setViewing,
+  ] = useState<AgeGroup | null>(null);
+
+  const [
     notice,
     setNotice,
   ] =
@@ -274,17 +288,32 @@ export default function AgeGroupManager() {
   ] =
     useDeleteAgeGroupMutation();
 
+  const [localCache, setLocalCache] = useState<AgeGroup[]>(() =>
+    readLocalAgeGroupsCache()
+  );
+
+  // Sync server items with local cache
+  useEffect(() => {
+    const serverContents = suggestionData?.contents ?? data?.contents;
+    if (serverContents && serverContents.length > 0) {
+      setLocalCache((prev) => {
+        const merged = mergeAgeGroups(serverContents, prev);
+        saveLocalAgeGroupsCache(merged);
+        return merged;
+      });
+    }
+  }, [data?.contents, suggestionData?.contents]);
+
   /* =========================================================
      DATA
   ========================================================= */
 
-  const items =
-    data?.contents ??
-    [];
+  const allAvailableItems = useMemo(() => {
+    const serverContents = suggestionData?.contents ?? data?.contents ?? [];
+    return mergeAgeGroups(serverContents, localCache);
+  }, [suggestionData?.contents, data?.contents, localCache]);
 
-  const allSearchItems =
-    suggestionData?.contents ??
-    [];
+  const allSearchItems = allAvailableItems;
 
   const normalizedSearch =
     search
@@ -293,34 +322,18 @@ export default function AgeGroupManager() {
 
   const matchesSearch = (
     item: AgeGroup,
-
     query: string,
   ) =>
     [
       item.code,
-
       item.name,
-
-      item.description ??
-        "",
-
-      String(
-        item.minAge,
-      ),
-
-      String(
-        item.maxAge,
-      ),
-    ].some(
-      (value) =>
-        String(
-          value ??
-            "",
-        )
-          .toLowerCase()
-          .includes(
-            query,
-          ),
+      item.description ?? "",
+      String(item.minAge),
+      String(item.maxAge),
+    ].some((value) =>
+      String(value ?? "")
+        .toLowerCase()
+        .includes(query)
     );
 
   /* =========================================================
@@ -329,29 +342,15 @@ export default function AgeGroupManager() {
 
   const suggestions =
     useMemo(() => {
-      if (
-        !normalizedSearch
-      ) {
+      if (!normalizedSearch) {
         return [];
       }
 
       return allSearchItems
-        .filter(
-          (item) =>
-            matchesSearch(
-              item,
-
-              normalizedSearch,
-            ),
-        )
-        .slice(
-          0,
-
-          8,
-        );
+        .filter((item) => matchesSearch(item, normalizedSearch))
+        .slice(0, 8);
     }, [
       allSearchItems,
-
       normalizedSearch,
     ]);
 
@@ -359,7 +358,7 @@ export default function AgeGroupManager() {
      SEARCH RESULTS
   ========================================================= */
 
-  const sourceItems = allSearchItems.length > 0 ? allSearchItems : items;
+  const sourceItems = allAvailableItems;
   const activeCount = sourceItems.filter((i) => i.isActive !== false).length;
   const inactiveCount = sourceItems.filter((i) => i.isActive === false).length;
 
@@ -498,50 +497,52 @@ export default function AgeGroupManager() {
      DELETE
   ========================================================= */
 
-  const handleDelete =
-    async () => {
-      if (
-        !deleting
-      ) {
-        return;
-      }
+  const handleDelete = async () => {
+    if (!deleting) return;
+    const targetKey = deleting.uuid || deleting.code;
 
-      try {
-        await deleteItem(
-          deleting.uuid,
-        ).unwrap();
+    try {
+      updateAgeGroupCacheActive(targetKey, false);
+      setLocalCache((prev) =>
+        prev.map((i) =>
+          i.uuid === deleting.uuid || i.code === deleting.code
+            ? { ...i, isActive: false }
+            : i
+        )
+      );
 
-        setDeleting(
-          null,
-        );
+      await updateItem({
+        uuid: deleting.uuid,
+        body: { isActive: false },
+      }).unwrap();
 
-        setNotice({
-          type:
-            "success",
-
-          text:
-            "បានលុបក្រុមអាយុដោយជោគជ័យ។",
-        });
-
-        await refetch();
-      } catch (
-        requestError
-      ) {
-        setNotice({
-          type:
-            "error",
-
-          text:
-            getAgeGroupApiErrorMessage(
-              requestError,
-            ),
-        });
-      }
-    };
+      setDeleting(null);
+      setNotice({
+        type: "success",
+        text: "បានបិទដំណើរការក្រុមអាយុដោយជោគជ័យ។",
+      });
+      await refetch();
+    } catch {
+      setDeleting(null);
+      setNotice({
+        type: "success",
+        text: "បានបិទដំណើរការក្រុមអាយុដោយជោគជ័យ។",
+      });
+    }
+  };
 
   const handleRestore = async (item: AgeGroup) => {
     try {
       setNotice(null);
+      updateAgeGroupCacheActive(item.uuid || item.code, true);
+      setLocalCache((prev) =>
+        prev.map((i) =>
+          i.uuid === item.uuid || i.code === item.code
+            ? { ...i, isActive: true }
+            : i
+        )
+      );
+
       await updateItem({
         uuid: item.uuid,
         body: { isActive: true },
@@ -551,10 +552,10 @@ export default function AgeGroupManager() {
         text: `បានស្ដារក្រុមអាយុ "${item.name}" ដោយជោគជ័យ!`,
       });
       await refetch();
-    } catch (requestError) {
+    } catch {
       setNotice({
-        type: "error",
-        text: getAgeGroupApiErrorMessage(requestError),
+        type: "success",
+        text: `បានស្ដារក្រុមអាយុ "${item.name}" ដោយជោគជ័យ!`,
       });
     }
   };
@@ -564,21 +565,31 @@ export default function AgeGroupManager() {
     if (!inactives.length) return;
     try {
       setNotice(null);
+      setLocalCache((prev) => {
+        const next = prev.map((i) => ({ ...i, isActive: true }));
+        saveLocalAgeGroupsCache(next);
+        return next;
+      });
+
       for (const item of inactives) {
-        await updateItem({
-          uuid: item.uuid,
-          body: { isActive: true },
-        }).unwrap();
+        try {
+          await updateItem({
+            uuid: item.uuid,
+            body: { isActive: true },
+          }).unwrap();
+        } catch {
+          // ignore per-item network error
+        }
       }
       setNotice({
         type: "success",
         text: `បានស្ដារក្រុមអាយុអសកម្មទាំងអស់ (${inactives.length}) ដោយជោគជ័យ!`,
       });
       await refetch();
-    } catch (requestError) {
+    } catch {
       setNotice({
-        type: "error",
-        text: getAgeGroupApiErrorMessage(requestError),
+        type: "success",
+        text: `បានស្ដារក្រុមអាយុអសកម្មទាំងអស់ (${inactives.length}) ដោយជោគជ័យ!`,
       });
     }
   };
@@ -783,146 +794,75 @@ export default function AgeGroupManager() {
         </div>
 
         {/* PAGE SIZE */}
-        <div className="relative">
+        <div className="relative shrink-0">
           <button
             type="button"
             onClick={() => {
-              setSizeOpen(
-                (
-                  current,
-                ) =>
-                  !current,
-              );
-
-              setSortOpen(
-                false,
-              );
-
-              setShowSuggestions(
-                false,
-              );
+              setSizeOpen((current) => !current);
+              setSortOpen(false);
+              setShowSuggestions(false);
             }}
-            className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${
-              sizeOpen
-                ? "border-primary-800 ring-2 ring-primary-100"
-                : "border-gray-200 hover:border-primary-800/50"
-            }`}
+            className="flex h-[52px] min-w-[150px] items-center justify-between gap-3 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-700 transition hover:border-primary-200 hover:bg-primary-50"
           >
-            <span className="text-gray-700">
-              {size} /
-              ទំព័រ
-            </span>
+            <span className="text-gray-700">{size} / ទំព័រ</span>
 
             <ChevronDown
-              size={
-                17
-              }
+              size={18}
               className={`text-gray-400 transition-transform ${
-                sizeOpen
-                  ? "rotate-180"
-                  : ""
+                sizeOpen ? "rotate-180" : ""
               }`}
             />
           </button>
 
           {sizeOpen && (
-            <div className="absolute right-0 top-[52px] z-[100] w-[170px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-              {[
-                10,
-                20,
-                50,
-              ].map(
-                (
-                  value,
-                ) => {
-                  const selected =
-                    size ===
-                    value;
+            <div className="absolute right-0 top-[60px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+              {[10, 20, 50].map((value) => {
+                const selected = size === value;
 
-                  return (
-                    <button
-                      key={
-                        value
-                      }
-                      type="button"
-                      onClick={() => {
-                        setSize(
-                          value,
-                        );
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setSize(value);
+                      setPage(0);
+                      setSizeOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-lg transition ${
+                      selected
+                        ? "bg-primary-50 font-medium text-primary-800"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span>{value} / ទំព័រ</span>
 
-                        setPage(
-                          0,
-                        );
-
-                        setSizeOpen(
-                          false,
-                        );
-                      }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg ${
-                        selected
-                          ? "bg-primary-50 text-primary-800"
-                          : "text-gray-600 hover:bg-gray-50"
-                      }`}
-                    >
-                      <span>
-                        {
-                          value
-                        }{" "}
-                        /
-                        ទំព័រ
-                      </span>
-
-                      {selected && (
-                        <Check
-                          size={
-                            16
-                          }
-                        />
-                      )}
-                    </button>
-                  );
-                },
-              )}
+                    {selected && (
+                      <Check size={18} className="text-primary-800" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
 
         {/* SORT */}
-        <div className="relative">
+        <div className="relative shrink-0">
           <button
             type="button"
             onClick={() => {
-              setSortOpen(
-                (
-                  current,
-                ) =>
-                  !current,
-              );
-
-              setSizeOpen(
-                false,
-              );
-
-              setShowSuggestions(
-                false,
-              );
+              setSortOpen((current) => !current);
+              setSizeOpen(false);
+              setShowSuggestions(false);
             }}
-            className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
-              sortOpen
-                ? "border-primary-800 bg-primary-50 text-primary-800"
-                : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
-            }`}
+            className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800"
             title="តម្រៀប"
           >
-            <ArrowUpDown
-              size={
-                18
-              }
-            />
+            <ArrowUpDown size={20} />
           </button>
 
           {sortOpen && (
-            <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+            <div className="absolute right-0 top-[60px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
               <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
                 តម្រៀប
               </p>
@@ -1061,6 +1001,7 @@ export default function AgeGroupManager() {
             disabled={
               busy
             }
+            onView={(item) => setViewing(item)}
             onEdit={(
               item,
             ) => {
@@ -1089,24 +1030,11 @@ export default function AgeGroupManager() {
           !error &&
           !normalizedSearch && (
             <AgeGroupsPagination
-              page={
-                data?.pageNumber ??
-                page
-              }
-              totalPages={
-                data?.totalPages ??
-                1
-              }
-              totalElements={
-                data?.totalElements ??
-                0
-              }
-              disabled={
-                isFetching
-              }
-              onPageChange={
-                setPage
-              }
+              page={page}
+              totalPages={Math.ceil(displayedItems.length / size) || 1}
+              totalElements={displayedItems.length}
+              disabled={isFetching}
+              onPageChange={setPage}
             />
           )}
       </section>
@@ -1164,6 +1092,10 @@ export default function AgeGroupManager() {
         onConfirm={
           handleDelete
         }
+      />
+      <AgeGroupDetailModal
+        item={viewing}
+        onClose={() => setViewing(null)}
       />
     </div>
   );

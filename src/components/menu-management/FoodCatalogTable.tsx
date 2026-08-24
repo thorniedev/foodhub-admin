@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { CircleMinus, Eye, Pencil } from "lucide-react";
 import FoodAvatar from "./FoodAvatar";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 
@@ -68,22 +68,23 @@ export default function FoodCatalogTable({
 }) {
   if (!items.length) {
     return (
-      <div className="px-6 py-20 text-center text-gray-400">
-        មិនទាន់មាន Food Catalog ទេ។
+      <div className="px-6 py-24 text-center">
+        <p className="text-2xl font-bold text-gray-400">មិនទាន់មានទិន្នន័យ Catalog ទេ</p>
+        <p className="mt-2 text-lg text-gray-400">ទិន្នន័យមុខម្ហូប និងភេសជ្ជៈនឹងបង្ហាញនៅទីនេះ។</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full">
+    <div className="w-full min-w-0 max-w-full overflow-x-auto">
+      <table className="w-full min-w-[1050px] border-collapse text-left">
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-xs font-black uppercase tracking-wide text-gray-400">
-            <th className="px-5 py-4">មុខម្ហូប</th>
-            <th className="px-5 py-4">ប្រភេទ</th>
-            <th className="px-5 py-4">ម្ហូបតាមប្រទេស</th>
-            <th className="px-5 py-4">ស្ថានភាព</th>
-            <th className="px-5 py-4 text-right">សកម្មភាព</th>
+          <tr className="border-b border-gray-100 bg-gray-50/70">
+            <th className="px-6 py-5 text-xl font-bold text-primary-800">មុខម្ហូប / ភេសជ្ជៈ</th>
+            <th className="px-6 py-5 text-xl font-bold text-primary-800">ប្រភេទ</th>
+            <th className="px-6 py-5 text-xl font-bold text-primary-800">ម្ហូបតាមប្រទេស</th>
+            <th className="px-6 py-5 text-xl font-bold text-primary-800">ស្ថានភាព</th>
+            <th className="px-6 py-5 text-right text-xl font-bold text-primary-800">សកម្មភាព</th>
           </tr>
         </thead>
 
@@ -91,11 +92,11 @@ export default function FoodCatalogTable({
           {items.map((item) => (
             <tr
               key={item.uuid}
-              className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/40 transition"
+              className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
             >
-              <td className="px-5 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+              <td className="px-6 py-5">
+                <div className="flex items-center gap-4">
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-gray-100 ring-1 ring-black/5 shadow-xs">
                     <FoodAvatar
                       item={item}
                       alt={foodName(item)}
@@ -104,47 +105,56 @@ export default function FoodCatalogTable({
                   </div>
 
                   <div className="min-w-0">
-                    <p className="truncate font-bold text-gray-900">
+                    <p className="truncate text-xl font-bold text-gray-900">
                       {foodName(item)}
                     </p>
 
-                    <p className="mt-1 truncate text-xs text-gray-400">
-                      {item.canonicalName}
-                    </p>
+                    {item.canonicalName && (
+                      <p className="mt-1 truncate text-lg font-medium text-gray-400">
+                        {item.canonicalName}
+                      </p>
+                    )}
                   </div>
                 </div>
               </td>
 
-              <td className="px-5 py-4 text-sm font-medium text-gray-700">
-                {categoryName(item, categories)}
+              <td className="px-6 py-5">
+                <span className="inline-flex rounded-full bg-secondary-50 px-4 py-1.5 text-lg font-medium text-secondary-700 ring-1 ring-inset ring-secondary-100">
+                  {categoryName(item, categories)}
+                </span>
               </td>
 
-              <td className="px-5 py-4 text-sm text-gray-600">
+              <td className="px-6 py-5 text-lg font-medium text-gray-600">
                 {cuisineName(item, cuisines)}
               </td>
 
-              <td className="px-5 py-4">
+              <td className="px-6 py-5">
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-bold ${
+                  className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-lg font-medium ring-1 ring-inset ${
                     item.isActive === false
-                      ? "bg-gray-100 text-gray-500"
-                      : "bg-emerald-50 text-emerald-700"
+                      ? "bg-gray-100 text-gray-500 ring-gray-200"
+                      : "bg-primary-50 text-primary-700 ring-primary-100"
                   }`}
                 >
+                  <span
+                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                      item.isActive === false ? "bg-gray-400" : "bg-primary-600"
+                    }`}
+                  />
                   {item.isActive === false ? "អសកម្ម" : "សកម្ម"}
                 </span>
               </td>
 
-              <td className="px-5 py-4">
-                <div className="flex justify-end gap-2">
+              <td className="px-6 py-5">
+                <div className="flex items-center justify-end gap-2.5">
                   {onView && (
                     <button
                       type="button"
                       onClick={() => onView(item)}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100"
                       title="មើលព័ត៌មានលម្អិត"
                     >
-                      <Eye size={16} />
+                      <Eye size={22} />
                     </button>
                   )}
 
@@ -152,20 +162,20 @@ export default function FoodCatalogTable({
                     type="button"
                     disabled={busy}
                     onClick={() => onEdit(item)}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-[#137A3D]"
+                    className="flex h-11 w-11 items-center justify-center rounded-xl text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:opacity-40"
                     title="កែប្រែ"
                   >
-                    <Pencil size={16} />
+                    <Pencil size={22} />
                   </button>
 
                   <button
                     type="button"
                     disabled={busy}
                     onClick={() => onDelete(item)}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-                    title="លុប"
+                    className="flex h-11 w-11 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:opacity-40"
+                    title="បិទ / អសកម្ម"
                   >
-                    <Trash2 size={16} />
+                    <CircleMinus size={22} />
                   </button>
                 </div>
               </td>

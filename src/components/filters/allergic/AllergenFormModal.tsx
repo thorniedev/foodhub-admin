@@ -183,14 +183,7 @@ export default function AllergenFormModal({
           onSubmit={handleSubmit}
           className="space-y-6 p-6 sm:p-8"
         >
-          <Section
-            title="ព័ត៌មានអាឡែស៊ី"
-            icon={
-              <ShieldAlert
-                size={22}
-              />
-            }
-          >
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
             <Field
               label="ឈ្មោះអាឡែស៊ី"
               value={form.code}
@@ -229,30 +222,7 @@ export default function AllergenFormModal({
                 className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-lg leading-8 text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
               />
             </label>
-          </Section>
-
-          <Section
-            title="ស្ថានភាព"
-            icon={
-              <AlertTriangle
-                size={22}
-              />
-            }
-          >
-            <StatusSwitch
-              active={form.active}
-              description="បើក ដើម្បីឱ្យកំណត់ត្រាអាឡែស៊ីនេះសកម្មក្នុងប្រព័ន្ធ។"
-              onChange={() =>
-                setForm(
-                  (previous) => ({
-                    ...previous,
-                    active:
-                      !previous.active,
-                  }),
-                )
-              }
-            />
-          </Section>
+          </div>
 
           {validationError && (
             <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg leading-7 text-red-600">

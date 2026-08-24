@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Trash2, X } from "lucide-react";
+import { CircleMinus, Loader2, X } from "lucide-react";
 
 export default function DeleteConfirmModal({
   open,
@@ -20,37 +20,37 @@ export default function DeleteConfirmModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px]">
-      <div className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs">
+      <div className="w-full max-w-lg rounded-[30px] bg-white p-7 shadow-2xl">
         <div className="flex items-start justify-between">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-500">
-            <Trash2 size={24} />
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+            <CircleMinus size={30} />
           </div>
 
           <button
             type="button"
             disabled={deleting}
             onClick={onClose}
-            className="rounded-full p-2 text-gray-400 hover:bg-gray-100"
+            className="rounded-full p-2.5 text-gray-400 hover:bg-gray-100 transition"
           >
-            <X size={20} />
+            <X size={24} />
           </button>
         </div>
 
-        <h3 className="mt-5 text-2xl font-bold text-gray-900">
+        <p className="mt-6 text-2xl font-bold text-gray-900">
           {title}
-        </h3>
+        </p>
 
-        <p className="mt-2 text-sm leading-6 text-gray-500">
+        <p className="mt-3 text-lg leading-7 text-gray-600">
           {description}
         </p>
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-8 flex justify-end gap-3.5">
           <button
             type="button"
             disabled={deleting}
             onClick={onClose}
-            className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-600"
+            className="rounded-2xl border border-gray-200 px-6 py-3 text-lg font-bold text-gray-600 hover:bg-gray-50 transition"
           >
             បោះបង់
           </button>
@@ -59,12 +59,12 @@ export default function DeleteConfirmModal({
             type="button"
             disabled={deleting}
             onClick={onConfirm}
-            className="inline-flex items-center gap-2 rounded-xl bg-red-500 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-2xl bg-amber-600 px-6 py-3 text-lg font-bold text-white hover:bg-amber-700 disabled:opacity-60 transition active:scale-95"
           >
             {deleting && (
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={20} className="animate-spin" />
             )}
-            លុប
+            យល់ព្រម
           </button>
         </div>
       </div>

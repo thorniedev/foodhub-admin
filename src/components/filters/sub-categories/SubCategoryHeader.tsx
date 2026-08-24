@@ -40,8 +40,8 @@ export default function SubCategoryHeader({
             </div>
 
             <div className="min-w-0">
-              <p className="text-3xl font-bold text-accent-400">{title}</p>
-              <p className="mt-2 max-w-2xl text-xl leading-7 text-white/85">
+              <p className="text-5xl font-bold text-accent-400">{title}</p>
+              <p className="mt-6 max-w-2xl text-xl text-white/85">
                 {description}
               </p>
             </div>
@@ -85,7 +85,7 @@ export default function SubCategoryHeader({
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-fit"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
           >
             <Plus size={20} />
             {buttonText}
