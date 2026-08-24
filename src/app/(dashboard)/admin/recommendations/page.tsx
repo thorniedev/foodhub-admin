@@ -397,13 +397,13 @@ export default function AdminRecommendationsPage() {
           <div className="flex items-center gap-2">
             <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
             <span>
-              Connected in preview audit mode ({fetchError}).
+              <strong>Preview Audit Mode Active:</strong> Displaying simulated audit sessions & safety check logs while connecting to live backend.
             </span>
           </div>
           <button
             type="button"
             onClick={loadSessions}
-            className="font-semibold underline hover:text-amber-900"
+            className="font-semibold underline hover:text-amber-900 ml-4 flex-shrink-0"
           >
             Retry Connection
           </button>

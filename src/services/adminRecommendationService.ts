@@ -59,61 +59,65 @@ export async function fetchAdminSessions(
 
   const queryString = query.toString();
   const headers = getHeaders(token);
-
-  // Try relative proxy first (prevents CORS on admin domain)
   const proxyBase = getBaseApiUrl();
-  const proxyUrl = `${proxyBase}/recommendations/sessions${queryString ? `?${queryString}` : ""}`;
+  const directBase = getDirectBackendUrl();
 
-  let res: Response;
-  try {
-    res = await fetch(proxyUrl, {
-      headers,
-      credentials: "include",
-      cache: "no-store",
-    });
-  } catch (proxyErr) {
-    // If proxy failed (e.g. offline/direct env), try direct backend
-    const directBase = getDirectBackendUrl();
-    const directUrl = `${directBase}/recommendations/sessions${queryString ? `?${queryString}` : ""}`;
-    res = await fetch(directUrl, {
-      headers,
-      credentials: "include",
-      cache: "no-store",
-    });
+  const candidateUrls = [
+    `${proxyBase}/admin/recommendations/sessions${queryString ? `?${queryString}` : ""}`,
+    `${proxyBase}/recommendations/sessions${queryString ? `?${queryString}` : ""}`,
+    `${directBase}/admin/recommendations/sessions${queryString ? `?${queryString}` : ""}`,
+    `${directBase}/recommendations/sessions${queryString ? `?${queryString}` : ""}`,
+  ];
+
+  let lastError: Error | null = null;
+
+  for (const url of candidateUrls) {
+    try {
+      const res = await fetch(url, {
+        headers,
+        credentials: "include",
+        cache: "no-store",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const content: AdminSessionSummary[] =
+          data.payload?.content ||
+          data.content ||
+          data.payload?.items ||
+          data.payload ||
+          (Array.isArray(data) ? data : []);
+
+        const totalElements: number =
+          data.payload?.totalElements ??
+          data.totalElements ??
+          data.payload?.total ??
+          data.total ??
+          content.length;
+
+        const totalPages: number =
+          data.payload?.totalPages ??
+          data.totalPages ??
+          Math.max(1, Math.ceil(totalElements / (params.size || 15)));
+
+        return {
+          content,
+          totalElements,
+          totalPages,
+          size: params.size || 15,
+          number: params.page || 0,
+        };
+      } else if (res.status === 405) {
+        lastError = new Error(`HTTP 405 Method Not Allowed on ${url}. Backend endpoint may only accept POST for session generation.`);
+      } else {
+        lastError = new Error(`HTTP ${res.status} ${res.statusText} on ${url}`);
+      }
+    } catch (err: any) {
+      lastError = err;
+    }
   }
 
-  if (!res.ok) {
-    throw new Error(`Failed to load recommendation sessions (${res.status} ${res.statusText})`);
-  }
-
-  const data = await res.json();
-
-  const content: AdminSessionSummary[] =
-    data.payload?.content ||
-    data.content ||
-    data.payload?.items ||
-    data.payload ||
-    (Array.isArray(data) ? data : []);
-
-  const totalElements: number =
-    data.payload?.totalElements ??
-    data.totalElements ??
-    data.payload?.total ??
-    data.total ??
-    content.length;
-
-  const totalPages: number =
-    data.payload?.totalPages ??
-    data.totalPages ??
-    Math.max(1, Math.ceil(totalElements / (params.size || 15)));
-
-  return {
-    content,
-    totalElements,
-    totalPages,
-    size: params.size || 15,
-    number: params.page || 0,
-  };
+  throw lastError || new Error("Failed to load recommendation sessions from backend.");
 }
 
 /**
@@ -128,22 +132,33 @@ export async function fetchAdminSessionDetail(
   const safeUuid = encodeURIComponent(sessionUuid);
 
   const fetchWithFallback = async (endpoint: string): Promise<Response> => {
-    try {
-      const res = await fetch(`${base}${endpoint}`, {
-        headers,
-        credentials: "include",
-        cache: "no-store",
-      });
-      if (res.ok || res.status !== 404) return res;
-      throw new Error(`Status ${res.status}`);
-    } catch {
-      const direct = getDirectBackendUrl();
-      return fetch(`${direct}${endpoint}`, {
-        headers,
-        credentials: "include",
-        cache: "no-store",
-      });
+    const direct = getDirectBackendUrl();
+    const tryUrls = [
+      `${base}/admin${endpoint}`,
+      `${base}${endpoint}`,
+      `${direct}/admin${endpoint}`,
+      `${direct}${endpoint}`,
+    ];
+
+    for (const u of tryUrls) {
+      try {
+        const res = await fetch(u, {
+          headers,
+          credentials: "include",
+          cache: "no-store",
+        });
+        if (res.ok) return res;
+      } catch {
+        // try next candidate
+      }
     }
+
+    // Return the standard attempt
+    return fetch(`${base}${endpoint}`, {
+      headers,
+      credentials: "include",
+      cache: "no-store",
+    });
   };
 
   const [sessionRes, itemsRes, safetyRes] = await Promise.all([
