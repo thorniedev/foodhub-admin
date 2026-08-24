@@ -27,6 +27,8 @@ export const discoveryApi = createApi({
         url: "/menu-items/filters",
         method: "GET",
       }),
+      transformResponse: (response: any) =>
+        response?.data ?? response?.payload ?? response,
       providesTags: ["DiscoveryFilterOptions"],
     }),
     searchAdvancedMenuItems: builder.mutation<
@@ -50,6 +52,49 @@ export const discoveryApi = createApi({
         },
         body,
       }),
+      transformResponse: (response: any, _meta, arg) => {
+        const raw = response?.data ?? response?.payload ?? response;
+        const contents = Array.isArray(raw?.items)
+          ? raw.items
+          : Array.isArray(raw?.contents)
+            ? raw.contents
+            : Array.isArray(raw?.content)
+              ? raw.content
+              : Array.isArray(raw)
+                ? raw
+                : [];
+        const totalElements =
+          typeof raw?.totalElements === "number"
+            ? raw.totalElements
+            : typeof raw?.total === "number"
+              ? raw.total
+              : contents.length;
+        const pageSize =
+          typeof raw?.pageSize === "number"
+            ? raw.pageSize
+            : typeof raw?.size === "number"
+              ? raw.size
+              : (arg.params?.size ?? 20);
+        const pageNumber =
+          typeof raw?.pageNumber === "number"
+            ? raw.pageNumber
+            : typeof raw?.number === "number"
+              ? raw.number
+              : (arg.params?.page ?? 0);
+        const totalPages =
+          typeof raw?.totalPages === "number"
+            ? raw.totalPages
+            : Math.max(1, Math.ceil(totalElements / Math.max(1, pageSize)));
+        return {
+          contents,
+          pageNumber,
+          pageSize,
+          totalElements,
+          totalPages,
+          first: typeof raw?.isFirst === "boolean" ? raw.isFirst : (raw?.first ?? pageNumber === 0),
+          last: typeof raw?.isLast === "boolean" ? raw.isLast : (raw?.last ?? true),
+        };
+      },
       invalidatesTags: ["DiscoverySearchResults"],
     }),
   }),

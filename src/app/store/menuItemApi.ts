@@ -508,28 +508,31 @@ function normalizePage<T>(
   const page =
     unwrap(response);
 
+  const raw = page as any;
   const contents =
-    page.content ??
-    page.contents ??
-    [];
+    raw?.items ??
+    raw?.content ??
+    raw?.contents ??
+    (Array.isArray(raw) ? raw : []);
 
   const pageNumber =
-    page.number ??
-    page.pageNumber ??
+    raw?.number ??
+    raw?.pageNumber ??
     0;
 
   const pageSize =
-    page.size ??
-    page.pageSize ??
+    raw?.size ??
+    raw?.pageSize ??
     contents.length;
 
   const totalElements =
-    page.totalElements ??
+    raw?.totalElements ??
+    raw?.total ??
     contents.length;
 
   const totalPages =
     Math.max(
-      page.totalPages ?? 1,
+      raw?.totalPages ?? 1,
       1,
     );
 

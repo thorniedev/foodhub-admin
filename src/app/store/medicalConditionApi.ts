@@ -1,4 +1,5 @@
 import { adminBaseApi } from "./adminBaseApi";
+import { normalizeSafetyPagedResponse, normalizeSingleEntity } from "./utils/safetyNormalizer";
 
 import type {
   MedicalCondition,
@@ -23,6 +24,8 @@ export const medicalConditionApi = adminBaseApi.injectEndpoints({
           params: { page, size },
         };
       },
+      transformResponse: (response: any, _meta, params) =>
+        normalizeSafetyPagedResponse<MedicalCondition>(response, params?.page, params?.size),
     }),
 
     getMedicalConditionByCode: builder.query<
@@ -33,6 +36,7 @@ export const medicalConditionApi = adminBaseApi.injectEndpoints({
         url: `/medical-conditions/${encodeURIComponent(code)}`,
         method: "GET",
       }),
+      transformResponse: (response: any) => normalizeSingleEntity<MedicalCondition>(response),
     }),
 
     createMedicalCondition: builder.mutation<

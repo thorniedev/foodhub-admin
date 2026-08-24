@@ -1,4 +1,5 @@
 import { adminBaseApi } from "./adminBaseApi";
+import { normalizeSafetyPagedResponse, normalizeSingleEntity } from "./utils/safetyNormalizer";
 import type {
   AdminBannerPage,
   AdminBannerResponse,
@@ -51,6 +52,12 @@ export const bannerApi = adminBaseApi.injectEndpoints({
           },
         };
       },
+      transformResponse: (response: any, _meta, params) =>
+        normalizeSafetyPagedResponse<AdminBannerResponse>(
+          response,
+          params ? params.page : undefined,
+          params ? params.size : undefined,
+        ),
       providesTags: (result) =>
         result
           ? [
@@ -68,6 +75,7 @@ export const bannerApi = adminBaseApi.injectEndpoints({
         url: `/banners/${encodeURIComponent(id)}`,
         method: "GET",
       }),
+      transformResponse: (response: any) => normalizeSingleEntity<AdminBannerResponse>(response),
       providesTags: (_result, _error, id) => [{ type: "Banner", id }],
     }),
 

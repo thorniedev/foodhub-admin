@@ -1,4 +1,5 @@
 import { adminBaseApi } from "./adminBaseApi";
+import { normalizeSafetyPagedResponse, normalizeSingleEntity } from "./utils/safetyNormalizer";
 
 import type { Allergen, AllergenPayload } from "../../types/allergen";
 import type { ListParams, PagedResponse } from "../../types/safetyResource";
@@ -20,6 +21,8 @@ export const allergenApi = adminBaseApi.injectEndpoints({
           params: { page, size },
         };
       },
+      transformResponse: (response: any, _meta, params) =>
+        normalizeSafetyPagedResponse<Allergen>(response, params?.page, params?.size),
     }),
 
     getAllergenByCode: builder.query<Allergen, string>({
@@ -27,6 +30,7 @@ export const allergenApi = adminBaseApi.injectEndpoints({
         url: `/allergens/${encodeURIComponent(code)}`,
         method: "GET",
       }),
+      transformResponse: (response: any) => normalizeSingleEntity<Allergen>(response),
     }),
 
     createAllergen: builder.mutation<Allergen, AllergenPayload>({

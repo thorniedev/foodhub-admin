@@ -44,16 +44,18 @@ interface SpringPage<T> {
 ========================================================= */
 
 function unwrapPayload<T>(
-  response: ApiResponse<T> | T,
+  response: any,
 ): T {
   if (
     response &&
-    typeof response === "object" &&
-    "payload" in response
+    typeof response === "object"
   ) {
-    const wrapped = response as ApiResponse<T>;
-
-    return wrapped.payload;
+    if ("data" in response && response.data !== undefined && response.data !== null) {
+      return response.data;
+    }
+    if ("payload" in response && response.payload !== undefined && response.payload !== null) {
+      return response.payload;
+    }
   }
 
   return response as T;
@@ -64,26 +66,50 @@ function unwrapPayload<T>(
 ========================================================= */
 
 function normalizeAgeGroupPage(
-  response:
-    | ApiResponse<SpringPage<AgeGroup>>
-    | SpringPage<AgeGroup>,
+  response: any,
 ): AgeGroupPage {
-  const page = unwrapPayload(response);
+  const page = unwrapPayload<any>(response);
+
+  const contents =
+    page?.items ??
+    page?.contents ??
+    page?.content ??
+    (Array.isArray(page) ? page : []);
+
+  const totalElements =
+    typeof page?.totalElements === "number"
+      ? page.totalElements
+      : typeof page?.total === "number"
+        ? page.total
+        : contents.length;
+
+  const pageSize =
+    typeof page?.pageSize === "number"
+      ? page.pageSize
+      : typeof page?.size === "number"
+        ? page.size
+        : 10;
+
+  const pageNumber =
+    typeof page?.pageNumber === "number"
+      ? page.pageNumber
+      : typeof page?.number === "number"
+        ? page.number
+        : 0;
+
+  const totalPages =
+    typeof page?.totalPages === "number"
+      ? page.totalPages
+      : Math.max(1, Math.ceil(totalElements / Math.max(1, pageSize)));
 
   return {
-    contents: page.content ?? [],
-
-    pageNumber: page.number ?? 0,
-
-    pageSize: page.size ?? 10,
-
-    totalElements: page.totalElements ?? 0,
-
-    totalPages: page.totalPages ?? 1,
-
-    first: page.first ?? true,
-
-    last: page.last ?? true,
+    contents,
+    pageNumber,
+    pageSize,
+    totalElements,
+    totalPages,
+    first: typeof page?.isFirst === "boolean" ? page.isFirst : (page?.first ?? true),
+    last: typeof page?.isLast === "boolean" ? page.isLast : (page?.last ?? true),
   };
 }
 

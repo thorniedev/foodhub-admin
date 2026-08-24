@@ -195,7 +195,8 @@ interface SpringPage<T> {
   last?: boolean;
 }
 
-function normalizeAdminUser(raw: any): AdminUser {
+function normalizeAdminUser(response: any): AdminUser {
+  const raw = response?.data ?? response?.payload ?? response;
   if (!raw) return raw;
   return {
     ...raw,
@@ -210,22 +211,77 @@ function normalizeAdminUser(raw: any): AdminUser {
   };
 }
 
-function normalizePage<T>(response: SpringPage<T>): AdminPage<T> {
-  const rawList = (response.contents ?? response.content ?? []) as any[];
+function normalizePage<T>(response: any): AdminPage<T> {
+  if (!response) {
+    return {
+      contents: [],
+      pageNumber: 0,
+      pageSize: 20,
+      totalElements: 0,
+      totalPages: 0,
+      first: true,
+      last: true,
+    };
+  }
+
+  const dataObj =
+    (response.data && typeof response.data === "object" && !Array.isArray(response.data)
+      ? response.data
+      : null) ||
+    (response.payload && typeof response.payload === "object" && !Array.isArray(response.payload)
+      ? response.payload
+      : null) ||
+    response;
+
+  const rawList = (
+    dataObj.items ??
+    dataObj.contents ??
+    dataObj.content ??
+    (Array.isArray(response.data) ? response.data : []) ??
+    (Array.isArray(response.payload) ? response.payload : []) ??
+    (Array.isArray(response) ? response : [])
+  ) as any[];
+
   const contents = rawList.map((item) =>
     item && typeof item === "object" && ("primaryEmail" in item || "email" in item || "username" in item)
       ? normalizeAdminUser(item)
       : item,
   ) as T[];
 
+  const totalElements =
+    typeof dataObj.totalElements === "number"
+      ? dataObj.totalElements
+      : typeof dataObj.total === "number"
+        ? dataObj.total
+        : contents.length;
+
+  const pageSize =
+    typeof dataObj.pageSize === "number"
+      ? dataObj.pageSize
+      : typeof dataObj.size === "number"
+        ? dataObj.size
+        : 20;
+
+  const pageNumber =
+    typeof dataObj.pageNumber === "number"
+      ? dataObj.pageNumber
+      : typeof dataObj.number === "number"
+        ? dataObj.number
+        : 0;
+
+  const totalPages =
+    typeof dataObj.totalPages === "number"
+      ? dataObj.totalPages
+      : (totalElements ? Math.ceil(totalElements / Math.max(1, pageSize)) : 0);
+
   return {
     contents,
-    pageNumber: response.pageNumber ?? response.number ?? 0,
-    pageSize: response.pageSize ?? response.size ?? 20,
-    totalElements: response.totalElements ?? 0,
-    totalPages: response.totalPages ?? 0,
-    first: response.first ?? true,
-    last: response.last ?? true,
+    pageNumber,
+    pageSize,
+    totalElements,
+    totalPages,
+    first: typeof dataObj.isFirst === "boolean" ? dataObj.isFirst : (dataObj.first ?? true),
+    last: typeof dataObj.isLast === "boolean" ? dataObj.isLast : (dataObj.last ?? true),
   };
 }
 
@@ -364,8 +420,8 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
           sort,
         },
       }),
-      transformResponse: (response: SpringPage<AdminProfile>) => {
-        const normalized = normalizePage(response);
+      transformResponse: (response: any): AdminPage<AdminProfile> => {
+        const normalized = normalizePage<AdminProfile>(response);
         return {
           ...normalized,
           contents: [...normalized.contents].sort((a, b) => {
@@ -387,6 +443,8 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
         url: `/profiles/${encodeURIComponent(profileUuid)}`,
         method: "GET",
       }),
+      transformResponse: (response: any) =>
+        (response?.data ?? response?.payload ?? response) as AdminProfile,
     }),
 
     createAdminProfile: builder.mutation<

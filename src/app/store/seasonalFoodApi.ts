@@ -25,16 +25,18 @@ export const seasonalFoodApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getSeasonalFoods: builder.query<SeasonalFoodImage[], void>({
       query: () => ({ url: "/api/banners" }),
-      transformResponse: (response: any[]) => {
-        return response
-          .filter((item) => item.season !== null && item.season !== undefined)
-          .map((item) => ({
+      transformResponse: (response: any) => {
+        const raw = response?.data?.items ?? response?.data ?? response?.payload ?? response;
+        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.items) ? raw.items : [];
+        return list
+          .filter((item: any) => item && item.season !== null && item.season !== undefined)
+          .map((item: any) => ({
             id: item.id,
-            name: item.name,
-            image_url: item.image_url,
+            name: item.name || item.title || "",
+            image_url: item.image_url || item.imageUrl || "",
             season: seasonIntToString(item.season),
             order: item.order ?? item.displayOrder ?? 0,
-            isdisplay: item.isdisplay ?? item.isDisplay ?? true,
+            isdisplay: item.isdisplay ?? item.isDisplay ?? item.isPublished ?? true,
           }));
       },
       providesTags: (result) =>
