@@ -19,8 +19,28 @@ export function resolveImageUrl(
   const trimmed = String(imageUrlOrUuid).trim();
   if (!trimmed || trimmed === "null" || trimmed === "undefined") return "";
 
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("blob:") || trimmed.startsWith("data:")) {
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("blob:") ||
+    trimmed.startsWith("data:")
+  ) {
     return trimmed;
+  }
+
+  if (
+    trimmed.startsWith("/api/v1/") ||
+    trimmed.startsWith("/api/") ||
+    trimmed.startsWith("api/")
+  ) {
+    return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  }
+
+  // If it's a UUID, map to /api/media/{uuid}
+  const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (UUID_REGEX.test(trimmed)) {
+    return `/api/media/${trimmed}`;
   }
 
   const backendBaseUrl =
@@ -29,16 +49,8 @@ export function resolveImageUrl(
     "https://api.mhoubahar.store";
   const cleanBase = backendBaseUrl.replace(/\/+$/, "");
 
-  // If already starts with /api/v1/media/ or /api/
   if (trimmed.startsWith("/")) {
     return `${cleanBase}${trimmed}`;
-  }
-
-  // If it's a UUID, map to /api/v1/media/{uuid}/file
-  const UUID_REGEX =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (UUID_REGEX.test(trimmed)) {
-    return `${cleanBase}/api/v1/media/${trimmed}/file`;
   }
 
   return `${cleanBase}/${trimmed}`;
@@ -93,6 +105,20 @@ async function handleResponse<T>(res: Response): Promise<T> {
       fieldErrors: data?.fieldErrors || undefined,
     };
     throw error;
+  }
+
+  // Unwrap backend envelope if payload is present
+  if (data && typeof data === "object") {
+    if (data.payload !== undefined) {
+      return data.payload as T;
+    }
+    if (
+      data.data !== undefined &&
+      !Array.isArray(data) &&
+      !("contents" in data)
+    ) {
+      return data.data as T;
+    }
   }
 
   return data as T;

@@ -103,9 +103,18 @@ export default function BannersView() {
 
     try {
       const response = await adminBannerApi.getBanners(params);
-      setBanners(response?.contents || []);
-      setTotalElements(response?.totalElements || 0);
-      setTotalPages(response?.totalPages || 1);
+      const pageData =
+        (response as any)?.payload || (response as any)?.data || response;
+      const contents: AdminBannerResponse[] =
+        pageData?.contents ||
+        pageData?.content ||
+        (Array.isArray(pageData) ? pageData : []);
+
+      setBanners(contents);
+      setTotalElements(
+        pageData?.totalElements ?? pageData?.total ?? contents.length,
+      );
+      setTotalPages(pageData?.totalPages ?? 1);
     } catch (err: any) {
       setError(
         err?.message || "មិនអាចទាញយកទិន្នន័យផ្ទាំងបែនណឺបានទេ សូមព្យាយាមម្តងទៀត។",
