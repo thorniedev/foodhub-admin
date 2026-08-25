@@ -9,10 +9,14 @@ import { useSidebar } from "../../context/SidebarContext";
 import { useCurrentAdmin } from "@/src/hooks/useCurrentAdmin";
 
 import {
+  getAdminAvatarCandidate,
   getAdminDisplayName,
   getAdminInitials,
+  getAdminRole,
+  getAdminUsername,
 } from "@/src/lib/currentAdminDisplay";
 import GlobalAdminSearch from "./GlobalAdminSearch";
+import UserAvatar from "../users/UserAvatar";
 
 export default function Topbar() {
   const pathname = usePathname();
@@ -24,8 +28,10 @@ export default function Topbar() {
   const { admin, isLoading: adminLoading } = useCurrentAdmin();
 
   const adminName = getAdminDisplayName(admin);
-
-  const adminInitials = getAdminInitials(admin);
+  const adminUsername = getAdminUsername(admin);
+  const adminRole = getAdminRole(admin);
+  const { mediaUuid: avatarMediaUuid, directUrl: avatarImageUrl } =
+    getAdminAvatarCandidate(admin);
 
   return (
     <header className="sticky top-0 z-40 flex min-h-[75px] flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-white px-4  md:flex-nowrap md:px-8">
@@ -60,30 +66,24 @@ export default function Topbar() {
           <GlobalAdminSearch />
         </div>
 
-        {/* Notifications */}
-        {/* <button
-          type="button"
-          title="Notifications"
-          className="relative shrink-0 rounded-xl p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
-        >
-          <Bell size={20} />
-
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-orange-500" />
-        </button> */}
-
         {/* CURRENT LOGGED-IN ADMIN */}
         <div className="hidden shrink-0 items-center gap-3 sm:flex">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold uppercase text-white shadow-sm">
-            {adminLoading ? "..." : adminInitials}
-          </div>
+          <UserAvatar
+            name={adminName}
+            userUuid={admin?.uuid}
+            avatarMediaUuid={avatarMediaUuid}
+            imageUrl={avatarImageUrl}
+            containerClassName="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-700 text-sm font-bold uppercase text-white shadow-sm"
+            textClassName="text-sm font-bold uppercase text-white"
+          />
 
           <div className="min-w-0">
-            <p className="max-w-[160px] truncate text-sm font-semibold text-gray-800">
-              {adminLoading ? "Loading..." : adminName}
+            <p className="max-w-[160px] truncate text-sm font-bold text-gray-900">
+              {adminLoading ? "..." : adminUsername}
             </p>
 
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">
-              ADMIN
+            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+              {adminLoading ? "..." : adminRole}
             </p>
           </div>
         </div>

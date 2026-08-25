@@ -74,7 +74,9 @@ export default function UsersTable({
             const avatarMediaUuid =
               user.avatarMediaUuid ||
               user.defaultProfile?.avatarMediaUuid ||
-              user.profiles?.[0]?.avatarMediaUuid;
+              user.profiles?.[0]?.avatarMediaUuid ||
+              (user as any).profileMediaUuid ||
+              (user as any).profile?.avatarMediaUuid;
 
             const imageUrl =
               user.avatarUrl ||
@@ -83,7 +85,19 @@ export default function UsersTable({
               user.picture ||
               user.imageUrl ||
               user.image ||
-              user.avatar;
+              user.avatar ||
+              (user.defaultProfile as any)?.avatarUrl ||
+              (user.defaultProfile as any)?.profileImageUrl ||
+              (user.defaultProfile as any)?.imageUrl ||
+              (user.defaultProfile as any)?.photoUrl ||
+              (user.defaultProfile as any)?.picture ||
+              (user.profiles?.[0] as any)?.avatarUrl ||
+              (user.profiles?.[0] as any)?.profileImageUrl ||
+              (user.profiles?.[0] as any)?.imageUrl ||
+              (user.profiles?.[0] as any)?.photoUrl ||
+              (user as any).profile?.avatarUrl ||
+              (user as any).profile?.profileImageUrl ||
+              (user as any).profile?.imageUrl;
 
             const isActive = user.status === "ACTIVE";
             const isSuspended = user.status === "SUSPENDED";

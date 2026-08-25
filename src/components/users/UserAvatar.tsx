@@ -14,27 +14,44 @@ const pendingProfileRequests = new Map<string, Promise<string | null>>();
 async function fetchMediaAccessUrl(mediaUuid: string): Promise<string | null> {
   if (!mediaUuid || typeof mediaUuid !== "string") return null;
 
+  const raw = mediaUuid.trim();
+
   if (
-    mediaUuid.startsWith("http://") ||
-    mediaUuid.startsWith("https://") ||
-    mediaUuid.startsWith("data:") ||
-    mediaUuid.startsWith("/")
+    raw.startsWith("http://") ||
+    raw.startsWith("https://") ||
+    raw.startsWith("data:") ||
+    raw.startsWith("blob:") ||
+    raw.startsWith("/Image/") ||
+    raw.startsWith("/images/")
   ) {
-    return mediaUuid;
+    return raw;
   }
 
-  if (mediaUrlCache.has(mediaUuid)) {
-    return mediaUrlCache.get(mediaUuid) ?? null;
+  if (
+    raw.startsWith("/api/v1/") ||
+    raw.startsWith("/api/") ||
+    raw.startsWith("api/")
+  ) {
+    return resolveFoodHubCatalogImageUrl(raw) || raw;
   }
 
-  if (pendingMediaRequests.has(mediaUuid)) {
-    return pendingMediaRequests.get(mediaUuid)!;
+  const cleanUuid = raw
+    .replace(/^\/api\/(v1\/)?media\//, "")
+    .replace(/\/access-url$/, "")
+    .trim();
+
+  if (mediaUrlCache.has(cleanUuid)) {
+    return mediaUrlCache.get(cleanUuid) ?? null;
+  }
+
+  if (pendingMediaRequests.has(cleanUuid)) {
+    return pendingMediaRequests.get(cleanUuid)!;
   }
 
   const promise = (async () => {
     try {
       const response = await fetch(
-        `/api/media/${encodeURIComponent(mediaUuid)}/access-url`,
+        `/api/media/${encodeURIComponent(cleanUuid)}/access-url`,
         {
           method: "GET",
           credentials: "include",
@@ -42,31 +59,37 @@ async function fetchMediaAccessUrl(mediaUuid: string): Promise<string | null> {
         },
       );
 
-      if (!response.ok) {
-        return null;
+      if (response.ok) {
+        const data = (await response.json()) as any;
+        const url =
+          data?.url ||
+          data?.payload?.url ||
+          data?.data?.url ||
+          data?.accessUrl ||
+          data?.payload?.accessUrl ||
+          data?.data?.accessUrl ||
+          (typeof data === "string" ? data : null);
+
+        if (url && typeof url === "string" && url.trim()) {
+          mediaUrlCache.set(cleanUuid, url.trim());
+          return url.trim();
+        }
       }
 
-      const data = (await response.json()) as any;
-      const url =
-        data?.url ||
-        data?.accessUrl ||
-        data?.mediaUrl ||
-        data?.fileUrl ||
-        (typeof data === "string" ? data : null);
-
-      if (url && typeof url === "string") {
-        mediaUrlCache.set(mediaUuid, url);
-        return url;
-      }
-      return null;
+      // Fallback: direct media proxy endpoint
+      const proxyUrl = `/api/media/${cleanUuid}`;
+      mediaUrlCache.set(cleanUuid, proxyUrl);
+      return proxyUrl;
     } catch {
-      return null;
+      const proxyUrl = `/api/media/${cleanUuid}`;
+      mediaUrlCache.set(cleanUuid, proxyUrl);
+      return proxyUrl;
     } finally {
-      pendingMediaRequests.delete(mediaUuid);
+      pendingMediaRequests.delete(cleanUuid);
     }
   })();
 
-  pendingMediaRequests.set(mediaUuid, promise);
+  pendingMediaRequests.set(cleanUuid, promise);
   return promise;
 }
 
@@ -111,10 +134,15 @@ async function fetchUserAvatarMediaUuid(userUuid: string): Promise<string | null
       }
 
       const data = await response.json();
-      const profiles: any[] =
+      const rawList =
+        data?.data ??
+        data?.payload ??
         data?.contents ??
         data?.content ??
+        data?.items ??
         (Array.isArray(data) ? data : []);
+
+      const profiles: any[] = Array.isArray(rawList) ? rawList : [];
 
       // Find the default profile (crown / isDefault), or self profile, or active profile, or first profile
       const defaultProfile =
@@ -169,7 +197,7 @@ export default function UserAvatar({
   className = "h-full w-full object-cover",
   textClassName = "",
   containerClassName = "flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-lg font-semibold text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100",
-  fallbackImageUrl = DEFAULT_AVATAR_IMAGE,
+  fallbackImageUrl,
 }: UserAvatarProps) {
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(() => {
     if (imageUrl) {
@@ -182,12 +210,10 @@ export default function UserAvatar({
   });
 
   const [hasError, setHasError] = useState(false);
-  const [fallbackHasError, setFallbackHasError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     setHasError(false);
-    setFallbackHasError(false);
 
     if (imageUrl) {
       const resolved = resolveFoodHubCatalogImageUrl(imageUrl) || imageUrl;
@@ -203,11 +229,7 @@ export default function UserAvatar({
 
       void fetchMediaAccessUrl(avatarMediaUuid).then((url) => {
         if (!cancelled) {
-          if (url) {
-            setResolvedUrl(url);
-          } else {
-            setResolvedUrl(null);
-          }
+          setResolvedUrl(url);
         }
       });
       return;
@@ -222,23 +244,9 @@ export default function UserAvatar({
           return;
         }
 
-        if (
-          foundAvatar.startsWith("http://") ||
-          foundAvatar.startsWith("https://") ||
-          foundAvatar.startsWith("data:") ||
-          foundAvatar.startsWith("/")
-        ) {
-          setResolvedUrl(foundAvatar);
-          return;
-        }
-
         const accessUrl = await fetchMediaAccessUrl(foundAvatar);
         if (!cancelled) {
-          if (accessUrl) {
-            setResolvedUrl(accessUrl);
-          } else {
-            setResolvedUrl(null);
-          }
+          setResolvedUrl(accessUrl);
         }
       });
       return;
@@ -252,22 +260,17 @@ export default function UserAvatar({
   }, [avatarMediaUuid, imageUrl, userUuid]);
 
   const displayInitials = initials(name || "User");
-  const activeImageUrl = !hasError && resolvedUrl ? resolvedUrl : fallbackImageUrl;
+  const activeImageUrl = !hasError && resolvedUrl ? resolvedUrl : fallbackImageUrl || null;
 
   return (
     <div className={containerClassName}>
-      {activeImageUrl && !fallbackHasError ? (
+      {activeImageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={activeImageUrl}
           alt={alt || name || "User avatar"}
           className={className}
-          onError={() => {
-            if (!hasError && resolvedUrl) {
-              setHasError(true);
-            } else {
-              setFallbackHasError(true);
-            }
-          }}
+          onError={() => setHasError(true)}
           loading="lazy"
         />
       ) : (
