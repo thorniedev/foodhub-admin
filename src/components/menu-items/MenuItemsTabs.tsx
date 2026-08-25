@@ -41,18 +41,16 @@ export default function MenuItemsTabs({
             key={tab.value}
             type="button"
             onClick={() => onChange(tab.value)}
-            className={`inline-flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-black transition ${
-              active
+            className={`inline-flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-black transition ${active
                 ? "bg-[#137A3D] text-white shadow-sm"
                 : "text-gray-500 hover:bg-white hover:text-gray-800"
-            }`}
+              }`}
           >
             <Icon size={17} />
             {tab.label}
             <span
-              className={`rounded-full px-2 py-0.5 text-xs ${
-                active ? "bg-white/20 text-white" : "bg-white text-gray-500"
-              }`}
+              className={`rounded-full px-2 py-0.5 text-xs ${active ? "bg-white/20 text-white" : "bg-white text-gray-500"
+                }`}
             >
               {tab.count}
             </span>

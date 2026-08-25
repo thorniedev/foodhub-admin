@@ -177,6 +177,7 @@ export default function IngredientDetailModal({
           </button>
         </div>
 
+<<<<<<< HEAD
         {/* Loading State */}
         {isLoading && !data ? (
           <div className="flex min-h-[260px] flex-col items-center justify-center gap-3 py-12">
@@ -195,6 +196,62 @@ export default function IngredientDetailModal({
                   <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
                     <Tag size={14} />
                     Code / កូដ
+=======
+        {/* ─── BODY ─── */}
+        <div className="space-y-6 p-6 sm:p-8">
+          {isLoading && !data ? (
+            <div className="flex min-h-[220px] flex-col items-center justify-center gap-3">
+              <Loader2 size={36} className="animate-spin text-primary-700" />
+              <p className="text-lg font-medium text-gray-500">កំពុងទាញយកព័ត៌មានលម្អិត...</p>
+            </div>
+          ) : isError && !data ? (
+            <div className="rounded-2xl border border-red-100 bg-red-50 p-5 text-lg font-medium text-red-600">
+              មិនអាចទាញយកព័ត៌មានលម្អិតគ្រឿងផ្សំបានទេ។
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6 space-y-5">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                {/* Code */}
+                <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-lg font-medium text-primary-800">
+                      <Tag size={18} />
+                      កូដ (Code)
+                    </span>
+                    {displayItem.code && (
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(displayItem.code, "code")}
+                        className="rounded-lg p-1 text-gray-400 transition hover:bg-white hover:text-primary-700"
+                        title="Copy"
+                      >
+                        {copiedKey === "code" ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                      </button>
+                    )}
+                  </div>
+                  <p className="mt-2 font-mono text-xl font-bold text-gray-800">{displayItem.code || "—"}</p>
+                </div>
+
+                {/* Status */}
+                <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                  <span className="block text-lg font-medium text-primary-800">ស្ថានភាព</span>
+                  <div className="mt-2">
+                    <span className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-lg font-medium ${isActive
+                        ? "bg-primary-50 text-primary-700"
+                        : "bg-gray-200 text-gray-600"
+                      }`}>
+                      <span className={`h-2 w-2 rounded-full ${isActive ? "bg-primary-600" : "bg-gray-400"}`} />
+                      {isActive ? "សកម្ម (Active)" : "អសកម្ម (Inactive)"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Name */}
+                <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 sm:col-span-2">
+                  <span className="flex items-center gap-1.5 text-lg font-medium text-primary-800">
+                    <Globe2 size={18} />
+                    ឈ្មោះគ្រឿងផ្សំ
+>>>>>>> origin/mingyeak
                   </span>
                   {displayItem.code && (
                     <button

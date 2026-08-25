@@ -85,11 +85,10 @@ export default function MenuItemsTable({ items }: { items: CatalogMenuItem[] }) 
                 </td>
                 <td className="px-5 py-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-black ${
-                      available
+                    className={`rounded-full px-3 py-1 text-xs font-black ${available
                         ? "bg-emerald-50 text-emerald-700"
                         : "bg-orange-50 text-orange-600"
-                    }`}
+                      }`}
                   >
                     {item.availabilityStatus || "UNKNOWN"}
                   </span>

@@ -36,19 +36,17 @@ export default function FoodTypesTabs({
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm sm:text-base font-medium transition-colors whitespace-nowrap shrink-0 ${
-              activeTab === tab.key
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm sm:text-base font-medium transition-colors whitespace-nowrap shrink-0 ${activeTab === tab.key
                 ? "bg-[#136C34] text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
+              }`}
           >
             {tab.label}
             <span
-              className={`text-xs rounded-full px-1.5 py-0.5 ${
-                activeTab === tab.key
+              className={`text-xs rounded-full px-1.5 py-0.5 ${activeTab === tab.key
                   ? "bg-white/20 text-white"
                   : "bg-white text-gray-500"
-              }`}
+                }`}
             >
               {countFor(tab.key)}
             </span>

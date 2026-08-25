@@ -88,7 +88,7 @@ export default function MedicalConditionsPagination({
             onPageChange(
               Math.min(
                 safeTotalPages -
-                  1,
+                1,
                 page + 1,
               ),
             )
@@ -96,8 +96,8 @@ export default function MedicalConditionsPagination({
           disabled={
             disabled ||
             page >=
-              safeTotalPages -
-                1
+            safeTotalPages -
+            1
           }
           className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800 disabled:cursor-not-allowed disabled:opacity-40"
         >

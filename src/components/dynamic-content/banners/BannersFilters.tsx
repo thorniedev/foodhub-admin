@@ -37,11 +37,10 @@ export default function BannersFilters({
       <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 -mx-1 px-1">
         <button
           onClick={() => onCategoryChange("ALL")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${
-            category === "ALL"
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${category === "ALL"
               ? "bg-[#136C34] text-white"
               : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
+            }`}
         >
           ទាំងអស់
         </button>
@@ -49,11 +48,10 @@ export default function BannersFilters({
           <button
             key={c}
             onClick={() => onCategoryChange(c)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${
-              category === c
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${category === c
                 ? "bg-[#136C34] text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
+              }`}
           >
             {BANNER_CATEGORY_LABELS[c]}
           </button>

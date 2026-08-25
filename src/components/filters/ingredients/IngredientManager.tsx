@@ -51,36 +51,36 @@ type SortMode =
 
 type Notice =
   | {
-      type: "success";
-      text: string;
-    }
+    type: "success";
+    text: string;
+  }
   | {
-      type: "error";
-      text: string;
-    }
+    type: "error";
+    text: string;
+  }
   | null;
 
 const sortOptions: Array<{
   value: SortMode;
   label: string;
 }> = [
-  {
-    value: "A_Z",
-    label: "A → Z",
-  },
-  {
-    value: "Z_A",
-    label: "Z → A",
-  },
-  {
-    value: "NEWEST",
-    label: "ថ្មីបំផុត",
-  },
-  {
-    value: "OLDEST",
-    label: "ចាស់បំផុត",
-  },
-];
+    {
+      value: "A_Z",
+      label: "A → Z",
+    },
+    {
+      value: "Z_A",
+      label: "Z → A",
+    },
+    {
+      value: "NEWEST",
+      label: "ថ្មីបំផុត",
+    },
+    {
+      value: "OLDEST",
+      label: "ចាស់បំផុត",
+    },
+  ];
 
 function getTime(
   value: string | null,
@@ -250,7 +250,7 @@ const {
     createIngredient,
     {
       isLoading:
-        isCreating,
+      isCreating,
     },
   ] =
     useCreateIngredientMutation();
@@ -259,7 +259,7 @@ const {
     updateIngredient,
     {
       isLoading:
-        isUpdating,
+      isUpdating,
     },
   ] =
     useUpdateIngredientMutation();
@@ -268,7 +268,7 @@ const {
     deleteIngredient,
     {
       isLoading:
-        isDeleting,
+      isDeleting,
     },
   ] =
     useDeleteIngredientMutation();
@@ -277,7 +277,7 @@ const {
     restoreIngredient,
     {
       isLoading:
-        isRestoring,
+      isRestoring,
     },
   ] =
     useRestoreIngredientMutation();
@@ -319,7 +319,7 @@ const {
       item.code,
       item.name,
       item.description ??
-        "",
+      "",
     ].some((value) =>
       String(
         value ?? "",
@@ -364,7 +364,7 @@ const {
           (item) => {
             const statusMatches =
               statusFilter ===
-                "ALL" ||
+              "ALL" ||
               (statusFilter ===
                 "ACTIVE" &&
                 item.isActive) ||
@@ -466,7 +466,7 @@ const {
       1,
       Math.ceil(
         filteredItems.length /
-          size,
+        size,
       ),
     );
 
@@ -514,22 +514,22 @@ const {
       setNotice(null);
 
       const body: CreateIngredientPayload =
-        {
-          code:
-            values.code
-              .trim()
-              .toUpperCase(),
+      {
+        code:
+          values.code
+            .trim()
+            .toUpperCase(),
 
-          name:
-            values.name.trim(),
+        name:
+          values.name.trim(),
 
-          description:
-            values.description.trim() ||
-            null,
+        description:
+          values.description.trim() ||
+          null,
 
-          isActive:
-            values.isActive,
-        };
+        isActive:
+          values.isActive,
+      };
 
       try {
         if (editing) {
@@ -569,7 +569,7 @@ const {
 
         await refetch();
       } catch (
-        requestError
+      requestError
       ) {
         setNotice({
           type: "error",
@@ -611,7 +611,7 @@ const {
 
         await refetch();
       } catch (
-        requestError
+      requestError
       ) {
         setNotice({
           type: "error",
@@ -649,7 +649,7 @@ const {
 
         await refetch();
       } catch (
-        requestError
+      requestError
       ) {
         setNotice({
           type: "error",
@@ -757,7 +757,7 @@ const {
                   value
                     .trim()
                     .length >
-                    0,
+                  0,
                 );
               }}
               onFocus={() => {
@@ -774,9 +774,9 @@ const {
               ) => {
                 if (
                   event.key ===
-                    "Escape" ||
+                  "Escape" ||
                   event.key ===
-                    "Enter"
+                  "Enter"
                 ) {
                   setShowSuggestions(
                     false,
@@ -815,7 +815,7 @@ const {
               normalizedSearch && (
                 <div className="absolute left-0 top-[56px] z-[100] w-[390px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
                   {suggestions.length ===
-                  0 ? (
+                    0 ? (
                     <div className="px-5 py-6 text-center">
                       <Leaf
                         size={
@@ -884,11 +884,15 @@ const {
                             </div>
 
                             <span
+<<<<<<< HEAD
                               className={`shrink-0 rounded-full px-2 py-1 text-xs ${
                                 item.isActive
+=======
+                              className={`shrink-0 rounded-full px-3 py-1 text-lg font-bold ${item.isActive
+>>>>>>> origin/mingyeak
                                   ? "bg-primary-50 text-primary-700"
                                   : "bg-gray-100 text-gray-500"
-                              }`}
+                                }`}
                             >
                               {item.isActive
                                 ? "សកម្ម"
@@ -936,6 +940,7 @@ const {
               </span>
 
               <ChevronDown
+<<<<<<< HEAD
                 size={
                   17
                 }
@@ -944,6 +949,11 @@ const {
                     ? "rotate-180"
                     : ""
                 }`}
+=======
+                size={18}
+                className={`text-gray-400 transition-transform ${sizeOpen ? "rotate-180" : ""
+                  }`}
+>>>>>>> origin/mingyeak
               />
             </button>
 
@@ -961,6 +971,7 @@ const {
                       size ===
                       value;
 
+<<<<<<< HEAD
                     return (
                       <button
                         key={
@@ -971,6 +982,23 @@ const {
                           setSize(
                             value,
                           );
+=======
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => {
+                        setSize(value);
+                        setPage(0);
+                        setSizeOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-lg transition ${selected
+                          ? "bg-primary-50 font-medium text-primary-800"
+                          : "text-gray-600 hover:bg-gray-50"
+                        }`}
+                    >
+                      <span>{value} / ទំព័រ</span>
+>>>>>>> origin/mingyeak
 
                           setPage(
                             0,
@@ -1076,11 +1104,10 @@ const {
                             0,
                           );
                         }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left ${
-                          selected
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left ${selected
                             ? "bg-primary-50 text-primary-800"
                             : "text-gray-600 hover:bg-gray-50"
-                        }`}
+                          }`}
                       >
                         <span>
                           {
@@ -1109,12 +1136,11 @@ const {
 
       {notice && (
         <div
-          className={`rounded-2xl border px-4 py-3 ${
-            notice.type ===
-            "success"
+          className={`rounded-2xl border px-4 py-3 ${notice.type ===
+              "success"
               ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
-          }`}
+            }`}
         >
           {
             notice.text
