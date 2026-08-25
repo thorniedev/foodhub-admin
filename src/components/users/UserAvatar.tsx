@@ -76,12 +76,11 @@ async function fetchMediaAccessUrl(mediaUuid: string): Promise<string | null> {
         }
       }
 
-      // Fallback: direct media proxy endpoint
-      const proxyUrl = `/api/media/${cleanUuid}`;
+      const proxyUrl = `/api/media/${cleanUuid}/file`;
       mediaUrlCache.set(cleanUuid, proxyUrl);
       return proxyUrl;
     } catch {
-      const proxyUrl = `/api/media/${cleanUuid}`;
+      const proxyUrl = `/api/media/${cleanUuid}/file`;
       mediaUrlCache.set(cleanUuid, proxyUrl);
       return proxyUrl;
     } finally {
@@ -134,13 +133,14 @@ async function fetchUserAvatarMediaUuid(userUuid: string): Promise<string | null
       }
 
       const data = await response.json();
-      const rawList =
-        data?.data ??
-        data?.payload ??
-        data?.contents ??
-        data?.content ??
-        data?.items ??
-        (Array.isArray(data) ? data : []);
+      const raw = data?.data ?? data?.payload ?? data;
+      const rawList = Array.isArray(raw)
+        ? raw
+        : raw?.items ??
+          raw?.contents ??
+          raw?.content ??
+          raw?.profiles ??
+          [];
 
       const profiles: any[] = Array.isArray(rawList) ? rawList : [];
 
@@ -153,10 +153,12 @@ async function fetchUserAvatarMediaUuid(userUuid: string): Promise<string | null
 
       const foundAvatar =
         defaultProfile?.avatarMediaUuid ||
+        defaultProfile?.avatarMedia?.uuid ||
         defaultProfile?.avatarUrl ||
         defaultProfile?.imageUrl ||
         defaultProfile?.photoUrl ||
         defaultProfile?.profileImage ||
+        defaultProfile?.profileImageUrl ||
         defaultProfile?.picture ||
         null;
 

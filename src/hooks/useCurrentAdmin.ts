@@ -8,12 +8,31 @@ import {
 
 import type { CurrentAdmin } from "@/src/types/currentAdmin";
 import { redirectToAdminLogin } from "@/src/lib/redirectToAdminLogin";
+import { normalizePayload } from "@/src/utils/normalize";
 
 interface UseCurrentAdminResult {
   admin: CurrentAdmin | null;
   isLoading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
+}
+
+function normalizeCurrentAdmin(response: unknown): CurrentAdmin {
+  const raw = normalizePayload<unknown>(response, response);
+
+  if (
+    raw &&
+    typeof raw === "object" &&
+    "user" in raw &&
+    (raw as { user?: unknown }).user
+  ) {
+    return normalizePayload<CurrentAdmin>(
+      (raw as { user: unknown }).user,
+      (raw as { user: CurrentAdmin }).user,
+    );
+  }
+
+  return raw as CurrentAdmin;
 }
 
 export function useCurrentAdmin(): UseCurrentAdminResult {
@@ -66,8 +85,7 @@ export function useCurrentAdmin(): UseCurrentAdminResult {
           );
         }
 
-        const data =
-          (await response.json()) as CurrentAdmin;
+        const data = normalizeCurrentAdmin(await response.json());
 
         setAdmin(data);
       } catch (error) {

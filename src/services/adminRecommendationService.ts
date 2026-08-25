@@ -17,8 +17,7 @@ import {
 
 function getBaseApiUrl(): string {
   if (typeof window !== "undefined") {
-    // In browser: use same-origin proxy to eliminate CORS errors and attach auth cookies automatically
-    return "/api";
+    return "/api/admin";
   }
 
   const configured =
@@ -26,7 +25,8 @@ function getBaseApiUrl(): string {
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     "https://api.mhoubahar.store";
   const trimmed = configured.replace(/\/+$/, "");
-  return /\/api\/v1$/i.test(trimmed) ? trimmed : `${trimmed}/api/v1`;
+  const apiBase = /\/api\/v1$/i.test(trimmed) ? trimmed : `${trimmed}/api/v1`;
+  return `${apiBase}/admin`;
 }
 
 function getHeaders(token?: string): HeadersInit {

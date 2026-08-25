@@ -19,19 +19,34 @@ export function resolveFoodHubCatalogImageUrl(
 
   // If value is a Media UUID (e.g. "ec7bf8c1-b30b-4409-a21f-06d874feb607")
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(url)) {
-    return `/api/media/${url}`;
+    return `/api/media/${url}/file`;
   }
 
   if (url.startsWith("/api/v1/media/")) {
-    return url.replace("/api/v1/media/", "/api/media/");
+    const mediaPath = url.replace("/api/v1/media/", "/api/media/");
+    return mediaPath.match(/^\/api\/media\/[0-9a-f-]{36}$/i)
+      ? `${mediaPath}/file`
+      : mediaPath;
   }
 
   if (url.startsWith("api/v1/media/")) {
-    return `/${url.replace("api/v1/media/", "api/media/")}`;
+    const mediaPath = `/${url.replace("api/v1/media/", "api/media/")}`;
+    return mediaPath.match(/^\/api\/media\/[0-9a-f-]{36}$/i)
+      ? `${mediaPath}/file`
+      : mediaPath;
   }
 
   if (url.startsWith("/api/media/")) {
-    return url;
+    return url.match(/^\/api\/media\/[0-9a-f-]{36}$/i)
+      ? `${url}/file`
+      : url;
+  }
+
+  if (url.startsWith("api/media/")) {
+    const mediaPath = `/${url}`;
+    return mediaPath.match(/^\/api\/media\/[0-9a-f-]{36}$/i)
+      ? `${mediaPath}/file`
+      : mediaPath;
   }
 
   if (url.startsWith("/api/v1/catalog/")) {

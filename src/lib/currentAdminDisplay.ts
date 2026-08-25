@@ -18,6 +18,8 @@ export function getAdminDisplayName(
   return (
     fullName ||
     admin.username ||
+    admin.preferredUsername ||
+    admin.preferred_username ||
     "Admin"
   );
 }
@@ -60,7 +62,11 @@ export function getAdminInitials(
   }
 
   const username =
-    admin.username?.trim();
+    (
+      admin.username ||
+      admin.preferredUsername ||
+      admin.preferred_username
+    )?.trim();
 
   if (username) {
     return username
@@ -80,6 +86,8 @@ export function getAdminUsername(
 
   return (
     admin.username ||
+    admin.preferredUsername ||
+    admin.preferred_username ||
     getAdminDisplayName(admin)
   );
 }
@@ -111,14 +119,35 @@ export function getAdminAvatarCandidate(
   }
 
   const candidates = [
-    (admin as any).avatarUrl,
-    (admin as any).profileImageUrl,
-    (admin as any).picture,
-    (admin as any).photoUrl,
-    (admin as any).imageUrl,
-    (admin as any).avatar,
-    (admin as any).avatarMediaUuid,
-    (admin as any).profilePictureMediaUuid,
+    admin.avatarMediaUuid,
+    admin.defaultProfile?.avatarMediaUuid,
+    admin.profiles?.[0]?.avatarMediaUuid,
+    (admin as any).profile?.avatarMediaUuid,
+    (admin as any).avatarMedia?.uuid,
+    (admin.defaultProfile as any)?.avatarMedia?.uuid,
+    (admin.profiles?.[0] as any)?.avatarMedia?.uuid,
+    admin.avatarUrl,
+    admin.profileImageUrl,
+    admin.profileImage,
+    admin.profilePicture,
+    admin.picture,
+    admin.photoUrl,
+    admin.imageUrl,
+    admin.image,
+    admin.avatar,
+    (admin.defaultProfile as any)?.avatarUrl,
+    (admin.defaultProfile as any)?.profileImageUrl,
+    (admin.defaultProfile as any)?.imageUrl,
+    (admin.defaultProfile as any)?.photoUrl,
+    (admin.defaultProfile as any)?.picture,
+    (admin.profiles?.[0] as any)?.avatarUrl,
+    (admin.profiles?.[0] as any)?.profileImageUrl,
+    (admin.profiles?.[0] as any)?.imageUrl,
+    (admin.profiles?.[0] as any)?.photoUrl,
+    (admin as any).profile?.avatarUrl,
+    (admin as any).profile?.profileImageUrl,
+    (admin as any).profile?.imageUrl,
+    admin.profilePictureMediaUuid,
   ];
 
   for (const c of candidates) {

@@ -115,7 +115,12 @@ describe("adminRecommendationService with Standardized Backend Envelopes", () =>
 
       const result = await fetchAdminSessions({ page: 0, size: 15, mode: "SINGLE", status: "READY" });
 
-      expect(global.fetch).toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/admin/recommendations/sessions?page=0&size=15&mode=SINGLE&status=READY",
+        expect.objectContaining({
+          credentials: "include",
+        }),
+      );
       expect(result.content.length).toBe(1);
       expect(result.totalElements).toBe(1);
       expect(result.totalPages).toBe(1);
@@ -168,8 +173,12 @@ describe("adminRecommendationService with Standardized Backend Envelopes", () =>
       });
 
       const detail = await fetchAdminSessionDetail("sess-100");
+      const requestedUrls = vi.mocked(global.fetch).mock.calls.map(([url]) => String(url));
 
       expect(detail.uuid).toBe("sess-100");
+      expect(requestedUrls).toContain("/api/admin/recommendations/sessions/sess-100");
+      expect(requestedUrls).toContain("/api/admin/recommendations/sessions/sess-100/items?limit=50");
+      expect(requestedUrls).toContain("/api/admin/recommendations/sessions/sess-100/safety-checks");
       expect(detail.items.length).toBe(1);
       expect(detail.safetyChecks.length).toBe(1);
       expect(detail.items[0].menuItemName).toBe("Amok");
