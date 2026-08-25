@@ -18,12 +18,14 @@ function formatStatusKhmer(status?: string | null) {
   const s = status.toUpperCase();
   if (s === "APPROVED") return "បានអនុម័ត";
   if (s === "REJECTED") return "បានបដិសេធ";
-  if (s === "PENDING" || s === "IN_REVIEW") return "កំពុងរង់ចាំពិនិត្យ";
+  if (s === "PENDING" || s === "IN_REVIEW") return "រង់ចាំពិនិត្យ";
   if (s === "ACTIVE") return "សកម្ម";
-  if (s === "SUSPENDED" || s === "INACTIVE") return "ផ្អាកដំណើរការ";
+  if (s === "SUSPENDED") return "ត្រូវបានផ្អាក";
+  if (s === "ARCHIVED" || s === "INACTIVE") return "ទុកក្នុងប័ណ្ណសារ";
   if (s === "OPEN") return "កំពុងបើកដំណើរការ";
   if (s === "CLOSED") return "បានបិទ";
   if (s === "TEMPORARILY_CLOSED") return "បិទបណ្តោះអាសន្ន";
+  if (s === "PERMANENTLY_CLOSED") return "បិទជាអចិន្ត្រៃយ៍";
   return status;
 }
 

@@ -7,9 +7,12 @@ import type {
   GooglePlaceResult,
   ReplaceStoreHoursPayload,
   Store,
+  StoreAccountStatus,
   StoreExternalSourceMetadata,
   StoreHour,
+  StoreOperatingStatus,
   StorePage,
+  StoreReviewStatus,
   UpdateStoreAccountStatusPayload,
   UpdateStoreOperatingStatusPayload,
   UpdateStorePayload,
@@ -26,15 +29,191 @@ const unwrapData = (v: unknown): unknown =>
       ? v.payload
       : v;
 
+function parseEnumString(val: unknown): string {
+  if (!val) return "";
+  if (typeof val === "string") return val.trim().toUpperCase();
+  if (typeof val === "object") {
+    const obj = val as Record<string, unknown>;
+    const inner = obj.name ?? obj.code ?? obj.value ?? obj.status ?? obj.key;
+    if (typeof inner === "string") return inner.trim().toUpperCase();
+  }
+  return "";
+}
+
+function extractReviewStatus(r: Record<string, any>): StoreReviewStatus {
+  const candidates = [
+    r.reviewStatus,
+    r.review_status,
+    r.storeReviewStatus,
+    r.store_review_status,
+    r.verificationStatus,
+    r.approvalStatus,
+    r.reviewState,
+    r.review_state,
+    r.review?.status,
+    r.review?.reviewStatus,
+    r.storeReview?.status,
+  ];
+
+  for (const raw of candidates) {
+    const u = parseEnumString(raw);
+    if (u) {
+      if (u === "APPROVED" || u === "APPROVE" || u === "VERIFIED") return "APPROVED";
+      if (u === "REJECTED" || u === "REJECT") return "REJECTED";
+      if (u === "PENDING" || u === "IN_REVIEW" || u === "WAITING") return "PENDING";
+      return u;
+    }
+  }
+
+  // Boolean approval flags
+  if (r.isApproved === true || r.approved === true) return "APPROVED";
+  if (r.isRejected === true || r.rejected === true) return "REJECTED";
+  if (r.isPending === true || r.pending === true) return "PENDING";
+
+  // Check generic status field ONLY if it contains a ReviewStatus value
+  const statusStr = parseEnumString(r.status);
+  if (statusStr === "APPROVED" || statusStr === "APPROVE") return "APPROVED";
+  if (statusStr === "REJECTED" || statusStr === "REJECT") return "REJECTED";
+  if (statusStr === "PENDING") return "PENDING";
+
+  return "UNKNOWN";
+}
+
+function extractAccountStatus(r: Record<string, any>): StoreAccountStatus {
+  const candidates = [
+    r.accountStatus,
+    r.account_status,
+    r.storeAccountStatus,
+    r.store_account_status,
+    r.accountState,
+    r.account_state,
+    r.account?.status,
+    r.account?.accountStatus,
+  ];
+
+  for (const raw of candidates) {
+    const u = parseEnumString(raw);
+    if (u) {
+      if (u === "ACTIVE" || u === "ACTIVATED") return "ACTIVE";
+      if (u === "SUSPENDED" || u === "SUSPEND") return "SUSPENDED";
+      if (u === "ARCHIVED" || u === "ARCHIVE" || u === "INACTIVE") return "ARCHIVED";
+      return u;
+    }
+  }
+
+  const statusStr = parseEnumString(r.status);
+  if (statusStr === "ACTIVE" || statusStr === "ACTIVATED") return "ACTIVE";
+  if (statusStr === "SUSPENDED" || statusStr === "SUSPEND") return "SUSPENDED";
+  if (statusStr === "ARCHIVED" || statusStr === "INACTIVE") return "ARCHIVED";
+
+  if (r.isActive === true || r.active === true) return "ACTIVE";
+  if (r.isSuspended === true || r.suspended === true) return "SUSPENDED";
+  if (r.isArchived === true || r.archived === true) return "ARCHIVED";
+
+  return "UNKNOWN";
+}
+
+function extractOperatingStatus(r: Record<string, any>): StoreOperatingStatus {
+  const candidates = [
+    r.operatingStatus,
+    r.operating_status,
+    r.operationStatus,
+    r.operation_status,
+    r.storeOperatingStatus,
+    r.operation?.status,
+    r.operating?.status,
+  ];
+
+  for (const raw of candidates) {
+    const u = parseEnumString(raw);
+    if (u) {
+      if (u === "PERMANENTLY_CLOSED" || u.includes("PERMANENT")) return "PERMANENTLY_CLOSED";
+      if (u === "TEMPORARILY_CLOSED" || u.includes("TEMP")) return "TEMPORARILY_CLOSED";
+      if (u === "CLOSED") return "CLOSED";
+      if (u === "OPEN") return "OPEN";
+      return u;
+    }
+  }
+
+  const statusStr = parseEnumString(r.status);
+  if (statusStr === "PERMANENTLY_CLOSED") return "PERMANENTLY_CLOSED";
+  if (statusStr === "TEMPORARILY_CLOSED") return "TEMPORARILY_CLOSED";
+  if (statusStr === "CLOSED") return "CLOSED";
+  if (statusStr === "OPEN") return "OPEN";
+
+  if (typeof r.isOpenNow === "boolean" || typeof r.is_open_now === "boolean" || typeof r.isOpen === "boolean") {
+    return "OPEN";
+  }
+
+  return "UNKNOWN";
+}
+
+export function normalizeStore(raw: unknown): Store {
+  if (!isObject(raw)) return {} as Store;
+  const r = raw as Record<string, any>;
+  return {
+    uuid: String(r.uuid || r.id || ""),
+    storeName: String(r.storeName || r.store_name || r.name || ""),
+    description: r.description !== undefined ? r.description : null,
+    addressLine: String(r.addressLine || r.address_line || r.address || ""),
+    commune: r.commune ?? null,
+    district: r.district ?? null,
+    city: r.city ?? null,
+    province: r.province ?? null,
+    countryCode: String(r.countryCode || r.country_code || "KH"),
+    postalCode: r.postalCode ?? r.postal_code ?? null,
+    timezone: String(r.timezone || "Asia/Phnom_Penh"),
+    latitude: Number(r.latitude ?? 0),
+    longitude: Number(r.longitude ?? 0),
+    phoneNumber: r.phoneNumber ?? r.phone_number ?? r.phone ?? null,
+    email: r.email ?? null,
+    logoMediaUuid: r.logoMediaUuid ?? r.logo_media_uuid ?? r.logoMedia ?? r.logo ?? null,
+    coverMediaUuid: r.coverMediaUuid ?? r.cover_media_uuid ?? r.coverMedia ?? r.cover ?? null,
+    logoUrl: r.logoUrl ?? r.logo_url ?? null,
+    coverImageUrl: r.coverImageUrl ?? r.cover_image_url ?? r.coverUrl ?? null,
+    priceLevel: r.priceLevel ?? r.price_level ?? null,
+    hygieneRating: r.hygieneRating ?? r.hygiene_rating ?? null,
+    averageRating: Number(r.averageRating ?? r.average_rating ?? r.rating ?? 0),
+    totalReviews: Number(r.totalReviews ?? r.total_reviews ?? 0),
+    reviewStatus: extractReviewStatus(r),
+    operatingStatus: extractOperatingStatus(r),
+    accountStatus: extractAccountStatus(r),
+    isOpenNow:
+      typeof r.isOpenNow === "boolean"
+        ? r.isOpenNow
+        : typeof r.is_open_now === "boolean"
+          ? r.is_open_now
+          : typeof r.isOpen === "boolean"
+            ? r.isOpen
+            : null,
+    socialLinks: Array.isArray(r.socialLinks)
+      ? r.socialLinks
+      : Array.isArray(r.social_links)
+        ? r.social_links
+        : [],
+    openingHours: Array.isArray(r.openingHours)
+      ? r.openingHours
+      : Array.isArray(r.opening_hours)
+        ? r.opening_hours
+        : Array.isArray(r.hours)
+          ? r.hours
+          : [],
+    externalSource: r.externalSource ?? r.external_source ?? null,
+    createdAt: r.createdAt ?? r.created_at ?? null,
+    updatedAt: r.updatedAt ?? r.updated_at ?? null,
+  };
+}
+
 function normalizeStorePage(response: unknown): StorePage {
   const raw = unwrapData(response);
   if (Array.isArray(raw)) {
+    const contents = raw.map(normalizeStore);
     return {
-      contents: raw as Store[],
+      contents,
       pageNumber: 0,
-      pageSize: raw.length,
-      totalElements: raw.length,
-      totalPages: raw.length ? 1 : 0,
+      pageSize: contents.length,
+      totalElements: contents.length,
+      totalPages: contents.length ? 1 : 0,
       first: true,
       last: true,
     };
@@ -50,13 +229,14 @@ function normalizeStorePage(response: unknown): StorePage {
       last: true,
     };
   }
-  const contents = Array.isArray(raw.items)
-    ? (raw.items as Store[])
+  const rawList = Array.isArray(raw.items)
+    ? raw.items
     : Array.isArray(raw.contents)
-      ? (raw.contents as Store[])
+      ? raw.contents
       : Array.isArray(raw.content)
-        ? (raw.content as Store[])
+        ? raw.content
         : [];
+  const contents = rawList.map(normalizeStore);
   return {
     contents,
     pageNumber:
@@ -87,7 +267,10 @@ function normalizeStorePage(response: unknown): StorePage {
     last: typeof raw.isLast === "boolean" ? raw.isLast : typeof raw.last === "boolean" ? raw.last : true,
   };
 }
-const normalizeOne = <T>(response: unknown): T => unwrapData(response) as T;
+const normalizeOne = <T>(response: unknown): T => {
+  const raw = unwrapData(response);
+  return normalizeStore(raw) as unknown as T;
+};
 
 function normalizeHours(response: unknown): StoreHour[] {
   const raw = unwrapData(response);
@@ -130,7 +313,33 @@ export const shopApi = adminBaseApi.injectEndpoints({
           },
         };
       },
-      transformResponse: normalizeStorePage,
+      transformResponse: (response: unknown, _meta, arg: GetAdminStoresParams | void) => {
+        const page = normalizeStorePage(response);
+        const p = (arg ?? {}) as GetAdminStoresParams;
+        const requestedReview =
+          p.reviewStatus && p.reviewStatus !== "ALL" ? p.reviewStatus : undefined;
+        const requestedAccount =
+          p.accountStatus || (requestedReview === "APPROVED" ? "ACTIVE" : undefined);
+        const requestedOperating = p.operatingStatus;
+
+        page.contents = page.contents.map((store) => ({
+          ...store,
+          reviewStatus:
+            store.reviewStatus && store.reviewStatus !== "UNKNOWN"
+              ? store.reviewStatus
+              : requestedReview || "APPROVED",
+          accountStatus:
+            store.accountStatus && store.accountStatus !== "UNKNOWN"
+              ? store.accountStatus
+              : requestedAccount || "ACTIVE",
+          operatingStatus:
+            store.operatingStatus && store.operatingStatus !== "UNKNOWN"
+              ? store.operatingStatus
+              : requestedOperating || (store.isOpenNow !== null ? (store.isOpenNow ? "OPEN" : "CLOSED") : "OPEN"),
+        }));
+
+        return page;
+      },
       providesTags: ["Store", "Shop"],
       keepUnusedDataFor: 300,
     }),

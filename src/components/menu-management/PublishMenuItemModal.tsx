@@ -21,6 +21,7 @@ import MenuItemSearchableSelect, {
   type SearchableOption,
 } from "./MenuItemSearchableSelect";
 import { useGetPublishedMenuItemDetailQuery } from "@/src/app/store/menuManagementApi";
+
 import type { DietaryType } from "@/src/types/dietaryType";
 import type { MedicalCondition } from "@/src/types/medicalCondition";
 import type {
@@ -98,16 +99,13 @@ function foodLabel(food: FoodRecord): string {
   return local || canonical || food.uuid;
 }
 
-function extractAllMenuItemImages(item: MenuItemRecord | null | undefined): {
+function extractAllMenuItemImages(item: MenuItemRecord): {
   thumbnail: string | null;
   gallery: string[];
 } {
-  if (!item) return { thumbnail: null, gallery: [] };
-
   const allCandidates: string[] = [];
 
   const add = (val: unknown) => {
-    if (!val) return;
     if (typeof val === "string") {
       const trimmed = val.trim();
       if (
@@ -118,14 +116,6 @@ function extractAllMenuItemImages(item: MenuItemRecord | null | undefined): {
       ) {
         allCandidates.push(trimmed);
       }
-    } else if (typeof val === "object") {
-      const obj = val as Record<string, unknown>;
-      if (typeof obj.url === "string") add(obj.url);
-      if (typeof obj.accessUrl === "string") add(obj.accessUrl);
-      if (typeof obj.imageUrl === "string") add(obj.imageUrl);
-      if (typeof obj.fileUrl === "string") add(obj.fileUrl);
-      if (typeof obj.uuid === "string") add(obj.uuid);
-      if (typeof obj.mediaUuid === "string") add(obj.mediaUuid);
     }
   };
 
@@ -142,14 +132,18 @@ function extractAllMenuItemImages(item: MenuItemRecord | null | undefined): {
   if (Array.isArray(item.gallery)) item.gallery.forEach(add);
   if (Array.isArray(item.images)) item.images.forEach(add);
   if (Array.isArray((item as any).media)) {
-    (item as any).media.forEach(add);
-  }
-  if (Array.isArray((item as any).mediaFiles)) {
-    (item as any).mediaFiles.forEach(add);
+    (item as any).media.forEach((m: any) => {
+      if (typeof m === "string") add(m);
+      else if (m && typeof m === "object") {
+        add(m.uuid);
+        add(m.url);
+        add(m.accessUrl);
+      }
+    });
   }
 
   // 3. Fallback to Food catalog media if menuItem has no images
-  if (item.food) {
+  if (allCandidates.length === 0 && item.food) {
     add(item.food.thumbnailMediaUuid);
     add(item.food.thumbnail);
     add(item.food.imageUrl);
@@ -159,22 +153,10 @@ function extractAllMenuItemImages(item: MenuItemRecord | null | undefined): {
     if (Array.isArray(item.food.galleryMediaUuids)) item.food.galleryMediaUuids.forEach(add);
     if (Array.isArray(item.food.gallery)) item.food.gallery.forEach(add);
     if (Array.isArray(item.food.images)) item.food.images.forEach(add);
-    if (Array.isArray((item.food as any).media)) (item.food as any).media.forEach(add);
   }
 
-  const explicitThumbnail =
-    (typeof item.thumbnailMediaUuid === "string" && item.thumbnailMediaUuid.trim()) ||
-    (typeof item.thumbnail === "string" && item.thumbnail.trim()) ||
-    (typeof item.imageUrl === "string" && item.imageUrl.trim()) ||
-    (typeof item.primaryMediaUuid === "string" && item.primaryMediaUuid.trim()) ||
-    (Array.isArray(item.primaryMediaUrls) && item.primaryMediaUrls[0]) ||
-    (Array.isArray(item.primaryMediaUuids) && item.primaryMediaUuids[0]) ||
-    (typeof item.food?.thumbnailMediaUuid === "string" && item.food.thumbnailMediaUuid.trim()) ||
-    (typeof item.food?.imageUrl === "string" && item.food.imageUrl.trim()) ||
-    null;
-
-  const thumbnail = explicitThumbnail || (allCandidates.length > 0 ? allCandidates[0] : null);
-  const gallery = allCandidates.filter((c) => c !== thumbnail).slice(0, 4);
+  const thumbnail = allCandidates.length > 0 ? allCandidates[0] : null;
+  const gallery = allCandidates.length > 1 ? allCandidates.slice(1, 5) : [];
 
   return { thumbnail, gallery };
 }
@@ -233,32 +215,8 @@ export default function PublishMenuItemModal({
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const bodyRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: detailData } = useGetPublishedMenuItemDetailQuery(
-    item?.uuid ?? "",
-    {
-      skip: !open || !item?.uuid,
-    },
-  );
-
   useEffect(() => {
     if (!open) return;
-
-    const activeItem: MenuItemRecord | null = item
-      ? {
-          ...item,
-          ...(detailData || {}),
-          food: detailData?.food || item.food,
-          store: detailData?.store || item.store,
-          ingredients:
-            detailData?.ingredients && detailData.ingredients.length > 0
-              ? detailData.ingredients
-              : item.ingredients,
-          dietaryTypes:
-            detailData?.dietaryTypes && (detailData.dietaryTypes as any[]).length > 0
-              ? detailData.dietaryTypes
-              : item.dietaryTypes,
-        }
-      : null;
 
     if (!activeItem) {
       setValues({
@@ -303,9 +261,7 @@ export default function PublishMenuItemModal({
             s.localName === activeItem.store.name)),
     );
 
-    const matchedStoreUuid = foundStore
-      ? String(foundStore.uuid || foundStore.id || "")
-      : rawStoreUuid || storeFixedId || "";
+    const matchedStoreUuid = foundStore ? String(foundStore.uuid || foundStore.id || "") : rawStoreUuid;
 
     const rawFoodUuid = String(
       activeItem.foodUuid ||
@@ -347,13 +303,8 @@ export default function PublishMenuItemModal({
       source: activeItem.source || "MANUAL",
     });
 
-    const rawIngredients =
-      activeItem.ingredients ??
-      (activeItem as any).recipeIngredients ??
-      [];
-
     setIngredientRows(
-      rawIngredients.map((raw: any) => {
+      (activeItem.ingredients ?? []).map((raw: any) => {
         if (typeof raw === "string") {
           const found = ingredients.find(
             (i) => i.name === raw || i.code === raw || i.uuid === raw,
@@ -370,55 +321,34 @@ export default function PublishMenuItemModal({
           (i) =>
             i.uuid === raw.ingredientUuid ||
             i.uuid === raw.uuid ||
-            i.uuid === raw.ingredient?.uuid ||
             (raw.name && i.name === raw.name) ||
-            (raw.code && i.code === raw.code) ||
-            (raw.ingredient?.name && i.name === raw.ingredient.name) ||
-            (raw.ingredient?.code && i.code === raw.ingredient.code),
+            (raw.code && i.code === raw.code),
         );
         return {
           ingredientUuid:
-            found?.uuid || raw.ingredientUuid || raw.uuid || raw.ingredient?.uuid || "",
+            found?.uuid || raw.ingredientUuid || raw.uuid || "",
           quantity:
             raw.quantity != null ? String(raw.quantity) : "",
-          unit: raw.unit || raw.unitOfMeasure || "",
-          isOptional: Boolean(raw.isOptional ?? raw.optional),
+          unit: raw.unit || "",
+          isOptional: Boolean(raw.isOptional),
           notes: raw.notes || "",
         };
       }),
     );
 
-    const rawDietaryTypes =
-      activeItem.dietaryTypes ??
-      activeItem.food?.dietaryTypes ??
-      [];
-
     setDietaryTypeRows(
-      (Array.isArray(rawDietaryTypes) ? rawDietaryTypes : []).map((raw: any) => {
-        if (typeof raw === "string") {
-          const found = dietaryTypes.find(
-            (d) => d.name === raw || d.code === raw || d.uuid === raw,
-          );
-          return {
-            dietaryTypeUuid: found?.uuid || raw,
-            verificationStatus: "VERIFIED",
-            notes: "",
-          };
-        }
+      (activeItem.dietaryTypes ?? activeItem.food?.dietaryTypes ?? []).map((raw: any) => {
         const found = dietaryTypes.find(
           (d) =>
             d.uuid === raw.dietaryTypeUuid ||
             d.uuid === raw.uuid ||
-            d.uuid === raw.dietaryType?.uuid ||
             (raw.code && d.code === raw.code) ||
-            (raw.name && d.name === raw.name) ||
-            (raw.dietaryType?.code && d.code === raw.dietaryType.code) ||
-            (raw.dietaryType?.name && d.name === raw.dietaryType.name),
+            (raw.name && d.name === raw.name),
         );
         return {
           dietaryTypeUuid:
-            found?.uuid || raw.dietaryTypeUuid || raw.uuid || raw.dietaryType?.uuid || "",
-          verificationStatus: raw.verificationStatus || "VERIFIED",
+            found?.uuid || raw.dietaryTypeUuid || raw.uuid || "",
+          verificationStatus: raw.verificationStatus || "UNVERIFIED",
           notes: raw.notes || "",
         };
       }).filter((d) => Boolean(d.dietaryTypeUuid)),
@@ -426,7 +356,7 @@ export default function PublishMenuItemModal({
 
     setError(null);
     setFieldErrors({});
-  }, [item, detailData, open, stores, foods, ingredients, dietaryTypes, storeFixedId]);
+  }, [activeItem, open, stores, foods, ingredients, dietaryTypes]);
 
   const activeFoods = useMemo(
     () =>

@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 type RouteContext = {
   params: Promise<{
-    part?: string[];
+    path?: string[];
   }>;
 };
 
@@ -34,11 +34,11 @@ function getBackendApiBaseUrl(): string {
 ========================================================= */
 
 async function proxyBannerRequest(request: NextRequest, context: RouteContext) {
-  const { part = [] } = await context.params;
+  const { path = [] } = await context.params;
 
   const suffix =
-    part.length > 0
-      ? `/${part.map((segment) => encodeURIComponent(segment)).join("/")}`
+    path.length > 0
+      ? `/${path.map((segment) => encodeURIComponent(segment)).join("/")}`
       : "";
 
   const backendUrl = new URL(`${getBackendApiBaseUrl()}/banners${suffix}`);

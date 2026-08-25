@@ -69,6 +69,16 @@ const OPERATING_OPTIONS = [
     text: "text-red-700",
     border: "border-red-300",
   },
+  {
+    value: "PERMANENTLY_CLOSED",
+    label: "បិទជាអចិន្ត្រៃយ៍",
+    desc: "ហាងបានបិទដំណើរការជាអចិន្ត្រៃយ៍",
+    dot: "bg-red-700",
+    ring: "ring-red-300",
+    bg: "bg-red-100",
+    text: "text-red-900",
+    border: "border-red-400",
+  },
 ] as const;
 
 const ACCOUNT_OPTIONS = [
@@ -92,11 +102,21 @@ const ACCOUNT_OPTIONS = [
     text: "text-red-700",
     border: "border-red-300",
   },
+  {
+    value: "ARCHIVED",
+    label: "ទុកក្នុងប័ណ្ណសារ",
+    desc: "គណនីហាងត្រូវបានទុកក្នុងប័ណ្ណសារ (Archived)",
+    dot: "bg-gray-500",
+    ring: "ring-gray-200",
+    bg: "bg-gray-50",
+    text: "text-gray-700",
+    border: "border-gray-300",
+  },
 ] as const;
 
 type ReviewValue = "APPROVED" | "REJECTED" | null;
-type OperatingValue = "OPEN" | "TEMPORARILY_CLOSED" | "CLOSED";
-type AccountValue = "ACTIVE" | "SUSPENDED";
+type OperatingValue = "OPEN" | "TEMPORARILY_CLOSED" | "CLOSED" | "PERMANENTLY_CLOSED";
+type AccountValue = "ACTIVE" | "SUSPENDED" | "ARCHIVED";
 type Step = 1 | 2 | 3;
 
 const STEPS = [
@@ -149,15 +169,23 @@ export default function ShopStatusModal({
 
     const op = String(store.operatingStatus || "").toUpperCase().trim();
     setOperating(
-      op === "TEMPORARILY_CLOSED"
-        ? "TEMPORARILY_CLOSED"
-        : op === "CLOSED"
-          ? "CLOSED"
-          : "OPEN",
+      op === "PERMANENTLY_CLOSED"
+        ? "PERMANENTLY_CLOSED"
+        : op === "TEMPORARILY_CLOSED"
+          ? "TEMPORARILY_CLOSED"
+          : op === "CLOSED"
+            ? "CLOSED"
+            : "OPEN",
     );
 
     const ac = String(store.accountStatus || "").toUpperCase().trim();
-    setAccount(ac === "SUSPENDED" ? "SUSPENDED" : "ACTIVE");
+    setAccount(
+      ac === "SUSPENDED"
+        ? "SUSPENDED"
+        : ac === "ARCHIVED" || ac === "INACTIVE"
+          ? "ARCHIVED"
+          : "ACTIVE",
+    );
 
     setNotes("");
     setError(null);

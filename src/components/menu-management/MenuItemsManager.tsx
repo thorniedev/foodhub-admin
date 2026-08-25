@@ -1437,6 +1437,7 @@ export default function MenuItemsManager({
                 onChange={(val) => setSortOrder(val as any)}
                 options={sortOptions}
                 placeholder="ថ្មីបំផុត"
+                align="right"
               />
             </div>
           </div>

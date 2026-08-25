@@ -19,7 +19,6 @@ import ImagePicker from "./ImagePicker";
 import CustomSelect from "../ui/CustomSelect";
 import {
   extractKhmerOnlyName,
-  findSubCategoriesByParentName,
   isDrinkSubCategory,
   isFoodSubCategory,
   isSubCategory,
@@ -46,9 +45,6 @@ import type { AgeGroup } from "@/src/types/ageGroup";
 import type { DietaryType } from "@/src/types/dietaryType";
 import type { Allergen } from "@/src/types/allergen";
 import type { FilterCatalogOption } from "@/src/types/filterCatalog";
-
-/** Exact parent category the Create Food form's "ប្រភេទម្ហូប *" field scopes to. */
-const FOOD_PARENT_CATEGORY_NAME = "ម្ហូបអាហារ";
 
 type FormState = {
   canonicalName: string;
@@ -674,30 +670,12 @@ export default function FoodFormModal({
 
       const hasImages = Array.isArray(images) && images.length > 0;
 
-      const selectedCategory = categories.find(
-        (c) => c.uuid === values.categoryUuid || c.code === values.categoryUuid,
-      );
-      const selectedCuisine = cuisines.find(
-        (c) => c.uuid === values.cuisineUuid || c.code === values.cuisineUuid,
-      );
-
-      const categoryCode =
-        selectedCategory?.code ||
-        (values.categoryUuid ? values.categoryUuid : "");
-      const cuisineCode =
-        selectedCuisine?.code ||
-        (values.cuisineUuid ? values.cuisineUuid : "");
-
       const payload: FoodWritePayload = {
         canonicalName: values.canonicalName.trim(),
         localName: values.localName.trim() || null,
         description: values.description.trim() || null,
         categoryUuid: values.categoryUuid,
-        categoryCode: categoryCode || values.categoryUuid,
         cuisineUuid: values.cuisineUuid,
-        cuisineCode: cuisineCode || values.cuisineUuid,
-        isActive: values.isActive,
-        active: values.isActive,
         ...(hasImages ? {} : { primaryMediaUuids: item?.primaryMediaUuids ?? [] }),
         defaultSpiceLevel: Math.min(5, Math.max(0, Math.round(numberOrNull(values.defaultSpiceLevel) ?? 0))),
         nutritionData,
@@ -741,6 +719,7 @@ export default function FoodFormModal({
             ruleResult: r.ruleResult || "ALLOWED",
             reasonText: r.reasonText?.trim() || "Suitable as a normal serving.",
           })),
+        isActive: values.isActive,
       };
 
       await onSubmit(payload, images);

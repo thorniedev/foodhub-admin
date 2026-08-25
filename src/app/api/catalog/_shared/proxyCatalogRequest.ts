@@ -33,7 +33,7 @@ function getConfig() {
   const backendApiUrl =
     process.env.BACKEND_API_URL ??
     process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "https://api.mhoubahar.store";
+    "http://localhost:7070/api/v1";
 
   const keycloakUrl =
     process.env.KEYCLOAK_URL ??
@@ -48,7 +48,7 @@ function getConfig() {
   const clientId =
     process.env.KEYCLOAK_CLIENT_ID ??
     process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ??
-    "mhoubahar-admin";
+    "foodhub-web";
 
   const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET;
 
@@ -126,11 +126,10 @@ async function refreshAccessToken(
   }
 }
 
-export function buildTargetUrl(
+function buildTargetUrl(
   request: NextRequest,
   resource: string,
   path: string[],
-  prefixMode: "admin" | "catalog" | "direct" = "admin",
 ): URL {
   const suffix = path.length
     ? `/${path
@@ -138,20 +137,9 @@ export function buildTargetUrl(
         .join("/")}`
     : "";
 
-  const baseUrl = getBackendApiBaseUrl();
-  let prefix = "";
-
-  if (resource === "menu-items") {
-    prefix = prefixMode === "catalog" ? "catalog/menu-items" : "admin/menu-items";
-  } else if (prefixMode === "admin") {
-    prefix = `admin/${resource}`;
-  } else if (prefixMode === "catalog") {
-    prefix = `catalog/${resource}`;
-  } else {
-    prefix = resource;
-  }
-
-  const target = new URL(`${baseUrl}/${prefix}${suffix}`);
+  const target = new URL(
+    `${getBackendApiBaseUrl()}/catalog/${resource}${suffix}`,
+  );
 
   request.nextUrl.searchParams.forEach((value, key) => {
     target.searchParams.append(key, value);
@@ -294,35 +282,6 @@ export async function proxyCatalogRequest(
 
   try {
     let backendResponse = await callBackend(target, method, headers, body);
-
-    // Fallback between admin, catalog, and direct endpoints on 404 (no
-    // handler for this path at all), and on 405 for GET only: some catalog
-    // resources (e.g. foods, food-categories, cuisines, meal-types) are
-    // registered under /api/v1/admin/{resource} for POST/PATCH mutations
-    // only (see CatalogController) — a GET there is a real path match with
-    // no GET handler, so Spring returns 405, not 404. Only GET is retried
-    // here since a 405 on a mutating request must not be silently replayed
-    // against a different endpoint that may expect a different body shape.
-    if (
-      backendResponse.status === 404 ||
-      (backendResponse.status === 405 && method === "GET")
-    ) {
-      const fallbackModes: Array<"admin" | "catalog" | "direct"> =
-        resource === "menu-items" ? ["catalog", "admin"] : ["direct", "catalog"];
-
-      for (const mode of fallbackModes) {
-        const altTarget = buildTargetUrl(request, resource, path, mode);
-        if (altTarget.toString() !== target.toString()) {
-          try {
-            const altResponse = await callBackend(altTarget, method, headers, body);
-            if (altResponse.ok || altResponse.status < 400) {
-              backendResponse = altResponse;
-              break;
-            }
-          } catch {}
-        }
-      }
-    }
 
     // If 401 and we have a refresh token, refresh and retry once
     if (backendResponse.status === 401 && refreshToken) {

@@ -159,28 +159,12 @@ export default function CreateCanonicalFoodModal({
         throw new Error("សូមជ្រើស Cuisine។");
       }
 
-      const selectedCategory = categories.find(
-        (c) => c.uuid === form.categoryUuid || c.code === form.categoryUuid,
-      );
-      const selectedCuisine = cuisines.find(
-        (c) => c.uuid === form.cuisineUuid || c.code === form.cuisineUuid,
-      );
-
-      const categoryCode =
-        selectedCategory?.code ||
-        (form.categoryUuid ? form.categoryUuid : "");
-      const cuisineCode =
-        selectedCuisine?.code ||
-        (form.cuisineUuid ? form.cuisineUuid : "");
-
       const payload: CreateCatalogFoodPayload = {
         canonicalName: form.canonicalName.trim(),
         localName: form.localName.trim() || null,
         description: form.description.trim() || null,
         categoryUuid: form.categoryUuid,
-        categoryCode: categoryCode || form.categoryUuid,
         cuisineUuid: form.cuisineUuid,
-        cuisineCode: cuisineCode || form.cuisineUuid,
         primaryMediaUuids: mediaUuids,
         defaultSpiceLevel: Number(form.defaultSpiceLevel || 0),
         nutritionData: {
@@ -198,7 +182,6 @@ export default function CreateCanonicalFoodModal({
         mealTypes: parseJsonArray(form.mealTypes, "Meal Types"),
         ageRules: parseJsonArray(form.ageRules, "Age Rules"),
         isActive: form.isActive,
-        active: form.isActive,
       };
 
       await createFood({ body: payload }).unwrap();

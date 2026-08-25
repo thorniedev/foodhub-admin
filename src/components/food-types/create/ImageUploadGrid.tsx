@@ -28,7 +28,7 @@ export default function ImageUploadGrid({
     <section className="rounded-2xl border border-gray-100 bg-white p-6 sm:p-8">
 
 
-      
+
       <div
         onClick={openFilePicker}
         onDrop={(event) => {

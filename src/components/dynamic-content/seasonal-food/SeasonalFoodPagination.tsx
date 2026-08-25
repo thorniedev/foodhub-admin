@@ -28,11 +28,10 @@ export default function SeasonalFoodPagination({
           <button
             key={p}
             onClick={() => onPageChange(p)}
-            className={`w-8 h-8 rounded-md text-sm font-medium transition-colors shrink-0 ${
-              page === p
+            className={`w-8 h-8 rounded-md text-sm font-medium transition-colors shrink-0 ${page === p
                 ? "bg-emerald-600 text-white"
                 : "text-gray-600 hover:bg-gray-100"
-            }`}
+              }`}
           >
             {p}
           </button>

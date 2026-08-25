@@ -35,7 +35,7 @@ export const dashboardNav: NavItem[] = [
     href: "/shops",
   },
   {
-    label: "មីនុយ",
+    label: "ម៉ឺនុយ",
     icon: Utensils,
     href: "/menu-items",
   },
@@ -83,18 +83,6 @@ export const dashboardNav: NavItem[] = [
       {
         label: "រូបបេណឺ",
         href: "/dynamic-content/banners",
-      },
-      {
-        label: "រូបអាហារតាមរដូវកាល",
-        href: "/dynamic-content/food-by-season",
-      },
-      {
-        label: "រូបអាហារតាមតំបន់",
-        href: "/dynamic-content/food-by-area",
-      },
-      {
-        label: "មតិកែលម្អ",
-        href: "/dynamic-content/feedback",
       },
     ],
   },
