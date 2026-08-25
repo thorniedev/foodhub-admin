@@ -29,6 +29,7 @@ describe("admin user roles", () => {
   it("normalizes Keycloak role names", () => {
     expect(normalizeRoleName("ROLE_super_admin")).toBe("SUPER_ADMIN");
     expect(normalizeRoleName(" admin ")).toBe("ADMIN");
+    expect(normalizeRoleName("default-roles-foodhub")).toBe("USER");
     expect(normalizeRoleName(null)).toBe("");
   });
 

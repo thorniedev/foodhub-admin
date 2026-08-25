@@ -7,10 +7,31 @@ export function normalizeRoleName(role: unknown): string {
     return "";
   }
 
-  const normalized = role.trim().toUpperCase();
-  return normalized.startsWith("ROLE_")
-    ? normalized.slice("ROLE_".length)
-    : normalized;
+  let normalized = role.trim().toUpperCase();
+  if (normalized.startsWith("ROLE_")) {
+    normalized = normalized.slice("ROLE_".length);
+  }
+
+  // Keycloak default roles pattern: default-roles-foodhub, default-roles-<realm>, etc.
+  if (
+    normalized.startsWith("DEFAULT-ROLES") ||
+    normalized.startsWith("DEFAULT_ROLES")
+  ) {
+    return "USER";
+  }
+
+  // Filter out internal Keycloak protocol roles
+  if (
+    normalized === "OFFLINE_ACCESS" ||
+    normalized === "UMA_AUTHORIZATION" ||
+    normalized.startsWith("QUERY-") ||
+    normalized.startsWith("VIEW-") ||
+    normalized.startsWith("MANAGE-")
+  ) {
+    return "";
+  }
+
+  return normalized;
 }
 
 export function getAdminUserRoles(user: AdminUser | null): string[] {

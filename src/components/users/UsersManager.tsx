@@ -36,6 +36,7 @@ import type {
 
 import { useCurrentAdmin } from "@/src/hooks/useCurrentAdmin";
 import { getAdminRole } from "@/src/lib/currentAdminDisplay";
+import { getAdminUserPrimaryRole } from "@/src/lib/adminUserRoles";
 import { displayName } from "@/src/lib/userProfileFormat";
 import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
 
@@ -49,6 +50,8 @@ import UsersHeader from "./UsersHeader";
 import UsersPagination from "./UsersPagination";
 import UsersTable from "./UsersTable";
 import UsersTabs from "./UsersTabs";
+
+export type UserRoleFilter = "ALL" | "ADMIN" | "USER";
 
 type Notice =
   | {
@@ -87,6 +90,7 @@ export default function UsersManager() {
   ======================================================= */
 
   const [statusFilter, setStatusFilter] = useState<UserStatusFilter>("ALL");
+  const [roleFilter, setRoleFilter] = useState<UserRoleFilter>("ALL");
 
   /* =======================================================
      SORT
@@ -199,38 +203,31 @@ export default function UsersManager() {
     [users],
   );
 
+  const roleCounts = useMemo(() => {
+    let adminCount = 0;
+    let userCount = 0;
+
+    for (const u of users) {
+      const r = getAdminUserPrimaryRole(u);
+      if (r === "ADMIN" || r === "SUPER_ADMIN") {
+        adminCount++;
+      } else {
+        userCount++;
+      }
+    }
+
+    return {
+      all: users.length,
+      admin: adminCount,
+      user: userCount,
+    };
+  }, [users]);
+
   /* =======================================================
      SEARCH
   ======================================================= */
 
   const normalizedSearch = search.trim().toLowerCase();
-
-  // const matchesSearch = (
-  //   user: AdminUser,
-  //   query: string,
-  // ) => {
-  //   const name =
-  //     displayName(
-  //       user.firstName,
-  //       user.lastName,
-  //       user.username,
-  //     );
-
-  //   return [
-  //     name,
-  //     user.username,
-  //     user.primaryEmail ??
-  //       "",
-  //     user.firstName ??
-  //       "",
-  //     user.lastName ??
-  //       "",
-  //   ].some((value) =>
-  //     value
-  //       .toLowerCase()
-  //       .includes(query),
-  //   );
-  // };
 
   const matchesSearch = (user: AdminUser, query: string) => {
     const name =
@@ -275,13 +272,20 @@ export default function UsersManager() {
         return false;
       }
 
+      if (roleFilter !== "ALL") {
+        const userRole = getAdminUserPrimaryRole(user);
+        const isAdmin = userRole === "ADMIN" || userRole === "SUPER_ADMIN";
+        if (roleFilter === "ADMIN" && !isAdmin) return false;
+        if (roleFilter === "USER" && isAdmin) return false;
+      }
+
       if (!normalizedSearch) {
         return true;
       }
 
       return matchesSearch(user, normalizedSearch);
     });
-  }, [normalizedSearch, searchSource, statusFilter]);
+  }, [normalizedSearch, roleFilter, searchSource, statusFilter]);
 
   /* =======================================================
      SORT
@@ -633,8 +637,8 @@ export default function UsersManager() {
           TABS + TOOLBAR
       ================================================== */}
 
-      <div className="flex w-full flex-nowrap items-center justify-between gap-4">
-        <div className="shrink-0">
+      <div className="flex w-full flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <UsersTabs
             value={statusFilter}
             counts={counts}
@@ -644,6 +648,52 @@ export default function UsersManager() {
               setPage(0);
             }}
           />
+
+          {/* ROLE FILTER */}
+          <div className="inline-flex items-center rounded-full bg-gray-100/90 p-1 ring-1 ring-gray-200/70 shadow-inner">
+            <button
+              type="button"
+              onClick={() => {
+                setRoleFilter("ALL");
+                setPage(0);
+              }}
+              className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-150 ${
+                roleFilter === "ALL"
+                  ? "bg-white text-gray-800 shadow-sm"
+                  : "text-gray-500 hover:text-gray-800"
+              }`}
+            >
+              តួនាទីទាំងអស់ ({roleCounts.all})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setRoleFilter("ADMIN");
+                setPage(0);
+              }}
+              className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-150 ${
+                roleFilter === "ADMIN"
+                  ? "bg-primary-800 text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-800"
+              }`}
+            >
+              Admin ({roleCounts.admin})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setRoleFilter("USER");
+                setPage(0);
+              }}
+              className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-150 ${
+                roleFilter === "USER"
+                  ? "bg-primary-800 text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-800"
+              }`}
+            >
+              User ({roleCounts.user})
+            </button>
+          </div>
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
