@@ -24,8 +24,8 @@ export default function KpiMetricsSection({
   const soloCount = kpis.soloModeCount || 0;
   const groupCount = kpis.groupModeCount || 0;
   const totalModes = soloCount + groupCount;
-  const soloPercent = totalModes > 0 ? Math.round((soloCount / totalModes) * 100) : 76;
-  const groupPercent = totalModes > 0 ? 100 - soloPercent : 24;
+  const soloPercent = totalModes > 0 ? Math.round((soloCount / totalModes) * 100) : 0;
+  const groupPercent = totalModes > 0 ? 100 - soloPercent : 0;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -69,7 +69,7 @@ export default function KpiMetricsSection({
             {loading ? (
               <span className="inline-block w-20 h-7 bg-zinc-200 dark:bg-zinc-800 animate-pulse rounded" />
             ) : (
-              `~${kpis.avgLatencyMs || 185} ms`
+              `${kpis.avgLatencyMs || 0} ms`
             )}
           </p>
           <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1">
@@ -154,7 +154,7 @@ export default function KpiMetricsSection({
             {loading ? (
               <span className="inline-block w-16 h-7 bg-zinc-200 dark:bg-zinc-800 animate-pulse rounded" />
             ) : (
-              `~${kpis.aiStrategyHealthRate ?? 98.2}%`
+              `${kpis.aiStrategyHealthRate ?? 0}%`
             )}
           </p>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">

@@ -3,6 +3,7 @@ import {
   fetchAdminSessions,
   fetchAdminSessionDetail,
   calculateKpiMetrics,
+  getSessionLatency,
 } from "./adminRecommendationService";
 import { AdminSessionSummary } from "@/src/types/adminRecommendation";
 
@@ -51,11 +52,28 @@ describe("adminRecommendationService with Standardized Backend Envelopes", () =>
       expect(kpis.groupModeCount).toBe(1);
     });
 
-    it("should return defaults when sessions array is empty", () => {
+    it("should return neutral values when sessions array is empty", () => {
       const kpis = calculateKpiMetrics([], 0);
       expect(kpis.totalSessions).toBe(0);
-      expect(kpis.avgLatencyMs).toBe(185);
-      expect(kpis.safetyBlockRate).toBe(24.8);
+      expect(kpis.avgLatencyMs).toBe(0);
+      expect(kpis.safetyBlockRate).toBe(0);
+      expect(kpis.aiStrategyHealthRate).toBe(0);
+    });
+
+    it("should not synthesize latency when backend timing fields are absent", () => {
+      const session = {
+        uuid: "sess-no-latency",
+        requestedByUserId: 1,
+        mode: "SINGLE",
+        status: "READY",
+        requestSource: "APP",
+        candidateCount: 50,
+        eligibleCount: 40,
+        startedAt: "2026-08-24T00:00:00Z",
+        createdAt: "2026-08-24T00:00:00Z",
+      } satisfies AdminSessionSummary;
+
+      expect(getSessionLatency(session)).toBe(0);
     });
   });
 

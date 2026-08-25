@@ -1,12 +1,15 @@
 import { baseApi } from "./baseApi";
 import { Restaurant } from "@/src/types/createFood";
+import { fetchFileMockJson } from "./mockDataGuard";
 
 let memoryStore: Restaurant[] | null = null;
 
 async function ensureStore(): Promise<Restaurant[]> {
   if (memoryStore) return memoryStore;
-  const res = await fetch("/data/restaurants.json");
-  const data: Restaurant[] = await res.json();
+  const data = await fetchFileMockJson<Restaurant[]>(
+    "/data/restaurants.json",
+    "Restaurant",
+  );
   memoryStore = data;
   return memoryStore;
 }

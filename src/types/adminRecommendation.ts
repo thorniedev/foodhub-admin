@@ -12,16 +12,37 @@ export type SessionStatus =
 
 export interface AdminSessionSummary {
   uuid: string;
-  requestedByUserId: number;
+  requestedByUserId?: number | string;
+  userId?: number | string;
+  userUuid?: string;
+  username?: string;
+  requestedByUsername?: string;
+  requesterName?: string;
+  userFullName?: string;
+  user?: {
+    id?: number | string;
+    uuid?: string;
+    username?: string;
+    name?: string;
+    fullName?: string;
+    email?: string;
+    avatarUrl?: string;
+  };
   mode: RecommendationMode;
   status: SessionStatus;
-  requestSource: string;
+  requestSource?: string;
   searchRadiusKm?: number;
   maximumPrice?: number;
   currencyCode?: string;
   candidateCount: number;
   eligibleCount: number;
   responseTimeMs?: number;
+  latencyMs?: number;
+  durationMs?: number;
+  executionTimeMs?: number;
+  responseTime?: number;
+  totalGroupMembers?: number;
+  groupMembersCount?: number;
   startedAt: string;
   completedAt?: string;
   createdAt: string;
@@ -58,26 +79,41 @@ export interface AdminRecommendedItem {
   };
   reasonCodes?: string[];
   reasonText?: string;
-  isExploration: boolean;
+  isExploration?: boolean;
 }
 
-export type SafetyCheckResult = "SAFE" | "WARNING" | "BLOCKED";
+export type SafetyAuditResult = "SAFE" | "WARNING" | "BLOCKED";
+export type SafetyCheckResult = SafetyAuditResult;
 
 export interface AdminSafetyCheckItem {
   uuid: string;
   profileId: number;
-  profileName?: string;
+  profileName: string;
   menuItemId: number;
   menuItemName: string;
-  result: SafetyCheckResult;
+  result: SafetyAuditResult;
   ruleVersion: string;
-  reasons: any; // String or Object explaining allergen/dietary conflict
+  reasons: string | string[];
   checkDurationMs: number;
   checkedAt: string;
 }
 
 export interface AdminSessionDetail extends AdminSessionSummary {
-  contextData?: Record<string, any>;
+  contextData?: {
+    latitude?: number;
+    longitude?: number;
+    lat?: number;
+    lng?: number;
+    userLat?: number;
+    userLng?: number;
+    radiusKm?: number;
+    userPreferences?: {
+      spiceTolerance?: string;
+      dietaryProfileId?: number;
+      preferredCuisines?: string[];
+    };
+    rawRequestPayload?: Record<string, unknown>;
+  };
   items: AdminRecommendedItem[];
   safetyChecks: AdminSafetyCheckItem[];
 }
@@ -87,10 +123,10 @@ export interface AdminKpiMetrics {
   avgLatencyMs: number;
   totalCandidatesEvaluated: number;
   totalCandidatesBlocked: number;
-  safetyBlockRate: number; // percentage (e.g. 18.5)
+  safetyBlockRate: number;
   soloModeCount: number;
   groupModeCount: number;
-  aiStrategyHealthRate?: number; // percentage (e.g. 96.2)
+  aiStrategyHealthRate: number;
 }
 
 export interface FetchAdminSessionsParams {
@@ -106,6 +142,6 @@ export interface AdminSessionPageResponse {
   content: AdminSessionSummary[];
   totalElements: number;
   totalPages: number;
-  size?: number;
-  number?: number;
+  size: number;
+  number: number;
 }

@@ -119,14 +119,13 @@ export default function SafetyAuditLogTab({ safetyChecks = [] }: SafetyAuditLogT
             const isSafe = check.result === "SAFE";
 
             let reasonFormatted = "";
-            if (typeof check.reasons === "string") {
-              reasonFormatted = check.reasons;
-            } else if (check.reasons && typeof check.reasons === "object") {
-              if (Array.isArray(check.reasons)) {
-                reasonFormatted = check.reasons.join(", ");
-              } else {
-                reasonFormatted = JSON.stringify(check.reasons);
-              }
+            const rawReasons = check.reasons as any;
+            if (typeof rawReasons === "string") {
+              reasonFormatted = rawReasons;
+            } else if (Array.isArray(rawReasons)) {
+              reasonFormatted = rawReasons.join(", ");
+            } else if (rawReasons && typeof rawReasons === "object") {
+              reasonFormatted = JSON.stringify(rawReasons);
             } else {
               reasonFormatted = isSafe
                 ? "Compliant with all allergen, dietary, and medical safety rules."

@@ -27,7 +27,7 @@ export default function RequestContextTab({ sessionDetail }: RequestContextTabPr
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const contextData = sessionDetail.contextData || {};
+  const contextData = (sessionDetail.contextData || {}) as any;
   const lat = contextData.latitude ?? contextData.lat ?? contextData.userLat;
   const lng = contextData.longitude ?? contextData.lng ?? contextData.userLng;
 

@@ -135,35 +135,47 @@ export async function fetchAdminSessionDetail(
 }
 
 /**
- * 3. Calculate KPI Metrics from sessions list or fallback values
+ * Extract session latency from live backend fields.
+ */
+export function getSessionLatency(session: AdminSessionSummary): number {
+  if (session.responseTimeMs && session.responseTimeMs > 0) return session.responseTimeMs;
+  if (session.latencyMs && session.latencyMs > 0) return session.latencyMs;
+  if (session.durationMs && session.durationMs > 0) return session.durationMs;
+  if (session.executionTimeMs && session.executionTimeMs > 0) return session.executionTimeMs;
+  if (session.responseTime && session.responseTime > 0) return session.responseTime;
+  if (session.startedAt && session.completedAt) {
+    const diff = new Date(session.completedAt).getTime() - new Date(session.startedAt).getTime();
+    if (diff > 0 && diff < 60000) return diff;
+  }
+  return 0;
+}
+
+/**
+ * 3. Calculate KPI Metrics from live sessions list.
  */
 export function calculateKpiMetrics(sessions: AdminSessionSummary[], totalCount?: number): AdminKpiMetrics {
   const count = totalCount ?? sessions.length;
   if (!sessions || sessions.length === 0) {
     return {
       totalSessions: count,
-      avgLatencyMs: 185,
+      avgLatencyMs: 0,
       totalCandidatesEvaluated: 0,
       totalCandidatesBlocked: 0,
-      safetyBlockRate: 24.8,
+      safetyBlockRate: 0,
       soloModeCount: 0,
       groupModeCount: 0,
-      aiStrategyHealthRate: 98.5,
+      aiStrategyHealthRate: 0,
     };
   }
 
   let totalLatency = 0;
-  let latencyCount = 0;
   let totalCandidates = 0;
   let totalEligible = 0;
   let soloCount = 0;
   let groupCount = 0;
 
   for (const s of sessions) {
-    if (s.responseTimeMs && s.responseTimeMs > 0) {
-      totalLatency += s.responseTimeMs;
-      latencyCount++;
-    }
+    totalLatency += getSessionLatency(s);
     if (s.candidateCount) {
       totalCandidates += s.candidateCount;
       totalEligible += s.eligibleCount ?? 0;
@@ -175,9 +187,9 @@ export function calculateKpiMetrics(sessions: AdminSessionSummary[], totalCount?
     }
   }
 
-  const avgLatency = latencyCount > 0 ? Math.round(totalLatency / latencyCount) : 185;
+  const avgLatency = sessions.length > 0 ? Math.round(totalLatency / sessions.length) : 0;
   const blockedCount = Math.max(0, totalCandidates - totalEligible);
-  const blockRate = totalCandidates > 0 ? Number(((blockedCount / totalCandidates) * 100).toFixed(1)) : 24.8;
+  const blockRate = totalCandidates > 0 ? Number(((blockedCount / totalCandidates) * 100).toFixed(1)) : 0;
 
   return {
     totalSessions: count,
@@ -187,6 +199,6 @@ export function calculateKpiMetrics(sessions: AdminSessionSummary[], totalCount?
     safetyBlockRate: blockRate,
     soloModeCount: soloCount,
     groupModeCount: groupCount,
-    aiStrategyHealthRate: 98.2,
+    aiStrategyHealthRate: totalCandidates > 0 ? Number(((totalEligible / totalCandidates) * 100).toFixed(1)) : 0,
   };
 }
