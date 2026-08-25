@@ -43,7 +43,7 @@ export const dashboardNav: NavItem[] = [
     icon: Layers,
     children: [
       {
-        label: "ម្ហូប",
+        label: "មុខម្ហូប",
         href: "/food-catalog/foods",
       },
       {
@@ -78,10 +78,10 @@ export const dashboardNav: NavItem[] = [
         label: "រូបបេណឺ",
         href: "/dynamic-content/banners",
       },
-      {
-        label: "មតិកែលម្អ",
-        href: "/dynamic-content/feedback",
-      },
+      // {
+      //   label: "មតិកែលម្អ",
+      //   href: "/dynamic-content/feedback",
+      // },
     ],
   },
   {

@@ -241,32 +241,45 @@ export default function PublishMenuItemModal({
     setExistingGallery(gallery);
     setGalleryFiles([]);
 
-    const matchedStoreUuid =
+    const rawStoreUuid = String(
       activeItem.storeUuid ||
       activeItem.store?.uuid ||
-      stores.find(
-        (s) =>
-          (activeItem.store?.name &&
-            (s.name === activeItem.store.name ||
-              s.storeName === activeItem.store.name ||
-              s.localName === activeItem.store.name)) ||
-          (activeItem.store?.storeName &&
-            (s.name === activeItem.store.storeName ||
-              s.storeName === activeItem.store.storeName)),
-      )?.uuid ||
-      "";
+      (activeItem.store as any)?.id ||
+      "",
+    );
 
-    const matchedFoodUuid =
+    const foundStore = stores.find(
+      (s) =>
+        (rawStoreUuid && (String(s.uuid) === rawStoreUuid || String(s.id) === rawStoreUuid)) ||
+        (activeItem.store?.storeName &&
+          (s.storeName === activeItem.store.storeName ||
+            s.name === activeItem.store.storeName ||
+            s.localName === activeItem.store.storeName)) ||
+        (activeItem.store?.name &&
+          (s.storeName === activeItem.store.name ||
+            s.name === activeItem.store.name ||
+            s.localName === activeItem.store.name)),
+    );
+
+    const matchedStoreUuid = foundStore ? String(foundStore.uuid || foundStore.id || "") : rawStoreUuid;
+
+    const rawFoodUuid = String(
       activeItem.foodUuid ||
       activeItem.food?.uuid ||
-      foods.find(
-        (f) =>
-          (activeItem.food?.canonicalName &&
-            f.canonicalName?.toLowerCase() ===
-              activeItem.food.canonicalName?.toLowerCase()) ||
-          (activeItem.food?.localName && f.localName === activeItem.food.localName),
-      )?.uuid ||
-      "";
+      (activeItem.food as any)?.id ||
+      "",
+    );
+
+    const foundFood = foods.find(
+      (f) =>
+        (rawFoodUuid && (String(f.uuid) === rawFoodUuid || String(f.id) === rawFoodUuid)) ||
+        (activeItem.food?.canonicalName &&
+          f.canonicalName?.toLowerCase() === activeItem.food.canonicalName?.toLowerCase()) ||
+        (activeItem.food?.localName && f.localName === activeItem.food.localName) ||
+        (activeItem.name && (f.canonicalName === activeItem.name || f.localName === activeItem.name)),
+    );
+
+    const matchedFoodUuid = foundFood ? String(foundFood.uuid || foundFood.id || "") : rawFoodUuid;
 
     setValues({
       storeUuid: matchedStoreUuid,
@@ -368,14 +381,14 @@ export default function PublishMenuItemModal({
   );
 
   const storeOptions: SearchableOption[] = useMemo(
-    () => stores.map((s) => ({ value: s.uuid, label: storeLabel(s) })),
+    () => stores.map((s) => ({ value: String(s.uuid || s.id || ""), label: storeLabel(s) })),
     [stores],
   );
 
   const foodOptions: SearchableOption[] = useMemo(
     () =>
       activeFoods.map((f) => ({
-        value: f.uuid,
+        value: String(f.uuid || f.id || ""),
         label: foodLabel(f),
       })),
     [activeFoods],

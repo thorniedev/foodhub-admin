@@ -51,7 +51,7 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
     refetch,
   } = useGetFoodCategoriesQuery({
     page: 0,
-    size: 200,
+    size: 100,
     includeInactive: true,
   });
 

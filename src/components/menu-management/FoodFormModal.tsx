@@ -2,18 +2,21 @@
 
 import {
   Clock,
-  Globe,
+  CupSoda,
   Loader2,
   MapPin,
   Plus,
   Save,
   ShieldAlert,
+  Soup,
   Trash2,
+  UtensilsCrossed,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import ImagePicker from "./ImagePicker";
+import CustomSelect from "../ui/CustomSelect";
 import {
   extractKhmerOnlyName,
   isDrinkSubCategory,
@@ -163,10 +166,10 @@ export default function FoodFormModal({
     const list = item.images?.length
       ? item.images
       : item.gallery?.length
-      ? item.gallery
-      : item.primaryMediaUrls?.length
-      ? item.primaryMediaUrls
-      : [item.thumbnail || item.imageUrl].filter(Boolean);
+        ? item.gallery
+        : item.primaryMediaUrls?.length
+          ? item.primaryMediaUrls
+          : [item.thumbnail || item.imageUrl].filter(Boolean);
     setExistingImages(list as string[]);
 
     const matchedCategoryUuid =
@@ -453,6 +456,177 @@ export default function FoodFormModal({
     [regions],
   );
 
+  const categorySelectOptions = useMemo(
+    () => [
+      {
+        value: "",
+        label: catalogType === "DRINK" ? "ជ្រើសប្រភេទភេសជ្ជៈ..." : "ជ្រើសប្រភេទម្ហូប...",
+      },
+      ...activeCategories.map((category) => ({
+        value: category.uuid,
+        label: (category as any).localName || extractKhmerOnlyName(category.name) || category.name,
+      })),
+    ],
+    [activeCategories, catalogType],
+  );
+
+  const cuisineSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសម្ហូបតាមប្រទេស..." },
+      ...cuisines
+        .filter((cuisine) => cuisine.isActive !== false)
+        .map((cuisine) => ({
+          value: cuisine.uuid,
+          label: (cuisine as any).localName || extractKhmerOnlyName(cuisine.name) || cuisine.code,
+        })),
+    ],
+    [cuisines],
+  );
+
+  const spiceLevelSelectOptions = useMemo(
+    () => [
+      { value: "0", label: "0 - មិនហឹរ (Not Spicy)" },
+      { value: "1", label: "1 - ហឹរតិច (Mild)" },
+      { value: "2", label: "2 - ហឹរមធ្យម (Medium)" },
+      { value: "3", label: "3 - ហឹរខ្លាំង (Hot)" },
+      { value: "4", label: "4 - ហឹរខ្លាំងណាស់ (Very Hot)" },
+      { value: "5", label: "5 - ហឹរបំផុត (Extreme)" },
+    ],
+    [],
+  );
+
+  const dietaryTypeSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសរបបអាហារ..." },
+      ...activeDietaryTypes.map((d) => ({
+        value: d.code,
+        label:
+          (d as any).localName || d.name
+            ? `${(d as any).localName || d.name} (${d.code})`
+            : d.code,
+      })),
+    ],
+    [activeDietaryTypes],
+  );
+
+  const allergenSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសសារធាតុបង្កអាឡែស៊ី..." },
+      ...activeAllergens.map((a) => ({
+        value: a.uuid,
+        label: (a as any).localName || a.name || a.code,
+        description: a.code,
+      })),
+    ],
+    [activeAllergens],
+  );
+
+  const allergenRiskSelectOptions = useMemo(
+    () => [
+      { value: "LOW", label: "LOW (ទាប)" },
+      { value: "MEDIUM", label: "MEDIUM (មធ្យម)" },
+      { value: "HIGH", label: "HIGH (ខ្ពស់)" },
+    ],
+    [],
+  );
+
+  const mealTypeSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសពេលទទួលទាន..." },
+      ...activeMealTypes.map((m) => ({
+        value: m.uuid,
+        label: (m as any).localName || m.name || m.code,
+      })),
+    ],
+    [activeMealTypes],
+  );
+
+  const ageGroupSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសក្រុមអាយុ..." },
+      ...activeAgeGroups.map((ag) => ({
+        value: ag.uuid,
+        label: (ag as any).localName || ag.name || ag.code,
+      })),
+    ],
+    [activeAgeGroups],
+  );
+
+  const ageRuleResultSelectOptions = useMemo(
+    () => [
+      { value: "ALLOWED", label: "ALLOWED (អនុញ្ញាត)" },
+      { value: "WARNING", label: "WARNING (ប្រុងប្រយ័ត្ន)" },
+      { value: "RESTRICTED", label: "RESTRICTED (ហាមឃាត់)" },
+    ],
+    [],
+  );
+
+  const seasonSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសរដូវកាល..." },
+      ...activeSeasons.map((s) => ({
+        value: s.uuid,
+        label: (s as any).localName || s.name || s.code,
+      })),
+    ],
+    [activeSeasons],
+  );
+
+  const eventSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសព្រឹត្តិការណ៍..." },
+      ...activeEvents.map((ev) => ({
+        value: ev.uuid,
+        label: (ev as any).localName || ev.name || ev.code,
+      })),
+    ],
+    [activeEvents],
+  );
+
+  const weatherSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសអាកាសធាតុ..." },
+      ...activeWeatherConditions.map((w) => ({
+        value: w.uuid,
+        label: (w as any).localName || w.name || w.code,
+      })),
+    ],
+    [activeWeatherConditions],
+  );
+
+  const preparationTimeSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសពេលចម្អិន..." },
+      ...activePreparationTimes.map((p) => ({
+        value: p.uuid,
+        label: (p as any).localName || p.name || p.code,
+      })),
+    ],
+    [activePreparationTimes],
+  );
+
+  const distanceSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសកម្រិតចម្ងាយ..." },
+      ...activeDistances.map((d) => ({
+        value: d.uuid,
+        label: (d as any).localName || d.name || d.code,
+      })),
+    ],
+    [activeDistances],
+  );
+
+  const regionSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសតំបន់ / ខេត្ត..." },
+      ...activeRegions.map((r) => ({
+        value: r.uuid,
+        label: (r as any).localName || r.name || r.code,
+      })),
+    ],
+    [activeRegions],
+  );
+
   const modalTitle = useMemo(() => {
     if (catalogType === "DRINK") {
       return item ? "កែប្រែព័ត៌មានភេសជ្ជៈ" : "បន្ថែមភេសជ្ជៈថ្មី";
@@ -475,7 +649,7 @@ export default function FoodFormModal({
       setError(null);
 
       if (!values.canonicalName.trim()) {
-        throw new Error("Canonical name is required.");
+        throw new Error("សូមបញ្ចូលឈ្មោះជាភាសាអង់គ្លេស (English name)");
       }
 
       if (!values.categoryUuid) {
@@ -564,29 +738,38 @@ export default function FoodFormModal({
     <div className="fixed inset-0 z-[140] overflow-y-auto bg-black/45 p-4 backdrop-blur-xs">
       <div className="mx-auto my-6 w-full max-w-4xl rounded-[30px] bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-7 py-6">
-          <div>
-            <p className="text-3xl font-black text-gray-900">
-              {modalTitle}
-            </p>
-            <p className="mt-1 text-lg text-gray-500">
-              {modalSubtitle}
-            </p>
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#137A3D] border border-emerald-100">
+              {catalogType === "DRINK" ? (
+                <CupSoda size={24} />
+              ) : (
+                <Soup size={24} />
+              )}
+            </div>
+            <div>
+              <p className="text-2xl font-black text-[#137A3D]">
+                {modalTitle}
+              </p>
+              <p className="mt-0.5 text-base text-gray-500">
+                {modalSubtitle}
+              </p>
+            </div>
           </div>
 
           <button
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="rounded-full p-2.5 text-gray-400 hover:bg-gray-100 transition"
+            className="rounded-full p-2.5 text-gray-400 hover:bg-gray-100 transition cursor-pointer"
           >
-            <X size={24} />
+            <X size={22} />
           </button>
         </div>
 
         <div className="space-y-6 p-7">
           <div className="grid gap-5 md:grid-cols-2">
             <Field
-              label="Canonical name *"
+              label="ឈ្មោះអង់គ្លេស *"
               value={values.canonicalName}
               onChange={(value) =>
                 setValues((current) => ({
@@ -597,7 +780,7 @@ export default function FoodFormModal({
             />
 
             <Field
-              label="ឈ្មោះខ្មែរ"
+              label="ឈ្មោះខ្មែរ *"
               value={values.localName}
               onChange={(value) =>
                 setValues((current) => ({
@@ -607,87 +790,83 @@ export default function FoodFormModal({
               }
             />
 
-            <label>
+            <div>
               <Label>{catalogType === "DRINK" ? "ប្រភេទភេសជ្ជៈ *" : "ប្រភេទម្ហូប *"}</Label>
-              <select
+              <CustomSelect
                 value={values.categoryUuid}
-                onChange={(event) =>
+                onChange={(val) =>
                   setValues((current) => ({
                     ...current,
-                    categoryUuid: event.target.value,
+                    categoryUuid: val,
                   }))
                 }
-                className={inputClass}
-              >
-                <option value="">
-                  {catalogType === "DRINK" ? "ជ្រើសប្រភេទភេសជ្ជៈ" : "ជ្រើសប្រភេទម្ហូប"}
-                </option>
-                {activeCategories.map((category) => (
-                  <option key={category.uuid} value={category.uuid}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              <Label>ម្ហូបតាមប្រទេស *</Label>
-              <select
-                value={values.cuisineUuid}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    cuisineUuid: event.target.value,
-                  }))
-                }
-                className={inputClass}
-              >
-                <option value="">ជ្រើសម្ហូបតាមប្រទេស</option>
-                {cuisines
-                  .filter((cuisine) => cuisine.isActive !== false)
-                  .map((cuisine) => (
-                    <option key={cuisine.uuid} value={cuisine.uuid}>
-                      {extractKhmerOnlyName(cuisine.name)}
-                    </option>
-                  ))}
-              </select>
-            </label>
-
-            <label>
-              <Label>កម្រិតហឹរ (Spice Level 0-5)</Label>
-              <select
-                value={values.defaultSpiceLevel}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    defaultSpiceLevel: event.target.value,
-                  }))
-                }
-                className={inputClass}
-              >
-                <option value="0">0 - មិនហឹរ (Not Spicy)</option>
-                <option value="1">1 - ហឹរតិច (Mild)</option>
-                <option value="2">2 - ហឹរមធ្យម (Medium)</option>
-                <option value="3">3 - ហឹរខ្លាំង (Hot)</option>
-                <option value="4">4 - ហឹរខ្លាំងណាស់ (Very Hot)</option>
-                <option value="5">5 - ហឹរបំផុត (Extreme)</option>
-              </select>
-            </label>
-
-            <label className="flex items-center gap-3 pt-8">
-              <input
-                type="checkbox"
-                checked={values.isActive}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    isActive: event.target.checked,
-                  }))
-                }
-                className="h-6 w-6 accent-[#137A3D]"
+                options={categorySelectOptions}
+                placeholder={catalogType === "DRINK" ? "ជ្រើសប្រភេទភេសជ្ជៈ..." : "ជ្រើសប្រភេទម្ហូប..."}
               />
-              <span className="text-xl font-bold text-gray-700">សកម្ម (Active)</span>
-            </label>
+            </div>
+
+            <div>
+              <Label>ម្ហូបតាមប្រទេស *</Label>
+              <CustomSelect
+                value={values.cuisineUuid}
+                onChange={(val) =>
+                  setValues((current) => ({
+                    ...current,
+                    cuisineUuid: val,
+                  }))
+                }
+                options={cuisineSelectOptions}
+                placeholder="ជ្រើសម្ហូបតាមប្រទេស..."
+              />
+            </div>
+
+            <div>
+              <Label>កម្រិតហឹរ (Spice Level 0-5)</Label>
+              <CustomSelect
+                value={values.defaultSpiceLevel}
+                onChange={(val) =>
+                  setValues((current) => ({
+                    ...current,
+                    defaultSpiceLevel: val,
+                  }))
+                }
+                options={spiceLevelSelectOptions}
+                placeholder="ជ្រើសកម្រិតហឹរ..."
+              />
+            </div>
+
+            <div className="flex flex-col justify-end">
+              <Label>ស្ថានភាព</Label>
+              <button
+                type="button"
+                onClick={() =>
+                  setValues((current) => ({
+                    ...current,
+                    isActive: !current.isActive,
+                  }))
+                }
+                className={`flex h-11 w-full items-center justify-between rounded-2xl border px-4 transition cursor-pointer ${
+                  values.isActive
+                    ? "border-emerald-200 bg-emerald-50/60 text-emerald-800"
+                    : "border-gray-200 bg-gray-50 text-gray-500"
+                }`}
+              >
+                <span className="text-base font-bold">
+                  {values.isActive ? "សកម្ម (Active)" : "អសកម្ម (Inactive)"}
+                </span>
+                <div
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                    values.isActive ? "bg-[#137A3D]" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
+                      values.isActive ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </div>
+              </button>
+            </div>
 
             <label className="md:col-span-2">
               <Label>ការពិពណ៌នា</Label>
@@ -723,14 +902,14 @@ export default function FoodFormModal({
                   type="number"
                   value={
                     values[
-                      key as keyof Pick<
-                        FormState,
-                        | "calories"
-                        | "protein"
-                        | "carbohydrate"
-                        | "fat"
-                        | "fiber"
-                      >
+                    key as keyof Pick<
+                      FormState,
+                      | "calories"
+                      | "protein"
+                      | "carbohydrate"
+                      | "fat"
+                      | "fiber"
+                    >
                     ]
                   }
                   onChange={(value) =>
@@ -772,33 +951,28 @@ export default function FoodFormModal({
               <div className="mt-4 space-y-3">
                 {dietaryTypeRows.map((row, idx) => (
                   <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <select
-                      value={row.code}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        const found = dietaryTypes.find((d) => d.code === val);
-                        setDietaryTypeRows((prev) =>
-                          prev.map((r, i) =>
-                            i === idx
-                              ? { ...r, code: val, name: found?.name ?? val }
-                              : r,
-                          ),
-                        );
-                      }}
-                      className="h-12 flex-1 min-w-[220px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសរបបអាហារ...</option>
-                      {activeDietaryTypes.map((d) => (
-                        <option key={d.uuid || d.code} value={d.code}>
-                          {d.name} ({d.code})
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex-1 min-w-[240px]">
+                      <CustomSelect
+                        value={row.code}
+                        onChange={(val) => {
+                          const found = dietaryTypes.find((d) => d.code === val);
+                          setDietaryTypeRows((prev) =>
+                            prev.map((r, i) =>
+                              i === idx
+                                ? { ...r, code: val, name: found?.name ?? val }
+                                : r,
+                            ),
+                          );
+                        }}
+                        options={dietaryTypeSelectOptions}
+                        placeholder="ជ្រើសរបបអាហារ..."
+                      />
+                    </div>
 
                     <button
                       type="button"
                       onClick={() => setDietaryTypeRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -836,38 +1010,31 @@ export default function FoodFormModal({
               <div className="mt-4 space-y-3">
                 {allergenRows.map((row, idx) => (
                   <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <select
-                      value={row.allergenUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setAllergenRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, allergenUuid: val } : r)),
-                        );
-                      }}
-                      className="h-12 flex-1 min-w-[220px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសសារធាតុបង្កអាឡែស៊ី...</option>
-                      {activeAllergens.map((a) => (
-                        <option key={a.uuid || a.code} value={a.uuid}>
-                          {a.name || a.code} ({a.code})
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex-1 min-w-[220px]">
+                      <CustomSelect
+                        value={row.allergenUuid}
+                        onChange={(val) => {
+                          setAllergenRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, allergenUuid: val } : r)),
+                          );
+                        }}
+                        options={allergenSelectOptions}
+                        placeholder="ជ្រើសសារធាតុបង្កអាឡែស៊ី..."
+                      />
+                    </div>
 
-                    <select
-                      value={row.riskLevel || "MEDIUM"}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setAllergenRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, riskLevel: val } : r)),
-                        );
-                      }}
-                      className="h-12 w-44 rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="LOW">LOW (ទាប)</option>
-                      <option value="MEDIUM">MEDIUM (មធ្យម)</option>
-                      <option value="HIGH">HIGH (ខ្ពស់)</option>
-                    </select>
+                    <div className="w-44">
+                      <CustomSelect
+                        value={row.riskLevel || "MEDIUM"}
+                        onChange={(val) => {
+                          setAllergenRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, riskLevel: val } : r)),
+                          );
+                        }}
+                        options={allergenRiskSelectOptions}
+                        placeholder="កម្រិតហានិភ័យ..."
+                      />
+                    </div>
 
                     <input
                       type="text"
@@ -879,13 +1046,13 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
                         );
                       }}
-                      className="h-12 flex-1 min-w-[200px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setAllergenRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -923,23 +1090,18 @@ export default function FoodFormModal({
               <div className="mt-4 space-y-3">
                 {mealTypeRows.map((row, idx) => (
                   <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <select
-                      value={row.mealTypeUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setMealTypeRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, mealTypeUuid: val } : r)),
-                        );
-                      }}
-                      className="h-12 flex-1 min-w-[220px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសពេលទទួលទាន...</option>
-                      {activeMealTypes.map((m) => (
-                        <option key={m.uuid} value={m.uuid}>
-                          {m.name} ({m.code})
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex-1 min-w-[220px]">
+                      <CustomSelect
+                        value={row.mealTypeUuid}
+                        onChange={(val) => {
+                          setMealTypeRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, mealTypeUuid: val } : r)),
+                          );
+                        }}
+                        options={mealTypeSelectOptions}
+                        placeholder="ជ្រើសពេលទទួលទាន..."
+                      />
+                    </div>
 
                     <input
                       type="number"
@@ -960,13 +1122,13 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
                         );
                       }}
-                      className="h-12 w-44 rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 w-44 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setMealTypeRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -1008,38 +1170,31 @@ export default function FoodFormModal({
               <div className="mt-4 space-y-3">
                 {ageRuleRows.map((row, idx) => (
                   <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <select
-                      value={row.ageGroupUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setAgeRuleRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, ageGroupUuid: val } : r)),
-                        );
-                      }}
-                      className="h-12 flex-1 min-w-[180px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសក្រុមអាយុ...</option>
-                      {activeAgeGroups.map((ag) => (
-                        <option key={ag.uuid} value={ag.uuid}>
-                          {ag.name} ({ag.code})
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex-1 min-w-[200px]">
+                      <CustomSelect
+                        value={row.ageGroupUuid}
+                        onChange={(val) => {
+                          setAgeRuleRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, ageGroupUuid: val } : r)),
+                          );
+                        }}
+                        options={ageGroupSelectOptions}
+                        placeholder="ជ្រើសក្រុមអាយុ..."
+                      />
+                    </div>
 
-                    <select
-                      value={row.ruleResult || "ALLOWED"}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setAgeRuleRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, ruleResult: val } : r)),
-                        );
-                      }}
-                      className="h-12 w-40 rounded-xl border border-gray-200 bg-white px-4 text-lg font-bold text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="ALLOWED">ALLOWED</option>
-                      <option value="WARNING">WARNING</option>
-                      <option value="RESTRICTED">RESTRICTED</option>
-                    </select>
+                    <div className="w-48">
+                      <CustomSelect
+                        value={row.ruleResult || "ALLOWED"}
+                        onChange={(val) => {
+                          setAgeRuleRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, ruleResult: val } : r)),
+                          );
+                        }}
+                        options={ageRuleResultSelectOptions}
+                        placeholder="លទ្ធផល..."
+                      />
+                    </div>
 
                     <input
                       type="text"
@@ -1051,13 +1206,13 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
                         );
                       }}
-                      className="h-12 flex-1 min-w-[200px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setAgeRuleRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -1095,23 +1250,18 @@ export default function FoodFormModal({
               <div className="mt-4 space-y-3">
                 {seasonRows.map((row, idx) => (
                   <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <select
-                      value={row.seasonUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setSeasonRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, seasonUuid: val } : r)),
-                        );
-                      }}
-                      className="h-12 flex-1 min-w-[180px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសរដូវកាល...</option>
-                      {activeSeasons.map((s) => (
-                        <option key={s.uuid} value={s.uuid}>
-                          {s.name} {s.localName ? `(${s.localName})` : ""}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex-1 min-w-[200px]">
+                      <CustomSelect
+                        value={row.seasonUuid}
+                        onChange={(val) => {
+                          setSeasonRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, seasonUuid: val } : r)),
+                          );
+                        }}
+                        options={seasonSelectOptions}
+                        placeholder="ជ្រើសរដូវកាល..."
+                      />
+                    </div>
 
                     <input
                       type="number"
@@ -1132,7 +1282,7 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
                         );
                       }}
-                      className="h-12 w-32 rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 w-32 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <input
@@ -1145,13 +1295,13 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
                         );
                       }}
-                      className="h-12 flex-1 min-w-[200px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setSeasonRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -1189,23 +1339,18 @@ export default function FoodFormModal({
               <div className="mt-4 space-y-3">
                 {eventRows.map((row, idx) => (
                   <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <select
-                      value={row.eventUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setEventRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, eventUuid: val } : r)),
-                        );
-                      }}
-                      className="h-12 flex-1 min-w-[180px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសព្រឹត្តិការណ៍...</option>
-                      {activeEvents.map((ev) => (
-                        <option key={ev.uuid} value={ev.uuid}>
-                          {ev.name} {ev.localName ? `(${ev.localName})` : ""}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex-1 min-w-[200px]">
+                      <CustomSelect
+                        value={row.eventUuid}
+                        onChange={(val) => {
+                          setEventRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, eventUuid: val } : r)),
+                          );
+                        }}
+                        options={eventSelectOptions}
+                        placeholder="ជ្រើសព្រឹត្តិការណ៍..."
+                      />
+                    </div>
 
                     <input
                       type="number"
@@ -1226,7 +1371,7 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, relevanceScore: val } : r)),
                         );
                       }}
-                      className="h-12 w-32 rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 w-32 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <input
@@ -1239,13 +1384,13 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
                         );
                       }}
-                      className="h-12 flex-1 min-w-[200px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setEventRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -1283,23 +1428,18 @@ export default function FoodFormModal({
               <div className="mt-4 space-y-3">
                 {weatherRows.map((row, idx) => (
                   <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <select
-                      value={row.weatherConditionUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setWeatherRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, weatherConditionUuid: val } : r)),
-                        );
-                      }}
-                      className="h-12 flex-1 min-w-[180px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសអាកាសធាតុ...</option>
-                      {activeWeatherConditions.map((w) => (
-                        <option key={w.uuid} value={w.uuid}>
-                          {w.name} {w.localName ? `(${w.localName})` : ""}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex-1 min-w-[200px]">
+                      <CustomSelect
+                        value={row.weatherConditionUuid}
+                        onChange={(val) => {
+                          setWeatherRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, weatherConditionUuid: val } : r)),
+                          );
+                        }}
+                        options={weatherSelectOptions}
+                        placeholder="ជ្រើសអាកាសធាតុ..."
+                      />
+                    </div>
 
                     <input
                       type="number"
@@ -1320,7 +1460,7 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
                         );
                       }}
-                      className="h-12 w-32 rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 w-32 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <input
@@ -1333,13 +1473,13 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
                         );
                       }}
-                      className="h-12 flex-1 min-w-[200px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setWeatherRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -1377,23 +1517,18 @@ export default function FoodFormModal({
               <div className="mt-4 space-y-3">
                 {preparationTimeRows.map((row, idx) => (
                   <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <select
-                      value={row.optionUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setPreparationTimeRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, optionUuid: val } : r)),
-                        );
-                      }}
-                      className="h-12 flex-1 min-w-[220px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសពេលចម្អិន...</option>
-                      {activePreparationTimes.map((p) => (
-                        <option key={p.uuid || p.code} value={p.uuid}>
-                          {p.localName || p.name} ({p.name})
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex-1 min-w-[220px]">
+                      <CustomSelect
+                        value={row.optionUuid}
+                        onChange={(val) => {
+                          setPreparationTimeRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, optionUuid: val } : r)),
+                          );
+                        }}
+                        options={preparationTimeSelectOptions}
+                        placeholder="ជ្រើសពេលចម្អិន..."
+                      />
+                    </div>
 
                     <input
                       type="text"
@@ -1405,13 +1540,13 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
                         );
                       }}
-                      className="h-12 flex-1 min-w-[200px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setPreparationTimeRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -1449,23 +1584,18 @@ export default function FoodFormModal({
               <div className="mt-4 space-y-3">
                 {distanceRows.map((row, idx) => (
                   <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <select
-                      value={row.optionUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setDistanceRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, optionUuid: val } : r)),
-                        );
-                      }}
-                      className="h-12 flex-1 min-w-[220px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសកម្រិតចម្ងាយ...</option>
-                      {activeDistances.map((d) => (
-                        <option key={d.uuid || d.code} value={d.uuid}>
-                          {d.localName || d.name} ({d.name})
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex-1 min-w-[220px]">
+                      <CustomSelect
+                        value={row.optionUuid}
+                        onChange={(val) => {
+                          setDistanceRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, optionUuid: val } : r)),
+                          );
+                        }}
+                        options={distanceSelectOptions}
+                        placeholder="ជ្រើសកម្រិតចម្ងាយ..."
+                      />
+                    </div>
 
                     <input
                       type="text"
@@ -1477,13 +1607,13 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
                         );
                       }}
-                      className="h-12 flex-1 min-w-[200px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setDistanceRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -1521,23 +1651,18 @@ export default function FoodFormModal({
               <div className="mt-4 space-y-3">
                 {regionRows.map((row, idx) => (
                   <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <select
-                      value={row.optionUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setRegionRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, optionUuid: val } : r)),
-                        );
-                      }}
-                      className="h-12 flex-1 min-w-[220px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសតំបន់ / ខេត្ត...</option>
-                      {activeRegions.map((r) => (
-                        <option key={r.uuid || r.code} value={r.uuid}>
-                          {r.localName || r.name} ({r.name})
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex-1 min-w-[220px]">
+                      <CustomSelect
+                        value={row.optionUuid}
+                        onChange={(val) => {
+                          setRegionRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, optionUuid: val } : r)),
+                          );
+                        }}
+                        options={regionSelectOptions}
+                        placeholder="ជ្រើសតំបន់ / ខេត្ត..."
+                      />
+                    </div>
 
                     <input
                       type="text"
@@ -1549,13 +1674,13 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
                         );
                       }}
-                      className="h-12 flex-1 min-w-[200px] rounded-xl border border-gray-200 bg-white px-4 text-lg font-medium text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setRegionRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -1614,16 +1739,35 @@ export default function FoodFormModal({
 }
 
 const inputClass =
-  "h-14 w-full rounded-2xl border border-gray-200 bg-gray-50/50 px-4 text-lg font-medium text-gray-800 outline-none transition focus:border-[#137A3D] focus:bg-white focus:ring-4 focus:ring-emerald-50";
+  "h-11 w-full rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100 placeholder:text-gray-400 placeholder:font-normal";
 
 function Label({
   children,
+  required = false,
 }: {
   children: React.ReactNode;
+  required?: boolean;
 }) {
+  if (typeof children === "string") {
+    const hasAsterisk = children.includes("*");
+    const cleanText = children.replace(/\s*\*/g, "").trim();
+
+    return (
+      <span className="mb-2 flex items-center gap-1 text-base font-bold text-gray-800">
+        <span>{cleanText}</span>
+        {(hasAsterisk || required) && (
+          <span className="text-red-500 font-bold ml-0.5">*</span>
+        )}
+      </span>
+    );
+  }
+
   return (
-    <span className="mb-2.5 block text-xl font-bold text-gray-800">
-      {children}
+    <span className="mb-2 flex items-center gap-1 text-base font-bold text-gray-800">
+      <span>{children}</span>
+      {required && (
+        <span className="text-red-500 font-bold ml-0.5">*</span>
+      )}
     </span>
   );
 }
@@ -1644,7 +1788,7 @@ function Field({
   step?: number | string;
 }) {
   return (
-    <label>
+    <div>
       <Label>{label}</Label>
       <input
         type={type}
@@ -1663,6 +1807,6 @@ function Field({
         }}
         className={inputClass}
       />
-    </label>
+    </div>
   );
 }

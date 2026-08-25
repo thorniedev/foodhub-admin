@@ -140,7 +140,7 @@ export default function MenuItemsManager({
   const categoriesQuery = useGetManagedFoodCategoriesQuery();
   const cuisinesQuery = useGetManagedCuisinesQuery();
   const storesQuery = useGetManagedStoresQuery();
-  const allShopsListQuery = useGetShopsQuery({ size: 1000 });
+  const allShopsListQuery = useGetShopsQuery({ size: 100 });
   const approvedStoresCountQuery = useGetShopsQuery({
     reviewStatus: "APPROVED",
     size: 1,
@@ -262,8 +262,8 @@ export default function MenuItemsManager({
     () => [
       { value: "", label: "វប្បធម៌ម្ហូបទាំងអស់" },
       ...activeCuisines.map((c) => ({
-        value: c.uuid,
-        label: c.name || (c as any).localName || c.code,
+        value: String(c.uuid || c.code || (c as any).id || c.name || ""),
+        label: (c as any).localName || c.name || c.code,
       })),
     ],
     [activeCuisines],
@@ -273,8 +273,8 @@ export default function MenuItemsManager({
     () => [
       { value: "", label: "រដូវកាលទាំងអស់" },
       ...activeSeasons.map((s) => ({
-        value: s.uuid,
-        label: s.name || (s as any).localName || s.code,
+        value: String(s.uuid || s.code || (s as any).id || s.name || ""),
+        label: (s as any).localName || s.name || s.code,
       })),
     ],
     [activeSeasons],
@@ -284,8 +284,8 @@ export default function MenuItemsManager({
     () => [
       { value: "", label: "ព្រឹត្តិការណ៍ទាំងអស់" },
       ...activeEvents.map((ev) => ({
-        value: ev.uuid,
-        label: ev.name || (ev as any).localName || ev.code,
+        value: String(ev.uuid || ev.code || (ev as any).id || ev.name || ""),
+        label: (ev as any).localName || ev.name || ev.code,
       })),
     ],
     [activeEvents],
@@ -295,8 +295,8 @@ export default function MenuItemsManager({
     () => [
       { value: "", label: "អាកាសធាតុទាំងអស់" },
       ...activeWeatherConditions.map((w) => ({
-        value: w.uuid || w.code,
-        label: w.name || (w as any).localName || w.code,
+        value: String(w.uuid || w.code || (w as any).id || w.name || ""),
+        label: (w as any).localName || w.name || w.code,
       })),
     ],
     [activeWeatherConditions],
@@ -305,25 +305,47 @@ export default function MenuItemsManager({
   const ageGroupOptions = useMemo(
     () => [
       { value: "", label: "ក្រុមអាយុទាំងអស់" },
-      ...activeAgeGroups.map((a) => ({
-        value: a.uuid || a.code,
-        label: a.name || (a as any).localName || a.code,
-      })),
+      ...activeAgeGroups.map((a) => {
+        const min = (a as any).minAge ?? (a as any).min_age;
+        const max = (a as any).maxAge ?? (a as any).max_age;
+        let rangeStr = "";
+        if (typeof min === "number" && typeof max === "number") {
+          rangeStr = max >= 90 ? `${min}+ ឆ្នាំ` : `${min}-${max} ឆ្នាំ`;
+        }
+        const nameStr = (a as any).localName || a.name || a.code || "";
+        const label = rangeStr ? (nameStr ? `${rangeStr} (${nameStr})` : `${rangeStr}`) : nameStr;
+        return {
+          value: String(a.uuid || a.code || (a as any).id || a.name || ""),
+          label,
+        };
+      }),
     ],
     [activeAgeGroups],
   );
 
-  const sortOptions = useMemo(
-    () => [
+  const sortOptions = useMemo(() => {
+    const baseOptions = [
       { value: "NEWEST", label: "ថ្មីបំផុត" },
       { value: "OLDEST", label: "ចាស់បំផុត" },
       { value: "NAME_ASC", label: "ឈ្មោះ: (A → Z)" },
       { value: "NAME_DESC", label: "ឈ្មោះ: (Z → A)" },
-      { value: "PRICE_ASC", label: "តម្លៃ: ទាប ទៅ ខ្ពស់" },
-      { value: "PRICE_DESC", label: "តម្លៃ: ខ្ពស់ ទៅ ទាប" },
-    ],
-    [],
-  );
+    ];
+
+    if (!isCatalogMode) {
+      baseOptions.push(
+        { value: "PRICE_ASC", label: "តម្លៃ: ទាប ទៅ ខ្ពស់" },
+        { value: "PRICE_DESC", label: "តម្លៃ: ខ្ពស់ ទៅ ទាប" },
+      );
+    }
+
+    return baseOptions;
+  }, [isCatalogMode]);
+
+  useEffect(() => {
+    if (isCatalogMode && (sortOrder === "PRICE_ASC" || sortOrder === "PRICE_DESC")) {
+      setSortOrder("NEWEST");
+    }
+  }, [isCatalogMode, sortOrder]);
 
   // Filter categories relevant to the current catalog mode (only active ones)
   const relevantCategories = useMemo(() => {
@@ -345,7 +367,7 @@ export default function MenuItemsManager({
       { value: "", label: "ប្រភេទទាំងអស់" },
       ...relevantCategories.map((c) => ({
         value: c.uuid,
-        label: extractKhmerOnlyName(c.name),
+        label: extractKhmerOnlyName((c as any).localName || c.name || ""),
       })),
     ],
     [relevantCategories],
@@ -418,49 +440,220 @@ export default function MenuItemsManager({
     }
 
     if (selectedCategoryUuid) {
-      result = result.filter(
-        (item) =>
-          item.category?.uuid === selectedCategoryUuid ||
-          item.categoryUuid === selectedCategoryUuid,
-      );
+      const selectedCat = allCategories.find((c) => c.uuid === selectedCategoryUuid || (c as any).id === selectedCategoryUuid);
+      const selName = (selectedCat?.name || "").toLowerCase();
+      const selKhmer = extractKhmerOnlyName(selectedCat?.name || "").toLowerCase();
+
+      result = result.filter((item) => {
+        const itemCatUuid = item.category?.uuid || item.categoryUuid;
+        const itemCatName = (item.category?.name || item.categoryName || "").toLowerCase();
+
+        if (itemCatUuid && itemCatUuid === selectedCategoryUuid) return true;
+        if (selectedCat && ((item.category as any)?.parentCategoryUuid === selectedCat.uuid || (item as any).parentCategoryUuid === selectedCat.uuid)) return true;
+        if (selName && itemCatName && (itemCatName === selName || itemCatName.includes(selName) || selName.includes(itemCatName))) return true;
+        if (selKhmer && itemCatName && extractKhmerOnlyName(itemCatName).toLowerCase() === selKhmer) return true;
+        return false;
+      });
+    }
+
+    if (selectedCuisineUuid) {
+      const selectedCui = activeCuisines.find((c) => c.uuid === selectedCuisineUuid || (c as any).id === selectedCuisineUuid || c.code === selectedCuisineUuid);
+      const selName = (selectedCui?.name || (selectedCui as any)?.localName || "").toLowerCase();
+      const selCode = (selectedCui?.code || "").toLowerCase();
+
+      result = result.filter((item) => {
+        const itemCuiUuid = item.cuisine?.uuid || item.cuisineUuid || (item.cuisine as any)?.id;
+        const itemCuiName = (item.cuisine?.name || item.cuisineName || "").toLowerCase();
+        const itemCuiCode = (item.cuisine?.code || "").toLowerCase();
+
+        if (itemCuiUuid && (itemCuiUuid === selectedCuisineUuid || (selectedCui && itemCuiUuid === selectedCui.uuid))) return true;
+        if (selCode && itemCuiCode && itemCuiCode === selCode) return true;
+        if (selName && itemCuiName && (itemCuiName === selName || itemCuiName.includes(selName) || selName.includes(itemCuiName))) return true;
+        return false;
+      });
+    }
+
+    if (selectedSeasonUuid) {
+      const selectedSeason = activeSeasons.find((s) => s.uuid === selectedSeasonUuid || (s as any).id === selectedSeasonUuid || s.code === selectedSeasonUuid);
+      const selName = (selectedSeason?.name || (selectedSeason as any)?.localName || "").toLowerCase();
+      const selCode = (selectedSeason?.code || "").toLowerCase();
+
+      result = result.filter((item) => {
+        const list = Array.isArray(item.seasons) ? item.seasons : [];
+        if (list.length === 0) return false;
+        return list.some((s: any) => {
+          const sUuid = typeof s === "string" ? s : s?.uuid || s?.seasonUuid;
+          const sCode = (s?.code || s?.seasonCode || "").toLowerCase();
+          const sName = (s?.name || s?.localName || (typeof s === "string" ? s : "")).toLowerCase();
+
+          return Boolean(
+            (sUuid && (sUuid === selectedSeasonUuid || (selectedSeason && sUuid === selectedSeason.uuid))) ||
+            (selCode && sCode && sCode === selCode) ||
+            (selName && sName && (sName.includes(selName) || selName.includes(sName)))
+          );
+        });
+      });
+    }
+
+    if (selectedEventUuid) {
+      const selectedEvent = activeEvents.find((e) => e.uuid === selectedEventUuid || (e as any).id === selectedEventUuid || e.code === selectedEventUuid);
+      const selName = (selectedEvent?.name || (selectedEvent as any)?.localName || "").toLowerCase();
+      const selCode = (selectedEvent?.code || "").toLowerCase();
+
+      result = result.filter((item) => {
+        const list = Array.isArray(item.events) ? item.events : [];
+        if (list.length === 0) return false;
+        return list.some((e: any) => {
+          const eUuid = typeof e === "string" ? e : e?.uuid || e?.eventUuid;
+          const eCode = (e?.code || e?.eventCode || "").toLowerCase();
+          const eName = (e?.name || e?.localName || (typeof e === "string" ? e : "")).toLowerCase();
+
+          return Boolean(
+            (eUuid && (eUuid === selectedEventUuid || (selectedEvent && eUuid === selectedEvent.uuid))) ||
+            (selCode && eCode && eCode === selCode) ||
+            (selName && eName && (eName.includes(selName) || selName.includes(eName)))
+          );
+        });
+      });
+    }
+
+    if (selectedWeatherUuid) {
+      const selectedWeather = activeWeatherConditions.find((w) => (w.uuid || w.code) === selectedWeatherUuid || (w as any).id === selectedWeatherUuid);
+      const selName = (selectedWeather?.name || (selectedWeather as any)?.localName || "").toLowerCase();
+      const selCode = (selectedWeather?.code || "").toLowerCase();
+
+      result = result.filter((item) => {
+        const list = Array.isArray(item.suitableWeather) ? item.suitableWeather : [];
+        if (list.length === 0) return false;
+        return list.some((w: any) => {
+          const wUuid = typeof w === "string" ? w : w?.uuid || w?.weatherUuid || w?.weatherConditionUuid;
+          const wCode = (w?.code || w?.weatherCode || "").toLowerCase();
+          const wName = (w?.name || w?.localName || (typeof w === "string" ? w : "")).toLowerCase();
+
+          return Boolean(
+            (wUuid && (wUuid === selectedWeatherUuid || (selectedWeather && wUuid === selectedWeather.uuid))) ||
+            (selCode && wCode && wCode === selCode) ||
+            (selName && wName && (wName.includes(selName) || selName.includes(wName)))
+          );
+        });
+      });
+    }
+
+    if (selectedAgeGroupUuid) {
+      const selectedAge = activeAgeGroups.find((a) => (a.uuid || a.code) === selectedAgeGroupUuid || (a as any).id === selectedAgeGroupUuid);
+      const selName = (selectedAge?.name || (selectedAge as any)?.localName || "").toLowerCase();
+      const selCode = (selectedAge?.code || "").toLowerCase();
+
+      result = result.filter((item) => {
+        const list = Array.isArray(item.ageRules) ? item.ageRules : (Array.isArray((item as any).ageGroups) ? (item as any).ageGroups : []);
+        if (list.length === 0) return false;
+        return list.some((a: any) => {
+          const aUuid = typeof a === "string" ? a : a?.uuid || a?.ageGroupUuid;
+          const aCode = (a?.code || a?.ageGroupCode || "").toLowerCase();
+          const aName = (a?.name || a?.localName || (typeof a === "string" ? a : "")).toLowerCase();
+
+          return Boolean(
+            (aUuid && (aUuid === selectedAgeGroupUuid || (selectedAge && aUuid === selectedAge.uuid))) ||
+            (selCode && aCode && aCode === selCode) ||
+            (selName && aName && (aName.includes(selName) || selName.includes(aName)))
+          );
+        });
+      });
     }
 
     if (selectedStatus) {
-      const wantActive = selectedStatus === "ACTIVE";
+      const wantActive = selectedStatus === "AVAILABLE" || selectedStatus === "ACTIVE";
       result = result.filter(
-        (item) => (item.isActive ?? (item as any).active ?? true) === wantActive,
+        (item) => ((item.isActive ?? (item as any).active ?? true) !== false) === wantActive,
       );
     }
 
-    // Always sort Foods newest first by ID descending then date descending
-    return [...result].sort((a, b) => {
-      const idA = typeof a.id === "number" ? a.id : Number((a as any).foodId || (a as any).id);
-      const idB = typeof b.id === "number" ? b.id : Number((b as any).foodId || (b as any).id);
-      if (Number.isFinite(idA) && Number.isFinite(idB) && idA !== idB) return idB - idA;
-      const timeA = a.createdAt || (a as any).updatedAt ? new Date(a.createdAt || (a as any).updatedAt).getTime() : null;
-      const timeB = b.createdAt || (b as any).updatedAt ? new Date(b.createdAt || (b as any).updatedAt).getTime() : null;
-      if (timeA !== null && timeB !== null && Number.isFinite(timeA) && Number.isFinite(timeB) && timeA !== timeB) return timeB - timeA;
-      return 0;
-    });
-  }, [displayFoods, search, selectedCategoryUuid, selectedStatus, allCategories, cuisinesQuery.data]);
+    if (sortOrder === "NEWEST") {
+      result = [...result].sort((a, b) => {
+        const idA = typeof a.id === "number" ? a.id : Number((a as any).foodId || (a as any).id);
+        const idB = typeof b.id === "number" ? b.id : Number((b as any).foodId || (b as any).id);
+        if (Number.isFinite(idA) && Number.isFinite(idB) && idA !== idB) return idB - idA;
+        const timeA = a.createdAt || (a as any).updatedAt ? new Date(a.createdAt || (a as any).updatedAt).getTime() : null;
+        const timeB = b.createdAt || (b as any).updatedAt ? new Date(b.createdAt || (b as any).updatedAt).getTime() : null;
+        if (timeA !== null && timeB !== null && Number.isFinite(timeA) && Number.isFinite(timeB) && timeA !== timeB) return timeB - timeA;
+        return 0;
+      });
+    } else if (sortOrder === "OLDEST") {
+      result = [...result].sort((a, b) => {
+        const idA = typeof a.id === "number" ? a.id : Number((a as any).foodId || (a as any).id);
+        const idB = typeof b.id === "number" ? b.id : Number((b as any).foodId || (b as any).id);
+        if (Number.isFinite(idA) && Number.isFinite(idB) && idA !== idB) return idA - idB;
+        const timeA = a.createdAt || (a as any).updatedAt ? new Date(a.createdAt || (a as any).updatedAt).getTime() : null;
+        const timeB = b.createdAt || (b as any).updatedAt ? new Date(b.createdAt || (b as any).updatedAt).getTime() : null;
+        if (timeA !== null && timeB !== null && Number.isFinite(timeA) && Number.isFinite(timeB) && timeA !== timeB) return timeA - timeB;
+        return 0;
+      });
+    } else if (sortOrder === "NAME_ASC") {
+      result = [...result].sort((a, b) => ((a as any).localName || a.canonicalName || a.name || "").localeCompare((b as any).localName || b.canonicalName || b.name || "", "km"));
+    } else if (sortOrder === "NAME_DESC") {
+      result = [...result].sort((a, b) => ((b as any).localName || b.canonicalName || b.name || "").localeCompare((a as any).localName || a.canonicalName || a.name || "", "km"));
+    }
+
+    return result;
+  }, [
+    displayFoods,
+    search,
+    selectedCategoryUuid,
+    selectedCuisineUuid,
+    selectedSeasonUuid,
+    selectedEventUuid,
+    selectedWeatherUuid,
+    selectedAgeGroupUuid,
+    selectedStatus,
+    sortOrder,
+    allCategories,
+    activeCuisines,
+    activeSeasons,
+    activeEvents,
+    activeWeatherConditions,
+    activeAgeGroups,
+  ]);
 
   // Search & Filter Published Menu Items
   const filteredMenuItems = useMemo(() => {
     let result = menuItems;
 
+    // Helper to resolve full FoodRecord metadata from catalog foods array if menu item's nested food object is partially populated
+    const getResolvedFood = (item: MenuItemRecord) => {
+      const foodUuid = item.foodUuid || item.food?.uuid;
+      const matchedCatalogFood = foodUuid ? foods.find((f) => f.uuid === foodUuid) : undefined;
+      return {
+        ...matchedCatalogFood,
+        ...item.food,
+        category: matchedCatalogFood?.category || item.food?.category,
+        categoryUuid: matchedCatalogFood?.categoryUuid || item.food?.categoryUuid,
+        cuisine: matchedCatalogFood?.cuisine || item.food?.cuisine,
+        cuisineUuid: matchedCatalogFood?.cuisineUuid || item.food?.cuisineUuid,
+        seasons: matchedCatalogFood?.seasons ?? item.food?.seasons ?? [],
+        events: matchedCatalogFood?.events ?? item.food?.events ?? [],
+        suitableWeather: matchedCatalogFood?.suitableWeather ?? item.food?.suitableWeather ?? [],
+        ageRules: matchedCatalogFood?.ageRules ?? item.food?.ageRules ?? [],
+      };
+    };
+
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      result = result.filter((item) =>
-        [
+      result = result.filter((item) => {
+        const resolvedFood = getResolvedFood(item);
+        return [
           item.name,
           item.description,
           item.store?.storeName,
           item.store?.name,
           item.food?.canonicalName,
           item.food?.localName,
+          resolvedFood.canonicalName,
+          resolvedFood.localName,
+          resolvedFood.categoryName,
+          resolvedFood.cuisineName,
           item.availabilityStatus,
-        ].some((val) => String(val ?? "").toLowerCase().includes(q)),
-      );
+        ].some((val) => String(val ?? "").toLowerCase().includes(q));
+      });
     }
 
     if (selectedStoreUuid) {
@@ -473,67 +666,122 @@ export default function MenuItemsManager({
     }
 
     if (selectedCategoryUuid) {
-      result = result.filter(
-        (item) =>
-          item.food?.category?.uuid === selectedCategoryUuid ||
-          item.food?.categoryUuid === selectedCategoryUuid ||
-          (item.food?.category as any)?.id === selectedCategoryUuid,
-      );
+      result = result.filter((item) => {
+        const resolvedFood = getResolvedFood(item);
+        return (
+          resolvedFood.category?.uuid === selectedCategoryUuid ||
+          resolvedFood.categoryUuid === selectedCategoryUuid ||
+          (resolvedFood.category as any)?.id === selectedCategoryUuid
+        );
+      });
     }
 
     if (selectedCuisineUuid) {
-      result = result.filter(
-        (item) =>
-          item.food?.cuisine?.uuid === selectedCuisineUuid ||
-          item.food?.cuisineUuid === selectedCuisineUuid ||
-          (item.food?.cuisine as any)?.id === selectedCuisineUuid,
-      );
+      const selectedCui = activeCuisines.find((c) => c.uuid === selectedCuisineUuid || (c as any).id === selectedCuisineUuid || c.code === selectedCuisineUuid);
+      const selName = (selectedCui?.name || (selectedCui as any)?.localName || "").toLowerCase();
+      const selCode = (selectedCui?.code || "").toLowerCase();
+
+      result = result.filter((item) => {
+        const resolvedFood = getResolvedFood(item);
+        const itemCuiUuid = resolvedFood.cuisine?.uuid || resolvedFood.cuisineUuid || (resolvedFood.cuisine as any)?.id;
+        const itemCuiName = (resolvedFood.cuisine?.name || resolvedFood.cuisineName || "").toLowerCase();
+        const itemCuiCode = (resolvedFood.cuisine?.code || "").toLowerCase();
+
+        if (!itemCuiUuid && !itemCuiCode && !itemCuiName) return true;
+
+        if (itemCuiUuid && (itemCuiUuid === selectedCuisineUuid || (selectedCui && itemCuiUuid === selectedCui.uuid))) return true;
+        if (selCode && itemCuiCode && itemCuiCode === selCode) return true;
+        if (selName && itemCuiName && (itemCuiName === selName || itemCuiName.includes(selName) || selName.includes(itemCuiName))) return true;
+        return false;
+      });
     }
 
     if (selectedSeasonUuid) {
-      result = result.filter((item) =>
-        item.food?.seasons?.some(
-          (s: any) =>
-            s.uuid === selectedSeasonUuid ||
-            s === selectedSeasonUuid ||
-            s.seasonUuid === selectedSeasonUuid,
-        ),
-      );
+      const targetSeason = activeSeasons.find((s) => s.uuid === selectedSeasonUuid || (s as any).id === selectedSeasonUuid || s.code === selectedSeasonUuid);
+      const targetCode = targetSeason?.code;
+      const targetName = (targetSeason?.name || (targetSeason as any)?.localName || "").toLowerCase();
+
+      result = result.filter((item) => {
+        const resolvedFood = getResolvedFood(item);
+        const list = Array.isArray(resolvedFood.seasons) ? resolvedFood.seasons : [];
+        if (list.length === 0) return false;
+        return list.some((s: any) => {
+          const sUuid = typeof s === "string" ? s : s?.uuid || s?.seasonUuid;
+          const sCode = s?.code || s?.seasonCode;
+          const sName = (s?.name || s?.localName || "").toLowerCase();
+          return (
+            sUuid === selectedSeasonUuid ||
+            (targetCode && sCode === targetCode) ||
+            (targetName && sName && (sName.includes(targetName) || targetName.includes(sName)))
+          );
+        });
+      });
     }
 
     if (selectedEventUuid) {
-      result = result.filter((item) =>
-        item.food?.events?.some(
-          (e: any) =>
-            e.uuid === selectedEventUuid ||
-            e === selectedEventUuid ||
-            e.eventUuid === selectedEventUuid,
-        ),
-      );
+      const targetEvent = activeEvents.find((e) => e.uuid === selectedEventUuid || (e as any).id === selectedEventUuid || e.code === selectedEventUuid);
+      const targetCode = targetEvent?.code;
+      const targetName = (targetEvent?.name || (targetEvent as any)?.localName || "").toLowerCase();
+
+      result = result.filter((item) => {
+        const resolvedFood = getResolvedFood(item);
+        const list = Array.isArray(resolvedFood.events) ? resolvedFood.events : [];
+        if (list.length === 0) return false;
+        return list.some((e: any) => {
+          const eUuid = typeof e === "string" ? e : e?.uuid || e?.eventUuid;
+          const eCode = e?.code || e?.eventCode;
+          const eName = (e?.name || e?.localName || "").toLowerCase();
+          return (
+            eUuid === selectedEventUuid ||
+            (targetCode && eCode === targetCode) ||
+            (targetName && eName && (eName.includes(targetName) || targetName.includes(eName)))
+          );
+        });
+      });
     }
 
     if (selectedWeatherUuid) {
-      result = result.filter((item) =>
-        item.food?.suitableWeather?.some(
-          (w: any) =>
-            w.uuid === selectedWeatherUuid ||
-            w === selectedWeatherUuid ||
-            w.weatherUuid === selectedWeatherUuid ||
-            w.code === selectedWeatherUuid,
-        ),
-      );
+      const targetWeather = activeWeatherConditions.find((w) => (w.uuid || w.code) === selectedWeatherUuid || (w as any).id === selectedWeatherUuid);
+      const targetCode = targetWeather?.code;
+      const targetName = (targetWeather?.name || (targetWeather as any)?.localName || "").toLowerCase();
+
+      result = result.filter((item) => {
+        const resolvedFood = getResolvedFood(item);
+        const list = Array.isArray(resolvedFood.suitableWeather) ? resolvedFood.suitableWeather : [];
+        if (list.length === 0) return false;
+        return list.some((w: any) => {
+          const wUuid = typeof w === "string" ? w : w?.uuid || w?.weatherUuid || w?.weatherConditionUuid;
+          const wCode = w?.code || w?.weatherCode;
+          const wName = (w?.name || w?.localName || "").toLowerCase();
+          return (
+            wUuid === selectedWeatherUuid ||
+            (targetCode && wCode === targetCode) ||
+            (targetName && wName && (wName.includes(targetName) || targetName.includes(wName)))
+          );
+        });
+      });
     }
 
     if (selectedAgeGroupUuid) {
-      result = result.filter((item) =>
-        item.food?.ageRules?.some(
-          (a: any) =>
-            a.uuid === selectedAgeGroupUuid ||
-            a === selectedAgeGroupUuid ||
-            a.ageGroupUuid === selectedAgeGroupUuid ||
-            a.code === selectedAgeGroupUuid,
-        ),
-      );
+      const targetAge = activeAgeGroups.find((a) => (a.uuid || a.code) === selectedAgeGroupUuid || (a as any).id === selectedAgeGroupUuid);
+      const targetCode = targetAge?.code;
+      const targetName = (targetAge?.name || (targetAge as any)?.localName || "").toLowerCase();
+
+      result = result.filter((item) => {
+        const resolvedFood = getResolvedFood(item);
+        const list = Array.isArray(resolvedFood.ageRules) ? resolvedFood.ageRules : (Array.isArray((resolvedFood as any).ageGroups) ? (resolvedFood as any).ageGroups : []);
+        if (list.length === 0) return false;
+        return list.some((a: any) => {
+          const aUuid = typeof a === "string" ? a : a?.uuid || a?.ageGroupUuid;
+          const aCode = a?.code || a?.ageGroupCode;
+          const aName = (a?.name || a?.localName || "").toLowerCase();
+          return (
+            aUuid === selectedAgeGroupUuid ||
+            (targetCode && aCode === targetCode) ||
+            (targetName && aName && (aName.includes(targetName) || targetName.includes(aName)))
+          );
+        });
+      });
     }
 
     if (selectedStatus) {
@@ -593,15 +841,33 @@ export default function MenuItemsManager({
     selectedAgeGroupUuid,
     selectedStatus,
     sortOrder,
+    foods,
+    activeCuisines,
+    activeSeasons,
+    activeEvents,
+    activeWeatherConditions,
+    activeAgeGroups,
+    allCategories,
   ]);
 
   const menuCounts = useMemo(() => {
+    if (isCatalogMode) {
+      const all = displayFoods.length;
+      const available = displayFoods.filter(
+        (item) => (item.isActive ?? (item as any).active ?? true) !== false,
+      ).length;
+      const hidden = displayFoods.filter(
+        (item) => (item.isActive ?? (item as any).active ?? true) === false,
+      ).length;
+      return { all, available, outOfStock: 0, hidden };
+    }
+
     const all = menuItems.length;
     const available = menuItems.filter((i) => i.availabilityStatus === "AVAILABLE").length;
     const outOfStock = menuItems.filter((i) => i.availabilityStatus === "OUT_OF_STOCK" || i.availabilityStatus === "UNAVAILABLE").length;
     const hidden = menuItems.filter((i) => i.availabilityStatus === "HIDDEN" || i.availabilityStatus === "ARCHIVED").length;
     return { all, available, outOfStock, hidden };
-  }, [menuItems]);
+  }, [menuItems, isCatalogMode, displayFoods]);
 
   const hasActiveFilters = Boolean(
     search ||
@@ -632,7 +898,7 @@ export default function MenuItemsManager({
   // Titles and Labels
   const pageTitle = useMemo(() => {
     if (catalogType === "DRINK") return "ភេសជ្ជៈ";
-    if (catalogType === "FOOD") return "ម្ហូប";
+    if (catalogType === "FOOD") return "មុខម្ហូប";
     return "ម៉ឺនុយ";
   }, [catalogType]);
 
@@ -1169,17 +1435,15 @@ export default function MenuItemsManager({
             )}
 
             {/* Sort Order (Right Aligned) */}
-            {!isCatalogMode && (
-              <div className="w-[170px] shrink-0 ml-auto">
-                <CustomSelect
-                  value={sortOrder}
-                  onChange={(val) => setSortOrder(val as any)}
-                  options={sortOptions}
-                  placeholder="ថ្មីបំផុត"
-                  align="right"
-                />
-              </div>
-            )}
+            <div className="w-[170px] shrink-0 ml-auto">
+              <CustomSelect
+                value={sortOrder}
+                onChange={(val) => setSortOrder(val as any)}
+                options={sortOptions}
+                placeholder="ថ្មីបំផុត"
+                align="right"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -1244,6 +1508,8 @@ export default function MenuItemsManager({
             categories={allCategories}
             cuisines={cuisinesQuery.data ?? []}
             busy={busy}
+            itemsPerPage={itemsPerPage}
+            catalogType={catalogType}
             onView={(item) => setFoodDetailUuid(item.uuid)}
             onEdit={(item) => {
               setEditingFood(item);
@@ -1256,6 +1522,7 @@ export default function MenuItemsManager({
           <PublishedMenuItemsTable
             items={filteredMenuItems}
             foods={foods}
+            categories={allCategories}
             busy={busy}
             itemsPerPage={itemsPerPage}
             onView={(item) => setDetailUuid(item.uuid)}

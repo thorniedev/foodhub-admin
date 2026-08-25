@@ -107,7 +107,7 @@ export const foodCategoryApi = baseApi.injectEndpoints({
       query: (params) => {
         const queryParams = params ?? {};
         const page = queryParams.page ?? 0;
-        const size = queryParams.size ?? 20;
+        const size = Math.min(Math.max(1, queryParams.size ?? 20), 100);
         const includeInactive = queryParams.includeInactive ?? false;
 
         return {

@@ -864,7 +864,12 @@ function makeQuery(
       return;
     }
 
-    search.set(key, String(value));
+    let finalValue = value;
+    if (key === "size" && typeof value === "number") {
+      finalValue = Math.min(Math.max(1, value), 100);
+    }
+
+    search.set(key, String(finalValue));
   });
 
   const value = search.toString();
@@ -898,7 +903,7 @@ export const menuManagementApi =
         builder.query<FoodCategoryOption[], void>({
           async queryFn() {
             const result = await browserRequest<unknown>(
-              "/api/catalog/food-categories?size=200",
+              "/api/catalog/food-categories?size=100",
             );
 
             if ("error" in result) {
@@ -963,12 +968,12 @@ export const menuManagementApi =
             // its store, so the store picker should never offer a store that
             // isn't already public-ready.
             const result = await browserRequest<unknown>(
-              "/api/admin/stores?page=0&size=1000",
+              "/api/admin/stores?page=0&size=100",
             );
 
             if ("error" in result) {
               const fallback = await browserRequest<unknown>(
-                "/api/catalog/stores?page=0&size=1000",
+                "/api/catalog/stores?page=0&size=100",
               );
               if (!("error" in fallback)) {
                 return {

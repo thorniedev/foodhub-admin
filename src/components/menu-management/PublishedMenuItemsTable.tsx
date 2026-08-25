@@ -5,9 +5,11 @@ import { ChevronLeft, ChevronRight, Eye, MinusCircle, MoreVertical, Pencil, Tras
 import MenuItemAvatar from "./MenuItemAvatar";
 
 import type {
+  FoodCategoryOption,
   FoodRecord,
   MenuItemRecord,
 } from "@/src/types/menu-management";
+import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -20,31 +22,39 @@ function storeName(item: MenuItemRecord): string {
   );
 }
 
-function renderBaseFoodCell(
+function renderCategoryCell(
   item: MenuItemRecord,
   foods: FoodRecord[] = [],
+  categories: FoodCategoryOption[] = [],
 ) {
   const matched = foods.find(
     (f) => f.uuid === item.foodUuid || f.uuid === item.food?.uuid,
   );
-  const local = matched?.localName || item.food?.localName;
-  const canonical = matched?.canonicalName || item.food?.canonicalName;
 
-  if (!local && !canonical) {
-    return <span className="line-clamp-1 text-sm font-medium text-gray-500">—</span>;
+  const catUuid =
+    matched?.categoryUuid ||
+    matched?.category?.uuid ||
+    item.food?.categoryUuid ||
+    item.food?.category?.uuid;
+
+  const matchedCat = categories.find((c) => c.uuid === catUuid);
+  const rawCatName =
+    matchedCat?.name ||
+    matched?.categoryName ||
+    matched?.category?.name ||
+    item.food?.categoryName ||
+    item.food?.category?.name;
+
+  const displayCategory = rawCatName ? extractKhmerOnlyName(rawCatName) : "";
+
+  if (!displayCategory) {
+    return <span className="line-clamp-1 text-base font-medium text-gray-400">—</span>;
   }
 
   return (
-    <div className="min-w-0">
-      <p className="max-w-[160px] truncate text-base font-semibold text-gray-800">
-        {local || canonical}
-      </p>
-      {canonical && local && canonical.toLowerCase() !== local.toLowerCase() && (
-        <p className="max-w-[160px] truncate text-xs font-medium text-gray-400">
-          {canonical}
-        </p>
-      )}
-    </div>
+    <span className="inline-block max-w-[180px] truncate rounded-xl bg-emerald-50 px-3.5 py-1 text-base font-semibold text-emerald-800 border border-emerald-100/80">
+      {displayCategory}
+    </span>
   );
 }
 
@@ -162,6 +172,7 @@ function MenuItemRowActions({
 export default function PublishedMenuItemsTable({
   items,
   foods = [],
+  categories = [],
   busy,
   itemsPerPage = 10,
   onView,
@@ -171,6 +182,7 @@ export default function PublishedMenuItemsTable({
 }: {
   items: MenuItemRecord[];
   foods?: FoodRecord[];
+  categories?: FoodCategoryOption[];
   busy: boolean;
   itemsPerPage?: number;
   onView: (item: MenuItemRecord) => void;
@@ -221,7 +233,7 @@ export default function PublishedMenuItemsTable({
               </th>
 
               <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[130px]">
-                មុខម្ហូបមេ
+                ប្រភេទ
               </th>
 
               <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[90px]">
@@ -249,9 +261,9 @@ export default function PublishedMenuItemsTable({
                   className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
                 >
                   {/* Menu Item Name + Avatar */}
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800">
                         <MenuItemAvatar
                           item={item}
                           alt={item.name}
@@ -260,12 +272,12 @@ export default function PublishedMenuItemsTable({
                       </div>
 
                       <div className="min-w-0">
-                        <p className="max-w-[160px] truncate text-base font-semibold text-gray-800">
+                        <p className="max-w-[200px] truncate text-base font-bold text-gray-900">
                           {item.name}
                         </p>
 
                         {item.isFeatured && (
-                          <span className="mt-0.5 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 border border-amber-100">
+                          <span className="mt-0.5 inline-block rounded-full bg-amber-50 px-2.5 py-0.5 text-sm font-semibold text-amber-700 border border-amber-100">
                             ពិសេស
                           </span>
                         )}
@@ -274,34 +286,34 @@ export default function PublishedMenuItemsTable({
                   </td>
 
                   {/* Store Name */}
-                  <td className="px-3 py-3">
-                    <span className="line-clamp-1 text-sm font-medium text-gray-500">
+                  <td className="px-3 py-3.5">
+                    <span className="line-clamp-1 text-base font-semibold text-gray-700">
                       {storeName(item)}
                     </span>
                   </td>
 
-                  {/* Base Food */}
-                  <td className="px-3 py-3">
-                    {renderBaseFoodCell(item, foods)}
+                  {/* Category */}
+                  <td className="px-3 py-3.5">
+                    {renderCategoryCell(item, foods, categories)}
                   </td>
 
                   {/* Price */}
-                  <td className="px-3 py-3">
-                    <span className="text-base font-semibold text-emerald-800">
+                  <td className="px-3 py-3.5">
+                    <span className="text-base font-bold text-emerald-800">
                       ${Number(item.price ?? 0).toFixed(2)}
                     </span>
                   </td>
 
                   {/* Status Badge */}
-                  <td className="px-2 py-3 text-center">
+                  <td className="px-2 py-3.5 text-center">
                     <span
-                      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${isAvailable
+                      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-base font-semibold border ${isAvailable
                         ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                         : "bg-red-50 text-red-600 border-red-100"
                         }`}
                     >
                       <span
-                        className={`h-2 w-2 shrink-0 rounded-full ${isAvailable ? "bg-emerald-500" : "bg-red-500"
+                        className={`h-2.5 w-2.5 shrink-0 rounded-full ${isAvailable ? "bg-emerald-500" : "bg-red-500"
                           }`}
                       />
                       {isAvailable ? "មានលក់" : "អស់/បិទ"}
@@ -309,7 +321,7 @@ export default function PublishedMenuItemsTable({
                   </td>
 
                   {/* Actions */}
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-3.5">
                     <MenuItemRowActions
                       item={item}
                       disabled={busy}
@@ -331,7 +343,7 @@ export default function PublishedMenuItemsTable({
       {/* PAGINATION CONTROLS */}
       {totalPages > 1 && (
         <div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50/50 p-3.5 sm:flex-row">
-          <p className="text-sm font-semibold text-gray-500">
+          <p className="text-base font-semibold text-gray-600">
             បង្ហាញ {Math.min((currentPage - 1) * itemsPerPage + 1, items.length)} -{" "}
             {Math.min(currentPage * itemsPerPage, items.length)} នៃ {items.length} ម៉ឺនុយ
           </p>
