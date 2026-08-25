@@ -15,11 +15,16 @@ import {
 
 import type { AdminUser } from "@/src/types/userProfile";
 
+import {
+  canManageAdminUser,
+  getAdminUserPrimaryRole,
+} from "@/src/lib/adminUserRoles";
 import { displayName, formatDateKhmer } from "@/src/lib/userProfileFormat";
 import UserAvatar from "./UserAvatar";
 
 interface UsersTableProps {
   users: AdminUser[];
+  currentAdminRole: string;
   disabled?: boolean;
   onProfileEdit: (user: AdminUser) => void;
   onSuspend?: (user: AdminUser) => void;
@@ -30,6 +35,7 @@ interface UsersTableProps {
 
 export default function UsersTable({
   users,
+  currentAdminRole,
   disabled = false,
   onProfileEdit,
   onSuspend,
@@ -101,6 +107,9 @@ export default function UsersTable({
 
             const isActive = user.status === "ACTIVE";
             const isSuspended = user.status === "SUSPENDED";
+            const role = getAdminUserPrimaryRole(user);
+            const canManage = canManageAdminUser(currentAdminRole, user);
+            const actionDisabled = disabled || !canManage;
 
             // Only show one clean subtext (Email or Username) without repetition
             const subtext = user.primaryEmail || (user.username ? `@${user.username}` : "");
@@ -145,6 +154,9 @@ export default function UsersTable({
                           {subtext}
                         </p>
                       )}
+                      <span className="mt-1 inline-flex rounded-full border border-primary-100 bg-primary-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-700">
+                        {role}
+                      </span>
                     </div>
                   </Link>
                 </td>
@@ -194,7 +206,7 @@ export default function UsersTable({
                       <>
                         <button
                           type="button"
-                          disabled={disabled}
+                          disabled={actionDisabled}
                           onClick={() => onProfileEdit(user)}
                           className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
                           title="កែប្រែ"
@@ -205,7 +217,7 @@ export default function UsersTable({
                         {onSuspend && (
                           <button
                             type="button"
-                            disabled={disabled}
+                            disabled={actionDisabled}
                             onClick={() => onSuspend(user)}
                             className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-500 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
                             title="ផ្អាកដំណើរការ"
@@ -217,7 +229,7 @@ export default function UsersTable({
                         {onHardDelete && (
                           <button
                             type="button"
-                            disabled={disabled}
+                            disabled={actionDisabled}
                             onClick={() => onHardDelete(user)}
                             className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                             title="លុប"
@@ -234,7 +246,7 @@ export default function UsersTable({
                         {onRestore && (
                           <button
                             type="button"
-                            disabled={disabled}
+                            disabled={actionDisabled}
                             onClick={() => onRestore(user)}
                             className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
                             title="ស្តារឡើងវិញ"
@@ -246,7 +258,7 @@ export default function UsersTable({
                         {onHardDelete && (
                           <button
                             type="button"
-                            disabled={disabled}
+                            disabled={actionDisabled}
                             onClick={() => onHardDelete(user)}
                             className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                             title="លុប"

@@ -34,6 +34,8 @@ import type {
   UserStatusFilter,
 } from "@/src/types/userProfile";
 
+import { useCurrentAdmin } from "@/src/hooks/useCurrentAdmin";
+import { getAdminRole } from "@/src/lib/currentAdminDisplay";
 import { displayName } from "@/src/lib/userProfileFormat";
 import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
 
@@ -93,6 +95,10 @@ export default function UsersManager() {
   const [sortBy, setSortBy] = useState<UserSort>("NEWEST");
 
   const [sortOpen, setSortOpen] = useState(false);
+
+  const { admin } = useCurrentAdmin();
+
+  const currentAdminRole = getAdminRole(admin);
 
   /* =======================================================
      MODALS / NOTICE
@@ -982,6 +988,7 @@ export default function UsersManager() {
         ) : (
           <UsersTable
             users={sortedUsers}
+            currentAdminRole={currentAdminRole}
             disabled={busy}
             onProfileEdit={setProfileEditUser}
             onSuspend={(user) => void handleSuspend(user)}

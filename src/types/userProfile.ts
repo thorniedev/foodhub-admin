@@ -94,6 +94,8 @@ export interface AdminUser {
   firstName: string | null;
   lastName: string | null;
   emailVerified: boolean;
+  role?: string | null;
+  roles?: string[] | null;
   status: AdminUserStatus;
   lastLoginAt: string | null;
   createdAt: string;

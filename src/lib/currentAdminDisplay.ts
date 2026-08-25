@@ -1,4 +1,5 @@
 import type { CurrentAdmin } from "@/src/types/currentAdmin";
+import { normalizeRoleName } from "@/src/lib/adminUserRoles";
 
 export function getAdminDisplayName(
   admin: CurrentAdmin | null,
@@ -99,16 +100,27 @@ export function getAdminRole(
     return "ADMIN";
   }
 
-  const raw =
-    (admin as any).role ||
-    (admin as any).roles?.[0] ||
-    (admin as any).realm_access?.roles?.find((r: string) =>
-      r.toUpperCase().includes("ADMIN"),
-    ) ||
-    (admin as any).userType ||
-    "ADMIN";
+  const roles = [
+    admin.role,
+    ...(Array.isArray(admin.roles) ? admin.roles : []),
+    ...(((admin as any).realm_access?.roles ?? []) as unknown[]),
+    ...Object.values((admin as any).resource_access ?? {}).flatMap((access) =>
+      Array.isArray((access as any)?.roles) ? (access as any).roles : [],
+    ),
+    admin.userType,
+  ]
+    .map(normalizeRoleName)
+    .filter(Boolean);
 
-  return String(raw).toUpperCase().replace(/^ROLE_/, "");
+  if (roles.includes("SUPER_ADMIN")) {
+    return "SUPER_ADMIN";
+  }
+
+  if (roles.includes("ADMIN")) {
+    return "ADMIN";
+  }
+
+  return roles[0] ?? "ADMIN";
 }
 
 export function getAdminAvatarCandidate(
