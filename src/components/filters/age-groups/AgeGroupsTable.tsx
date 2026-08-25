@@ -115,7 +115,6 @@ export default function AgeGroupsTable({
                   </p>
                 </td>
 
-<<<<<<< HEAD
                 <td className="px-6 py-5">
                   <span
                     className={`inline-flex rounded-full px-3 py-1 text-lg font-semibold ${
@@ -123,27 +122,6 @@ export default function AgeGroupsTable({
                         ? "bg-primary-50 text-primary-700"
                         : "bg-gray-100 text-gray-500"
                     }`}
-=======
-              <td className="px-6 py-5">
-                <span
-                  className={`inline-flex rounded-full px-3 py-1 text-lg font-semibold ${item.isActive
-                      ? "bg-primary-50 text-primary-700"
-                      : "bg-gray-100 text-gray-500"
-                    }`}
-                >
-                  {item.isActive ? "សកម្ម" : "អសកម្ម"}
-                </span>
-              </td>
-
-              <td className="px-6 py-5">
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => onView(item)}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100 disabled:opacity-40"
-                    title="មើលព័ត៌មានលម្អិត"
->>>>>>> origin/mingyeak
                   >
                     {item.isActive
                       ? "សកម្ម"

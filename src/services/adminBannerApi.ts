@@ -6,6 +6,7 @@ import type {
   GetAdminBannersParams,
   UpdateBannerPayload,
 } from "../types/banner";
+import { normalizeArrayPayload, normalizePageResponse } from "../utils/normalize";
 
 /**
  * Resolves full URL for an image path or media UUID.
@@ -130,7 +131,17 @@ export const adminBannerApi = {
       cache: "no-store",
     });
 
-    return handleResponse<AdminBannerPage>(res);
+    const data = await handleResponse<any>(res);
+    const normalized = normalizePageResponse<AdminBannerResponse>(data, params?.size ?? 10);
+    return {
+      contents: normalized.items,
+      totalElements: normalized.totalElements,
+      totalPages: normalized.totalPages,
+      pageNumber: normalized.pageNumber,
+      pageSize: normalized.pageSize,
+      first: normalized.pageNumber === 0,
+      last: normalized.pageNumber >= normalized.totalPages - 1,
+    };
   },
 
   /**

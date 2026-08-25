@@ -89,7 +89,7 @@ export function useFilterCatalog(groupCode?: string) {
       const next: FilterCatalogOption = {
         uuid: createClientUuid(),
         groupCode,
-        code: values.code?.trim().toUpperCase() || createCodeFromLabel(label),
+        code: createCodeFromLabel(label),
         name: values.name.trim() || values.localName.trim(),
         localName:
           values.localName.trim() || values.name.trim(),
@@ -160,9 +160,6 @@ export function useFilterCatalog(groupCode?: string) {
 
             return {
               ...item,
-              code:
-                values.code?.trim().toUpperCase() ||
-                item.code,
               name:
                 values.name.trim() ||
                 values.localName.trim(),

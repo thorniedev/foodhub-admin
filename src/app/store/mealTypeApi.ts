@@ -13,15 +13,15 @@ interface ApiResponse<T> {
 type BackendPagedResponse<T> =
   | PagedResponse<T>
   | {
-    content?: T[];
-    contents?: T[];
-    number?: number;
-    size?: number;
-    totalElements?: number;
-    totalPages?: number;
-    first?: boolean;
-    last?: boolean;
-  };
+      content?: T[];
+      contents?: T[];
+      number?: number;
+      size?: number;
+      totalElements?: number;
+      totalPages?: number;
+      first?: boolean;
+      last?: boolean;
+    };
 
 function unwrapResponse<T>(response: T | ApiResponse<T> | { payload: T }): T {
   if (
@@ -137,21 +137,21 @@ export const mealTypeApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-            ...result.contents.map(({ uuid }) => ({
-              type: "MealType" as const,
-              id: uuid,
-            })),
-            {
-              type: "MealType" as const,
-              id: "LIST",
-            },
-          ]
+              ...result.contents.map(({ uuid }) => ({
+                type: "MealType" as const,
+                id: uuid,
+              })),
+              {
+                type: "MealType" as const,
+                id: "LIST",
+              },
+            ]
           : [
-            {
-              type: "MealType" as const,
-              id: "LIST",
-            },
-          ],
+              {
+                type: "MealType" as const,
+                id: "LIST",
+              },
+            ],
     }),
 
     getMealTypeByUuid: builder.query<MealType, string>({

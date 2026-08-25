@@ -30,9 +30,9 @@ export const foodByAreaApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-            ...result.map(({ id }) => ({ type: "FoodByArea" as const, id })),
-            { type: "FoodByArea" as const, id: "LIST" },
-          ]
+              ...result.map(({ id }) => ({ type: "FoodByArea" as const, id })),
+              { type: "FoodByArea" as const, id: "LIST" },
+            ]
           : [{ type: "FoodByArea" as const, id: "LIST" }],
     }),
 

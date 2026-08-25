@@ -27,7 +27,6 @@ import type {
 ========================================================= */
 
 const EMPTY_FORM: FilterCatalogOptionFormValues = {
-  code: "",
   localName: "",
   name: "",
   description: "",
@@ -94,8 +93,6 @@ export default function FilterOptionFormModal({
     setForm(
       item
         ? {
-            code:
-              item.code || "",
             localName:
               item.localName,
             name:
@@ -161,9 +158,10 @@ export default function FilterOptionFormModal({
     ) => {
       event.preventDefault();
 
-      const finalName = form.localName.trim();
-
-      if (!finalName) {
+      if (
+        !form.localName.trim() &&
+        !form.name.trim()
+      ) {
         setValidationError(
           "សូមបំពេញឈ្មោះស្លាកត្រង។",
         );
@@ -213,11 +211,7 @@ export default function FilterOptionFormModal({
 
       setValidationError("");
 
-      await onSubmit({
-        ...form,
-        name: finalName,
-        localName: finalName,
-      });
+      await onSubmit(form);
     };
 
   return (
@@ -365,7 +359,8 @@ export default function FilterOptionFormModal({
           ================================================== */}
           <Section>
             <p className="mb-5 text-lg leading-7 text-gray-500">
-              សូមបំពេញឈ្មោះ និងព័ត៌មានលម្អិត។
+              សូមបំពេញឈ្មោះយ៉ាងហោចណាស់មួយ
+              ជាភាសាខ្មែរ ឬភាសាអង់គ្លេស។
             </p>
 
             <div
@@ -390,7 +385,6 @@ export default function FilterOptionFormModal({
                       ...previous,
                       localName:
                         value,
-                      name: value,
                     }),
                   )
                 }
@@ -398,9 +392,9 @@ export default function FilterOptionFormModal({
               />
 
               <Field
-                label="កូដ (Code)"
+                label="English name"
                 value={
-                  form.code ?? ""
+                  form.name
                 }
                 onChange={(
                   value,
@@ -410,11 +404,11 @@ export default function FilterOptionFormModal({
                       previous,
                     ) => ({
                       ...previous,
-                      code: value.toUpperCase(),
+                      name: value,
                     }),
                   )
                 }
-                placeholder="ឧ. JAPANESE"
+                placeholder={`e.g. Enter ${group.labelEn}`}
               />
             </div>
 
@@ -501,57 +495,55 @@ export default function FilterOptionFormModal({
               </div>
             )}
 
-            {/* Description (not applicable for Meal Types) */}
-            {group.source !== "MEAL_TYPE_API" && (
-              <label className="mt-5 block">
-                <FieldLabel>
-                  ការពិពណ៌នា
-                </FieldLabel>
+            {/* Description */}
+            <label className="mt-5 block">
+              <FieldLabel>
+                ការពិពណ៌នា
+              </FieldLabel>
 
-                <textarea
-                  rows={4}
-                  value={
-                    form.description
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    setForm(
-                      (
-                        previous,
-                      ) => ({
-                        ...previous,
-                        description:
-                          event.target
-                            .value,
-                      }),
-                    )
-                  }
-                  placeholder="បញ្ចូលការពិពណ៌នា..."
-                  className="
-                    w-full
-                    resize-none
-                    rounded-xl
-                    border
-                    border-gray-200
-                    bg-gray-50
-                    px-4
-                    py-3.5
-                    text-lg
-                    leading-8
-                    text-gray-800
-                    outline-none
-                    transition
-                    placeholder:text-gray-400
-                    hover:border-gray-300
-                    focus:border-primary-600
-                    focus:bg-white
-                    focus:ring-4
-                    focus:ring-primary-100
-                  "
-                />
-              </label>
-            )}
+              <textarea
+                rows={4}
+                value={
+                  form.description
+                }
+                onChange={(
+                  event,
+                ) =>
+                  setForm(
+                    (
+                      previous,
+                    ) => ({
+                      ...previous,
+                      description:
+                        event.target
+                          .value,
+                    }),
+                  )
+                }
+                placeholder="បញ្ចូលការពិពណ៌នា..."
+                className="
+                  w-full
+                  resize-none
+                  rounded-xl
+                  border
+                  border-gray-200
+                  bg-gray-50
+                  px-4
+                  py-3.5
+                  text-lg
+                  leading-8
+                  text-gray-800
+                  outline-none
+                  transition
+                  placeholder:text-gray-400
+                  hover:border-gray-300
+                  focus:border-primary-600
+                  focus:bg-white
+                  focus:ring-4
+                  focus:ring-primary-100
+                "
+              />
+            </label>
           </Section>
 
           {/* =================================================

@@ -25,9 +25,9 @@ export const drinkApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-            ...result.map(({ id }) => ({ type: "Drink" as const, id })),
-            { type: "Drink" as const, id: "LIST" },
-          ]
+              ...result.map(({ id }) => ({ type: "Drink" as const, id })),
+              { type: "Drink" as const, id: "LIST" },
+            ]
           : [{ type: "Drink" as const, id: "LIST" }],
     }),
 

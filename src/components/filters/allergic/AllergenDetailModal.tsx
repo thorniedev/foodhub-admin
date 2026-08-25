@@ -210,46 +210,8 @@ export default function AllergenDetailModal({
                     </button>
                   )}
                 </div>
-<<<<<<< HEAD
                 <p className="mt-2 font-mono text-base font-bold text-gray-900">
                   {displayItem.code || "—"}
-=======
-
-                {/* Status */}
-                <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
-                  <span className="block text-lg font-medium text-primary-800">ស្ថានភាព</span>
-                  <div className="mt-2">
-                    <span className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-lg font-medium ${isActive
-                        ? "bg-primary-50 text-primary-700"
-                        : "bg-gray-200 text-gray-600"
-                      }`}>
-                      <span className={`h-2 w-2 rounded-full ${isActive ? "bg-primary-600" : "bg-gray-400"}`} />
-                      {isActive ? "សកម្ម (Active)" : "អសកម្ម (Inactive)"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Name (if different from code) */}
-                {displayItem.name && displayItem.name !== displayItem.code && (
-                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 sm:col-span-2">
-                    <span className="flex items-center gap-1.5 text-lg font-medium text-primary-800">
-                      <Globe2 size={18} />
-                      ឈ្មោះទូទៅ
-                    </span>
-                    <p className="mt-2 text-xl font-bold text-gray-800">{displayItem.name}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Description */}
-              <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
-                <span className="flex items-center gap-1.5 text-lg font-medium text-primary-800">
-                  <FileText size={18} />
-                  ការពិពណ៌នា
-                </span>
-                <p className="mt-2 text-lg leading-8 text-gray-700">
-                  {displayItem.description || <span className="italic text-gray-400">គ្មានការពិពណ៌នាឡើយ</span>}
->>>>>>> origin/mingyeak
                 </p>
               </div>
 

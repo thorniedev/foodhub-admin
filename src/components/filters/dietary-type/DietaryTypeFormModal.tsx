@@ -162,20 +162,14 @@ export default function DietaryTypeFormModal({
             <Field
               label="កូដ"
               value={values.code}
-              disabled={Boolean(item)}
               onChange={(value) =>
                 setValues((previous) => ({
                   ...previous,
-                  code: value.toUpperCase(),
+                  code: value,
                 }))
               }
               placeholder="VEGAN"
               required
-              helperText={
-                item
-                  ? "កូដសម្គាល់មិនអាចកែប្រែបានទេ (Fixed Identifier)"
-                  : undefined
-              }
             />
 
             <Field
@@ -334,8 +328,6 @@ function Field({
   type = "text",
   placeholder,
   required,
-  disabled,
-  helperText,
 }: {
   label: string;
   value: string;
@@ -343,8 +335,6 @@ function Field({
   type?: string;
   placeholder?: string;
   required?: boolean;
-  disabled?: boolean;
-  helperText?: string;
 }) {
   return (
     <label className="block">
@@ -357,21 +347,10 @@ function Field({
         type={type}
         value={value}
         required={required}
-        disabled={disabled}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
-        className={`h-[52px] w-full rounded-xl border border-gray-200 px-4 text-lg outline-none transition ${
-          disabled
-            ? "cursor-not-allowed bg-gray-100/80 font-mono text-gray-500 shadow-inner select-none"
-            : "bg-gray-50 text-gray-800 placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
-        }`}
+        className="h-[52px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
       />
-
-      {helperText && (
-        <span className="mt-1.5 block text-sm font-medium text-gray-400">
-          {helperText}
-        </span>
-      )}
     </label>
   );
 }

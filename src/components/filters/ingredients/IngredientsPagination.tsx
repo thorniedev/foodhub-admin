@@ -74,8 +74,8 @@ export default function IngredientsPagination({
           disabled={
             disabled ||
             page >=
-            safeTotalPages -
-            1
+              safeTotalPages -
+                1
           }
           onClick={() =>
             onPageChange(

@@ -51,15 +51,15 @@ type SortMode =
 
 type Notice =
   | {
-    type: "success";
+      type: "success";
 
-    text: string;
-  }
+      text: string;
+    }
   | {
-    type: "error";
+      type: "error";
 
-    text: string;
-  }
+      text: string;
+    }
   | null;
 
 const sortMap: Record<
@@ -84,38 +84,38 @@ const sortOptions: Array<{
 
   label: string;
 }> = [
-    {
-      value:
-        "A_Z",
+  {
+    value:
+      "A_Z",
 
-      label:
-        "A → Z",
-    },
+    label:
+      "A → Z",
+  },
 
-    {
-      value:
-        "Z_A",
+  {
+    value:
+      "Z_A",
 
-      label:
-        "Z → A",
-    },
+    label:
+      "Z → A",
+  },
 
-    {
-      value:
-        "NEWEST",
+  {
+    value:
+      "NEWEST",
 
-      label:
-        "ថ្មីបំផុត",
-    },
+    label:
+      "ថ្មីបំផុត",
+  },
 
-    {
-      value:
-        "OLDEST",
+  {
+    value:
+      "OLDEST",
 
-      label:
-        "ចាស់បំផុត",
-    },
-  ];
+    label:
+      "ចាស់បំផុត",
+  },
+];
 
 export default function AgeGroupManager() {
   const [
@@ -207,7 +207,7 @@ export default function AgeGroupManager() {
 
       sort:
         sortMap[
-        sortMode
+          sortMode
         ],
     });
 
@@ -220,7 +220,7 @@ export default function AgeGroupManager() {
 
   const {
     data:
-    suggestionData,
+      suggestionData,
   } =
     useGetAgeGroupsQuery({
       page: 0,
@@ -239,7 +239,7 @@ export default function AgeGroupManager() {
     createItem,
     {
       isLoading:
-      isCreating,
+        isCreating,
     },
   ] =
     useCreateAgeGroupMutation();
@@ -248,7 +248,7 @@ export default function AgeGroupManager() {
     updateItem,
     {
       isLoading:
-      isUpdating,
+        isUpdating,
     },
   ] =
     useUpdateAgeGroupMutation();
@@ -257,7 +257,7 @@ export default function AgeGroupManager() {
     deleteItem,
     {
       isLoading:
-      isDeleting,
+        isDeleting,
     },
   ] =
     useDeleteAgeGroupMutation();
@@ -390,33 +390,33 @@ export default function AgeGroupManager() {
       );
 
       const body: CreateAgeGroupPayload =
-      {
-        code:
-          values.code
-            .trim()
-            .toUpperCase(),
+        {
+          code:
+            values.code
+              .trim()
+              .toUpperCase(),
 
-        name:
-          values.name.trim(),
+          name:
+            values.name.trim(),
 
-        minAge:
-          Number(
-            values.minAge,
-          ),
+          minAge:
+            Number(
+              values.minAge,
+            ),
 
-        maxAge:
-          Number(
-            values.maxAge,
-          ),
+          maxAge:
+            Number(
+              values.maxAge,
+            ),
 
-        description:
-          values.description
-            .trim() ||
-          null,
+          description:
+            values.description
+              .trim() ||
+            null,
 
-        isActive:
-          values.isActive,
-      };
+          isActive:
+            values.isActive,
+        };
 
       try {
         if (editing) {
@@ -470,7 +470,7 @@ export default function AgeGroupManager() {
 
         await refetch();
       } catch (
-      requestError
+        requestError
       ) {
         setNotice({
           type:
@@ -565,7 +565,6 @@ export default function AgeGroupManager() {
         }}
       />
 
-<<<<<<< HEAD
       {/* SEARCH + SIZE + SORT */}
       <div className="flex w-full items-center justify-end gap-2 overflow-visible">
         {/* SEARCH */}
@@ -576,202 +575,79 @@ export default function AgeGroupManager() {
             }
             className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
           />
-=======
-      {/* TABS + SEARCH + SIZE + SORT */}
-      <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between overflow-visible">
-        {/* TABS */}
-        <div className="shrink-0">
-          <AgeGroupsTabs
-            value={statusFilter}
-            allCount={sourceItems.length}
-            activeCount={activeCount}
-            inactiveCount={inactiveCount}
-            onChange={(value) => {
-              setStatusFilter(value);
-              setPage(0);
-            }}
-          />
-        </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* SEARCH */}
-          <div className="relative">
-            <Search
-              size={
-                18
-              }
-              className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
-            />
->>>>>>> origin/mingyeak
+          <input
+            value={
+              search
+            }
+            onChange={(
+              event,
+            ) => {
+              const value =
+                event
+                  .target
+                  .value;
 
-            <input
-              value={
-                search
-              }
-              onChange={(
-                event,
-              ) => {
-                const value =
-                  event
-                    .target
-                    .value;
+              setSearch(
+                value,
+              );
 
-                setSearch(
-                  value,
-                );
-
-                setShowSuggestions(
-                  value
-                    .trim()
-                    .length >
+              setShowSuggestions(
+                value
+                  .trim()
+                  .length >
                   0,
+              );
+            }}
+            onFocus={() => {
+              if (
+                search.trim()
+              ) {
+                setShowSuggestions(
+                  true,
                 );
-              }}
-              onFocus={() => {
-                if (
-                  search.trim()
-                ) {
-                  setShowSuggestions(
-                    true,
-                  );
-                }
-              }}
-              onKeyDown={(
-                event,
-              ) => {
-                if (
-                  event.key ===
+              }
+            }}
+            onKeyDown={(
+              event,
+            ) => {
+              if (
+                event.key ===
                   "Escape" ||
-                  event.key ===
+                event.key ===
                   "Enter"
-                ) {
-                  setShowSuggestions(
-                    false,
-                  );
-                }
-              }}
-              placeholder="ស្វែងរកឈ្មោះ កូដ ការពិពណ៌នា ឬអាយុ..."
-              className="h-[52px] w-[390px] rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
-            />
+              ) {
+                setShowSuggestions(
+                  false,
+                );
+              }
+            }}
+            placeholder="ស្វែងរកឈ្មោះ កូដ ការពិពណ៌នា ឬអាយុ..."
+            className="h-[52px] w-[390px] rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+          />
 
-            {search && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearch(
-                    "",
-                  );
-
-                  setShowSuggestions(
-                    false,
-                  );
-                }}
-                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
-              >
-                <X
-                  size={
-                    16
-                  }
-                />
-              </button>
-            )}
-
-            {showSuggestions &&
-              normalizedSearch && (
-                <div className="absolute left-0 top-[52px] z-[100] w-[390px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
-                  {suggestions.length ===
-                    0 ? (
-                    <div className="px-5 py-6 text-center">
-                      <UsersRound
-                        size={
-                          32
-                        }
-                        className="mx-auto text-secondary-600"
-                      />
-
-                      <p className="mt-2 text-lg text-secondary-600">
-                        មិនមានក្រុមអាយុដែលត្រូវគ្នា
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="max-h-[340px] overflow-y-auto p-2">
-                      {suggestions.map(
-                        (
-                          item,
-                        ) => (
-                          <button
-                            key={
-                              item.uuid
-                            }
-                            type="button"
-                            onMouseDown={(
-                              event,
-                            ) =>
-                              event.preventDefault()
-                            }
-                            onClick={() => {
-                              setSearch(
-                                item.name,
-                              );
-
-                              setShowSuggestions(
-                                false,
-                              );
-                            }}
-                            className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
-                          >
-                            <div className="min-w-0">
-                              <p className="truncate text-lg font-semibold text-gray-800">
-                                {
-                                  item.name
-                                }
-                              </p>
-
-                              <p className="mt-0.5 text-lg text-gray-400">
-                                {
-                                  item.code
-                                }{" "}
-                                ·{" "}
-                                {
-                                  item.minAge
-                                }
-                                –
-                                {
-                                  item.maxAge
-                                }{" "}
-                                ឆ្នាំ
-                              </p>
-                            </div>
-                          </button>
-                        ),
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-          </div>
-
-          {/* PAGE SIZE */}
-          <div className="relative shrink-0">
+          {search && (
             <button
               type="button"
               onClick={() => {
-                setSizeOpen((current) => !current);
-                setSortOpen(false);
-                setShowSuggestions(false);
-              }}
-              className="flex h-[52px] min-w-[150px] items-center justify-between gap-3 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-700 transition hover:border-primary-200 hover:bg-primary-50"
-            >
-              <span className="text-gray-700">{size} / ទំព័រ</span>
+                setSearch(
+                  "",
+                );
 
-              <ChevronDown
-                size={18}
-                className={`text-gray-400 transition-transform ${sizeOpen ? "rotate-180" : ""
-                  }`}
+                setShowSuggestions(
+                  false,
+                );
+              }}
+              className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
+            >
+              <X
+                size={
+                  16
+                }
               />
             </button>
+          )}
 
-<<<<<<< HEAD
           {showSuggestions &&
             normalizedSearch && (
               <div className="absolute left-0 top-[52px] z-[100] w-[390px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
@@ -999,130 +875,63 @@ export default function AgeGroupManager() {
                   const selected =
                     sortMode ===
                     option.value;
-=======
-            {sizeOpen && (
-              <div className="absolute right-0 top-[60px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                {[10, 20, 50].map((value) => {
-                  const selected = size === value;
->>>>>>> origin/mingyeak
 
                   return (
                     <button
-                      key={value}
+                      key={
+                        option.value
+                      }
                       type="button"
                       onClick={() => {
-                        setSize(value);
-                        setPage(0);
-                        setSizeOpen(false);
+                        setSortMode(
+                          option.value,
+                        );
+
+                        setSortOpen(
+                          false,
+                        );
+
+                        setPage(
+                          0,
+                        );
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-lg transition ${selected
-                          ? "bg-primary-50 font-medium text-primary-800"
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg ${
+                        selected
+                          ? "bg-primary-50 text-primary-800"
                           : "text-gray-600 hover:bg-gray-50"
-                        }`}
+                      }`}
                     >
-                      <span>{value} / ទំព័រ</span>
+                      <span>
+                        {
+                          option.label
+                        }
+                      </span>
 
                       {selected && (
-                        <Check size={18} className="text-primary-800" />
+                        <Check
+                          size={
+                            16
+                          }
+                        />
                       )}
                     </button>
                   );
-<<<<<<< HEAD
                 },
               )}
             </div>
           )}
-=======
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* SORT */}
-          <div className="relative shrink-0">
-            <button
-              type="button"
-              onClick={() => {
-                setSortOpen((current) => !current);
-                setSizeOpen(false);
-                setShowSuggestions(false);
-              }}
-              className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800"
-              title="តម្រៀប"
-            >
-              <ArrowUpDown size={20} />
-            </button>
-
-            {sortOpen && (
-              <div className="absolute right-0 top-[60px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
-                  តម្រៀប
-                </p>
-
-                {sortOptions.map(
-                  (
-                    option,
-                  ) => {
-                    const selected =
-                      sortMode ===
-                      option.value;
-
-                    return (
-                      <button
-                        key={
-                          option.value
-                        }
-                        type="button"
-                        onClick={() => {
-                          setSortMode(
-                            option.value,
-                          );
-
-                          setSortOpen(
-                            false,
-                          );
-
-                          setPage(
-                            0,
-                          );
-                        }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg ${selected
-                            ? "bg-primary-50 text-primary-800"
-                            : "text-gray-600 hover:bg-gray-50"
-                          }`}
-                      >
-                        <span>
-                          {
-                            option.label
-                          }
-                        </span>
-
-                        {selected && (
-                          <Check
-                            size={
-                              16
-                            }
-                          />
-                        )}
-                      </button>
-                    );
-                  },
-                )}
-              </div>
-            )}
-          </div>
->>>>>>> origin/mingyeak
         </div>
       </div>
 
       {/* NOTICE */}
       {notice && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-lg ${notice.type ===
-              "success"
+          className={`rounded-2xl border px-4 py-3 text-lg ${
+            notice.type ===
+            "success"
               ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
-            }`}
+          }`}
         >
           {
             notice.text

@@ -152,10 +152,11 @@ export default function IngredientsTable({
 
                 <td className="px-6 py-5">
                   <span
-                    className={`inline-flex rounded-full px-3 py-1 text-lg ${item.isActive
+                    className={`inline-flex rounded-full px-3 py-1 text-lg ${
+                      item.isActive
                         ? "bg-primary-50 text-primary-700"
                         : "bg-gray-100 text-gray-500"
-                      }`}
+                    }`}
                   >
                     {item.isActive
                       ? "សកម្ម"
@@ -253,7 +254,6 @@ export default function IngredientsTable({
 
           {items.length ===
             0 && (
-<<<<<<< HEAD
             <tr>
               <td
                 colSpan={6}
@@ -265,26 +265,13 @@ export default function IngredientsTable({
                   }
                   className="mx-auto text-gray-300"
                 />
-=======
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-5 py-16 text-center"
-                >
-                  <Leaf
-                    size={
-                      38
-                    }
-                    className="mx-auto text-gray-300"
-                  />
->>>>>>> origin/mingyeak
 
-                  <p className="mt-3 text-lg text-gray-500">
-                    មិនមានទិន្នន័យគ្រឿងផ្សំ
-                  </p>
-                </td>
-              </tr>
-            )}
+                <p className="mt-3 text-lg text-gray-500">
+                  មិនមានទិន្នន័យគ្រឿងផ្សំ
+                </p>
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

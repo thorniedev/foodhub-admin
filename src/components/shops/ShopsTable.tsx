@@ -6,6 +6,9 @@ import { Eye, MapPin, MoreVertical, Pencil, Settings2, Store as StoreIcon, Trash
 import type { Store, StoreStatusAction } from "@/src/types/shop";
 import {
   displayStoreLocation,
+  getStoreAccountStatus,
+  getStoreLiveStatus,
+  getStoreReviewStatus,
   storeLogoCandidate,
 } from "@/src/lib/shopFormat";
 import StoreMediaImage from "./detail/StoreMediaImage";
@@ -117,10 +120,7 @@ export default function ShopsTable({
                     onClick={() => onStatus(store, "REVIEW")}
                     className="rounded-full transition focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <StatusBadge
-                      value={store.reviewStatus || "APPROVED"}
-                      kind="review"
-                    />
+                    <ReviewStatusBadge status={store.reviewStatus} />
                   </button>
                 </td>
 
@@ -132,16 +132,13 @@ export default function ShopsTable({
                     onClick={() => onStatus(store, "ACCOUNT")}
                     className="rounded-full transition focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <StatusBadge
-                      value={store.accountStatus || "ACTIVE"}
-                      kind="account"
-                    />
+                    <AccountStatusBadge status={store.accountStatus} />
                   </button>
                 </td>
 
-                {/* Open Now */}
+                {/* Open Now / Operating Status */}
                 <td className="px-2 py-3 text-center">
-                  <OpenStatusBadge isOpen={store.isOpenNow} />
+                  <LiveStatusBadge store={store} />
                 </td>
 
                 {/* Actions */}
@@ -290,6 +287,85 @@ function ShopRowActions({
   );
 }
 
+export function ReviewStatusBadge({ status }: { status?: string | null }) {
+  const info = getStoreReviewStatus(status);
+  const className = info.isPositive
+    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+    : info.isDanger
+      ? "bg-red-50 text-red-600 border-red-100"
+      : "bg-amber-50 text-amber-700 border-amber-100";
+
+  const dotClassName = info.isPositive
+    ? "bg-emerald-500"
+    : info.isDanger
+      ? "bg-red-500"
+      : "bg-amber-500";
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${className}`}
+      title={info.note}
+    >
+      <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
+      {info.label}
+    </span>
+  );
+}
+
+export function AccountStatusBadge({ status }: { status?: string | null }) {
+  const info = getStoreAccountStatus(status);
+  const className = info.isPositive
+    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+    : info.isDanger
+      ? "bg-red-50 text-red-600 border-red-100"
+      : "bg-gray-50 text-gray-600 border-gray-150";
+
+  const dotClassName = info.isPositive
+    ? "bg-emerald-500"
+    : info.isDanger
+      ? "bg-red-500"
+      : "bg-gray-400";
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${className}`}
+      title={info.note}
+    >
+      <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
+      {info.label}
+    </span>
+  );
+}
+
+export function LiveStatusBadge({ store }: { store: Store }) {
+  const info = getStoreLiveStatus(store);
+  const className = info.isPositive
+    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+    : info.isDanger
+      ? "bg-red-50 text-red-600 border-red-100"
+      : info.isWarning
+        ? "bg-amber-50 text-amber-700 border-amber-100"
+        : "bg-gray-50 text-gray-500 border-gray-150";
+
+  const dotClassName = info.isPositive
+    ? "bg-emerald-500"
+    : info.isDanger
+      ? "bg-red-500"
+      : info.isWarning
+        ? "bg-amber-500"
+        : "bg-gray-400";
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${className}`}
+      title={info.note}
+    >
+      <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
+      {info.label}
+    </span>
+  );
+}
+
 export function StatusBadge({
   value,
   kind,
@@ -297,80 +373,16 @@ export function StatusBadge({
   value: string;
   kind: "review" | "account" | "operating";
 }) {
-  const normalized = String(value || "UNKNOWN").toUpperCase();
-
-  const positive = ["APPROVED", "ACTIVE", "OPEN"].includes(normalized);
-  const warning = ["PENDING", "TEMPORARILY_CLOSED"].includes(normalized);
-  const danger = ["REJECTED", "SUSPENDED", "CLOSED"].includes(normalized);
-
-  const className = positive
-    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-    : warning
-      ? "bg-amber-50 text-amber-700 border-amber-100"
-      : danger
-        ? "bg-red-50 text-red-600 border-red-100"
-        : "bg-gray-50 text-gray-600 border-gray-150";
-
-  const dotClassName = positive
-    ? "bg-emerald-500"
-    : warning
-      ? "bg-amber-500"
-      : danger
-        ? "bg-red-500"
-        : "bg-gray-400";
-
-  const label =
-    normalized === "APPROVED"
-      ? "បានអនុម័ត"
-      : normalized === "PENDING"
-        ? "រង់ចាំពិនិត្យ"
-        : normalized === "REJECTED"
-          ? "បានបដិសេធ"
-          : normalized === "ACTIVE"
-            ? "សកម្ម"
-            : normalized === "SUSPENDED"
-              ? "ផ្អាក"
-              : normalized === "OPEN"
-                ? "បើក"
-                : normalized === "CLOSED"
-                  ? "បិទ"
-                  : normalized === "TEMPORARILY_CLOSED"
-                    ? "បិទបណ្តោះអាសន្ន"
-                    : normalized;
-
+  if (kind === "review") return <ReviewStatusBadge status={value} />;
+  if (kind === "account") return <AccountStatusBadge status={value} />;
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${className}`}
-    >
-      <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
-      {label}
-    </span>
-  );
-}
-
-function OpenStatusBadge({ isOpen }: { isOpen: boolean | null | undefined }) {
-  if (isOpen === true) {
-    return (
-      <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-emerald-50 px-3.5 py-1 text-sm font-semibold text-emerald-700 border border-emerald-100">
-        <span className="h-2 w-2 rounded-full bg-emerald-500" />
-        បើក
-      </span>
-    );
-  }
-
-  if (isOpen === false) {
-    return (
-      <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-red-50 px-3.5 py-1 text-sm font-semibold text-red-600 border border-red-100">
-        <span className="h-2 w-2 rounded-full bg-red-500" />
-        បិទ
-      </span>
-    );
-  }
-
-  return (
-    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-gray-50 px-3.5 py-1 text-sm font-semibold text-gray-500 border border-gray-150">
-      <span className="h-2 w-2 rounded-full bg-gray-400" />
-      —
-    </span>
+    <LiveStatusBadge
+      store={
+        {
+          operatingStatus: value,
+          isOpenNow: value === "OPEN",
+        } as Store
+      }
+    />
   );
 }

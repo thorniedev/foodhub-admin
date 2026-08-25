@@ -17,7 +17,7 @@ type Props = {
   deleting: boolean;
   onClose: () => void;
   onConfirm:
-  () => Promise<void>;
+    () => Promise<void>;
 };
 
 export default function DeleteAgeGroupConfirmModal({

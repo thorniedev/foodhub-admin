@@ -25,9 +25,9 @@ export const foodTypeApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-            ...result.map(({ id }) => ({ type: "FoodType" as const, id })),
-            { type: "FoodType" as const, id: "LIST" },
-          ]
+              ...result.map(({ id }) => ({ type: "FoodType" as const, id })),
+              { type: "FoodType" as const, id: "LIST" },
+            ]
           : [{ type: "FoodType" as const, id: "LIST" }],
     }),
 
@@ -54,95 +54,95 @@ export const foodTypeApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "FoodType", id: "LIST" }],
     }),
 
-    updateFoodType: builder.mutation<
-      FoodType,
-      { id: string; changes: Partial<FoodType> }
-    >({
-      queryFn: async ({ id, changes }) => {
-        const data = await ensureStore();
-        const index = data.findIndex((f) => f.id === id);
+updateFoodType: builder.mutation<
+  FoodType,
+  { id: string; changes: Partial<FoodType> }
+>({
+  queryFn: async ({ id, changes }) => {
+    const data = await ensureStore();
+    const index = data.findIndex((f) => f.id === id);
 
-        if (index === -1) {
-          return {
-            error: {
-              status: 404,
-              data: "Food type not found",
-            } as any,
-          };
-        }
+    if (index === -1) {
+      return {
+        error: {
+          status: 404,
+          data: "Food type not found",
+        } as any,
+      };
+    }
 
-        const updated: FoodType = {
-          ...data[index],
-          ...changes,
-        };
+    const updated: FoodType = {
+      ...data[index],
+      ...changes,
+    };
 
-        memoryStore = [
-          ...data.slice(0, index),
-          updated,
-          ...data.slice(index + 1),
-        ];
+    memoryStore = [
+      ...data.slice(0, index),
+      updated,
+      ...data.slice(index + 1),
+    ];
 
-        return { data: updated };
-      },
+    return { data: updated };
+  },
 
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "FoodType", id },
-        { type: "FoodType", id: "LIST" },
-      ],
-    }),
+  invalidatesTags: (_result, _error, { id }) => [
+    { type: "FoodType", id },
+    { type: "FoodType", id: "LIST" },
+  ],
+}),
 
-    deleteFoodType: builder.mutation<{ id: string }, string>({
-      queryFn: async (id) => {
-        const data = await ensureStore();
+deleteFoodType: builder.mutation<{ id: string }, string>({
+  queryFn: async (id) => {
+    const data = await ensureStore();
 
-        memoryStore = data.filter((f) => f.id !== id);
+    memoryStore = data.filter((f) => f.id !== id);
 
-        return {
-          data: { id },
-        };
-      },
+    return {
+      data: { id },
+    };
+  },
 
-      invalidatesTags: (_result, _error, id) => [
-        { type: "FoodType", id },
-        { type: "FoodType", id: "LIST" },
-      ],
-    }),
+  invalidatesTags: (_result, _error, id) => [
+    { type: "FoodType", id },
+    { type: "FoodType", id: "LIST" },
+  ],
+}),
 
-    toggleFoodTypeStatus: builder.mutation<FoodType, string>({
-      queryFn: async (id) => {
-        const data = await ensureStore();
-        const index = data.findIndex((f) => f.id === id);
+toggleFoodTypeStatus: builder.mutation<FoodType, string>({
+  queryFn: async (id) => {
+    const data = await ensureStore();
+    const index = data.findIndex((f) => f.id === id);
 
-        if (index === -1) {
-          return {
-            error: {
-              status: 404,
-              data: "Food type not found",
-            } as any,
-          };
-        }
+    if (index === -1) {
+      return {
+        error: {
+          status: 404,
+          data: "Food type not found",
+        } as any,
+      };
+    }
 
-        const current = data[index];
+    const current = data[index];
 
-        const updated: FoodType = {
-          ...current,
-          status: current.status === "active" ? "disabled" : "active",
-        };
+    const updated: FoodType = {
+      ...current,
+      status: current.status === "active" ? "disabled" : "active",
+    };
 
-        memoryStore = [
-          ...data.slice(0, index),
-          updated,
-          ...data.slice(index + 1),
-        ];
+    memoryStore = [
+      ...data.slice(0, index),
+      updated,
+      ...data.slice(index + 1),
+    ];
 
-        return { data: updated };
-      },
+    return { data: updated };
+  },
 
-      invalidatesTags: (_result, _error, id) => [
-        { type: "FoodType", id },
-        { type: "FoodType", id: "LIST" },
-      ],
-    }),
+  invalidatesTags: (_result, _error, id) => [
+    { type: "FoodType", id },
+    { type: "FoodType", id: "LIST" },
+  ],
+}),
   }),
   overrideExisting: true,
 });

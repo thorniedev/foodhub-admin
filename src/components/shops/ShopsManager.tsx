@@ -73,9 +73,11 @@ const CITY_OPTIONS = [
 ];
 
 const OPEN_OPTIONS = [
-  { value: "ALL", label: "ស្ថានភាពហាង" },
-  { value: "OPEN", label: "កំពុងដំណើរការ" },
-  { value: "CLOSED", label: "បានបិទដំណើរការ" },
+  { value: "ALL", label: "ស្ថានភាពហាងទាំងអស់" },
+  { value: "OPEN", label: "កំពុងបើកដំណើរការ" },
+  { value: "TEMPORARILY_CLOSED", label: "បិទបណ្តោះអាសន្ន" },
+  { value: "CLOSED", label: "បានបិទ" },
+  { value: "PERMANENTLY_CLOSED", label: "បិទជាអចិន្ត្រៃយ៍" },
 ];
 
 const SORT_OPTIONS: Array<{ value: StoreSort; label: string }> = [
@@ -130,7 +132,7 @@ export default function ShopsManager() {
     size,
   });
 
-  /* Optimized count queries: skip fetching count for active tab or during search */
+  /* Optimized count queries and known status lookups */
   const isSearching = Boolean(serverQuery);
 
   const { data: approvedData } = useGetShopsQuery(
@@ -147,18 +149,36 @@ export default function ShopsManager() {
     {
       reviewStatus: "PENDING",
       page: 0,
-      size: 1,
+      size: 100,
     },
-    { skip: isSearching || filter === "PENDING" },
+    { skip: isSearching },
   );
 
   const { data: rejectedData } = useGetShopsQuery(
     {
       reviewStatus: "REJECTED",
       page: 0,
-      size: 1,
+      size: 100,
     },
-    { skip: isSearching || filter === "REJECTED" },
+    { skip: isSearching },
+  );
+
+  const { data: suspendedData } = useGetShopsQuery(
+    {
+      accountStatus: "SUSPENDED",
+      page: 0,
+      size: 100,
+    },
+    { skip: isSearching },
+  );
+
+  const { data: archivedData } = useGetShopsQuery(
+    {
+      accountStatus: "ARCHIVED",
+      page: 0,
+      size: 100,
+    },
+    { skip: isSearching },
   );
 
   const { data: allData } = useGetShopsQuery(
@@ -214,7 +234,62 @@ export default function ShopsManager() {
     return () => window.clearTimeout(timer);
   }, [searchInput, suggestionSelected]);
 
-  const stores = data?.contents ?? [];
+  const rejectedUuids = useMemo(() => {
+    const set = new Set<string>();
+    rejectedData?.contents?.forEach((s) => s.uuid && set.add(s.uuid));
+    return set;
+  }, [rejectedData]);
+
+  const pendingUuids = useMemo(() => {
+    const set = new Set<string>();
+    pendingData?.contents?.forEach((s) => s.uuid && set.add(s.uuid));
+    return set;
+  }, [pendingData]);
+
+  const suspendedUuids = useMemo(() => {
+    const set = new Set<string>();
+    suspendedData?.contents?.forEach((s) => s.uuid && set.add(s.uuid));
+    return set;
+  }, [suspendedData]);
+
+  const archivedUuids = useMemo(() => {
+    const set = new Set<string>();
+    archivedData?.contents?.forEach((s) => s.uuid && set.add(s.uuid));
+    return set;
+  }, [archivedData]);
+
+  const rawStores = data?.contents ?? [];
+  const stores = useMemo(() => {
+    return rawStores.map((store) => {
+      let reviewStatus = store.reviewStatus;
+      if (filter === "REJECTED" || rejectedUuids.has(store.uuid)) {
+        reviewStatus = "REJECTED";
+      } else if (filter === "PENDING" || pendingUuids.has(store.uuid)) {
+        reviewStatus = "PENDING";
+      } else if (filter === "APPROVED") {
+        reviewStatus = "APPROVED";
+      } else if (!reviewStatus || reviewStatus === "UNKNOWN") {
+        reviewStatus = "APPROVED";
+      }
+
+      let accountStatus = store.accountStatus;
+      if (suspendedUuids.has(store.uuid)) {
+        accountStatus = "SUSPENDED";
+      } else if (archivedUuids.has(store.uuid)) {
+        accountStatus = "ARCHIVED";
+      } else if (filter === "APPROVED") {
+        accountStatus = "ACTIVE";
+      } else if (!accountStatus || accountStatus === "UNKNOWN") {
+        accountStatus = "ACTIVE";
+      }
+
+      return {
+        ...store,
+        reviewStatus,
+        accountStatus,
+      };
+    });
+  }, [rawStores, filter, rejectedUuids, pendingUuids, suspendedUuids, archivedUuids]);
 
   /* Dynamic counts: Uses main query total for active tab and skips duplicate requests */
   const counts = {
@@ -234,11 +309,19 @@ export default function ShopsManager() {
     }
 
     // Open/Close filter
-    if (openFilter === "OPEN" && store.isOpenNow !== true) {
-      return false;
-    }
-    if (openFilter === "CLOSED" && store.isOpenNow !== false) {
-      return false;
+    if (openFilter !== "ALL") {
+      if (openFilter === "OPEN" && store.isOpenNow !== true && store.operatingStatus !== "OPEN") {
+        return false;
+      }
+      if (openFilter === "TEMPORARILY_CLOSED" && store.operatingStatus !== "TEMPORARILY_CLOSED") {
+        return false;
+      }
+      if (openFilter === "CLOSED" && store.operatingStatus !== "CLOSED" && store.isOpenNow !== false) {
+        return false;
+      }
+      if (openFilter === "PERMANENTLY_CLOSED" && store.operatingStatus !== "PERMANENTLY_CLOSED") {
+        return false;
+      }
     }
 
     return true;

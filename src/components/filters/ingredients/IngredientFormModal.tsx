@@ -62,13 +62,13 @@ export default function IngredientFormModal({
     setValues(
       item
         ? {
-          code: item.code ?? "",
-          name: item.name ?? "",
-          description:
-            item.description ?? "",
-          isActive:
-            item.isActive,
-        }
+            code: item.code ?? "",
+            name: item.name ?? "",
+            description:
+              item.description ?? "",
+            isActive:
+              item.isActive,
+          }
         : emptyValues,
     );
   }, [open, item]);

@@ -131,10 +131,11 @@ export default function MedicalConditionsTable({
 
                 <td className="px-6 py-5">
                   <span
-                    className={`inline-flex rounded-full px-3 py-1 text-lg ${item.active
+                    className={`inline-flex rounded-full px-3 py-1 text-lg ${
+                      item.active
                         ? "bg-primary-50 text-primary-700"
                         : "bg-gray-100 text-gray-500"
-                      }`}
+                    }`}
                   >
                     {item.active
                       ? "សកម្ម"
@@ -241,7 +242,6 @@ export default function MedicalConditionsTable({
 
           {items.length ===
             0 && (
-<<<<<<< HEAD
             <tr>
               <td
                 colSpan={6}
@@ -251,24 +251,13 @@ export default function MedicalConditionsTable({
                   size={36}
                   className="mx-auto text-secondary-600"
                 />
-=======
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-5 py-16 text-center"
-                >
-                  <HeartPulse
-                    size={36}
-                    className="mx-auto text-secondary-600"
-                  />
->>>>>>> origin/mingyeak
 
-                  <p className="mt-3 text-lg text-secondary-600">
-                    មិនមានទិន្នន័យស្ថានភាពសុខភាព
-                  </p>
-                </td>
-              </tr>
-            )}
+                <p className="mt-3 text-lg text-secondary-600">
+                  មិនមានទិន្នន័យស្ថានភាពសុខភាព
+                </p>
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

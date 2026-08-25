@@ -175,7 +175,7 @@ export function storeCoverCandidate(store: Store): string | null {
 }
 
 export interface StoreLiveStatusInfo {
-  status: "OPEN" | "CLOSED" | "TEMPORARILY_CLOSED" | "UNKNOWN";
+  status: "OPEN" | "CLOSED" | "TEMPORARILY_CLOSED" | "PERMANENTLY_CLOSED" | "UNKNOWN";
   label: string;
   note: string;
   isPositive: boolean;
@@ -203,6 +203,19 @@ export function getStoreLiveStatus(store?: {
   }
 
   const op = String(store.operatingStatus || "").toUpperCase();
+
+  if (op === "PERMANENTLY_CLOSED") {
+    return {
+      status: "PERMANENTLY_CLOSED",
+      label: "បិទជាអចិន្ត្រៃយ៍",
+      note: "ហាងបានបិទដំណើរការជាអចិន្ត្រៃយ៍",
+      isPositive: false,
+      isWarning: false,
+      isDanger: true,
+      colorClass: "text-red-700",
+      bgClass: "bg-red-50",
+    };
+  }
 
   if (op === "TEMPORARILY_CLOSED") {
     return {
@@ -291,22 +304,9 @@ export function getStoreReviewStatus(reviewStatus?: string | null): {
   colorClass: string;
   bgClass: string;
 } {
-  const rv = String(reviewStatus || "").toUpperCase();
+  const rv = String(reviewStatus || "").toUpperCase().trim();
 
-  if (rv === "APPROVED") {
-    return {
-      status: "APPROVED",
-      label: "បានអនុម័ត",
-      note: "បានអនុម័តដោយ Admin",
-      isPositive: true,
-      isWarning: false,
-      isDanger: false,
-      colorClass: "text-[#137A3D]",
-      bgClass: "bg-emerald-50",
-    };
-  }
-
-  if (rv === "REJECTED") {
+  if (rv === "REJECTED" || rv === "REJECT") {
     return {
       status: "REJECTED",
       label: "បានបដិសេធ",
@@ -319,15 +319,28 @@ export function getStoreReviewStatus(reviewStatus?: string | null): {
     };
   }
 
+  if (rv === "PENDING" || rv === "IN_REVIEW" || rv === "WAITING") {
+    return {
+      status: "PENDING",
+      label: "រង់ចាំពិនិត្យ",
+      note: "កំពុងរង់ចាំការពិនិត្យពី Admin",
+      isPositive: false,
+      isWarning: true,
+      isDanger: false,
+      colorClass: "text-amber-600",
+      bgClass: "bg-amber-50",
+    };
+  }
+
   return {
-    status: "PENDING",
-    label: "កំពុងរង់ចាំ",
-    note: "កំពុងរង់ចាំការពិនិត្យពី Admin",
-    isPositive: false,
-    isWarning: true,
+    status: "APPROVED",
+    label: "បានអនុម័ត",
+    note: "បានអនុម័តដោយ Admin",
+    isPositive: true,
+    isWarning: false,
     isDanger: false,
-    colorClass: "text-amber-600",
-    bgClass: "bg-amber-50",
+    colorClass: "text-[#137A3D]",
+    bgClass: "bg-emerald-50",
   };
 }
 
@@ -341,9 +354,9 @@ export function getStoreAccountStatus(accountStatus?: string | null): {
   colorClass: string;
   bgClass: string;
 } {
-  const ac = String(accountStatus || "").toUpperCase();
+  const ac = String(accountStatus || "").toUpperCase().trim();
 
-  if (ac === "SUSPENDED") {
+  if (ac === "SUSPENDED" || ac === "SUSPEND") {
     return {
       status: "SUSPENDED",
       label: "ត្រូវបានផ្អាក",
@@ -356,11 +369,11 @@ export function getStoreAccountStatus(accountStatus?: string | null): {
     };
   }
 
-  if (ac === "INACTIVE") {
+  if (ac === "ARCHIVED" || ac === "ARCHIVE" || ac === "INACTIVE") {
     return {
-      status: "INACTIVE",
-      label: "អសកម្ម",
-      note: "គណនីបិទជាបណ្តោះអាសន្ន",
+      status: "ARCHIVED",
+      label: "ទុកក្នុងប័ណ្ណសារ",
+      note: "គណនីត្រូវបានទុកក្នុងប័ណ្ណសារ",
       isPositive: false,
       isWarning: false,
       isDanger: false,

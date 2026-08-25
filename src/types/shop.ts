@@ -3,9 +3,14 @@ export type StoreOperatingStatus =
   | "OPEN"
   | "CLOSED"
   | "TEMPORARILY_CLOSED"
+  | "PERMANENTLY_CLOSED"
   | "UNKNOWN"
   | string;
-export type StoreAccountStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED" | string;
+export type StoreAccountStatus =
+  | "ACTIVE"
+  | "SUSPENDED"
+  | "ARCHIVED"
+  | string;
 
 /**
  * Mirrors the backend `StoreSocialPlatform` enum. The API rejects any other

@@ -96,14 +96,14 @@ export default function AgeGroupsPagination({
           disabled={
             disabled ||
             page >=
-            safeTotalPages -
-            1
+              safeTotalPages -
+                1
           }
           onClick={() =>
             onPageChange(
               Math.min(
                 safeTotalPages -
-                1,
+                  1,
 
                 page + 1,
               ),

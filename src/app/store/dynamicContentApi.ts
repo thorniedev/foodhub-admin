@@ -112,9 +112,9 @@ export const dynamicContentApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-            ...result.map(({ id }) => ({ type: "DynamicContent" as const, id })),
-            { type: "DynamicContent" as const, id: "LIST" },
-          ]
+              ...result.map(({ id }) => ({ type: "DynamicContent" as const, id })),
+              { type: "DynamicContent" as const, id: "LIST" },
+            ]
           : [{ type: "DynamicContent" as const, id: "LIST" }],
     }),
 
@@ -128,182 +128,182 @@ export const dynamicContentApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "DynamicContent", id: "LIST" }],
     }),
 
-    updateFilterOption: builder.mutation<
-      FilterOption,
-      {
-        id: string;
-        changes: Partial<FilterOption>;
+ updateFilterOption: builder.mutation<
+  FilterOption,
+  {
+    id: string;
+    changes: Partial<FilterOption>;
+  }
+>({
+  queryFn: async ({ id, changes }) => {
+    const data = await ensureOptionsStore();
+
+    const index = data.findIndex((option) => option.id === id);
+
+    if (index === -1) {
+      return {
+        error: {
+          status: 404,
+          data: "Option not found",
+        } as any,
+      };
+    }
+
+    const updated: FilterOption = {
+      ...data[index],
+      ...changes,
+    };
+
+    optionsStore = [
+      ...data.slice(0, index),
+      updated,
+      ...data.slice(index + 1),
+    ];
+
+    return {
+      data: updated,
+    };
+  },
+
+  invalidatesTags: (result, error, { id }) => [
+    {
+      type: "DynamicContent",
+      id,
+    },
+    {
+      type: "DynamicContent",
+      id: "LIST",
+    },
+  ],
+}),
+
+deleteFilterOption: builder.mutation<
+  { id: string },
+  string
+>({
+  queryFn: async (id) => {
+    const data = await ensureOptionsStore();
+
+    const exists = data.some((option) => option.id === id);
+
+    if (!exists) {
+      return {
+        error: {
+          status: 404,
+          data: "Option not found",
+        } as any,
+      };
+    }
+
+    optionsStore = data.filter(
+      (option) => option.id !== id,
+    );
+
+    return {
+      data: {
+        id,
+      },
+    };
+  },
+
+  invalidatesTags: (result, error, id) => [
+    {
+      type: "DynamicContent",
+      id,
+    },
+    {
+      type: "DynamicContent",
+      id: "LIST",
+    },
+  ],
+}),
+
+reorderFilterOption: builder.mutation<
+  FilterOption[],
+  {
+    id: string;
+    direction: "up" | "down";
+  }
+>({
+  queryFn: async ({ id, direction }) => {
+    const data = await ensureOptionsStore();
+
+    const current = data.find(
+      (option) => option.id === id,
+    );
+
+    if (!current) {
+      return {
+        error: {
+          status: 404,
+          data: "Option not found",
+        } as any,
+      };
+    }
+
+    const siblings = data
+      .filter(
+        (option) =>
+          option.groupKey === current.groupKey,
+      )
+      .sort((a, b) => a.order - b.order);
+
+    const currentIndex = siblings.findIndex(
+      (option) => option.id === id,
+    );
+
+    const targetIndex =
+      direction === "up"
+        ? currentIndex - 1
+        : currentIndex + 1;
+
+    if (
+      targetIndex < 0 ||
+      targetIndex >= siblings.length
+    ) {
+      return {
+        data: [...data],
+      };
+    }
+
+    const target = siblings[targetIndex];
+
+    const currentOrder = current.order;
+
+    const updatedCurrent: FilterOption = {
+      ...current,
+      order: target.order,
+    };
+
+    const updatedTarget: FilterOption = {
+      ...target,
+      order: currentOrder,
+    };
+
+    optionsStore = data.map((option) => {
+      if (option.id === updatedCurrent.id) {
+        return updatedCurrent;
       }
-    >({
-      queryFn: async ({ id, changes }) => {
-        const data = await ensureOptionsStore();
 
-        const index = data.findIndex((option) => option.id === id);
-
-        if (index === -1) {
-          return {
-            error: {
-              status: 404,
-              data: "Option not found",
-            } as any,
-          };
-        }
-
-        const updated: FilterOption = {
-          ...data[index],
-          ...changes,
-        };
-
-        optionsStore = [
-          ...data.slice(0, index),
-          updated,
-          ...data.slice(index + 1),
-        ];
-
-        return {
-          data: updated,
-        };
-      },
-
-      invalidatesTags: (result, error, { id }) => [
-        {
-          type: "DynamicContent",
-          id,
-        },
-        {
-          type: "DynamicContent",
-          id: "LIST",
-        },
-      ],
-    }),
-
-    deleteFilterOption: builder.mutation<
-      { id: string },
-      string
-    >({
-      queryFn: async (id) => {
-        const data = await ensureOptionsStore();
-
-        const exists = data.some((option) => option.id === id);
-
-        if (!exists) {
-          return {
-            error: {
-              status: 404,
-              data: "Option not found",
-            } as any,
-          };
-        }
-
-        optionsStore = data.filter(
-          (option) => option.id !== id,
-        );
-
-        return {
-          data: {
-            id,
-          },
-        };
-      },
-
-      invalidatesTags: (result, error, id) => [
-        {
-          type: "DynamicContent",
-          id,
-        },
-        {
-          type: "DynamicContent",
-          id: "LIST",
-        },
-      ],
-    }),
-
-    reorderFilterOption: builder.mutation<
-      FilterOption[],
-      {
-        id: string;
-        direction: "up" | "down";
+      if (option.id === updatedTarget.id) {
+        return updatedTarget;
       }
-    >({
-      queryFn: async ({ id, direction }) => {
-        const data = await ensureOptionsStore();
 
-        const current = data.find(
-          (option) => option.id === id,
-        );
+      return option;
+    });
 
-        if (!current) {
-          return {
-            error: {
-              status: 404,
-              data: "Option not found",
-            } as any,
-          };
-        }
+    return {
+      data: [...optionsStore],
+    };
+  },
 
-        const siblings = data
-          .filter(
-            (option) =>
-              option.groupKey === current.groupKey,
-          )
-          .sort((a, b) => a.order - b.order);
-
-        const currentIndex = siblings.findIndex(
-          (option) => option.id === id,
-        );
-
-        const targetIndex =
-          direction === "up"
-            ? currentIndex - 1
-            : currentIndex + 1;
-
-        if (
-          targetIndex < 0 ||
-          targetIndex >= siblings.length
-        ) {
-          return {
-            data: [...data],
-          };
-        }
-
-        const target = siblings[targetIndex];
-
-        const currentOrder = current.order;
-
-        const updatedCurrent: FilterOption = {
-          ...current,
-          order: target.order,
-        };
-
-        const updatedTarget: FilterOption = {
-          ...target,
-          order: currentOrder,
-        };
-
-        optionsStore = data.map((option) => {
-          if (option.id === updatedCurrent.id) {
-            return updatedCurrent;
-          }
-
-          if (option.id === updatedTarget.id) {
-            return updatedTarget;
-          }
-
-          return option;
-        });
-
-        return {
-          data: [...optionsStore],
-        };
-      },
-
-      invalidatesTags: [
-        {
-          type: "DynamicContent",
-          id: "LIST",
-        },
-      ],
-    }),
+  invalidatesTags: [
+    {
+      type: "DynamicContent",
+      id: "LIST",
+    },
+  ],
+}),
   }),
   overrideExisting: true,
 });

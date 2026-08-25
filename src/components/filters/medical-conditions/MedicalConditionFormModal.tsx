@@ -60,12 +60,12 @@ export default function MedicalConditionFormModal({
     setForm(
       item
         ? {
-          code: item.code,
-          name: item.name,
-          description:
-            item.description ?? "",
-          active: item.active,
-        }
+            code: item.code,
+            name: item.name,
+            description:
+              item.description ?? "",
+            active: item.active,
+          }
         : EMPTY_FORM,
     );
 

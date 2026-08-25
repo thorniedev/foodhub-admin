@@ -80,14 +80,14 @@ export default function AllergenFormModal({
     setForm(
       allergen
         ? {
-          code: allergen.code,
-          name: allergen.name,
-          description:
-            allergen.description ??
-            "",
-          active:
-            allergen.active,
-        }
+            code: allergen.code,
+            name: allergen.name,
+            description:
+              allergen.description ??
+              "",
+            active:
+              allergen.active,
+          }
         : EMPTY_FORM,
     );
 
@@ -412,16 +412,18 @@ function StatusSwitch({
         role="switch"
         aria-checked={active}
         onClick={onChange}
-        className={`relative h-7 w-12 shrink-0 rounded-full transition focus:outline-none focus:ring-4 focus:ring-primary-100 ${active
+        className={`relative h-7 w-12 shrink-0 rounded-full transition focus:outline-none focus:ring-4 focus:ring-primary-100 ${
+          active
             ? "bg-primary-700"
             : "bg-gray-300"
-          }`}
+        }`}
       >
         <span
-          className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-all ${active
+          className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-all ${
+            active
               ? "left-6"
               : "left-1"
-            }`}
+          }`}
         />
       </button>
     </div>
