@@ -82,20 +82,20 @@ export default function MenuItemSearchableSelect({
         disabled={disabled}
         aria-label={ariaLabel}
         onClick={() => (open ? close() : setOpen(true))}
-        className={`flex h-12 w-full items-center justify-between gap-3 rounded-xl border bg-gray-50 px-4 text-left text-sm text-gray-800 outline-none transition disabled:cursor-not-allowed disabled:opacity-50 ${
+        className={`flex h-11 w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-left text-base font-semibold text-gray-700 outline-none transition disabled:cursor-not-allowed disabled:bg-gray-50 disabled:opacity-70 ${
           invalid
             ? "border-red-300 bg-red-50/40"
             : open
-              ? "border-[#137A3D] bg-white ring-4 ring-emerald-50"
-              : "border-gray-200 hover:border-[#137A3D]/50"
+              ? "border-primary-600 bg-white ring-2 ring-primary-100"
+              : "border-gray-200 hover:border-primary-600/50"
         }`}
       >
-        <span className={`truncate ${selected ? "" : "text-gray-400"}`}>
+        <span className={`truncate ${selected ? "text-gray-700" : "text-gray-400 font-normal"}`}>
           {selected ? (
             <>
               {selected.label}
               {selected.sublabel && (
-                <span className="ml-1.5 text-xs text-gray-400">
+                <span className="ml-2 text-sm text-gray-400 font-normal">
                   {selected.sublabel}
                 </span>
               )}
@@ -105,7 +105,7 @@ export default function MenuItemSearchableSelect({
           )}
         </span>
 
-        <span className="flex shrink-0 items-center gap-1">
+        <span className="flex shrink-0 items-center gap-1.5">
           {clearable && value && !disabled && (
             <span
               role="button"
@@ -114,36 +114,36 @@ export default function MenuItemSearchableSelect({
                 event.stopPropagation();
                 onChange("");
               }}
-              className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              className="cursor-pointer rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
             >
-              <X size={13} />
+              <X size={16} />
             </span>
           )}
           <ChevronDown
-            size={16}
+            size={18}
             className={`text-gray-400 transition-transform duration-200 ${
-              open ? "rotate-180" : ""
+              open ? "rotate-180 text-primary-800" : ""
             }`}
           />
         </span>
       </button>
 
       {open && (
-        <div className="absolute left-0 right-0 top-[54px] z-[160] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-          <div className="flex items-center gap-2 border-b border-gray-100 px-3 py-2">
-            <Search size={15} className="shrink-0 text-gray-400" />
+        <div className="absolute left-0 right-0 top-[50px] z-[160] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl">
+          <div className="flex items-center gap-2.5 border-b border-gray-100 px-3.5 py-2.5">
+            <Search size={18} className="shrink-0 text-gray-400" />
             <input
               ref={searchRef}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="ស្វែងរក..."
-              className="h-8 w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
+              className="h-8 w-full bg-transparent text-base text-gray-800 outline-none placeholder:text-gray-400"
             />
           </div>
 
-          <div className="max-h-56 overflow-y-auto p-1.5">
+          <div className="max-h-60 overflow-y-auto p-1.5">
             {filtered.length === 0 && (
-              <p className="px-3 py-6 text-center text-sm text-gray-400">
+              <p className="px-3.5 py-4 text-center text-sm font-medium text-gray-400">
                 {emptyLabel}
               </p>
             )}
@@ -159,22 +159,22 @@ export default function MenuItemSearchableSelect({
                     onChange(option.value);
                     close();
                   }}
-                  className={`flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition ${
+                  className={`flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 text-left text-base font-semibold transition ${
                     isSelected
-                      ? "bg-emerald-50 text-[#137A3D]"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
+                      ? "bg-primary-50 text-primary-800 font-bold"
+                      : "text-gray-700 hover:bg-gray-50 hover:text-primary-800"
                   }`}
                 >
                   <span className="min-w-0">
                     <span className="block truncate">{option.label}</span>
                     {option.sublabel && (
-                      <span className="block truncate text-xs font-normal text-gray-400">
+                      <span className="block truncate text-sm font-normal text-gray-400">
                         {option.sublabel}
                       </span>
                     )}
                   </span>
                   {isSelected && (
-                    <Check size={16} className="shrink-0 text-[#137A3D]" />
+                    <Check size={18} className="shrink-0 text-primary-800" />
                   )}
                 </button>
               );

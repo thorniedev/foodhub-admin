@@ -88,10 +88,10 @@ export default function CreateCanonicalFoodModal({
   const [error, setError] = useState<string | null>(null);
 
   const { data: categoryData, isLoading: categoriesLoading } =
-    useGetFoodCategoriesQuery({ page: 0, size: 200 });
+    useGetFoodCategoriesQuery({ page: 0, size: 100 });
   const { data: cuisineData, isLoading: cuisinesLoading } = useGetCuisinesQuery({
     page: 0,
-    size: 200,
+    size: 100,
   });
   const [createFood, { isLoading: saving }] = useCreateFoodMutation();
 
@@ -148,7 +148,7 @@ export default function CreateCanonicalFoodModal({
       setError(null);
 
       if (!form.canonicalName.trim()) {
-        throw new Error("សូមបញ្ចូល Canonical name។");
+        throw new Error("សូមបញ្ចូលឈ្មោះជាភាសាអង់គ្លេស។");
       }
 
       if (!form.categoryUuid) {
@@ -237,7 +237,7 @@ export default function CreateCanonicalFoodModal({
             <h3 className="text-xl font-bold text-gray-900">ព័ត៌មាន Food</h3>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <Field label="Canonical name *">
+              <Field label="ឈ្មោះជាអង់គ្លេស *">
                 <input
                   value={form.canonicalName}
                   onChange={(event) => set("canonicalName", event.target.value)}
@@ -246,7 +246,7 @@ export default function CreateCanonicalFoodModal({
                 />
               </Field>
 
-              <Field label="ឈ្មោះខ្មែរ">
+              <Field label="ឈ្មោះខ្មែរ *">
                 <input
                   value={form.localName}
                   onChange={(event) => set("localName", event.target.value)}

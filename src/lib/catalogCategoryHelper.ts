@@ -86,11 +86,28 @@ export function isDrinkCategory(
   if (code.startsWith("DRINK")) return true;
   if (code.startsWith("FOOD")) return false;
 
+  // Direct Root UUID checks
+  if (
+    category.parentCategoryUuid === "172b3ccf-9edd-4ef6-8a03-6af40bf6ba83" ||
+    category.uuid === "172b3ccf-9edd-4ef6-8a03-6af40bf6ba83"
+  ) {
+    return true;
+  }
+  if (
+    category.parentCategoryUuid === "834c39dc-67df-4544-a48d-816103115631" ||
+    category.uuid === "834c39dc-67df-4544-a48d-816103115631"
+  ) {
+    return false;
+  }
+
   // Check parent category name
   const parentName = (category.parentCategoryName ?? "").toLowerCase().trim();
   if (parentName) {
-    if (DRINK_KEYWORDS.some((kw) => parentName.includes(kw))) {
+    if (parentName.includes("ភេសជ្ជៈ") || DRINK_KEYWORDS.some((kw) => parentName.includes(kw))) {
       return true;
+    }
+    if (parentName.includes("ម្ហូប") || parentName.includes("អាហារ")) {
+      return false;
     }
   }
 

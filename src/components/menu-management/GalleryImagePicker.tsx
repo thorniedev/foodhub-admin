@@ -81,12 +81,12 @@ function ExistingGalleryTile({
     <div className="group relative aspect-square overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 shadow-xs">
       {loading ? (
         <div className="flex h-full w-full items-center justify-center bg-gray-100">
-          <Loader2 className="h-5 w-5 animate-spin text-emerald-600" />
+          <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
         </div>
       ) : hasError || !src ? (
         <div className="flex h-full w-full flex-col items-center justify-center bg-gray-100 text-gray-400">
-          <span className="text-2xl">🖼️</span>
-          <span className="mt-1 text-[10px]">No image</span>
+          <span className="text-3xl">🖼️</span>
+          <span className="mt-1 text-lg font-medium">No image</span>
         </div>
       ) : (
         <img
@@ -97,7 +97,7 @@ function ExistingGalleryTile({
         />
       )}
 
-      <span className="absolute left-2 top-2 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs">
+      <span className="absolute left-2 top-2 rounded-lg bg-black/70 px-2.5 py-1 text-lg font-bold text-white backdrop-blur-xs">
         Gallery #{index + 1}
       </span>
 
@@ -105,10 +105,10 @@ function ExistingGalleryTile({
       <button
         type="button"
         onClick={onRemove}
-        className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white shadow-md transition hover:bg-red-600 hover:scale-110 active:scale-95"
+        className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-red-500 text-white shadow-md transition hover:bg-red-600 hover:scale-110 active:scale-95"
         title="ដករូបភាពនេះចេញ"
       >
-        <Minus size={15} strokeWidth={3} />
+        <Minus size={18} strokeWidth={3} />
       </button>
     </div>
   );
@@ -120,7 +120,7 @@ export default function GalleryImagePicker({
   existingUrls = [],
   onExistingChange,
   maxFiles = DEFAULT_MAX,
-  label = "រូបភាព Gallery បន្ថែម (Gallery Images)",
+  label = "រូបភាព Gallery បន្ថែម",
   sublabel = "រូបភាពបន្ថែមសម្រាប់បង្ហាញក្នុងផ្ទាំងលម្អិតមុខម្ហូប (អតិបរមា 4 រូប)",
 }: GalleryImagePickerProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -180,14 +180,14 @@ export default function GalleryImagePicker({
   const canAddMore = totalCount < maxFiles;
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-xs">
-      <div className="mb-3 flex items-center justify-between">
+    <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-xs">
+      <div className="mb-4 flex items-center justify-between">
         <div>
-          <h4 className="text-sm font-bold text-gray-900">{label}</h4>
-          <p className="mt-0.5 text-xs text-gray-400">{sublabel}</p>
+          <p className="text-[18px] font-bold text-primary-900">{label}</p>
+          <p className="mt-0.5 text-base text-gray-500">{sublabel}</p>
         </div>
 
-        <span className="text-xs font-bold text-gray-400">
+        <span className="text-base font-semibold text-gray-400">
           {totalCount}/{maxFiles}
         </span>
       </div>
@@ -219,13 +219,14 @@ export default function GalleryImagePicker({
             key={`${preview.file.name}-${index}`}
             className="group relative aspect-square overflow-hidden rounded-2xl border-2 border-emerald-500 bg-gray-50 shadow-xs"
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={preview.url}
               alt=""
               className="h-full w-full object-cover"
             />
 
-            <span className="absolute left-2 top-2 rounded-md bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow">
+            <span className="absolute left-2 top-2 rounded-lg bg-emerald-600 px-2 py-0.5 text-xs font-bold text-white shadow">
               រូបថ្មី #{index + 1}
             </span>
 
@@ -235,10 +236,10 @@ export default function GalleryImagePicker({
               onClick={() =>
                 onChange(value.filter((_, itemIndex) => itemIndex !== index))
               }
-              className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white shadow-md transition hover:bg-red-600 hover:scale-110 active:scale-95"
+              className="absolute right-2 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-md transition hover:bg-red-600 hover:scale-110 active:scale-95"
               title="ដករូបភាពនេះចេញ"
             >
-              <Minus size={15} strokeWidth={3} />
+              <Minus size={16} strokeWidth={3} />
             </button>
           </div>
         ))}
@@ -248,15 +249,15 @@ export default function GalleryImagePicker({
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="flex aspect-square flex-col items-center justify-center rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/60 text-[#137A3D] transition hover:border-emerald-400 hover:bg-emerald-50 active:scale-[0.98]"
+            className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/60 text-[#137A3D] transition hover:border-emerald-400 hover:bg-emerald-50 active:scale-[0.98]"
           >
             <ImagePlus size={24} />
-            <span className="mt-2 text-xs font-bold">+ បន្ថែមរូប Gallery</span>
+            <span className="mt-1.5 text-base font-semibold">+ បន្ថែមរូប Gallery</span>
           </button>
         )}
       </div>
 
-      {error && <p className="mt-2 text-xs font-semibold text-red-500">{error}</p>}
+      {error && <p className="mt-3 text-lg font-semibold text-red-500">{error}</p>}
     </div>
   );
 }

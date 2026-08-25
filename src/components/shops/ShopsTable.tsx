@@ -1,16 +1,15 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-
-import { Eye, MapPin, Pencil, Settings2, Trash2 } from "lucide-react";
-
+import { Eye, MapPin, MoreVertical, Pencil, Settings2, Store as StoreIcon, Trash2 } from "lucide-react";
 import type { Store, StoreStatusAction } from "@/src/types/shop";
-
 import {
   displayStoreLocation,
   formatPriceLevel,
   imageUrlOrNull,
   storeInitials,
 } from "@/src/lib/shopFormat";
-
 import StoreMediaImage from "./detail/StoreMediaImage";
 
 export default function ShopsTable({
@@ -27,36 +26,32 @@ export default function ShopsTable({
   onDelete?: (store: Store) => void;
 }) {
   return (
-    <div className="w-full min-w-0 max-w-full overflow-hidden">
+    <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full table-auto border-collapse text-left">
         {/* ================= HEADER ================= */}
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/70">
-            <th className="px-4 py-3.5 text-lg font-semibold text-primary-800">
+            <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[140px]">
               ហាង
             </th>
 
-            <th className="px-4 py-3.5 text-lg font-semibold text-primary-800">
+            <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[130px]">
               ទីតាំង
             </th>
 
-            <th className="px-3.5 py-3.5 text-lg font-semibold text-primary-800 text-center">
+            <th className="whitespace-nowrap px-2 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[95px]">
               ការពិនិត្យ
             </th>
 
-            <th className="px-3.5 py-3.5 text-lg font-semibold text-primary-800 text-center">
+            <th className="whitespace-nowrap px-2 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[85px]">
               គណនី
             </th>
 
-            <th className="px-3.5 py-3.5 text-lg font-semibold text-primary-800 text-center">
-              ដំណើរការ
-            </th>
-
-            <th className="px-3.5 py-3.5 text-lg font-semibold text-primary-800 text-center">
+            <th className="whitespace-nowrap px-2 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[80px]">
               បើកឥឡូវ
             </th>
 
-            <th className="px-4 py-3.5 text-center text-lg font-semibold text-primary-800">
+            <th className="whitespace-nowrap px-3 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[110px]">
               សកម្មភាព
             </th>
           </tr>
@@ -64,161 +59,66 @@ export default function ShopsTable({
 
         {/* ================= BODY ================= */}
         <tbody>
-          {stores.map((store) => {
+          {stores.map((store, index) => {
             const fallbackLogo = imageUrlOrNull(store.logoUrl);
-
-            const priceLevel = formatPriceLevel(store.priceLevel);
-
             const detailHref = `/shops/${store.uuid}`;
 
             return (
               <tr
                 key={store.uuid}
-                className="
-                  border-b
-                  border-gray-100
-                  bg-white
-                  transition-colors
-                  duration-150
-                  last:border-b-0
-                  hover:bg-gray-50/70
-                "
+                className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
               >
-                {/* ================= STORE PROFILE ================= */}
-                <td className="px-4 py-2.5">
+                {/* Store Profile */}
+                <td className="px-4 py-3">
                   <Link
                     href={detailHref}
                     title={`មើលព័ត៌មាន ${store.storeName}`}
-                    className="
-                      group
-                      flex
-                      items-center
-                      gap-3
-                      rounded-xl
-                      outline-none
-                      transition
-                      focus-visible:ring-4
-                      focus-visible:ring-primary-100
-                    "
+                    className="group flex items-center gap-3 rounded-2xl outline-none transition focus-visible:ring-4 focus-visible:ring-primary-100"
                   >
-                    {/* Logo */}
-                    <div
-                      className="
-                        flex
-                        h-11
-                        w-11
-                        shrink-0
-                        items-center
-                        justify-center
-                        overflow-hidden
-                        rounded-xl
-                        border
-                        border-primary-100
-                        bg-primary-50
-                        text-primary-800
-                        transition
-                        group-hover:border-primary-200
-                        group-hover:bg-primary-100
-                      "
-                    >
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100">
                       {store.logoMediaUuid ? (
                         <StoreMediaImage
                           mediaUuid={store.logoMediaUuid}
                           alt={`${store.storeName} logo`}
-                          className="
-                            h-full
-                            w-full
-                            object-cover
-                          "
+                          className="h-full w-full object-cover"
                         />
                       ) : fallbackLogo ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={fallbackLogo}
                           alt={store.storeName}
-                          className="
-                            h-full
-                            w-full
-                            object-cover
-                          "
+                          className="h-full w-full object-cover"
                         />
                       ) : (
-                        <span
-                          className="
-                            text-base
-                            font-semibold
-                          "
-                        >
-                          {storeInitials(store.storeName)}
-                        </span>
+                        <StoreIcon size={22} className="text-primary-800 shrink-0" />
                       )}
                     </div>
 
-                    {/* Store information */}
                     <div className="min-w-0">
-                      <p
-                        className="
-                          max-w-[220px]
-                          truncate
-                          text-base
-                          font-semibold
-                          text-gray-800
-                          transition
-                          group-hover:text-primary-800
-                        "
-                      >
+                      <p className="max-w-[160px] truncate text-base font-semibold text-gray-800 transition group-hover:text-primary-800">
                         {store.storeName}
                       </p>
                     </div>
                   </Link>
                 </td>
 
-                {/* ================= LOCATION ================= */}
-                <td className="px-4 py-2.5">
-                  <div
-                    className="
-                      flex
-                      max-w-[260px]
-                      items-center
-                      gap-2
-                    "
-                  >
-                    <MapPin
-                      size={16}
-                      strokeWidth={2}
-                      className="
-                        shrink-0
-                        text-primary-700
-                      "
-                    />
-
-                    <span
-                      className="
-                        line-clamp-1
-                        text-sm
-                        text-gray-500
-                      "
-                    >
+                {/* Location */}
+                <td className="px-3 py-3">
+                  <div className="flex max-w-[160px] items-center gap-1.5">
+                    <MapPin size={15} strokeWidth={2} className="shrink-0 text-primary-700" />
+                    <span className="line-clamp-1 text-sm font-medium text-gray-500">
                       {displayStoreLocation(store) || "—"}
                     </span>
                   </div>
                 </td>
 
-                {/* ================= REVIEW STATUS ================= */}
-                <td className="px-3 py-2.5 text-center">
+                {/* Review Status */}
+                <td className="px-2 py-3 text-center">
                   <button
                     type="button"
                     disabled={disabled}
                     onClick={() => onStatus(store, "REVIEW")}
-                    className="
-                      rounded-full
-                      transition
-                      focus:outline-none
-                      focus:ring-4
-                      focus:ring-primary-100
-                      disabled:cursor-not-allowed
-                      disabled:opacity-50
-                    "
+                    className="rounded-full transition focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <StatusBadge
                       value={store.reviewStatus || "APPROVED"}
@@ -227,21 +127,13 @@ export default function ShopsTable({
                   </button>
                 </td>
 
-                {/* ================= ACCOUNT STATUS ================= */}
-                <td className="px-3 py-2.5 text-center">
+                {/* Account Status */}
+                <td className="px-2 py-3 text-center">
                   <button
                     type="button"
                     disabled={disabled}
                     onClick={() => onStatus(store, "ACCOUNT")}
-                    className="
-                      rounded-full
-                      transition
-                      focus:outline-none
-                      focus:ring-4
-                      focus:ring-primary-100
-                      disabled:cursor-not-allowed
-                      disabled:opacity-50
-                    "
+                    className="rounded-full transition focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <StatusBadge
                       value={store.accountStatus || "ACTIVE"}
@@ -250,182 +142,36 @@ export default function ShopsTable({
                   </button>
                 </td>
 
-                {/* ================= OPERATING STATUS ================= */}
-                <td className="px-3 py-2.5 text-center">
-                  <button
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => onStatus(store, "OPERATING")}
-                    className="
-                      rounded-full
-                      transition
-                      focus:outline-none
-                      focus:ring-4
-                      focus:ring-primary-100
-                      disabled:cursor-not-allowed
-                      disabled:opacity-50
-                    "
-                  >
-                    <StatusBadge
-                      value={store.operatingStatus}
-                      kind="operating"
-                    />
-                  </button>
-                </td>
-
-                {/* ================= OPEN NOW ================= */}
-                <td className="px-3 py-2.5 text-center">
+                {/* Open Now */}
+                <td className="px-2 py-3 text-center">
                   <OpenStatusBadge isOpen={store.isOpenNow} />
                 </td>
 
-                {/* ================= ACTIONS ================= */}
-                <td className="px-4 py-2.5 text-center">
-                  <div
-                    className="
-                      flex
-                      items-center
-                      justify-center
-                      gap-2
-                    "
-                  >
-                    {/* Detail */}
-                    <Link
-                      href={detailHref}
-                      className="
-                        flex
-                        h-10
-                        w-10
-                        items-center
-                        justify-center
-                        rounded-xl
-                        text-primary-700
-                        transition
-                        hover:bg-primary-50
-                        hover:text-primary-800
-                        focus:outline-none
-                        focus:ring-4
-                        focus:ring-primary-100
-                      "
-                      title="មើលលម្អិត"
-                    >
-                      <Eye size={20} />
-                    </Link>
-
-                    {/* Edit */}
-                    <button
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => onEdit(store)}
-                      className="
-                        flex
-                        h-10
-                        w-10
-                        items-center
-                        justify-center
-                        rounded-xl
-                        text-blue-500
-                        transition
-                        hover:bg-blue-50
-                        focus:outline-none
-                        focus:ring-4
-                        focus:ring-blue-100
-                        disabled:cursor-not-allowed
-                        disabled:opacity-40
-                      "
-                      title="កែប្រែ"
-                    >
-                      <Pencil size={20} />
-                    </button>
-
-                    {/* Status */}
-                    <button
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => onStatus(store, "ACCOUNT")}
-                      className="
-                        flex
-                        h-10
-                        w-10
-                        items-center
-                        justify-center
-                        rounded-xl
-                        text-secondary-500
-                        transition
-                        hover:bg-secondary-50
-                        hover:text-secondary-600
-                        focus:outline-none
-                        focus:ring-4
-                        focus:ring-secondary-100
-                        disabled:cursor-not-allowed
-                        disabled:opacity-40
-                      "
-                      title="គ្រប់គ្រងស្ថានភាព"
-                    >
-                      <Settings2 size={20} />
-                    </button>
-
-                    {/* Delete */}
-                    {onDelete && (
-                      <button
-                        type="button"
-                        disabled={disabled}
-                        onClick={() => onDelete(store)}
-                        className="
-                          flex
-                          h-10
-                          w-10
-                          items-center
-                          justify-center
-                          rounded-xl
-                          text-red-500
-                          transition
-                          hover:bg-red-50
-                          hover:text-red-600
-                          focus:outline-none
-                          focus:ring-4
-                          focus:ring-red-100
-                          disabled:cursor-not-allowed
-                          disabled:opacity-40
-                        "
-                        title="លុបហាង"
-                      >
-                        <Trash2 size={20} />
-                      </button>
-                    )}
-                  </div>
+                {/* Actions */}
+                <td className="px-3 py-3">
+                  <ShopRowActions
+                    store={store}
+                    detailHref={detailHref}
+                    disabled={disabled}
+                    rowIndex={index}
+                    totalRows={stores.length}
+                    onEdit={onEdit}
+                    onStatus={onStatus}
+                    onDelete={onDelete}
+                  />
                 </td>
               </tr>
             );
           })}
 
-          {/* ================= EMPTY STATE ================= */}
+          {/* Empty State */}
           {stores.length === 0 && (
             <tr>
-              <td
-                colSpan={5}
-                className="
-                  px-6
-                  py-16
-                  text-center
-                "
-              >
-                <p
-                  className="
-                    text-lg
-                    font-medium
-                    text-gray-500
-                  "
-                >
+              <td colSpan={6} className="px-6 py-16 text-center">
+                <p className="text-lg font-medium text-gray-500">
                   មិនមានទិន្នន័យហាង
                 </p>
-
-                <p
-                  className="
-                    mt-1
-                    text-lg
-                    text-gray-400
-                  "
-                >
+                <p className="mt-1 text-base text-gray-400">
                   ទិន្នន័យហាងនឹងបង្ហាញនៅទីនេះ
                 </p>
               </td>
@@ -437,9 +183,115 @@ export default function ShopsTable({
   );
 }
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
+function ShopRowActions({
+  store,
+  detailHref,
+  disabled,
+  rowIndex = 0,
+  totalRows = 1,
+  onEdit,
+  onStatus,
+  onDelete,
+}: {
+  store: Store;
+  detailHref: string;
+  disabled: boolean;
+  rowIndex?: number;
+  totalRows?: number;
+  onEdit: (store: Store) => void;
+  onStatus: (store: Store, action: StoreStatusAction) => void;
+  onDelete?: (store: Store) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const openUpward = totalRows > 2 && rowIndex >= totalRows - 2;
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div className="relative flex items-center justify-center gap-2">
+      {/* 1. View Detail (Green Eye) */}
+      <Link
+        href={detailHref}
+        className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+        title="មើលលម្អិត"
+      >
+        <Eye size={18} />
+      </Link>
+
+      {/* 2. Primary Action: Edit (Blue Pencil) */}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onEdit(store)}
+        className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+        title="កែប្រែ"
+      >
+        <Pencil size={18} />
+      </button>
+
+      {/* 3. More (3-dots) for extra actions */}
+      <div className="relative" ref={menuRef}>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setOpen((prev) => !prev)}
+          className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition hover:bg-gray-100 hover:text-gray-800 focus:outline-none ${
+            open ? "bg-gray-200 text-gray-900 ring-2 ring-gray-300/60" : ""
+          }`}
+          title="ផ្សេងទៀត"
+          aria-label="More actions"
+        >
+          <MoreVertical size={18} />
+        </button>
+
+        {open && (
+          <div
+            className={`absolute right-0 z-[100] min-w-[175px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 ${
+              openUpward ? "bottom-full mb-2" : "top-full mt-2"
+            }`}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onStatus(store, "ACCOUNT");
+              }}
+              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-50"
+            >
+              <Settings2 size={16} />
+              <span>គ្រប់គ្រងស្ថានភាព</span>
+            </button>
+
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onDelete(store);
+                }}
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+              >
+                <Trash2 size={16} />
+                <span>លុបចេញពីប្រព័ន្ធ</span>
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export function StatusBadge({
   value,
@@ -451,25 +303,21 @@ export function StatusBadge({
   const normalized = String(value || "UNKNOWN").toUpperCase();
 
   const positive = ["APPROVED", "ACTIVE", "OPEN"].includes(normalized);
-
   const warning = ["PENDING", "TEMPORARILY_CLOSED"].includes(normalized);
-
   const danger = ["REJECTED", "SUSPENDED", "CLOSED"].includes(normalized);
 
   const className = positive
-    ? "bg-primary-50 text-primary-700 ring-primary-100"
+    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
     : warning
-      ? "bg-secondary-50 text-secondary-600 ring-secondary-100"
+      ? "bg-amber-50 text-amber-700 border-amber-100"
       : danger
-        ? "bg-red-50 text-red-600 ring-red-100"
-        : kind === "operating"
-          ? "bg-slate-100 text-slate-600 ring-slate-200"
-          : "bg-gray-100 text-gray-600 ring-gray-200";
+        ? "bg-red-50 text-red-600 border-red-100"
+        : "bg-gray-50 text-gray-600 border-gray-150";
 
   const dotClassName = positive
-    ? "bg-primary-600"
+    ? "bg-emerald-500"
     : warning
-      ? "bg-secondary-500"
+      ? "bg-amber-500"
       : danger
         ? "bg-red-500"
         : "bg-gray-400";
@@ -495,68 +343,19 @@ export function StatusBadge({
 
   return (
     <span
-      className={`
-        inline-flex
-        items-center
-        gap-1.5
-        whitespace-nowrap
-        rounded-full
-        px-3
-        py-1
-        text-base
-        font-medium
-        ring-1
-        ring-inset
-        ${className}
-      `}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${className}`}
     >
-      <span
-        className={`
-          h-1.5
-          w-1.5
-          shrink-0
-          rounded-full
-          ${dotClassName}
-        `}
-      />
-
+      <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
       {label}
     </span>
   );
 }
 
-/* =========================================================
-   OPEN STATUS BADGE
-========================================================= */
-
 function OpenStatusBadge({ isOpen }: { isOpen: boolean | null | undefined }) {
   if (isOpen === true) {
     return (
-      <span
-        className="
-          inline-flex
-          items-center
-          gap-1.5
-          rounded-full
-          bg-primary-50
-          px-3
-          py-1
-          text-base
-          font-medium
-          text-primary-700
-          ring-1
-          ring-inset
-          ring-primary-100
-        "
-      >
-        <span
-          className="
-            h-1.5
-            w-1.5
-            rounded-full
-            bg-primary-600
-          "
-        />
+      <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-emerald-50 px-3.5 py-1 text-sm font-semibold text-emerald-700 border border-emerald-100">
+        <span className="h-2 w-2 rounded-full bg-emerald-500" />
         បើក
       </span>
     );
@@ -564,59 +363,16 @@ function OpenStatusBadge({ isOpen }: { isOpen: boolean | null | undefined }) {
 
   if (isOpen === false) {
     return (
-      <span
-        className="
-          inline-flex
-          items-center
-          gap-1.5
-          rounded-full
-          bg-red-50
-          px-3
-          py-1
-          text-base
-          font-medium
-          text-red-600
-          ring-1
-          ring-inset
-          ring-red-100
-        "
-      >
-        <span
-          className="
-            h-1.5
-            w-1.5
-            rounded-full
-            bg-red-500
-          "
-        />
+      <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-red-50 px-3.5 py-1 text-sm font-semibold text-red-600 border border-red-100">
+        <span className="h-2 w-2 rounded-full bg-red-500" />
         បិទ
       </span>
     );
   }
 
   return (
-    <span
-      className="
-        inline-flex
-        items-center
-        gap-1.5
-        rounded-full
-        bg-gray-50
-        px-3
-        py-1
-        text-base
-        font-medium
-        text-gray-500
-      "
-    >
-      <span
-        className="
-          h-2
-          w-2
-          rounded-full
-          bg-gray-400
-        "
-      />
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-gray-50 px-3.5 py-1 text-sm font-semibold text-gray-500 border border-gray-150">
+      <span className="h-2 w-2 rounded-full bg-gray-400" />
       —
     </span>
   );

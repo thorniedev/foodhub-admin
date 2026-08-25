@@ -3,15 +3,17 @@
 import {
   AlertCircle,
   Heart,
+  HeartPulse,
   Loader2,
   Plus,
   Save,
   ShieldAlert,
   Sparkles,
   Trash2,
+  UtensilsCrossed,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import ThumbnailImagePicker from "./ThumbnailImagePicker";
 import GalleryImagePicker from "./GalleryImagePicker";
@@ -20,6 +22,7 @@ import MenuItemSearchableSelect, {
 } from "./MenuItemSearchableSelect";
 import { useGetPublishedMenuItemDetailQuery } from "@/src/app/store/menuManagementApi";
 import type { DietaryType } from "@/src/types/dietaryType";
+import type { MedicalCondition } from "@/src/types/medicalCondition";
 import type {
   FoodRecord,
   IngredientOption,
@@ -44,6 +47,12 @@ type DietaryTypeRow = {
   notes: string;
 };
 
+type MedicalConditionRow = {
+  medicalConditionUuid: string;
+  suitabilityStatus: "ALLOWED" | "NOT_RECOMMENDED" | "RESTRICTED" | string;
+  notes: string;
+};
+
 type FormState = {
   storeUuid: string;
   foodUuid: string;
@@ -59,7 +68,7 @@ type FormState = {
 };
 
 type FieldErrors = Partial<
-  Record<"storeUuid" | "foodUuid" | "name" | "price", string>
+  Record<"storeUuid" | "foodUuid" | "name" | "price" | "thumbnail", string>
 >;
 
 const EMPTY: FormState = {
@@ -177,6 +186,8 @@ export default function PublishMenuItemModal({
   stores,
   ingredients,
   dietaryTypes = [],
+  allergens = [],
+  medicalConditions = [],
   saving,
   fixedStoreUuid,
   defaultStoreUuid,
@@ -190,6 +201,7 @@ export default function PublishMenuItemModal({
   ingredients: IngredientOption[];
   dietaryTypes?: DietaryType[];
   allergens?: unknown[];
+  medicalConditions?: MedicalCondition[];
   saving: boolean;
   fixedStoreUuid?: string;
   defaultStoreUuid?: string;
@@ -201,15 +213,25 @@ export default function PublishMenuItemModal({
   ) => Promise<void>;
 }) {
   const storeFixedId = fixedStoreUuid || defaultStoreUuid;
+  const itemUuid = item?.uuid || (item as any)?.menuItemUuid || (item as any)?.id;
+  const { data: detailedItem } = useGetPublishedMenuItemDetailQuery(
+    itemUuid ? String(itemUuid) : "",
+    { skip: !open || !itemUuid },
+  );
+
+  const activeItem = detailedItem || item;
+
   const [values, setValues] = useState<FormState>(EMPTY);
   const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>([]);
   const [dietaryTypeRows, setDietaryTypeRows] = useState<DietaryTypeRow[]>([]);
+  const [medicalConditionRows, setMedicalConditionRows] = useState<MedicalConditionRow[]>([]);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [existingThumbnail, setExistingThumbnail] = useState<string | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [existingGallery, setExistingGallery] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const bodyRef = useRef<HTMLDivElement | null>(null);
 
   const { data: detailData } = useGetPublishedMenuItemDetailQuery(
     item?.uuid ?? "",
@@ -221,13 +243,31 @@ export default function PublishMenuItemModal({
   useEffect(() => {
     if (!open) return;
 
-    if (!item) {
+    const activeItem: MenuItemRecord | null = item
+      ? {
+          ...item,
+          ...(detailData || {}),
+          food: detailData?.food || item.food,
+          store: detailData?.store || item.store,
+          ingredients:
+            detailData?.ingredients && detailData.ingredients.length > 0
+              ? detailData.ingredients
+              : item.ingredients,
+          dietaryTypes:
+            detailData?.dietaryTypes && (detailData.dietaryTypes as any[]).length > 0
+              ? detailData.dietaryTypes
+              : item.dietaryTypes,
+        }
+      : null;
+
+    if (!activeItem) {
       setValues({
         ...EMPTY,
         storeUuid: storeFixedId || "",
       });
       setIngredientRows([]);
       setDietaryTypeRows([]);
+      setMedicalConditionRows([]);
       setThumbnailFile(null);
       setExistingThumbnail(null);
       setGalleryFiles([]);
@@ -237,54 +277,53 @@ export default function PublishMenuItemModal({
       return;
     }
 
-    const activeItem: MenuItemRecord = {
-      ...item,
-      ...(detailData || {}),
-      food: detailData?.food || item.food,
-      store: detailData?.store || item.store,
-      ingredients:
-        detailData?.ingredients && detailData.ingredients.length > 0
-          ? detailData.ingredients
-          : item.ingredients,
-      dietaryTypes:
-        detailData?.dietaryTypes && (detailData.dietaryTypes as any[]).length > 0
-          ? detailData.dietaryTypes
-          : item.dietaryTypes,
-    };
-
     const { thumbnail, gallery } = extractAllMenuItemImages(activeItem);
     setExistingThumbnail(thumbnail);
     setThumbnailFile(null);
     setExistingGallery(gallery);
     setGalleryFiles([]);
 
-    const matchedStoreUuid =
+    const rawStoreUuid = String(
       activeItem.storeUuid ||
       activeItem.store?.uuid ||
-      stores.find(
-        (s) =>
-          (activeItem.store?.name &&
-            (s.name === activeItem.store.name ||
-              s.storeName === activeItem.store.name ||
-              s.localName === activeItem.store.name)) ||
-          (activeItem.store?.storeName &&
-            (s.name === activeItem.store.storeName ||
-              s.storeName === activeItem.store.storeName)),
-      )?.uuid ||
-      storeFixedId ||
-      "";
+      (activeItem.store as any)?.id ||
+      "",
+    );
 
-    const matchedFoodUuid =
+    const foundStore = stores.find(
+      (s) =>
+        (rawStoreUuid && (String(s.uuid) === rawStoreUuid || String(s.id) === rawStoreUuid)) ||
+        (activeItem.store?.storeName &&
+          (s.storeName === activeItem.store.storeName ||
+            s.name === activeItem.store.storeName ||
+            s.localName === activeItem.store.storeName)) ||
+        (activeItem.store?.name &&
+          (s.storeName === activeItem.store.name ||
+            s.name === activeItem.store.name ||
+            s.localName === activeItem.store.name)),
+    );
+
+    const matchedStoreUuid = foundStore
+      ? String(foundStore.uuid || foundStore.id || "")
+      : rawStoreUuid || storeFixedId || "";
+
+    const rawFoodUuid = String(
       activeItem.foodUuid ||
       activeItem.food?.uuid ||
-      foods.find(
-        (f) =>
-          (activeItem.food?.canonicalName &&
-            f.canonicalName?.toLowerCase() ===
-              activeItem.food.canonicalName?.toLowerCase()) ||
-          (activeItem.food?.localName && f.localName === activeItem.food.localName),
-      )?.uuid ||
-      "";
+      (activeItem.food as any)?.id ||
+      "",
+    );
+
+    const foundFood = foods.find(
+      (f) =>
+        (rawFoodUuid && (String(f.uuid) === rawFoodUuid || String(f.id) === rawFoodUuid)) ||
+        (activeItem.food?.canonicalName &&
+          f.canonicalName?.toLowerCase() === activeItem.food.canonicalName?.toLowerCase()) ||
+        (activeItem.food?.localName && f.localName === activeItem.food.localName) ||
+        (activeItem.name && (f.canonicalName === activeItem.name || f.localName === activeItem.name)),
+    );
+
+    const matchedFoodUuid = foundFood ? String(foundFood.uuid || foundFood.id || "") : rawFoodUuid;
 
     setValues({
       storeUuid: matchedStoreUuid,
@@ -390,8 +429,15 @@ export default function PublishMenuItemModal({
   }, [item, detailData, open, stores, foods, ingredients, dietaryTypes, storeFixedId]);
 
   const activeFoods = useMemo(
-    () => foods.filter((food) => food.isActive !== false),
-    [foods],
+    () =>
+      foods.filter(
+        (food) =>
+          food.isActive !== false ||
+          food.uuid === item?.foodUuid ||
+          food.uuid === (item as any)?.food?.uuid ||
+          food.uuid === values.foodUuid,
+      ),
+    [foods, item, values.foodUuid],
   );
 
   const activeIngredients = useMemo(
@@ -405,14 +451,14 @@ export default function PublishMenuItemModal({
   );
 
   const storeOptions: SearchableOption[] = useMemo(
-    () => stores.map((s) => ({ value: s.uuid, label: storeLabel(s) })),
+    () => stores.map((s) => ({ value: String(s.uuid || s.id || ""), label: storeLabel(s) })),
     [stores],
   );
 
   const foodOptions: SearchableOption[] = useMemo(
     () =>
       activeFoods.map((f) => ({
-        value: f.uuid,
+        value: String(f.uuid || f.id || ""),
         label: foodLabel(f),
       })),
     [activeFoods],
@@ -436,6 +482,50 @@ export default function PublishMenuItemModal({
         sublabel: d.code,
       })),
     [activeDietaryTypes],
+  );
+
+  const activeMedicalConditions = useMemo(
+    () => (medicalConditions ?? []).filter((m) => m.active !== false),
+    [medicalConditions],
+  );
+
+  const medicalConditionOptions: SearchableOption[] = useMemo(
+    () =>
+      activeMedicalConditions.map((m) => ({
+        value: m.uuid,
+        label: m.name,
+        sublabel: m.code,
+      })),
+    [activeMedicalConditions],
+  );
+
+  const availabilityStatusOptions: SearchableOption[] = useMemo(
+    () => [
+      { value: "AVAILABLE", label: "មានលក់" },
+      { value: "UNAVAILABLE", label: "មិនមានលក់" },
+      { value: "SOLD_OUT", label: "អស់ស្តុក" },
+      { value: "DISCONTINUED", label: "ឈប់លក់" },
+    ],
+    [],
+  );
+
+
+
+  const verificationStatusOptions: SearchableOption[] = useMemo(
+    () => [
+      { value: "UNVERIFIED", label: "មិនទាន់ផ្ទៀងផ្ទាត់" },
+      { value: "VERIFIED", label: "បានផ្ទៀងផ្ទាត់" },
+    ],
+    [],
+  );
+
+  const suitabilityStatusOptions: SearchableOption[] = useMemo(
+    () => [
+      { value: "ALLOWED", label: "សមរម្យ" },
+      { value: "NOT_RECOMMENDED", label: "មិនណែនាំ" },
+      { value: "RESTRICTED", label: "ហាមឃាត់" },
+    ],
+    [],
   );
 
   const handleFoodSelect = (selectedUuid: string) => {
@@ -487,17 +577,20 @@ export default function PublishMenuItemModal({
     ).trim();
 
     if (!item && !targetStoreUuid) {
-      nextErrors.storeUuid = "សូមជ្រើសរើស Store";
+      nextErrors.storeUuid = "សូមជ្រើសរើសហាង";
     }
     if (!values.foodUuid) {
-      nextErrors.foodUuid = "សូមជ្រើសរើស Food Catalog";
+      nextErrors.foodUuid = "សូមជ្រើសរើសមុខម្ហូបមេ";
     }
     if (!values.name.trim()) {
-      nextErrors.name = "សូមបញ្ចូលឈ្មោះ Menu Item";
+      nextErrors.name = "សូមបញ្ចូលឈ្មោះ ម៉ឺនុយ";
     }
     const price = Number(values.price);
     if (!values.price.trim() || !Number.isFinite(price) || price <= 0) {
-      nextErrors.price = "តម្លៃត្រូវតែធំជាង ០ (Price must be greater than 0)";
+      nextErrors.price = "តម្លៃត្រូវតែធំជាង ០";
+    }
+    if (!item && !thumbnailFile && !existingThumbnail) {
+      nextErrors.thumbnail = "សូមបង្ហោះរូបភាព Thumbnail ចាំបាច់";
     }
     return nextErrors;
   };
@@ -509,7 +602,8 @@ export default function PublishMenuItemModal({
       const nextFieldErrors = validateBasics();
       if (Object.keys(nextFieldErrors).length > 0) {
         setFieldErrors(nextFieldErrors);
-        setError("សូមបំពេញព័ត៌មានចាំបាច់ដែលបានសម្គាល់ខាងក្រោម។");
+        setError("សូមពិនិត្យ និងបំពេញព័ត៌មានចាំបាច់ដែលបានសម្គាល់ខាងក្រោម។");
+        bodyRef.current?.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
       setFieldErrors({});
@@ -562,7 +656,7 @@ export default function PublishMenuItemModal({
             ? Number(values.preparationTimeMinutes)
             : null,
           availabilityStatus: values.availabilityStatus,
-          ingredientDataStatus: values.ingredientDataStatus,
+          ingredientDataStatus: item?.ingredientDataStatus || "VERIFIED",
           isFeatured: values.isFeatured,
           source: values.source || "MANUAL",
         },
@@ -579,7 +673,7 @@ export default function PublishMenuItemModal({
       setError(
         submitError instanceof Error
           ? submitError.message
-          : "Could not publish Menu Item.",
+          : "មិនអាចរក្សាទុក ម៉ឺនុយ បានទេ។",
       );
     }
   };
@@ -589,42 +683,42 @@ export default function PublishMenuItemModal({
   const effectiveStoreUuid = storeFixedId || values.storeUuid;
 
   return (
-    <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px]">
-      <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-[30px] bg-white shadow-2xl">
+    <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs">
+      <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-[30px] bg-white shadow-2xl border-t-4 border-t-primary-800">
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
-          <div>
-            <h2 className="text-2xl font-black text-gray-900">
-              {item ? "កែប្រែ Menu Item" : "បង្កើត Menu Item សម្រាប់ Store"}
-            </h2>
-            <p className="mt-1 text-sm text-gray-400">
-              {storeFixedId
-                ? "ជ្រើស Food Catalog កំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីដាក់លក់ក្នុងហាងនេះ"
-                : "ជ្រើស Store និង Food Catalog រួចកំណត់តម្លៃ សុវត្ថិភាពម្ហូប និងរូបភាពដើម្បីផ្សាយលើ Website"}
-            </p>
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5 bg-gradient-to-r from-emerald-50/30 via-white to-white">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-100 text-primary-800">
+              <UtensilsCrossed size={20} />
+            </div>
+            <div>
+              <p className="text-[20px] font-bold text-primary-900">
+                {item ? "កែប្រែ ម៉ឺនុយ" : "បង្កើត ម៉ឺនុយ សម្រាប់ហាង"}
+              </p>
+              <p className="mt-0.5 text-[18px] text-gray-500">
+                {storeFixedId
+                  ? "ជ្រើសរើសមុខម្ហូបមេ កំណត់តម្លៃ និងរូបភាពដើម្បីដាក់លក់ក្នុងហាងនេះ"
+                  : "ជ្រើសរើសហាង និងមុខម្ហូបមេ រួចកំណត់តម្លៃ និងរូបភាពដើម្បីផ្សាយលើប្រព័ន្ធ"}
+              </p>
+            </div>
           </div>
 
           <button
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="rounded-full p-2 text-gray-400 hover:bg-gray-100"
+            className="cursor-pointer rounded-full p-2 text-gray-400 hover:bg-gray-100 transition"
           >
-            <X size={21} />
+            <X size={20} />
           </button>
         </div>
 
         {/* Scrollable body — everything on one page */}
-        <div className="flex-1 space-y-6 overflow-y-auto p-6">
+        <div ref={bodyRef} className="flex-1 space-y-6 overflow-y-auto p-7">
           {/* Basic info */}
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-2">
             <label>
               <Label required>ហាង</Label>
-              {(Boolean(item) || Boolean(storeFixedId)) && (
-                <p className="mb-1 text-xs text-gray-400">
-                  Store ត្រូវបានកំណត់រួចហើយ មិនអាចប្តូរបានទេ។
-                </p>
-              )}
               <MenuItemSearchableSelect
                 disabled={Boolean(item) || Boolean(storeFixedId)}
                 value={effectiveStoreUuid}
@@ -637,6 +731,11 @@ export default function PublishMenuItemModal({
                 invalid={Boolean(fieldErrors.storeUuid)}
                 ariaLabel="ជ្រើសរើសហាង"
               />
+              {(Boolean(item) || Boolean(storeFixedId)) && (
+                <p className="mt-1.5 text-sm font-semibold text-primary-800">
+                  ហាងត្រូវបានកំណត់រួចហើយ មិនអាចផ្លាស់ប្តូរបានទេ។
+                </p>
+              )}
               <FieldError message={fieldErrors.storeUuid} />
             </label>
 
@@ -654,7 +753,7 @@ export default function PublishMenuItemModal({
             </label>
 
             <Field
-              label="ឈ្មោះ Menu Item"
+              label="ឈ្មោះ ម៉ឺនុយ"
               required
               value={values.name}
               placeholder="ឧទាហរណ៍៖ សម្លកកូរពិសេស ឬ Phnom Penh Noodle Soup"
@@ -712,41 +811,21 @@ export default function PublishMenuItemModal({
 
             <label>
               <Label>ស្ថានភាព</Label>
-              <select
+              <MenuItemSearchableSelect
                 value={values.availabilityStatus}
-                onChange={(event) =>
+                options={availabilityStatusOptions}
+                onChange={(next) =>
                   setValues((current) => ({
                     ...current,
-                    availabilityStatus: event.target.value,
+                    availabilityStatus: next,
                   }))
                 }
-                className={inputClass}
-              >
-                <option value="AVAILABLE">មានលក់</option>
-                <option value="UNAVAILABLE">មិនមានលក់</option>
-                <option value="SOLD_OUT">អស់ស្តុក</option>
-                <option value="DISCONTINUED">ឈប់លក់</option>
-              </select>
+                placeholder="ជ្រើសរើសស្ថានភាព"
+                ariaLabel="ជ្រើសរើសស្ថានភាព"
+              />
             </label>
 
-            <label>
-              <Label>ទិន្នន័យគ្រឿងផ្សំ</Label>
-              <select
-                value={values.ingredientDataStatus}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    ingredientDataStatus: event.target.value,
-                  }))
-                }
-                className={inputClass}
-              >
-                <option value="VERIFIED">បានផ្ទៀងផ្ទាត់ (VERIFIED)</option>
-                <option value="COMPLETE">ពេញលេញ (COMPLETE)</option>
-                <option value="PARTIAL">ផ្នែកខ្លះ (PARTIAL)</option>
-                <option value="UNKNOWN">មិនច្បាស់ (UNKNOWN)</option>
-              </select>
-            </label>
+
 
             <label className="md:col-span-2">
               <Label>ការពិពណ៌នា</Label>
@@ -760,24 +839,24 @@ export default function PublishMenuItemModal({
                     description: event.target.value,
                   }))
                 }
-                className={`${inputClass} h-auto py-3`}
+                className={`${inputClass} h-auto py-3.5`}
               />
             </label>
           </div>
 
           {/* Ingredients */}
-          <section className="rounded-2xl border border-gray-100 p-5">
+          <section className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
             <TabIntro
-              icon={<Sparkles size={18} className="text-[#137A3D]" />}
+              icon={<Sparkles size={20} className="text-primary-800" />}
               title="គ្រឿងផ្សំ"
-              description="កំណត់គ្រឿងផ្សំ បរិមាណ និងខ្នាតសម្រាប់មុខម្ហូបនេះ។"
+              description="កំណត់គ្រឿងផ្សំ បរិមាណ និងខ្នាតសម្រាប់មុខម្ហូបនេះ"
               onAdd={() =>
                 setIngredientRows((current) => [
                   ...current,
                   {
                     ingredientUuid: "",
                     quantity: "",
-                    unit: "g",
+                    unit: "",
                     isOptional: false,
                     notes: "",
                   },
@@ -790,7 +869,8 @@ export default function PublishMenuItemModal({
               {ingredientRows.map((row, index) => (
                 <div
                   key={index}
-                  className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[2fr_1fr_1fr_auto_auto]"
+                  style={{ zIndex: ingredientRows.length - index + 20 }}
+                  className="relative grid gap-3 rounded-2xl bg-white p-3.5 shadow-xs border border-gray-200/80 border-l-4 border-l-primary-600 md:grid-cols-[2.5fr_1fr_1fr_auto_auto] items-center"
                 >
                   <MenuItemSearchableSelect
                     value={row.ingredientUuid}
@@ -798,15 +878,15 @@ export default function PublishMenuItemModal({
                     onChange={(next) =>
                       updateIngredientRow(index, { ingredientUuid: next })
                     }
-                    placeholder="ជ្រើស Ingredient"
-                    ariaLabel="ជ្រើស Ingredient"
+                    placeholder="ជ្រើសរើសគ្រឿងផ្សំ"
+                    ariaLabel="ជ្រើសរើសគ្រឿងផ្សំ"
                   />
 
                   <input
                     type="number"
                     min="0"
                     step="any"
-                    placeholder="បរិមាណ (Qty)"
+                    placeholder="បរិមាណ"
                     value={row.quantity}
                     onKeyDown={(e) => {
                       if (e.key === "-" || e.key === "e") {
@@ -824,7 +904,7 @@ export default function PublishMenuItemModal({
                   />
 
                   <input
-                    placeholder="ខ្នាត (Unit e.g. g, ml)"
+                    placeholder="ខ្នាត (g, ml...)"
                     value={row.unit}
                     onChange={(event) =>
                       updateIngredientRow(index, {
@@ -834,7 +914,7 @@ export default function PublishMenuItemModal({
                     className={inputClass}
                   />
 
-                  <label className="flex items-center gap-2 px-2 text-xs font-bold text-gray-700">
+                  <label className="flex h-11 items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50/50 px-3.5 text-base font-semibold text-gray-700 cursor-pointer hover:bg-gray-100/70 transition">
                     <input
                       type="checkbox"
                       checked={row.isOptional}
@@ -843,9 +923,9 @@ export default function PublishMenuItemModal({
                           isOptional: event.target.checked,
                         })
                       }
-                      className="h-4 w-4 rounded accent-[#137A3D]"
+                      className="h-4 w-4 rounded accent-primary-800"
                     />
-                    Optional
+                    <span className="whitespace-nowrap">Optional</span>
                   </label>
 
                   <RemoveRowButton
@@ -859,17 +939,17 @@ export default function PublishMenuItemModal({
               ))}
 
               {!ingredientRows.length && (
-                <EmptyRowsHint text="មិនទាន់បានបន្ថែម Ingredient ទេ។" />
+                <EmptyRowsHint text="មិនទាន់បានបន្ថែមគ្រឿងផ្សំទេ។" />
               )}
             </div>
           </section>
 
           {/* Dietary types */}
-          <section className="rounded-2xl border border-gray-100 p-5">
+          <section className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
             <TabIntro
-              icon={<Heart size={18} className="text-emerald-600" />}
+              icon={<Heart size={20} className="text-primary-800" />}
               title="របបអាហារ"
-              description="សម្គាល់របបអាហារ (Vegan, Halal, Keto, etc.)"
+              description="សម្គាល់របបអាហារសម្រាប់មុខម្ហូបនេះ"
               onAdd={() =>
                 setDietaryTypeRows((current) => [
                   ...current,
@@ -880,14 +960,15 @@ export default function PublishMenuItemModal({
                   },
                 ])
               }
-              addLabel="បន្ថែម Dietary Type"
+              addLabel="បន្ថែមរបបអាហារ"
             />
 
             <div className="mt-4 space-y-3">
               {dietaryTypeRows.map((row, index) => (
                 <div
                   key={index}
-                  className="grid gap-3 rounded-2xl bg-gray-50 p-3 md:grid-cols-[2fr_1.5fr_2fr_auto]"
+                  style={{ zIndex: dietaryTypeRows.length - index + 20 }}
+                  className="relative grid gap-3 rounded-2xl bg-white p-3.5 shadow-xs border border-gray-200/80 border-l-4 border-l-primary-600 md:grid-cols-[2.5fr_1.8fr_2fr_auto] items-center"
                 >
                   <MenuItemSearchableSelect
                     value={row.dietaryTypeUuid}
@@ -899,18 +980,17 @@ export default function PublishMenuItemModal({
                     ariaLabel="ជ្រើស Dietary Type"
                   />
 
-                  <select
+                  <MenuItemSearchableSelect
                     value={row.verificationStatus}
-                    onChange={(event) =>
+                    options={verificationStatusOptions}
+                    onChange={(next) =>
                       updateDietaryTypeRow(index, {
-                        verificationStatus: event.target.value,
+                        verificationStatus: next,
                       })
                     }
-                    className={inputClass}
-                  >
-                    <option value="UNVERIFIED">UNVERIFIED</option>
-                    <option value="VERIFIED">VERIFIED</option>
-                  </select>
+                    placeholder="ជ្រើសរើសស្ថានភាព"
+                    ariaLabel="ជ្រើសរើសស្ថានភាព"
+                  />
 
                   <input
                     placeholder="កំណត់ចំណាំ (Notes)"
@@ -934,18 +1014,107 @@ export default function PublishMenuItemModal({
               ))}
 
               {!dietaryTypeRows.length && (
-                <EmptyRowsHint text="មិនទាន់បានកំណត់ Dietary Type ទេ។" />
+                <EmptyRowsHint text="មិនទាន់បានកំណត់របបអាហារទេ។" />
+              )}
+            </div>
+          </section>
+
+          {/* Medical conditions */}
+          <section className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
+            <TabIntro
+              icon={<HeartPulse size={20} className="text-primary-800" />}
+              title="ស្ថានភាពសុខភាព"
+              description="សម្គាល់ស្ថានភាពសុខភាពដែលសាកសម ឬគួរប្រុងប្រយ័ត្ន"
+              onAdd={() =>
+                setMedicalConditionRows((current) => [
+                  ...current,
+                  {
+                    medicalConditionUuid: "",
+                    suitabilityStatus: "ALLOWED",
+                    notes: "",
+                  },
+                ])
+              }
+              addLabel="បន្ថែមស្ថានភាពសុខភាព"
+            />
+
+            <div className="mt-4 space-y-3">
+              {medicalConditionRows.map((row, index) => (
+                <div
+                  key={index}
+                  style={{ zIndex: medicalConditionRows.length - index + 20 }}
+                  className="relative grid gap-3 rounded-2xl bg-white p-3.5 shadow-xs border border-gray-200/80 border-l-4 border-l-primary-600 md:grid-cols-[2.5fr_1.8fr_2fr_auto] items-center"
+                >
+                  <MenuItemSearchableSelect
+                    value={row.medicalConditionUuid}
+                    options={medicalConditionOptions}
+                    onChange={(next) =>
+                      setMedicalConditionRows((current) =>
+                        current.map((r, i) =>
+                          i === index ? { ...r, medicalConditionUuid: next } : r,
+                        ),
+                      )
+                    }
+                    placeholder="ជ្រើសស្ថានភាពសុខភាព"
+                    ariaLabel="ជ្រើសស្ថានភាពសុខភាព"
+                  />
+
+                  <MenuItemSearchableSelect
+                    value={row.suitabilityStatus}
+                    options={suitabilityStatusOptions}
+                    onChange={(next) =>
+                      setMedicalConditionRows((current) =>
+                        current.map((r, i) =>
+                          i === index
+                            ? { ...r, suitabilityStatus: next }
+                            : r,
+                        ),
+                      )
+                    }
+                    placeholder="ជ្រើសរើសសមរម្យភាព"
+                    ariaLabel="ជ្រើសរើសសមរម្យភាព"
+                  />
+
+                  <input
+                    placeholder="កំណត់ចំណាំ (Notes)"
+                    value={row.notes}
+                    onChange={(event) =>
+                      setMedicalConditionRows((current) =>
+                        current.map((r, i) =>
+                          i === index ? { ...r, notes: event.target.value } : r,
+                        ),
+                      )
+                    }
+                    className={inputClass}
+                  />
+
+                  <RemoveRowButton
+                    onClick={() =>
+                      setMedicalConditionRows((current) =>
+                        current.filter((_, rowIndex) => rowIndex !== index),
+                      )
+                    }
+                  />
+                </div>
+              ))}
+
+              {!medicalConditionRows.length && (
+                <EmptyRowsHint text="មិនទាន់បានកំណត់ស្ថានភាពសុខភាពទេ។" />
               )}
             </div>
           </section>
 
           {/* Image Upload: 2 Separate Parts (Thumbnail & Gallery) */}
-          <div className="space-y-4">
+          <div className="space-y-5">
             <ThumbnailImagePicker
               value={thumbnailFile}
-              onChange={setThumbnailFile}
+              onChange={(file) => {
+                setThumbnailFile(file);
+                setFieldErrors((current) => ({ ...current, thumbnail: undefined }));
+              }}
               existingUrl={existingThumbnail}
               onExistingChange={setExistingThumbnail}
+              error={fieldErrors.thumbnail}
             />
 
             <GalleryImagePicker
@@ -959,10 +1128,10 @@ export default function PublishMenuItemModal({
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 border-t border-gray-100 px-6 py-4">
+        <div className="shrink-0 border-t border-gray-100 px-7 py-5">
           {error && (
-            <div className="mb-3 flex items-start gap-2 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
-              <AlertCircle size={16} className="mt-0.5 shrink-0" />
+            <div className="mb-4 flex items-start gap-2.5 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg font-semibold text-red-600">
+              <AlertCircle size={22} className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
@@ -972,7 +1141,7 @@ export default function PublishMenuItemModal({
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50"
+              className="h-11 cursor-pointer rounded-2xl border border-gray-200 bg-white px-6 text-base font-semibold text-gray-700 hover:bg-gray-50 transition"
             >
               បោះបង់
             </button>
@@ -981,14 +1150,14 @@ export default function PublishMenuItemModal({
               type="button"
               disabled={saving}
               onClick={() => void submit()}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#137A3D] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-700/20 hover:bg-[#0f8e48] disabled:opacity-60 transition"
+              className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-2xl bg-primary-800 px-6 text-base font-semibold text-white shadow-xs hover:bg-primary-900 disabled:opacity-60 transition active:scale-95"
             >
               {saving ? (
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={18} className="animate-spin" />
               ) : (
-                <Save size={16} />
+                <Save size={18} />
               )}
-              {item ? "រក្សាទុក" : "Publish ទៅ Website"}
+              {item ? "រក្សាទុក" : "រក្សាទុកមុខម្ហូប"}
             </button>
           </div>
         </div>
@@ -998,7 +1167,7 @@ export default function PublishMenuItemModal({
 }
 
 const inputClass =
-  "h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm text-gray-800 outline-none transition focus:border-[#137A3D] focus:ring-4 focus:ring-emerald-50";
+  "h-11 w-full rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100";
 
 function Label({
   children,
@@ -1008,9 +1177,9 @@ function Label({
   required?: boolean;
 }) {
   return (
-    <span className="mb-2 block text-sm font-bold text-gray-800">
+    <span className="mb-2 block text-[18px] font-semibold text-gray-800">
       {children}
-      {required && <span className="ml-0.5 text-red-500">*</span>}
+      {required && <span className="ml-1 text-red-500">*</span>}
     </span>
   );
 }
@@ -1018,8 +1187,8 @@ function Label({
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <p className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-red-500">
-      <AlertCircle size={12} />
+    <p className="mt-1.5 flex items-center gap-1.5 text-lg font-semibold text-red-500">
+      <AlertCircle size={16} />
       {message}
     </p>
   );
@@ -1097,24 +1266,24 @@ function TabIntro({
   const buttonClass =
     accent === "amber"
       ? "bg-amber-50 text-amber-800 hover:bg-amber-100"
-      : "bg-emerald-50 text-[#137A3D] hover:bg-emerald-100";
+      : "bg-primary-50 text-primary-800 hover:bg-primary-100 border border-primary-100";
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {icon}
         <div>
-          <h3 className="font-black text-gray-900">{title}</h3>
-          <p className="mt-0.5 text-xs text-gray-400">{description}</p>
+          <p className="text-[18px] font-bold text-primary-900">{title}</p>
+          <p className="mt-0.5 text-base text-gray-500">{description}</p>
         </div>
       </div>
 
       <button
         type="button"
         onClick={onAdd}
-        className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black transition ${buttonClass}`}
+        className={`inline-flex h-10 shrink-0 cursor-pointer items-center gap-2 rounded-2xl px-4 text-base font-semibold whitespace-nowrap transition active:scale-95 ${buttonClass}`}
       >
-        <Plus size={15} />
+        <Plus size={16} />
         {addLabel}
       </button>
     </div>
@@ -1122,7 +1291,7 @@ function TabIntro({
 }
 
 function EmptyRowsHint({ text }: { text: string }) {
-  return <p className="py-4 text-center text-sm text-gray-400">{text}</p>;
+  return <p className="py-4 text-center text-base font-medium text-gray-400">{text}</p>;
 }
 
 function RemoveRowButton({ onClick }: { onClick: () => void }) {
@@ -1130,9 +1299,10 @@ function RemoveRowButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-100 text-red-400 hover:bg-red-50"
+      className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-2xl border border-red-200 bg-red-50/60 text-red-500 hover:bg-red-100 hover:text-red-600 transition active:scale-95"
+      title="លុបជួរនេះចេញ"
     >
-      <Trash2 size={17} />
+      <Trash2 size={18} />
     </button>
   );
 }

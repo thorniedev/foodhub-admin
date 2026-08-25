@@ -91,11 +91,11 @@ export default function CreateStoreMenuItemModal({
   });
   const { data: foodData, isLoading: foodsLoading } = useGetFoodsQuery({
     page: 0,
-    size: 200,
+    size: 100,
     sort: "createdAt,desc",
   });
   const { data: ingredientData, isLoading: ingredientsLoading } =
-    useGetIngredientsQuery({ page: 0, size: 200, sort: "name,asc" });
+    useGetIngredientsQuery({ page: 0, size: 100, sort: "name,asc" });
 
   const [createStoreMenuItem, { isLoading: saving }] =
     useCreateStoreMenuItemMutation();

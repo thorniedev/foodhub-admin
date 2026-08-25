@@ -865,7 +865,12 @@ function makeQuery(
       return;
     }
 
-    search.set(key, String(value));
+    let finalValue = value;
+    if (key === "size" && typeof value === "number") {
+      finalValue = Math.min(Math.max(1, value), 100);
+    }
+
+    search.set(key, String(finalValue));
   });
 
   const value = search.toString();
@@ -899,7 +904,7 @@ export const menuManagementApi =
         builder.query<FoodCategoryOption[], void>({
           async queryFn() {
             const result = await browserRequest<unknown>(
-              "/api/catalog/food-categories?size=200",
+              "/api/catalog/food-categories?size=100",
             );
 
             if ("error" in result) {
@@ -913,6 +918,7 @@ export const menuManagementApi =
                 ).content,
             };
           },
+          providesTags: [{ type: "FoodCategory", id: "LIST" }],
         }),
 
       getManagedCuisines:
@@ -963,7 +969,7 @@ export const menuManagementApi =
             // its store, so the store picker should never offer a store that
             // isn't already public-ready.
             const result = await browserRequest<unknown>(
-              "/api/admin/stores?page=0&size=100&reviewStatus=APPROVED&accountStatus=ACTIVE",
+              "/api/admin/stores?page=0&size=100",
             );
 
             if ("error" in result) {
@@ -2081,6 +2087,42 @@ export const menuManagementApi =
                   }),
                 },
               );
+            }
+
+            // 6. Replace Images if new files provided
+            if (Array.isArray(images) && images.length > 0) {
+              try {
+                const imgFormData = new FormData();
+                if (images[0]) {
+                  imgFormData.append("thumbnail", images[0]);
+                  imgFormData.append("file", images[0]);
+                  imgFormData.append("images", images[0]);
+                }
+                for (let i = 1; i < images.length && i < 5; i++) {
+                  imgFormData.append("gallery", images[i]);
+                  imgFormData.append("images", images[i]);
+                }
+
+                let imgResult = await browserRequest<unknown>(
+                  `/api/admin/menu-items/${encodeURIComponent(targetUuid)}/images`,
+                  {
+                    method: "PUT",
+                    body: imgFormData,
+                  },
+                );
+
+                if ("error" in imgResult) {
+                  await browserRequest<unknown>(
+                    `/api/catalog/menu-items/${encodeURIComponent(targetUuid)}/images`,
+                    {
+                      method: "PUT",
+                      body: imgFormData,
+                    },
+                  );
+                }
+              } catch (imgError) {
+                console.warn("[REPLACE MENU ITEM IMAGES FAILED]", imgError);
+              }
             }
 
             return {
