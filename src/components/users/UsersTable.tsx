@@ -1,10 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 import {
   Calendar,
   CheckCircle,
   Eye,
   Mail,
+  MoreVertical,
   Pencil,
   RotateCcw,
   Shield,
@@ -68,7 +72,7 @@ export default function UsersTable({
 
         {/* ================= BODY ================= */}
         <tbody>
-          {users.map((user) => {
+          {users.map((user, index) => {
             const name = displayName(
               user.firstName,
               user.lastName,
@@ -190,85 +194,18 @@ export default function UsersTable({
                 </td>
 
                 {/* Actions */}
-                <td className="px-6 py-2">
-                  <div className="flex items-center justify-end gap-2 pr-2">
-                    {/* View */}
-                    <Link
-                      href={detailHref}
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100"
-                      title="មើលលម្អិត"
-                    >
-                      <Eye size={20} />
-                    </Link>
-
-                    {/* ACTIVE: edit + suspend + delete */}
-                    {isActive && (
-                      <>
-                        <button
-                          type="button"
-                          disabled={actionDisabled}
-                          onClick={() => onProfileEdit(user)}
-                          className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
-                          title="កែប្រែ"
-                        >
-                          <Pencil size={20} />
-                        </button>
-
-                        {onSuspend && (
-                          <button
-                            type="button"
-                            disabled={actionDisabled}
-                            onClick={() => onSuspend(user)}
-                            className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-500 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
-                            title="ផ្អាកដំណើរការ"
-                          >
-                            <AlertTriangle size={20} />
-                          </button>
-                        )}
-
-                        {onHardDelete && (
-                          <button
-                            type="button"
-                            disabled={actionDisabled}
-                            onClick={() => onHardDelete(user)}
-                            className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
-                            title="លុប"
-                          >
-                            <Trash2 size={20} />
-                          </button>
-                        )}
-                      </>
-                    )}
-
-                    {/* SUSPENDED: restore + delete */}
-                    {isSuspended && (
-                      <>
-                        {onRestore && (
-                          <button
-                            type="button"
-                            disabled={actionDisabled}
-                            onClick={() => onRestore(user)}
-                            className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-40"
-                            title="ស្តារឡើងវិញ"
-                          >
-                            <RotateCcw size={20} />
-                          </button>
-                        )}
-
-                        {onHardDelete && (
-                          <button
-                            type="button"
-                            disabled={actionDisabled}
-                            onClick={() => onHardDelete(user)}
-                            className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
-                            title="លុប"
-                          >
-                            <Trash2 size={20} />
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
+                <td className="px-6 py-3.5 text-right">
+                  <UserRowActions
+                    user={user}
+                    detailHref={detailHref}
+                    disabled={actionDisabled}
+                    rowIndex={index}
+                    totalRows={users.length}
+                    onProfileEdit={onProfileEdit}
+                    onSuspend={onSuspend}
+                    onRestore={onRestore}
+                    onHardDelete={onHardDelete}
+                  />
                 </td>
               </tr>
             );
@@ -290,6 +227,139 @@ export default function UsersTable({
           )}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function UserRowActions({
+  user,
+  detailHref,
+  disabled,
+  rowIndex = 0,
+  totalRows = 1,
+  onProfileEdit,
+  onSuspend,
+  onRestore,
+  onHardDelete,
+}: {
+  user: AdminUser;
+  detailHref: string;
+  disabled: boolean;
+  rowIndex?: number;
+  totalRows?: number;
+  onProfileEdit: (user: AdminUser) => void;
+  onSuspend?: (user: AdminUser) => void;
+  onRestore?: (user: AdminUser) => void;
+  onHardDelete?: (user: AdminUser) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const openUpward = totalRows > 2 && rowIndex >= totalRows - 2;
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  const isActive = user.status?.toUpperCase() === "ACTIVE";
+  const isSuspended = user.status?.toUpperCase() === "SUSPENDED";
+
+  return (
+    <div className="relative flex items-center justify-end gap-2 pr-1">
+      {/* 1. View Detail (Green Eye) */}
+      <Link
+        href={detailHref}
+        className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+        title="មើលលម្អិត"
+      >
+        <Eye size={18} />
+      </Link>
+
+      {/* 2. Primary Action: Edit (Blue Pencil) */}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onProfileEdit(user)}
+        className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+        title="កែប្រែ"
+      >
+        <Pencil size={18} />
+      </button>
+
+      {/* 3. More (3-dots) for extra actions */}
+      {(onSuspend || onRestore || onHardDelete) && (
+        <div className="relative" ref={menuRef}>
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => setOpen((prev) => !prev)}
+            className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition hover:bg-gray-100 hover:text-gray-800 focus:outline-none ${
+              open ? "bg-gray-200 text-gray-900 ring-2 ring-gray-300/60" : ""
+            }`}
+            title="ផ្សេងទៀត"
+            aria-label="More actions"
+          >
+            <MoreVertical size={18} />
+          </button>
+
+          {open && (
+            <div
+              className={`absolute right-0 z-[100] min-w-[175px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 text-left ${
+                openUpward ? "bottom-full mb-2" : "top-full mt-2"
+              }`}
+            >
+              {isActive && onSuspend && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    onSuspend(user);
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-50"
+                >
+                  <AlertTriangle size={16} />
+                  <span>ផ្អាកដំណើរការ</span>
+                </button>
+              )}
+
+              {isSuspended && onRestore && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    onRestore(user);
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
+                >
+                  <RotateCcw size={16} />
+                  <span>ស្តារឡើងវិញ</span>
+                </button>
+              )}
+
+              {onHardDelete && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    onHardDelete(user);
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                >
+                  <Trash2 size={16} />
+                  <span>លុបចេញពីប្រព័ន្ធ</span>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -17,6 +17,7 @@ interface CustomSelectProps {
   disabled?: boolean;
   error?: boolean;
   className?: string;
+  align?: "left" | "right" | string;
 }
 
 export default function CustomSelect({
@@ -27,6 +28,7 @@ export default function CustomSelect({
   disabled = false,
   error = false,
   className = "",
+  align = "left",
 }: CustomSelectProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -84,7 +86,7 @@ export default function CustomSelect({
 
       {/* Dropdown Menu */}
       {open && (
-        <div className="absolute left-0 top-full z-[130] mt-1.5 max-h-60 w-full overflow-y-auto rounded-2xl border border-gray-150 bg-white p-1.5 shadow-xl shadow-gray-900/10 animate-in fade-in zoom-in-95 duration-150 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className={`absolute top-full z-[130] mt-1.5 max-h-60 w-full overflow-y-auto rounded-2xl border border-gray-150 bg-white p-1.5 shadow-xl shadow-gray-900/10 animate-in fade-in zoom-in-95 duration-150 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${align === "right" ? "right-0" : "left-0"}`}>
           {options.map((opt) => {
             const isSelected = opt.value === value;
             return (

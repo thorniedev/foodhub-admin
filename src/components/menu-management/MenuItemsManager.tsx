@@ -37,10 +37,6 @@ import {
   useUpdateStoreMenuItemMutation,
 } from "@/src/app/store/menuManagementApi";
 import { useGetWeatherConditionsQuery } from "@/src/app/store/weatherConditionApi";
-import {
-  mergeWeatherConditions,
-  readLocalWeatherCache,
-} from "@/src/lib/weatherConditionStorage";
 import { useGetMealTypesQuery } from "@/src/app/store/mealTypeApi";
 import { useGetAgeGroupsQuery } from "@/src/app/store/ageGroupApi";
 import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
