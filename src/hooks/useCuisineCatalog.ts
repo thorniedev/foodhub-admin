@@ -1,16 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+"use client";
+
+import { useCallback, useMemo } from "react";
 
 import {
   useCreateCuisineMutation,
   useGetCuisinesQuery,
   useUpdateCuisineMutation,
 } from "@/src/app/store/cuisineApi";
-import {
-  createCodeFromLabel,
-  mergeCatalogWithCache,
-  readCatalogCache,
-  updateCatalogCacheActive,
-} from "@/src/lib/filterCatalogStorage";
+import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
@@ -53,93 +50,95 @@ export function useCuisineCatalog() {
     includeInactive: true,
   });
 
-  const [createCuisine] = useCreateCuisineMutation();
-  const [updateCuisine] = useUpdateCuisineMutation();
-  const [localItems, setLocalItems] = useState<FilterCatalogOption[]>(() =>
-    readCatalogCache("CUISINE"),
+  const [createCuisine] =
+    useCreateCuisineMutation();
+
+  const [updateCuisine] =
+    useUpdateCuisineMutation();
+
+  const groupOptions = useMemo(
+    () =>
+      (data?.contents ?? []).map(
+        toCatalogOption,
+      ),
+    [data],
   );
 
-  useEffect(() => {
-    if (data?.contents) {
-      const serverConverted = data.contents.map(toCatalogOption);
-      const merged = mergeCatalogWithCache("CUISINE", serverConverted);
-      setLocalItems(merged);
-    }
-  }, [data]);
-
-  const groupOptions = useMemo(() => {
-    if (localItems.length > 0) return localItems;
-    return (data?.contents ?? []).map(toCatalogOption);
-  }, [data, localItems]);
-
   const createOption = useCallback(
-    async (values: FilterCatalogOptionFormValues) => {
-      const label = values.name.trim() || values.localName.trim();
+    async (
+      values: FilterCatalogOptionFormValues,
+    ) => {
+      const label =
+        values.name.trim() ||
+        values.localName.trim();
 
       await createCuisine({
-        code: createCodeFromLabel(label),
-        name: values.name.trim() || values.localName.trim(),
-        description: values.description.trim() || null,
-        isActive: values.active,
+        code: createCodeFromLabel(
+          label,
+        ),
+        name:
+          values.name.trim() ||
+          values.localName.trim(),
+        description:
+          values.description.trim() ||
+          null,
+        isActive:
+          values.active,
       }).unwrap();
 
       await refetch();
     },
-    [createCuisine, refetch],
+    [
+      createCuisine,
+      refetch,
+    ],
   );
 
   const updateOption = useCallback(
-    async (uuid: string, values: FilterCatalogOptionFormValues) => {
+    async (
+      uuid: string,
+      values: FilterCatalogOptionFormValues,
+    ) => {
       await updateCuisine({
         uuid,
         body: {
-          name: values.name.trim() || values.localName.trim(),
-          description: values.description.trim() || null,
-          isActive: values.active,
+          name:
+            values.name.trim() ||
+            values.localName.trim(),
+          description:
+            values.description.trim() ||
+            null,
+          isActive:
+            values.active,
         },
       }).unwrap();
 
-      updateCatalogCacheActive("CUISINE", uuid, values.active);
-      setLocalItems((prev) =>
-        prev.map((item) =>
-          item.uuid === uuid
-            ? {
-                ...item,
-                name: values.name.trim() || values.localName.trim(),
-                localName: values.localName.trim() || values.name.trim(),
-                description: values.description.trim() || null,
-                active: values.active,
-              }
-            : item,
-        ),
-      );
-
       await refetch();
     },
-    [updateCuisine, refetch],
+    [
+      updateCuisine,
+      refetch,
+    ],
   );
 
   const setActive = useCallback(
-    async (uuid: string, active: boolean) => {
-      updateCatalogCacheActive("CUISINE", uuid, active);
-      setLocalItems((prev) =>
-        prev.map((item) => (item.uuid === uuid ? { ...item, active } : item)),
-      );
-
-      try {
-        await updateCuisine({
-          uuid,
-          body: {
-            isActive: active,
-          },
-        }).unwrap();
-      } catch (err) {
-        console.warn("Could not update cuisine on server:", err);
-      }
+    async (
+      uuid: string,
+      active: boolean,
+    ) => {
+      await updateCuisine({
+        uuid,
+        body: {
+          isActive: active,
+        },
+      }).unwrap();
 
       await refetch();
     },
-    [updateCuisine, refetch],
+    [
+      updateCuisine,
+      refetch,
+    ],
   );
 
   return {

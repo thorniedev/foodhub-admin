@@ -37,7 +37,7 @@ export default function DietarySection({
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-[18px] font-bold text-gray-900">
+                  <p className="text-[20px] font-bold text-gray-900">
                     {item.name}
                   </p>
 

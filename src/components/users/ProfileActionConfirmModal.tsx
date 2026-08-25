@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, MinusCircle, UserCheck, X } from "lucide-react";
+import { Loader2, UserCheck, UserX, X } from "lucide-react";
 
 interface ProfileActionConfirmModalProps {
   open: boolean;
@@ -51,7 +51,7 @@ export default function ProfileActionConfirmModal({
           }`}
         >
           {isSuspend ? (
-            <MinusCircle size={28} className="stroke-[2.2]" />
+            <UserX size={26} className="stroke-[2.2]" />
           ) : (
             <UserCheck size={26} className="stroke-[2.2]" />
           )}

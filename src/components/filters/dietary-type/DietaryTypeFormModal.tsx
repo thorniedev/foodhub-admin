@@ -241,7 +241,37 @@ export default function DietaryTypeFormModal({
             </label>
           </div>
 
+          {/* Active status */}
+          <div className="flex items-center justify-between gap-5 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4">
+            <div className="min-w-0">
+              <p className="text-lg font-medium text-primary-800">ស្ថានភាព</p>
 
+              <p className="mt-1 text-lg leading-7 text-gray-500">
+                បើក ដើម្បីឱ្យរបបអាហារនេះសកម្ម និងអាចប្រើបានក្នុងប្រព័ន្ធ។
+              </p>
+            </div>
+
+            <button
+              type="button"
+              role="switch"
+              aria-checked={values.active}
+              onClick={() =>
+                setValues((previous) => ({
+                  ...previous,
+                  active: !previous.active,
+                }))
+              }
+              className={`relative h-7 w-12 shrink-0 rounded-full transition focus:outline-none focus:ring-4 focus:ring-primary-100 ${
+                values.active ? "bg-primary-700" : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-all ${
+                  values.active ? "left-6" : "left-1"
+                }`}
+              />
+            </button>
+          </div>
 
           {/* Validation error */}
           {localError && (

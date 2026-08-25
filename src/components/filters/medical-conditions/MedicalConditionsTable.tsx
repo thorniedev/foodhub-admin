@@ -1,12 +1,15 @@
 import {
-  CircleMinus,
+  AlertOctagon,
   Eye,
   HeartPulse,
   Pencil,
   RotateCcw,
+  Trash2,
 } from "lucide-react";
 
 import type { MedicalCondition } from "@/src/types/medicalCondition";
+
+import { formatAdminDate } from "@/src/types/safetyResource";
 
 type Props = {
   items: MedicalCondition[];
@@ -25,6 +28,10 @@ type Props = {
     item: MedicalCondition,
   ) => void;
 
+  onHardDelete?: (
+    item: MedicalCondition,
+  ) => void;
+
   onRestore: (
     item: MedicalCondition,
   ) => void;
@@ -36,6 +43,7 @@ export default function MedicalConditionsTable({
   onView,
   onEdit,
   onDelete,
+  onHardDelete,
   onRestore,
 }: Props) {
   return (
@@ -59,6 +67,10 @@ export default function MedicalConditionsTable({
 
             <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               ស្ថានភាព
+            </th>
+
+            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
+              កែប្រែចុងក្រោយ
             </th>
 
             <th className="px-6 py-5 text-right text-xl font-semibold text-primary-800">
@@ -131,6 +143,14 @@ export default function MedicalConditionsTable({
                   </span>
                 </td>
 
+                {/* UPDATED */}
+
+                <td className="whitespace-nowrap px-6 py-5 text-lg text-gray-500">
+                  {formatAdminDate(
+                    item.updatedAt,
+                  )}
+                </td>
+
                 {/* ACTION */}
 
                 <td className="px-6 py-5">
@@ -177,7 +197,7 @@ export default function MedicalConditionsTable({
                         className="flex h-10 w-10 items-center justify-center rounded-xl text-red-400 transition hover:bg-red-50 disabled:opacity-40"
                         title="បិទ"
                       >
-                        <CircleMinus
+                        <Trash2
                           size={20}
                         />
                       </button>
@@ -200,6 +220,18 @@ export default function MedicalConditionsTable({
                         />
                       </button>
                     )}
+
+                    {onHardDelete && (
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => onHardDelete(item)}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:opacity-40"
+                        title="លុបជាអចិន្ត្រៃយ៍ (Hard Delete)"
+                      >
+                        <AlertOctagon size={20} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -212,7 +244,7 @@ export default function MedicalConditionsTable({
             0 && (
             <tr>
               <td
-                colSpan={5}
+                colSpan={6}
                 className="px-5 py-16 text-center"
               >
                 <HeartPulse

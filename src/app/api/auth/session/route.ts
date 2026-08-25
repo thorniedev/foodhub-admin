@@ -12,6 +12,20 @@ interface KeycloakUser {
   email_verified?: boolean;
   given_name?: string;
   family_name?: string;
+  role?: string | null;
+  roles?: string[];
+}
+
+interface KeycloakAccessTokenClaims {
+  realm_access?: {
+    roles?: string[];
+  };
+  resource_access?: Record<
+    string,
+    {
+      roles?: string[];
+    }
+  >;
 }
 
 function clearAuthCookies(response: NextResponse) {
@@ -26,6 +40,57 @@ function clearAuthCookies(response: NextResponse) {
   response.cookies.set("foodhub_access_token", "", options);
   response.cookies.set("foodhub_refresh_token", "", options);
   response.cookies.set("foodhub_id_token", "", options);
+}
+
+function decodeAccessToken(token: string): KeycloakAccessTokenClaims | null {
+  try {
+    const parts = token.split(".");
+
+    if (parts.length < 2) {
+      return null;
+    }
+
+    return JSON.parse(
+      Buffer.from(parts[1], "base64url").toString("utf8"),
+    ) as KeycloakAccessTokenClaims;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeRole(role: unknown): string {
+  if (typeof role !== "string") {
+    return "";
+  }
+
+  const normalized = role.trim().toUpperCase();
+  return normalized.startsWith("ROLE_")
+    ? normalized.slice("ROLE_".length)
+    : normalized;
+}
+
+function getRolesFromToken(accessToken: string): string[] {
+  const claims = decodeAccessToken(accessToken);
+
+  if (!claims) {
+    return [];
+  }
+
+  const roles = [
+    ...(claims.realm_access?.roles ?? []),
+    ...Object.values(claims.resource_access ?? {}).flatMap((access) =>
+      Array.isArray(access.roles) ? access.roles : [],
+    ),
+  ];
+
+  return [...new Set(roles.map(normalizeRole).filter(Boolean))];
+}
+
+function getPrimaryRole(roles: string[]): string | null {
+  if (roles.includes("SUPER_ADMIN")) return "SUPER_ADMIN";
+  if (roles.includes("ADMIN")) return "ADMIN";
+  if (roles.includes("USER")) return "USER";
+  return roles[0] ?? null;
 }
 
 export async function GET(request: NextRequest) {
@@ -97,11 +162,16 @@ export async function GET(request: NextRequest) {
       return response;
     }
 
+    const roles = getRolesFromToken(accessToken);
     const user = (await userResponse.json()) as KeycloakUser;
 
     return NextResponse.json({
       authenticated: true,
-      user,
+      user: {
+        ...user,
+        role: getPrimaryRole(roles),
+        roles,
+      },
     });
   } catch (error) {
     console.error("Failed to check authentication:", error);

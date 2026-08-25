@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, MinusCircle, X } from "lucide-react";
+import { Info, Loader2, UserX, X } from "lucide-react";
 import type { AdminUser } from "@/src/types/userProfile";
 import { displayName } from "@/src/lib/userProfileFormat";
 
@@ -43,8 +43,8 @@ export default function DeleteUserConfirmModal({
         </button>
 
         {/* Circular Icon with Soft Glow */}
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-500 ring-8 ring-amber-50/60">
-          <MinusCircle size={28} className="stroke-[2.2]" />
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 text-rose-500 ring-8 ring-rose-50/60">
+          <UserX size={26} className="stroke-[2.2]" />
         </div>
 
         {/* Header Content */}
@@ -62,8 +62,8 @@ export default function DeleteUserConfirmModal({
         </div>
 
         {/* Callout Notice */}
-        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-amber-200/90 bg-amber-50/40 p-4 text-left">
-          <MinusCircle size={17} className="mt-0.5 shrink-0 text-amber-600" />
+        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-rose-200/90 bg-rose-50/40 p-4 text-left">
+          <Info size={17} className="mt-0.5 shrink-0 text-rose-600" />
           <p className="text-xs font-medium leading-relaxed text-rose-800">
             អ្នកអាចស្វែងរកគណនីនេះនៅផ្ទាំង <strong>"បិទដំណើរការ"</strong> និងចុច "ស្តារឡើងវិញ" បានគ្រប់ពេល។
           </p>

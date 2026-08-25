@@ -17,7 +17,6 @@ interface CustomSelectProps {
   disabled?: boolean;
   error?: boolean;
   className?: string;
-  align?: "left" | "right";
 }
 
 export default function CustomSelect({
@@ -28,7 +27,6 @@ export default function CustomSelect({
   disabled = false,
   error = false,
   className = "",
-  align = "left",
 }: CustomSelectProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -60,7 +58,7 @@ export default function CustomSelect({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}
-        className={`flex h-11 w-full items-center justify-between rounded-2xl border bg-white px-4 text-left text-base font-semibold transition outline-none disabled:cursor-not-allowed disabled:bg-gray-50 cursor-pointer ${
+        className={`flex h-12 w-full items-center justify-between rounded-2xl border bg-white px-4 text-left text-base transition outline-none disabled:cursor-not-allowed disabled:bg-gray-50 ${
           error
             ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
             : open
@@ -69,8 +67,8 @@ export default function CustomSelect({
         }`}
       >
         <span
-          className={`truncate ${
-            selectedOption ? "text-gray-700 font-semibold" : "text-gray-400 font-medium"
+          className={`truncate font-medium ${
+            selectedOption ? "text-gray-900" : "text-gray-400"
           }`}
         >
           {selectedOption ? selectedOption.label : placeholder}
@@ -86,11 +84,7 @@ export default function CustomSelect({
 
       {/* Dropdown Menu */}
       {open && (
-        <div
-          className={`absolute top-full z-[130] mt-1.5 max-h-80 min-w-full w-max max-w-[320px] overflow-y-auto rounded-2xl border border-gray-150 bg-white p-1.5 shadow-2xl shadow-gray-900/15 animate-in fade-in zoom-in-95 duration-150 ${
-            align === "right" ? "right-0" : "left-0"
-          }`}
-        >
+        <div className="absolute left-0 top-full z-[130] mt-1.5 max-h-60 w-full overflow-y-auto rounded-2xl border border-gray-150 bg-white p-1.5 shadow-xl shadow-gray-900/10 animate-in fade-in zoom-in-95 duration-150 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {options.map((opt) => {
             const isSelected = opt.value === value;
             return (
@@ -101,14 +95,14 @@ export default function CustomSelect({
                   onChange(opt.value);
                   setOpen(false);
                 }}
-                className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-base transition ${
+                className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-base transition ${
                   isSelected
-                    ? "bg-primary-50 font-semibold text-primary-800"
-                    : "text-gray-700 hover:bg-emerald-50/70 hover:text-primary-800"
+                    ? "bg-primary-50/80 font-semibold text-primary-800"
+                    : "text-gray-700 hover:bg-emerald-50/60 hover:text-primary-800"
                 }`}
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{opt.label}</p>
+                  <p className="truncate">{opt.label}</p>
                   {opt.description && (
                     <p className="mt-0.5 truncate text-xs text-gray-400 font-normal">
                       {opt.description}

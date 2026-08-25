@@ -9,6 +9,8 @@ import {
 
 export const dynamic = "force-dynamic";
 
+const mockGroupSessionsEnabled = process.env.NODE_ENV !== "production";
+
 interface RouteContext {
   params: Promise<{
     inviteCode: string;
@@ -30,10 +32,28 @@ type SessionActionRequest =
       ownerToken: string;
     };
 
+function disabledMockResponse(): NextResponse {
+  return NextResponse.json(
+    {
+      message: "Mock group sessions are disabled in production mode.",
+    },
+    {
+      status: 404,
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    },
+  );
+}
+
 export async function GET(
   _request: Request,
   context: RouteContext,
 ): Promise<NextResponse> {
+  if (!mockGroupSessionsEnabled) {
+    return disabledMockResponse();
+  }
+
   const { inviteCode } = await context.params;
   const session = getMockGroupSession(inviteCode);
 
@@ -60,6 +80,10 @@ export async function POST(
   request: Request,
   context: RouteContext,
 ): Promise<NextResponse> {
+  if (!mockGroupSessionsEnabled) {
+    return disabledMockResponse();
+  }
+
   try {
     const { inviteCode } = await context.params;
     const body = (await request.json()) as SessionActionRequest;

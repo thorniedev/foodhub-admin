@@ -29,7 +29,7 @@ import type {
   UpdateStorePayload,
 } from "@/src/types/shop";
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
-import { imageUrlOrNull } from "@/src/lib/shopFormat";
+import { storeLogoCandidate } from "@/src/lib/shopFormat";
 import CustomSelect from "../ui/CustomSelect";
 
 import StoreMediaImage from "./detail/StoreMediaImage";
@@ -431,7 +431,7 @@ export default function ShopsManager() {
                       </div>
                       <div className="max-h-[300px] overflow-y-auto p-1.5">
                         {suggestions.map((store) => {
-                          const fallbackLogo = imageUrlOrNull(store.logoUrl);
+                          const logoCandidate = storeLogoCandidate(store);
 
                           return (
                             <button
@@ -442,18 +442,12 @@ export default function ShopsManager() {
                               className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-emerald-50"
                             >
                               <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-primary-800">
-                                {store.logoMediaUuid ? (
+                                {logoCandidate ? (
                                   <StoreMediaImage
-                                    mediaUuid={store.logoMediaUuid}
+                                    mediaUuid={logoCandidate}
                                     alt={`${store.storeName} logo`}
                                     className="h-full w-full object-cover"
-                                  />
-                                ) : fallbackLogo ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img
-                                    src={fallbackLogo}
-                                    alt={store.storeName}
-                                    className="h-full w-full object-cover"
+                                    fallbackIcon={<Store size={18} />}
                                   />
                                 ) : (
                                   <Store size={18} />

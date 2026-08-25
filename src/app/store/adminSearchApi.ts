@@ -13,7 +13,9 @@ const isObject = (v: unknown): v is UnknownRecord =>
 const unwrapData = (v: unknown): unknown =>
   isObject(v) && "data" in v && v.data !== undefined && v.data !== null
     ? v.data
-    : v;
+    : isObject(v) && "payload" in v && v.payload !== undefined && v.payload !== null
+      ? v.payload
+      : v;
 
 function normalizeSearchItem(item: unknown): AdminSearchResultItem | null {
   if (!isObject(item)) return null;

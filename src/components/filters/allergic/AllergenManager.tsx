@@ -471,30 +471,9 @@ export default function AllergenManager() {
 
       await refetch();
     } catch (hardDeleteError) {
-      setHardDeletingItem(null);
       setMessage({
         type: "error",
         text: getApiErrorMessage(hardDeleteError),
-      });
-    }
-  };
-
-  const handleRestoreAll = async () => {
-    const inactives = items.filter((item) => !item.active);
-    if (!inactives.length) return;
-    try {
-      for (const item of inactives) {
-        await restoreItem(item.code).unwrap();
-      }
-      setMessage({
-        type: "success",
-        text: `បានស្ដារប្រភេទអាឡែស៊ីអសកម្មទាំងអស់ (${inactives.length}) ដោយជោគជ័យ!`,
-      });
-      await refetch();
-    } catch (restoreError) {
-      setMessage({
-        type: "error",
-        text: getApiErrorMessage(restoreError),
       });
     }
   };
@@ -520,7 +499,6 @@ export default function AllergenManager() {
 
           setFormOpen(true);
         }}
-        onRestoreAll={inactiveCount > 0 ? handleRestoreAll : undefined}
       />
 
       {/* =================================================
@@ -714,16 +692,20 @@ export default function AllergenManager() {
               PAGE SIZE
           ============================================== */}
 
-          <div className="relative shrink-0">
+          <div className="relative">
             <button
               type="button"
               onClick={() => setSizeOpen((current) => !current)}
-              className="flex h-[52px] min-w-[150px] items-center justify-between gap-3 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-700 transition hover:border-primary-200 hover:bg-primary-50"
+              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${
+                sizeOpen
+                  ? "border-primary-800 ring-2 ring-primary-100"
+                  : "border-gray-200 hover:border-primary-800/50"
+              }`}
             >
               <span className="text-gray-700">{size} / ទំព័រ</span>
 
               <ChevronDown
-                size={18}
+                size={17}
                 className={`text-gray-400 transition-transform duration-200 ${
                   sizeOpen ? "rotate-180" : ""
                 }`}
@@ -731,7 +713,11 @@ export default function AllergenManager() {
             </button>
 
             {sizeOpen && (
-              <div className="absolute right-0 top-[60px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+              <div className="absolute right-0 top-[52px] z-[100] w-[150px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+                <p className="px-3 pb-2 pt-1 text-lg  text-secondary-600">
+                  ចំនួនក្នុងទំព័រ
+                </p>
+
                 {[10, 20, 50].map((value) => {
                   const selected = size === value;
 
@@ -744,16 +730,16 @@ export default function AllergenManager() {
                         setPage(0);
                         setSizeOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg transition ${
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${
                         selected
-                          ? "bg-primary-50 font-medium text-primary-800"
-                          : "text-gray-600 hover:bg-gray-50"
+                          ? "bg-primary-50 text-primary-800"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
                       }`}
                     >
                       <span>{value} / ទំព័រ</span>
 
                       {selected && (
-                        <Check size={18} className="text-primary-800" />
+                        <Check size={16} className="text-primary-800" />
                       )}
                     </button>
                   );
@@ -766,15 +752,19 @@ export default function AllergenManager() {
               SORT
           ============================================== */}
 
-          <div className="relative shrink-0">
+          <div className="relative">
             <button
               type="button"
               onClick={() => setSortOpen((current) => !current)}
-              className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800"
+              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
+                sortOpen
+                  ? "border-primary-800 bg-primary-50 text-primary-800"
+                  : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
+              }`}
               aria-label="Sort allergens"
               title="Sort allergens"
             >
-              <ArrowUpDown size={20} />
+              <ArrowUpDown size={18} />
             </button>
 
             {/* =========================================
@@ -782,8 +772,8 @@ export default function AllergenManager() {
             ========================================== */}
 
             {sortOpen && (
-              <div className="absolute right-0 top-[60px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+              <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+                <p className="px-3 pb-2 pt-1 text-lg uppercase tracking-wide text-secondary-600">
                   តម្រៀប
                 </p>
 
@@ -860,6 +850,7 @@ export default function AllergenManager() {
             setFormOpen(true);
           }}
           onDelete={setDeleting}
+          onHardDelete={(item) => setHardDeletingItem(item)}
           onRestore={(item) => void handleRestore(item)}
         />
 

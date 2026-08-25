@@ -1,16 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+"use client";
+
+import { useCallback, useMemo } from "react";
 
 import {
   useCreateFoodCategoryMutation,
   useGetFoodCategoriesQuery,
   useUpdateFoodCategoryMutation,
 } from "@/src/app/store/foodCategoryApi";
-import {
-  createCodeFromLabel,
-  mergeCatalogWithCache,
-  readCatalogCache,
-  updateCatalogCacheActive,
-} from "@/src/lib/filterCatalogStorage";
+import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
@@ -54,96 +51,99 @@ export function useFoodCategoryCatalog() {
     includeInactive: true,
   });
 
-  const [createFoodCategory] = useCreateFoodCategoryMutation();
-  const [updateFoodCategory] = useUpdateFoodCategoryMutation();
-  const [localItems, setLocalItems] = useState<FilterCatalogOption[]>(() =>
-    readCatalogCache("FOOD_CATEGORY"),
+  const [createFoodCategory] =
+    useCreateFoodCategoryMutation();
+
+  const [updateFoodCategory] =
+    useUpdateFoodCategoryMutation();
+
+  const groupOptions = useMemo(
+    () =>
+      (data?.contents ?? []).map(
+        toCatalogOption,
+      ),
+    [data],
   );
 
-  useEffect(() => {
-    if (data?.contents) {
-      const serverConverted = data.contents.map(toCatalogOption);
-      const merged = mergeCatalogWithCache("FOOD_CATEGORY", serverConverted);
-      setLocalItems(merged);
-    }
-  }, [data]);
-
-  const groupOptions = useMemo(() => {
-    if (localItems.length > 0) return localItems;
-    return (data?.contents ?? []).map(toCatalogOption);
-  }, [data, localItems]);
-
   const createOption = useCallback(
-    async (values: FilterCatalogOptionFormValues) => {
-      const label = values.name.trim() || values.localName.trim();
+    async (
+      values: FilterCatalogOptionFormValues,
+    ) => {
+      const label =
+        values.name.trim() ||
+        values.localName.trim();
 
       await createFoodCategory({
-        code: createCodeFromLabel(label),
-        name: values.name.trim() || values.localName.trim(),
-        description: values.description.trim() || null,
-        isActive: values.active,
-        parentCategoryUuid: values.parentUuid || null,
+        code: createCodeFromLabel(
+          label,
+        ),
+        name:
+          values.name.trim() ||
+          values.localName.trim(),
+        description:
+          values.description.trim() ||
+          null,
+        isActive:
+          values.active,
+        parentCategoryUuid:
+          values.parentUuid || null,
       }).unwrap();
 
       await refetch();
     },
-    [createFoodCategory, refetch],
+    [
+      createFoodCategory,
+      refetch,
+    ],
   );
 
   const updateOption = useCallback(
-    async (uuid: string, values: FilterCatalogOptionFormValues) => {
+    async (
+      uuid: string,
+      values: FilterCatalogOptionFormValues,
+    ) => {
       await updateFoodCategory({
         uuid,
         body: {
-          name: values.name.trim() || values.localName.trim(),
-          description: values.description.trim() || null,
-          isActive: values.active,
-          parentCategoryUuid: values.parentUuid || null,
+          name:
+            values.name.trim() ||
+            values.localName.trim(),
+          description:
+            values.description.trim() ||
+            null,
+          isActive:
+            values.active,
+          parentCategoryUuid:
+            values.parentUuid || null,
         },
       }).unwrap();
 
-      updateCatalogCacheActive("FOOD_CATEGORY", uuid, values.active);
-      setLocalItems((prev) =>
-        prev.map((item) =>
-          item.uuid === uuid
-            ? {
-                ...item,
-                name: values.name.trim() || values.localName.trim(),
-                localName: values.localName.trim() || values.name.trim(),
-                description: values.description.trim() || null,
-                parentUuid: values.parentUuid || null,
-                active: values.active,
-              }
-            : item,
-        ),
-      );
-
       await refetch();
     },
-    [updateFoodCategory, refetch],
+    [
+      updateFoodCategory,
+      refetch,
+    ],
   );
 
   const setActive = useCallback(
-    async (uuid: string, active: boolean) => {
-      updateCatalogCacheActive("FOOD_CATEGORY", uuid, active);
-      setLocalItems((prev) =>
-        prev.map((item) => (item.uuid === uuid ? { ...item, active } : item)),
-      );
-
-      try {
-        await updateFoodCategory({
-          uuid,
-          body: {
-            isActive: active,
-          },
-        }).unwrap();
-      } catch (err) {
-        console.warn("Could not update category on server:", err);
-      }
+    async (
+      uuid: string,
+      active: boolean,
+    ) => {
+      await updateFoodCategory({
+        uuid,
+        body: {
+          isActive: active,
+        },
+      }).unwrap();
 
       await refetch();
     },
-    [updateFoodCategory, refetch],
+    [
+      updateFoodCategory,
+      refetch,
+    ],
   );
 
   return {

@@ -1,5 +1,6 @@
 import { baseApi } from "./baseApi";
 import { FilterGroup, FilterOption } from "../../types/dynamicContent";
+import { fetchFileMockJson } from "./mockDataGuard";
 
 let optionsStore: FilterOption[] | null = null;
 let groupsStore: FilterGroup[] | null = null;
@@ -16,8 +17,10 @@ const DEFAULT_GROUPS: FilterGroup[] = [
 
 async function ensureOptionsStore(): Promise<FilterOption[]> {
   if (optionsStore) return optionsStore;
-  const res = await fetch("/data/dynamicContent.json");
-  const data: FilterOption[] = await res.json();
+  const data = await fetchFileMockJson<FilterOption[]>(
+    "/data/dynamicContent.json",
+    "Dynamic content",
+  );
   optionsStore = data;
   return optionsStore;
 }

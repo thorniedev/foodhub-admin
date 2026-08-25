@@ -94,6 +94,8 @@ export interface AdminUser {
   firstName: string | null;
   lastName: string | null;
   emailVerified: boolean;
+  role?: string | null;
+  roles?: string[] | null;
   status: AdminUserStatus;
   lastLoginAt: string | null;
   createdAt: string;
@@ -189,10 +191,6 @@ export interface AdminProfile {
   dateOfBirth: string | null;
   preferredLanguage: string | null;
   avatarMediaUuid: string | null;
-  avatarUrl?: string | null;
-  imageUrl?: string | null;
-  profileImage?: string | null;
-  picture?: string | null;
   ageGroup: AgeGroupResponse | null;
   isDefault: boolean | null;
   isActive: boolean | null;

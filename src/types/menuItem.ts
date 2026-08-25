@@ -207,7 +207,9 @@ export interface CreateCatalogFoodPayload {
   localName?: string | null;
   description?: string | null;
   categoryUuid: string;
+  categoryCode?: string | null;
   cuisineUuid: string;
+  cuisineCode?: string | null;
   primaryMediaUuids: string[];
   defaultSpiceLevel: number;
   nutritionData: {
@@ -225,6 +227,7 @@ export interface CreateCatalogFoodPayload {
   mealTypes: Array<Record<string, unknown>>;
   ageRules: Array<Record<string, unknown>>;
   isActive: boolean;
+  active?: boolean;
 }
 
 export interface MenuItemStoreSummary {

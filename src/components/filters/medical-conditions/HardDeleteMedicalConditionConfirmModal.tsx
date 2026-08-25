@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Loader2, Trash2, X } from "lucide-react";
+import { AlertOctagon, Loader2, X } from "lucide-react";
 
 import type { MedicalCondition } from "@/src/types/medicalCondition";
 
@@ -41,7 +41,7 @@ export default function HardDeleteMedicalConditionConfirmModal({
       <div className="w-full max-w-lg rounded-[30px] border border-red-100 bg-white p-6 shadow-2xl sm:p-7">
         <div className="flex items-start justify-between">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 text-red-600">
-            <Trash2 size={28} />
+            <AlertOctagon size={28} />
           </div>
 
           <button
@@ -56,27 +56,27 @@ export default function HardDeleteMedicalConditionConfirmModal({
         </div>
 
         <div className="mt-5">
-          <span className="inline-flex items-center rounded-full bg-red-50 px-4 py-1.5 text-lg font-black uppercase tracking-wider text-red-700 ring-1 ring-inset ring-red-200">
+          <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-xs font-black uppercase tracking-wider text-red-700 ring-1 ring-inset ring-red-200">
             Permanent Action
           </span>
 
-          <p className="mt-2 text-2xl font-black text-gray-900 sm:text-3xl">
+          <h3 className="mt-2 text-2xl font-black text-gray-900 sm:text-3xl">
             លុបស្ថានភាពសុខភាពជាអចិន្ត្រៃយ៍?
-          </p>
+          </h3>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-red-100 bg-red-50/70 p-5 text-lg leading-relaxed text-red-800">
+        <div className="mt-4 rounded-2xl border border-red-100 bg-red-50/70 p-4 text-sm leading-relaxed text-red-800">
           <p>
             អ្នកកំពុងលុបស្ថានភាពសុខភាព{" "}
             <span className="font-bold text-red-950">{item.name}</span> (Code:{" "}
-            <code className="rounded bg-red-100 px-1.5 py-0.5 font-mono text-lg">{item.code}</code>)។
+            <code className="rounded bg-red-100 px-1.5 py-0.5 font-mono">{item.code}</code>)។
           </p>
           <p className="mt-2 font-medium">
             ⚠️ ការលុបនេះជាលក្ខណៈ <strong>Hard Delete</strong> ដែលនឹងលុបទិន្នន័យចេញពី Database ទាំងស្រុង ហើយ<strong>មិនអាចត្រឡប់ក្រោយវិញបានទេ</strong>។
           </p>
         </div>
 
-        <div className="mt-4 flex items-center gap-2 rounded-xl bg-gray-50 px-4 py-3 text-lg font-mono text-gray-600">
+        <div className="mt-4 flex items-center gap-2 rounded-xl bg-gray-50 px-3 py-2 text-xs font-mono text-gray-600">
           <span className="font-bold text-gray-400">Endpoint:</span>
           <span>DELETE /api/v1/admin/medical-conditions/{item.code}/hard</span>
         </div>

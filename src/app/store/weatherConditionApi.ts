@@ -81,37 +81,42 @@ function normalizePagedResponse(
     };
   }
 
+  const raw = data as Record<string, any>;
   const rawContents =
-    "contents" in data && Array.isArray(data.contents)
-      ? data.contents
-      : "content" in data && Array.isArray(data.content)
-        ? data.content
-        : [];
+    Array.isArray(raw.items)
+      ? raw.items
+      : Array.isArray(raw.contents)
+        ? raw.contents
+        : Array.isArray(raw.content)
+          ? raw.content
+          : [];
 
   const contents = rawContents.map(normalizeWeatherCondition);
 
   const pageNumber =
-    "pageNumber" in data && typeof data.pageNumber === "number"
-      ? data.pageNumber
-      : "number" in data && typeof data.number === "number"
-        ? data.number
+    typeof raw.pageNumber === "number"
+      ? raw.pageNumber
+      : typeof raw.number === "number"
+        ? raw.number
         : page;
 
   const pageSize =
-    "pageSize" in data && typeof data.pageSize === "number"
-      ? data.pageSize
-      : "size" in data && typeof data.size === "number"
-        ? data.size
+    typeof raw.pageSize === "number"
+      ? raw.pageSize
+      : typeof raw.size === "number"
+        ? raw.size
         : size;
 
   const totalElements =
-    typeof data.totalElements === "number"
-      ? data.totalElements
-      : contents.length;
+    typeof raw.totalElements === "number"
+      ? raw.totalElements
+      : typeof raw.total === "number"
+        ? raw.total
+        : contents.length;
 
   const totalPages =
-    typeof data.totalPages === "number"
-      ? data.totalPages
+    typeof raw.totalPages === "number"
+      ? raw.totalPages
       : Math.max(Math.ceil(totalElements / pageSize), 1);
 
   return {

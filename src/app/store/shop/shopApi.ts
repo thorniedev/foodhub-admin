@@ -22,7 +22,9 @@ const isObject = (v: unknown): v is UnknownRecord =>
 const unwrapData = (v: unknown): unknown =>
   isObject(v) && "data" in v && v.data !== undefined && v.data !== null
     ? v.data
-    : v;
+    : isObject(v) && "payload" in v && v.payload !== undefined && v.payload !== null
+      ? v.payload
+      : v;
 
 function normalizeStorePage(response: unknown): StorePage {
   const raw = unwrapData(response);
@@ -48,11 +50,13 @@ function normalizeStorePage(response: unknown): StorePage {
       last: true,
     };
   }
-  const contents = Array.isArray(raw.contents)
-    ? (raw.contents as Store[])
-    : Array.isArray(raw.content)
-      ? (raw.content as Store[])
-      : [];
+  const contents = Array.isArray(raw.items)
+    ? (raw.items as Store[])
+    : Array.isArray(raw.contents)
+      ? (raw.contents as Store[])
+      : Array.isArray(raw.content)
+        ? (raw.content as Store[])
+        : [];
   return {
     contents,
     pageNumber:
@@ -70,15 +74,17 @@ function normalizeStorePage(response: unknown): StorePage {
     totalElements:
       typeof raw.totalElements === "number"
         ? raw.totalElements
-        : contents.length,
+        : typeof raw.total === "number"
+          ? raw.total
+          : contents.length,
     totalPages:
       typeof raw.totalPages === "number"
         ? raw.totalPages
         : contents.length
           ? 1
           : 0,
-    first: typeof raw.first === "boolean" ? raw.first : true,
-    last: typeof raw.last === "boolean" ? raw.last : true,
+    first: typeof raw.isFirst === "boolean" ? raw.isFirst : typeof raw.first === "boolean" ? raw.first : true,
+    last: typeof raw.isLast === "boolean" ? raw.isLast : typeof raw.last === "boolean" ? raw.last : true,
   };
 }
 const normalizeOne = <T>(response: unknown): T => unwrapData(response) as T;

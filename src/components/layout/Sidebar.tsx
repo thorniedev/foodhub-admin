@@ -250,17 +250,13 @@ export default function Sidebar() {
           {/* ========================================= */}
 
           <div className="flex h-20 shrink-0 items-center justify-between px-6">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/Image/logo.PNG"
-                alt="MhouBahar"
-                width={200}
-                height={80}
-                className="h-30 w-auto object-contain"
-                priority
-                unoptimized
-              />
-            </Link>
+            <Image
+              src="/Image/logo.png"
+              alt="MhouBahar"
+              width={90}
+              height={90}
+              priority
+            />
 
             <button
               type="button"

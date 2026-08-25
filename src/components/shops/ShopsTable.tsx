@@ -6,9 +6,7 @@ import { Eye, MapPin, MoreVertical, Pencil, Settings2, Store as StoreIcon, Trash
 import type { Store, StoreStatusAction } from "@/src/types/shop";
 import {
   displayStoreLocation,
-  formatPriceLevel,
-  imageUrlOrNull,
-  storeInitials,
+  storeLogoCandidate,
 } from "@/src/lib/shopFormat";
 import StoreMediaImage from "./detail/StoreMediaImage";
 
@@ -60,7 +58,7 @@ export default function ShopsTable({
         {/* ================= BODY ================= */}
         <tbody>
           {stores.map((store, index) => {
-            const fallbackLogo = imageUrlOrNull(store.logoUrl);
+            const logoCandidate = storeLogoCandidate(store);
             const detailHref = `/shops/${store.uuid}`;
 
             return (
@@ -76,18 +74,17 @@ export default function ShopsTable({
                     className="group flex items-center gap-3 rounded-2xl outline-none transition focus-visible:ring-4 focus-visible:ring-primary-100"
                   >
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100">
-                      {store.logoMediaUuid ? (
+                      {logoCandidate ? (
                         <StoreMediaImage
-                          mediaUuid={store.logoMediaUuid}
+                          mediaUuid={logoCandidate}
                           alt={`${store.storeName} logo`}
                           className="h-full w-full object-cover"
-                        />
-                      ) : fallbackLogo ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={fallbackLogo}
-                          alt={store.storeName}
-                          className="h-full w-full object-cover"
+                          fallbackIcon={
+                            <StoreIcon
+                              size={22}
+                              className="text-primary-800 shrink-0"
+                            />
+                          }
                         />
                       ) : (
                         <StoreIcon size={22} className="text-primary-800 shrink-0" />

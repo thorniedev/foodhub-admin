@@ -58,42 +58,47 @@ function normalizePagedResponse<T>(
     };
   }
 
+  const raw = data as Record<string, any>;
   const contents =
-    "contents" in data && Array.isArray(data.contents)
-      ? data.contents
-      : "content" in data && Array.isArray(data.content)
-        ? data.content
-        : [];
+    Array.isArray(raw.items)
+      ? (raw.items as T[])
+      : Array.isArray(raw.contents)
+        ? (raw.contents as T[])
+        : Array.isArray(raw.content)
+          ? (raw.content as T[])
+          : [];
 
   return {
     contents,
     pageNumber:
-      "pageNumber" in data && typeof data.pageNumber === "number"
-        ? data.pageNumber
-        : "number" in data && typeof data.number === "number"
-          ? data.number
+      typeof raw.pageNumber === "number"
+        ? raw.pageNumber
+        : typeof raw.number === "number"
+          ? raw.number
           : page,
     pageSize:
-      "pageSize" in data && typeof data.pageSize === "number"
-        ? data.pageSize
-        : "size" in data && typeof data.size === "number"
-          ? data.size
+      typeof raw.pageSize === "number"
+        ? raw.pageSize
+        : typeof raw.size === "number"
+          ? raw.size
           : size,
     totalElements:
-      typeof data.totalElements === "number"
-        ? data.totalElements
-        : contents.length,
+      typeof raw.totalElements === "number"
+        ? raw.totalElements
+        : typeof raw.total === "number"
+          ? raw.total
+          : contents.length,
     totalPages:
-      typeof data.totalPages === "number"
-        ? data.totalPages
+      typeof raw.totalPages === "number"
+        ? raw.totalPages
         : Math.max(Math.ceil(contents.length / size), 1),
     first:
-      typeof data.first === "boolean"
-        ? data.first
+      typeof raw.first === "boolean"
+        ? raw.first
         : page === 0,
     last:
-      typeof data.last === "boolean"
-        ? data.last
+      typeof raw.last === "boolean"
+        ? raw.last
         : true,
   };
 }
@@ -107,7 +112,7 @@ export const cuisineApi = baseApi.injectEndpoints({
       query: (params) => {
         const queryParams = params ?? {};
         const page = queryParams.page ?? 0;
-        const size = Math.min(Math.max(1, queryParams.size ?? 20), 100);
+        const size = queryParams.size ?? 20;
         const includeInactive = queryParams.includeInactive ?? false;
 
         return {

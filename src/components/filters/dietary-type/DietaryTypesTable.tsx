@@ -1,12 +1,17 @@
 import {
-  CircleMinus,
+  AlertOctagon,
   Eye,
   Pencil,
   RotateCcw,
   Salad,
+  Trash2,
 } from "lucide-react";
 
 import type { DietaryType } from "@/src/types/dietaryType";
+
+import {
+  formatAdminDate,
+} from "@/src/types/safetyResource";
 
 type Props = {
   items: DietaryType[];
@@ -20,6 +25,9 @@ type Props = {
   onDelete: (
     item: DietaryType,
   ) => void;
+  onHardDelete?: (
+    item: DietaryType,
+  ) => void;
   onRestore: (
     item: DietaryType,
   ) => void;
@@ -31,11 +39,12 @@ export default function DietaryTypesTable({
   onView,
   onEdit,
   onDelete,
+  onHardDelete,
   onRestore,
 }: Props) {
   return (
     <div className="w-full min-w-0 max-w-full overflow-x-auto">
-      <table className="w-full min-w-[900px] border-collapse text-left">
+      <table className="w-full min-w-[1100px] border-collapse text-left">
         {/* =================================================
             TABLE HEADER
         ================================================== */}
@@ -59,6 +68,10 @@ export default function DietaryTypesTable({
 
             <th className="px-6 py-4 text-xl font-semibold text-primary-800">
               ស្ថានភាព
+            </th>
+
+            <th className="px-6 py-4 text-xl font-semibold text-primary-800">
+              កែប្រែចុងក្រោយ
             </th>
 
             <th className="px-6 py-4 text-right text-xl font-semibold text-primary-800">
@@ -117,6 +130,13 @@ export default function DietaryTypesTable({
                 />
               </td>
 
+              {/* Updated date */}
+              <td className="whitespace-nowrap px-6 py-5 text-lg text-gray-500">
+                {formatAdminDate(
+                  item.updatedAt,
+                )}
+              </td>
+
               {/* Actions */}
               <td className="px-6 py-5">
                 <div className="flex items-center justify-end gap-2">
@@ -152,7 +172,7 @@ export default function DietaryTypesTable({
                       className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
                       title="បិទ"
                     >
-                      <CircleMinus size={20} />
+                      <Trash2 size={20} />
                     </button>
                   ) : (
                     <button
@@ -167,6 +187,18 @@ export default function DietaryTypesTable({
                       <RotateCcw size={20} />
                     </button>
                   )}
+
+                  {onHardDelete && (
+                    <button
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => onHardDelete(item)}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      title="លុបជាអចិន្ត្រៃយ៍ (Hard Delete)"
+                    >
+                      <AlertOctagon size={20} />
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
@@ -176,7 +208,7 @@ export default function DietaryTypesTable({
           {items.length === 0 && (
             <tr>
               <td
-                colSpan={6}
+                colSpan={7}
                 className="px-6 py-16 text-center"
               >
                 <Salad

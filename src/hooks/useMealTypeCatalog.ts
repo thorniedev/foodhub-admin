@@ -1,16 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+"use client";
+
+import { useCallback, useMemo } from "react";
 
 import {
   useCreateMealTypeMutation,
   useGetMealTypesQuery,
   useUpdateMealTypeMutation,
 } from "@/src/app/store/mealTypeApi";
-import {
-  createCodeFromLabel,
-  mergeCatalogWithCache,
-  readCatalogCache,
-  updateCatalogCacheActive,
-} from "@/src/lib/filterCatalogStorage";
+import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
@@ -48,31 +45,32 @@ export function useMealTypeCatalog() {
     includeInactive: true,
   });
 
-  const [createMealType] = useCreateMealTypeMutation();
-  const [updateMealType] = useUpdateMealTypeMutation();
-  const [localItems, setLocalItems] = useState<FilterCatalogOption[]>(() =>
-    readCatalogCache("MEAL_TIME"),
+  const [createMealType] =
+    useCreateMealTypeMutation();
+
+  const [updateMealType] =
+    useUpdateMealTypeMutation();
+
+  const groupOptions = useMemo(
+    () =>
+      (data?.contents ?? []).map(
+        toCatalogOption,
+      ),
+    [data],
   );
 
-  useEffect(() => {
-    if (data?.contents) {
-      const serverConverted = data.contents.map(toCatalogOption);
-      const merged = mergeCatalogWithCache("MEAL_TIME", serverConverted);
-      setLocalItems(merged);
-    }
-  }, [data]);
-
-  const groupOptions = useMemo(() => {
-    if (localItems.length > 0) return localItems;
-    return (data?.contents ?? []).map(toCatalogOption);
-  }, [data, localItems]);
-
   const createOption = useCallback(
-    async (values: FilterCatalogOptionFormValues) => {
-      const label = values.name.trim() || values.localName.trim();
+    async (
+      values: FilterCatalogOptionFormValues,
+    ) => {
+      const label =
+        values.name.trim() ||
+        values.localName.trim();
 
       await createMealType({
-        code: createCodeFromLabel(label),
+        code: createCodeFromLabel(
+          label,
+        ),
         name: label,
         defaultStartTime: values.startTime || "00:00:00",
         defaultEndTime: values.endTime || "23:59:00",
@@ -86,8 +84,13 @@ export function useMealTypeCatalog() {
   );
 
   const updateOption = useCallback(
-    async (uuid: string, values: FilterCatalogOptionFormValues) => {
-      const label = values.name.trim() || values.localName.trim();
+    async (
+      uuid: string,
+      values: FilterCatalogOptionFormValues,
+    ) => {
+      const label =
+        values.name.trim() ||
+        values.localName.trim();
 
       await updateMealType({
         uuid,
@@ -100,42 +103,22 @@ export function useMealTypeCatalog() {
         },
       }).unwrap();
 
-      updateCatalogCacheActive("MEAL_TIME", uuid, values.active);
-      setLocalItems((prev) =>
-        prev.map((item) =>
-          item.uuid === uuid
-            ? {
-                ...item,
-                name: label,
-                localName: label,
-                active: values.active,
-              }
-            : item,
-        ),
-      );
-
       await refetch();
     },
     [updateMealType, refetch],
   );
 
   const setActive = useCallback(
-    async (uuid: string, active: boolean) => {
-      updateCatalogCacheActive("MEAL_TIME", uuid, active);
-      setLocalItems((prev) =>
-        prev.map((item) => (item.uuid === uuid ? { ...item, active } : item)),
-      );
-
-      try {
-        await updateMealType({
-          uuid,
-          body: {
-            isActive: active,
-          },
-        }).unwrap();
-      } catch (err) {
-        console.warn("Could not update meal type on server:", err);
-      }
+    async (
+      uuid: string,
+      active: boolean,
+    ) => {
+      await updateMealType({
+        uuid,
+        body: {
+          isActive: active,
+        },
+      }).unwrap();
 
       await refetch();
     },

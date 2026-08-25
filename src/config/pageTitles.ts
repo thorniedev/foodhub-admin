@@ -67,7 +67,7 @@ export function getPageTitle(pathname: string): PageTitleEntry {
   }
 
   if (cleanPath.startsWith("/menu-items")) {
-    return { title: "ម៉ឺនុយ" };
+    return { title: "មីនុយ" };
   }
 
   if (cleanPath.startsWith("/food-catalog")) {

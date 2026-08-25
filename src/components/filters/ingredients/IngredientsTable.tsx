@@ -1,9 +1,9 @@
 import {
-  CircleMinus,
   Eye,
   Leaf,
   Pencil,
   RotateCcw,
+  Trash2,
 } from "lucide-react";
 
 import type {
@@ -71,7 +71,7 @@ export default function IngredientsTable({
 }: Props) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[800px] border-collapse text-left">
+      <table className="w-full min-w-[1000px] border-collapse text-left">
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/50">
             <th className="px-6 py-5 text-xl font-semibold text-primary-800">
@@ -88,6 +88,10 @@ export default function IngredientsTable({
 
             <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               ស្ថានភាព
+            </th>
+
+            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
+              កែប្រែចុងក្រោយ
             </th>
 
             <th className="px-6 py-5 text-right text-xl font-semibold text-primary-800">
@@ -160,6 +164,15 @@ export default function IngredientsTable({
                   </span>
                 </td>
 
+                {/* UPDATED */}
+
+                <td className="px-6 py-5 text-lg text-gray-500">
+                  {formatDate(
+                    item.updatedAt ??
+                      item.createdAt,
+                  )}
+                </td>
+
                 {/* ACTION */}
 
                 <td className="px-6 py-5">
@@ -206,9 +219,9 @@ export default function IngredientsTable({
                         className="flex h-10 w-10 items-center justify-center rounded-xl text-red-400 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
                         title="បិទ"
                       >
-                        <CircleMinus
+                        <Trash2
                           size={
-                            20
+                            18
                           }
                         />
                       </button>
@@ -243,7 +256,7 @@ export default function IngredientsTable({
             0 && (
             <tr>
               <td
-                colSpan={5}
+                colSpan={6}
                 className="px-5 py-16 text-center"
               >
                 <Leaf

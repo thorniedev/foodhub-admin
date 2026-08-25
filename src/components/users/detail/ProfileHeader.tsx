@@ -1,5 +1,5 @@
 import {
-  MinusCircle,
+  AlertTriangle,
   Pencil,
   RotateCcw,
   Star,
@@ -82,17 +82,17 @@ export default function ProfileHeader({
           </div>
         </div>
 
-        {/* Right Side: Unified Sleek Glass Action Bar */}
-        <div className="flex items-center gap-1.5 rounded-2xl border border-white/20 bg-white/10 p-1.5 backdrop-blur-md shadow-lg shadow-black/5 shrink-0">
+        {/* Right Side: Responsive Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           {!profile.isDefault && profile.isActive && onSetDefault && (
             <button
               type="button"
               disabled={busy}
               onClick={onSetDefault}
-              title="កំណត់ជាលំនាំដើម"
-              className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-amber-300 transition hover:bg-amber-400/30 hover:text-amber-200 active:scale-95 disabled:opacity-50"
+              className="inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl border border-amber-300/50 bg-amber-400/20 px-3 sm:px-3.5 text-xs sm:text-sm font-semibold text-amber-100 backdrop-blur-md transition hover:bg-amber-400/30 active:scale-[0.98] disabled:opacity-50"
             >
-              <Star size={18} className="fill-amber-300" />
+              <Star size={14} className="fill-amber-300 text-amber-300" />
+              <span>កំណត់ជាលំនាំដើម</span>
             </button>
           )}
 
@@ -101,10 +101,10 @@ export default function ProfileHeader({
               type="button"
               disabled={busy}
               onClick={onEdit}
-              title="កែប្រែ"
-              className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/25 active:scale-95 disabled:opacity-50"
+              className="inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl bg-white px-3.5 sm:px-4 text-xs sm:text-sm font-semibold text-primary-800 shadow-sm transition hover:bg-emerald-50 active:scale-[0.98] disabled:opacity-50"
             >
-              <Pencil size={18} />
+              <Pencil size={14} />
+              <span>កែប្រែ</span>
             </button>
           )}
 
@@ -113,20 +113,20 @@ export default function ProfileHeader({
               type="button"
               disabled={busy}
               onClick={onDelete}
-              title="ផ្អាកដំណើរការ"
-              className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-amber-200 transition hover:bg-amber-400/30 hover:text-amber-100 active:scale-95 disabled:opacity-50"
+              className="inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 px-3 sm:px-3.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50"
             >
-              <MinusCircle size={18} />
+              <AlertTriangle size={14} />
+              <span>ផ្អាកដំណើរការ</span>
             </button>
           ) : (
             <button
               type="button"
               disabled={busy}
               onClick={onRestore}
-              title="បើកដំណើរការឡើងវិញ"
-              className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-emerald-200 transition hover:bg-emerald-400/30 hover:text-emerald-100 active:scale-95 disabled:opacity-50"
+              className="inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl bg-white px-3 sm:px-3.5 text-xs sm:text-sm font-semibold text-primary-800 shadow-sm transition hover:bg-primary-50 active:scale-[0.98] disabled:opacity-50"
             >
-              <RotateCcw size={18} />
+              <RotateCcw size={14} />
+              <span>បើកដំណើរការឡើងវិញ</span>
             </button>
           )}
 
@@ -135,10 +135,11 @@ export default function ProfileHeader({
               type="button"
               disabled={busy}
               onClick={onHardDelete}
-              title="លុបចេញពីប្រព័ន្ធ"
-              className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-rose-200 transition hover:bg-rose-500/30 hover:text-rose-100 active:scale-95 disabled:opacity-50"
+              className="inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-700 px-3 sm:px-3.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50"
+              title="លុប profile ចេញពីប្រព័ន្ធ"
             >
-              <Trash2 size={18} />
+              <Trash2 size={14} />
+              <span>លុបចេញពីប្រព័ន្ធ</span>
             </button>
           )}
         </div>

@@ -1,5 +1,5 @@
 import {
-  CircleMinus,
+  AlertOctagon,
   Eye,
   Pencil,
   RotateCcw,
@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 
 import type { Allergen } from "@/src/types/allergen";
+
+import { formatAdminDate } from "@/src/types/safetyResource";
 
 type Props = {
   allergens: Allergen[];
@@ -25,6 +27,10 @@ type Props = {
     item: Allergen,
   ) => void;
 
+  onHardDelete?: (
+    item: Allergen,
+  ) => void;
+
   onRestore: (
     item: Allergen,
   ) => void;
@@ -36,6 +42,7 @@ export default function AllergensTable({
   onView,
   onEdit,
   onDelete,
+  onHardDelete,
   onRestore,
 }: Props) {
   return (
@@ -59,6 +66,10 @@ export default function AllergensTable({
 
             <th className="px-6 py-5 text-xl font-semibold text-primary-800">
               ស្ថានភាព
+            </th>
+
+            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
+              កែប្រែចុងក្រោយ
             </th>
 
             <th className="px-6 py-5 text-right text-xl font-semibold text-primary-800">
@@ -133,6 +144,16 @@ export default function AllergensTable({
                 </td>
 
                 {/* =======================================
+                    UPDATED
+                ======================================== */}
+
+                <td className="whitespace-nowrap px-6 py-5 text-lg text-gray-500">
+                  {formatAdminDate(
+                    item.updatedAt,
+                  )}
+                </td>
+
+                {/* =======================================
                     ACTIONS
                 ======================================== */}
 
@@ -186,7 +207,7 @@ export default function AllergensTable({
                         className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-600 transition hover:bg-amber-50 disabled:opacity-40"
                         title="បិទ"
                       >
-                        <CircleMinus
+                        <Trash2
                           size={20}
                         />
                       </button>
@@ -209,6 +230,20 @@ export default function AllergensTable({
                         />
                       </button>
                     )}
+
+                    {/* HARD DELETE */}
+
+                    {onHardDelete && (
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => onHardDelete(item)}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:opacity-40"
+                        title="លុបជាអចិន្ត្រៃយ៍ (Hard Delete)"
+                      >
+                        <AlertOctagon size={20} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -223,7 +258,7 @@ export default function AllergensTable({
             0 && (
             <tr>
               <td
-                colSpan={4}
+                colSpan={5}
                 className="px-5 py-16 text-center"
               >
                 <ShieldAlert

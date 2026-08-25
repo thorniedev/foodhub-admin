@@ -644,9 +644,21 @@ export default function ShopDetailManager({
         foods={foodsQuery.data?.content ?? []}
         stores={storesQuery.data ?? []}
         ingredients={ingredientsQuery.data ?? []}
-        dietaryTypes={dietaryTypesQuery.data?.contents ?? []}
-        allergens={allergensQuery.data?.contents ?? []}
-        medicalConditions={medicalConditionsQuery.data?.contents ?? []}
+        dietaryTypes={
+          dietaryTypesQuery.data?.contents ??
+          (dietaryTypesQuery.data as any)?.content ??
+          (Array.isArray(dietaryTypesQuery.data) ? dietaryTypesQuery.data : [])
+        }
+        allergens={
+          allergensQuery.data?.contents ??
+          (allergensQuery.data as any)?.content ??
+          (Array.isArray(allergensQuery.data) ? allergensQuery.data : [])
+        }
+        medicalConditions={
+          medicalConditionsQuery.data?.contents ??
+          (medicalConditionsQuery.data as any)?.content ??
+          (Array.isArray(medicalConditionsQuery.data) ? medicalConditionsQuery.data : [])
+        }
         defaultStoreUuid={resolvedStoreUuid}
         saving={false}
         onClose={() => {

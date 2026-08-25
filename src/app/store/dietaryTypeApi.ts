@@ -1,4 +1,5 @@
 import { adminBaseApi } from "./adminBaseApi";
+import { normalizeSafetyPagedResponse, normalizeSingleEntity } from "./utils/safetyNormalizer";
 
 import type {
   DietaryType,
@@ -23,6 +24,8 @@ export const dietaryTypeApi = adminBaseApi.injectEndpoints({
           params: { page, size },
         };
       },
+      transformResponse: (response: any, _meta, params) =>
+        normalizeSafetyPagedResponse<DietaryType>(response, params?.page, params?.size),
     }),
 
     getDietaryTypeByCode: builder.query<DietaryType, string>({
@@ -30,6 +33,7 @@ export const dietaryTypeApi = adminBaseApi.injectEndpoints({
         url: `/dietary-types/${encodeURIComponent(code)}`,
         method: "GET",
       }),
+      transformResponse: (response: any) => normalizeSingleEntity<DietaryType>(response),
     }),
 
     createDietaryType: builder.mutation<

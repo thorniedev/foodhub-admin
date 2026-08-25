@@ -1,5 +1,9 @@
-import SubCategoryManager from "@/src/components/filters/sub-categories/SubCategoryManager";
+import FilterCatalogManager from "@/src/components/filters/catalog/FilterCatalogManager";
 
-export default function FoodCategoriesPage() {
-  return <SubCategoryManager mode="FOOD" />;
+export default function Page() {
+  return (
+    <FilterCatalogManager
+      groupSlug="food-categories"
+    />
+  );
 }

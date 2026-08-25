@@ -1,19 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import {
   AlertTriangle,
-  CheckCircle2,
   Loader2,
   Search,
   X,
 } from "lucide-react";
 
 import {
+  useMemo,
+  useState,
+} from "react";
+
+import {
   useCreateWeatherConditionMutation,
   useDeactivateWeatherConditionMutation,
   useGetWeatherConditionsQuery,
-  useRestoreWeatherConditionMutation,
   useUpdateWeatherConditionMutation,
 } from "@/src/app/store/weatherConditionApi";
 
@@ -29,57 +31,137 @@ import WeatherConditionFormModal from "./WeatherConditionFormModal";
 import WeatherConditionHeader from "./WeatherConditionHeader";
 import WeatherConditionTable from "./WeatherConditionTable";
 
-function getApiErrorMessage(error: unknown): string {
-  if (error && typeof error === "object") {
-    const record = error as Record<string, unknown>;
-    const data = record.data;
+function getApiErrorMessage(
+  error: unknown,
+): string {
+  if (
+    error &&
+    typeof error ===
+      "object"
+  ) {
+    const record =
+      error as Record<
+        string,
+        unknown
+      >;
 
-    if (data && typeof data === "object") {
-      const dataRecord = data as Record<string, unknown>;
-      if (typeof dataRecord.message === "string" && dataRecord.message.trim()) {
+    const data =
+      record.data;
+
+    if (
+      data &&
+      typeof data ===
+        "object"
+    ) {
+      const dataRecord =
+        data as Record<
+          string,
+          unknown
+        >;
+
+      if (
+        typeof dataRecord.message ===
+          "string" &&
+        dataRecord.message.trim()
+      ) {
         return dataRecord.message;
       }
     }
 
-    if (typeof data === "string" && data.trim()) {
+    if (
+      typeof data ===
+        "string" &&
+      data.trim()
+    ) {
       return data;
     }
 
-    if (typeof record.error === "string" && record.error.trim()) {
+    if (
+      typeof record.error ===
+        "string" &&
+      record.error.trim()
+    ) {
       return record.error;
     }
 
-    if (typeof record.status === "number") {
+    if (
+      typeof record.status ===
+        "number"
+    ) {
       return `Request failed (${record.status}).`;
     }
   }
 
-  if (error instanceof Error) {
+  if (
+    error instanceof Error
+  ) {
     return error.message;
   }
 
   return "មិនអាចភ្ជាប់ទៅ Weather Condition API បានទេ។";
 }
 
-function searchText(value: unknown): string {
-  return String(value ?? "").trim().toLowerCase();
+function searchText(
+  value: unknown,
+): string {
+  return String(
+    value ?? "",
+  )
+    .trim()
+    .toLowerCase();
 }
 
-type StatusFilter = "ALL" | "ACTIVE" | "INACTIVE";
-
 export default function WeatherConditionManager() {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<WeatherCondition | null>(null);
-  const [detailUuid, setDetailUuid] = useState<string | null>(null);
-  const [deactivateItem, setDeactivateItem] = useState<WeatherCondition | null>(null);
+  const [
+    search,
+    setSearch,
+  ] = useState("");
 
-  const [notice, setNotice] = useState<{
-    type: "success" | "error";
-    text: string;
-    action?: { label: string; onClick: () => void };
-  } | null>(null);
+  const [
+    formOpen,
+    setFormOpen,
+  ] =
+    useState(false);
+
+  const [
+    editingItem,
+    setEditingItem,
+  ] =
+    useState<WeatherCondition | null>(
+      null,
+    );
+
+  const [
+    detailUuid,
+    setDetailUuid,
+  ] =
+    useState<string | null>(
+      null,
+    );
+
+  const [
+    deactivateItem,
+    setDeactivateItem,
+  ] =
+    useState<WeatherCondition | null>(
+      null,
+    );
+
+  const [
+    notice,
+    setNotice,
+  ] =
+    useState<
+      | {
+          type:
+            | "success"
+            | "error";
+
+          text:
+            string;
+        }
+      | null
+    >(null);
 
   const {
     data,
@@ -87,369 +169,434 @@ export default function WeatherConditionManager() {
     isLoading,
     isFetching,
     refetch,
-  } = useGetWeatherConditionsQuery({
-    page: 0,
-    size: 100,
-    sort: "name,asc",
-  });
-
-  const [createWeather, { isLoading: creating }] =
-    useCreateWeatherConditionMutation();
-  const [updateWeather, { isLoading: updating }] =
-    useUpdateWeatherConditionMutation();
-  const [deactivateWeather, { isLoading: deactivating }] =
-    useDeactivateWeatherConditionMutation();
-  const [restoreWeatherMutation, { isLoading: restoring }] =
-    useRestoreWeatherConditionMutation();
-
-  const serverItems = data?.contents ?? [];
-
-  const activeCount = serverItems.filter(
-    (item) => (item.isActive ?? item.active) !== false,
-  ).length;
-  const inactiveCount = serverItems.length - activeCount;
-
-  // Filter by search & status
-  const filteredItems = useMemo(() => {
-    const query = searchText(search);
-
-    return serverItems.filter((item) => {
-      const isActive = (item.isActive ?? item.active) !== false;
-
-      if (statusFilter === "ACTIVE" && !isActive) return false;
-      if (statusFilter === "INACTIVE" && isActive) return false;
-
-      if (!query) return true;
-
-      return [item.code, item.name, item.localName, item.description].some(
-        (val) => searchText(val).includes(query),
-      );
+  } =
+    useGetWeatherConditionsQuery({
+      page: 0,
+      size: 100,
+      sort: "name,asc",
     });
-  }, [serverItems, search, statusFilter]);
 
-  const busy = creating || updating || deactivating || restoring;
+  const [
+    createWeather,
+    {
+      isLoading:
+        creating,
+    },
+  ] =
+    useCreateWeatherConditionMutation();
 
-  const openCreate = () => {
-    setEditingItem(null);
-    setFormOpen(true);
-  };
+  const [
+    updateWeather,
+    {
+      isLoading:
+        updating,
+    },
+  ] =
+    useUpdateWeatherConditionMutation();
 
-  const openEdit = (item: WeatherCondition) => {
-    setEditingItem(item);
-    setFormOpen(true);
-  };
+  const [
+    deactivateWeather,
+    {
+      isLoading:
+        deactivating,
+    },
+  ] =
+    useDeactivateWeatherConditionMutation();
 
-  const closeForm = () => {
-    if (creating || updating) return;
-    setFormOpen(false);
-    setEditingItem(null);
-  };
+  const items =
+    data?.contents ??
+    [];
 
-  // Restore single weather condition
-  const handleRestore = async (item: WeatherCondition) => {
-    try {
-      setNotice(null);
+  const filteredItems =
+    useMemo(() => {
+      const query =
+        searchText(
+          search,
+        );
 
-      try {
-        await restoreWeatherMutation(item.uuid).unwrap();
-      } catch {
-        await updateWeather({
-          uuid: item.uuid,
-          body: { isActive: true },
-        }).unwrap();
+      if (!query) {
+        return items;
       }
 
-      setNotice({
-        type: "success",
-        text: `បានស្ដារស្ថានភាពអាកាសធាតុ "${item.name}" (${item.code}) ដោយជោគជ័យ!`,
-      });
+      return items.filter(
+        (item) =>
+          [
+            item.code,
+            item.name,
+            item.localName,
+            item.description,
+          ].some(
+            (value) =>
+              searchText(
+                value,
+              ).includes(
+                query,
+              ),
+          ),
+      );
+    }, [
+      items,
+      search,
+    ]);
 
-      await refetch();
-    } catch (err) {
-      setNotice({
-        type: "error",
-        text: getApiErrorMessage(err),
-      });
-    }
-  };
+  const busy =
+    creating ||
+    updating ||
+    deactivating;
 
-  // Restore All Inactive items
-  const handleRestoreAll = async () => {
-    const inactives = serverItems.filter(
-      (item) => (item.isActive ?? item.active) === false,
-    );
-    if (!inactives.length) return;
+  const openCreate =
+    () => {
+      setEditingItem(
+        null,
+      );
 
-    try {
-      for (const item of inactives) {
-        await handleRestore(item);
-      }
-      setNotice({
-        type: "success",
-        text: `បានស្ដារស្ថានភាពអាកាសធាតុអសកម្មទាំងអស់ (${inactives.length}) ដោយជោគជ័យ!`,
-      });
-      await refetch();
-    } catch (err) {
-      setNotice({
-        type: "error",
-        text: getApiErrorMessage(err),
-      });
-    }
-  };
+      setFormOpen(
+        true,
+      );
+    };
 
-  const saveWeather = async (
-    payload: CreateWeatherConditionPayload | UpdateWeatherConditionPayload,
+  const openEdit = (
+    item: WeatherCondition,
   ) => {
-    try {
-      setNotice(null);
+    setEditingItem(
+      item,
+    );
 
-      if (editingItem) {
-        await updateWeather({
-          uuid: editingItem.uuid,
-          body: payload as UpdateWeatherConditionPayload,
-        }).unwrap();
+    setFormOpen(
+      true,
+    );
+  };
 
-        setNotice({
-          type: "success",
-          text: "បានកែប្រែ Weather Condition ដោយជោគជ័យ។",
-        });
-      } else {
-        const createPayload = payload as CreateWeatherConditionPayload;
-        try {
-          await createWeather(createPayload).unwrap();
+  const closeForm =
+    () => {
+      if (
+        creating ||
+        updating
+      ) {
+        return;
+      }
+
+      setFormOpen(
+        false,
+      );
+
+      setEditingItem(
+        null,
+      );
+    };
+
+  const saveWeather =
+    async (
+      payload:
+        | CreateWeatherConditionPayload
+        | UpdateWeatherConditionPayload,
+    ) => {
+      try {
+        setNotice(null);
+
+        if (
+          editingItem
+        ) {
+          await updateWeather({
+            uuid:
+              editingItem.uuid,
+
+            body:
+              payload as UpdateWeatherConditionPayload,
+          }).unwrap();
 
           setNotice({
-            type: "success",
-            text: "បានបង្កើត Weather Condition ថ្មីដោយជោគជ័យ។",
+            type:
+              "success",
+
+            text:
+              "បានកែប្រែ Weather Condition ដោយជោគជ័យ។",
           });
-        } catch (createErr) {
-          const msg = getApiErrorMessage(createErr);
+        } else {
+          await createWeather(
+            payload as CreateWeatherConditionPayload,
+          ).unwrap();
 
-          if (msg.toLowerCase().includes("already exists") || (createErr as any)?.status === 409) {
-            const matchingInactive = serverItems.find(
-              (item) => item.code.toUpperCase() === createPayload.code.toUpperCase(),
-            );
+          setNotice({
+            type:
+              "success",
 
-            if (matchingInactive) {
-              setNotice({
-                type: "error",
-                text: `កូដ "${createPayload.code}" ធ្លាប់បានលុបពីមុន (ស្ថិតក្នុងស្ថានភាពអសកម្ម)។ អ្នកអាចស្ដារវាឡើងវិញបាន។`,
-                action: {
-                  label: "ស្ដារឡើងវិញ (Restore)",
-                  onClick: () => {
-                    handleRestore(matchingInactive);
-                    setFormOpen(false);
-                  },
-                },
-              });
-              return;
-            }
-          }
-          throw createErr;
+            text:
+              "បានបង្កើត Weather Condition ថ្មីដោយជោគជ័យ។",
+          });
         }
+
+        setFormOpen(
+          false,
+        );
+
+        setEditingItem(
+          null,
+        );
+
+        await refetch();
+      } catch (
+        requestError
+      ) {
+        const message =
+          getApiErrorMessage(
+            requestError,
+          );
+
+        setNotice({
+          type:
+            "error",
+
+          text:
+            message,
+        });
+
+        throw new Error(
+          message,
+        );
+      }
+    };
+
+  const confirmDeactivate =
+    async () => {
+      if (
+        !deactivateItem
+      ) {
+        return;
       }
 
-      setFormOpen(false);
-      setEditingItem(null);
-      await refetch();
-    } catch (requestError) {
-      const message = getApiErrorMessage(requestError);
-      setNotice({
-        type: "error",
-        text: message,
-      });
-      throw new Error(message);
-    }
-  };
+      try {
+        setNotice(null);
 
-  const confirmDeactivate = async () => {
-    if (!deactivateItem) return;
+        await deactivateWeather(
+          deactivateItem.uuid,
+        ).unwrap();
 
-    try {
-      setNotice(null);
-      await deactivateWeather(deactivateItem.uuid).unwrap();
+        setDeactivateItem(
+          null,
+        );
 
-      setDeactivateItem(null);
-      setNotice({
-        type: "success",
-        text: `បានបិទដំណើរការ / លុប "${deactivateItem.name}" (${deactivateItem.code}) រួចរាល់។ អ្នកអាចស្ដារឡើងវិញក្នុងផ្ទាំង "អសកម្ម"។`,
-      });
+        setNotice({
+          type:
+            "success",
 
-      await refetch();
-    } catch (requestError) {
-      setNotice({
-        type: "error",
-        text: getApiErrorMessage(requestError),
-      });
-    }
-  };
+          text:
+            "បាន Deactivate Weather Condition ដោយជោគជ័យ។",
+        });
+
+        await refetch();
+      } catch (
+        requestError
+      ) {
+        setNotice({
+          type:
+            "error",
+
+          text:
+            getApiErrorMessage(
+              requestError,
+            ),
+        });
+      }
+    };
 
   return (
-    <div className="w-full min-w-0 max-w-full space-y-6">
-      {/* Header Banner */}
+    <div className="space-y-5 p-4 sm:p-6 lg:p-7">
       <WeatherConditionHeader
-        total={serverItems.length}
-        activeCount={activeCount}
-        inactiveCount={inactiveCount}
-        refreshing={isFetching}
-        onCreate={openCreate}
-        onRefresh={() => refetch()}
-        onRestoreAll={inactiveCount > 0 ? handleRestoreAll : undefined}
+        total={
+          data?.totalElements ??
+          items.length
+        }
+        refreshing={
+          isFetching
+        }
+        onCreate={
+          openCreate
+        }
+        onRefresh={() =>
+          void refetch()
+        }
       />
 
-      {/* Notice with Optional Restore Button */}
+      <section className="rounded-[26px] border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-2xl font-black text-primary-800">
+              Active Weather Conditions
+            </p>
+
+            <p className="mt-1 text-lg text-gray-500">
+              List endpoint បង្ហាញ Weather Conditions ដែល Active។
+            </p>
+          </div>
+
+          <div className="relative w-full lg:w-[390px]">
+            <Search
+              size={19}
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+            />
+
+            <input
+              value={
+                search
+              }
+              onChange={(event) =>
+                setSearch(
+                  event.target.value,
+                )
+              }
+              placeholder="ស្វែងរក code, name, local name..."
+              className="h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 pl-11 pr-10 text-lg outline-none transition focus:border-primary-700 focus:bg-white focus:ring-4 focus:ring-emerald-50"
+            />
+
+            {search && (
+              <button
+                type="button"
+                onClick={() =>
+                  setSearch(
+                    "",
+                  )
+                }
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+              >
+                <X
+                  size={
+                    17
+                  }
+                />
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
       {notice && (
         <div
-          className={`flex flex-col gap-3 rounded-2xl p-5 text-lg font-semibold sm:flex-row sm:items-center sm:justify-between ${notice.type === "success"
-            ? "border border-emerald-100 bg-emerald-50 text-emerald-800"
-            : "border border-red-100 bg-red-50 text-red-700"
-            }`}
+          className={`rounded-2xl border px-4 py-3 text-lg ${
+            notice.type ===
+            "success"
+              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+              : "border-red-100 bg-red-50 text-red-600"
+          }`}
         >
-          <div className="flex items-center gap-3">
-            {notice.type === "success" ? (
-              <CheckCircle2 size={24} className="text-emerald-600 shrink-0" />
-            ) : (
-              <AlertTriangle size={24} className="text-red-500 shrink-0" />
-            )}
-            <span>{notice.text}</span>
-          </div>
+          {notice.text}
+        </div>
+      )}
 
-          <div className="flex items-center gap-3">
-            {notice.action && (
-              <button
-                type="button"
-                onClick={notice.action.onClick}
-                className="rounded-xl bg-red-600 px-4 py-2 text-lg font-bold text-white transition hover:bg-red-700"
-              >
-                {notice.action.label}
-              </button>
-            )}
+      <section className="overflow-hidden rounded-[26px] border border-gray-100 bg-white shadow-sm">
+        {isLoading ? (
+          <div className="flex min-h-[360px] flex-col items-center justify-center">
+            <Loader2
+              size={32}
+              className="animate-spin text-primary-800"
+            />
+
+            <p className="mt-3 text-lg font-semibold text-gray-400">
+              កំពុងទាញយក Weather Conditions...
+            </p>
+          </div>
+        ) : error ? (
+          <div className="flex min-h-[360px] flex-col items-center justify-center px-5 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500">
+              <AlertTriangle
+                size={28}
+              />
+            </div>
+
+            <p className="mt-4 text-2xl font-black text-gray-800">
+              មិនអាចទាញយក Weather Conditions បានទេ
+            </p>
+
+            <p className="mt-2 max-w-xl whitespace-pre-wrap text-lg leading-7 text-gray-500">
+              {getApiErrorMessage(
+                error,
+              )}
+            </p>
+
             <button
               type="button"
-              onClick={() => setNotice(null)}
-              className="rounded-full p-1.5 text-gray-400 hover:bg-black/5 hover:text-gray-600"
+              onClick={() =>
+                void refetch()
+              }
+              className="mt-5 rounded-full bg-primary-800 px-6 py-3 text-lg font-black text-white"
             >
-              <X size={20} />
+              សាកល្បងម្តងទៀត
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Fetch Error Display */}
-      {error && (
-        <div className="flex items-center justify-between rounded-2xl border border-red-100 bg-red-50 p-5 text-lg text-red-700">
-          <div className="flex items-center gap-3">
-            <AlertTriangle size={24} className="shrink-0 text-red-500" />
-            <span>{getApiErrorMessage(error)}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="rounded-xl border border-red-200 bg-white px-4 py-2 text-lg font-bold text-red-700 hover:bg-red-50"
-          >
-            ព្យាយាមម្តងទៀត
-          </button>
-        </div>
-      )}
-
-      {/* Toolbar: Search + Filter Tabs */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* Search */}
-        <div className="relative w-full sm:max-w-md">
-          <Search
-            size={20}
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+        ) : (
+          <WeatherConditionTable
+            items={
+              filteredItems
+            }
+            busy={
+              busy
+            }
+            onView={(item) =>
+              setDetailUuid(
+                item.uuid,
+              )
+            }
+            onEdit={
+              openEdit
+            }
+            onDeactivate={
+              setDeactivateItem
+            }
           />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="ស្វែងរកតាមឈ្មោះ ឬកូដ..."
-            className="h-12 w-full rounded-full border border-gray-200 bg-white pl-12 pr-4 text-lg font-medium text-gray-800 outline-none transition focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
-          />
-        </div>
+        )}
+      </section>
 
-        {/* Status Filter Tabs */}
-        <div className="flex items-center gap-2">
-          {(["ALL", "ACTIVE", "INACTIVE"] as const).map((tab) => {
-            const isSelected = statusFilter === tab;
-            const count =
-              tab === "ALL"
-                ? serverItems.length
-                : tab === "ACTIVE"
-                  ? activeCount
-                  : inactiveCount;
-
-            const label =
-              tab === "ALL"
-                ? "ទាំងអស់"
-                : tab === "ACTIVE"
-                  ? "សកម្ម"
-                  : "អសកម្ម";
-
-            return (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setStatusFilter(tab)}
-                className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition ${isSelected
-                  ? "bg-primary-800 text-white"
-                  : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-                  }`}
-              >
-                <span>{label}</span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-lg font-normal ${isSelected ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
-                    }`}
-                >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Main Table */}
-      {isLoading ? (
-        <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 rounded-3xl border border-gray-100 bg-white p-8">
-          <Loader2 size={36} className="animate-spin text-[#14833E]" />
-          <p className="text-lg font-semibold text-gray-500">
-            កំពុងទាញយកបញ្ជីស្ថានភាពអាកាសធាតុ...
-          </p>
-        </div>
-      ) : (
-        <WeatherConditionTable
-          items={filteredItems}
-          busy={busy}
-          onView={(item) => setDetailUuid(item.uuid)}
-          onEdit={openEdit}
-          onDeactivate={(item) => setDeactivateItem(item)}
-          onRestore={handleRestore}
-        />
-      )}
-
-      {/* Create / Edit Form Modal */}
       <WeatherConditionFormModal
-        open={formOpen}
-        item={editingItem}
-        saving={creating || updating}
-        onClose={closeForm}
-        onSubmit={saveWeather}
+        open={
+          formOpen
+        }
+        item={
+          editingItem
+        }
+        saving={
+          creating ||
+          updating
+        }
+        onClose={
+          closeForm
+        }
+        onSubmit={
+          saveWeather
+        }
       />
 
-      {/* Detail Modal */}
       <WeatherConditionDetailModal
-        uuid={detailUuid}
-        onClose={() => setDetailUuid(null)}
+        uuid={
+          detailUuid
+        }
+        onClose={() =>
+          setDetailUuid(
+            null,
+          )
+        }
       />
 
-      {/* Deactivate Confirmation Modal */}
       <DeactivateWeatherConditionModal
-        item={deactivateItem}
-        deleting={deactivating}
-        onClose={() => setDeactivateItem(null)}
-        onConfirm={confirmDeactivate}
+        item={
+          deactivateItem
+        }
+        deleting={
+          deactivating
+        }
+        onClose={() => {
+          if (
+            deactivating
+          ) {
+            return;
+          }
+
+          setDeactivateItem(
+            null,
+          );
+        }}
+        onConfirm={() =>
+          void confirmDeactivate()
+        }
       />
     </div>
   );

@@ -1,5 +1,66 @@
 import type { GooglePlaceResult, Store, StoreHour } from "@/src/types/shop";
 
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const IMAGE_EXTENSION_REGEX = /\.(avif|gif|jpe?g|png|svg|webp)([?#].*)?$/i;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isUsableImageCandidate(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  return (
+    UUID_REGEX.test(trimmed) ||
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("blob:") ||
+    trimmed.startsWith("data:") ||
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("api/") ||
+    IMAGE_EXTENSION_REGEX.test(trimmed)
+  );
+}
+
+function firstImageCandidate(...values: unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (isUsableImageCandidate(trimmed)) return trimmed;
+      continue;
+    }
+
+    if (Array.isArray(value)) {
+      const nested = firstImageCandidate(...value);
+      if (nested) return nested;
+      continue;
+    }
+
+    if (!isRecord(value)) continue;
+
+    const nested = firstImageCandidate(
+      value.url,
+      value.accessUrl,
+      value.fileUrl,
+      value.downloadUrl,
+      value.previewUrl,
+      value.imageUrl,
+      value.thumbnailUrl,
+      value.mediaUrl,
+      value.uuid,
+      value.mediaUuid,
+      value.image,
+      value.media,
+    );
+
+    if (nested) return nested;
+  }
+
+  return null;
+}
+
 export function displayStoreLocation(store: Store): string {
   return [store.addressLine, store.commune, store.district, store.city, store.province]
     .filter(Boolean)
@@ -46,6 +107,71 @@ export function imageUrlOrNull(value: string | null | undefined): string | null 
   if (!trimmed) return null;
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("/")) return trimmed;
   return `/${trimmed}`;
+}
+
+export function storeLogoCandidate(store: Store): string | null {
+  const record = store as Store & Record<string, unknown>;
+
+  return firstImageCandidate(
+    store.logoMediaUuid,
+    store.logoUrl,
+    record.logo,
+    record.logoUrl,
+    record.logoMedia,
+    record.logoMediaUuid,
+    record.profileImageUrl,
+    record.profileImage,
+    record.profilePicture,
+    record.thumbnailMediaUuid,
+    record.thumbnailUrl,
+    record.thumbnail,
+    record.avatarMediaUuid,
+    record.avatarUrl,
+    record.avatar,
+    record.imageUrl,
+    record.image,
+    record.images,
+    record.primaryMediaUuid,
+    record.primaryMediaUuids,
+    record.primaryMediaUrls,
+    record.media,
+    record.mediaFiles,
+    store.coverMediaUuid,
+    store.coverImageUrl,
+    record.cover,
+    record.coverMedia,
+    isRecord(store.externalSource) ? store.externalSource.photos : null,
+    isRecord(store.externalSource) ? store.externalSource.photoUrls : null,
+  );
+}
+
+export function storeCoverCandidate(store: Store): string | null {
+  const record = store as Store & Record<string, unknown>;
+
+  return firstImageCandidate(
+    store.coverMediaUuid,
+    store.coverImageUrl,
+    record.cover,
+    record.coverUrl,
+    record.coverMedia,
+    record.coverMediaUuid,
+    record.bannerMediaUuid,
+    record.bannerUrl,
+    record.imageUrl,
+    record.image,
+    record.images,
+    record.primaryMediaUuid,
+    record.primaryMediaUuids,
+    record.primaryMediaUrls,
+    record.media,
+    record.mediaFiles,
+    isRecord(store.externalSource) ? store.externalSource.photos : null,
+    isRecord(store.externalSource) ? store.externalSource.photoUrls : null,
+    store.logoMediaUuid,
+    store.logoUrl,
+    record.logo,
+    record.logoMedia,
+  );
 }
 
 export interface StoreLiveStatusInfo {

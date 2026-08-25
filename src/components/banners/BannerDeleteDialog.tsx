@@ -30,18 +30,18 @@ export default function BannerDeleteDialog({
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-[150] bg-black/40 backdrop-blur-[2px] transition-opacity" />
         <Dialog.Popup className="fixed inset-0 z-[150] flex items-center justify-center p-4 outline-none">
-          <div className="w-full max-w-lg overflow-hidden rounded-[28px] bg-white shadow-2xl transition-all">
+          <div className="w-full max-w-md overflow-hidden rounded-[24px] bg-white shadow-2xl transition-all">
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-gray-100 px-7 py-6">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-                  <AlertTriangle size={26} />
+            <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+                  <AlertTriangle size={22} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <Dialog.Title className="text-lg font-bold text-gray-900">
                     លុបផ្ទាំងបែនណឺ (Delete Banner)
-                  </p>
-                  <p className="mt-1 text-lg text-gray-500">
+                  </Dialog.Title>
+                  <p className="text-xs text-gray-500">
                     ការលុបនេះមិនអាចត្រឡប់វិញបានទេ
                   </p>
                 </div>
@@ -51,28 +51,28 @@ export default function BannerDeleteDialog({
                 onClick={onClose}
                 className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
               >
-                <X size={22} />
+                <X size={18} />
               </Dialog.Close>
             </div>
 
             {/* Body */}
-            <div className="space-y-5 p-7">
-              <div className="rounded-2xl border border-red-100 bg-red-50/50 p-5">
-                <p className="text-lg text-gray-700 leading-relaxed">
+            <div className="space-y-4 p-6">
+              <div className="rounded-2xl border border-red-100 bg-red-50/50 p-4">
+                <p className="text-sm text-gray-700 leading-relaxed">
                   តើអ្នកពិតជាចង់លុបបែនណឺ{" "}
                   <span className="font-bold text-gray-900 underline decoration-red-300">
                     &ldquo;{banner.title}&rdquo;
                   </span>{" "}
                   នេះមែនទេ?
                 </p>
-                <div className="mt-4 flex flex-wrap items-center gap-2.5">
+                <div className="mt-3 flex items-center gap-2">
                   <span
-                    className={`inline-flex items-center rounded-full border px-3.5 py-1 text-lg font-semibold ${categoryColor.bg}`}
+                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${categoryColor.bg}`}
                   >
                     {BANNER_CATEGORY_LABELS[banner.category] || banner.category}
                   </span>
                   {banner.location && (
-                    <span className="inline-flex items-center rounded-full bg-blue-50 px-3.5 py-1 text-lg font-semibold text-blue-700">
+                    <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
                       📍 {banner.location}
                     </span>
                   )}
@@ -81,12 +81,12 @@ export default function BannerDeleteDialog({
             </div>
 
             {/* Footer */}
-            <div className="flex flex-col-reverse gap-3 border-t border-gray-100 bg-gray-50 px-7 py-5 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 disabled={loading}
                 onClick={onClose}
-                className="rounded-xl border border-gray-200 bg-white px-5 py-3 text-lg font-bold text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
+                className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
               >
                 បោះបង់ (Cancel)
               </button>
@@ -94,12 +94,12 @@ export default function BannerDeleteDialog({
                 type="button"
                 disabled={loading}
                 onClick={onConfirm}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3 text-lg font-bold text-white shadow-sm transition hover:bg-red-700 active:scale-95 disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-red-700 active:scale-95 disabled:opacity-60"
               >
                 {loading ? (
-                  <Loader2 size={20} className="animate-spin" />
+                  <Loader2 size={16} className="animate-spin" />
                 ) : (
-                  <Trash2 size={20} />
+                  <Trash2 size={16} />
                 )}
                 {loading ? "កំពុងលុប..." : "លុបបែនណឺ (Delete)"}
               </button>

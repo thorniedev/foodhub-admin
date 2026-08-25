@@ -58,63 +58,41 @@ export default function FoodByAreaPage() {
         }}
       />
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         {/* Dynamic Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 -mx-1 px-1">
           <button
-            type="button"
             onClick={() => setActiveFilter("all")}
-            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
-              activeFilter === "all"
-                ? "bg-primary-800 text-white"
-                : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
-            }`}
-          >
-            <span>ទាំងអស់</span>
-            <span
-              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
-                activeFilter === "all" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeFilter === "all"
+              ? "bg-[#136C34] text-white"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
-            >
-              {areas.length}
-            </span>
+          >
+            ទាំងអស់ (All)
           </button>
 
-          {availableAreas.map((area) => {
-            const count = areas.filter((a) => a.location === area).length;
-            const active = activeFilter === area;
-            return (
-              <button
-                key={area}
-                type="button"
-                onClick={() => setActiveFilter(area as Area)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
-                  active
-                    ? "bg-primary-800 text-white"
-                    : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
+          {availableAreas.map((area) => (
+            <button
+              key={area}
+              onClick={() => setActiveFilter(area as Area)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeFilter === area
+                ? "bg-[#136C34] text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
-              >
-                <span>{AREA_LABELS[area as Area] || area}</span>
-                <span
-                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
-                    active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
+            >
+              {AREA_LABELS[area as Area] || area}
+            </button>
+          ))}
         </div>
 
-        <div className="relative w-full lg:w-[420px] shrink-0">
-          <Search size={20} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="relative w-full lg:w-72 shrink-0">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ស្វែងរកតាមចំណងជើង..."
-            className="h-[52px] w-full rounded-full border border-gray-200 bg-white pl-12 pr-4 text-lg font-medium outline-none transition focus:border-primary-600 focus:ring-4 focus:ring-primary-100"
+            className="w-full pl-9 pr-3 py-2 text-sm sm:text-base border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
           />
         </div>
       </div>

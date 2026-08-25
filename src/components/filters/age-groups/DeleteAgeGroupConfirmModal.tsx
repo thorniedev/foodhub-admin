@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 
 import {
-  CircleMinus,
   Loader2,
+  Trash2,
   X,
 } from "lucide-react";
 
@@ -50,7 +50,7 @@ export default function DeleteAgeGroupConfirmModal({
       <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
-            <CircleMinus size={26} />
+            <Trash2 size={24} />
           </div>
 
           <button
@@ -65,15 +65,15 @@ export default function DeleteAgeGroupConfirmModal({
         </div>
 
         <p className="mt-5 text-3xl font-semibold text-primary-800">
-          បិទដំណើរការក្រុមអាយុនេះ?
+          លុបក្រុមអាយុនេះ?
         </p>
 
         <p className="mt-3 text-lg leading-8 text-gray-500">
-          អ្នកកំពុងបិទដំណើរការ{" "}
+          អ្នកកំពុងលុប{" "}
           <span className="font-semibold text-gray-800">
             {item.name}
           </span>{" "}
-          ({item.minAge}–{item.maxAge} ឆ្នាំ)។ អ្នកអាចស្ដារវាឡើងវិញបាននៅពេលក្រោយ។
+          ({item.minAge}–{item.maxAge} ឆ្នាំ)។
         </p>
 
         <div className="mt-6 grid grid-cols-2 gap-3">
@@ -92,7 +92,7 @@ export default function DeleteAgeGroupConfirmModal({
               void onConfirm()
             }
             disabled={deleting}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-amber-500 px-4 text-lg font-medium text-white transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-500 px-4 text-lg font-medium text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {deleting && (
               <Loader2
@@ -101,7 +101,7 @@ export default function DeleteAgeGroupConfirmModal({
               />
             )}
 
-            បិទដំណើរការ
+            លុប
           </button>
         </div>
       </div>

@@ -20,8 +20,8 @@ import {
   getStoreAccountStatus,
   getStoreLiveStatus,
   getStoreReviewStatus,
-  imageUrlOrNull,
-  storeInitials,
+  storeCoverCandidate,
+  storeLogoCandidate,
 } from "@/src/lib/shopFormat";
 import StoreMediaImage from "./StoreMediaImage";
 
@@ -40,8 +40,8 @@ export default function StoreProfileHeader({
   onHours: () => void;
   onDelete?: () => void;
 }) {
-  const fallbackCover = imageUrlOrNull(store.coverImageUrl);
-  const fallbackLogo = imageUrlOrNull(store.logoUrl);
+  const coverCandidate = storeCoverCandidate(store);
+  const logoCandidate = storeLogoCandidate(store);
 
   const reviewStatus = getStoreReviewStatus(store.reviewStatus);
   const liveStatus = getStoreLiveStatus(store);
@@ -53,20 +53,10 @@ export default function StoreProfileHeader({
           TOP COVER BANNER
       ================================================== */}
       <div className="relative h-60 overflow-hidden bg-gradient-to-br from-[#0e6f34] via-[#14833E] to-[#1cb053] sm:h-72">
-        {store.coverMediaUuid ? (
+        {coverCandidate ? (
           <>
             <StoreMediaImage
-              mediaUuid={store.coverMediaUuid}
-              alt={`${store.storeName} cover`}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10" />
-          </>
-        ) : fallbackCover ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={fallbackCover}
+              mediaUuid={coverCandidate}
               alt={`${store.storeName} cover`}
               className="absolute inset-0 h-full w-full object-cover"
             />
@@ -93,18 +83,16 @@ export default function StoreProfileHeader({
           <div className="flex items-end gap-4">
             {/* Logo */}
             <div className="flex h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-4 border-white bg-white shadow-xl sm:h-24 sm:w-24">
-              {store.logoMediaUuid ? (
+              {logoCandidate ? (
                 <StoreMediaImage
-                  mediaUuid={store.logoMediaUuid}
+                  mediaUuid={logoCandidate}
                   alt={`${store.storeName} logo`}
                   className="h-full w-full object-cover"
-                />
-              ) : fallbackLogo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={fallbackLogo}
-                  alt={`${store.storeName} logo`}
-                  className="h-full w-full object-cover"
+                  fallbackIcon={
+                    <div className="flex h-full w-full items-center justify-center bg-emerald-50 text-[#137A3D]">
+                      <StoreIcon size={36} />
+                    </div>
+                  }
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-emerald-50 text-[#137A3D]">

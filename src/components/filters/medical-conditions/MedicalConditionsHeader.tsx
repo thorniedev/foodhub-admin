@@ -1,7 +1,6 @@
 import {
   HeartPulse,
   Plus,
-  RotateCcw,
 } from "lucide-react";
 
 type Props = {
@@ -9,7 +8,6 @@ type Props = {
   activeCount: number;
   inactiveCount: number;
   onAdd: () => void;
-  onRestoreAll?: () => void;
 };
 
 export default function MedicalConditionsHeader({
@@ -17,80 +15,81 @@ export default function MedicalConditionsHeader({
   activeCount,
   inactiveCount,
   onAdd,
-  onRestoreAll,
 }: Props) {
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
       {/* DECORATION */}
+
       <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full bg-white/5" />
+
       <div className="pointer-events-none absolute -bottom-24 right-20 h-64 w-64 rounded-full bg-white/5" />
 
       <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
-              <HeartPulse size={25} />
+              <HeartPulse
+                size={25}
+              />
             </div>
 
             <div>
-              <p className="text-5xl font-bold text-accent-400">
+              <p className="text-3xl font-bold text-accent-400">
                 គ្រប់គ្រងស្ថានភាពសុខភាព
               </p>
 
-              <p className="mt-6 max-w-2xl text-xl text-white/85">
-                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារស្ថានភាពសុខភាពដែលប្រើក្នុងប្រព័ន្ធ ម្ហូបអាហារ។
+              <p className="mt-2 max-w-2xl text-xl leading-7 text-white/85">
+                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារស្ថានភាពសុខភាពដែលប្រើក្នុងប្រព័ន្ធ MhouBahar។
               </p>
             </div>
           </div>
 
           {/* STATS */}
+
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="rounded-3xl bg-white/20 px-5 py-4">
-              <div className="flex items-center gap-2 text-xl text-white/80">
-                <HeartPulse size={20} />
-                <span>សរុប</span>
-              </div>
-              <p className="mt-1 text-2xl font-bold">{total}</p>
+              <p className="text-xl text-white/75">
+                សរុប
+              </p>
+
+              <p className="mt-1 text-2xl font-bold">
+                {total}
+              </p>
             </div>
 
             <div className="rounded-3xl bg-white/20 px-5 py-4">
-              <div className="flex items-center gap-2 text-xl text-white/80">
-                <span>សកម្មក្នុងទំព័រ</span>
-              </div>
-              <p className="mt-1 text-2xl font-bold">{activeCount}</p>
+              <p className="text-xl text-white/75">
+                សកម្មក្នុងទំព័រ
+              </p>
+
+              <p className="mt-1 text-2xl font-bold">
+                {activeCount}
+              </p>
             </div>
 
             <div className="rounded-3xl bg-white/20 px-5 py-4">
-              <div className="flex items-center gap-2 text-xl text-white/80">
-                <span>អសកម្មក្នុងទំព័រ</span>
-              </div>
-              <p className="mt-1 text-2xl font-bold">{inactiveCount}</p>
+              <p className="text-xl text-white/75">
+                អសកម្មក្នុងទំព័រ
+              </p>
+
+              <p className="mt-1 text-2xl font-bold">
+                {inactiveCount}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* ACTIONS */}
-        <div className="flex flex-wrap items-center gap-3">
-          {inactiveCount > 0 && onRestoreAll && (
-            <button
-              type="button"
-              onClick={onRestoreAll}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-400 px-5 py-3 text-lg font-bold text-gray-900 shadow-sm transition hover:bg-amber-300 sm:w-fit"
-            >
-              <RotateCcw size={20} />
-              ស្ដារទាំងអស់ ({inactiveCount})
-            </button>
-          )}
+        {/* ADD */}
 
-          <button
-            type="button"
-            onClick={onAdd}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
-          >
-            <Plus size={20} />
-            បន្ថែមស្ថានភាពសុខភាព
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
+        >
+          <Plus size={20} />
+
+          បន្ថែមស្ថានភាពសុខភាព
+        </button>
       </div>
     </section>
   );

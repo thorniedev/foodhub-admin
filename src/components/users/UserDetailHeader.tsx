@@ -10,7 +10,7 @@ import {
   User,
 } from "lucide-react";
 
-import type { AdminProfile, AdminUser } from "@/src/types/userProfile";
+import type { AdminUser } from "@/src/types/userProfile";
 
 import { displayName, formatDateTime } from "@/src/lib/userProfileFormat";
 
@@ -19,7 +19,6 @@ import UserAvatar from "./UserAvatar";
 
 interface UserDetailHeaderProps {
   user: AdminUser;
-  defaultProfile?: AdminProfile | null;
   busy?: boolean;
   onStatusEdit?: () => void;
   onCreateProfile?: () => void;
@@ -29,7 +28,6 @@ interface UserDetailHeaderProps {
 
 export default function UserDetailHeader({
   user,
-  defaultProfile,
   busy = false,
   onStatusEdit,
   onCreateProfile,
@@ -42,22 +40,33 @@ export default function UserDetailHeader({
     user.username,
   );
 
-  const activeDefault = defaultProfile || user.defaultProfile;
-
   const avatarMediaUuid =
-    activeDefault?.avatarMediaUuid ||
     user.avatarMediaUuid ||
-    user.profiles?.[0]?.avatarMediaUuid;
+    user.defaultProfile?.avatarMediaUuid ||
+    user.profiles?.[0]?.avatarMediaUuid ||
+    (user as any).profileMediaUuid ||
+    (user as any).profile?.avatarMediaUuid;
 
   const imageUrl =
-    activeDefault?.avatarUrl ||
     user.avatarUrl ||
     user.profileImage ||
     user.profilePicture ||
     user.picture ||
     user.imageUrl ||
     user.image ||
-    user.avatar;
+    user.avatar ||
+    (user.defaultProfile as any)?.avatarUrl ||
+    (user.defaultProfile as any)?.profileImageUrl ||
+    (user.defaultProfile as any)?.imageUrl ||
+    (user.defaultProfile as any)?.photoUrl ||
+    (user.defaultProfile as any)?.picture ||
+    (user.profiles?.[0] as any)?.avatarUrl ||
+    (user.profiles?.[0] as any)?.profileImageUrl ||
+    (user.profiles?.[0] as any)?.imageUrl ||
+    (user.profiles?.[0] as any)?.photoUrl ||
+    (user as any).profile?.avatarUrl ||
+    (user as any).profile?.profileImageUrl ||
+    (user as any).profile?.imageUrl;
 
   const isDisabledOrDeleted =
     user.status === "DISABLED" || user.status === "DELETED";
