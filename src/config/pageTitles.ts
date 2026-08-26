@@ -11,6 +11,8 @@ const DEFAULT_TITLE: PageTitleEntry = { title: "ផ្ទាំងគ្រប�
 const SUB_ROUTE_TITLES: Record<string, PageTitleEntry> = {
   "/shops/create": { title: "បន្ថែមហាងថ្មី", parent: "ហាង" },
   "/users/create": { title: "បង្កើតអ្នកប្រើប្រាស់ថ្មី", parent: "អ្នកប្រើប្រាស់" },
+  "/filter/food-sub-categories": { title: "អនុប្រភេទម្ហូប", parent: "ចម្រោះទិន្នន័យ" },
+  "/filter/drink-sub-categories": { title: "អនុប្រភេទភេសជ្ជៈ", parent: "ចម្រោះទិន្នន័យ" },
 };
 
 function buildNavLookup(): Record<string, PageTitleEntry> {
@@ -67,11 +69,11 @@ export function getPageTitle(pathname: string): PageTitleEntry {
   }
 
   if (cleanPath.startsWith("/menu-items")) {
-    return { title: "ប្រភេទអាហារ" };
+    return { title: "មីនុយ" };
   }
 
-  if (cleanPath.startsWith("/food-types")) {
-    return { title: "ប្រភេទអាហារ" };
+  if (cleanPath.startsWith("/food-catalog")) {
+    return { title: "ម្ហូបអាហារ" };
   }
 
   if (cleanPath.startsWith("/dynamic-content")) {

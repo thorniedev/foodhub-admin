@@ -1,9 +1,28 @@
 "use client";
 
-import { Loader2, Plus, Save, Trash2, X } from "lucide-react";
+import {
+  Clock,
+  CupSoda,
+  Loader2,
+  MapPin,
+  Plus,
+  Save,
+  ShieldAlert,
+  Soup,
+  Trash2,
+  UtensilsCrossed,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import ImagePicker from "./ImagePicker";
+import CustomSelect from "../ui/CustomSelect";
+import {
+  extractKhmerOnlyName,
+  isDrinkSubCategory,
+  isFoodSubCategory,
+  isSubCategory,
+} from "@/src/lib/catalogCategoryHelper";
 
 import type {
   CuisineOption,
@@ -24,6 +43,13 @@ import type {
 import type { MealType } from "@/src/types/mealType";
 import type { AgeGroup } from "@/src/types/ageGroup";
 import type { DietaryType } from "@/src/types/dietaryType";
+import type { Allergen } from "@/src/types/allergen";
+import type { FilterCatalogOption } from "@/src/types/filterCatalog";
+import { useGetManagedFoodQuery } from "@/src/app/store/menuManagementApi";
+import {
+  readFoodRelationsStorage,
+  saveFoodRelationsStorage,
+} from "@/src/lib/filterCatalogStorage";
 
 type FormState = {
   canonicalName: string;
@@ -73,7 +99,11 @@ export default function FoodFormModal({
   mealTypes = [],
   ageGroups = [],
   dietaryTypes = [],
+  allergens = [],
+  preparationTimes = [],
+  distances = [],
   saving,
+  catalogType = "ALL",
   onClose,
   onSubmit,
 }: {
@@ -87,7 +117,12 @@ export default function FoodFormModal({
   mealTypes?: MealType[];
   ageGroups?: AgeGroup[];
   dietaryTypes?: DietaryType[];
+  allergens?: Allergen[];
+  preparationTimes?: FilterCatalogOption[];
+  distances?: FilterCatalogOption[];
+  regions?: FilterCatalogOption[];
   saving: boolean;
+  catalogType?: "FOOD" | "DRINK" | "ALL";
   onClose: () => void;
   onSubmit: (
     payload: FoodWritePayload,
@@ -105,12 +140,19 @@ export default function FoodFormModal({
   const [mealTypeRows, setMealTypeRows] = useState<FoodMealTypeRelation[]>([]);
   const [ageRuleRows, setAgeRuleRows] = useState<FoodAgeRuleRelation[]>([]);
   const [dietaryTypeRows, setDietaryTypeRows] = useState<FoodDietaryTypeRelation[]>([]);
+  const [allergenRows, setAllergenRows] = useState<Array<{ allergenUuid: string; riskLevel?: string; notes?: string }>>([]);
+  const [preparationTimeRows, setPreparationTimeRows] = useState<Array<{ optionUuid: string; notes?: string }>>([]);
+  const [distanceRows, setDistanceRows] = useState<Array<{ optionUuid: string; notes?: string }>>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (!open) return;
+  const { data: detailedFood } = useGetManagedFoodQuery(item?.uuid ?? "", {
+    skip: !open || !item?.uuid,
+  });
 
-    if (!item) {
+  const activeItem = item ? (detailedFood ?? item) : null;
+
+  useEffect(() => {
+    if (!open || !item || !activeItem) {
       setValues(EMPTY);
       setImages([]);
       setExistingImages([]);
@@ -120,89 +162,157 @@ export default function FoodFormModal({
       setMealTypeRows([]);
       setAgeRuleRows([]);
       setDietaryTypeRows([]);
+      setAllergenRows([]);
+      setPreparationTimeRows([]);
+      setDistanceRows([]);
       setError(null);
       return;
     }
 
-    const list = item.images?.length
-      ? item.images
-      : item.gallery?.length
-      ? item.gallery
-      : item.primaryMediaUrls?.length
-      ? item.primaryMediaUrls
-      : [item.thumbnail || item.imageUrl].filter(Boolean);
+    const list = activeItem.images?.length
+      ? activeItem.images
+      : activeItem.gallery?.length
+        ? activeItem.gallery
+        : activeItem.primaryMediaUrls?.length
+          ? activeItem.primaryMediaUrls
+          : [activeItem.thumbnail || activeItem.imageUrl].filter(Boolean);
     setExistingImages(list as string[]);
 
     const matchedCategoryUuid =
-      item.categoryUuid ??
-      item.category?.uuid ??
+      activeItem.categoryUuid ??
+      activeItem.category?.uuid ??
       categories.find(
         (c) =>
-          (item.category?.code && c.code === item.category.code) ||
-          (item.category?.name && c.name === item.category.name) ||
-          (item.categoryName && c.name === item.categoryName),
+          (activeItem.category?.code && c.code === activeItem.category.code) ||
+          (activeItem.category?.name && c.name === activeItem.category.name) ||
+          (activeItem.categoryName && c.name === activeItem.categoryName),
       )?.uuid ??
       "";
 
     const matchedCuisineUuid =
-      item.cuisineUuid ??
-      item.cuisine?.uuid ??
+      activeItem.cuisineUuid ??
+      activeItem.cuisine?.uuid ??
       cuisines.find(
         (c) =>
-          (item.cuisine?.code && c.code === item.cuisine.code) ||
-          (item.cuisine?.name && c.name === item.cuisine.name) ||
-          (item.cuisineName && c.name === item.cuisineName),
+          (activeItem.cuisine?.code && c.code === activeItem.cuisine.code) ||
+          (activeItem.cuisine?.name && c.name === activeItem.cuisine.name) ||
+          (activeItem.cuisineName && c.name === activeItem.cuisineName),
       )?.uuid ??
       "";
 
+    const stored =
+      (activeItem?.uuid ? readFoodRelationsStorage(activeItem.uuid) : null) ??
+      (item?.uuid ? readFoodRelationsStorage(item.uuid) : null);
+
+    // Server often returns nutritionData with all 0s/nulls when not persisted.
+    // Only trust server nutrition when at least one field has a real non-zero value.
+    const serverNut = activeItem.nutritionData ?? (activeItem as any).nutrition;
+    const storedNut = stored?.nutritionData ?? stored?.nutrition;
+    const serverHasRealData = !!(
+      serverNut &&
+      (
+        (serverNut as any).calories ||
+        (serverNut as any).proteinGrams ||
+        (serverNut as any).protein ||
+        (serverNut as any).carbohydrateGrams ||
+        (serverNut as any).carbs ||
+        (serverNut as any).fatGrams ||
+        (serverNut as any).fat ||
+        (serverNut as any).fiberGrams ||
+        (serverNut as any).fiber
+      )
+    );
+    const nutrition = serverHasRealData ? serverNut : (storedNut ?? serverNut);
+
     setValues({
-      canonicalName: item.canonicalName ?? "",
-      localName: item.localName ?? "",
-      description: item.description ?? "",
+      canonicalName: activeItem.canonicalName ?? "",
+      localName: activeItem.localName ?? "",
+      description: activeItem.description ?? "",
       categoryUuid: matchedCategoryUuid,
       cuisineUuid: matchedCuisineUuid,
-      defaultSpiceLevel: String(item.defaultSpiceLevel ?? 0),
+      defaultSpiceLevel: String(activeItem.defaultSpiceLevel ?? 0),
       calories:
-        item.nutritionData?.calories != null
-          ? String(item.nutritionData.calories)
-          : "",
-      protein:
-        item.nutritionData?.proteinGrams != null
-          ? String(item.nutritionData.proteinGrams)
-          : "",
-      carbohydrate:
-        item.nutritionData?.carbohydrateGrams != null
-          ? String(item.nutritionData.carbohydrateGrams)
-          : item.nutritionData?.carbsGrams != null
-            ? String(item.nutritionData.carbsGrams)
+        nutrition?.calories != null
+          ? String(nutrition.calories)
+          : (activeItem as any)?.calories != null
+            ? String((activeItem as any).calories)
             : "",
+      protein:
+        nutrition?.proteinGrams != null
+          ? String(nutrition.proteinGrams)
+          : (nutrition as any)?.protein != null
+            ? String((nutrition as any).protein)
+            : (activeItem as any)?.proteinGrams != null
+              ? String((activeItem as any).proteinGrams)
+              : "",
+      carbohydrate:
+        nutrition?.carbohydrateGrams != null
+          ? String(nutrition.carbohydrateGrams)
+          : nutrition?.carbsGrams != null
+            ? String(nutrition.carbsGrams)
+            : (nutrition as any)?.carbs != null
+              ? String((nutrition as any).carbs)
+              : (activeItem as any)?.carbohydrateGrams != null
+                ? String((activeItem as any).carbohydrateGrams)
+                : "",
       fat:
-        item.nutritionData?.fatGrams != null
-          ? String(item.nutritionData.fatGrams)
-          : "",
+        nutrition?.fatGrams != null
+          ? String(nutrition.fatGrams)
+          : (nutrition as any)?.fat != null
+            ? String((nutrition as any).fat)
+            : (activeItem as any)?.fatGrams != null
+              ? String((activeItem as any).fatGrams)
+              : "",
       fiber:
-        item.nutritionData?.fiberGrams != null
-          ? String(item.nutritionData.fiberGrams)
-          : "",
-      isActive: item.isActive !== false,
+        nutrition?.fiberGrams != null
+          ? String(nutrition.fiberGrams)
+          : (nutrition as any)?.fiber != null
+            ? String((nutrition as any).fiber)
+            : (activeItem as any)?.fiberGrams != null
+              ? String((activeItem as any).fiberGrams)
+              : "",
+      isActive: activeItem.isActive !== false,
     });
 
-    // Populate metadata relations if editing
-    const rawSeasons = Array.isArray(item.seasons) ? item.seasons : [];
+    // Populate metadata relations if editing - prioritize stored relations saved by the user
+    const rawSeasons =
+      Array.isArray(stored?.seasons) && stored.seasons.length > 0
+        ? stored.seasons
+        : Array.isArray(activeItem.seasons) && activeItem.seasons.length > 0
+          ? activeItem.seasons
+          : Array.isArray((activeItem as any).seasonRelations) && (activeItem as any).seasonRelations.length > 0
+            ? (activeItem as any).seasonRelations
+            : [];
     setSeasonRows(
       rawSeasons
         .map((s: any) => {
+          const sId =
+            typeof s === "string"
+              ? s
+              : s.seasonUuid ||
+                s.uuid ||
+                s.id ||
+                s.season?.uuid ||
+                s.season?.id ||
+                s.code ||
+                s.seasonCode ||
+                s.season?.code ||
+                "";
+          const sName =
+            typeof s === "string"
+              ? s
+              : s.name ||
+                s.season?.name ||
+                s.localName ||
+                s.season?.localName ||
+                "";
           const found = seasons.find(
             (opt) =>
-              opt.uuid === s.seasonUuid ||
-              opt.uuid === s.uuid ||
-              opt.uuid === s.season?.uuid ||
-              (s.code && opt.code === s.code) ||
-              (s.name && opt.name === s.name),
+              (sId && (opt.uuid === sId || opt.code === sId || (opt as any).id === sId)) ||
+              (sName && (opt.name === sName || (opt as any).localName === sName)),
           );
           return {
-            seasonUuid:
-              found?.uuid || s.seasonUuid || s.uuid || s.season?.uuid || "",
+            seasonUuid: found?.uuid || found?.code || sId || "",
             suitabilityScore:
               s.suitabilityScore != null ? Number(s.suitabilityScore) : 0.95,
             reasonText: s.reasonText ?? "",
@@ -211,21 +321,44 @@ export default function FoodFormModal({
         .filter((s) => Boolean(s.seasonUuid)),
     );
 
-    const rawEvents = Array.isArray(item.events) ? item.events : [];
+    const rawEvents =
+      Array.isArray(stored?.events) && stored.events.length > 0
+        ? stored.events
+        : Array.isArray(activeItem.events) && activeItem.events.length > 0
+          ? activeItem.events
+          : Array.isArray((activeItem as any).eventRelations) && (activeItem as any).eventRelations.length > 0
+            ? (activeItem as any).eventRelations
+            : [];
     setEventRows(
       rawEvents
         .map((e: any) => {
+          const eId =
+            typeof e === "string"
+              ? e
+              : e.eventUuid ||
+                e.uuid ||
+                e.id ||
+                e.event?.uuid ||
+                e.event?.id ||
+                e.code ||
+                e.eventCode ||
+                e.event?.code ||
+                "";
+          const eName =
+            typeof e === "string"
+              ? e
+              : e.name ||
+                e.event?.name ||
+                e.localName ||
+                e.event?.localName ||
+                "";
           const found = events.find(
             (opt) =>
-              opt.uuid === e.eventUuid ||
-              opt.uuid === e.uuid ||
-              opt.uuid === e.event?.uuid ||
-              (e.code && opt.code === e.code) ||
-              (e.name && opt.name === e.name),
+              (eId && (opt.uuid === eId || opt.code === eId || (opt as any).id === eId)) ||
+              (eName && (opt.name === eName || (opt as any).localName === eName)),
           );
           return {
-            eventUuid:
-              found?.uuid || e.eventUuid || e.uuid || e.event?.uuid || "",
+            eventUuid: found?.uuid || found?.code || eId || "",
             relevanceScore:
               e.relevanceScore != null ? Number(e.relevanceScore) : 0.9,
             reasonText: e.reasonText ?? "",
@@ -234,27 +367,52 @@ export default function FoodFormModal({
         .filter((e) => Boolean(e.eventUuid)),
     );
 
-    const rawWeather = Array.isArray(item.suitableWeather)
-      ? item.suitableWeather
-      : [];
+    const rawWeather =
+      Array.isArray(stored?.suitableWeather) && stored.suitableWeather.length > 0
+        ? stored.suitableWeather
+        : Array.isArray(stored?.weatherConditions) && stored.weatherConditions.length > 0
+          ? stored.weatherConditions
+          : Array.isArray(activeItem.suitableWeather) && activeItem.suitableWeather.length > 0
+            ? activeItem.suitableWeather
+            : Array.isArray((activeItem as any).weatherConditions) && (activeItem as any).weatherConditions.length > 0
+              ? (activeItem as any).weatherConditions
+              : Array.isArray((activeItem as any).weathers) && (activeItem as any).weathers.length > 0
+                ? (activeItem as any).weathers
+                : Array.isArray((activeItem as any).weather) && (activeItem as any).weather.length > 0
+                  ? (activeItem as any).weather
+                  : [];
     setWeatherRows(
       rawWeather
         .map((w: any) => {
+          const wId =
+            typeof w === "string"
+              ? w
+              : w.weatherConditionUuid ||
+                w.weatherUuid ||
+                w.conditionUuid ||
+                w.uuid ||
+                w.id ||
+                w.weatherCondition?.uuid ||
+                w.weatherCondition?.id ||
+                w.code ||
+                w.weatherCode ||
+                w.weatherCondition?.code ||
+                "";
+          const wName =
+            typeof w === "string"
+              ? w
+              : w.name ||
+                w.weatherCondition?.name ||
+                w.localName ||
+                w.weatherCondition?.localName ||
+                "";
           const found = weatherConditions.find(
             (opt) =>
-              opt.uuid === w.weatherConditionUuid ||
-              opt.uuid === w.uuid ||
-              opt.uuid === w.weatherCondition?.uuid ||
-              (w.code && opt.code === w.code) ||
-              (w.name && opt.name === w.name),
+              (wId && (opt.uuid === wId || opt.code === wId || (opt as any).id === wId)) ||
+              (wName && (opt.name === wName || (opt as any).localName === wName)),
           );
           return {
-            weatherConditionUuid:
-              found?.uuid ||
-              w.weatherConditionUuid ||
-              w.uuid ||
-              w.weatherCondition?.uuid ||
-              "",
+            weatherConditionUuid: found?.uuid || found?.code || wId || "",
             suitabilityScore:
               w.suitabilityScore != null ? Number(w.suitabilityScore) : 0.95,
             reasonText: w.reasonText ?? "",
@@ -263,21 +421,44 @@ export default function FoodFormModal({
         .filter((w) => Boolean(w.weatherConditionUuid)),
     );
 
-    const rawMealTypes = Array.isArray(item.mealTypes) ? item.mealTypes : [];
+    const rawMealTypes =
+      Array.isArray(stored?.mealTypes) && stored.mealTypes.length > 0
+        ? stored.mealTypes
+        : Array.isArray(activeItem.mealTypes) && activeItem.mealTypes.length > 0
+          ? activeItem.mealTypes
+          : Array.isArray((activeItem as any).mealTypeRelations) && (activeItem as any).mealTypeRelations.length > 0
+            ? (activeItem as any).mealTypeRelations
+            : [];
     setMealTypeRows(
       rawMealTypes
         .map((m: any) => {
+          const mId =
+            typeof m === "string"
+              ? m
+              : m.mealTypeUuid ||
+                m.uuid ||
+                m.id ||
+                m.mealType?.uuid ||
+                m.mealType?.id ||
+                m.code ||
+                m.mealTypeCode ||
+                m.mealType?.code ||
+                "";
+          const mName =
+            typeof m === "string"
+              ? m
+              : m.name ||
+                m.mealType?.name ||
+                m.localName ||
+                m.mealType?.localName ||
+                "";
           const found = mealTypes.find(
             (opt) =>
-              opt.uuid === m.mealTypeUuid ||
-              opt.uuid === m.uuid ||
-              opt.uuid === m.mealType?.uuid ||
-              (m.code && opt.code === m.code) ||
-              (m.name && opt.name === m.name),
+              (mId && (opt.uuid === mId || opt.code === mId || (opt as any).id === mId)) ||
+              (mName && (opt.name === mName || (opt as any).localName === mName)),
           );
           return {
-            mealTypeUuid:
-              found?.uuid || m.mealTypeUuid || m.uuid || m.mealType?.uuid || "",
+            mealTypeUuid: found?.uuid || found?.code || mId || "",
             suitabilityScore:
               m.suitabilityScore != null ? Number(m.suitabilityScore) : 1.0,
           };
@@ -285,21 +466,46 @@ export default function FoodFormModal({
         .filter((m) => Boolean(m.mealTypeUuid)),
     );
 
-    const rawAgeRules = Array.isArray(item.ageRules) ? item.ageRules : [];
+    const rawAgeRules =
+      Array.isArray(stored?.ageRules) && stored.ageRules.length > 0
+        ? stored.ageRules
+        : Array.isArray(stored?.ageGroups) && stored.ageGroups.length > 0
+          ? stored.ageGroups
+          : Array.isArray(activeItem.ageRules) && activeItem.ageRules.length > 0
+            ? activeItem.ageRules
+            : Array.isArray((activeItem as any).ageGroups) && (activeItem as any).ageGroups.length > 0
+              ? (activeItem as any).ageGroups
+              : [];
     setAgeRuleRows(
       rawAgeRules
         .map((a: any) => {
+          const aId =
+            typeof a === "string"
+              ? a
+              : a.ageGroupUuid ||
+                a.uuid ||
+                a.id ||
+                a.ageGroup?.uuid ||
+                a.ageGroup?.id ||
+                a.code ||
+                a.ageGroupCode ||
+                a.ageGroup?.code ||
+                "";
+          const aName =
+            typeof a === "string"
+              ? a
+              : a.name ||
+                a.ageGroup?.name ||
+                a.localName ||
+                a.ageGroup?.localName ||
+                "";
           const found = ageGroups.find(
             (opt) =>
-              opt.uuid === a.ageGroupUuid ||
-              opt.uuid === a.uuid ||
-              opt.uuid === a.ageGroup?.uuid ||
-              (a.code && opt.code === a.code) ||
-              (a.name && opt.name === a.name),
+              (aId && (opt.uuid === aId || opt.code === aId || (opt as any).id === aId)) ||
+              (aName && (opt.name === aName || (opt as any).localName === aName)),
           );
           return {
-            ageGroupUuid:
-              found?.uuid || a.ageGroupUuid || a.uuid || a.ageGroup?.uuid || "",
+            ageGroupUuid: found?.uuid || found?.code || aId || "",
             ruleResult: a.ruleResult || "ALLOWED",
             reasonText: a.reasonText ?? "Suitable as a normal serving.",
           };
@@ -307,31 +513,98 @@ export default function FoodFormModal({
         .filter((a) => Boolean(a.ageGroupUuid)),
     );
 
-    const rawDietary = Array.isArray(item.dietaryTypes)
-      ? item.dietaryTypes
-      : [];
+    const rawDietary =
+      Array.isArray(stored?.dietaryTypes) && stored.dietaryTypes.length > 0
+        ? stored.dietaryTypes
+        : Array.isArray(activeItem.dietaryTypes) && activeItem.dietaryTypes.length > 0
+          ? activeItem.dietaryTypes
+          : [];
     setDietaryTypeRows(
       rawDietary
         .map((d: any) => {
-          const code = d.code ?? d.dietaryTypeCode ?? "";
+          const code = typeof d === "string" ? d : d.code ?? d.dietaryTypeCode ?? d.uuid ?? "";
           const found = dietaryTypes.find(
             (opt) =>
               opt.code === code ||
-              opt.uuid === d.uuid ||
-              opt.uuid === d.dietaryTypeUuid,
+              opt.uuid === code ||
+              (typeof d === "object" && (opt.uuid === d.uuid || opt.uuid === d.dietaryTypeUuid || opt.code === d.code)),
           );
           return {
-            code: found?.code || code,
-            name: found?.name || d.name || code,
+            code: found?.code || (typeof d === "object" ? d.code || d.dietaryTypeCode : code) || code,
+            name: found?.name || (typeof d === "object" ? d.name || d.localName : code) || code,
           };
         })
         .filter((d) => Boolean(d.code)),
+    );
+
+    const rawAllergens =
+      Array.isArray(stored?.allergens) && stored.allergens.length > 0
+        ? stored.allergens
+        : Array.isArray(activeItem.allergens) && activeItem.allergens.length > 0
+          ? activeItem.allergens
+          : Array.isArray((activeItem as any).allergenDeclarations) && (activeItem as any).allergenDeclarations.length > 0
+            ? (activeItem as any).allergenDeclarations
+            : [];
+    setAllergenRows(
+      rawAllergens
+        .map((a: any) => {
+          const aId =
+            typeof a === "string"
+              ? a
+              : a.allergenUuid || a.uuid || a.id || a.code || "";
+          const aName =
+            typeof a === "string"
+              ? a
+              : a.name || a.localName || a.allergenName || "";
+          const found = allergens.find(
+            (opt) =>
+              (aId && (opt.uuid === aId || opt.code === aId || (opt as any).id === aId)) ||
+              (aName && (opt.name === aName || (opt as any).localName === aName)),
+          );
+          return {
+            allergenUuid: found?.uuid || found?.code || aId || "",
+            riskLevel: a.riskLevel || "MEDIUM",
+            notes: a.notes ?? "",
+          };
+        })
+        .filter((a) => Boolean(a.allergenUuid)),
+    );
+
+    const rawPrepTimes =
+      Array.isArray(stored?.preparationTimes) && stored.preparationTimes.length > 0
+        ? stored.preparationTimes
+        : Array.isArray((activeItem as any)?.preparationTimes)
+          ? (activeItem as any).preparationTimes
+          : [];
+    setPreparationTimeRows(
+      rawPrepTimes
+        .map((p: any) => ({
+          optionUuid: p.optionUuid || p.uuid || p.id || p.code || "",
+          notes: p.notes ?? "",
+        }))
+        .filter((p: any) => Boolean(p.optionUuid)),
+    );
+
+    const rawDistances =
+      Array.isArray(stored?.distances) && stored.distances.length > 0
+        ? stored.distances
+        : Array.isArray((activeItem as any)?.distances)
+          ? (activeItem as any).distances
+          : [];
+    setDistanceRows(
+      rawDistances
+        .map((d: any) => ({
+          optionUuid: d.optionUuid || d.uuid || d.id || d.code || "",
+          notes: d.notes ?? "",
+        }))
+        .filter((d: any) => Boolean(d.optionUuid)),
     );
 
     setImages([]);
     setError(null);
   }, [
     item,
+    detailedFood,
     open,
     categories,
     cuisines,
@@ -341,18 +614,263 @@ export default function FoodFormModal({
     mealTypes,
     ageGroups,
     dietaryTypes,
+    allergens,
+    preparationTimes,
+    distances,
   ]);
 
   const activeCategories = useMemo(() => {
-    return categories.filter((category) => category.isActive !== false);
-  }, [categories]);
+    if (catalogType === "DRINK") {
+      return categories.filter(
+        (c) =>
+          (c.isActive !== false || c.uuid === values.categoryUuid) &&
+          isDrinkSubCategory(c, categories),
+      );
+    }
+
+    if (catalogType === "FOOD") {
+      return categories.filter(
+        (c) =>
+          (c.isActive !== false || c.uuid === values.categoryUuid) &&
+          isFoodSubCategory(c, categories),
+      );
+    }
+
+    return categories.filter(
+      (c) =>
+        (c.isActive !== false || c.uuid === values.categoryUuid) &&
+        isSubCategory(c, categories),
+    );
+  }, [categories, catalogType, values.categoryUuid]);
+
+  const activeDietaryTypes = useMemo(
+    () => dietaryTypes.filter((d) => d.active !== false),
+    [dietaryTypes],
+  );
+
+  const activeAllergens = useMemo(
+    () => (allergens ?? []).filter((a) => a.active !== false),
+    [allergens],
+  );
+
+  const activeMealTypes = useMemo(
+    () => mealTypes.filter((m) => m.isActive !== false),
+    [mealTypes],
+  );
+
+  const activeAgeGroups = useMemo(
+    () => ageGroups.filter((a) => a.isActive !== false),
+    [ageGroups],
+  );
+
+  const activeSeasons = useMemo(
+    () => seasons.filter((s) => s.isActive !== false),
+    [seasons],
+  );
+
+  const activeEvents = useMemo(
+    () => events.filter((e) => e.isActive !== false),
+    [events],
+  );
+
+  const activeWeatherConditions = useMemo(
+    () => weatherConditions.filter((w) => w.isActive !== false),
+    [weatherConditions],
+  );
+
+  const activePreparationTimes = useMemo(
+    () => (preparationTimes ?? []).filter((p) => p.active !== false),
+    [preparationTimes],
+  );
+
+  const activeDistances = useMemo(
+    () => (distances ?? []).filter((d) => d.active !== false),
+    [distances],
+  );
+
+  const categorySelectOptions = useMemo(
+    () => [
+      {
+        value: "",
+        label: catalogType === "DRINK" ? "ជ្រើសប្រភេទភេសជ្ជៈ..." : "ជ្រើសប្រភេទម្ហូប...",
+      },
+      ...activeCategories.map((category) => ({
+        value: category.uuid,
+        label: (category as any).localName || extractKhmerOnlyName(category.name) || category.name,
+      })),
+    ],
+    [activeCategories, catalogType],
+  );
+
+  const cuisineSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសម្ហូបតាមប្រទេស..." },
+      ...cuisines
+        .filter((cuisine) => cuisine.isActive !== false)
+        .map((cuisine) => ({
+          value: cuisine.uuid,
+          label: (cuisine as any).localName || extractKhmerOnlyName(cuisine.name) || cuisine.code,
+        })),
+    ],
+    [cuisines],
+  );
+
+  const spiceLevelSelectOptions = useMemo(
+    () => [
+      { value: "0", label: "0 - មិនហឹរ (Not Spicy)" },
+      { value: "1", label: "1 - ហឹរតិច (Mild)" },
+      { value: "2", label: "2 - ហឹរមធ្យម (Medium)" },
+      { value: "3", label: "3 - ហឹរខ្លាំង (Hot)" },
+      { value: "4", label: "4 - ហឹរខ្លាំងណាស់ (Very Hot)" },
+      { value: "5", label: "5 - ហឹរបំផុត (Extreme)" },
+    ],
+    [],
+  );
+
+  const dietaryTypeSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសរបបអាហារ..." },
+      ...activeDietaryTypes.map((d) => ({
+        value: d.code,
+        label:
+          (d as any).localName || d.name
+            ? `${(d as any).localName || d.name} (${d.code})`
+            : d.code,
+      })),
+    ],
+    [activeDietaryTypes],
+  );
+
+  const allergenSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសសារធាតុបង្កអាឡែស៊ី..." },
+      ...activeAllergens.map((a) => ({
+        value: a.uuid,
+        label: (a as any).localName || a.name || a.code,
+        description: a.code,
+      })),
+    ],
+    [activeAllergens],
+  );
+
+  const allergenRiskSelectOptions = useMemo(
+    () => [
+      { value: "LOW", label: "LOW (ទាប)" },
+      { value: "MEDIUM", label: "MEDIUM (មធ្យម)" },
+      { value: "HIGH", label: "HIGH (ខ្ពស់)" },
+    ],
+    [],
+  );
+
+  const mealTypeSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសពេលទទួលទាន..." },
+      ...activeMealTypes.map((m) => ({
+        value: m.uuid,
+        label: (m as any).localName || m.name || m.code,
+      })),
+    ],
+    [activeMealTypes],
+  );
+
+  const ageGroupSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសក្រុមអាយុ..." },
+      ...activeAgeGroups.map((ag) => ({
+        value: ag.uuid,
+        label: (ag as any).localName || ag.name || ag.code,
+      })),
+    ],
+    [activeAgeGroups],
+  );
+
+  const ageRuleResultSelectOptions = useMemo(
+    () => [
+      { value: "ALLOWED", label: "ALLOWED (អនុញ្ញាត)" },
+      { value: "WARNING", label: "WARNING (ប្រុងប្រយ័ត្ន)" },
+      { value: "RESTRICTED", label: "RESTRICTED (ហាមឃាត់)" },
+    ],
+    [],
+  );
+
+  const seasonSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសរដូវកាល..." },
+      ...activeSeasons.map((s) => ({
+        value: s.uuid,
+        label: (s as any).localName || s.name || s.code,
+      })),
+    ],
+    [activeSeasons],
+  );
+
+  const eventSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសព្រឹត្តិការណ៍..." },
+      ...activeEvents.map((ev) => ({
+        value: ev.uuid,
+        label: (ev as any).localName || ev.name || ev.code,
+      })),
+    ],
+    [activeEvents],
+  );
+
+  const weatherSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសអាកាសធាតុ..." },
+      ...activeWeatherConditions.map((w) => ({
+        value: w.uuid,
+        label: (w as any).localName || w.name || w.code,
+      })),
+    ],
+    [activeWeatherConditions],
+  );
+
+  const preparationTimeSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសពេលចម្អិន..." },
+      ...activePreparationTimes.map((p) => ({
+        value: p.uuid,
+        label: (p as any).localName || p.name || p.code,
+      })),
+    ],
+    [activePreparationTimes],
+  );
+
+  const distanceSelectOptions = useMemo(
+    () => [
+      { value: "", label: "ជ្រើសកម្រិតចម្ងាយ..." },
+      ...activeDistances.map((d) => ({
+        value: d.uuid,
+        label: (d as any).localName || d.name || d.code,
+      })),
+    ],
+    [activeDistances],
+  );
+
+  const modalTitle = useMemo(() => {
+    if (catalogType === "DRINK") {
+      return item ? "កែប្រែព័ត៌មានភេសជ្ជៈ" : "បន្ថែមភេសជ្ជៈថ្មី";
+    }
+    if (catalogType === "FOOD") {
+      return item ? "កែប្រែព័ត៌មានមុខម្ហូប" : "បន្ថែមមុខម្ហូបថ្មី";
+    }
+    return item ? "កែប្រែព័ត៌មានមុខម្ហូប" : "បន្ថែមមុខម្ហូបថ្មី";
+  }, [item, catalogType]);
+
+  const modalSubtitle = useMemo(() => {
+    if (catalogType === "DRINK") {
+      return "ភេសជ្ជៈនេះអាចឱ្យ Store ជ្រើសយកទៅដាក់លក់ក្នុង Menu Item។";
+    }
+    return "មុខម្ហូបនេះអាចឱ្យ Store ជ្រើសយកទៅដាក់លក់ក្នុង Menu Item។";
+  }, [catalogType]);
 
   const submit = async () => {
     try {
       setError(null);
 
       if (!values.canonicalName.trim()) {
-        throw new Error("Canonical name is required.");
+        throw new Error("សូមបញ្ចូលឈ្មោះជាភាសាអង់គ្លេស (English name)");
       }
 
       if (!values.categoryUuid) {
@@ -373,22 +891,40 @@ export default function FoodFormModal({
 
       const hasImages = Array.isArray(images) && images.length > 0;
 
+      const matchedCategory = categories.find(
+        (c) => c.uuid === values.categoryUuid || c.code === values.categoryUuid,
+      );
+      const matchedCuisine = cuisines.find(
+        (c) => c.uuid === values.cuisineUuid || c.code === values.cuisineUuid,
+      );
+
       const payload: FoodWritePayload = {
         canonicalName: values.canonicalName.trim(),
         localName: values.localName.trim() || null,
         description: values.description.trim() || null,
         categoryUuid: values.categoryUuid,
+        categoryCode: matchedCategory?.code || values.categoryUuid,
         cuisineUuid: values.cuisineUuid,
+        cuisineCode: matchedCuisine?.code || values.cuisineUuid,
         ...(hasImages ? {} : { primaryMediaUuids: item?.primaryMediaUuids ?? [] }),
-        defaultSpiceLevel: numberOrNull(values.defaultSpiceLevel) ?? 0,
+        defaultSpiceLevel: Math.min(5, Math.max(0, Math.round(numberOrNull(values.defaultSpiceLevel) ?? 0))),
         nutritionData,
         seasons: seasonRows
           .filter((r) => Boolean(r.seasonUuid))
-          .map((r) => ({
-            seasonUuid: r.seasonUuid,
-            suitabilityScore: r.suitabilityScore ?? 0.95,
-            reasonText: r.reasonText?.trim() || null,
-          })),
+          .map((r) => {
+            const found = seasons.find(
+              (s) => s.uuid === r.seasonUuid || s.code === r.seasonUuid,
+            );
+            return {
+              seasonUuid: found?.uuid || r.seasonUuid,
+              seasonCode: found?.code || undefined,
+              code: found?.code || undefined,
+              name: found?.name || undefined,
+              localName: (found as any)?.localName || undefined,
+              suitabilityScore: r.suitabilityScore ?? 0.95,
+              reasonText: r.reasonText?.trim() || null,
+            };
+          }),
         dietaryTypes: dietaryTypeRows
           .filter((r) => Boolean(r.code))
           .map((r) => ({
@@ -397,35 +933,119 @@ export default function FoodFormModal({
           })),
         events: eventRows
           .filter((r) => Boolean(r.eventUuid))
-          .map((r) => ({
-            eventUuid: r.eventUuid,
-            relevanceScore: r.relevanceScore ?? 0.9,
-            reasonText: r.reasonText?.trim() || null,
-          })),
+          .map((r) => {
+            const found = events.find(
+              (e) => e.uuid === r.eventUuid || e.code === r.eventUuid,
+            );
+            return {
+              eventUuid: found?.uuid || r.eventUuid,
+              eventCode: found?.code || undefined,
+              code: found?.code || undefined,
+              name: found?.name || undefined,
+              localName: (found as any)?.localName || undefined,
+              relevanceScore: r.relevanceScore ?? 0.9,
+              reasonText: r.reasonText?.trim() || null,
+            };
+          }),
         suitableWeather: weatherRows
           .filter((r) => Boolean(r.weatherConditionUuid))
-          .map((r) => ({
-            weatherConditionUuid: r.weatherConditionUuid,
-            suitabilityScore: r.suitabilityScore ?? 0.95,
-            reasonText: r.reasonText?.trim() || null,
-          })),
+          .map((r) => {
+            const found = weatherConditions.find(
+              (w) =>
+                w.uuid === r.weatherConditionUuid ||
+                w.code === r.weatherConditionUuid,
+            );
+            return {
+              weatherConditionUuid: found?.uuid || r.weatherConditionUuid,
+              weatherConditionCode: found?.code || undefined,
+              weatherCode: found?.code || undefined,
+              code: found?.code || undefined,
+              name: found?.name || undefined,
+              localName: (found as any)?.localName || undefined,
+              suitabilityScore: r.suitabilityScore ?? 0.95,
+              reasonText: r.reasonText?.trim() || null,
+            };
+          }),
         mealTypes: mealTypeRows
           .filter((r) => Boolean(r.mealTypeUuid))
-          .map((r) => ({
-            mealTypeUuid: r.mealTypeUuid,
-            suitabilityScore: r.suitabilityScore ?? 1.0,
-          })),
+          .map((r) => {
+            const found = mealTypes.find(
+              (m) => m.uuid === r.mealTypeUuid || m.code === r.mealTypeUuid,
+            );
+            return {
+              mealTypeUuid: found?.uuid || r.mealTypeUuid,
+              mealTypeCode: found?.code || undefined,
+              code: found?.code || undefined,
+              name: found?.name || undefined,
+              localName: (found as any)?.localName || undefined,
+              suitabilityScore: r.suitabilityScore ?? 1.0,
+            };
+          }),
         ageRules: ageRuleRows
           .filter((r) => Boolean(r.ageGroupUuid))
+          .map((r) => {
+            const found = ageGroups.find(
+              (a) => a.uuid === r.ageGroupUuid || a.code === r.ageGroupUuid,
+            );
+            return {
+              ageGroupUuid: found?.uuid || r.ageGroupUuid,
+              ageGroupCode: found?.code || undefined,
+              code: found?.code || undefined,
+              name: found?.name || undefined,
+              localName: (found as any)?.localName || undefined,
+              ruleResult: r.ruleResult || "ALLOWED",
+              reasonText: r.reasonText?.trim() || "Suitable as a normal serving.",
+            };
+          }),
+        allergens: allergenRows
+          .filter((r) => Boolean(r.allergenUuid))
+          .map((r) => {
+            const found = allergens.find(
+              (a) => a.uuid === r.allergenUuid || a.code === r.allergenUuid,
+            );
+            return {
+              allergenUuid: found?.uuid || r.allergenUuid,
+              allergenCode: found?.code || undefined,
+              code: found?.code || undefined,
+              name: found?.name || undefined,
+              localName: (found as any)?.localName || undefined,
+              riskLevel: r.riskLevel || "MEDIUM",
+              notes: r.notes?.trim() || null,
+            };
+          }),
+        preparationTimes: preparationTimeRows
+          .filter((r) => Boolean(r.optionUuid))
           .map((r) => ({
-            ageGroupUuid: r.ageGroupUuid,
-            ruleResult: r.ruleResult || "ALLOWED",
-            reasonText: r.reasonText?.trim() || "Suitable as a normal serving.",
+            optionUuid: r.optionUuid,
+            notes: r.notes?.trim() || null,
+          })),
+        distances: distanceRows
+          .filter((r) => Boolean(r.optionUuid))
+          .map((r) => ({
+            optionUuid: r.optionUuid,
+            notes: r.notes?.trim() || null,
           })),
         isActive: values.isActive,
       };
 
       await onSubmit(payload, images);
+
+      if (item?.uuid) {
+        saveFoodRelationsStorage(item.uuid, {
+          nutritionData: payload.nutritionData,
+          nutrition: payload.nutritionData,
+          seasons: payload.seasons,
+          events: payload.events,
+          suitableWeather: payload.suitableWeather,
+          weatherConditions: payload.suitableWeather,
+          mealTypes: payload.mealTypes,
+          ageRules: payload.ageRules,
+          dietaryTypes: payload.dietaryTypes,
+          allergens: (payload as any).allergens,
+          preparationTimes: payload.preparationTimes,
+          distances: payload.distances,
+        });
+      }
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -438,32 +1058,41 @@ export default function FoodFormModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[140] overflow-y-auto bg-black/45 p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-[140] overflow-y-auto bg-black/45 p-4 backdrop-blur-xs">
       <div className="mx-auto my-6 w-full max-w-4xl rounded-[30px] bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
-          <div>
-            <h2 className="text-2xl font-black text-gray-900">
-              {item ? "កែប្រែ Food Catalog" : "បន្ថែម Food Catalog"}
-            </h2>
-            <p className="mt-1 text-sm text-gray-400">
-              Food នេះអាចឱ្យ Store ជ្រើសយកទៅបង្កើត Menu Item។
-            </p>
+        <div className="flex items-center justify-between border-b border-gray-100 px-7 py-6">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#137A3D] border border-emerald-100">
+              {catalogType === "DRINK" ? (
+                <CupSoda size={24} />
+              ) : (
+                <Soup size={24} />
+              )}
+            </div>
+            <div>
+              <p className="text-2xl font-black text-[#137A3D]">
+                {modalTitle}
+              </p>
+              <p className="mt-0.5 text-base text-gray-500">
+                {modalSubtitle}
+              </p>
+            </div>
           </div>
 
           <button
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="rounded-full p-2 text-gray-400 hover:bg-gray-100"
+            className="rounded-full p-2.5 text-gray-400 hover:bg-gray-100 transition cursor-pointer"
           >
-            <X size={21} />
+            <X size={22} />
           </button>
         </div>
 
-        <div className="space-y-6 p-6">
-          <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-6 p-7">
+          <div className="grid gap-5 md:grid-cols-2">
             <Field
-              label="Canonical name *"
+              label="ឈ្មោះអង់គ្លេស *"
               value={values.canonicalName}
               onChange={(value) =>
                 setValues((current) => ({
@@ -474,7 +1103,7 @@ export default function FoodFormModal({
             />
 
             <Field
-              label="ឈ្មោះខ្មែរ"
+              label="ឈ្មោះខ្មែរ *"
               value={values.localName}
               onChange={(value) =>
                 setValues((current) => ({
@@ -484,79 +1113,86 @@ export default function FoodFormModal({
               }
             />
 
-            <label>
-              <Label>Category (ប្រភេទម្ហូប) *</Label>
-              <select
+            <div>
+              <Label>{catalogType === "DRINK" ? "ប្រភេទភេសជ្ជៈ *" : "ប្រភេទម្ហូប *"}</Label>
+              <CustomSelect
                 value={values.categoryUuid}
-                onChange={(event) =>
+                onChange={(val) =>
                   setValues((current) => ({
                     ...current,
-                    categoryUuid: event.target.value,
+                    categoryUuid: val,
                   }))
                 }
-                className={inputClass}
-              >
-                <option value="">ជ្រើស Category</option>
-                {activeCategories.map((category) => (
-                  <option key={category.uuid} value={category.uuid}>
-                    {category.name} ({category.code})
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              <Label>Cuisine (ម្ហូបតាមប្រទេស) *</Label>
-              <select
-                value={values.cuisineUuid}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    cuisineUuid: event.target.value,
-                  }))
-                }
-                className={inputClass}
-              >
-                <option value="">ជ្រើស Cuisine</option>
-                {cuisines
-                  .filter((cuisine) => cuisine.isActive !== false)
-                  .map((cuisine) => (
-                    <option key={cuisine.uuid} value={cuisine.uuid}>
-                      {cuisine.name}
-                    </option>
-                  ))}
-              </select>
-            </label>
-
-            <Field
-              label="Spice level"
-              type="number"
-              value={values.defaultSpiceLevel}
-              onChange={(value) =>
-                setValues((current) => ({
-                  ...current,
-                  defaultSpiceLevel: value,
-                }))
-              }
-            />
-
-            <label className="flex items-center gap-3 pt-7">
-              <input
-                type="checkbox"
-                checked={values.isActive}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    isActive: event.target.checked,
-                  }))
-                }
-                className="h-5 w-5 accent-[#137A3D]"
+                options={categorySelectOptions}
+                placeholder={catalogType === "DRINK" ? "ជ្រើសប្រភេទភេសជ្ជៈ..." : "ជ្រើសប្រភេទម្ហូប..."}
               />
-              <span className="font-bold text-gray-700">Active</span>
-            </label>
+            </div>
+
+            <div>
+              <Label>ម្ហូបតាមប្រទេស *</Label>
+              <CustomSelect
+                value={values.cuisineUuid}
+                onChange={(val) =>
+                  setValues((current) => ({
+                    ...current,
+                    cuisineUuid: val,
+                  }))
+                }
+                options={cuisineSelectOptions}
+                placeholder="ជ្រើសម្ហូបតាមប្រទេស..."
+              />
+            </div>
+
+            <div>
+              <Label>កម្រិតហឹរ (Spice Level 0-5)</Label>
+              <CustomSelect
+                value={values.defaultSpiceLevel}
+                onChange={(val) =>
+                  setValues((current) => ({
+                    ...current,
+                    defaultSpiceLevel: val,
+                  }))
+                }
+                options={spiceLevelSelectOptions}
+                placeholder="ជ្រើសកម្រិតហឹរ..."
+              />
+            </div>
+
+            <div className="flex flex-col justify-end">
+              <Label>ស្ថានភាព</Label>
+              <button
+                type="button"
+                onClick={() =>
+                  setValues((current) => ({
+                    ...current,
+                    isActive: !current.isActive,
+                  }))
+                }
+                className={`flex h-11 w-full items-center justify-between rounded-2xl border px-4 transition cursor-pointer ${
+                  values.isActive
+                    ? "border-emerald-200 bg-emerald-50/60 text-emerald-800"
+                    : "border-gray-200 bg-gray-50 text-gray-500"
+                }`}
+              >
+                <span className="text-base font-bold">
+                  {values.isActive ? "សកម្ម (Active)" : "អសកម្ម (Inactive)"}
+                </span>
+                <div
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                    values.isActive ? "bg-[#137A3D]" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
+                      values.isActive ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </div>
+              </button>
+            </div>
 
             <label className="md:col-span-2">
-              <Label>Description</Label>
+              <Label>ការពិពណ៌នា</Label>
               <textarea
                 rows={3}
                 value={values.description}
@@ -566,20 +1202,20 @@ export default function FoodFormModal({
                     description: event.target.value,
                   }))
                 }
-                className={`${inputClass} h-auto py-3`}
+                className={`${inputClass} h-auto py-3.5`}
               />
             </label>
           </div>
 
           {/* Nutrition Section */}
-          <div>
-            <h3 className="mb-3 text-lg font-black text-gray-900">Nutrition</h3>
+          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
+            <p className="mb-4 text-2xl font-black text-gray-900">សារធាតុចិញ្ចឹម (Nutrition)</p>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {[
-                ["calories", "Calories"],
+                ["calories", "Calories (kcal)"],
                 ["protein", "Protein (g)"],
-                ["carbohydrate", "Carbohydrate (g)"],
+                ["carbohydrate", "Carbs (g)"],
                 ["fat", "Fat (g)"],
                 ["fiber", "Fiber (g)"],
               ].map(([key, label]) => (
@@ -589,14 +1225,14 @@ export default function FoodFormModal({
                   type="number"
                   value={
                     values[
-                      key as keyof Pick<
-                        FormState,
-                        | "calories"
-                        | "protein"
-                        | "carbohydrate"
-                        | "fat"
-                        | "fiber"
-                      >
+                    key as keyof Pick<
+                      FormState,
+                      | "calories"
+                      | "protein"
+                      | "carbohydrate"
+                      | "fat"
+                      | "fiber"
+                    >
                     ]
                   }
                   onChange={(value) =>
@@ -611,11 +1247,11 @@ export default function FoodFormModal({
           </div>
 
           {/* Dietary Types Metadata Section */}
-          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
+          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-gray-900">របបអាហារ (Dietary Types)</h3>
-                <p className="text-xs text-gray-400">កំណត់របបអាហារដែលត្រូវគ្នា (Gluten Free, Vegan, Halal, etc.)</p>
+                <p className="text-2xl font-black text-gray-900">របបអាហារ (Dietary Types)</p>
+                <p className="mt-1 text-lg text-gray-500">កំណត់របបអាហារដែលត្រូវគ្នា (Gluten Free, Vegan, Halal, etc.)</p>
               </div>
               <button
                 type="button"
@@ -625,48 +1261,123 @@ export default function FoodFormModal({
                     { code: "", name: "" },
                   ])
                 }
-                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
+                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
               >
-                <Plus size={14} />
+                <Plus size={18} />
                 បន្ថែមរបបអាហារ
               </button>
             </div>
 
             {dietaryTypeRows.length === 0 ? (
-              <p className="mt-3 text-xs italic text-gray-400">មិនទាន់បានជ្រើសរបបអាហារ</p>
+              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសរបបអាហារ</p>
             ) : (
-              <div className="mt-3 space-y-2.5">
+              <div className="mt-4 space-y-3">
                 {dietaryTypeRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm border border-gray-100">
-                    <select
-                      value={row.code}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        const found = dietaryTypes.find((d) => d.code === val);
-                        setDietaryTypeRows((prev) =>
-                          prev.map((r, i) =>
-                            i === idx
-                              ? { ...r, code: val, name: found?.name ?? val }
-                              : r,
-                          ),
-                        );
-                      }}
-                      className="h-10 flex-1 min-w-[200px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសរបបអាហារ...</option>
-                      {dietaryTypes.map((d) => (
-                        <option key={d.uuid || d.code} value={d.code}>
-                          {d.name} ({d.code})
-                        </option>
-                      ))}
-                    </select>
+                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                    <div className="flex-1 min-w-[240px]">
+                      <CustomSelect
+                        value={row.code}
+                        onChange={(val) => {
+                          const found = dietaryTypes.find((d) => d.code === val);
+                          setDietaryTypeRows((prev) =>
+                            prev.map((r, i) =>
+                              i === idx
+                                ? { ...r, code: val, name: found?.name ?? val }
+                                : r,
+                            ),
+                          );
+                        }}
+                        options={dietaryTypeSelectOptions}
+                        placeholder="ជ្រើសរបបអាហារ..."
+                      />
+                    </div>
 
                     <button
                       type="button"
                       onClick={() => setDietaryTypeRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Allergens Metadata Section */}
+          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-black text-gray-900">សារធាតុបង្កអាឡែស៊ី (Allergens)</p>
+                <p className="mt-1 text-lg text-gray-500">កំណត់សារធាតុដែលអាចបង្កអាឡែស៊ី (Peanuts, Seafood, Dairy, etc.)</p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setAllergenRows((current) => [
+                    ...current,
+                    { allergenUuid: "", riskLevel: "MEDIUM", notes: "" },
+                  ])
+                }
+                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
+              >
+                <Plus size={18} />
+                បន្ថែមអាឡែស៊ី
+              </button>
+            </div>
+
+            {allergenRows.length === 0 ? (
+              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសសារធាតុបង្កអាឡែស៊ី</p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {allergenRows.map((row, idx) => (
+                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                    <div className="flex-1 min-w-[220px]">
+                      <CustomSelect
+                        value={row.allergenUuid}
+                        onChange={(val) => {
+                          setAllergenRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, allergenUuid: val } : r)),
+                          );
+                        }}
+                        options={allergenSelectOptions}
+                        placeholder="ជ្រើសសារធាតុបង្កអាឡែស៊ី..."
+                      />
+                    </div>
+
+                    <div className="w-44">
+                      <CustomSelect
+                        value={row.riskLevel || "MEDIUM"}
+                        onChange={(val) => {
+                          setAllergenRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, riskLevel: val } : r)),
+                          );
+                        }}
+                        options={allergenRiskSelectOptions}
+                        placeholder="កម្រិតហានិភ័យ..."
+                      />
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="កំណត់ចំណាំ (Notes)..."
+                      value={row.notes ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setAllergenRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
+                        );
+                      }}
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setAllergenRows((prev) => prev.filter((_, i) => i !== idx))}
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
+                    >
+                      <Trash2 size={20} />
                     </button>
                   </div>
                 ))}
@@ -675,11 +1386,11 @@ export default function FoodFormModal({
           </div>
 
           {/* Meal Types Metadata Section */}
-          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
+          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-gray-900">ពេលទទួលទាន (Meal Types)</h3>
-                <p className="text-xs text-gray-400">កំណត់ពេលទទួលទាន (Breakfast, Lunch, Dinner, etc.)</p>
+                <p className="text-2xl font-black text-gray-900">ពេលទទួលទាន (Meal Types)</p>
+                <p className="mt-1 text-lg text-gray-500">កំណត់ពេលទទួលទាន (Breakfast, Lunch, Dinner, etc.)</p>
               </div>
               <button
                 type="button"
@@ -689,36 +1400,31 @@ export default function FoodFormModal({
                     { mealTypeUuid: "", suitabilityScore: 1.0 },
                   ])
                 }
-                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
+                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
               >
-                <Plus size={14} />
+                <Plus size={18} />
                 បន្ថែមពេលទទួលទាន
               </button>
             </div>
 
             {mealTypeRows.length === 0 ? (
-              <p className="mt-3 text-xs italic text-gray-400">មិនទាន់បានជ្រើសពេលទទួលទាន</p>
+              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសពេលទទួលទាន</p>
             ) : (
-              <div className="mt-3 space-y-2.5">
+              <div className="mt-4 space-y-3">
                 {mealTypeRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm border border-gray-100">
-                    <select
-                      value={row.mealTypeUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setMealTypeRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, mealTypeUuid: val } : r)),
-                        );
-                      }}
-                      className="h-10 flex-1 min-w-[200px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសពេលទទួលទាន...</option>
-                      {mealTypes.map((m) => (
-                        <option key={m.uuid} value={m.uuid}>
-                          {m.name} ({m.code})
-                        </option>
-                      ))}
-                    </select>
+                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                    <div className="flex-1 min-w-[220px]">
+                      <CustomSelect
+                        value={row.mealTypeUuid}
+                        onChange={(val) => {
+                          setMealTypeRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, mealTypeUuid: val } : r)),
+                          );
+                        }}
+                        options={mealTypeSelectOptions}
+                        placeholder="ជ្រើសពេលទទួលទាន..."
+                      />
+                    </div>
 
                     <input
                       type="number"
@@ -727,21 +1433,27 @@ export default function FoodFormModal({
                       max="1"
                       placeholder="Suitability Score (0-1)"
                       value={row.suitabilityScore ?? 1.0}
+                      onKeyDown={(e) => {
+                        if (e.key === "-" || e.key === "e") {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => {
                         const val = Number(e.target.value);
+                        if (val < 0) return;
                         setMealTypeRows((prev) =>
                           prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
                         );
                       }}
-                      className="h-10 w-32 rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 w-44 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setMealTypeRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={20} />
                     </button>
                   </div>
                 ))}
@@ -750,11 +1462,11 @@ export default function FoodFormModal({
           </div>
 
           {/* Age Rules Section */}
-          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
+          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-gray-900">ក្រុមអាយុ (Age Rules)</h3>
-                <p className="text-xs text-gray-400">កំណត់លក្ខខណ្ឌសាកសមសម្រាប់ក្រុមអាយុ</p>
+                <p className="text-2xl font-black text-gray-900">ក្រុមអាយុ (Age Groups)</p>
+                <p className="mt-1 text-lg text-gray-500">កំណត់លក្ខខណ្ឌសាកសមសម្រាប់ក្រុមអាយុ</p>
               </div>
               <button
                 type="button"
@@ -768,51 +1480,44 @@ export default function FoodFormModal({
                     },
                   ])
                 }
-                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
+                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
               >
-                <Plus size={14} />
+                <Plus size={18} />
                 បន្ថែមក្រុមអាយុ
               </button>
             </div>
 
             {ageRuleRows.length === 0 ? (
-              <p className="mt-3 text-xs italic text-gray-400">មិនទាន់បានជ្រើសក្រុមអាយុ</p>
+              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសក្រុមអាយុ</p>
             ) : (
-              <div className="mt-3 space-y-2.5">
+              <div className="mt-4 space-y-3">
                 {ageRuleRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm border border-gray-100">
-                    <select
-                      value={row.ageGroupUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setAgeRuleRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, ageGroupUuid: val } : r)),
-                        );
-                      }}
-                      className="h-10 flex-1 min-w-[160px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសក្រុមអាយុ...</option>
-                      {ageGroups.map((ag) => (
-                        <option key={ag.uuid} value={ag.uuid}>
-                          {ag.name} ({ag.code})
-                        </option>
-                      ))}
-                    </select>
+                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                    <div className="flex-1 min-w-[200px]">
+                      <CustomSelect
+                        value={row.ageGroupUuid}
+                        onChange={(val) => {
+                          setAgeRuleRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, ageGroupUuid: val } : r)),
+                          );
+                        }}
+                        options={ageGroupSelectOptions}
+                        placeholder="ជ្រើសក្រុមអាយុ..."
+                      />
+                    </div>
 
-                    <select
-                      value={row.ruleResult || "ALLOWED"}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setAgeRuleRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, ruleResult: val } : r)),
-                        );
-                      }}
-                      className="h-10 w-32 rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="ALLOWED">ALLOWED</option>
-                      <option value="WARNING">WARNING</option>
-                      <option value="RESTRICTED">RESTRICTED</option>
-                    </select>
+                    <div className="w-48">
+                      <CustomSelect
+                        value={row.ruleResult || "ALLOWED"}
+                        onChange={(val) => {
+                          setAgeRuleRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, ruleResult: val } : r)),
+                          );
+                        }}
+                        options={ageRuleResultSelectOptions}
+                        placeholder="លទ្ធផល..."
+                      />
+                    </div>
 
                     <input
                       type="text"
@@ -824,15 +1529,15 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
                         );
                       }}
-                      className="h-10 flex-1 min-w-[180px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setAgeRuleRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={20} />
                     </button>
                   </div>
                 ))}
@@ -841,11 +1546,11 @@ export default function FoodFormModal({
           </div>
 
           {/* Seasons Metadata Section */}
-          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
+          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-gray-900">រដូវកាល (Seasons)</h3>
-                <p className="text-xs text-gray-400">កំណត់រដូវកាលដែលសាកសមសម្រាប់ម្ហូបនេះ</p>
+                <p className="text-2xl font-black text-gray-900">រដូវកាល (Seasons)</p>
+                <p className="mt-1 text-lg text-gray-500">កំណត់រដូវកាលដែលសាកសមសម្រាប់មុខម្ហូប/ភេសជ្ជៈនេះ</p>
               </div>
               <button
                 type="button"
@@ -855,36 +1560,31 @@ export default function FoodFormModal({
                     { seasonUuid: "", suitabilityScore: 1.0, reasonText: "" },
                   ])
                 }
-                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
+                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
               >
-                <Plus size={14} />
+                <Plus size={18} />
                 បន្ថែមរដូវកាល
               </button>
             </div>
 
             {seasonRows.length === 0 ? (
-              <p className="mt-3 text-xs italic text-gray-400">មិនទាន់បានជ្រើសរដូវកាល</p>
+              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសរដូវកាល</p>
             ) : (
-              <div className="mt-3 space-y-2.5">
+              <div className="mt-4 space-y-3">
                 {seasonRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm border border-gray-100">
-                    <select
-                      value={row.seasonUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setSeasonRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, seasonUuid: val } : r)),
-                        );
-                      }}
-                      className="h-10 flex-1 min-w-[160px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសរដូវកាល...</option>
-                      {seasons.map((s) => (
-                        <option key={s.uuid} value={s.uuid}>
-                          {s.name} {s.localName ? `(${s.localName})` : ""}
-                        </option>
-                      ))}
-                    </select>
+                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                    <div className="flex-1 min-w-[200px]">
+                      <CustomSelect
+                        value={row.seasonUuid}
+                        onChange={(val) => {
+                          setSeasonRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, seasonUuid: val } : r)),
+                          );
+                        }}
+                        options={seasonSelectOptions}
+                        placeholder="ជ្រើសរដូវកាល..."
+                      />
+                    </div>
 
                     <input
                       type="number"
@@ -893,13 +1593,19 @@ export default function FoodFormModal({
                       max="1"
                       placeholder="Score (0-1)"
                       value={row.suitabilityScore ?? 1.0}
+                      onKeyDown={(e) => {
+                        if (e.key === "-" || e.key === "e") {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => {
                         const val = Number(e.target.value);
+                        if (val < 0) return;
                         setSeasonRows((prev) =>
                           prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
                         );
                       }}
-                      className="h-10 w-24 rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 w-32 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <input
@@ -912,15 +1618,15 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
                         );
                       }}
-                      className="h-10 flex-1 min-w-[180px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setSeasonRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={20} />
                     </button>
                   </div>
                 ))}
@@ -929,11 +1635,11 @@ export default function FoodFormModal({
           </div>
 
           {/* Events Metadata Section */}
-          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
+          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-gray-900">ព្រឹត្តិការណ៍ / បុណ្យទាន (Events)</h3>
-                <p className="text-xs text-gray-400">កំណត់ពិធីបុណ្យ ឬព្រឹត្តិការណ៍ដែលពាក់ព័ន្ធ</p>
+                <p className="text-2xl font-black text-gray-900">ព្រឹត្តិការណ៍ / បុណ្យទាន (Events)</p>
+                <p className="mt-1 text-lg text-gray-500">កំណត់ពិធីបុណ្យ ឬព្រឹត្តិការណ៍ដែលពាក់ព័ន្ធ</p>
               </div>
               <button
                 type="button"
@@ -943,36 +1649,31 @@ export default function FoodFormModal({
                     { eventUuid: "", relevanceScore: 0.9, reasonText: "" },
                   ])
                 }
-                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
+                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
               >
-                <Plus size={14} />
+                <Plus size={18} />
                 បន្ថែមព្រឹត្តិការណ៍
               </button>
             </div>
 
             {eventRows.length === 0 ? (
-              <p className="mt-3 text-xs italic text-gray-400">មិនទាន់បានជ្រើសព្រឹត្តិការណ៍</p>
+              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសព្រឹត្តិការណ៍</p>
             ) : (
-              <div className="mt-3 space-y-2.5">
+              <div className="mt-4 space-y-3">
                 {eventRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm border border-gray-100">
-                    <select
-                      value={row.eventUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setEventRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, eventUuid: val } : r)),
-                        );
-                      }}
-                      className="h-10 flex-1 min-w-[160px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសព្រឹត្តិការណ៍...</option>
-                      {events.map((ev) => (
-                        <option key={ev.uuid} value={ev.uuid}>
-                          {ev.name} {ev.localName ? `(${ev.localName})` : ""}
-                        </option>
-                      ))}
-                    </select>
+                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                    <div className="flex-1 min-w-[200px]">
+                      <CustomSelect
+                        value={row.eventUuid}
+                        onChange={(val) => {
+                          setEventRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, eventUuid: val } : r)),
+                          );
+                        }}
+                        options={eventSelectOptions}
+                        placeholder="ជ្រើសព្រឹត្តិការណ៍..."
+                      />
+                    </div>
 
                     <input
                       type="number"
@@ -981,13 +1682,19 @@ export default function FoodFormModal({
                       max="1"
                       placeholder="Score (0-1)"
                       value={row.relevanceScore ?? 0.9}
+                      onKeyDown={(e) => {
+                        if (e.key === "-" || e.key === "e") {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => {
                         const val = Number(e.target.value);
+                        if (val < 0) return;
                         setEventRows((prev) =>
                           prev.map((r, i) => (i === idx ? { ...r, relevanceScore: val } : r)),
                         );
                       }}
-                      className="h-10 w-24 rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 w-32 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <input
@@ -1000,15 +1707,15 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
                         );
                       }}
-                      className="h-10 flex-1 min-w-[180px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setEventRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={20} />
                     </button>
                   </div>
                 ))}
@@ -1017,11 +1724,11 @@ export default function FoodFormModal({
           </div>
 
           {/* Weather Conditions Metadata Section */}
-          <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
+          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-black text-gray-900">ស្ថានភាពអាកាសធាតុ (Weather Conditions)</h3>
-                <p className="text-xs text-gray-400">កំណត់អាកាសធាតុដែលសាកសមសម្រាប់ម្ហូបនេះ</p>
+                <p className="text-2xl font-black text-gray-900">ស្ថានភាពអាកាសធាតុ (Weather Conditions)</p>
+                <p className="mt-1 text-lg text-gray-500">កំណត់អាកាសធាតុដែលសាកសមសម្រាប់មុខម្ហូប/ភេសជ្ជៈនេះ</p>
               </div>
               <button
                 type="button"
@@ -1031,36 +1738,31 @@ export default function FoodFormModal({
                     { weatherConditionUuid: "", suitabilityScore: 0.8, reasonText: "" },
                   ])
                 }
-                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#137A3D] hover:bg-emerald-100"
+                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
               >
-                <Plus size={14} />
+                <Plus size={18} />
                 បន្ថែមអាកាសធាតុ
               </button>
             </div>
 
             {weatherRows.length === 0 ? (
-              <p className="mt-3 text-xs italic text-gray-400">មិនទាន់បានជ្រើសអាកាសធាតុ</p>
+              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសអាកាសធាតុ</p>
             ) : (
-              <div className="mt-3 space-y-2.5">
+              <div className="mt-4 space-y-3">
                 {weatherRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm border border-gray-100">
-                    <select
-                      value={row.weatherConditionUuid}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setWeatherRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, weatherConditionUuid: val } : r)),
-                        );
-                      }}
-                      className="h-10 flex-1 min-w-[160px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
-                    >
-                      <option value="">ជ្រើសអាកាសធាតុ...</option>
-                      {weatherConditions.map((w) => (
-                        <option key={w.uuid} value={w.uuid}>
-                          {w.name} {w.localName ? `(${w.localName})` : ""}
-                        </option>
-                      ))}
-                    </select>
+                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                    <div className="flex-1 min-w-[200px]">
+                      <CustomSelect
+                        value={row.weatherConditionUuid}
+                        onChange={(val) => {
+                          setWeatherRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, weatherConditionUuid: val } : r)),
+                          );
+                        }}
+                        options={weatherSelectOptions}
+                        placeholder="ជ្រើសអាកាសធាតុ..."
+                      />
+                    </div>
 
                     <input
                       type="number"
@@ -1069,13 +1771,19 @@ export default function FoodFormModal({
                       max="1"
                       placeholder="Score (0-1)"
                       value={row.suitabilityScore ?? 0.8}
+                      onKeyDown={(e) => {
+                        if (e.key === "-" || e.key === "e") {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => {
                         const val = Number(e.target.value);
+                        if (val < 0) return;
                         setWeatherRows((prev) =>
                           prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
                         );
                       }}
-                      className="h-10 w-24 rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 w-32 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <input
@@ -1088,21 +1796,157 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
                         );
                       }}
-                      className="h-10 flex-1 min-w-[180px] rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-800 outline-none focus:border-[#137A3D]"
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
                     />
 
                     <button
                       type="button"
                       onClick={() => setWeatherRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={20} />
                     </button>
                   </div>
                 ))}
               </div>
             )}
           </div>
+
+          {/* Preparation Times Section */}
+          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-black text-gray-900">ពេលចម្អិន (Preparation Times)</p>
+                <p className="mt-1 text-lg text-gray-500">កំណត់រយៈពេលរៀបចំ ឬចម្អិនមុខម្ហូប/ភេសជ្ជៈនេះ</p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setPreparationTimeRows((current) => [
+                    ...current,
+                    { optionUuid: "", notes: "" },
+                  ])
+                }
+                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
+              >
+                <Plus size={18} />
+                បន្ថែមពេលចម្អិន
+              </button>
+            </div>
+
+            {preparationTimeRows.length === 0 ? (
+              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសពេលចម្អិន</p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {preparationTimeRows.map((row, idx) => (
+                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                    <div className="flex-1 min-w-[220px]">
+                      <CustomSelect
+                        value={row.optionUuid}
+                        onChange={(val) => {
+                          setPreparationTimeRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, optionUuid: val } : r)),
+                          );
+                        }}
+                        options={preparationTimeSelectOptions}
+                        placeholder="ជ្រើសពេលចម្អិន..."
+                      />
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="កំណត់ចំណាំ (Notes)..."
+                      value={row.notes ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setPreparationTimeRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
+                        );
+                      }}
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setPreparationTimeRows((prev) => prev.filter((_, i) => i !== idx))}
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Distances Section */}
+          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-black text-gray-900">ចម្ងាយដឹកជញ្ជូន (Distances)</p>
+                <p className="mt-1 text-lg text-gray-500">កំណត់កម្រិតចម្ងាយសមស្របសម្រាប់ការដឹកជញ្ជូនមុខម្ហូបនេះ</p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setDistanceRows((current) => [
+                    ...current,
+                    { optionUuid: "", notes: "" },
+                  ])
+                }
+                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
+              >
+                <Plus size={18} />
+                បន្ថែមចម្ងាយ
+              </button>
+            </div>
+
+            {distanceRows.length === 0 ? (
+              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសចម្ងាយ</p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {distanceRows.map((row, idx) => (
+                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                    <div className="flex-1 min-w-[220px]">
+                      <CustomSelect
+                        value={row.optionUuid}
+                        onChange={(val) => {
+                          setDistanceRows((prev) =>
+                            prev.map((r, i) => (i === idx ? { ...r, optionUuid: val } : r)),
+                          );
+                        }}
+                        options={distanceSelectOptions}
+                        placeholder="ជ្រើសកម្រិតចម្ងាយ..."
+                      />
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="កំណត់ចំណាំ (Notes)..."
+                      value={row.notes ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setDistanceRows((prev) =>
+                          prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
+                        );
+                      }}
+                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setDistanceRows((prev) => prev.filter((_, i) => i !== idx))}
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+
 
           <ImagePicker
             value={images}
@@ -1117,17 +1961,17 @@ export default function FoodFormModal({
           />
 
           {error && (
-            <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg font-semibold text-red-600">
               {error}
             </div>
           )}
 
-          <div className="flex justify-end gap-3 border-t border-gray-100 pt-5">
+          <div className="flex justify-end gap-4 border-t border-gray-100 pt-6">
             <button
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-600"
+              className="rounded-2xl border border-gray-200 px-7 py-3.5 text-xl font-bold text-gray-600 hover:bg-gray-50 transition"
             >
               បោះបង់
             </button>
@@ -1136,12 +1980,12 @@ export default function FoodFormModal({
               type="button"
               disabled={saving}
               onClick={() => void submit()}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#137A3D] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+              className="inline-flex items-center gap-2.5 rounded-2xl bg-[#137A3D] px-7 py-3.5 text-xl font-bold text-white shadow-md hover:bg-emerald-800 disabled:opacity-60 transition active:scale-95"
             >
               {saving ? (
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={22} className="animate-spin" />
               ) : (
-                <Save size={16} />
+                <Save size={22} />
               )}
               រក្សាទុក
             </button>
@@ -1153,16 +1997,35 @@ export default function FoodFormModal({
 }
 
 const inputClass =
-  "h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm text-gray-800 outline-none transition focus:border-[#137A3D] focus:ring-4 focus:ring-emerald-50";
+  "h-11 w-full rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100 placeholder:text-gray-400 placeholder:font-normal";
 
 function Label({
   children,
+  required = false,
 }: {
   children: React.ReactNode;
+  required?: boolean;
 }) {
+  if (typeof children === "string") {
+    const hasAsterisk = children.includes("*");
+    const cleanText = children.replace(/\s*\*/g, "").trim();
+
+    return (
+      <span className="mb-2 flex items-center gap-1 text-base font-bold text-gray-800">
+        <span>{cleanText}</span>
+        {(hasAsterisk || required) && (
+          <span className="text-red-500 font-bold ml-0.5">*</span>
+        )}
+      </span>
+    );
+  }
+
   return (
-    <span className="mb-2 block text-sm font-bold text-gray-800">
-      {children}
+    <span className="mb-2 flex items-center gap-1 text-base font-bold text-gray-800">
+      <span>{children}</span>
+      {required && (
+        <span className="text-red-500 font-bold ml-0.5">*</span>
+      )}
     </span>
   );
 }
@@ -1172,23 +2035,36 @@ function Field({
   value,
   onChange,
   type = "text",
+  min = 0,
+  step,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
+  min?: number | string;
+  step?: number | string;
 }) {
   return (
-    <label>
+    <div>
       <Label>{label}</Label>
       <input
         type={type}
+        min={type === "number" ? min : undefined}
+        step={step}
         value={value}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
+        onKeyDown={(e) => {
+          if (type === "number" && (e.key === "-" || e.key === "e")) {
+            e.preventDefault();
+          }
+        }}
+        onChange={(event) => {
+          const val = event.target.value;
+          if (type === "number" && Number(val) < 0) return;
+          onChange(val);
+        }}
         className={inputClass}
       />
-    </label>
+    </div>
   );
 }

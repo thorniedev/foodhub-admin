@@ -1,20 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
-  Calendar,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Code2,
-  Copy,
-  Hash,
-  Info,
-  Layers,
   Loader2,
-  Sparkles,
-  Tag,
+  SlidersHorizontal,
   X,
 } from "lucide-react";
 import type { getFilterGroupBySlug } from "@/src/config/filterCatalog";
@@ -28,10 +17,13 @@ interface DetailPayload {
   name?: string;
   localName?: string | null;
   description?: string | null;
+  parentUuid?: string | null;
   isActive?: boolean;
   active?: boolean;
   numericValue?: number | null;
   unit?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
   [key: string]: unknown;
@@ -64,58 +56,36 @@ function resolveApiResource(group: FilterGroup): string {
   }
 }
 
-function formatDate(dateString?: string | null): string {
-  if (!dateString) return "—";
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-    return date.toLocaleString("km-KH", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-  } catch {
-    return dateString;
-  }
-}
-
 export default function FilterCatalogDetailModal({
   uuid,
   group,
   initialOption,
+  options,
+  onToggleStatus,
   onClose,
 }: {
   uuid: string | null;
   group: FilterGroup;
   initialOption?: FilterCatalogOption | null;
+  options?: FilterCatalogOption[];
+  onToggleStatus?: (uuid: string, nextActive: boolean) => Promise<void> | void;
   onClose: () => void;
 }) {
   const [data, setData] = useState<DetailPayload | null>(null);
-  const [rawResponse, setRawResponse] = useState<unknown>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [showRawJson, setShowRawJson] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
 
   const resource = resolveApiResource(group);
   const endpointPath = `/api/catalog/${resource}/${encodeURIComponent(uuid ?? "")}`;
-  const swaggerApiPath = `/api/v1/catalog/${resource}/${uuid ?? "{uuid}"}`;
 
   useEffect(() => {
     if (!uuid) {
       setData(null);
-      setRawResponse(null);
       return;
     }
 
     let isMounted = true;
     setIsLoading(true);
-    setIsError(false);
-    setErrorMessage("");
 
     const fetchDetail = async () => {
       try {
@@ -131,16 +101,24 @@ export default function FilterCatalogDetailModal({
           throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         }
 
-        const json = (await res.json()) as ApiResponseEnvelope<DetailPayload> | DetailPayload;
+        const json = (await res.json()) as
+          | ApiResponseEnvelope<DetailPayload>
+          | DetailPayload;
         if (!isMounted) return;
-
-        setRawResponse(json);
 
         let payload: DetailPayload | null = null;
         if (json && typeof json === "object") {
-          if ("payload" in json && json.payload && typeof json.payload === "object") {
+          if (
+            "payload" in json &&
+            json.payload &&
+            typeof json.payload === "object"
+          ) {
             payload = json.payload as DetailPayload;
-          } else if ("data" in json && json.data && typeof json.data === "object") {
+          } else if (
+            "data" in json &&
+            json.data &&
+            typeof json.data === "object"
+          ) {
             payload = json.data as DetailPayload;
           } else {
             payload = json as DetailPayload;
@@ -150,11 +128,11 @@ export default function FilterCatalogDetailModal({
         setData(payload);
       } catch (err) {
         if (!isMounted) return;
-        console.warn(`[FilterCatalogDetailModal] Could not fetch ${endpointPath}:`, err);
-        setIsError(true);
-        setErrorMessage(err instanceof Error ? err.message : "Error fetching detail");
+        console.warn(
+          `[FilterCatalogDetailModal] Could not fetch ${endpointPath}:`,
+          err,
+        );
 
-        // Fallback to initial local option data if available
         if (initialOption) {
           setData({
             uuid: initialOption.uuid,
@@ -162,10 +140,13 @@ export default function FilterCatalogDetailModal({
             name: initialOption.name,
             localName: initialOption.localName,
             description: initialOption.description,
+            parentUuid: initialOption.parentUuid,
             isActive: initialOption.active,
             active: initialOption.active,
             numericValue: initialOption.numericValue,
             unit: initialOption.unit,
+            startTime: initialOption.startTime,
+            endTime: initialOption.endTime,
             createdAt: initialOption.createdAt,
             updatedAt: initialOption.updatedAt,
           });
@@ -184,69 +165,176 @@ export default function FilterCatalogDetailModal({
     };
   }, [uuid, endpointPath, initialOption]);
 
-  const copyToClipboard = (text: string, key: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(key);
-    setTimeout(() => setCopiedKey(null), 2000);
-  };
+  /* Lock background scroll while modal is open */
+  useEffect(() => {
+    if (!uuid) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [uuid]);
 
   if (!uuid) {
     return null;
   }
 
-  const displayItem = data || (initialOption ? {
-    uuid: initialOption.uuid,
-    code: initialOption.code,
-    name: initialOption.name,
-    localName: initialOption.localName,
-    description: initialOption.description,
-    isActive: initialOption.active,
-    active: initialOption.active,
-    numericValue: initialOption.numericValue,
-    unit: initialOption.unit,
-    createdAt: initialOption.createdAt,
-    updatedAt: initialOption.updatedAt,
-  } : null);
+  const displayItem =
+    data ||
+    (initialOption
+      ? {
+          uuid: initialOption.uuid,
+          code: initialOption.code,
+          name: initialOption.name,
+          localName: initialOption.localName,
+          description: initialOption.description,
+          parentUuid: initialOption.parentUuid,
+          isActive: initialOption.active,
+          active: initialOption.active,
+          numericValue: initialOption.numericValue,
+          unit: initialOption.unit,
+          startTime: initialOption.startTime,
+          endTime: initialOption.endTime,
+          createdAt: initialOption.createdAt,
+          updatedAt: initialOption.updatedAt,
+        }
+      : null);
 
   const isActive = displayItem?.isActive ?? displayItem?.active ?? true;
 
+  const parentOption = options?.find(
+    (opt) => opt.uuid === displayItem?.parentUuid,
+  );
+  const parentName = parentOption
+    ? parentOption.localName || parentOption.name
+    : displayItem?.parentUuid
+      ? displayItem.parentUuid
+      : "គ្មាន (Top Level)";
+
+  const isMealType = group.source === "MEAL_TYPE_API";
+  const hasNumericOrUnit =
+    (displayItem?.numericValue !== null &&
+      displayItem?.numericValue !== undefined) ||
+    Boolean(displayItem?.unit);
+
+  const handleToggleStatus = async () => {
+    if (!displayItem || isToggling) return;
+    const targetUuid = displayItem.uuid || uuid;
+    const nextActive = !isActive;
+
+    // Optimistic local update
+    setData((prev) =>
+      prev
+        ? { ...prev, isActive: nextActive, active: nextActive }
+        : {
+            uuid: targetUuid,
+            isActive: nextActive,
+            active: nextActive,
+          },
+    );
+
+    setIsToggling(true);
+    try {
+      if (onToggleStatus) {
+        await onToggleStatus(targetUuid, nextActive);
+      }
+    } catch (err) {
+      console.error("[FilterCatalogDetailModal] Failed to toggle status:", err);
+      // Revert on error
+      setData((prev) =>
+        prev
+          ? { ...prev, isActive: !nextActive, active: !nextActive }
+          : null,
+      );
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   return (
     <div
-      className="fixed inset-0 z-[160] flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-[3px] animate-in fade-in duration-200"
+      className="
+        fixed
+        inset-0
+        z-[150]
+        flex
+        items-center
+        justify-center
+        bg-black/40
+        p-4
+        backdrop-blur-[3px]
+      "
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative my-8 w-full max-w-2xl rounded-[32px] border border-gray-100 bg-white p-6 shadow-2xl sm:p-8">
-        {/* Modal Header */}
-        <div className="flex items-start justify-between border-b border-gray-100 pb-5">
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
-              <Layers size={26} />
+      {/* Modal */}
+      <div
+        className="
+          w-full
+          max-w-2xl
+          overflow-hidden
+          rounded-3xl
+          border
+          border-gray-100
+          bg-white
+          shadow-2xl
+        "
+      >
+        {/* ================= HEADER ================= */}
+        <div
+          className="
+            flex
+            items-center
+            justify-between
+            border-b
+            border-gray-100
+            bg-white
+            px-6
+            py-5
+            sm:px-8
+          "
+        >
+          <div className="flex min-w-0 items-center gap-4">
+            <div
+              className="
+                flex
+                h-12
+                w-12
+                shrink-0
+                items-center
+                justify-center
+                rounded-xl
+                bg-primary-50
+                text-primary-800
+              "
+            >
+              <SlidersHorizontal size={24} />
             </div>
 
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h2 className="text-2xl font-black text-gray-900 sm:text-3xl">
-                  {displayItem?.localName || displayItem?.name || group.labelKm}
-                </h2>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-black ${
-                    isActive
-                      ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-                      : "bg-gray-100 text-gray-500 ring-1 ring-gray-200"
-                  }`}
-                >
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      isActive ? "bg-emerald-500" : "bg-gray-400"
-                    }`}
-                  />
-                  {isActive ? "សកម្ម" : "អសកម្ម"}
-                </span>
-              </div>
+            <div className="min-w-0">
+              <p
+                className="
+                  text-3xl
+                  font-semibold
+                  text-primary-800
+                "
+              >
+                ព័ត៌មានលម្អិត {group.labelKm}
+              </p>
 
-      
+              <p
+                className="
+                  mt-0.5
+                  truncate
+                  text-lg
+                  text-gray-500
+                "
+              >
+                {group.labelEn}
+              </p>
             </div>
           </div>
 
@@ -254,184 +342,204 @@ export default function FilterCatalogDetailModal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+            className="
+              flex
+              h-11
+              w-11
+              shrink-0
+              items-center
+              justify-center
+              rounded-full
+              text-gray-400
+              transition
+              hover:bg-gray-100
+              hover:text-gray-700
+              focus:outline-none
+              focus:ring-4
+              focus:ring-gray-100
+            "
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
-        {/* Loading State */}
+        {/* ================= CONTENT ================= */}
         {isLoading && !displayItem ? (
-          <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 py-12">
-            <Loader2 size={36} className="animate-spin text-emerald-600" />
-            <p className="text-base font-semibold text-gray-500">
+          <div className="flex min-h-[260px] flex-col items-center justify-center gap-3 p-8">
+            <Loader2 size={34} className="animate-spin text-primary-800" />
+            <p className="text-lg font-medium text-gray-500">
               កំពុងទាញយកព័ត៌មានលម្អិត...
             </p>
           </div>
         ) : (
-          <div className="mt-6 space-y-5">
-            {/* Warning if network fetch failed but fallback is shown */}
-            {isError && (
-              <div className="flex items-center justify-between rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                <div className="flex items-center gap-2">
-                  <Info size={18} className="shrink-0 text-amber-600" />
-                  <span>
-                    មិនអាចភ្ជាប់ទៅកាន់ API ផ្ទាល់បានទេ ({errorMessage})។ កំពុងបង្ហាញទិន្នន័យពីអង្គចងចាំ។
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Core Info Grid */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {/* Code */}
-              <div className="relative rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
-                    <Tag size={14} />
-                    Code
-                  </span>
-                  {displayItem?.code && (
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(displayItem.code ?? "", "code")}
-                      className="rounded p-1 text-gray-400 hover:bg-white hover:text-gray-700 transition"
-                      title="Copy Code"
-                    >
-                      {copiedKey === "code" ? (
-                        <Check size={14} className="text-emerald-600" />
-                      ) : (
-                        <Copy size={14} />
-                      )}
-                    </button>
-                  )}
-                </div>
-                <p className="mt-2 font-mono text-base font-bold text-gray-900">
-                  {displayItem?.code || "—"}
-                </p>
-              </div>
-
-              {/* Status */}
-              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">
-                  <Sparkles size={14} />
-                  ស្ថានភាព (Status)
-                </span>
-                <p className="mt-2 text-base font-bold text-gray-900">
-                  {isActive ? "ACTIVE (បើកដំណើរការ)" : "INACTIVE (បិទដំណើរការ)"}
-                </p>
-              </div>
-
-              {/* Local Name (Khmer) */}
-              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                  ឈ្មោះជាភាសាខ្មែរ (Local Name)
-                </span>
-                <p className="mt-2 text-base font-bold text-gray-900">
-                  {displayItem?.localName || "—"}
-                </p>
-              </div>
-
-              {/* English Name */}
-              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                  ឈ្មោះអន្តរជាតិ (Name)
-                </span>
-                <p className="mt-2 text-base font-bold text-gray-900">
-                  {displayItem?.name || "—"}
-                </p>
+          <div className="space-y-4 p-6 sm:p-7">
+            {/* Name */}
+            <div>
+              <FieldLabel>ឈ្មោះ</FieldLabel>
+              <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                {displayItem?.localName || displayItem?.name || "—"}
               </div>
             </div>
+
+          
 
             {/* Description */}
-            <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                ការពិពណ៌នា (Description)
-              </span>
-              <p className="mt-2 text-base leading-relaxed text-gray-700">
+            <div>
+              <FieldLabel>ការពិពណ៌នា</FieldLabel>
+              <div className="min-h-[84px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg leading-8 text-gray-800">
                 {displayItem?.description || "គ្មានការពិពណ៌នាឡើយ"}
-              </p>
+              </div>
             </div>
 
-            {/* Numeric Value & Unit if exists */}
-            {(displayItem?.numericValue !== null && displayItem?.numericValue !== undefined) && (
-              <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 transition hover:bg-gray-50">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                  តម្លៃជាលេខ (Numeric Value)
-                </span>
-                <p className="mt-2 text-base font-bold text-gray-900">
-                  {displayItem.numericValue}{" "}
-                  {displayItem.unit ? (
-                    <span className="text-sm font-normal text-gray-500">
-                      ({displayItem.unit})
-                    </span>
-                  ) : null}
-                </p>
+            {/* Meal type times */}
+            {isMealType && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <FieldLabel>ម៉ោងចាប់ផ្តើម</FieldLabel>
+                  <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                    {displayItem?.startTime || "—"}
+                  </div>
+                </div>
+
+                <div>
+                  <FieldLabel>ម៉ោងបញ្ចប់</FieldLabel>
+                  <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                    {displayItem?.endTime || "—"}
+                  </div>
+                </div>
               </div>
             )}
 
-            {/* UUID & Timestamp Metadata */}
-            {/* <div className="space-y-2 rounded-2xl border border-gray-100 bg-emerald-50/30 p-4">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-800">
-                  <Hash size={14} />
-                  UUID
-                </span>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(displayItem?.uuid || uuid, "uuid")}
-                  className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 text-xs font-medium text-gray-600 shadow-sm transition hover:bg-gray-50"
-                >
-                  {copiedKey === "uuid" ? (
-                    <>
-                      <Check size={13} className="text-emerald-600" />
-                      <span className="text-emerald-600">បានចម្លង</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy size={13} />
-                      <span>ចម្លង UUID</span>
-                    </>
-                  )}
-                </button>
-              </div>
-              <p className="break-all font-mono text-sm font-semibold text-gray-800">
-                {displayItem?.uuid || uuid}
-              </p>
-
-              {(displayItem?.createdAt || displayItem?.updatedAt) && (
-                <div className="mt-3 grid grid-cols-1 gap-2 pt-2 border-t border-emerald-100/60 sm:grid-cols-2 text-xs text-gray-500">
-                  {displayItem?.createdAt && (
-                    <div className="flex items-center gap-1.5">
-                      <Calendar size={13} className="text-gray-400" />
-                      <span>បង្កើតនៅ: {formatDate(displayItem.createdAt)}</span>
-                    </div>
-                  )}
-                  {displayItem?.updatedAt && (
-                    <div className="flex items-center gap-1.5">
-                      <Clock size={13} className="text-gray-400" />
-                      <span>កែប្រែចុងក្រោយ: {formatDate(displayItem.updatedAt)}</span>
-                    </div>
-                  )}
+            {/* Numeric and unit */}
+            {hasNumericOrUnit && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <FieldLabel>Numeric value</FieldLabel>
+                  <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                    {displayItem?.numericValue ?? "—"}
+                  </div>
                 </div>
-              )}
-            </div> */}
 
-       
+                <div>
+                  <FieldLabel>Unit</FieldLabel>
+                  <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                    {displayItem?.unit || "—"}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Status (Clickable toggle badge) */}
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-3.5">
+              <div className="min-w-0">
+                <p className="text-lg font-medium text-primary-800">
+                  ស្ថានភាព
+                </p>
+                <p className="text-base text-gray-500">
+                  {isActive
+                    ? "បើកដំណើរការក្នុងប្រព័ន្ធ"
+                    : "បិទដំណើរការ"}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                disabled={isToggling}
+                onClick={handleToggleStatus}
+                title={
+                  isActive
+                    ? "ចុចដើម្បីប្តូរទៅជា អសកម្ម"
+                    : "ចុចដើម្បីប្តូរទៅជា សកម្ម"
+                }
+                className={`
+                  inline-flex
+                  cursor-pointer
+                  items-center
+                  gap-2.5
+                  whitespace-nowrap
+                  rounded-full
+                  px-4
+                  py-2
+                  text-lg
+                  font-medium
+                  transition-all
+                  ring-1
+                  ring-inset
+                  hover:scale-105
+                  active:scale-95
+                  focus:outline-none
+                  focus:ring-4
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                  ${
+                    isActive
+                      ? "bg-primary-50 text-primary-700 ring-primary-200 hover:bg-primary-100 focus:ring-primary-100"
+                      : "bg-gray-100 text-gray-600 ring-gray-300 hover:bg-gray-200 focus:ring-gray-200"
+                  }
+                `}
+              >
+                {isToggling ? (
+                  <Loader2 size={18} className="animate-spin text-primary-800" />
+                ) : (
+                  <span
+                    className={`
+                      h-2.5
+                      w-2.5
+                      shrink-0
+                      rounded-full
+                      ${isActive ? "bg-primary-600" : "bg-gray-400"}
+                    `}
+                  />
+                )}
+                {isActive ? "សកម្ម" : "អសកម្ម"}
+              </button>
+            </div>
+
+            {/* ================= FOOTER ================= */}
+            <div className="flex items-center justify-end border-t border-gray-100 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="
+                  inline-flex
+                  min-h-12
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-primary-800
+                  px-7
+                  text-lg
+                  font-medium
+                  text-white
+                  transition
+                  hover:bg-primary-900
+                  focus:outline-none
+                  focus:ring-4
+                  focus:ring-primary-200
+                "
+              >
+                បិទ
+              </button>
+            </div>
           </div>
         )}
-
-        {/* Modal Footer */}
-        <div className="mt-8 flex justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-11 rounded-full bg-gray-900 px-6 text-base font-bold text-white transition hover:bg-black focus:outline-none focus:ring-4 focus:ring-gray-200"
-          >
-            បិទ
-          </button>
-        </div>
       </div>
     </div>
+  );
+}
+
+function FieldLabel({ children }: { children: ReactNode }) {
+  return (
+    <span
+      className="
+        mb-2
+        block
+        text-lg
+        font-medium
+        text-primary-800
+      "
+    >
+      {children}
+    </span>
   );
 }

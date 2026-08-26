@@ -50,7 +50,7 @@ export default function OrdersChart({ data }: { data: OrdersPoint[] }) {
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <p className="text-2xl font-semibold text-[#136C34]">
-          កំណើនអ្នកប្រើប្រាស់
+          កំណើនគណនីអ្នកប្រើប្រាស់
         </p>
 
         {/* Filter Dropdown */}
@@ -74,9 +74,8 @@ export default function OrdersChart({ data }: { data: OrdersPoint[] }) {
 
             <ChevronDown
               size={20}
-              className={`shrink-0 text-gray-400 transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
+              className={`shrink-0 text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
@@ -106,10 +105,9 @@ export default function OrdersChart({ data }: { data: OrdersPoint[] }) {
                       rounded-lg px-3.5 py-2.5
                       text-left text-lg
                       transition-colors duration-150
-                      ${
-                        isSelected
-                          ? "bg-[#136C34]/10 font-semibold text-[#136C34]"
-                          : "font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ${isSelected
+                        ? "bg-[#136C34]/10 font-semibold text-[#136C34]"
+                        : "font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       }
                     `}
                   >

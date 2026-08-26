@@ -49,7 +49,7 @@ export default function UserGrowthChart({ data }: { data: UserGrowthPoint[] }) {
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <p className="text-2xl font-semibold text-[#136C34]">
-          ទិន្នន័យអភិវឌ្ឍនៃអ្នកប្រើប្រាស់
+          ទិន្នន័យអភិវឌ្ឍនៃគណនីអ្នកប្រើប្រាស់
         </p>
 
         {/* Custom Dropdown */}
@@ -73,9 +73,8 @@ export default function UserGrowthChart({ data }: { data: UserGrowthPoint[] }) {
 
             <ChevronDown
               size={20}
-              className={`shrink-0 text-gray-400 transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
+              className={`shrink-0 text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
@@ -105,10 +104,9 @@ export default function UserGrowthChart({ data }: { data: UserGrowthPoint[] }) {
                       rounded-lg px-3.5 py-2.5
                       text-left text-lg
                       transition-colors duration-150
-                      ${
-                        isSelected
-                          ? "bg-[#136C34]/10 font-semibold text-[#136C34]"
-                          : "font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ${isSelected
+                        ? "bg-[#136C34]/10 font-semibold text-[#136C34]"
+                        : "font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       }
                     `}
                   >

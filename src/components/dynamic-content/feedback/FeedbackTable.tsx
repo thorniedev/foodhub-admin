@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Pencil, RefreshCcw, Star, Trash2, User } from "lucide-react";
+import { formatPhnomPenhDate } from "@/src/lib/formatDate";
 import { Feedback } from "@/src/types/feedback";
 
 interface FeedbackTableProps {
@@ -91,7 +92,7 @@ export default function FeedbackTable({
                   <div>
                     <p className="font-medium text-gray-800">{item.customerName}</p>
                     <p className="text-xs text-gray-400">
-                      {new Date(item.createdAt).toLocaleDateString("km-KH")}
+                      {formatPhnomPenhDate(item.createdAt)}
                     </p>
                   </div>
                 </div>
@@ -107,9 +108,8 @@ export default function FeedbackTable({
               </td>
               <td className="py-3 px-4">
                 <span
-                  className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                    STATUS_BADGE[item.status]
-                  }`}
+                  className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_BADGE[item.status]
+                    }`}
                 >
                   {STATUS_LABEL[item.status]}
                 </span>

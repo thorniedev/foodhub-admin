@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: "MhouBahar Admin",
   description: "MhouBahar admin dashboard",
   icons: {
-    icon: "/assets/logo/mhoubahar.ico",
+    icon: "/assets/logo/mhoubahar.png",
   },
 };
 
@@ -29,9 +29,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="h-full overflow-hidden antialiased">
+      <body
+        suppressHydrationWarning
+        className="h-full overflow-hidden antialiased"
+      >
         <Providers>{children}</Providers>
       </body>
     </html>

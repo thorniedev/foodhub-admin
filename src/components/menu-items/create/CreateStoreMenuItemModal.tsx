@@ -44,9 +44,9 @@ const EMPTY_FORM: FormState = {
   currencyCode: "USD",
   preparationTimeMinutes: "10",
   availabilityStatus: "AVAILABLE",
-  ingredientDataStatus: "COMPLETE",
+  ingredientDataStatus: "VERIFIED",
   isFeatured: false,
-  source: "MANUAL",
+  source: "ADMIN",
   dietaryTypes: "[]",
   allergenDeclarations: "[]",
 };
@@ -91,11 +91,11 @@ export default function CreateStoreMenuItemModal({
   });
   const { data: foodData, isLoading: foodsLoading } = useGetFoodsQuery({
     page: 0,
-    size: 200,
+    size: 100,
     sort: "createdAt,desc",
   });
   const { data: ingredientData, isLoading: ingredientsLoading } =
-    useGetIngredientsQuery({ page: 0, size: 200, sort: "name,asc" });
+    useGetIngredientsQuery({ page: 0, size: 100, sort: "name,asc" });
 
   const [createStoreMenuItem, { isLoading: saving }] =
     useCreateStoreMenuItemMutation();
@@ -181,8 +181,8 @@ export default function CreateStoreMenuItemModal({
       }
 
       const price = Number(form.price);
-      if (!Number.isFinite(price) || price < 0) {
-        throw new Error("Price មិនត្រឹមត្រូវ។");
+      if (!Number.isFinite(price) || price <= 0) {
+        throw new Error("តម្លៃ (Price) ត្រូវតែធំជាង ០។");
       }
 
       const body: CreateStoreMenuItemPayload = {
@@ -207,10 +207,7 @@ export default function CreateStoreMenuItemModal({
             notes: item.notes?.trim() || null,
           })),
         dietaryTypes: parseArray(form.dietaryTypes, "Dietary Types"),
-        allergenDeclarations: parseArray(
-          form.allergenDeclarations,
-          "Allergen Declarations",
-        ),
+        allergenDeclarations: [],
       };
 
       await createStoreMenuItem({
@@ -318,10 +315,19 @@ export default function CreateStoreMenuItemModal({
               <Field label="Price *">
                 <input
                   type="number"
-                  min="0"
+                  min="0.01"
                   step="0.01"
                   value={form.price}
-                  onChange={(event) => set("price", event.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => {
+                    const val = event.target.value;
+                    if (Number(val) < 0) return;
+                    set("price", val);
+                  }}
                   className="field-input"
                 />
               </Field>
@@ -340,9 +346,16 @@ export default function CreateStoreMenuItemModal({
                   type="number"
                   min="0"
                   value={form.preparationTimeMinutes}
-                  onChange={(event) =>
-                    set("preparationTimeMinutes", event.target.value)
-                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => {
+                    const val = event.target.value;
+                    if (Number(val) < 0) return;
+                    set("preparationTimeMinutes", val);
+                  }}
                   className="field-input"
                 />
               </Field>
@@ -365,9 +378,10 @@ export default function CreateStoreMenuItemModal({
                   onChange={(event) => set("ingredientDataStatus", event.target.value)}
                   className="field-input"
                 >
-                  <option value="COMPLETE">COMPLETE</option>
+                  <option value="VERIFIED">VERIFIED</option>
                   <option value="PARTIAL">PARTIAL</option>
                   <option value="UNKNOWN">UNKNOWN</option>
+                  <option value="COMPLETE">COMPLETE</option>
                 </select>
               </Field>
 
@@ -423,16 +437,11 @@ export default function CreateStoreMenuItemModal({
               ទុកជា [] បើមិនមាន។ Fields ទាំងពីរនេះត្រូវបានផ្ញើតាម Store Menu Item endpoint។
             </p>
 
-            <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            <div className="mt-4">
               <JsonField
                 label="Dietary Types"
                 value={form.dietaryTypes}
                 onChange={(value) => set("dietaryTypes", value)}
-              />
-              <JsonField
-                label="Allergen Declarations"
-                value={form.allergenDeclarations}
-                onChange={(value) => set("allergenDeclarations", value)}
               />
             </div>
           </section>

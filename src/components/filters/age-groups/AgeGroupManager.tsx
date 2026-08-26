@@ -41,7 +41,11 @@ import AgeGroupsPagination from "./AgeGroupsPagination";
 
 import AgeGroupsTable from "./AgeGroupsTable";
 
+import AgeGroupsTabs from "./AgeGroupsTabs";
+
 import DeleteAgeGroupConfirmModal from "./DeleteAgeGroupConfirmModal";
+
+import type { ResourceStatusFilter } from "@/src/types/safetyResource";
 
 type SortMode =
   | "A_Z"
@@ -137,6 +141,14 @@ export default function AgeGroupManager() {
     search,
     setSearch,
   ] = useState("");
+
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] =
+    useState<ResourceStatusFilter>(
+      "ALL",
+    );
 
   const [
     showSuggestions,
@@ -343,32 +355,79 @@ export default function AgeGroupManager() {
       normalizedSearch,
     ]);
 
+  const activeCount =
+    useMemo(() => {
+      return (
+        allSearchItems.filter(
+          (item) =>
+            item.isActive,
+        ).length ||
+        items.filter(
+          (item) =>
+            item.isActive,
+        ).length
+      );
+    }, [
+      allSearchItems,
+      items,
+    ]);
+
+  const inactiveCount =
+    (allSearchItems.length ||
+      items.length) -
+    activeCount;
+
   /* =========================================================
      SEARCH RESULTS
   ========================================================= */
 
   const displayedItems =
     useMemo(() => {
-      if (
-        !normalizedSearch
-      ) {
-        return items;
-      }
+      const sourceList =
+        normalizedSearch ||
+        statusFilter !==
+          "ALL"
+          ? allSearchItems.length >
+            0
+            ? allSearchItems
+            : items
+          : items;
 
-      return allSearchItems.filter(
-        (item) =>
-          matchesSearch(
+      return sourceList.filter(
+        (item) => {
+          const statusMatches =
+            statusFilter ===
+              "ALL" ||
+            (statusFilter ===
+              "ACTIVE" &&
+              item.isActive) ||
+            (statusFilter ===
+              "INACTIVE" &&
+              !item.isActive);
+
+          if (
+            !statusMatches
+          ) {
+            return false;
+          }
+
+          if (
+            !normalizedSearch
+          ) {
+            return true;
+          }
+
+          return matchesSearch(
             item,
-
             normalizedSearch,
-          ),
+          );
+        },
       );
     }, [
       allSearchItems,
-
       items,
-
       normalizedSearch,
+      statusFilter,
     ]);
 
   const busy =
@@ -566,9 +625,39 @@ export default function AgeGroupManager() {
       />
 
       {/* SEARCH + SIZE + SORT */}
-      <div className="flex w-full items-center justify-end gap-2 overflow-visible">
-        {/* SEARCH */}
-        <div className="relative">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        {/* TABS */}
+        <div className="w-full min-w-0 overflow-x-auto pb-1 xl:w-auto">
+          <AgeGroupsTabs
+            value={
+              statusFilter
+            }
+            allCount={
+              allSearchItems.length ||
+              (data?.totalElements ??
+                items.length)
+            }
+            activeCount={
+              activeCount
+            }
+            inactiveCount={
+              inactiveCount
+            }
+            onChange={(
+              value,
+            ) => {
+              setStatusFilter(
+                value,
+              );
+              setPage(0);
+            }}
+          />
+        </div>
+
+        {/* SEARCH + CONTROLS */}
+        <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center xl:w-auto">
+          {/* SEARCH */}
+          <div className="relative min-w-0 flex-1 sm:min-w-[340px]">
           <Search
             size={
               18
@@ -922,6 +1011,7 @@ export default function AgeGroupManager() {
           )}
         </div>
       </div>
+    </div>
 
       {/* NOTICE */}
       {notice && (

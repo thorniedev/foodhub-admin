@@ -100,9 +100,16 @@ export default function FoodTypeEditModal({
                 max={5}
                 step={0.1}
                 value={form.rating ?? 0}
-                onChange={(e) =>
-                  setForm({ ...form, rating: Number(e.target.value) })
-                }
+                onKeyDown={(e) => {
+                  if (e.key === "-" || e.key === "e") {
+                    e.preventDefault();
+                  }
+                }}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  if (val < 0) return;
+                  setForm({ ...form, rating: val });
+                }}
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>

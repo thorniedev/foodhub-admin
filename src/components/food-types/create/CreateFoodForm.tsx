@@ -433,42 +433,42 @@ const MAX_IMAGE_BYTES =
   1024 * 1024;
 
 const DEFAULT_CLASSIFICATIONS: ClassificationSelections =
-  {
-    FOOD_CATEGORY: [
-      "KHMER_FOOD",
-    ],
-    CUISINE: ["KHMER"],
-    MEAL_TIME: ["LUNCH"],
-    AGE_GROUP: ["ADULT"],
-    DIETARY_TYPE: [],
-    ALLERGEN: [],
-    MEDICAL_CONDITION: [],
-    SPICE_LEVEL: [
-      "NOT_SPICY",
-    ],
-    PREPARATION_TIME: [
-      "PREP_10",
-    ],
-    DISTANCE: [],
-    COOKING_METHOD: [],
-    FOOD_STYLE: [],
-    HEALTH_GOAL: [],
-    REGION: [],
-    TASTE: [],
-    TEXTURE: [],
-    INGREDIENT: [],
-    NUTRITION: [],
-    PRICE_LEVEL: [],
-    RATING: [],
-    AI_SCORE: [],
-  };
+{
+  FOOD_CATEGORY: [
+    "KHMER_FOOD",
+  ],
+  CUISINE: ["KHMER"],
+  MEAL_TIME: ["LUNCH"],
+  AGE_GROUP: ["ADULT"],
+  DIETARY_TYPE: [],
+  ALLERGEN: [],
+  MEDICAL_CONDITION: [],
+  SPICE_LEVEL: [
+    "NOT_SPICY",
+  ],
+  PREPARATION_TIME: [
+    "PREP_10",
+  ],
+  DISTANCE: [],
+  COOKING_METHOD: [],
+  FOOD_STYLE: [],
+  HEALTH_GOAL: [],
+  REGION: [],
+  TASTE: [],
+  TEXTURE: [],
+  INGREDIENT: [],
+  NUTRITION: [],
+  PRICE_LEVEL: [],
+  RATING: [],
+  AI_SCORE: [],
+};
 
 function createUuid(): string {
   if (
     typeof crypto !==
-      "undefined" &&
+    "undefined" &&
     typeof crypto.randomUUID ===
-      "function"
+    "function"
   ) {
     return crypto.randomUUID();
   }
@@ -569,7 +569,7 @@ export default function CreateFoodForm({
    */
   const {
     options:
-      localCatalogOptions,
+    localCatalogOptions,
   } =
     useFilterCatalog();
 
@@ -673,9 +673,9 @@ export default function CreateFoodForm({
           (
             currentImages,
           ) => [
-            ...currentImages,
-            ...imageUrls,
-          ],
+              ...currentImages,
+              ...imageUrls,
+            ],
         );
       } catch (error) {
         console.error(
@@ -751,7 +751,7 @@ export default function CreateFoodForm({
 
     if (
       mode ===
-        "published" &&
+      "published" &&
       !description.trim()
     ) {
       return "សូមបញ្ចូលការពិពណ៌នាម្ហូប។";
@@ -764,7 +764,7 @@ export default function CreateFoodForm({
     groupCode: string,
   ) =>
     classifications[
-      groupCode
+    groupCode
     ] ?? [];
 
   const firstCode = (
@@ -794,7 +794,7 @@ export default function CreateFoodForm({
         localCatalogOptions.find(
           (item) =>
             item.groupCode ===
-              groupCode &&
+            groupCode &&
             item.code === code,
         );
 
@@ -904,7 +904,7 @@ export default function CreateFoodForm({
 
       availabilityStatus:
         mode ===
-        "published"
+          "published"
           ? "AVAILABLE"
           : "UNAVAILABLE",
 

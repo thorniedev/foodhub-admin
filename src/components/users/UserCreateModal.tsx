@@ -1,10 +1,39 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
-
-import { AlertTriangle, Loader2, UserPlus, X } from "lucide-react";
-
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { AlertCircle, Loader2, UserPlus, X } from "lucide-react";
 import type { CreateAdminUserPayload } from "@/src/types/userProfile";
+import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
+
+const userSchema = z
+  .object({
+    firstName: z.string().trim().min(1, "សូមបញ្ចូលនាមខ្លួន (First name)"),
+    lastName: z.string().trim().min(1, "សូមបញ្ចូលនាមត្រកូល (Last name)"),
+    username: z
+      .string()
+      .trim()
+      .min(3, "ឈ្មោះគណនីត្រូវមានយ៉ាងហោចណាស់ 3 តួអក្សរ")
+      .max(30, "ឈ្មោះគណនីមិនអាចលើសពី 30 តួអក្សរ"),
+    email: z
+      .string()
+      .trim()
+      .min(1, "សូមបញ្ចូលអ៊ីមែល")
+      .email("ទម្រង់អ៊ីមែលមិនត្រឹមត្រូវ (ឧ. example@gmail.com)"),
+    phoneNumber: z.string().trim().min(1, "សូមបញ្ចូលលេខទូរស័ព្ទ"),
+    password: z
+      .string()
+      .min(6, "ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ 6 តួអក្សរ"),
+    confirmedPassword: z.string().min(1, "សូមបញ្ជាក់ពាក្យសម្ងាត់"),
+  })
+  .refine((data) => data.password === data.confirmedPassword, {
+    message: "ពាក្យសម្ងាត់ និងការបញ្ជាក់ពាក្យសម្ងាត់មិនដូចគ្នាទេ",
+    path: ["confirmedPassword"],
+  });
+
+type UserFormData = z.infer<typeof userSchema>;
 
 interface UserCreateModalProps {
   open: boolean;
@@ -13,246 +42,283 @@ interface UserCreateModalProps {
   onSubmit: (values: CreateAdminUserPayload) => Promise<void>;
 }
 
-const initialValues: CreateAdminUserPayload = {
-  username: "",
-  password: "",
-  confirmedPassword: "",
-  email: "",
-  firstName: "",
-  lastName: "",
-  phoneNumber: "",
-};
-
 export default function UserCreateModal({
   open,
   saving,
   onClose,
   onSubmit,
 }: UserCreateModalProps) {
-  const [values, setValues] = useState<CreateAdminUserPayload>(initialValues);
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  const [localError, setLocalError] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<UserFormData>({
+    resolver: zodResolver(userSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      username: "",
+      email: "",
+      phoneNumber: "",
+      password: "",
+      confirmedPassword: "",
+    },
+  });
 
   useEffect(() => {
-    if (!open) return;
-
-    setValues(initialValues);
-    setLocalError(null);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const previousOverflow = document.body.style.overflow;
-
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [open]);
+    if (open) {
+      reset({
+        firstName: "",
+        lastName: "",
+        username: "",
+        email: "",
+        phoneNumber: "",
+        password: "",
+        confirmedPassword: "",
+      });
+      setApiError(null);
+    }
+  }, [open, reset]);
 
   if (!open) return null;
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLocalError(null);
-
-    if (values.password !== values.confirmedPassword) {
-      setLocalError("Password និង Confirm password មិនដូចគ្នាទេ។");
-      return;
+  const onFormSubmit = async (data: UserFormData) => {
+    setApiError(null);
+    try {
+      await onSubmit(data);
+      reset();
+      onClose();
+    } catch (err) {
+      setApiError(getAdminApiErrorMessage(err));
     }
-
-    if (values.password.length < 6) {
-      setLocalError("Password ត្រូវមានយ៉ាងហោចណាស់ 6 តួអក្សរ។");
-      return;
-    }
-
-    await onSubmit(values);
   };
 
-  return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
-      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] bg-white shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-start justify-between border-b border-gray-100 bg-white px-6 py-5">
-          <div>
-            <p className="flex items-center gap-3 text-4xl font-bold text-[#136C34]">
-              <UserPlus size={28} />
-              បង្កើតអ្នកប្រើថ្មី
-            </p>
+  const isBusy = saving || isSubmitting;
 
-            <p className="mt-2 text-base text-gray-500">
-              បង្កើត regular MhouBahar user និង Keycloak account។
-            </p>
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[3px]">
+      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-gray-100 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {/* Header */}
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-gradient-to-r from-emerald-50/70 via-white to-emerald-50/40 px-6 py-5 sm:px-8">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-800 text-white shadow-md shadow-primary-900/20 ring-1 ring-primary-700/20">
+              <UserPlus size={24} />
+            </div>
+            <div>
+              <p className="text-2xl font-bold tracking-tight text-[#0F5A2C]">
+                បង្កើតគណនីអ្នកប្រើប្រាស់ថ្មី
+              </p>
+              <p className="mt-0.5 text-sm text-gray-500">
+                បញ្ចូលព័ត៌មានដើម្បីបង្កើតគណនីអ្នកប្រើប្រាស់ក្នុងប្រព័ន្ធ
+              </p>
+            </div>
           </div>
 
           <button
             type="button"
-            disabled={saving}
+            disabled={isBusy}
             onClick={onClose}
             aria-label="Close"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 p-6 sm:p-8">
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
-              label="First name"
-              value={values.firstName}
-              onChange={(value) =>
-                setValues((previous) => ({
-                  ...previous,
-                  firstName: value,
-                }))
-              }
-              required
-            />
-
-            <Field
-              label="Last name"
-              value={values.lastName}
-              onChange={(value) =>
-                setValues((previous) => ({
-                  ...previous,
-                  lastName: value,
-                }))
-              }
-              required
-            />
-
-            <Field
-              label="Username"
-              value={values.username}
-              onChange={(value) =>
-                setValues((previous) => ({
-                  ...previous,
-                  username: value,
-                }))
-              }
-              required
-            />
-
-            <Field
-              label="Email"
-              type="email"
-              value={values.email}
-              onChange={(value) =>
-                setValues((previous) => ({
-                  ...previous,
-                  email: value,
-                }))
-              }
-              required
-            />
-
-            <Field
-              label="Phone number"
-              value={values.phoneNumber}
-              onChange={(value) =>
-                setValues((previous) => ({
-                  ...previous,
-                  phoneNumber: value,
-                }))
-              }
-              placeholder="+85512345678"
-              required
-            />
-
-            <div className="hidden sm:block" />
-
-            <Field
-              label="Password"
-              type="password"
-              value={values.password}
-              onChange={(value) =>
-                setValues((previous) => ({
-                  ...previous,
-                  password: value,
-                }))
-              }
-              required
-            />
-
-            <Field
-              label="Confirm password"
-              type="password"
-              value={values.confirmedPassword}
-              onChange={(value) =>
-                setValues((previous) => ({
-                  ...previous,
-                  confirmedPassword: value,
-                }))
-              }
-              required
-            />
-          </div>
-
-          {localError && (
-            <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg leading-7 text-red-600">
-              <AlertTriangle size={21} className="mt-0.5 shrink-0" />
-              <span>{localError}</span>
+        {/* Form Body */}
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6 p-6 sm:p-8">
+          {apiError && (
+            <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <AlertCircle size={18} className="shrink-0 text-red-500 mt-0.5" />
+              <div className="flex-1 font-medium">{apiError}</div>
             </div>
           )}
 
-          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-end">
+          <div className="grid gap-5 sm:grid-cols-2">
+            {/* First Name */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700">
+                នាមខ្លួន <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                {...register("firstName")}
+                disabled={isBusy}
+                placeholder="ឧ. សុខ"
+                className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
+                  errors.firstName
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                    : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
+                }`}
+              />
+              {errors.firstName && (
+                <p className="text-xs font-medium text-red-500">{errors.firstName.message}</p>
+              )}
+            </div>
+
+            {/* Last Name */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700">
+                នាមត្រកូល <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                {...register("lastName")}
+                disabled={isBusy}
+                placeholder="ឧ. គឹម"
+                className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
+                  errors.lastName
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                    : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
+                }`}
+              />
+              {errors.lastName && (
+                <p className="text-xs font-medium text-red-500">{errors.lastName.message}</p>
+              )}
+            </div>
+
+            {/* Username */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700">
+                ឈ្មោះគណនី <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                {...register("username")}
+                disabled={isBusy}
+                placeholder="ឈ្មោះគណនី"
+                className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
+                  errors.username
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                    : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
+                }`}
+              />
+              {errors.username && (
+                <p className="text-xs font-medium text-red-500">{errors.username.message}</p>
+              )}
+            </div>
+
+            {/* Email */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700">
+                អ៊ីមែល <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                {...register("email")}
+                disabled={isBusy}
+                placeholder="ឧ. example@gmail.com"
+                className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
+                  errors.email
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                    : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
+                }`}
+              />
+              {errors.email && (
+                <p className="text-xs font-medium text-red-500">{errors.email.message}</p>
+              )}
+            </div>
+
+            {/* Phone Number */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700">
+                លេខទូរស័ព្ទ <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                {...register("phoneNumber")}
+                disabled={isBusy}
+                placeholder="ឧ. +85512345678"
+                className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
+                  errors.phoneNumber
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                    : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
+                }`}
+              />
+              {errors.phoneNumber && (
+                <p className="text-xs font-medium text-red-500">{errors.phoneNumber.message}</p>
+              )}
+            </div>
+
+            <div className="hidden sm:block" />
+
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700">
+                ពាក្យសម្ងាត់ <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                {...register("password")}
+                disabled={isBusy}
+                placeholder="យ៉ាងហោចណាស់ 6 តួអក្សរ"
+                className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
+                  errors.password
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                    : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
+                }`}
+              />
+              {errors.password && (
+                <p className="text-xs font-medium text-red-500">{errors.password.message}</p>
+              )}
+            </div>
+
+            {/* Confirm Password */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700">
+                បញ្ជាក់ពាក្យសម្ងាត់ <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                {...register("confirmedPassword")}
+                disabled={isBusy}
+                placeholder="បញ្ចូលពាក្យសម្ងាត់ម្តងទៀត"
+                className={`h-12 w-full rounded-2xl border bg-white px-4 text-base text-gray-800 outline-none transition focus:ring-2 disabled:bg-gray-50 ${
+                  errors.confirmedPassword
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                    : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"
+                }`}
+              />
+              {errors.confirmedPassword && (
+                <p className="text-xs font-medium text-red-500">{errors.confirmedPassword.message}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Footer Buttons */}
+          <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-6">
             <button
               type="button"
-              disabled={saving}
+              disabled={isBusy}
               onClick={onClose}
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-medium text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-2xl border border-gray-200 bg-white px-5 py-2.5 text-base font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
             >
               បោះបង់
             </button>
 
             <button
               type="submit"
-              disabled={saving}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary-800 px-7 text-lg font-medium text-white transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={isBusy}
+              className="inline-flex items-center gap-2 rounded-2xl bg-primary-800 px-6 py-2.5 text-base font-bold text-white shadow-md shadow-primary-900/20 transition-all hover:bg-primary-900 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
             >
-              {saving && <Loader2 size={20} className="animate-spin" />}
-
-              {saving ? "កំពុងបង្កើត..." : "បង្កើតអ្នកប្រើ"}
+              {isBusy ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  កំពុងបង្កើត...
+                </>
+              ) : (
+                <>
+                  <UserPlus size={18} />
+                  បង្កើតគណនីអ្នកប្រើប្រាស់
+                </>
+              )}
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  type = "text",
-  placeholder,
-  required,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  type?: string;
-  placeholder?: string;
-  required?: boolean;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-2 block text-lg font-medium text-primary-800">
-        {label}
-        {required ? " *" : ""}
-      </span>
-
-      <input
-        type={type}
-        value={value}
-        required={required}
-        placeholder={placeholder}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-[52px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
-      />
-    </label>
   );
 }

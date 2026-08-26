@@ -1,11 +1,12 @@
 export async function compressImage(file: File, maxSizeMB: number = 1): Promise<File> {
   const maxBytes = maxSizeMB * 1024 * 1024;
   
-  if (file.size <= maxBytes) {
+  // If already WebP and within size limit, no conversion needed
+  if (file.type === "image/webp" && file.size <= maxBytes) {
     return file;
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
 
@@ -19,8 +20,8 @@ export async function compressImage(file: File, maxSizeMB: number = 1): Promise<
       const maxDimension = 1920;
       if (width > maxDimension || height > maxDimension) {
         const ratio = Math.min(maxDimension / width, maxDimension / height);
-        width *= ratio;
-        height *= ratio;
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
       }
 
       canvas.width = width;
@@ -34,9 +35,9 @@ export async function compressImage(file: File, maxSizeMB: number = 1): Promise<
 
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Attempt compression with webp or jpeg
-      const type = "image/webp"; // WebP generally provides better compression
-      let quality = 0.8;
+      // Convert to WebP format supported by backend media service
+      const type = "image/webp";
+      let quality = 0.85;
       
       const attemptCompression = () => {
         canvas.toBlob(
@@ -47,9 +48,9 @@ export async function compressImage(file: File, maxSizeMB: number = 1): Promise<
             }
             
             if (blob.size <= maxBytes || quality <= 0.2) {
-              // Found a good size, or we can't compress further
-              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
-                type: type,
+              const cleanBaseName = file.name.replace(/\.[^/.]+$/, "").trim() || "image";
+              const compressedFile = new File([blob], `${cleanBaseName}.webp`, {
+                type: "image/webp",
                 lastModified: Date.now(),
               });
               resolve(compressedFile);

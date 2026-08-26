@@ -3,9 +3,49 @@ export type StoreOperatingStatus =
   | "OPEN"
   | "CLOSED"
   | "TEMPORARILY_CLOSED"
+  | "PERMANENTLY_CLOSED"
   | "UNKNOWN"
   | string;
-export type StoreAccountStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED" | string;
+export type StoreAccountStatus =
+  | "ACTIVE"
+  | "SUSPENDED"
+  | "ARCHIVED"
+  | string;
+
+/**
+ * Mirrors the backend `StoreSocialPlatform` enum. The API rejects any other
+ * value, so the admin UI must only ever offer these.
+ */
+export const STORE_SOCIAL_PLATFORMS = [
+  "FACEBOOK",
+  "INSTAGRAM",
+  "TIKTOK",
+  "YOUTUBE",
+  "TELEGRAM",
+  "X",
+] as const;
+
+export type StoreSocialPlatform = (typeof STORE_SOCIAL_PLATFORMS)[number];
+
+/**
+ * Hosts the backend accepts per platform (`StoreSocialUrlValidator`). Used to
+ * validate before submitting so the admin sees a field-level message instead of
+ * a generic 400 from the API.
+ */
+export const STORE_SOCIAL_PLATFORM_HOSTS: Record<
+  StoreSocialPlatform,
+  string[]
+> = {
+  FACEBOOK: ["facebook.com"],
+  INSTAGRAM: ["instagram.com"],
+  TIKTOK: ["tiktok.com"],
+  YOUTUBE: ["youtube.com"],
+  TELEGRAM: ["t.me"],
+  X: ["x.com", "twitter.com"],
+};
+
+/** Backend caps a store at 10 social links. */
+export const MAX_STORE_SOCIAL_LINKS = 10;
 
 export interface StoreSocialLink {
   platform: string;
@@ -71,6 +111,9 @@ export interface StorePage {
 
 export interface GetAdminStoresParams {
   query?: string;
+  reviewStatus?: StoreReviewStatus | "ALL";
+  operatingStatus?: StoreOperatingStatus;
+  accountStatus?: StoreAccountStatus;
   page?: number;
   size?: number;
 }
@@ -98,14 +141,17 @@ export interface CreateStorePayload {
   socialLinks?: StoreSocialLink[];
 }
 
-/** Fields demonstrated by the supplied PUT request. */
+/** Fields demonstrated by the supplied PUT request (matches StoreRequest). */
 export interface UpdateStorePayload {
   storeName: string;
   description?: string | null;
   addressLine: string;
+  commune?: string | null;
+  district?: string | null;
   city?: string | null;
   province?: string | null;
   countryCode: string;
+  postalCode?: string | null;
   timezone: string;
   latitude: number;
   longitude: number;
@@ -116,6 +162,11 @@ export interface UpdateStorePayload {
   priceLevel?: number | null;
   hygieneRating?: number | null;
   operatingStatus?: StoreOperatingStatus;
+  /**
+   * Omit to leave the store's existing links untouched; send an array to
+   * replace them wholesale (`[]` clears them).
+   */
+  socialLinks?: StoreSocialLink[];
 }
 
 export interface UpdateStoreReviewStatusPayload {

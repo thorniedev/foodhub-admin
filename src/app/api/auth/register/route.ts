@@ -5,9 +5,15 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const API_BASE_URL =
-  process.env.BACKEND_API_URL ??
-  "https://food.chanthorndev.site//api/v1";
+function getBackendApiBaseUrl(): string {
+  const configured =
+    process.env.BACKEND_API_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "https://api.mhoubahar.store";
+
+  const clean = configured.trim().replace(/\/+$/, "");
+  return clean.endsWith("/api/v1") ? clean : `${clean}/api/v1`;
+}
 
 function parseResponseBody(value: string): unknown {
   if (!value) {
@@ -24,14 +30,13 @@ function parseResponseBody(value: string): unknown {
 }
 
 export async function POST(request: NextRequest) {
-  const endpoint = `${API_BASE_URL.replace(/\/$/, "")}/auth/register`;
+  const endpoint = `${getBackendApiBaseUrl()}/auth/register`;
 
   try {
     const requestBody = await request.json();
 
     console.log("[REGISTER PROXY REQUEST]", {
       endpoint,
-      API_BASE_URL,
     });
 
     const backendResponse = await fetch(endpoint, {

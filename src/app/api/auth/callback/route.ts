@@ -49,6 +49,46 @@ function clearOAuthCookies(response: NextResponse): void {
   response.cookies.delete("foodhub_return_to");
 }
 
+const MAX_OAUTH_RETRIES = 1;
+
+/**
+ * Restart the OAuth flow instead of showing an error page.
+ *
+ * Uses a short-lived `oauth_retry` cookie as a counter so we only
+ * retry once.  If the retry also fails the caller falls through to
+ * the normal error page.
+ */
+function retryOAuthFlow(
+  request: NextRequest,
+  returnTo: string,
+): NextResponse | null {
+  const retryCount = Number(request.cookies.get("oauth_retry")?.value) || 0;
+
+  if (retryCount >= MAX_OAUTH_RETRIES) {
+    return null;
+  }
+
+  const loginUrl = new URL("/api/auth/login", request.url);
+  loginUrl.searchParams.set("returnTo", returnTo);
+  loginUrl.searchParams.set("prompt", "login");
+
+  const response = NextResponse.redirect(loginUrl);
+
+  clearOAuthCookies(response);
+
+  response.cookies.set("oauth_retry", String(retryCount + 1), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: 2 * 60,
+  });
+
+  response.headers.set("Cache-Control", "no-store");
+
+  return response;
+}
+
 function clearSessionCookies(response: NextResponse): void {
   response.cookies.delete("foodhub_access_token");
   response.cookies.delete("foodhub_refresh_token");
@@ -246,6 +286,14 @@ export async function GET(request: NextRequest) {
   }
 
   if (!receivedState || !expectedState) {
+    console.warn("OAUTH STATE MISSING – attempting retry", {
+      hasReceivedState: Boolean(receivedState),
+      hasExpectedState: Boolean(expectedState),
+    });
+
+    const retry = retryOAuthFlow(request, storedReturnTo);
+    if (retry) return retry;
+
     return redirectToLogin(
       request,
       "missing_oauth_state",
@@ -254,6 +302,11 @@ export async function GET(request: NextRequest) {
   }
 
   if (receivedState !== expectedState) {
+    console.warn("OAUTH STATE MISMATCH – attempting retry");
+
+    const retry = retryOAuthFlow(request, storedReturnTo);
+    if (retry) return retry;
+
     return redirectToLogin(
       request,
       "invalid_oauth_state",
@@ -262,6 +315,11 @@ export async function GET(request: NextRequest) {
   }
 
   if (!codeVerifier) {
+    console.warn("PKCE VERIFIER MISSING – attempting retry");
+
+    const retry = retryOAuthFlow(request, storedReturnTo);
+    if (retry) return retry;
+
     return redirectToLogin(
       request,
       "missing_code_verifier",
@@ -395,6 +453,7 @@ export async function GET(request: NextRequest) {
   clearSessionCookies(response);
   setSessionCookies(response, tokens);
   clearOAuthCookies(response);
+  response.cookies.delete("oauth_retry");
   response.headers.set("Cache-Control", "no-store");
 
   console.log("ADMIN LOGIN SUCCESS:", {

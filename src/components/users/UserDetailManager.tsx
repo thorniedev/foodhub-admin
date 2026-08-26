@@ -2,43 +2,60 @@
 
 import {
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
 import {
+  AlertCircle,
   AlertTriangle,
+  CheckCircle2,
   Loader2,
+  X,
 } from "lucide-react";
 
 import { useRouter } from "next/navigation";
 
 import {
+  useCreateAdminProfileMutation,
   useDeleteAdminProfileMutation,
-  useDeleteAdminUserMutation,
   useGetAdminProfileQuery,
   useGetAdminUserProfilesQuery,
   useGetAdminUserQuery,
+  useHardDeleteAdminProfileMutation,
   useHardDeleteAdminUserMutation,
   useRestoreAdminProfileMutation,
+  useRestoreAdminUserMutation,
+  useSetDefaultAdminProfileMutation,
+  useUpdateAdminProfileMutation,
   useUpdateAdminUserStatusMutation,
 } from "@/src/app/store/userProfileApi";
 
 import type {
   AdminProfile,
+  AdminProfileDetail,
   AdminUser,
+  CreateAdminProfilePayload,
   MutableAdminUserStatus,
   ProfileStatusFilter,
+  UpdateAdminProfilePayload,
 } from "@/src/types/userProfile";
 
 import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
+import { displayName } from "@/src/lib/userProfileFormat";
 
-import DeleteUserConfirmModal from "./DeleteUserConfirmModal";
+import HardDeleteProfileConfirmModal from "./HardDeleteProfileConfirmModal";
 import HardDeleteUserConfirmModal from "./HardDeleteUserConfirmModal";
 import ProfileActionConfirmModal from "./ProfileActionConfirmModal";
+import ProfileCreateModal from "./ProfileCreateModal";
 import ProfileDetailPanel from "./ProfileDetailPanel";
+import ProfileEditModal from "./ProfileEditModal";
 import RelatedProfilesPanel from "./RelatedProfilesPanel";
 import UserDetailHeader from "./UserDetailHeader";
 import UserEditModal from "./UserEditModal";
+import {
+  removeDisabledUserCache,
+} from "./disabledUserCache";
 
 type Notice =
   | { type: "success"; text: string }
@@ -63,11 +80,14 @@ export default function UserDetailManager({
   const [statusUser, setStatusUser] =
     useState<AdminUser | null>(null);
 
-  const [deleteUser, setDeleteUser] =
-    useState<AdminUser | null>(null);
-
   const [hardDeleteUser, setHardDeleteUser] =
     useState<AdminUser | null>(null);
+
+  const [hardDeleteProfile, setHardDeleteProfile] =
+    useState<AdminProfile | null>(null);
+
+  const [createProfileOpen, setCreateProfileOpen] = useState(false);
+  const [editProfile, setEditProfile] = useState<AdminProfile | null>(null);
 
   const [profileAction, setProfileAction] = useState<{
     action: "DELETE" | "RESTORE";
@@ -75,6 +95,13 @@ export default function UserDetailManager({
   } | null>(null);
 
   const [notice, setNotice] = useState<Notice>(null);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => {
+      setNotice(null);
+    }, 4500);
+    return () => clearTimeout(timer);
+  }, [notice]);
 
   const {
     data: user,
@@ -104,46 +131,146 @@ export default function UserDetailManager({
     sort: "createdAt,desc",
   });
 
-  useEffect(() => {
-    const profiles = profilePageData?.contents ?? [];
+  const rawProfiles = profilePageData?.contents ?? [];
 
-    if (profiles.length === 0) {
-      setSelectedProfileUuid(null);
-      return;
-    }
+  // Default profile always first, then newly created profiles (createdAt descending)
+  const visibleProfiles = useMemo(() => {
+    return [...rawProfiles].sort((a, b) => {
+      const aDefault = Boolean(a.isDefault);
+      const bDefault = Boolean(b.isDefault);
+      if (aDefault && !bDefault) return -1;
+      if (!aDefault && bDefault) return 1;
 
-    const selectionStillVisible = profiles.some(
-      (profile) => profile.uuid === selectedProfileUuid,
-    );
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    });
+  }, [rawProfiles]);
 
-    if (!selectedProfileUuid || !selectionStillVisible) {
-      setSelectedProfileUuid(profiles[0].uuid);
-    }
-  }, [profilePageData, selectedProfileUuid]);
+  const effectiveProfilePageData = useMemo(() => {
+    if (!profilePageData) return undefined;
+    return {
+      ...profilePageData,
+      contents: visibleProfiles,
+    };
+  }, [profilePageData, visibleProfiles]);
+
+  const effectiveSelectedProfileUuid =
+    selectedProfileUuid &&
+      visibleProfiles.some((profile) => profile.uuid === selectedProfileUuid)
+      ? selectedProfileUuid
+      : visibleProfiles[0]?.uuid ?? null;
 
   const {
     data: selectedProfile,
     error: profileError,
     isLoading: profileLoading,
     refetch: refetchProfile,
-  } = useGetAdminProfileQuery(selectedProfileUuid ?? "", {
-    skip: !selectedProfileUuid,
+  } = useGetAdminProfileQuery(effectiveSelectedProfileUuid ?? "", {
+    skip: !effectiveSelectedProfileUuid,
   });
+
+  const selectedProfileDetail: AdminProfileDetail | undefined = selectedProfile
+    ? {
+      ...selectedProfile,
+      allergies: selectedProfile.allergies ?? [],
+      dietaryTypes: selectedProfile.dietaryTypes ?? [],
+      medicalConditions: selectedProfile.medicalConditions ?? [],
+      ingredientAvoids: selectedProfile.ingredientAvoids ?? [],
+      preferences: selectedProfile.preferences ?? null,
+    }
+    : undefined;
+
+  const profileDetailLoading = profileLoading;
 
   const [updateStatus, { isLoading: updatingStatus }] =
     useUpdateAdminUserStatusMutation();
 
-  const [deleteAdminUser, { isLoading: deletingUser }] =
-    useDeleteAdminUserMutation();
-
   const [hardDeleteAdminUser, { isLoading: hardDeletingUser }] =
     useHardDeleteAdminUserMutation();
+
+  const [restoreAdminUser, { isLoading: restoringUser }] =
+    useRestoreAdminUserMutation();
+
+  const [createAdminProfile, { isLoading: creatingProfile }] =
+    useCreateAdminProfileMutation();
 
   const [deleteAdminProfile, { isLoading: deletingProfile }] =
     useDeleteAdminProfileMutation();
 
+  const [hardDeleteAdminProfile, { isLoading: hardDeletingProfile }] =
+    useHardDeleteAdminProfileMutation();
+
   const [restoreAdminProfile, { isLoading: restoringProfile }] =
     useRestoreAdminProfileMutation();
+
+  const [updateAdminProfile, { isLoading: updatingProfile }] =
+    useUpdateAdminProfileMutation();
+
+  const [setDefaultAdminProfile, { isLoading: settingDefault }] =
+    useSetDefaultAdminProfileMutation();
+
+  const handleCreateProfile = async (payload: CreateAdminProfilePayload) => {
+    setNotice(null);
+    try {
+      const newProfile = await createAdminProfile({
+        userUuid,
+        body: payload,
+      }).unwrap();
+
+      if (newProfile?.uuid) {
+        setSelectedProfileUuid(newProfile.uuid);
+      }
+
+      setNotice({
+        type: "success",
+        text: `បានបង្កើតប្រវត្តិរូប "${payload.profileName}" ដោយជោគជ័យ។`,
+      });
+
+      await refetchProfiles();
+    } catch (requestError) {
+      throw requestError;
+    }
+  };
+
+  const handleProfileUpdate = async (payload: UpdateAdminProfilePayload) => {
+    if (!editProfile) return;
+    setNotice(null);
+    try {
+      await updateAdminProfile({
+        profileUuid: editProfile.uuid,
+        body: payload,
+      }).unwrap();
+
+      setNotice({
+        type: "success",
+        text: `បានកែប្រែព័ត៌មានប្រវត្តិរូប "${payload.profileName || editProfile.profileName}" ដោយជោគជ័យ។`,
+      });
+
+      setEditProfile(null);
+      await Promise.all([refetchProfiles(), refetchProfile()]);
+    } catch (requestError) {
+      throw requestError;
+    }
+  };
+
+  const handleSetDefaultProfile = async () => {
+    if (!selectedProfileDetail) return;
+    setNotice(null);
+    try {
+      await setDefaultAdminProfile(selectedProfileDetail.uuid).unwrap();
+      setNotice({
+        type: "success",
+        text: `បានកំណត់ "${selectedProfileDetail.profileName}" ជាលំនាំដើម ដោយជោគជ័យ។`,
+      });
+      await Promise.all([refetchProfiles(), refetchProfile()]);
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAdminApiErrorMessage(requestError),
+      });
+    }
+  };
 
   const handleStatusUpdate = async (
     status: MutableAdminUserStatus,
@@ -174,21 +301,22 @@ export default function UserDetailManager({
     }
   };
 
-  const handleDeleteUser = async () => {
-    if (!deleteUser) {
+  const handleHardDeleteUser = async () => {
+    if (!hardDeleteUser) {
       return;
     }
 
-    const target = deleteUser;
+    const target = hardDeleteUser;
 
     try {
-      await deleteAdminUser(target.uuid).unwrap();
+      await hardDeleteAdminUser(target.uuid).unwrap();
 
-      setDeleteUser(null);
+      removeDisabledUserCache(target.uuid);
+      setHardDeleteUser(null);
 
       setNotice({
         type: "success",
-        text: "User ត្រូវបាន soft-delete។ កំពុងត្រឡប់ទៅ User list...",
+        text: "User ត្រូវបានលុបចេញពីប្រព័ន្ធដោយជោគជ័យ។ កំពុងត្រឡប់ទៅបញ្ជីអ្នកប្រើ...",
       });
 
       router.replace("/users");
@@ -201,25 +329,52 @@ export default function UserDetailManager({
     }
   };
 
-  const handleHardDeleteUser = async () => {
-    if (!hardDeleteUser) {
+  const handleRestoreUser = async () => {
+    if (!user) {
       return;
     }
 
-    const target = hardDeleteUser;
-
     try {
-      await hardDeleteAdminUser(target.uuid).unwrap();
+      await restoreAdminUser(user.uuid).unwrap();
 
-      setHardDeleteUser(null);
+      removeDisabledUserCache(user.uuid);
 
       setNotice({
         type: "success",
-        text: "User ត្រូវបាន hard-delete ជាអចិន្ត្រៃយ៍។ កំពុងត្រឡប់ទៅ User list...",
+        text: `គណនី "${displayName(
+          user.firstName,
+          user.lastName,
+          user.username,
+        )}" ត្រូវបានស្តារឡើងវិញដោយជោគជ័យ។`,
       });
 
-      router.replace("/users");
-      router.refresh();
+      await refetchUser();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAdminApiErrorMessage(requestError),
+      });
+    }
+  };
+
+  const handleHardDeleteProfile = async () => {
+    if (!hardDeleteProfile) {
+      return;
+    }
+
+    const target = hardDeleteProfile;
+
+    try {
+      await hardDeleteAdminProfile(target.uuid).unwrap();
+
+      setHardDeleteProfile(null);
+      setNotice({
+        type: "success",
+        text: `Profile "${target.profileName}" ត្រូវបានលុបចេញពីប្រព័ន្ធដោយជោគជ័យ។`,
+      });
+
+      setSelectedProfileUuid(null);
+      await refetchProfiles();
     } catch (requestError) {
       setNotice({
         type: "error",
@@ -239,21 +394,21 @@ export default function UserDetailManager({
 
         setNotice({
           type: "success",
-          text: "Profile ត្រូវបាន soft-delete ដោយជោគជ័យ។",
+          text: `Profile "${profileAction.profile.profileName}" ត្រូវបានផ្អាកដំណើរការដោយជោគជ័យ។`,
         });
       } else {
         await restoreAdminProfile(profileAction.profile.uuid).unwrap();
 
         setNotice({
           type: "success",
-          text: "Profile ត្រូវបាន Restore ដោយជោគជ័យ។",
+          text: `Profile "${profileAction.profile.profileName}" ត្រូវបានបើកដំណើរការឡើងវិញដោយជោគជ័យ។`,
         });
       }
 
       setProfileAction(null);
       await refetchProfiles();
 
-      if (selectedProfileUuid) {
+      if (effectiveSelectedProfileUuid) {
         await refetchProfile();
       }
     } catch (requestError) {
@@ -290,28 +445,62 @@ export default function UserDetailManager({
     );
   }
 
-  const profileBusy = deletingProfile || restoringProfile;
-  const userBusy = updatingStatus || deletingUser || hardDeletingUser;
+  const profileBusy =
+    deletingProfile ||
+    restoringProfile ||
+    hardDeletingProfile ||
+    settingDefault ||
+    updatingProfile;
+  const userBusy = updatingStatus || hardDeletingUser || restoringUser;
 
   return (
     <div className="w-full min-w-0 max-w-full space-y-5">
       <UserDetailHeader
         user={user}
         busy={userBusy}
+        onCreateProfile={() => setCreateProfileOpen(true)}
         onStatusEdit={() => setStatusUser(user)}
-        onDelete={() => setDeleteUser(user)}
         onHardDelete={() => setHardDeleteUser(user)}
+        onRestore={handleRestoreUser}
       />
 
+      {/* =================================================
+          FLOATING TOAST NOTIFICATION (SHADCN STYLE)
+      ================================================== */}
       {notice && (
-        <div
-          className={`rounded-2xl border px-4 py-3 text-base ${
-            notice.type === "success"
-              ? "border-primary-100 bg-primary-50 text-primary-700"
-              : "border-red-100 bg-red-50 text-red-600"
-          }`}
-        >
-          {notice.text}
+        <div className="fixed top-6 right-6 z-[9999] pointer-events-none flex max-w-md animate-in fade-in slide-in-from-top-5 duration-300">
+          <div
+            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-3.5 shadow-2xl backdrop-blur-md transition-all ${notice.type === "success"
+              ? "border-emerald-200 bg-white/95 text-emerald-950 shadow-emerald-500/10"
+              : "border-red-200 bg-white/95 text-red-950 shadow-red-500/10"
+              }`}
+          >
+            <div
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${notice.type === "success"
+                ? "bg-emerald-50 text-emerald-600"
+                : "bg-red-50 text-red-600"
+                }`}
+            >
+              {notice.type === "success" ? (
+                <CheckCircle2 size={20} />
+              ) : (
+                <AlertCircle size={20} />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold leading-relaxed">
+                {notice.text}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setNotice(null)}
+              className="ml-2 flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+              aria-label="Close"
+            >
+              <X size={15} />
+            </button>
+          </div>
         </div>
       )}
 
@@ -324,11 +513,11 @@ export default function UserDetailManager({
       <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]">
         <div className="min-w-0 xl:sticky xl:top-5">
           <RelatedProfilesPanel
-            data={profilePageData}
+            data={effectiveProfilePageData}
             loading={profilesLoading}
             fetching={profilesFetching}
             filter={profileFilter}
-            selectedProfileUuid={selectedProfileUuid}
+            selectedProfileUuid={effectiveSelectedProfileUuid}
             onFilterChange={(filter) => {
               setProfileFilter(filter);
               setProfilePage(0);
@@ -340,23 +529,32 @@ export default function UserDetailManager({
         </div>
 
         <ProfileDetailPanel
-          profile={selectedProfile}
-          loading={profileLoading}
+          profile={selectedProfileDetail}
+          loading={profileDetailLoading}
           error={profileError}
+          hasProfiles={visibleProfiles.length > 0}
           busy={profileBusy}
+          onCreateProfile={() => setCreateProfileOpen(true)}
+          onEdit={() => setEditProfile(selectedProfileDetail ?? null)}
+          onSetDefault={handleSetDefaultProfile}
           onDelete={() => {
-            if (selectedProfile) {
+            if (selectedProfileDetail) {
               setProfileAction({
                 action: "DELETE",
-                profile: selectedProfile,
+                profile: selectedProfileDetail,
               });
             }
           }}
+          onHardDelete={() => {
+            if (selectedProfileDetail) {
+              setHardDeleteProfile(selectedProfileDetail);
+            }
+          }}
           onRestore={() => {
-            if (selectedProfile) {
+            if (selectedProfileDetail) {
               setProfileAction({
                 action: "RESTORE",
-                profile: selectedProfile,
+                profile: selectedProfileDetail,
               });
             }
           }}
@@ -374,17 +572,6 @@ export default function UserDetailManager({
         onSubmit={handleStatusUpdate}
       />
 
-      <DeleteUserConfirmModal
-        user={deleteUser}
-        deleting={deletingUser}
-        onClose={() => {
-          if (!deletingUser) {
-            setDeleteUser(null);
-          }
-        }}
-        onConfirm={handleDeleteUser}
-      />
-
       <HardDeleteUserConfirmModal
         user={hardDeleteUser}
         deleting={hardDeletingUser}
@@ -394,6 +581,17 @@ export default function UserDetailManager({
           }
         }}
         onConfirm={handleHardDeleteUser}
+      />
+
+      <HardDeleteProfileConfirmModal
+        profile={hardDeleteProfile}
+        deleting={hardDeletingProfile}
+        onClose={() => {
+          if (!hardDeletingProfile) {
+            setHardDeleteProfile(null);
+          }
+        }}
+        onConfirm={handleHardDeleteProfile}
       />
 
       <ProfileActionConfirmModal
@@ -407,6 +605,28 @@ export default function UserDetailManager({
           }
         }}
         onConfirm={handleProfileAction}
+      />
+
+      <ProfileCreateModal
+        open={createProfileOpen}
+        saving={creatingProfile}
+        onClose={() => {
+          if (!creatingProfile) {
+            setCreateProfileOpen(false);
+          }
+        }}
+        onSubmit={handleCreateProfile}
+      />
+
+      <ProfileEditModal
+        profile={editProfile}
+        saving={updatingProfile}
+        onClose={() => {
+          if (!updatingProfile) {
+            setEditProfile(null);
+          }
+        }}
+        onSubmit={handleProfileUpdate}
       />
     </div>
   );

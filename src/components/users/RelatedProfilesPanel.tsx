@@ -47,12 +47,12 @@ export default function RelatedProfilesPanel({
           </div>
 
           <div>
-            <p className="text-2xl font-semibold text-primary-800">
-              Profiles របស់អ្នកប្រើ
+            <p className="text-[20px] font-bold text-primary-800">
+              បញ្ជីប្រវត្តិរូប
             </p>
 
-            <p className="mt-1 text-lg text-gray-500">
-              {data?.totalElements ?? 0} profile(s)
+            <p className="mt-0.5 text-[18px] text-gray-500">
+              {data?.totalElements ?? 0} ប្រវត្តិរូប
             </p>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function RelatedProfilesPanel({
           {[
             { value: "ALL" as const, label: "ទាំងអស់" },
             { value: "ACTIVE" as const, label: "សកម្ម" },
-            { value: "INACTIVE" as const, label: "Deleted" },
+            { value: "INACTIVE" as const, label: "ផ្អាកដំណើរការ" },
           ].map((item) => {
             const selected = filter === item.value;
 
@@ -91,7 +91,7 @@ export default function RelatedProfilesPanel({
         ) : profiles.length === 0 ? (
           <div className="flex min-h-48 flex-col items-center justify-center text-center text-gray-400">
             <Users size={34} />
-            <p className="mt-2 text-lg">មិនមាន Profile</p>
+            <p className="mt-2 text-lg">មិនមានប្រវត្តិរូប</p>
           </div>
         ) : (
           profiles.map((profile) => (
@@ -108,7 +108,7 @@ export default function RelatedProfilesPanel({
       {!loading && (
         <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 text-lg text-gray-500">
           <span>
-            Page {page + 1} / {totalPages}
+            ទំព័រ {page + 1} / {totalPages}
           </span>
 
           <div className="flex gap-2">

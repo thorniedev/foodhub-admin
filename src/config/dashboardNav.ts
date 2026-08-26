@@ -22,22 +22,39 @@ export const dashboardNav: NavItem[] = [
     icon: LayoutGrid,
     href: "/",
   },
+    {
+    label: "អនុសាសន៍ & សវនកម្ម AI",
+    href: "/admin/recommendations",
+  },
 
   {
     label: "ហាង",
     icon: Store,
     href: "/shops",
   },
-
+  {
+    label: "មីនុយ",
+    icon: Utensils,
+    href: "/menu-items",
+  },
   {
     label: "អ្នកប្រើប្រាស់",
     icon: Users,
     href: "/users",
   },
   {
-    label: "ប្រភេទអាហារ",
-    icon: Utensils,
-    href: "/menu-items",
+    label: "ម្ហូបអាហារ",
+    icon: Layers,
+    children: [
+      {
+        label: "ម្ហូប",
+        href: "/food-catalog/foods",
+      },
+      {
+        label: "ភេសជ្ជៈ",
+        href: "/food-catalog/drinks",
+      },
+    ],
   },
   // {
   //   label: "ប្រភេទអាហារ",
@@ -65,18 +82,10 @@ export const dashboardNav: NavItem[] = [
         label: "រូបបេណឺ",
         href: "/dynamic-content/banners",
       },
-      {
-        label: "រូបអាហារតាមរដូវកាល",
-        href: "/dynamic-content/food-by-season",
-      },
-      {
-        label: "រូបអាហារតាមតំបន់",
-        href: "/dynamic-content/food-by-area",
-      },
-      {
-        label: "មតិកែលម្អ",
-        href: "/dynamic-content/feedback",
-      },
+      // {
+      //   label: "មតិកែលម្អ",
+      //   href: "/dynamic-content/feedback",
+      // },
     ],
   },
   {
@@ -84,8 +93,12 @@ export const dashboardNav: NavItem[] = [
     icon: SlidersHorizontal,
     children: [
       {
-        label: "ប្រភេទម្ហូប",
+        label: "អនុប្រភេទម្ហូប",
         href: "/filter/food-categories",
+      },
+      {
+        label: "អនុប្រភេទភេសជ្ជៈ",
+        href: "/filter/drink-categories",
       },
       {
         label: "ម្ហូបតាមប្រទេស",
@@ -112,10 +125,6 @@ export const dashboardNav: NavItem[] = [
         href: "/filter/medical-conditions",
       },
       {
-        label: "កម្រិតហឹរ",
-        href: "/filter/spice-levels",
-      },
-      {
         label: "ពេលចម្អិន",
         href: "/filter/preparation-times",
       },
@@ -124,48 +133,12 @@ export const dashboardNav: NavItem[] = [
         href: "/filter/distances",
       },
       {
-        label: "វិធីចម្អិន",
-        href: "/filter/cooking-methods",
-      },
-      {
-        label: "លក្ខណៈម្ហូប",
-        href: "/filter/food-styles",
-      },
-      {
-        label: "គោលដៅសុខភាព",
-        href: "/filter/health-goals",
-      },
-      {
         label: "តំបន់",
         href: "/filter/regions",
       },
       {
-        label: "រសជាតិ",
-        href: "/filter/tastes",
-      },
-      {
-        label: "វាយនភាព",
-        href: "/filter/textures",
-      },
-      {
         label: "គ្រឿងផ្សំ",
         href: "/filter/ingredients",
-      },
-      {
-        label: "សារធាតុចិញ្ចឹម",
-        href: "/filter/nutrition",
-      },
-      {
-        label: "តម្លៃ",
-        href: "/filter/price-levels",
-      },
-      {
-        label: "ការវាយតម្លៃ",
-        href: "/filter/ratings",
-      },
-      {
-        label: "កម្រិតណែនាំ AI",
-        href: "/filter/ai-scores",
       },
       {
         label: "រដូវកាល",

@@ -67,9 +67,8 @@ export default function DrinkShopSection({
                 setQuery("");
                 setOpen(false);
               }}
-              className={`w-full text-left px-3 py-2 text-sm hover:bg-emerald-50 ${
-                shopId === r.id ? "bg-emerald-50 text-emerald-700" : "text-gray-600"
-              }`}
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-emerald-50 ${shopId === r.id ? "bg-emerald-50 text-emerald-700" : "text-gray-600"
+                }`}
             >
               <p className="font-medium">{r.name}</p>
               <p className="text-xs text-gray-400">{r.address}</p>

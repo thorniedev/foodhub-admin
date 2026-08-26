@@ -46,7 +46,7 @@ export default function UserStatusChart({
     <div className="rounded-2xl border border-gray-100 bg-white p-6">
       <div className="mb-4 ">
         <p className="text-2xl font-semibold text-[#136C34]">
-          ស្ថានភាពអ្នកប្រើប្រាស់
+          ស្ថានភាពគណនីអ្នកប្រើប្រាស់
         </p>
       </div>
 

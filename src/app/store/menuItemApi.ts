@@ -508,28 +508,31 @@ function normalizePage<T>(
   const page =
     unwrap(response);
 
+  const raw = page as any;
   const contents =
-    page.content ??
-    page.contents ??
-    [];
+    raw?.items ??
+    raw?.content ??
+    raw?.contents ??
+    (Array.isArray(raw) ? raw : []);
 
   const pageNumber =
-    page.number ??
-    page.pageNumber ??
+    raw?.number ??
+    raw?.pageNumber ??
     0;
 
   const pageSize =
-    page.size ??
-    page.pageSize ??
+    raw?.size ??
+    raw?.pageSize ??
     contents.length;
 
   const totalElements =
-    page.totalElements ??
+    raw?.totalElements ??
+    raw?.total ??
     contents.length;
 
   const totalPages =
     Math.max(
-      page.totalPages ?? 1,
+      raw?.totalPages ?? 1,
       1,
     );
 
@@ -620,8 +623,9 @@ function normalizePossiblyArrayPage<T>(
    images -> File
 
    MENU ITEM CREATE:
-   request -> application/json
-   images  -> File
+   request   -> application/json
+   thumbnail -> File   (first image)
+   gallery   -> File   (remaining images)
 ========================================================= */
 
 function buildMultipartBody(
@@ -644,10 +648,41 @@ function buildMultipartBody(
   /*
    * Backend supports multiple image parts.
    * Limit frontend to 4 images.
+   *
+   * The two endpoints name their file parts differently:
+   *
+   * FoodController      -> images
+   * MenuItemController  -> thumbnail + gallery
    */
-  images
-    .slice(0, 4)
-    .forEach(
+  const supplied =
+    images.slice(0, 4);
+
+  if (
+    jsonPartName ===
+    "request"
+  ) {
+    const [
+      thumbnail,
+      ...gallery
+    ] = supplied;
+
+    if (thumbnail) {
+      formData.append(
+        "thumbnail",
+        thumbnail,
+      );
+    }
+
+    gallery.forEach(
+      (image) => {
+        formData.append(
+          "gallery",
+          image,
+        );
+      },
+    );
+  } else {
+    supplied.forEach(
       (image) => {
         formData.append(
           "images",
@@ -655,6 +690,7 @@ function buildMultipartBody(
         );
       },
     );
+  }
 
   /*
    * DO NOT manually set:
@@ -691,7 +727,7 @@ export const menuItemApi =
             const p = (params ?? {}) as CatalogListParams;
             return {
               url:
-                "catalog/food-categories",
+                "/api/catalog/food-categories",
 
               method:
                 "GET",
@@ -757,7 +793,7 @@ export const menuItemApi =
             body,
           ) => ({
             url:
-              "catalog/food-categories",
+              "/api/catalog/food-categories",
 
             method:
               "POST",
@@ -791,7 +827,7 @@ export const menuItemApi =
             const p = (params ?? {}) as CatalogListParams;
             return {
               url:
-                "catalog/cuisines",
+                "/api/catalog/cuisines",
 
               method:
                 "GET",
@@ -853,7 +889,7 @@ export const menuItemApi =
             body,
           ) => ({
             url:
-              "catalog/cuisines",
+              "/api/catalog/cuisines",
 
             method:
               "POST",
@@ -887,7 +923,7 @@ export const menuItemApi =
             const p = (params ?? {}) as FoodListParams;
             return {
               url:
-                "catalog/foods",
+                "/api/catalog/foods",
 
               method:
                 "GET",
@@ -991,20 +1027,10 @@ export const menuItemApi =
             arg,
           ) => {
             const body = "body" in arg ? arg.body : arg;
-            const images = "images" in arg && arg.images ? arg.images : [];
             return {
-              url:
-                "catalog/foods",
-
-              method:
-                "POST",
-
-              body:
-                buildMultipartBody(
-                  "food",
-                  body,
-                  images,
-                ),
+              url: "/api/catalog/foods",
+              method: "POST",
+              body,
             };
           },
 
@@ -1044,7 +1070,7 @@ export const menuItemApi =
             const p = (params ?? {}) as MenuItemListParams;
             return {
               url:
-                "catalog/menu-items",
+                "/api/catalog/menu-items",
 
               method:
                 "GET",
@@ -1142,7 +1168,7 @@ export const menuItemApi =
             uuid,
           ) => ({
             url:
-              `catalog/menu-items/${encodeURIComponent(
+              `/api/catalog/menu-items/${encodeURIComponent(
                 uuid,
               )}`,
 
@@ -1202,7 +1228,7 @@ export const menuItemApi =
             longitude,
           }) => ({
             url:
-              `catalog/menu-items/${encodeURIComponent(
+              `/api/catalog/menu-items/${encodeURIComponent(
                 uuid,
               )}/detail`,
 
@@ -1275,7 +1301,7 @@ export const menuItemApi =
             images = [],
           }) => ({
             url:
-              `catalog/stores/${encodeURIComponent(
+              `/api/catalog/stores/${encodeURIComponent(
                 storeUuid,
               )}/menu-items`,
 

@@ -88,10 +88,10 @@ export default function CreateCanonicalFoodModal({
   const [error, setError] = useState<string | null>(null);
 
   const { data: categoryData, isLoading: categoriesLoading } =
-    useGetFoodCategoriesQuery({ page: 0, size: 200 });
+    useGetFoodCategoriesQuery({ page: 0, size: 100 });
   const { data: cuisineData, isLoading: cuisinesLoading } = useGetCuisinesQuery({
     page: 0,
-    size: 200,
+    size: 100,
   });
   const [createFood, { isLoading: saving }] = useCreateFoodMutation();
 
@@ -148,7 +148,7 @@ export default function CreateCanonicalFoodModal({
       setError(null);
 
       if (!form.canonicalName.trim()) {
-        throw new Error("សូមបញ្ចូល Canonical name។");
+        throw new Error("សូមបញ្ចូលឈ្មោះជាភាសាអង់គ្លេស។");
       }
 
       if (!form.categoryUuid) {
@@ -201,7 +201,7 @@ export default function CreateCanonicalFoodModal({
               Food Catalog
             </p>
             <h2 className="mt-1 text-2xl font-black text-gray-900 sm:text-3xl">
-              បង្កើត Food សម្រាប់ Store ជ្រើសយក
+              បន្ថែមមុខម្ហូបថ្មី
             </h2>
           </div>
 
@@ -220,7 +220,7 @@ export default function CreateCanonicalFoodModal({
             <h3 className="text-xl font-bold text-gray-900">ព័ត៌មាន Food</h3>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <Field label="Canonical name *">
+              <Field label="ឈ្មោះជាអង់គ្លេស *">
                 <input
                   value={form.canonicalName}
                   onChange={(event) => set("canonicalName", event.target.value)}
@@ -229,7 +229,7 @@ export default function CreateCanonicalFoodModal({
                 />
               </Field>
 
-              <Field label="ឈ្មោះខ្មែរ">
+              <Field label="ឈ្មោះខ្មែរ *">
                 <input
                   value={form.localName}
                   onChange={(event) => set("localName", event.target.value)}
@@ -276,7 +276,16 @@ export default function CreateCanonicalFoodModal({
                   min="0"
                   max="5"
                   value={form.defaultSpiceLevel}
-                  onChange={(event) => set("defaultSpiceLevel", event.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => {
+                    const val = event.target.value;
+                    if (Number(val) < 0) return;
+                    set("defaultSpiceLevel", val);
+                  }}
                   className="field-input"
                 />
               </Field>
@@ -406,7 +415,16 @@ function NumberField({
         min="0"
         step="0.01"
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "-" || e.key === "e") {
+            e.preventDefault();
+          }
+        }}
+        onChange={(event) => {
+          const val = event.target.value;
+          if (Number(val) < 0) return;
+          onChange(val);
+        }}
         className="h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 outline-none focus:border-emerald-500 focus:bg-white"
       />
     </Field>

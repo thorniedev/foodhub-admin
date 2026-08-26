@@ -640,8 +640,11 @@ export interface FoodRecord {
   defaultSpiceLevel?: number | null;
   nutritionData?: NutritionData | null;
 
+  primaryMediaUuid?: string | null;
   primaryMediaUuids?: string[];
   primaryMediaUrls?: string[];
+  thumbnailMediaUuid?: string | null;
+  galleryMediaUuids?: string[];
   images?: string[];
   gallery?: string[];
   thumbnail?: string | null;
@@ -649,10 +652,14 @@ export interface FoodRecord {
 
   mealTypes?: unknown[];
   ageRules?: unknown[];
+  ageGroups?: unknown[];
   dietaryTypes?: unknown[];
+  allergens?: unknown[];
   seasons?: unknown[];
   events?: unknown[];
   suitableWeather?: unknown[];
+  preparationTimes?: unknown[];
+  distances?: unknown[];
 
   isActive?: boolean;
   createdAt?: string | null;
@@ -727,6 +734,7 @@ export interface MenuItemRecord {
   isFeatured?: boolean;
   source?: MenuItemSource;
 
+  primaryMediaUuid?: string | null;
   primaryMediaUuids?: string[];
   primaryMediaUrls?: string[];
   thumbnailMediaUuid?: string | null;
@@ -764,17 +772,24 @@ export interface FoodWritePayload {
   localName?: string | null;
   description?: string | null;
   categoryUuid: string;
+  categoryCode?: string | null;
   cuisineUuid?: string | null;
+  cuisineCode?: string | null;
+  primaryMediaUuid?: string | null;
   primaryMediaUuids?: string[];
   defaultSpiceLevel?: number | null;
   nutritionData?: NutritionData | null;
   mealTypes: FoodMealTypeRelation[];
   ageRules: FoodAgeRuleRelation[];
   dietaryTypes: FoodDietaryTypeRelation[];
+  allergens?: unknown[];
   seasons: FoodSeasonRelation[];
   events: FoodEventRelation[];
   suitableWeather: FoodWeatherRelation[];
+  preparationTimes?: unknown[];
+  distances?: unknown[];
   isActive: boolean;
+  active?: boolean;
 }
 
 export interface MenuItemWritePayload {

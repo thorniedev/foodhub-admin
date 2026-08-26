@@ -1,4 +1,5 @@
 import type { CurrentAdmin } from "@/src/types/currentAdmin";
+import { normalizeRoleName } from "@/src/lib/adminUserRoles";
 
 export function getAdminDisplayName(
   admin: CurrentAdmin | null,
@@ -18,6 +19,8 @@ export function getAdminDisplayName(
   return (
     fullName ||
     admin.username ||
+    admin.preferredUsername ||
+    admin.preferred_username ||
     "Admin"
   );
 }
@@ -60,7 +63,11 @@ export function getAdminInitials(
   }
 
   const username =
-    admin.username?.trim();
+    (
+      admin.username ||
+      admin.preferredUsername ||
+      admin.preferred_username
+    )?.trim();
 
   if (username) {
     return username
@@ -69,4 +76,105 @@ export function getAdminInitials(
   }
 
   return "A";
+}
+
+export function getAdminUsername(
+  admin: CurrentAdmin | null,
+): string {
+  if (!admin) {
+    return "Admin";
+  }
+
+  return (
+    admin.username ||
+    admin.preferredUsername ||
+    admin.preferred_username ||
+    getAdminDisplayName(admin)
+  );
+}
+
+export function getAdminRole(
+  admin: CurrentAdmin | null,
+): string {
+  if (!admin) {
+    return "ADMIN";
+  }
+
+  const roles = [
+    admin.role,
+    ...(Array.isArray(admin.roles) ? admin.roles : []),
+    ...(((admin as any).realm_access?.roles ?? []) as unknown[]),
+    ...Object.values((admin as any).resource_access ?? {}).flatMap((access) =>
+      Array.isArray((access as any)?.roles) ? (access as any).roles : [],
+    ),
+    admin.userType,
+  ]
+    .map(normalizeRoleName)
+    .filter(Boolean);
+
+  if (roles.includes("SUPER_ADMIN")) {
+    return "SUPER_ADMIN";
+  }
+
+  if (roles.includes("ADMIN")) {
+    return "ADMIN";
+  }
+
+  return roles[0] ?? "ADMIN";
+}
+
+export function getAdminAvatarCandidate(
+  admin: CurrentAdmin | null,
+): { mediaUuid: string | null; directUrl: string | null } {
+  if (!admin) {
+    return { mediaUuid: null, directUrl: null };
+  }
+
+  const candidates = [
+    admin.avatarMediaUuid,
+    admin.defaultProfile?.avatarMediaUuid,
+    admin.profiles?.[0]?.avatarMediaUuid,
+    (admin as any).profile?.avatarMediaUuid,
+    (admin as any).avatarMedia?.uuid,
+    (admin.defaultProfile as any)?.avatarMedia?.uuid,
+    (admin.profiles?.[0] as any)?.avatarMedia?.uuid,
+    admin.avatarUrl,
+    admin.profileImageUrl,
+    admin.profileImage,
+    admin.profilePicture,
+    admin.picture,
+    admin.photoUrl,
+    admin.imageUrl,
+    admin.image,
+    admin.avatar,
+    (admin.defaultProfile as any)?.avatarUrl,
+    (admin.defaultProfile as any)?.profileImageUrl,
+    (admin.defaultProfile as any)?.imageUrl,
+    (admin.defaultProfile as any)?.photoUrl,
+    (admin.defaultProfile as any)?.picture,
+    (admin.profiles?.[0] as any)?.avatarUrl,
+    (admin.profiles?.[0] as any)?.profileImageUrl,
+    (admin.profiles?.[0] as any)?.imageUrl,
+    (admin.profiles?.[0] as any)?.photoUrl,
+    (admin as any).profile?.avatarUrl,
+    (admin as any).profile?.profileImageUrl,
+    (admin as any).profile?.imageUrl,
+    admin.profilePictureMediaUuid,
+  ];
+
+  for (const c of candidates) {
+    if (typeof c === "string" && c.trim()) {
+      const trimmed = c.trim();
+      if (
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          trimmed,
+        )
+      ) {
+        return { mediaUuid: trimmed, directUrl: null };
+      }
+      return { mediaUuid: null, directUrl: trimmed };
+    }
+  }
+
+  return { mediaUuid: null, directUrl: null };
 }

@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Loader2,
-  Trash2,
-  X,
-} from "lucide-react";
-
+import { Info, Loader2, UserX, X } from "lucide-react";
 import type { AdminUser } from "@/src/types/userProfile";
 import { displayName } from "@/src/lib/userProfileFormat";
 
@@ -24,49 +19,63 @@ export default function DeleteUserConfirmModal({
 }: DeleteUserConfirmModalProps) {
   if (!user) return null;
 
-  const name = displayName(
-    user.firstName,
-    user.lastName,
-    user.username,
-  );
+  const name = displayName(user.firstName, user.lastName, user.username);
 
   return (
-    <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
-      <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
-        <div className="flex items-start justify-between">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
-            <Trash2 size={24} />
-          </div>
+    <div
+      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs animate-in fade-in duration-200"
+      onClick={(event) => {
+        if (event.target === event.currentTarget && !deleting) {
+          onClose();
+        }
+      }}
+    >
+      <div className="relative w-full max-w-[440px] overflow-hidden rounded-[32px] border border-gray-100 bg-white px-6 py-7 shadow-2xl animate-in zoom-in-95 duration-200">
+        {/* Close Button */}
+        <button
+          type="button"
+          disabled={deleting}
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
+        >
+          <X size={17} />
+        </button>
 
-          <button
-            type="button"
-            disabled={deleting}
-            onClick={onClose}
-            aria-label="Close"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
-          >
-            <X size={22} />
-          </button>
+        {/* Circular Icon with Soft Glow */}
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 text-rose-500 ring-8 ring-rose-50/60">
+          <UserX size={26} className="stroke-[2.2]" />
         </div>
 
-        <p className="mt-5 text-2xl font-semibold text-primary-800">
-          បញ្ឈប់អ្នកប្រើនេះ?
-        </p>
+        {/* Header Content */}
+        <div className="mt-5 text-center">
+          <h3 className="text-xl font-bold tracking-tight text-gray-900 whitespace-nowrap">
+            បិទដំណើរការគណនី?
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+            គណនី{" "}
+            <span className="font-bold text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200/80">
+              {name}
+            </span>{" "}
+            នឹងត្រូវបានបិទដំណើរការជាបណ្តោះអាសន្ន។
+          </p>
+        </div>
 
-        <p className="mt-3 text-lg leading-8 text-gray-500">
-          អ្នកប្រើ{" "}
-          <span className="font-semibold text-gray-800">
-            {name}
-          </span>{" "}
-          នឹងត្រូវ soft-delete តាម rule របស់ backend។
-        </p>
+        {/* Callout Notice */}
+        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-rose-200/90 bg-rose-50/40 p-4 text-left">
+          <Info size={17} className="mt-0.5 shrink-0 text-rose-600" />
+          <p className="text-xs font-medium leading-relaxed text-rose-800">
+            អ្នកអាចស្វែងរកគណនីនេះនៅផ្ទាំង <strong>"បិទដំណើរការ"</strong> និងចុច "ស្តារឡើងវិញ" បានគ្រប់ពេល។
+          </p>
+        </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-3">
+        {/* Action Buttons */}
+        <div className="mt-6 grid grid-cols-2 gap-3.5">
           <button
             type="button"
             disabled={deleting}
             onClick={onClose}
-            className="min-h-12 rounded-full border border-gray-200 px-4 text-lg font-medium text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+            className="flex h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-base font-bold text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50"
           >
             បោះបង់
           </button>
@@ -75,12 +84,16 @@ export default function DeleteUserConfirmModal({
             type="button"
             disabled={deleting}
             onClick={() => void onConfirm()}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-500 px-4 text-lg font-medium text-white transition hover:bg-red-600 disabled:opacity-60"
+            className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 text-base font-bold text-white shadow-md shadow-red-900/20 transition hover:bg-red-700 active:scale-[0.98] disabled:opacity-60"
           >
-            {deleting && (
-              <Loader2 size={20} className="animate-spin" />
+            {deleting ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                កំពុងបិទ...
+              </>
+            ) : (
+              "បិទដំណើរការ"
             )}
-            បញ្ឈប់
           </button>
         </div>
       </div>

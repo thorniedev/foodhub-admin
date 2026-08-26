@@ -3,8 +3,6 @@
 import {
   AlertTriangle,
   Loader2,
-  Search,
-  X,
 } from "lucide-react";
 
 import {
@@ -29,7 +27,12 @@ import DeactivateWeatherConditionModal from "./DeactivateWeatherConditionModal";
 import WeatherConditionDetailModal from "./WeatherConditionDetailModal";
 import WeatherConditionFormModal from "./WeatherConditionFormModal";
 import WeatherConditionHeader from "./WeatherConditionHeader";
+import WeatherConditionPagination from "./WeatherConditionPagination";
 import WeatherConditionTable from "./WeatherConditionTable";
+import WeatherConditionToolbar, {
+  type SortMode,
+  type StatusFilter,
+} from "./WeatherConditionToolbar";
 
 function getApiErrorMessage(
   error: unknown,
@@ -111,11 +114,39 @@ function searchText(
     .toLowerCase();
 }
 
+function getTime(
+  value: string | null | undefined,
+): number {
+  if (!value) return 0;
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? time : 0;
+}
+
 export default function WeatherConditionManager() {
   const [
     search,
     setSearch,
   ] = useState("");
+
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] = useState<StatusFilter>("ALL");
+
+  const [
+    sortMode,
+    setSortMode,
+  ] = useState<SortMode>("NEWEST");
+
+  const [
+    size,
+    setSize,
+  ] = useState(20);
+
+  const [
+    page,
+    setPage,
+  ] = useState(0);
 
   const [
     formOpen,
@@ -207,37 +238,93 @@ export default function WeatherConditionManager() {
     data?.contents ??
     [];
 
-  const filteredItems =
-    useMemo(() => {
-      const query =
-        searchText(
-          search,
-        );
+  const totalCount = items.length;
 
-      if (!query) {
-        return items;
+  const activeCount = useMemo(() => {
+    return items.filter(
+      (item) => item.isActive ?? item.active ?? true,
+    ).length;
+  }, [items]);
+
+  const inactiveCount = totalCount - activeCount;
+
+  const normalizedSearch = search.trim().toLowerCase();
+
+  const suggestions = useMemo(() => {
+    if (!normalizedSearch) {
+      return [];
+    }
+
+    return items
+      .filter((item) =>
+        [item.localName, item.name, item.code, item.description].some(
+          (value) =>
+            String(value ?? "")
+              .toLowerCase()
+              .includes(normalizedSearch),
+        ),
+      )
+      .slice(0, 8);
+  }, [items, normalizedSearch]);
+
+  const filteredItems = useMemo(() => {
+    const query = searchText(search);
+
+    return items.filter((item) => {
+      const active = item.isActive ?? item.active ?? true;
+      const statusMatches =
+        statusFilter === "ALL" ||
+        (statusFilter === "ACTIVE" && active) ||
+        (statusFilter === "INACTIVE" && !active);
+
+      if (!statusMatches) {
+        return false;
       }
 
-      return items.filter(
-        (item) =>
-          [
-            item.code,
-            item.name,
-            item.localName,
-            item.description,
-          ].some(
-            (value) =>
-              searchText(
-                value,
-              ).includes(
-                query,
-              ),
-          ),
+      if (!query) {
+        return true;
+      }
+
+      return [
+        item.code,
+        item.name,
+        item.localName,
+        item.description,
+      ].some((value) =>
+        searchText(value).includes(query),
       );
-    }, [
-      items,
-      search,
-    ]);
+    });
+  }, [items, search, statusFilter]);
+
+  const sortedItems = useMemo(() => {
+    return [...filteredItems].sort((first, second) => {
+      const firstLabel = first.localName || first.name || "";
+      const secondLabel = second.localName || second.name || "";
+
+      if (sortMode === "A_Z") {
+        return firstLabel.localeCompare(secondLabel, "km", {
+          sensitivity: "base",
+        });
+      }
+
+      if (sortMode === "Z_A") {
+        return secondLabel.localeCompare(firstLabel, "km", {
+          sensitivity: "base",
+        });
+      }
+
+      const firstTime = getTime(first.createdAt);
+      const secondTime = getTime(second.createdAt);
+
+      return sortMode === "NEWEST"
+        ? secondTime - firstTime
+        : firstTime - secondTime;
+    });
+  }, [filteredItems, sortMode]);
+
+  const totalPages = Math.max(Math.ceil(sortedItems.length / size), 1);
+  const safePage = Math.min(page, totalPages - 1);
+  const pageItems = sortedItems.slice(safePage * size, safePage * size + size);
 
   const busy =
     creating ||
@@ -401,12 +488,9 @@ export default function WeatherConditionManager() {
     };
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 lg:p-7">
+    <div className="space-y-5">
       <WeatherConditionHeader
-        total={
-          data?.totalElements ??
-          items.length
-        }
+        total={activeCount}
         refreshing={
           isFetching
         }
@@ -418,57 +502,39 @@ export default function WeatherConditionManager() {
         }
       />
 
-      <section className="rounded-[26px] border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-2xl font-black text-primary-800">
-              Active Weather Conditions
-            </p>
-
-            <p className="mt-1 text-lg text-gray-500">
-              List endpoint បង្ហាញ Weather Conditions ដែល Active។
-            </p>
-          </div>
-
-          <div className="relative w-full lg:w-[390px]">
-            <Search
-              size={19}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-
-            <input
-              value={
-                search
-              }
-              onChange={(event) =>
-                setSearch(
-                  event.target.value,
-                )
-              }
-              placeholder="ស្វែងរក code, name, local name..."
-              className="h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 pl-11 pr-10 text-lg outline-none transition focus:border-primary-700 focus:bg-white focus:ring-4 focus:ring-emerald-50"
-            />
-
-            {search && (
-              <button
-                type="button"
-                onClick={() =>
-                  setSearch(
-                    "",
-                  )
-                }
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
-              >
-                <X
-                  size={
-                    17
-                  }
-                />
-              </button>
-            )}
-          </div>
-        </div>
-      </section>
+      <WeatherConditionToolbar
+        search={search}
+        statusFilter={statusFilter}
+        sortMode={sortMode}
+        size={size}
+        totalCount={totalCount}
+        activeCount={activeCount}
+        inactiveCount={inactiveCount}
+        suggestions={suggestions}
+        onSearchChange={(value) => {
+          setSearch(value);
+          setPage(0);
+        }}
+        onClearSearch={() => {
+          setSearch("");
+          setPage(0);
+        }}
+        onSuggestionSelect={(item) => {
+          setSearch(item.localName || item.name);
+          setPage(0);
+        }}
+        onStatusChange={(value) => {
+          setStatusFilter(value);
+          setPage(0);
+        }}
+        onSortChange={(value) => {
+          setSortMode(value);
+        }}
+        onSizeChange={(value) => {
+          setSize(value);
+          setPage(0);
+        }}
+      />
 
       {notice && (
         <div
@@ -524,25 +590,34 @@ export default function WeatherConditionManager() {
             </button>
           </div>
         ) : (
-          <WeatherConditionTable
-            items={
-              filteredItems
-            }
-            busy={
-              busy
-            }
-            onView={(item) =>
-              setDetailUuid(
-                item.uuid,
-              )
-            }
-            onEdit={
-              openEdit
-            }
-            onDeactivate={
-              setDeactivateItem
-            }
-          />
+          <>
+            <WeatherConditionTable
+              items={
+                pageItems
+              }
+              busy={
+                busy
+              }
+              onView={(item) =>
+                setDetailUuid(
+                  item.uuid,
+                )
+              }
+              onEdit={
+                openEdit
+              }
+              onDeactivate={
+                setDeactivateItem
+              }
+            />
+
+            <WeatherConditionPagination
+              page={safePage}
+              totalPages={totalPages}
+              totalElements={sortedItems.length}
+              onPageChange={setPage}
+            />
+          </>
         )}
       </section>
 
@@ -569,6 +644,15 @@ export default function WeatherConditionManager() {
         uuid={
           detailUuid
         }
+        onToggleStatus={async (targetUuid, nextActive) => {
+          await updateWeather({
+            uuid: targetUuid,
+            body: {
+              isActive: nextActive,
+            },
+          }).unwrap();
+          await refetch();
+        }}
         onClose={() =>
           setDetailUuid(
             null,

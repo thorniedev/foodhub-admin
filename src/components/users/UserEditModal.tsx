@@ -1,29 +1,14 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-} from "react";
-
-import {
-  Check,
-  Loader2,
-  UserCog,
-  X,
-} from "lucide-react";
-
-import type {
-  AdminUser,
-  MutableAdminUserStatus,
-} from "@/src/types/userProfile";
+import { useEffect, useState } from "react";
+import { Check, Loader2, Save, UserCog, UserCheck, UserX, X } from "lucide-react";
+import type { AdminUser, MutableAdminUserStatus } from "@/src/types/userProfile";
 
 interface UserEditModalProps {
   user: AdminUser | null;
   saving: boolean;
   onClose: () => void;
-  onSubmit: (
-    status: MutableAdminUserStatus,
-  ) => Promise<void>;
+  onSubmit: (status: MutableAdminUserStatus) => Promise<void>;
 }
 
 export default function UserEditModal({
@@ -32,51 +17,29 @@ export default function UserEditModal({
   onClose,
   onSubmit,
 }: UserEditModalProps) {
-  const [status, setStatus] =
-    useState<MutableAdminUserStatus>("ACTIVE");
+  const [status, setStatus] = useState<MutableAdminUserStatus>("ACTIVE");
 
   useEffect(() => {
     if (!user) return;
-
-    setStatus(
-      user.status === "SUSPENDED"
-        ? "SUSPENDED"
-        : "ACTIVE",
-    );
-  }, [user]);
-
-  useEffect(() => {
-    if (!user) return;
-
-    const previousOverflow =
-      document.body.style.overflow;
-
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
+    setStatus(user.status === "SUSPENDED" ? "SUSPENDED" : "ACTIVE");
   }, [user]);
 
   if (!user) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
-      <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-5 sm:px-8">
-          <div className="flex min-w-0 items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
-              <UserCog size={24} />
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[3px]">
+      <div className="w-full max-w-lg overflow-hidden rounded-[28px] border border-gray-100 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-gray-100 bg-gradient-to-r from-emerald-50/70 via-white to-emerald-50/40 px-6 py-5 sm:px-8">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-800 text-white shadow-md shadow-primary-900/20 ring-1 ring-primary-700/20">
+              <UserCog size={22} />
             </div>
-
-            <div className="min-w-0">
-              <p className="text-2xl font-semibold text-primary-800">
-                កែប្រែស្ថានភាព User
+            <div>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">
+                ស្ថានភាពគណនី
               </p>
-
-              <p className="mt-1 truncate text-lg text-gray-500">
-                @{user.username}
-              </p>
+              <p className="mt-0.5 text-sm text-gray-400">@{user.username}</p>
             </div>
           </div>
 
@@ -85,50 +48,74 @@ export default function UserEditModal({
             disabled={saving}
             onClick={onClose}
             aria-label="Close"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         </div>
 
-        <div className="space-y-6 p-6 sm:p-8">
+        {/* Content */}
+        <div className="space-y-5 p-6 sm:p-8">
           <div>
-            <p className="mb-3 text-lg font-medium text-primary-800">
-              ស្ថានភាពគណនី
+            <p className="text-sm font-semibold text-gray-700 mb-3">
+              ជ្រើសរើសស្ថានភាពគណនី
             </p>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3.5">
               {(["ACTIVE", "SUSPENDED"] as const).map((option) => {
                 const selected = status === option;
-                const warning = option === "SUSPENDED";
+                const isSuspend = option === "SUSPENDED";
 
                 return (
                   <button
                     key={option}
                     type="button"
                     onClick={() => setStatus(option)}
-                    className={`flex min-h-14 items-center justify-between rounded-2xl border px-4 text-lg font-medium transition focus:outline-none focus:ring-4 ${
+                    className={`flex min-h-16 items-center justify-between rounded-2xl border-2 px-4 py-3 text-base font-bold transition active:scale-95 ${
                       selected
-                        ? warning
-                          ? "border-secondary-200 bg-secondary-50 text-secondary-600 focus:ring-secondary-100"
-                          : "border-primary-200 bg-primary-50 text-primary-800 focus:ring-primary-100"
-                        : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 focus:ring-gray-100"
+                        ? isSuspend
+                          ? "border-amber-400 bg-amber-50/80 text-amber-900 shadow-sm"
+                          : "border-primary-600 bg-primary-50/80 text-primary-900 shadow-sm"
+                        : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50/50"
                     }`}
                   >
-                    {option}
-                    {selected && <Check size={19} />}
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className={`flex h-8 w-8 items-center justify-center rounded-xl ${
+                          isSuspend
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-emerald-100 text-emerald-700"
+                        }`}
+                      >
+                        {isSuspend ? <UserX size={17} /> : <UserCheck size={17} />}
+                      </div>
+                      <span>{option === "ACTIVE" ? "សកម្ម" : "ផ្អាកដំណើរការ"}</span>
+                    </div>
+
+                    {selected && (
+                      <div
+                        className={`flex h-6 w-6 items-center justify-center rounded-full ${
+                          isSuspend
+                            ? "bg-amber-500 text-white"
+                            : "bg-primary-700 text-white"
+                        }`}
+                      >
+                        <Check size={14} className="stroke-[3]" />
+                      </div>
+                    )}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-end">
+          {/* Footer Buttons */}
+          <div className="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50/50 -mx-6 -mb-6 sm:-mx-8 sm:-mb-8 px-6 py-4 sm:px-8 mt-6">
             <button
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-medium text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-2xl border border-gray-200 bg-white px-5 py-2.5 text-base font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
             >
               បោះបង់
             </button>
@@ -137,12 +124,19 @@ export default function UserEditModal({
               type="button"
               disabled={saving || status === user.status}
               onClick={() => void onSubmit(status)}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary-800 px-7 text-lg font-medium text-white transition hover:bg-primary-900 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-2xl bg-primary-800 px-6 py-2.5 text-base font-bold text-white shadow-md shadow-primary-900/20 transition-all hover:bg-primary-900 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
             >
-              {saving && (
-                <Loader2 size={20} className="animate-spin" />
+              {saving ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  កំពុងរក្សាទុក...
+                </>
+              ) : (
+                <>
+                  <Save size={18} />
+                  រក្សាទុក
+                </>
               )}
-              រក្សាទុក
             </button>
           </div>
         </div>

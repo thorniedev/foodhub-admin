@@ -1,7 +1,5 @@
-import WeatherConditionManager from "@/src/components/filters/weather-conditions/WeatherConditionManager";
+import FilterCatalogManager from "@/src/components/filters/catalog/FilterCatalogManager";
 
 export default function WeatherConditionsPage() {
-  return (
-    <WeatherConditionManager />
-  );
+  return <FilterCatalogManager groupSlug="weather-conditions" />;
 }

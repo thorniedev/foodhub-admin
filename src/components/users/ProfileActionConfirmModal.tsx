@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Loader2,
-  RotateCcw,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Loader2, UserCheck, UserX, X } from "lucide-react";
 
 interface ProfileActionConfirmModalProps {
   open: boolean;
@@ -26,57 +21,67 @@ export default function ProfileActionConfirmModal({
 }: ProfileActionConfirmModalProps) {
   if (!open) return null;
 
-  const deleting = action === "DELETE";
+  const isSuspend = action === "DELETE";
 
   return (
-    <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
-      <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
-        <div className="flex items-start justify-between">
-          <div
-            className={`flex h-14 w-14 items-center justify-center rounded-2xl ${
-              deleting
-                ? "bg-red-50 text-red-500"
-                : "bg-primary-50 text-primary-800"
-            }`}
-          >
-            {deleting ? (
-              <Trash2 size={24} />
-            ) : (
-              <RotateCcw size={24} />
-            )}
-          </div>
+    <div
+      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !loading) onClose();
+      }}
+    >
+      <div className="relative w-full max-w-[440px] overflow-hidden rounded-[32px] border border-gray-100 bg-white px-6 py-7 shadow-2xl animate-in zoom-in-95 duration-200">
+        {/* Close Button */}
+        <button
+          type="button"
+          disabled={loading}
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
+        >
+          <X size={17} />
+        </button>
 
-          <button
-            type="button"
-            disabled={loading}
-            onClick={onClose}
-            aria-label="Close"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
-          >
-            <X size={22} />
-          </button>
+        {/* Circular Icon with Soft Glow */}
+        <div
+          className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full ring-8 ${
+            isSuspend
+              ? "bg-amber-50 text-amber-500 ring-amber-50/60"
+              : "bg-emerald-50 text-emerald-600 ring-emerald-50/60"
+          }`}
+        >
+          {isSuspend ? (
+            <UserX size={26} className="stroke-[2.2]" />
+          ) : (
+            <UserCheck size={26} className="stroke-[2.2]" />
+          )}
         </div>
 
-        <p className="mt-5 text-2xl font-semibold text-primary-800">
-          {deleting ? "Soft delete Profile?" : "Restore Profile?"}
-        </p>
+        {/* Header Content */}
+        <div className="mt-5 text-center">
+          <h3 className="text-xl font-bold tracking-tight text-gray-900 whitespace-nowrap">
+            {isSuspend
+              ? "ផ្អាកដំណើរការប្រវត្តិរូប?"
+              : "បើកដំណើរការប្រវត្តិរូបឡើងវិញ?"}
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+            ប្រវត្តិរូប{" "}
+            <span className="font-bold text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200/80">
+              {profileName}
+            </span>{" "}
+            {isSuspend
+              ? "នឹងត្រូវបានផ្អាកដំណើរការជាបណ្តោះអាសន្ន។"
+              : "នឹងត្រូវបានបើកឱ្យដំណើរការឡើងវិញជាធម្មតា។"}
+          </p>
+        </div>
 
-        <p className="mt-3 text-lg leading-8 text-gray-500">
-          Profile{" "}
-          <span className="font-semibold text-gray-800">
-            {profileName}
-          </span>
-          {deleting
-            ? " នឹងត្រូវបិទ (isActive=false) មិនមែនលុបចេញពី database ទាំងស្រុងទេ។"
-            : " នឹងត្រូវស្ដារឲ្យសកម្មវិញ តាម rule របស់ backend។"}
-        </p>
-
-        <div className="mt-6 grid grid-cols-2 gap-3">
+        {/* Action Buttons */}
+        <div className="mt-6 grid grid-cols-2 gap-3.5">
           <button
             type="button"
             disabled={loading}
             onClick={onClose}
-            className="min-h-12 rounded-full border border-gray-200 px-4 text-lg font-medium text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+            className="flex h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-base font-bold text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50"
           >
             បោះបង់
           </button>
@@ -85,16 +90,22 @@ export default function ProfileActionConfirmModal({
             type="button"
             disabled={loading}
             onClick={() => void onConfirm()}
-            className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-4 text-lg font-medium text-white disabled:opacity-60 ${
-              deleting
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-primary-800 hover:bg-primary-900"
+            className={`flex h-12 items-center justify-center gap-2 rounded-2xl px-4 text-base font-bold text-white shadow-md transition active:scale-[0.98] disabled:opacity-60 ${
+              isSuspend
+                ? "bg-[#F59E0B] hover:bg-[#D97706] shadow-amber-900/15"
+                : "bg-[#0F5A2C] hover:bg-[#0C4723] shadow-emerald-950/20"
             }`}
           >
-            {loading && (
-              <Loader2 size={20} className="animate-spin" />
+            {loading ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                {isSuspend ? "កំពុងផ្អាក..." : "កំពុងបើក..."}
+              </>
+            ) : isSuspend ? (
+              "ផ្អាកដំណើរការ"
+            ) : (
+              "បើកដំណើរការឡើងវិញ"
             )}
-            {deleting ? "Delete" : "Restore"}
           </button>
         </div>
       </div>

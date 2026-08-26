@@ -55,9 +55,8 @@ import {
   adminBaseApi,
 } from "./adminBaseApi";
 
-import {
-  catalogBaseApi,
-} from "./catalogBaseApi";
+import { catalogBaseApi } from "./catalogBaseApi";
+import { discoveryApi } from "./discoveryApi";
 
 export const store =
   configureStore({
@@ -70,6 +69,9 @@ export const store =
 
       [catalogBaseApi.reducerPath]:
         catalogBaseApi.reducer,
+
+      [discoveryApi.reducerPath]:
+        discoveryApi.reducer,
     },
 
     middleware: (
@@ -84,6 +86,9 @@ export const store =
         )
         .concat(
           catalogBaseApi.middleware,
+        )
+        .concat(
+          discoveryApi.middleware,
         ),
   });
 

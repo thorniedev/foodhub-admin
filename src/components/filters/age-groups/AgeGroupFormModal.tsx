@@ -1,24 +1,10 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-  type FormEvent,
-  type ReactNode,
-} from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 
-import {
-  AlertTriangle,
-  CalendarRange,
-  Loader2,
-  Users,
-  X,
-} from "lucide-react";
+import { AlertTriangle, CalendarRange, Loader2, Users, X } from "lucide-react";
 
-import type {
-  AgeGroup,
-  AgeGroupFormValues,
-} from "@/src/types/ageGroup";
+import type { AgeGroup, AgeGroupFormValues } from "@/src/types/ageGroup";
 
 /* =========================================================
    DEFAULT VALUES
@@ -42,9 +28,7 @@ type Props = {
   item: AgeGroup | null;
   saving: boolean;
   onClose: () => void;
-  onSubmit: (
-    values: AgeGroupFormValues,
-  ) => Promise<void>;
+  onSubmit: (values: AgeGroupFormValues) => Promise<void>;
 };
 
 /* =========================================================
@@ -69,15 +53,9 @@ export default function AgeGroupFormModal({
   onClose,
   onSubmit,
 }: Props) {
-  const [form, setForm] =
-    useState<AgeGroupFormValues>(
-      EMPTY_FORM,
-    );
+  const [form, setForm] = useState<AgeGroupFormValues>(EMPTY_FORM);
 
-  const [
-    validationError,
-    setValidationError,
-  ] = useState("");
+  const [validationError, setValidationError] = useState("");
 
   /* =======================================================
      LOAD FORM VALUES
@@ -92,21 +70,13 @@ export default function AgeGroupFormModal({
       setForm({
         code: item.code,
         name: item.name,
-        minAge: String(
-          item.minAge,
-        ),
-        maxAge: String(
-          item.maxAge,
-        ),
-        description:
-          item.description ?? "",
-        isActive:
-          item.isActive,
+        minAge: String(item.minAge),
+        maxAge: String(item.maxAge),
+        description: item.description ?? "",
+        isActive: item.isActive,
       });
     } else {
-      setForm(
-        EMPTY_FORM,
-      );
+      setForm(EMPTY_FORM);
     }
 
     setValidationError("");
@@ -121,15 +91,12 @@ export default function AgeGroupFormModal({
       return;
     }
 
-    const previousOverflow =
-      document.body.style.overflow;
+    const previousOverflow = document.body.style.overflow;
 
-    document.body.style.overflow =
-      "hidden";
+    document.body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.overflow =
-        previousOverflow;
+      document.body.style.overflow = previousOverflow;
     };
   }, [open]);
 
@@ -141,87 +108,51 @@ export default function AgeGroupFormModal({
      SUBMIT
   ======================================================= */
 
-  const handleSubmit =
-    async (
-      event:
-        FormEvent<HTMLFormElement>,
-    ) => {
-      event.preventDefault();
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-      const code =
-        form.code
-          .trim()
-          .toUpperCase();
+    const code = form.code.trim().toUpperCase();
 
-      const name =
-        form.name.trim();
+    const name = form.name.trim();
 
-      const minAge =
-        Number(
-          form.minAge,
-        );
+    const minAge = Number(form.minAge);
 
-      const maxAge =
-        Number(
-          form.maxAge,
-        );
+    const maxAge = Number(form.maxAge);
 
-      if (
-        !code ||
-        !name ||
-        !form.minAge.trim() ||
-        !form.maxAge.trim()
-      ) {
-        setValidationError(
-          "សូមបំពេញ កូដ ឈ្មោះ អាយុអប្បបរមា និងអាយុអតិបរមា។",
-        );
+    if (!code || !name || !form.minAge.trim() || !form.maxAge.trim()) {
+      setValidationError("សូមបំពេញ កូដ ឈ្មោះ អាយុអប្បបរមា និងអាយុអតិបរមា។");
 
-        return;
-      }
+      return;
+    }
 
-      if (
-        !Number.isInteger(
-          minAge,
-        ) ||
-        !Number.isInteger(
-          maxAge,
-        ) ||
-        minAge < 0 ||
-        maxAge < 0
-      ) {
-        setValidationError(
-          "អាយុត្រូវតែជាចំនួនគត់ និងមិនតិចជាង 0។",
-        );
+    if (
+      !Number.isInteger(minAge) ||
+      !Number.isInteger(maxAge) ||
+      minAge < 0 ||
+      maxAge < 0
+    ) {
+      setValidationError("អាយុត្រូវតែជាចំនួនគត់ និងមិនតិចជាង 0។");
 
-        return;
-      }
+      return;
+    }
 
-      if (
-        maxAge < minAge
-      ) {
-        setValidationError(
-          "អាយុអតិបរមាត្រូវធំជាង ឬស្មើអាយុអប្បបរមា។",
-        );
+    if (maxAge < minAge) {
+      setValidationError("អាយុអតិបរមាត្រូវធំជាង ឬស្មើអាយុអប្បបរមា។");
 
-        return;
-      }
+      return;
+    }
 
-      setValidationError("");
+    setValidationError("");
 
-      await onSubmit({
-        ...form,
-        code,
-        name,
-        minAge: String(
-          minAge,
-        ),
-        maxAge: String(
-          maxAge,
-        ),
-        description:
-          form.description.trim(),
-      });
-    };
+    await onSubmit({
+      ...form,
+      code,
+      name,
+      minAge: String(minAge),
+      maxAge: String(maxAge),
+      description: form.description.trim(),
+    });
+  };
 
   return (
     <div
@@ -302,9 +233,7 @@ export default function AgeGroupFormModal({
                   text-primary-800
                 "
               >
-                {item
-                  ? "កែប្រែក្រុមអាយុ"
-                  : "បន្ថែមក្រុមអាយុថ្មី"}
+                {item ? "កែប្រែក្រុមអាយុ" : "បន្ថែមក្រុមអាយុថ្មី"}
               </p>
 
               <p
@@ -315,8 +244,7 @@ export default function AgeGroupFormModal({
                   text-gray-500
                 "
               >
-                កំណត់ចន្លោះអាយុដែលប្រព័ន្ធនឹងប្រើ
-                សម្រាប់ការណែនាំម្ហូប។
+                កំណត់ចន្លោះអាយុដែលប្រព័ន្ធនឹងប្រើ សម្រាប់ការណែនាំម្ហូប។
               </p>
             </div>
           </div>
@@ -353,9 +281,7 @@ export default function AgeGroupFormModal({
             FORM
         ================================================== */}
         <form
-          onSubmit={
-            handleSubmit
-          }
+          onSubmit={handleSubmit}
           className="
             space-y-6
             p-6
@@ -365,12 +291,7 @@ export default function AgeGroupFormModal({
           {/* =================================================
               SECTION 1: BASIC INFORMATION
           ================================================== */}
-          <Section
-            icon={
-              <Users size={22} />
-            }
-            title="ព័ត៌មានក្រុមអាយុ"
-          >
+          <Section icon={<Users size={22} />} title="ព័ត៌មានក្រុមអាយុ">
             <div
               className="
                 grid
@@ -381,20 +302,12 @@ export default function AgeGroupFormModal({
             >
               <Field
                 label="កូដ"
-                value={
-                  form.code
-                }
-                onChange={(
-                  value,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      code: value,
-                    }),
-                  )
+                value={form.code}
+                onChange={(value) =>
+                  setForm((previous) => ({
+                    ...previous,
+                    code: value,
+                  }))
                 }
                 placeholder="ADULT"
                 required
@@ -402,20 +315,12 @@ export default function AgeGroupFormModal({
 
               <Field
                 label="ឈ្មោះ"
-                value={
-                  form.name
-                }
-                onChange={(
-                  value,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      name: value,
-                    }),
-                  )
+                value={form.name}
+                onChange={(value) =>
+                  setForm((previous) => ({
+                    ...previous,
+                    name: value,
+                  }))
                 }
                 placeholder="Adult"
                 required
@@ -435,21 +340,12 @@ export default function AgeGroupFormModal({
                 label="អាយុអប្បបរមា"
                 type="number"
                 min="0"
-                value={
-                  form.minAge
-                }
-                onChange={(
-                  value,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      minAge:
-                        value,
-                    }),
-                  )
+                value={form.minAge}
+                onChange={(value) =>
+                  setForm((previous) => ({
+                    ...previous,
+                    minAge: value,
+                  }))
                 }
                 placeholder="18"
                 required
@@ -459,21 +355,12 @@ export default function AgeGroupFormModal({
                 label="អាយុអតិបរមា"
                 type="number"
                 min="0"
-                value={
-                  form.maxAge
-                }
-                onChange={(
-                  value,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      maxAge:
-                        value,
-                    }),
-                  )
+                value={form.maxAge}
+                onChange={(value) =>
+                  setForm((previous) => ({
+                    ...previous,
+                    maxAge: value,
+                  }))
                 }
                 placeholder="59"
                 required
@@ -482,29 +369,16 @@ export default function AgeGroupFormModal({
 
             {/* Description */}
             <label className="mt-5 block">
-              <FieldLabel>
-                ការពិពណ៌នា
-              </FieldLabel>
+              <FieldLabel>ការពិពណ៌នា</FieldLabel>
 
               <textarea
                 rows={4}
-                value={
-                  form.description
-                }
-                onChange={(
-                  event,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      description:
-                        event
-                          .target
-                          .value,
-                    }),
-                  )
+                value={form.description}
+                onChange={(event) =>
+                  setForm((previous) => ({
+                    ...previous,
+                    description: event.target.value,
+                  }))
                 }
                 placeholder="សរសេរការពិពណ៌នាអំពីក្រុមអាយុ..."
                 className="
@@ -535,14 +409,7 @@ export default function AgeGroupFormModal({
           {/* =================================================
               SECTION 2: STATUS
           ================================================== */}
-          <Section
-            icon={
-              <CalendarRange
-                size={22}
-              />
-            }
-            title="ស្ថានភាព"
-          >
+          <Section icon={<CalendarRange size={22} />} title="ស្ថានភាព">
             <div
               className="
                 flex
@@ -576,27 +443,19 @@ export default function AgeGroupFormModal({
                     text-gray-500
                   "
                 >
-                  បើក ដើម្បីឱ្យក្រុមអាយុនេះសកម្ម
-                  និងអាចប្រើបានក្នុងប្រព័ន្ធ។
+                  បើក ដើម្បីឱ្យក្រុមអាយុនេះសកម្ម និងអាចប្រើបានក្នុងប្រព័ន្ធ។
                 </p>
               </div>
 
               <button
                 type="button"
                 role="switch"
-                aria-checked={
-                  form.isActive
-                }
+                aria-checked={form.isActive}
                 onClick={() =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      isActive:
-                        !previous.isActive,
-                    }),
-                  )
+                  setForm((previous) => ({
+                    ...previous,
+                    isActive: !previous.isActive,
+                  }))
                 }
                 className={`
                   relative
@@ -608,11 +467,7 @@ export default function AgeGroupFormModal({
                   focus:outline-none
                   focus:ring-4
                   focus:ring-primary-100
-                  ${
-                    form.isActive
-                      ? "bg-primary-700"
-                      : "bg-gray-300"
-                  }
+                  ${form.isActive ? "bg-primary-700" : "bg-gray-300"}
                 `}
               >
                 <span
@@ -625,11 +480,7 @@ export default function AgeGroupFormModal({
                     bg-white
                     shadow-sm
                     transition-all
-                    ${
-                      form.isActive
-                        ? "left-6"
-                        : "left-1"
-                    }
+                    ${form.isActive ? "left-6" : "left-1"}
                   `}
                 />
               </button>
@@ -664,9 +515,7 @@ export default function AgeGroupFormModal({
                 "
               />
 
-              <span>
-                {validationError}
-              </span>
+              <span>{validationError}</span>
             </div>
           )}
 
@@ -742,12 +591,7 @@ export default function AgeGroupFormModal({
                 disabled:opacity-60
               "
             >
-              {saving && (
-                <Loader2
-                  size={20}
-                  className="animate-spin"
-                />
-              )}
+              {saving && <Loader2 size={20} className="animate-spin" />}
 
               {saving
                 ? "កំពុងរក្សាទុក..."
@@ -843,11 +687,7 @@ function FieldLabel({
     >
       {children}
 
-      {required && (
-        <span className="text-red-500">
-          {" "}*
-        </span>
-      )}
+      {required && <span className="text-red-500"> *</span>}
     </span>
   );
 }
@@ -867,9 +707,7 @@ function Field({
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string,
-  ) => void;
+  onChange: (value: string) => void;
   type?: string;
   min?: string;
   placeholder?: string;
@@ -877,29 +715,15 @@ function Field({
 }) {
   return (
     <label className="block">
-      <FieldLabel
-        required={
-          required
-        }
-      >
-        {label}
-      </FieldLabel>
+      <FieldLabel required={required}>{label}</FieldLabel>
 
       <input
         type={type}
         min={min}
         required={required}
         value={value}
-        onChange={(
-          event,
-        ) =>
-          onChange(
-            event.target.value,
-          )
-        }
-        placeholder={
-          placeholder
-        }
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
         className="
           h-[52px]
           w-full

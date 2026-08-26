@@ -27,11 +27,10 @@ export default function FeedbackPagination({
           <button
             key={p}
             onClick={() => onPageChange(p)}
-            className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${
-              page === p
+            className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${page === p
                 ? "bg-emerald-600 text-white"
                 : "text-gray-600 hover:bg-gray-100"
-            }`}
+              }`}
           >
             {p}
           </button>

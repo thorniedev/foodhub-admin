@@ -143,7 +143,16 @@ function SeasonalFoodFormContent({
                 min={1}
                 required
                 value={form.order}
-                onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
+                onKeyDown={(e) => {
+                  if (e.key === "-" || e.key === "e") {
+                    e.preventDefault();
+                  }
+                }}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  if (val < 0) return;
+                  setForm({ ...form, order: val });
+                }}
                 className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
               />
             </div>
@@ -157,14 +166,12 @@ function SeasonalFoodFormContent({
             <button
               type="button"
               onClick={() => setForm((prev) => ({ ...prev, isdisplay: !prev.isdisplay }))}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                form.isdisplay ? "bg-[#136C34]" : "bg-gray-300"
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isdisplay ? "bg-[#136C34]" : "bg-gray-300"
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  form.isdisplay ? "translate-x-6" : "translate-x-1"
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.isdisplay ? "translate-x-6" : "translate-x-1"
+                  }`}
               />
             </button>
           </div>

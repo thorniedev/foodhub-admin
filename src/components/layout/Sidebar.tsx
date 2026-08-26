@@ -9,6 +9,8 @@ import { usePathname } from "next/navigation";
 
 import { ChevronDown, LogOut, X } from "lucide-react";
 
+import { markLogoutPending } from "../../lib/redirectToAdminLogin";
+
 import { dashboardNav, type NavItem } from "../../config/dashboardNav";
 
 import { useSidebar } from "../../context/SidebarContext";
@@ -124,17 +126,15 @@ export default function Sidebar() {
               py-2.5
               transition
 
-              ${
-                active
-                  ? "bg-emerald-50 text-[#136C34]"
-                  : "text-gray-700 hover:bg-gray-50"
+              ${active
+                ? "bg-emerald-50 text-[#136C34]"
+                : "text-gray-700 hover:bg-gray-50"
               }
             `}
           >
             <span
-              className={`flex items-center gap-3 font-medium ${
-                level === 0 ? "text-lg" : "text-sm"
-              }`}
+              className={`flex items-center gap-3 font-medium ${level === 0 ? "text-lg" : "text-sm"
+                }`}
             >
               {Icon && <Icon size={level === 0 ? 22 : 18} />}
 
@@ -143,9 +143,8 @@ export default function Sidebar() {
 
             <ChevronDown
               size={16}
-              className={`shrink-0 transition-transform duration-200 ${
-                isOpenMenu ? "rotate-180" : "rotate-0"
-              }`}
+              className={`shrink-0 transition-transform duration-200 ${isOpenMenu ? "rotate-180" : "rotate-0"
+                }`}
             />
           </button>
 
@@ -177,18 +176,16 @@ export default function Sidebar() {
           py-2.5
           transition
 
-          ${
-            level === 0
-              ? "rounded-full text-lg font-medium"
-              : "rounded-lg text-lg"
+          ${level === 0
+            ? "rounded-full text-lg font-medium"
+            : "rounded-lg text-lg"
           }
 
-          ${
-            isActive
-              ? level === 0
-                ? "bg-[#136C34] text-white"
-                : "bg-emerald-50 font-semibold text-[#136C34]"
-              : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+          ${isActive
+            ? level === 0
+              ? "bg-[#136C34] text-white"
+              : "bg-emerald-50 font-semibold text-[#136C34]"
+            : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
           }
         `}
       >
@@ -248,13 +245,16 @@ export default function Sidebar() {
           {/* ========================================= */}
 
           <div className="flex h-20 shrink-0 items-center justify-between px-6">
-            <Image
-              src="/Image/logo.png"
-              alt="MhouBahar"
-              width={90}
-              height={90}
-              priority
-            />
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/Image/foodHub-logo.png"
+                alt="FoodHub"
+                width={200}
+                height={80}
+                className="h-14 w-auto object-contain"
+                priority
+              />
+            </Link>
 
             <button
               type="button"
@@ -302,7 +302,12 @@ export default function Sidebar() {
         {/* ============================================= */}
 
         <div className="shrink-0 border-t border-gray-100 bg-white p-3">
-          <form action="/api/auth/logout" method="post" className="w-full">
+          <form
+            action="/api/auth/logout"
+            method="post"
+            className="w-full"
+            onSubmit={markLogoutPending}
+          >
             <button
               type="submit"
               className="group flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-gray-600 transition hover:bg-red-50 hover:text-red-600"

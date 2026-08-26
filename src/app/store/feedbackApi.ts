@@ -1,12 +1,15 @@
 import { Feedback, FeedbackStatus } from "@/src/types/feedback";
 import { baseApi } from "./baseApi";
+import { fetchFileMockJson } from "./mockDataGuard";
 
 let memoryStore: Feedback[] | null = null;
 
 async function ensureStore(): Promise<Feedback[]> {
   if (memoryStore) return memoryStore;
-  const res = await fetch("/data/feedbacks.json");
-  const data: Feedback[] = await res.json();
+  const data = await fetchFileMockJson<Feedback[]>(
+    "/data/feedbacks.json",
+    "Feedback",
+  );
   memoryStore = data;
   return memoryStore;
 }

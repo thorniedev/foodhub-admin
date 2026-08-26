@@ -5,60 +5,28 @@ import {
   RotateCcw,
   Trash2,
 } from "lucide-react";
-
-import type {
-  Ingredient,
-} from "@/src/types/ingredient";
+import type { Ingredient } from "@/src/types/ingredient";
 
 interface Props {
   items: Ingredient[];
   disabled?: boolean;
-
-  onView: (
-    item: Ingredient,
-  ) => void;
-
-  onEdit: (
-    item: Ingredient,
-  ) => void;
-
-  onDelete: (
-    item: Ingredient,
-  ) => void;
-
-  onRestore: (
-    item: Ingredient,
-  ) => void;
+  onView: (item: Ingredient) => void;
+  onEdit: (item: Ingredient) => void;
+  onDelete: (item: Ingredient) => void;
+  onRestore: (item: Ingredient) => void;
 }
 
-function formatDate(
-  value: string | null,
-) {
-  if (!value) {
-    return "—";
-  }
-
-  const date =
-    new Date(value);
-
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
-    return value;
-  }
-
-  return date.toLocaleString(
-    "en-US",
-    {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    },
-  );
+function formatDate(value: string | null | undefined) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export default function IngredientsTable({
@@ -70,210 +38,149 @@ export default function IngredientsTable({
   onRestore,
 }: Props) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[1000px] border-collapse text-left">
-        <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/50">
-            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
-              គ្រឿងផ្សំ
-            </th>
+    <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <table className="w-full min-w-[700px] table-auto border-collapse text-left">
+          <thead>
+            <tr className="border-b border-gray-100 bg-gray-50/70">
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+                គ្រឿងផ្សំ
+              </th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+                កូដ
+              </th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+                ការពិពណ៌នា
+              </th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800">
+                ស្ថានភាព
+              </th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+                កែប្រែចុងក្រោយ
+              </th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[120px]">
+                សកម្មភាព
+              </th>
+            </tr>
+          </thead>
 
-            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
-              កូដ
-            </th>
-
-            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
-              ការពិពណ៌នា
-            </th>
-
-            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
-              ស្ថានភាព
-            </th>
-
-            <th className="px-6 py-5 text-xl font-semibold text-primary-800">
-              កែប្រែចុងក្រោយ
-            </th>
-
-            <th className="px-6 py-5 text-right text-xl font-semibold text-primary-800">
-              សកម្មភាព
-            </th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {items.map(
-            (item) => (
+          <tbody>
+            {items.map((item) => (
               <tr
-                key={
-                  item.uuid
-                }
-                className="border-b border-gray-100 transition last:border-0 hover:bg-gray-50/60"
+                key={item.uuid}
+                className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
               >
-                {/* NAME */}
-
-                <td className="px-6 py-5">
+                {/* Name */}
+                <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
-                      <Leaf
-                        size={
-                          20
-                        }
-                      />
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary-100 bg-primary-50 text-primary-800">
+                      <Leaf size={20} />
                     </div>
-
-                    <p className="text-lg text-gray-800">
-                      {
-                        item.name
-                      }
+                    <p className="text-base font-semibold text-gray-800">
+                      {item.name}
                     </p>
                   </div>
                 </td>
 
-                {/* CODE */}
-
-                <td className="px-6 py-5">
-                  <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-lg font-semibold text-gray-600">
-                    {
-                      item.code
-                    }
+                {/* Code */}
+                <td className="whitespace-nowrap px-4 py-3">
+                  <span className="inline-flex rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-base font-semibold text-gray-700">
+                    {item.code || "—"}
                   </span>
                 </td>
 
-                {/* DESCRIPTION */}
-
-                <td className="max-w-[380px] px-6 py-5 text-lg leading-6 text-gray-500">
-                  <p className="line-clamp-2">
-                    {item.description ||
-                      "—"}
+                {/* Description */}
+                <td className="max-w-[380px] px-4 py-3">
+                  <p className="line-clamp-2 text-base font-normal text-gray-500">
+                    {item.description || "—"}
                   </p>
                 </td>
 
-                {/* STATUS */}
-
-                <td className="px-6 py-5">
+                {/* Status */}
+                <td className="px-4 py-3 text-center">
                   <span
-                    className={`inline-flex rounded-full px-3 py-1 text-lg ${
+                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${
                       item.isActive
-                        ? "bg-primary-50 text-primary-700"
-                        : "bg-gray-100 text-gray-500"
+                        ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+                        : "border-gray-200 bg-gray-50 text-gray-600"
                     }`}
                   >
-                    {item.isActive
-                      ? "សកម្ម"
-                      : "អសកម្ម"}
+                    <span
+                      className={`h-2 w-2 shrink-0 rounded-full ${
+                        item.isActive ? "bg-emerald-500" : "bg-gray-400"
+                      }`}
+                    />
+                    {item.isActive ? "សកម្ម" : "អសកម្ម"}
                   </span>
                 </td>
 
-                {/* UPDATED */}
-
-                <td className="px-6 py-5 text-lg text-gray-500">
-                  {formatDate(
-                    item.updatedAt ??
-                      item.createdAt,
-                  )}
+                {/* Updated */}
+                <td className="whitespace-nowrap px-4 py-3 text-base font-normal text-gray-500">
+                  {formatDate(item.updatedAt ?? item.createdAt)}
                 </td>
 
-                {/* ACTION */}
-
-                <td className="px-6 py-5">
-                  <div className="flex justify-end gap-2">
+                {/* Action */}
+                <td className="px-4 py-3 text-center">
+                  <div className="flex items-center justify-center gap-2">
                     <button
                       type="button"
                       disabled={disabled}
                       onClick={() => onView(item)}
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
                       title="មើលព័ត៌មានលម្អិត"
                     >
-                      <Eye size={20} />
+                      <Eye size={18} />
                     </button>
 
                     <button
                       type="button"
-                      disabled={
-                        disabled
-                      }
-                      onClick={() =>
-                        onEdit(
-                          item,
-                        )
-                      }
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
+                      disabled={disabled}
+                      onClick={() => onEdit(item)}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
                       title="កែប្រែ"
                     >
-                      <Pencil
-                        size={20}
-                      />
+                      <Pencil size={18} />
                     </button>
 
                     {item.isActive ? (
                       <button
                         type="button"
-                        disabled={
-                          disabled
-                        }
-                        onClick={() =>
-                          onDelete(
-                            item,
-                          )
-                        }
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-400 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        disabled={disabled}
+                        onClick={() => onDelete(item)}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                         title="បិទ"
                       >
-                        <Trash2
-                          size={
-                            18
-                          }
-                        />
+                        <Trash2 size={18} />
                       </button>
                     ) : (
                       <button
                         type="button"
-                        disabled={
-                          disabled
-                        }
-                        onClick={() =>
-                          onRestore(
-                            item,
-                          )
-                        }
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        disabled={disabled}
+                        onClick={() => onRestore(item)}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
                         title="ស្ដារ"
                       >
-                        <RotateCcw
-                          size={
-                            18
-                          }
-                        />
+                        <RotateCcw size={18} />
                       </button>
                     )}
                   </div>
                 </td>
               </tr>
-            ),
-          )}
+            ))}
 
-          {items.length ===
-            0 && (
-            <tr>
-              <td
-                colSpan={6}
-                className="px-5 py-16 text-center"
-              >
-                <Leaf
-                  size={
-                    38
-                  }
-                  className="mx-auto text-gray-300"
-                />
-
-                <p className="mt-3 text-lg text-gray-500">
-                  មិនមានទិន្នន័យគ្រឿងផ្សំ
-                </p>
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+            {items.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-6 py-16 text-center">
+                  <p className="text-lg font-medium text-gray-500">
+                    មិនមានទិន្នន័យគ្រឿងផ្សំ
+                  </p>
+                  <p className="mt-1 text-base text-gray-400">
+                    ទិន្នន័យគ្រឿងផ្សំនឹងបង្ហាញនៅទីនេះ
+                  </p>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
   );
 }

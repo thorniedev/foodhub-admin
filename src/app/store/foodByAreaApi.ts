@@ -13,16 +13,18 @@ export const foodByAreaApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getFoodByAreas: builder.query<FoodByAreaImage[], void>({
       query: () => ({ url: "/api/banners" }),
-      transformResponse: (response: any[]) => {
-        return response
-          .filter((item) => item.location && AREA_KEYS.includes(item.location))
-          .map((item) => ({
+      transformResponse: (response: any) => {
+        const raw = response?.data?.items ?? response?.data ?? response?.payload ?? response;
+        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.items) ? raw.items : [];
+        return list
+          .filter((item: any) => item && item.location && AREA_KEYS.includes(item.location))
+          .map((item: any) => ({
             id: item.id,
             location: item.location,
-            name: item.name,
+            name: item.name || item.title || "",
             description: item.description ?? "",
-            image_url: item.image_url,
-            isdisplay: item.isdisplay ?? item.isDisplay ?? true,
+            image_url: item.image_url || item.imageUrl || "",
+            isdisplay: item.isdisplay ?? item.isDisplay ?? item.isPublished ?? true,
           }));
       },
       providesTags: (result) =>

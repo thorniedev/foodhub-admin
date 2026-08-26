@@ -94,6 +94,8 @@ export interface AdminUser {
   firstName: string | null;
   lastName: string | null;
   emailVerified: boolean;
+  role?: string | null;
+  roles?: string[] | null;
   status: AdminUserStatus;
   lastLoginAt: string | null;
   createdAt: string;
@@ -192,13 +194,21 @@ export interface AdminProfile {
   ageGroup: AgeGroupResponse | null;
   isDefault: boolean | null;
   isActive: boolean | null;
+  allergies?: AllergyResponse[];
+  dietaryTypes?: DietaryTypeResponse[];
+  medicalConditions?: MedicalConditionResponse[];
+  ingredientAvoids?: IngredientAvoidResponse[];
+  preferences?: ProfilePreferenceResponse | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminProfileDetail extends AdminProfile {
   allergies: AllergyResponse[];
   dietaryTypes: DietaryTypeResponse[];
   medicalConditions: MedicalConditionResponse[];
   ingredientAvoids: IngredientAvoidResponse[];
   preferences: ProfilePreferenceResponse | null;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface AdminPage<T> {
@@ -215,12 +225,33 @@ export interface AdminPageQuery {
   page?: number;
   size?: number;
   sort?: string;
+  query?: string;
 }
+
 
 export interface AdminUserProfilesQuery extends AdminPageQuery {
   userUuid: string;
   active?: boolean;
 }
 
-export type UserStatusFilter = "ALL" | "ACTIVE" | "SUSPENDED" | "DISABLED";
+export interface CreateAdminProfilePayload {
+  profileName: string;
+  relationship?: string;
+  gender?: string;
+  dateOfBirth?: string;
+  preferredLanguage?: string;
+  avatarMediaUuid?: string;
+  isDefault?: boolean;
+}
+
+export interface UpdateAdminProfilePayload {
+  profileName?: string;
+  relationship?: string;
+  gender?: string;
+  dateOfBirth?: string;
+  preferredLanguage?: string;
+  avatarMediaUuid?: string;
+}
+
+export type UserStatusFilter = "ALL" | "ACTIVE" | "SUSPENDED";
 export type ProfileStatusFilter = "ALL" | "ACTIVE" | "INACTIVE";

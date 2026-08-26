@@ -1,68 +1,47 @@
 import type { ReactNode } from "react";
-
-import { Building2, DollarSign, ShieldCheck } from "lucide-react";
-
+import {
+  CheckCircle,
+  Clock,
+  DollarSign,
+  Globe,
+  ShieldAlert,
+  ShieldCheck,
+  Store as StoreIcon,
+  Tag,
+  UserCheck,
+} from "lucide-react";
 import type { Store } from "@/src/types/shop";
-
-import { formatPriceLevel, formatRating } from "@/src/lib/shopFormat";
-
-/* =========================================================
-   SECTION
-========================================================= */
+import {
+  formatPriceLevel,
+  formatRating,
+  getStoreAccountStatus,
+  getStoreLiveStatus,
+  getStoreReviewStatus,
+} from "@/src/lib/shopFormat";
 
 export function Section({
   title,
   icon,
+  action,
   children,
 }: {
   title: string;
   icon: ReactNode;
+  action?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <section
-      className="
-        rounded-2xl
-        border
-        border-gray-100
-        bg-white
-        p-5
-        sm:p-6
-      "
-    >
-      <div
-        className="
-          mb-6
-          flex
-          items-center
-          gap-3
-        "
-      >
-        <div
-          className="
-            flex
-            h-11
-            w-11
-            shrink-0
-            items-center
-            justify-center
-            rounded-xl
-            bg-primary-50
-            text-primary-800
-          "
-        >
-          {icon}
+    <section className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6 shadow-sm">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
+            {icon}
+          </div>
+
+          <p className="text-2xl font-semibold text-primary-800">{title}</p>
         </div>
 
-        <p
-          className="
-            text-2xl
-            font-semibold
-            text-primary-800
-          "
-        >
-          {title}
-        </p>
+        {action && <div>{action}</div>}
       </div>
 
       {children}
@@ -70,183 +49,151 @@ export function Section({
   );
 }
 
-/* =========================================================
-   STORE OVERVIEW
-========================================================= */
-
-export default function StoreOverviewSection({ store }: { store: Store }) {
+export function Item({
+  label,
+  value,
+  customValue,
+  icon,
+}: {
+  label: string;
+  value?: string;
+  customValue?: ReactNode;
+  icon?: ReactNode;
+}) {
   return (
-    <Section title="Store overview" icon={<Building2 size={22} />}>
-      <div
-        className="
-          grid
-          gap-4
-          sm:grid-cols-2
-        "
-      >
-        <Info label="Store name" value={store.storeName} />
+    <div className="rounded-2xl border border-gray-100 bg-gray-50/60 px-4 py-4 transition hover:border-gray-200 hover:bg-gray-50">
+      <p className="text-lg font-medium text-gray-500">{label}</p>
 
-        <Info label="Country" value={store.countryCode} />
-
-        <Info
-          label="Price level"
-          value={formatPriceLevel(store.priceLevel)}
-          icon={<DollarSign size={20} />}
-          accent
-        />
-
-        <Info
-          label="Hygiene rating"
-          value={formatRating(store.hygieneRating)}
-          icon={<ShieldCheck size={20} />}
-          accent
-        />
-
-        <Info label="Timezone" value={store.timezone} />
-
-        <Info
-          label="Open now"
-          value={
-            store.isOpenNow === null
-              ? "Unknown"
-              : store.isOpenNow
-                ? "Yes"
-                : "No"
-          }
-          status={
-            store.isOpenNow === true
-              ? "success"
-              : store.isOpenNow === false
-                ? "danger"
-                : "default"
-          }
-        />
-      </div>
-
-      {/* Description */}
-      <div
-        className="
-          mt-5
-          rounded-2xl
-          border
-          border-gray-100
-          bg-gray-50/60
-          px-5
-          py-4
-        "
-      >
-        <p
-          className="
-            text-lg
-            font-medium
-            text-primary-800
-          "
-        >
-          Description
+      {customValue ? (
+        <div className="mt-2">{customValue}</div>
+      ) : (
+        <p className="mt-1 flex items-center gap-2 break-words text-lg font-semibold text-gray-800">
+          {icon && <span className="text-primary-700">{icon}</span>}
+          {value || "—"}
         </p>
-
-        <p
-          className="
-            mt-2
-            whitespace-pre-wrap
-            text-lg
-            leading-8
-            text-gray-600
-          "
-        >
-          {store.description || "—"}
-        </p>
-      </div>
-    </Section>
+      )}
+    </div>
   );
 }
 
-/* =========================================================
-   INFO
-========================================================= */
-
-function Info({
-  label,
-  value,
-  icon,
-  accent = false,
-  status = "default",
-}: {
-  label: string;
-  value: string;
-  icon?: ReactNode;
-  accent?: boolean;
-  status?: "default" | "success" | "danger";
-}) {
-  const valueStyle =
-    status === "success"
-      ? "text-primary-700"
-      : status === "danger"
-        ? "text-red-600"
-        : "text-gray-800";
+export default function StoreOverviewSection({ store }: { store: Store }) {
+  const reviewStatus = getStoreReviewStatus(store.reviewStatus);
+  const liveStatus = getStoreLiveStatus(store);
+  const accountStatus = getStoreAccountStatus(store.accountStatus);
 
   return (
-    <div
-      className="
-        flex
-        min-w-0
-        items-center
-        gap-4
-        rounded-2xl
-        border
-        border-gray-100
-        bg-gray-50/60
-        p-4
-        transition
-        hover:border-gray-200
-        hover:bg-gray-50
-      "
-    >
-      {icon && (
-        <div
-          className={`
-            flex
-            h-11
-            w-11
-            shrink-0
-            items-center
-            justify-center
-            rounded-xl
-            ${
-              accent
-                ? "bg-secondary-50 text-secondary-600"
-                : "bg-primary-50 text-primary-800"
-            }
-          `}
-        >
-          {icon}
+    <Section title="ព័ត៌មានទូទៅ" icon={<StoreIcon size={22} />}>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Item
+          label="ឈ្មោះហាង"
+          value={store.storeName}
+          icon={<Tag size={19} />}
+        />
+
+        <Item
+          label="ប្រទេស"
+          value={store.countryCode || "KH"}
+          icon={<Globe size={19} />}
+        />
+
+        <Item
+          label="កម្រិតតម្លៃ"
+          value={formatPriceLevel(store.priceLevel)}
+          icon={<DollarSign size={19} />}
+        />
+
+        <Item
+          label="ពិន្ទុអនាម័យ"
+          value={formatRating(store.hygieneRating)}
+          icon={<ShieldCheck size={19} />}
+        />
+
+        <Item
+          label="តំបន់ម៉ោង"
+          value={store.timezone || "Asia/Phnom_Penh"}
+          icon={<Clock size={19} />}
+        />
+
+        {/* 1. Review Status */}
+        <Item
+          label="ស្ថានភាពពិនិត្យ"
+          customValue={
+            <div className="flex flex-col gap-1">
+              <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold border ${
+                reviewStatus.isPositive
+                  ? "bg-emerald-50 text-[#137A3D] border-emerald-200"
+                  : reviewStatus.isDanger
+                    ? "bg-red-50 text-red-700 border-red-200"
+                    : "bg-amber-50 text-amber-800 border-amber-200"
+              }`}>
+                {reviewStatus.isPositive ? (
+                  <CheckCircle size={14} className="text-emerald-600" />
+                ) : (
+                  <span className={`h-2 w-2 shrink-0 rounded-full ${reviewStatus.isDanger ? "bg-red-500" : "bg-amber-500"}`} />
+                )}
+                {reviewStatus.label}
+              </span>
+              <p className="text-xs text-gray-500">{reviewStatus.note}</p>
+            </div>
+          }
+        />
+
+        {/* 2. Operating Status */}
+        <Item
+          label="ស្ថានភាពដំណើរការ"
+          customValue={
+            <div className="flex flex-col gap-1">
+              <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold border ${
+                liveStatus.isPositive
+                  ? "bg-emerald-50 text-[#137A3D] border-emerald-200"
+                  : liveStatus.isDanger
+                    ? "bg-red-50 text-red-700 border-red-200"
+                    : "bg-amber-50 text-amber-800 border-amber-200"
+              }`}>
+                {liveStatus.isPositive ? (
+                  <CheckCircle size={14} className="text-emerald-600" />
+                ) : (
+                  <span className={`h-2 w-2 shrink-0 rounded-full ${liveStatus.isDanger ? "bg-red-500" : "bg-amber-500"}`} />
+                )}
+                {liveStatus.label}
+              </span>
+              <p className="text-xs text-gray-500">{liveStatus.note}</p>
+            </div>
+          }
+        />
+
+        {/* 3. Account Status */}
+        <Item
+          label="ស្ថានភាពគណនី"
+          customValue={
+            <div className="flex flex-col gap-1">
+              <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold border ${
+                accountStatus.isPositive
+                  ? "bg-emerald-50 text-[#137A3D] border-emerald-200"
+                  : accountStatus.isDanger
+                    ? "bg-red-50 text-red-700 border-red-200"
+                    : "bg-gray-100 text-gray-700 border-gray-200"
+              }`}>
+                {accountStatus.isPositive ? (
+                  <CheckCircle size={14} className="text-emerald-600" />
+                ) : (
+                  <span className={`h-2 w-2 shrink-0 rounded-full ${accountStatus.isDanger ? "bg-red-500" : "bg-gray-400"}`} />
+                )}
+                {accountStatus.label}
+              </span>
+              <p className="text-xs text-gray-500">{accountStatus.note}</p>
+            </div>
+          }
+        />
+
+        {/* Description Full Width */}
+        <div className="col-span-full rounded-2xl border border-gray-100 bg-gray-50/60 px-4 py-4 transition hover:border-gray-200 hover:bg-gray-50">
+          <p className="text-lg font-medium text-gray-500">ការពិពណ៌នាអំពីហាង</p>
+          <p className="mt-2 whitespace-pre-wrap text-lg font-medium leading-relaxed text-gray-800">
+            {store.description || "មិនមានការពិពណ៌នាឡើយ"}
+          </p>
         </div>
-      )}
-
-      <div className="min-w-0 flex-1">
-        <p
-          className="
-            text-lg
-            font-medium
-            text-gray-500
-          "
-        >
-          {label}
-        </p>
-
-        <p
-          className={`
-            mt-1
-            truncate
-            text-lg
-            font-semibold
-            ${valueStyle}
-          `}
-          title={value}
-        >
-          {value}
-        </p>
       </div>
-    </div>
+    </Section>
   );
 }

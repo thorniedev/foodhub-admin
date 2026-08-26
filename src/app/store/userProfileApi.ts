@@ -176,8 +176,10 @@ import type {
   AdminProfile,
   AdminUser,
   AdminUserProfilesQuery,
+  CreateAdminProfilePayload,
   CreateAdminUserPayload,
   MutableAdminUserStatus,
+  UpdateAdminProfilePayload,
 } from "@/src/types/userProfile";
 
 interface SpringPage<T> {
@@ -193,15 +195,93 @@ interface SpringPage<T> {
   last?: boolean;
 }
 
-function normalizePage<T>(response: SpringPage<T>): AdminPage<T> {
+function normalizeAdminUser(response: any): AdminUser {
+  const raw = response?.data ?? response?.payload ?? response;
+  if (!raw) return raw;
   return {
-    contents: response.contents ?? response.content ?? [],
-    pageNumber: response.pageNumber ?? response.number ?? 0,
-    pageSize: response.pageSize ?? response.size ?? 20,
-    totalElements: response.totalElements ?? 0,
-    totalPages: response.totalPages ?? 0,
-    first: response.first ?? true,
-    last: response.last ?? true,
+    ...raw,
+    emailVerified: Boolean(
+      raw.emailVerified ??
+      raw.isEmailVerified ??
+      raw.isVerified ??
+      raw.verified ??
+      raw.email_verified ??
+      raw.is_email_verified
+    ),
+  };
+}
+
+function normalizePage<T>(response: any): AdminPage<T> {
+  if (!response) {
+    return {
+      contents: [],
+      pageNumber: 0,
+      pageSize: 20,
+      totalElements: 0,
+      totalPages: 0,
+      first: true,
+      last: true,
+    };
+  }
+
+  const dataObj =
+    (response.data && typeof response.data === "object" && !Array.isArray(response.data)
+      ? response.data
+      : null) ||
+    (response.payload && typeof response.payload === "object" && !Array.isArray(response.payload)
+      ? response.payload
+      : null) ||
+    response;
+
+  const rawList = (
+    dataObj.items ??
+    dataObj.contents ??
+    dataObj.content ??
+    (Array.isArray(response.data) ? response.data : []) ??
+    (Array.isArray(response.payload) ? response.payload : []) ??
+    (Array.isArray(response) ? response : [])
+  ) as any[];
+
+  const contents = rawList.map((item) =>
+    item && typeof item === "object" && ("primaryEmail" in item || "email" in item || "username" in item)
+      ? normalizeAdminUser(item)
+      : item,
+  ) as T[];
+
+  const totalElements =
+    typeof dataObj.totalElements === "number"
+      ? dataObj.totalElements
+      : typeof dataObj.total === "number"
+        ? dataObj.total
+        : contents.length;
+
+  const pageSize =
+    typeof dataObj.pageSize === "number"
+      ? dataObj.pageSize
+      : typeof dataObj.size === "number"
+        ? dataObj.size
+        : 20;
+
+  const pageNumber =
+    typeof dataObj.pageNumber === "number"
+      ? dataObj.pageNumber
+      : typeof dataObj.number === "number"
+        ? dataObj.number
+        : 0;
+
+  const totalPages =
+    typeof dataObj.totalPages === "number"
+      ? dataObj.totalPages
+      : (totalElements ? Math.ceil(totalElements / Math.max(1, pageSize)) : 0);
+
+  return {
+    contents,
+    pageNumber,
+    pageSize,
+    totalElements,
+    totalPages,
+    first: typeof dataObj.isFirst === "boolean" ? dataObj.isFirst : (dataObj.first ?? true),
+    last: typeof dataObj.isLast === "boolean" ? dataObj.isLast : (dataObj.last ?? true),
   };
 }
 
@@ -217,11 +297,23 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
             page: p.page ?? 0,
             size: p.size ?? 20,
             sort: p.sort ?? "createdAt,desc",
+            query: p.query ? p.query.trim() : undefined,
+            q: p.query ? p.query.trim() : undefined,
           },
         };
       },
       transformResponse: (response: SpringPage<AdminUser>) =>
         normalizePage(response),
+      providesTags: (result) =>
+        result
+          ? [
+            ...result.contents.map(({ uuid }) => ({
+              type: "AdminUser" as const,
+              id: uuid,
+            })),
+            { type: "AdminUser" as const, id: "LIST" },
+          ]
+          : [{ type: "AdminUser" as const, id: "LIST" }],
     }),
 
     createAdminUser: builder.mutation<AdminUser, CreateAdminUserPayload>({
@@ -230,6 +322,8 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
         method: "POST",
         body,
       }),
+      transformResponse: (response: any) => normalizeAdminUser(response),
+      invalidatesTags: [{ type: "AdminUser", id: "LIST" }],
     }),
 
     getAdminUser: builder.query<AdminUser, string>({
@@ -237,6 +331,10 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
         url: `/users/${encodeURIComponent(userUuid)}`,
         method: "GET",
       }),
+      transformResponse: (response: any) => normalizeAdminUser(response),
+      providesTags: (_result, _error, userUuid) => [
+        { type: "AdminUser", id: userUuid },
+      ],
     }),
 
     updateAdminUserStatus: builder.mutation<
@@ -248,6 +346,31 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
         method: "PATCH",
         body: { status },
       }),
+      invalidatesTags: (_result, _error, { userUuid }) => [
+        { type: "AdminUser", id: userUuid },
+        { type: "AdminUser", id: "LIST" },
+      ],
+    }),
+
+    updateAdminUser: builder.mutation<
+      AdminUser,
+      {
+        userUuid: string;
+        firstName: string;
+        lastName: string;
+        username: string;
+        email: string;
+      }
+    >({
+      query: ({ userUuid, ...payload }) => ({
+        url: `/users/${encodeURIComponent(userUuid)}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: (_result, _error, { userUuid }) => [
+        { type: "AdminUser", id: userUuid },
+        { type: "AdminUser", id: "LIST" },
+      ],
     }),
 
     deleteAdminUser: builder.mutation<void, string>({
@@ -255,6 +378,10 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
         url: `/users/${encodeURIComponent(userUuid)}`,
         method: "DELETE",
       }),
+      invalidatesTags: (_result, _error, userUuid) => [
+        { type: "AdminUser", id: userUuid },
+        { type: "AdminUser", id: "LIST" },
+      ],
     }),
 
     hardDeleteAdminUser: builder.mutation<void, string>({
@@ -273,6 +400,10 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
         url: `/users/${encodeURIComponent(userUuid)}/restore`,
         method: "PATCH",
       }),
+      invalidatesTags: (_result, _error, userUuid) => [
+        { type: "AdminUser", id: userUuid },
+        { type: "AdminUser", id: "LIST" },
+      ],
     }),
 
     getAdminUserProfiles: builder.query<
@@ -289,8 +420,22 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
           sort,
         },
       }),
-      transformResponse: (response: SpringPage<AdminProfile>) =>
-        normalizePage(response),
+      transformResponse: (response: any): AdminPage<AdminProfile> => {
+        const normalized = normalizePage<AdminProfile>(response);
+        return {
+          ...normalized,
+          contents: [...normalized.contents].sort((a, b) => {
+            const aDefault = Boolean(a.isDefault);
+            const bDefault = Boolean(b.isDefault);
+            if (aDefault && !bDefault) return -1;
+            if (!aDefault && bDefault) return 1;
+
+            const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return bTime - aTime;
+          }),
+        };
+      },
     }),
 
     getAdminProfile: builder.query<AdminProfile, string>({
@@ -298,6 +443,38 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
         url: `/profiles/${encodeURIComponent(profileUuid)}`,
         method: "GET",
       }),
+      transformResponse: (response: any) =>
+        (response?.data ?? response?.payload ?? response) as AdminProfile,
+    }),
+
+    createAdminProfile: builder.mutation<
+      AdminProfile,
+      { userUuid: string; body: CreateAdminProfilePayload }
+    >({
+      query: ({ userUuid, body }) => ({
+        url: `/users/${encodeURIComponent(userUuid)}/profiles`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (_result, _error, { userUuid }) => [
+        { type: "AdminProfile", id: "LIST" },
+        { type: "AdminUser", id: userUuid },
+      ],
+    }),
+
+    updateAdminProfile: builder.mutation<
+      AdminProfile,
+      { profileUuid: string; body: UpdateAdminProfilePayload }
+    >({
+      query: ({ profileUuid, body }) => ({
+        url: `/profiles/${encodeURIComponent(profileUuid)}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (_result, _error, { profileUuid }) => [
+        { type: "AdminProfile", id: profileUuid },
+        { type: "AdminProfile", id: "LIST" },
+      ],
     }),
 
     deleteAdminProfile: builder.mutation<void, string>({
@@ -305,6 +482,32 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
         url: `/profiles/${encodeURIComponent(profileUuid)}`,
         method: "DELETE",
       }),
+      invalidatesTags: (_result, _error, profileUuid) => [
+        { type: "AdminProfile", id: profileUuid },
+        { type: "AdminProfile", id: "LIST" },
+      ],
+    }),
+
+    setDefaultAdminProfile: builder.mutation<AdminProfile, string>({
+      query: (profileUuid) => ({
+        url: `/profiles/${encodeURIComponent(profileUuid)}/default`,
+        method: "PATCH",
+      }),
+      invalidatesTags: (_result, _error, profileUuid) => [
+        { type: "AdminProfile", id: profileUuid },
+        { type: "AdminProfile", id: "LIST" },
+      ],
+    }),
+
+    hardDeleteAdminProfile: builder.mutation<void, string>({
+      query: (profileUuid) => ({
+        url: `/profiles/${encodeURIComponent(profileUuid)}/hard`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _error, profileUuid) => [
+        { type: "AdminProfile", id: profileUuid },
+        { type: "AdminProfile", id: "LIST" },
+      ],
     }),
 
     restoreAdminProfile: builder.mutation<AdminProfile, string>({
@@ -312,6 +515,10 @@ export const userProfileApi = adminBaseApi.injectEndpoints({
         url: `/profiles/${encodeURIComponent(profileUuid)}/restore`,
         method: "PATCH",
       }),
+      invalidatesTags: (_result, _error, profileUuid) => [
+        { type: "AdminProfile", id: profileUuid },
+        { type: "AdminProfile", id: "LIST" },
+      ],
     }),
   }),
 
@@ -323,11 +530,16 @@ export const {
   useCreateAdminUserMutation,
   useGetAdminUserQuery,
   useUpdateAdminUserStatusMutation,
+  useUpdateAdminUserMutation,
   useDeleteAdminUserMutation,
   useHardDeleteAdminUserMutation,
   useRestoreAdminUserMutation,
   useGetAdminUserProfilesQuery,
   useGetAdminProfileQuery,
+  useCreateAdminProfileMutation,
+  useUpdateAdminProfileMutation,
+  useSetDefaultAdminProfileMutation,
   useDeleteAdminProfileMutation,
+  useHardDeleteAdminProfileMutation,
   useRestoreAdminProfileMutation,
 } = userProfileApi;
