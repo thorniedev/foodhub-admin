@@ -45,6 +45,11 @@ import type { AgeGroup } from "@/src/types/ageGroup";
 import type { DietaryType } from "@/src/types/dietaryType";
 import type { Allergen } from "@/src/types/allergen";
 import type { FilterCatalogOption } from "@/src/types/filterCatalog";
+import { useGetManagedFoodQuery } from "@/src/app/store/menuManagementApi";
+import {
+  readFoodRelationsStorage,
+  saveFoodRelationsStorage,
+} from "@/src/lib/filterCatalogStorage";
 
 type FormState = {
   canonicalName: string;
@@ -97,7 +102,6 @@ export default function FoodFormModal({
   allergens = [],
   preparationTimes = [],
   distances = [],
-  regions = [],
   saving,
   catalogType = "ALL",
   onClose,
@@ -139,13 +143,16 @@ export default function FoodFormModal({
   const [allergenRows, setAllergenRows] = useState<Array<{ allergenUuid: string; riskLevel?: string; notes?: string }>>([]);
   const [preparationTimeRows, setPreparationTimeRows] = useState<Array<{ optionUuid: string; notes?: string }>>([]);
   const [distanceRows, setDistanceRows] = useState<Array<{ optionUuid: string; notes?: string }>>([]);
-  const [regionRows, setRegionRows] = useState<Array<{ optionUuid: string; notes?: string }>>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (!open) return;
+  const { data: detailedFood } = useGetManagedFoodQuery(item?.uuid ?? "", {
+    skip: !open || !item?.uuid,
+  });
 
-    if (!item) {
+  const activeItem = item ? (detailedFood ?? item) : null;
+
+  useEffect(() => {
+    if (!open || !item || !activeItem) {
       setValues(EMPTY);
       setImages([]);
       setExistingImages([]);
@@ -158,90 +165,154 @@ export default function FoodFormModal({
       setAllergenRows([]);
       setPreparationTimeRows([]);
       setDistanceRows([]);
-      setRegionRows([]);
       setError(null);
       return;
     }
 
-    const list = item.images?.length
-      ? item.images
-      : item.gallery?.length
-        ? item.gallery
-        : item.primaryMediaUrls?.length
-          ? item.primaryMediaUrls
-          : [item.thumbnail || item.imageUrl].filter(Boolean);
+    const list = activeItem.images?.length
+      ? activeItem.images
+      : activeItem.gallery?.length
+        ? activeItem.gallery
+        : activeItem.primaryMediaUrls?.length
+          ? activeItem.primaryMediaUrls
+          : [activeItem.thumbnail || activeItem.imageUrl].filter(Boolean);
     setExistingImages(list as string[]);
 
     const matchedCategoryUuid =
-      item.categoryUuid ??
-      item.category?.uuid ??
+      activeItem.categoryUuid ??
+      activeItem.category?.uuid ??
       categories.find(
         (c) =>
-          (item.category?.code && c.code === item.category.code) ||
-          (item.category?.name && c.name === item.category.name) ||
-          (item.categoryName && c.name === item.categoryName),
+          (activeItem.category?.code && c.code === activeItem.category.code) ||
+          (activeItem.category?.name && c.name === activeItem.category.name) ||
+          (activeItem.categoryName && c.name === activeItem.categoryName),
       )?.uuid ??
       "";
 
     const matchedCuisineUuid =
-      item.cuisineUuid ??
-      item.cuisine?.uuid ??
+      activeItem.cuisineUuid ??
+      activeItem.cuisine?.uuid ??
       cuisines.find(
         (c) =>
-          (item.cuisine?.code && c.code === item.cuisine.code) ||
-          (item.cuisine?.name && c.name === item.cuisine.name) ||
-          (item.cuisineName && c.name === item.cuisineName),
+          (activeItem.cuisine?.code && c.code === activeItem.cuisine.code) ||
+          (activeItem.cuisine?.name && c.name === activeItem.cuisine.name) ||
+          (activeItem.cuisineName && c.name === activeItem.cuisineName),
       )?.uuid ??
       "";
 
+    const stored =
+      (activeItem?.uuid ? readFoodRelationsStorage(activeItem.uuid) : null) ??
+      (item?.uuid ? readFoodRelationsStorage(item.uuid) : null);
+
+    // Server often returns nutritionData with all 0s/nulls when not persisted.
+    // Only trust server nutrition when at least one field has a real non-zero value.
+    const serverNut = activeItem.nutritionData ?? (activeItem as any).nutrition;
+    const storedNut = stored?.nutritionData ?? stored?.nutrition;
+    const serverHasRealData = !!(
+      serverNut &&
+      (
+        (serverNut as any).calories ||
+        (serverNut as any).proteinGrams ||
+        (serverNut as any).protein ||
+        (serverNut as any).carbohydrateGrams ||
+        (serverNut as any).carbs ||
+        (serverNut as any).fatGrams ||
+        (serverNut as any).fat ||
+        (serverNut as any).fiberGrams ||
+        (serverNut as any).fiber
+      )
+    );
+    const nutrition = serverHasRealData ? serverNut : (storedNut ?? serverNut);
+
     setValues({
-      canonicalName: item.canonicalName ?? "",
-      localName: item.localName ?? "",
-      description: item.description ?? "",
+      canonicalName: activeItem.canonicalName ?? "",
+      localName: activeItem.localName ?? "",
+      description: activeItem.description ?? "",
       categoryUuid: matchedCategoryUuid,
       cuisineUuid: matchedCuisineUuid,
-      defaultSpiceLevel: String(item.defaultSpiceLevel ?? 0),
+      defaultSpiceLevel: String(activeItem.defaultSpiceLevel ?? 0),
       calories:
-        item.nutritionData?.calories != null
-          ? String(item.nutritionData.calories)
-          : "",
-      protein:
-        item.nutritionData?.proteinGrams != null
-          ? String(item.nutritionData.proteinGrams)
-          : "",
-      carbohydrate:
-        item.nutritionData?.carbohydrateGrams != null
-          ? String(item.nutritionData.carbohydrateGrams)
-          : item.nutritionData?.carbsGrams != null
-            ? String(item.nutritionData.carbsGrams)
+        nutrition?.calories != null
+          ? String(nutrition.calories)
+          : (activeItem as any)?.calories != null
+            ? String((activeItem as any).calories)
             : "",
+      protein:
+        nutrition?.proteinGrams != null
+          ? String(nutrition.proteinGrams)
+          : (nutrition as any)?.protein != null
+            ? String((nutrition as any).protein)
+            : (activeItem as any)?.proteinGrams != null
+              ? String((activeItem as any).proteinGrams)
+              : "",
+      carbohydrate:
+        nutrition?.carbohydrateGrams != null
+          ? String(nutrition.carbohydrateGrams)
+          : nutrition?.carbsGrams != null
+            ? String(nutrition.carbsGrams)
+            : (nutrition as any)?.carbs != null
+              ? String((nutrition as any).carbs)
+              : (activeItem as any)?.carbohydrateGrams != null
+                ? String((activeItem as any).carbohydrateGrams)
+                : "",
       fat:
-        item.nutritionData?.fatGrams != null
-          ? String(item.nutritionData.fatGrams)
-          : "",
+        nutrition?.fatGrams != null
+          ? String(nutrition.fatGrams)
+          : (nutrition as any)?.fat != null
+            ? String((nutrition as any).fat)
+            : (activeItem as any)?.fatGrams != null
+              ? String((activeItem as any).fatGrams)
+              : "",
       fiber:
-        item.nutritionData?.fiberGrams != null
-          ? String(item.nutritionData.fiberGrams)
-          : "",
-      isActive: item.isActive !== false,
+        nutrition?.fiberGrams != null
+          ? String(nutrition.fiberGrams)
+          : (nutrition as any)?.fiber != null
+            ? String((nutrition as any).fiber)
+            : (activeItem as any)?.fiberGrams != null
+              ? String((activeItem as any).fiberGrams)
+              : "",
+      isActive: activeItem.isActive !== false,
     });
 
-    // Populate metadata relations if editing
-    const rawSeasons = Array.isArray(item.seasons) ? item.seasons : [];
+    // Populate metadata relations if editing - prioritize stored relations saved by the user
+    const rawSeasons =
+      Array.isArray(stored?.seasons) && stored.seasons.length > 0
+        ? stored.seasons
+        : Array.isArray(activeItem.seasons) && activeItem.seasons.length > 0
+          ? activeItem.seasons
+          : Array.isArray((activeItem as any).seasonRelations) && (activeItem as any).seasonRelations.length > 0
+            ? (activeItem as any).seasonRelations
+            : [];
     setSeasonRows(
       rawSeasons
         .map((s: any) => {
+          const sId =
+            typeof s === "string"
+              ? s
+              : s.seasonUuid ||
+                s.uuid ||
+                s.id ||
+                s.season?.uuid ||
+                s.season?.id ||
+                s.code ||
+                s.seasonCode ||
+                s.season?.code ||
+                "";
+          const sName =
+            typeof s === "string"
+              ? s
+              : s.name ||
+                s.season?.name ||
+                s.localName ||
+                s.season?.localName ||
+                "";
           const found = seasons.find(
             (opt) =>
-              opt.uuid === s.seasonUuid ||
-              opt.uuid === s.uuid ||
-              opt.uuid === s.season?.uuid ||
-              (s.code && opt.code === s.code) ||
-              (s.name && opt.name === s.name),
+              (sId && (opt.uuid === sId || opt.code === sId || (opt as any).id === sId)) ||
+              (sName && (opt.name === sName || (opt as any).localName === sName)),
           );
           return {
-            seasonUuid:
-              found?.uuid || s.seasonUuid || s.uuid || s.season?.uuid || "",
+            seasonUuid: found?.uuid || found?.code || sId || "",
             suitabilityScore:
               s.suitabilityScore != null ? Number(s.suitabilityScore) : 0.95,
             reasonText: s.reasonText ?? "",
@@ -250,21 +321,44 @@ export default function FoodFormModal({
         .filter((s) => Boolean(s.seasonUuid)),
     );
 
-    const rawEvents = Array.isArray(item.events) ? item.events : [];
+    const rawEvents =
+      Array.isArray(stored?.events) && stored.events.length > 0
+        ? stored.events
+        : Array.isArray(activeItem.events) && activeItem.events.length > 0
+          ? activeItem.events
+          : Array.isArray((activeItem as any).eventRelations) && (activeItem as any).eventRelations.length > 0
+            ? (activeItem as any).eventRelations
+            : [];
     setEventRows(
       rawEvents
         .map((e: any) => {
+          const eId =
+            typeof e === "string"
+              ? e
+              : e.eventUuid ||
+                e.uuid ||
+                e.id ||
+                e.event?.uuid ||
+                e.event?.id ||
+                e.code ||
+                e.eventCode ||
+                e.event?.code ||
+                "";
+          const eName =
+            typeof e === "string"
+              ? e
+              : e.name ||
+                e.event?.name ||
+                e.localName ||
+                e.event?.localName ||
+                "";
           const found = events.find(
             (opt) =>
-              opt.uuid === e.eventUuid ||
-              opt.uuid === e.uuid ||
-              opt.uuid === e.event?.uuid ||
-              (e.code && opt.code === e.code) ||
-              (e.name && opt.name === e.name),
+              (eId && (opt.uuid === eId || opt.code === eId || (opt as any).id === eId)) ||
+              (eName && (opt.name === eName || (opt as any).localName === eName)),
           );
           return {
-            eventUuid:
-              found?.uuid || e.eventUuid || e.uuid || e.event?.uuid || "",
+            eventUuid: found?.uuid || found?.code || eId || "",
             relevanceScore:
               e.relevanceScore != null ? Number(e.relevanceScore) : 0.9,
             reasonText: e.reasonText ?? "",
@@ -273,27 +367,52 @@ export default function FoodFormModal({
         .filter((e) => Boolean(e.eventUuid)),
     );
 
-    const rawWeather = Array.isArray(item.suitableWeather)
-      ? item.suitableWeather
-      : [];
+    const rawWeather =
+      Array.isArray(stored?.suitableWeather) && stored.suitableWeather.length > 0
+        ? stored.suitableWeather
+        : Array.isArray(stored?.weatherConditions) && stored.weatherConditions.length > 0
+          ? stored.weatherConditions
+          : Array.isArray(activeItem.suitableWeather) && activeItem.suitableWeather.length > 0
+            ? activeItem.suitableWeather
+            : Array.isArray((activeItem as any).weatherConditions) && (activeItem as any).weatherConditions.length > 0
+              ? (activeItem as any).weatherConditions
+              : Array.isArray((activeItem as any).weathers) && (activeItem as any).weathers.length > 0
+                ? (activeItem as any).weathers
+                : Array.isArray((activeItem as any).weather) && (activeItem as any).weather.length > 0
+                  ? (activeItem as any).weather
+                  : [];
     setWeatherRows(
       rawWeather
         .map((w: any) => {
+          const wId =
+            typeof w === "string"
+              ? w
+              : w.weatherConditionUuid ||
+                w.weatherUuid ||
+                w.conditionUuid ||
+                w.uuid ||
+                w.id ||
+                w.weatherCondition?.uuid ||
+                w.weatherCondition?.id ||
+                w.code ||
+                w.weatherCode ||
+                w.weatherCondition?.code ||
+                "";
+          const wName =
+            typeof w === "string"
+              ? w
+              : w.name ||
+                w.weatherCondition?.name ||
+                w.localName ||
+                w.weatherCondition?.localName ||
+                "";
           const found = weatherConditions.find(
             (opt) =>
-              opt.uuid === w.weatherConditionUuid ||
-              opt.uuid === w.uuid ||
-              opt.uuid === w.weatherCondition?.uuid ||
-              (w.code && opt.code === w.code) ||
-              (w.name && opt.name === w.name),
+              (wId && (opt.uuid === wId || opt.code === wId || (opt as any).id === wId)) ||
+              (wName && (opt.name === wName || (opt as any).localName === wName)),
           );
           return {
-            weatherConditionUuid:
-              found?.uuid ||
-              w.weatherConditionUuid ||
-              w.uuid ||
-              w.weatherCondition?.uuid ||
-              "",
+            weatherConditionUuid: found?.uuid || found?.code || wId || "",
             suitabilityScore:
               w.suitabilityScore != null ? Number(w.suitabilityScore) : 0.95,
             reasonText: w.reasonText ?? "",
@@ -302,21 +421,44 @@ export default function FoodFormModal({
         .filter((w) => Boolean(w.weatherConditionUuid)),
     );
 
-    const rawMealTypes = Array.isArray(item.mealTypes) ? item.mealTypes : [];
+    const rawMealTypes =
+      Array.isArray(stored?.mealTypes) && stored.mealTypes.length > 0
+        ? stored.mealTypes
+        : Array.isArray(activeItem.mealTypes) && activeItem.mealTypes.length > 0
+          ? activeItem.mealTypes
+          : Array.isArray((activeItem as any).mealTypeRelations) && (activeItem as any).mealTypeRelations.length > 0
+            ? (activeItem as any).mealTypeRelations
+            : [];
     setMealTypeRows(
       rawMealTypes
         .map((m: any) => {
+          const mId =
+            typeof m === "string"
+              ? m
+              : m.mealTypeUuid ||
+                m.uuid ||
+                m.id ||
+                m.mealType?.uuid ||
+                m.mealType?.id ||
+                m.code ||
+                m.mealTypeCode ||
+                m.mealType?.code ||
+                "";
+          const mName =
+            typeof m === "string"
+              ? m
+              : m.name ||
+                m.mealType?.name ||
+                m.localName ||
+                m.mealType?.localName ||
+                "";
           const found = mealTypes.find(
             (opt) =>
-              opt.uuid === m.mealTypeUuid ||
-              opt.uuid === m.uuid ||
-              opt.uuid === m.mealType?.uuid ||
-              (m.code && opt.code === m.code) ||
-              (m.name && opt.name === m.name),
+              (mId && (opt.uuid === mId || opt.code === mId || (opt as any).id === mId)) ||
+              (mName && (opt.name === mName || (opt as any).localName === mName)),
           );
           return {
-            mealTypeUuid:
-              found?.uuid || m.mealTypeUuid || m.uuid || m.mealType?.uuid || "",
+            mealTypeUuid: found?.uuid || found?.code || mId || "",
             suitabilityScore:
               m.suitabilityScore != null ? Number(m.suitabilityScore) : 1.0,
           };
@@ -324,21 +466,46 @@ export default function FoodFormModal({
         .filter((m) => Boolean(m.mealTypeUuid)),
     );
 
-    const rawAgeRules = Array.isArray(item.ageRules) ? item.ageRules : [];
+    const rawAgeRules =
+      Array.isArray(stored?.ageRules) && stored.ageRules.length > 0
+        ? stored.ageRules
+        : Array.isArray(stored?.ageGroups) && stored.ageGroups.length > 0
+          ? stored.ageGroups
+          : Array.isArray(activeItem.ageRules) && activeItem.ageRules.length > 0
+            ? activeItem.ageRules
+            : Array.isArray((activeItem as any).ageGroups) && (activeItem as any).ageGroups.length > 0
+              ? (activeItem as any).ageGroups
+              : [];
     setAgeRuleRows(
       rawAgeRules
         .map((a: any) => {
+          const aId =
+            typeof a === "string"
+              ? a
+              : a.ageGroupUuid ||
+                a.uuid ||
+                a.id ||
+                a.ageGroup?.uuid ||
+                a.ageGroup?.id ||
+                a.code ||
+                a.ageGroupCode ||
+                a.ageGroup?.code ||
+                "";
+          const aName =
+            typeof a === "string"
+              ? a
+              : a.name ||
+                a.ageGroup?.name ||
+                a.localName ||
+                a.ageGroup?.localName ||
+                "";
           const found = ageGroups.find(
             (opt) =>
-              opt.uuid === a.ageGroupUuid ||
-              opt.uuid === a.uuid ||
-              opt.uuid === a.ageGroup?.uuid ||
-              (a.code && opt.code === a.code) ||
-              (a.name && opt.name === a.name),
+              (aId && (opt.uuid === aId || opt.code === aId || (opt as any).id === aId)) ||
+              (aName && (opt.name === aName || (opt as any).localName === aName)),
           );
           return {
-            ageGroupUuid:
-              found?.uuid || a.ageGroupUuid || a.uuid || a.ageGroup?.uuid || "",
+            ageGroupUuid: found?.uuid || found?.code || aId || "",
             ruleResult: a.ruleResult || "ALLOWED",
             reasonText: a.reasonText ?? "Suitable as a normal serving.",
           };
@@ -346,31 +513,98 @@ export default function FoodFormModal({
         .filter((a) => Boolean(a.ageGroupUuid)),
     );
 
-    const rawDietary = Array.isArray(item.dietaryTypes)
-      ? item.dietaryTypes
-      : [];
+    const rawDietary =
+      Array.isArray(stored?.dietaryTypes) && stored.dietaryTypes.length > 0
+        ? stored.dietaryTypes
+        : Array.isArray(activeItem.dietaryTypes) && activeItem.dietaryTypes.length > 0
+          ? activeItem.dietaryTypes
+          : [];
     setDietaryTypeRows(
       rawDietary
         .map((d: any) => {
-          const code = d.code ?? d.dietaryTypeCode ?? "";
+          const code = typeof d === "string" ? d : d.code ?? d.dietaryTypeCode ?? d.uuid ?? "";
           const found = dietaryTypes.find(
             (opt) =>
               opt.code === code ||
-              opt.uuid === d.uuid ||
-              opt.uuid === d.dietaryTypeUuid,
+              opt.uuid === code ||
+              (typeof d === "object" && (opt.uuid === d.uuid || opt.uuid === d.dietaryTypeUuid || opt.code === d.code)),
           );
           return {
-            code: found?.code || code,
-            name: found?.name || d.name || code,
+            code: found?.code || (typeof d === "object" ? d.code || d.dietaryTypeCode : code) || code,
+            name: found?.name || (typeof d === "object" ? d.name || d.localName : code) || code,
           };
         })
         .filter((d) => Boolean(d.code)),
+    );
+
+    const rawAllergens =
+      Array.isArray(stored?.allergens) && stored.allergens.length > 0
+        ? stored.allergens
+        : Array.isArray(activeItem.allergens) && activeItem.allergens.length > 0
+          ? activeItem.allergens
+          : Array.isArray((activeItem as any).allergenDeclarations) && (activeItem as any).allergenDeclarations.length > 0
+            ? (activeItem as any).allergenDeclarations
+            : [];
+    setAllergenRows(
+      rawAllergens
+        .map((a: any) => {
+          const aId =
+            typeof a === "string"
+              ? a
+              : a.allergenUuid || a.uuid || a.id || a.code || "";
+          const aName =
+            typeof a === "string"
+              ? a
+              : a.name || a.localName || a.allergenName || "";
+          const found = allergens.find(
+            (opt) =>
+              (aId && (opt.uuid === aId || opt.code === aId || (opt as any).id === aId)) ||
+              (aName && (opt.name === aName || (opt as any).localName === aName)),
+          );
+          return {
+            allergenUuid: found?.uuid || found?.code || aId || "",
+            riskLevel: a.riskLevel || "MEDIUM",
+            notes: a.notes ?? "",
+          };
+        })
+        .filter((a) => Boolean(a.allergenUuid)),
+    );
+
+    const rawPrepTimes =
+      Array.isArray(stored?.preparationTimes) && stored.preparationTimes.length > 0
+        ? stored.preparationTimes
+        : Array.isArray((activeItem as any)?.preparationTimes)
+          ? (activeItem as any).preparationTimes
+          : [];
+    setPreparationTimeRows(
+      rawPrepTimes
+        .map((p: any) => ({
+          optionUuid: p.optionUuid || p.uuid || p.id || p.code || "",
+          notes: p.notes ?? "",
+        }))
+        .filter((p: any) => Boolean(p.optionUuid)),
+    );
+
+    const rawDistances =
+      Array.isArray(stored?.distances) && stored.distances.length > 0
+        ? stored.distances
+        : Array.isArray((activeItem as any)?.distances)
+          ? (activeItem as any).distances
+          : [];
+    setDistanceRows(
+      rawDistances
+        .map((d: any) => ({
+          optionUuid: d.optionUuid || d.uuid || d.id || d.code || "",
+          notes: d.notes ?? "",
+        }))
+        .filter((d: any) => Boolean(d.optionUuid)),
     );
 
     setImages([]);
     setError(null);
   }, [
     item,
+    detailedFood,
     open,
     categories,
     cuisines,
@@ -380,6 +614,9 @@ export default function FoodFormModal({
     mealTypes,
     ageGroups,
     dietaryTypes,
+    allergens,
+    preparationTimes,
+    distances,
   ]);
 
   const activeCategories = useMemo(() => {
@@ -449,11 +686,6 @@ export default function FoodFormModal({
   const activeDistances = useMemo(
     () => (distances ?? []).filter((d) => d.active !== false),
     [distances],
-  );
-
-  const activeRegions = useMemo(
-    () => (regions ?? []).filter((r) => r.active !== false),
-    [regions],
   );
 
   const categorySelectOptions = useMemo(
@@ -616,17 +848,6 @@ export default function FoodFormModal({
     [activeDistances],
   );
 
-  const regionSelectOptions = useMemo(
-    () => [
-      { value: "", label: "ជ្រើសតំបន់ / ខេត្ត..." },
-      ...activeRegions.map((r) => ({
-        value: r.uuid,
-        label: (r as any).localName || r.name || r.code,
-      })),
-    ],
-    [activeRegions],
-  );
-
   const modalTitle = useMemo(() => {
     if (catalogType === "DRINK") {
       return item ? "កែប្រែព័ត៌មានភេសជ្ជៈ" : "បន្ថែមភេសជ្ជៈថ្មី";
@@ -670,22 +891,40 @@ export default function FoodFormModal({
 
       const hasImages = Array.isArray(images) && images.length > 0;
 
+      const matchedCategory = categories.find(
+        (c) => c.uuid === values.categoryUuid || c.code === values.categoryUuid,
+      );
+      const matchedCuisine = cuisines.find(
+        (c) => c.uuid === values.cuisineUuid || c.code === values.cuisineUuid,
+      );
+
       const payload: FoodWritePayload = {
         canonicalName: values.canonicalName.trim(),
         localName: values.localName.trim() || null,
         description: values.description.trim() || null,
         categoryUuid: values.categoryUuid,
+        categoryCode: matchedCategory?.code || values.categoryUuid,
         cuisineUuid: values.cuisineUuid,
+        cuisineCode: matchedCuisine?.code || values.cuisineUuid,
         ...(hasImages ? {} : { primaryMediaUuids: item?.primaryMediaUuids ?? [] }),
         defaultSpiceLevel: Math.min(5, Math.max(0, Math.round(numberOrNull(values.defaultSpiceLevel) ?? 0))),
         nutritionData,
         seasons: seasonRows
-          .filter((r) => typeof r.seasonUuid === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(r.seasonUuid.trim()))
-          .map((r) => ({
-            seasonUuid: r.seasonUuid.trim(),
-            suitabilityScore: r.suitabilityScore ?? 0.95,
-            reasonText: r.reasonText?.trim() || null,
-          })),
+          .filter((r) => Boolean(r.seasonUuid))
+          .map((r) => {
+            const found = seasons.find(
+              (s) => s.uuid === r.seasonUuid || s.code === r.seasonUuid,
+            );
+            return {
+              seasonUuid: found?.uuid || r.seasonUuid,
+              seasonCode: found?.code || undefined,
+              code: found?.code || undefined,
+              name: found?.name || undefined,
+              localName: (found as any)?.localName || undefined,
+              suitabilityScore: r.suitabilityScore ?? 0.95,
+              reasonText: r.reasonText?.trim() || null,
+            };
+          }),
         dietaryTypes: dietaryTypeRows
           .filter((r) => Boolean(r.code))
           .map((r) => ({
@@ -693,36 +932,120 @@ export default function FoodFormModal({
             name: r.name || r.code,
           })),
         events: eventRows
-          .filter((r) => typeof r.eventUuid === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(r.eventUuid.trim()))
-          .map((r) => ({
-            eventUuid: r.eventUuid.trim(),
-            relevanceScore: r.relevanceScore ?? 0.9,
-            reasonText: r.reasonText?.trim() || null,
-          })),
+          .filter((r) => Boolean(r.eventUuid))
+          .map((r) => {
+            const found = events.find(
+              (e) => e.uuid === r.eventUuid || e.code === r.eventUuid,
+            );
+            return {
+              eventUuid: found?.uuid || r.eventUuid,
+              eventCode: found?.code || undefined,
+              code: found?.code || undefined,
+              name: found?.name || undefined,
+              localName: (found as any)?.localName || undefined,
+              relevanceScore: r.relevanceScore ?? 0.9,
+              reasonText: r.reasonText?.trim() || null,
+            };
+          }),
         suitableWeather: weatherRows
-          .filter((r) => typeof r.weatherConditionUuid === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(r.weatherConditionUuid.trim()))
-          .map((r) => ({
-            weatherConditionUuid: r.weatherConditionUuid.trim(),
-            suitabilityScore: r.suitabilityScore ?? 0.95,
-            reasonText: r.reasonText?.trim() || null,
-          })),
+          .filter((r) => Boolean(r.weatherConditionUuid))
+          .map((r) => {
+            const found = weatherConditions.find(
+              (w) =>
+                w.uuid === r.weatherConditionUuid ||
+                w.code === r.weatherConditionUuid,
+            );
+            return {
+              weatherConditionUuid: found?.uuid || r.weatherConditionUuid,
+              weatherConditionCode: found?.code || undefined,
+              weatherCode: found?.code || undefined,
+              code: found?.code || undefined,
+              name: found?.name || undefined,
+              localName: (found as any)?.localName || undefined,
+              suitabilityScore: r.suitabilityScore ?? 0.95,
+              reasonText: r.reasonText?.trim() || null,
+            };
+          }),
         mealTypes: mealTypeRows
-          .filter((r) => typeof r.mealTypeUuid === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(r.mealTypeUuid.trim()))
-          .map((r) => ({
-            mealTypeUuid: r.mealTypeUuid.trim(),
-            suitabilityScore: r.suitabilityScore ?? 1.0,
-          })),
+          .filter((r) => Boolean(r.mealTypeUuid))
+          .map((r) => {
+            const found = mealTypes.find(
+              (m) => m.uuid === r.mealTypeUuid || m.code === r.mealTypeUuid,
+            );
+            return {
+              mealTypeUuid: found?.uuid || r.mealTypeUuid,
+              mealTypeCode: found?.code || undefined,
+              code: found?.code || undefined,
+              name: found?.name || undefined,
+              localName: (found as any)?.localName || undefined,
+              suitabilityScore: r.suitabilityScore ?? 1.0,
+            };
+          }),
         ageRules: ageRuleRows
-          .filter((r) => typeof r.ageGroupUuid === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(r.ageGroupUuid.trim()))
+          .filter((r) => Boolean(r.ageGroupUuid))
+          .map((r) => {
+            const found = ageGroups.find(
+              (a) => a.uuid === r.ageGroupUuid || a.code === r.ageGroupUuid,
+            );
+            return {
+              ageGroupUuid: found?.uuid || r.ageGroupUuid,
+              ageGroupCode: found?.code || undefined,
+              code: found?.code || undefined,
+              name: found?.name || undefined,
+              localName: (found as any)?.localName || undefined,
+              ruleResult: r.ruleResult || "ALLOWED",
+              reasonText: r.reasonText?.trim() || "Suitable as a normal serving.",
+            };
+          }),
+        allergens: allergenRows
+          .filter((r) => Boolean(r.allergenUuid))
+          .map((r) => {
+            const found = allergens.find(
+              (a) => a.uuid === r.allergenUuid || a.code === r.allergenUuid,
+            );
+            return {
+              allergenUuid: found?.uuid || r.allergenUuid,
+              allergenCode: found?.code || undefined,
+              code: found?.code || undefined,
+              name: found?.name || undefined,
+              localName: (found as any)?.localName || undefined,
+              riskLevel: r.riskLevel || "MEDIUM",
+              notes: r.notes?.trim() || null,
+            };
+          }),
+        preparationTimes: preparationTimeRows
+          .filter((r) => Boolean(r.optionUuid))
           .map((r) => ({
-            ageGroupUuid: r.ageGroupUuid.trim(),
-            ruleResult: r.ruleResult || "ALLOWED",
-            reasonText: r.reasonText?.trim() || "Suitable as a normal serving.",
+            optionUuid: r.optionUuid,
+            notes: r.notes?.trim() || null,
+          })),
+        distances: distanceRows
+          .filter((r) => Boolean(r.optionUuid))
+          .map((r) => ({
+            optionUuid: r.optionUuid,
+            notes: r.notes?.trim() || null,
           })),
         isActive: values.isActive,
       };
 
       await onSubmit(payload, images);
+
+      if (item?.uuid) {
+        saveFoodRelationsStorage(item.uuid, {
+          nutritionData: payload.nutritionData,
+          nutrition: payload.nutritionData,
+          seasons: payload.seasons,
+          events: payload.events,
+          suitableWeather: payload.suitableWeather,
+          weatherConditions: payload.suitableWeather,
+          mealTypes: payload.mealTypes,
+          ageRules: payload.ageRules,
+          dietaryTypes: payload.dietaryTypes,
+          allergens: (payload as any).allergens,
+          preparationTimes: payload.preparationTimes,
+          distances: payload.distances,
+        });
+      }
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -1623,72 +1946,7 @@ export default function FoodFormModal({
             )}
           </div>
 
-          {/* Regions Section */}
-          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-black text-gray-900">តំបន់ / ប្រភពដើម (Regions)</p>
-                <p className="mt-1 text-lg text-gray-500">កំណត់តំបន់ ឬខេត្តដែលជាប្រភពដើម ឬសាកសមនៃមុខម្ហូបនេះ</p>
-              </div>
-              <button
-                type="button"
-                onClick={() =>
-                  setRegionRows((current) => [
-                    ...current,
-                    { optionUuid: "", notes: "" },
-                  ])
-                }
-                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
-              >
-                <Plus size={18} />
-                បន្ថែមតំបន់
-              </button>
-            </div>
 
-            {regionRows.length === 0 ? (
-              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសតំបន់</p>
-            ) : (
-              <div className="mt-4 space-y-3">
-                {regionRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <div className="flex-1 min-w-[220px]">
-                      <CustomSelect
-                        value={row.optionUuid}
-                        onChange={(val) => {
-                          setRegionRows((prev) =>
-                            prev.map((r, i) => (i === idx ? { ...r, optionUuid: val } : r)),
-                          );
-                        }}
-                        options={regionSelectOptions}
-                        placeholder="ជ្រើសតំបន់ / ខេត្ត..."
-                      />
-                    </div>
-
-                    <input
-                      type="text"
-                      placeholder="កំណត់ចំណាំ (Notes)..."
-                      value={row.notes ?? ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setRegionRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
-                        );
-                      }}
-                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => setRegionRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
           <ImagePicker
             value={images}

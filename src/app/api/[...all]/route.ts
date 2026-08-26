@@ -72,17 +72,17 @@ const allowedRoutes: Record<string, ReadonlySet<string>> = {
    * GET /safety/dietary-types
    * GET /safety/medical-conditions
    */
-  safety: new Set(["GET"]),
+  safety: new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]),
 
-  stores: new Set(["GET"]),
+  stores: new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]),
 
-  "menu-items": new Set(["GET", "POST"]),
+  "menu-items": new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]),
 
   admin: new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]),
 
-  catalog: new Set(["GET", "POST", "PATCH", "DELETE"]),
+  catalog: new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]),
 
-  media: new Set(["GET"]),
+  media: new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]),
 
   discovery: new Set(["GET", "POST"]),
 

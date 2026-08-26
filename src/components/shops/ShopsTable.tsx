@@ -105,8 +105,8 @@ export default function ShopsTable({
                 {/* Location */}
                 <td className="px-3 py-3">
                   <div className="flex max-w-[160px] items-center gap-1.5">
-                    <MapPin size={15} strokeWidth={2} className="shrink-0 text-primary-700" />
-                    <span className="line-clamp-1 text-sm font-medium text-gray-500">
+                    <MapPin size={16} strokeWidth={2} className="shrink-0 text-primary-700" />
+                    <span className="line-clamp-1 text-base font-normal text-gray-500">
                       {displayStoreLocation(store) || "—"}
                     </span>
                   </div>
@@ -303,7 +303,7 @@ export function ReviewStatusBadge({ status }: { status?: string | null }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${className}`}
       title={info.note}
     >
       <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
@@ -328,7 +328,7 @@ export function AccountStatusBadge({ status }: { status?: string | null }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${className}`}
       title={info.note}
     >
       <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
@@ -357,7 +357,7 @@ export function LiveStatusBadge({ store }: { store: Store }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${className}`}
       title={info.note}
     >
       <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />

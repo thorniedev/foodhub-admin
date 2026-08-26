@@ -29,7 +29,7 @@ import type {
   UpdateStorePayload,
 } from "@/src/types/shop";
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
-import { storeLogoCandidate } from "@/src/lib/shopFormat";
+import { getStoreLiveStatus, storeLogoCandidate } from "@/src/lib/shopFormat";
 import CustomSelect from "../ui/CustomSelect";
 
 import StoreMediaImage from "./detail/StoreMediaImage";
@@ -75,6 +75,7 @@ const CITY_OPTIONS = [
 const OPEN_OPTIONS = [
   { value: "ALL", label: "ស្ថានភាពហាងទាំងអស់" },
   { value: "OPEN", label: "កំពុងបើកដំណើរការ" },
+  { value: "CLOSED_NOW", label: "បិទពេលនេះ" },
   { value: "TEMPORARILY_CLOSED", label: "បិទបណ្តោះអាសន្ន" },
   { value: "CLOSED", label: "បានបិទ" },
   { value: "PERMANENTLY_CLOSED", label: "បិទជាអចិន្ត្រៃយ៍" },
@@ -310,16 +311,20 @@ export default function ShopsManager() {
 
     // Open/Close filter
     if (openFilter !== "ALL") {
-      if (openFilter === "OPEN" && store.isOpenNow !== true && store.operatingStatus !== "OPEN") {
+      const live = getStoreLiveStatus(store);
+      if (openFilter === "OPEN" && live.status !== "OPEN") {
         return false;
       }
-      if (openFilter === "TEMPORARILY_CLOSED" && store.operatingStatus !== "TEMPORARILY_CLOSED") {
+      if (openFilter === "CLOSED_NOW" && live.status !== "CLOSED_NOW") {
         return false;
       }
-      if (openFilter === "CLOSED" && store.operatingStatus !== "CLOSED" && store.isOpenNow !== false) {
+      if (openFilter === "TEMPORARILY_CLOSED" && live.status !== "TEMPORARILY_CLOSED") {
         return false;
       }
-      if (openFilter === "PERMANENTLY_CLOSED" && store.operatingStatus !== "PERMANENTLY_CLOSED") {
+      if (openFilter === "CLOSED" && live.status !== "CLOSED") {
+        return false;
+      }
+      if (openFilter === "PERMANENTLY_CLOSED" && live.status !== "PERMANENTLY_CLOSED") {
         return false;
       }
     }

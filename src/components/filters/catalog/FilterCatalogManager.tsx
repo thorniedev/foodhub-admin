@@ -5,21 +5,32 @@ import { useMemo, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   ArrowUpDown,
+  CalendarDays,
   Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  CircleMinus,
+  Clock,
+  CloudSun,
   Eye,
+  Flame,
+  Globe,
+  MapPin,
+  Navigation,
   Pencil,
   Plus,
   RotateCcw,
   Search,
   SlidersHorizontal,
+  Sparkles,
+  Timer,
+  Trash2,
+  UtensilsCrossed,
   X,
 } from "lucide-react";
 
 import { getFilterGroupBySlug } from "@/src/config/filterCatalog";
+import { formatAdminDate } from "@/src/types/safetyResource";
 
 import { useCuisineCatalog } from "@/src/hooks/useCuisineCatalog";
 import { useFoodCategoryCatalog } from "@/src/hooks/useFoodCategoryCatalog";
@@ -298,17 +309,6 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         active={activeCount}
         inactive={inactiveCount}
         onCreate={openCreateModal}
-        onRestoreAll={
-          inactiveCount > 0
-            ? () => {
-                groupOptions
-                  .filter((item) => item.active === false)
-                  .forEach((item) => {
-                    setActive(item.uuid, true);
-                  });
-              }
-            : undefined
-        }
       />
 
       {/* COMPONENT: CatalogToolbar */}
@@ -371,23 +371,25 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
       {/* COMPONENT: ErrorNotice */}
       {errorMessage && <ErrorNotice message={errorMessage} />}
 
-      {/* COMPONENT: CatalogTable */}
-      <CatalogTable
-        groupLabel={group.labelKm}
-        items={pageItems}
-        onView={(item) => setViewing(item)}
-        onEdit={openEditModal}
-        onDelete={setDeleting}
-        onRestore={(item) => setActive(item.uuid, true)}
-      />
+      {/* COMPONENT: CatalogTable & Pagination */}
+      <section className="overflow-visible rounded-3xl border border-gray-100 bg-white shadow-sm">
+        <CatalogTable
+          groupCode={group.code}
+          groupLabel={group.labelKm}
+          items={pageItems}
+          onView={(item) => setViewing(item)}
+          onEdit={openEditModal}
+          onDelete={setDeleting}
+          onRestore={(item) => setActive(item.uuid, true)}
+        />
 
-      {/* COMPONENT: CatalogPagination */}
-      <CatalogPagination
-        page={safePage}
-        totalPages={totalPages}
-        totalElements={sorted.length}
-        onPageChange={setPage}
-      />
+        <CatalogPagination
+          page={safePage}
+          totalPages={totalPages}
+          totalElements={sorted.length}
+          onPageChange={setPage}
+        />
+      </section>
 
       {/* EXISTING COMPONENT: FilterOptionFormModal */}
       <FilterOptionFormModal
@@ -427,6 +429,10 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         uuid={viewing?.uuid ?? null}
         group={group}
         initialOption={viewing}
+        options={groupOptions}
+        onToggleStatus={async (targetUuid, nextActive) => {
+          await setActive(targetUuid, nextActive);
+        }}
         onClose={() => setViewing(null)}
       />
     </div>
@@ -445,14 +451,12 @@ function CatalogHeader({
   active,
   inactive,
   onCreate,
-  onRestoreAll,
 }: {
   group: FilterGroup;
   total: number;
   active: number;
   inactive: number;
   onCreate: () => void;
-  onRestoreAll?: () => void;
 }) {
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
@@ -486,27 +490,14 @@ function CatalogHeader({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {inactive > 0 && onRestoreAll && (
-            <button
-              type="button"
-              onClick={onRestoreAll}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-400 px-5 py-3 text-lg font-bold text-gray-900 shadow-sm transition hover:bg-amber-300 sm:w-fit"
-            >
-              <RotateCcw size={20} />
-              ស្ដារទាំងអស់ ({inactive})
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={onCreate}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
-          >
-            <Plus size={20} />
-            បន្ថែម {group.labelKm}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onCreate}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
+        >
+          <Plus size={20} />
+          បន្ថែម {group.labelKm}
+        </button>
       </div>
     </section>
   );
@@ -600,7 +591,7 @@ function CatalogToolbar({
   ];
 
   return (
-    <section className="w-full">
+    <section className=" ">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         {/* Status tabs */}
         <div className="flex w-full min-w-0 gap-2 overflow-x-auto pb-1 xl:w-auto">
@@ -612,17 +603,17 @@ function CatalogToolbar({
                 key={tab.value}
                 type="button"
                 onClick={() => onStatusChange(tab.value)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-lg font-medium transition-all duration-200 ${
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
                   active
                     ? "bg-primary-800 text-white"
-                    : "bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 hover:text-gray-900"
+                    : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
                 }`}
               >
-                <span>{tab.label}</span>
+                {tab.label}
 
                 <span
-                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-lg font-normal ${
-                    active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
+                    active ? "bg-white/20 text-white" : "bg-white text-gray-500"
                   }`}
                 >
                   {tab.count}
@@ -645,7 +636,7 @@ function CatalogToolbar({
               onChange={(event) => onSearchChange(event.target.value)}
               onFocus={onSearchFocus}
               placeholder={`ស្វែងរក ${groupLabel}...`}
-              className="h-[52px] w-full rounded-full border border-gray-200 bg-white pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+              className="h-[52px] w-full rounded-full border border-gray-200 bg-gray-50 pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
             />
 
             {search && (
@@ -776,7 +767,61 @@ function ErrorNotice({ message }: { message: string }) {
    Suggested file: CatalogTable.tsx
 ========================================================= */
 
+function getFilterGroupIcon(groupCode: string) {
+  switch (groupCode) {
+    case "PREPARATION_TIME":
+      return <Timer size={20} />;
+    case "DISTANCE":
+      return <Navigation size={20} />;
+    case "REGION":
+      return <MapPin size={20} />;
+    case "SEASON":
+      return <CloudSun size={20} />;
+    case "EVENT":
+      return <CalendarDays size={20} />;
+    case "MEAL_TIME":
+      return <Clock size={20} />;
+    case "FOOD_CATEGORY":
+      return <UtensilsCrossed size={20} />;
+    case "CUISINE":
+      return <Globe size={20} />;
+    case "COOKING_METHOD":
+      return <Flame size={20} />;
+    case "FOOD_STYLE":
+      return <Sparkles size={20} />;
+    case "TASTE":
+      return <Flame size={20} />;
+    case "TEXTURE":
+      return <Sparkles size={20} />;
+    default:
+      return <SlidersHorizontal size={20} />;
+  }
+}
+
+function getOptionValueBadge(item: FilterCatalogOption) {
+  if (
+    item.numericValue !== null &&
+    item.numericValue !== undefined &&
+    String(item.numericValue).trim() !== ""
+  ) {
+    let unitLabel = item.unit || "";
+    if (unitLabel === "MINUTE" || item.groupCode === "PREPARATION_TIME") {
+      unitLabel = "នាទី";
+    } else if (unitLabel === "KM" || item.groupCode === "DISTANCE") {
+      unitLabel = "km";
+    } else if (unitLabel === "LEVEL" || item.groupCode === "SPICE_LEVEL") {
+      return `កម្រិត ${item.numericValue}`;
+    }
+    return `${item.numericValue} ${unitLabel}`.trim();
+  }
+  if (item.startTime || item.endTime) {
+    return `${item.startTime || ""} – ${item.endTime || ""}`.trim();
+  }
+  return null;
+}
+
 function CatalogTable({
+  groupCode,
   groupLabel,
   items,
   onView,
@@ -784,6 +829,7 @@ function CatalogTable({
   onDelete,
   onRestore,
 }: {
+  groupCode: string;
   groupLabel: string;
   items: FilterCatalogOption[];
   onView: (item: FilterCatalogOption) => void;
@@ -791,87 +837,146 @@ function CatalogTable({
   onDelete: (item: FilterCatalogOption) => void;
   onRestore: (item: FilterCatalogOption) => void;
 }) {
+  const hasValueColumn = useMemo(() => {
+    return (
+      [
+        "PREPARATION_TIME",
+        "DISTANCE",
+        "SPICE_LEVEL",
+        "MEAL_TIME",
+        "SEASON",
+        "EVENT",
+      ].includes(groupCode) ||
+      items.some(
+        (it) =>
+          (it.numericValue !== null && it.numericValue !== undefined) ||
+          it.startTime ||
+          it.endTime,
+      )
+    );
+  }, [groupCode, items]);
+
   return (
-    <section className="w-full min-w-0 max-w-full overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
-      <div className="w-full max-w-full overflow-x-auto">
-        <table className="w-full min-w-[1000px] border-collapse text-left">
-          <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/70">
-              <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-                {groupLabel}
-              </th>
+    <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <table className="w-full min-w-[700px] table-auto border-collapse text-left">
+        <thead>
+          <tr className="border-b border-gray-100 bg-gray-50/70">
+            <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+              {groupLabel}
+            </th>
 
-              <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-                Code
-              </th>
+            <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+              កូដ
+            </th>
 
-              <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-                ការពិពណ៌នា
+            {hasValueColumn && (
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+                តម្លៃ / ឯកតា
               </th>
+            )}
 
-              <th className="px-6 py-4 text-xl font-semibold text-primary-800">
-                ស្ថានភាព
-              </th>
+            <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+              ការពិពណ៌នា
+            </th>
 
-              <th className="px-6 py-4 text-right text-xl font-semibold text-primary-800">
-                សកម្មភាព
-              </th>
-            </tr>
-          </thead>
+            <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800">
+              ស្ថានភាព
+            </th>
 
-          <tbody>
-            {items.map((item) => (
+            <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+              កែប្រែចុងក្រោយ
+            </th>
+
+            <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[120px]">
+              សកម្មភាព
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {items.map((item) => {
+            const valBadge = getOptionValueBadge(item);
+
+            return (
               <tr
                 key={item.uuid}
                 className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
               >
-                {/* Name */}
-                <td className="px-6 py-5">
-                  <div className="min-w-[200px]">
-                    <p className="text-lg font-medium text-gray-800">
-                      {item.localName || item.name}
-                    </p>
+                {/* Name + Icon */}
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary-100 bg-primary-50 text-primary-800">
+                      {getFilterGroupIcon(item.groupCode || groupCode)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-base font-semibold text-gray-800">
+                        {item.localName || item.name}
+                      </p>
+                      {item.name && item.localName && item.name !== item.localName && (
+                        <p className="text-base font-normal text-gray-400">
+                          {item.name}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </td>
 
                 {/* Code */}
-                <td className="px-6 py-5">
-                  <span className="inline-flex rounded-lg bg-gray-50 px-3 py-1.5 font-mono text-lg font-medium text-gray-600">
-                    {item.code}
+                <td className="whitespace-nowrap px-4 py-3">
+                  <span className="inline-flex rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-base font-semibold text-gray-700">
+                    {item.code || "—"}
                   </span>
                 </td>
 
+                {/* Value / Unit */}
+                {hasValueColumn && (
+                  <td className="whitespace-nowrap px-4 py-3">
+                    {valBadge ? (
+                      <span className="inline-flex rounded-full bg-secondary-50 px-3.5 py-1 text-base font-semibold text-secondary-700 ring-1 ring-inset ring-secondary-100">
+                        {valBadge}
+                      </span>
+                    ) : (
+                      <span className="text-base font-normal text-gray-400">—</span>
+                    )}
+                  </td>
+                )}
+
                 {/* Description */}
-                <td className="max-w-[360px] px-6 py-5">
-                  <p className="line-clamp-2 text-lg leading-7 text-gray-500">
+                <td className="max-w-[340px] px-4 py-3">
+                  <p className="line-clamp-2 text-base font-normal text-gray-500">
                     {item.description || "—"}
                   </p>
                 </td>
 
                 {/* Status */}
-                <td className="px-6 py-5">
+                <td className="px-4 py-3 text-center">
                   <CatalogStatusBadge active={item.active} />
                 </td>
 
+                {/* Last Updated */}
+                <td className="whitespace-nowrap px-4 py-3 text-base font-normal text-gray-500">
+                  {formatAdminDate(item.updatedAt || item.createdAt)}
+                </td>
+
                 {/* Actions */}
-                <td className="px-6 py-5">
-                  <div className="flex items-center justify-end gap-2">
+                <td className="px-4 py-3 text-center">
+                  <div className="flex items-center justify-center gap-2">
                     <button
                       type="button"
                       onClick={() => onView(item)}
                       title="មើលព័ត៌មានលម្អិត"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-emerald-600 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
                     >
-                      <Eye size={20} />
+                      <Eye size={18} />
                     </button>
 
                     <button
                       type="button"
                       onClick={() => onEdit(item)}
                       title="កែប្រែ"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-500 transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100"
                     >
-                      <Pencil size={20} />
+                      <Pencil size={18} />
                     </button>
 
                     {item.active ? (
@@ -879,73 +984,47 @@ function CatalogTable({
                         type="button"
                         onClick={() => onDelete(item)}
                         title="បិទ"
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
+                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100"
                       >
-                        <CircleMinus size={20} />
+                        <Trash2 size={18} />
                       </button>
                     ) : (
                       <button
                         type="button"
                         onClick={() => onRestore(item)}
                         title="ស្ដារឡើងវិញ"
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-700 transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-100"
+                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
                       >
-                        <RotateCcw size={20} />
+                        <RotateCcw size={18} />
                       </button>
                     )}
                   </div>
                 </td>
               </tr>
-            ))}
+            );
+          })}
 
-            {items.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-6 py-16 text-center">
-                  <Search size={34} className="mx-auto text-gray-300" />
-
-                  <p className="mt-3 text-lg font-medium text-gray-500">
-                    មិនមានទិន្នន័យ
-                  </p>
-
-                  <p className="mt-1 text-lg text-gray-400">
-                    សូមសាកល្បងស្វែងរក ឬជ្រើស filter ផ្សេងទៀត។
-                  </p>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  );
-}
-
-/* =========================================================
-   COMPONENT 5: NUMERIC VALUE CELL
-   Suggested file: NumericValue.tsx
-========================================================= */
-
-function NumericValue({
-  value,
-  unit,
-}: {
-  value: number | null | undefined;
-  unit: string | null | undefined;
-}) {
-  if (value === null || value === undefined) {
-    return <span className="text-lg text-gray-400">—</span>;
-  }
-
-  return (
-    <div className="flex items-baseline gap-1.5">
-      <span className="text-lg font-semibold text-gray-800">{value}</span>
-
-      {unit && (
-        <span className="text-lg font-medium text-gray-500">{unit}</span>
-      )}
+          {items.length === 0 && (
+            <tr>
+              <td
+                colSpan={hasValueColumn ? 7 : 6}
+                className="px-6 py-16 text-center"
+              >
+                <p className="text-lg font-medium text-gray-500">
+                  មិនមានទិន្នន័យ
+                </p>
+                <p className="mt-1 text-base text-gray-400">
+                  សូមសាកល្បងស្វែងរក ឬជ្រើស filter ផ្សេងទៀត។
+                </p>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }
+
 
 /* =========================================================
    COMPONENT 6: STATUS BADGE
@@ -955,18 +1034,17 @@ function NumericValue({
 function CatalogStatusBadge({ active }: { active: boolean }) {
   return (
     <span
-      className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-lg font-medium ring-1 ring-inset ${
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${
         active
-          ? "bg-primary-50 text-primary-700 ring-primary-100"
-          : "bg-gray-100 text-gray-500 ring-gray-200"
+          ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+          : "border-gray-200 bg-gray-50 text-gray-600"
       }`}
     >
       <span
-        className={`h-2 w-2 rounded-full ${
-          active ? "bg-primary-600" : "bg-gray-400"
+        className={`h-2 w-2 shrink-0 rounded-full ${
+          active ? "bg-emerald-500" : "bg-gray-400"
         }`}
       />
-
       {active ? "សកម្ម" : "អសកម្ម"}
     </span>
   );
@@ -988,14 +1066,12 @@ function CatalogPagination({
   totalElements: number;
   onPageChange: (page: number) => void;
 }) {
+  const pages = Math.max(totalPages, 1);
+
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-lg text-gray-500">
-        Page <span className="font-semibold text-gray-800">{page + 1}</span> /{" "}
-        <span className="font-semibold text-gray-800">{totalPages}</span>
-        {" · "}
-        សរុប{" "}
-        <span className="font-semibold text-primary-800">{totalElements}</span>
+    <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-base text-gray-500">
+        សរុប <span className="font-semibold text-gray-700">{totalElements}</span> ទិន្នន័យ
       </p>
 
       <div className="flex items-center gap-2">
@@ -1003,20 +1079,22 @@ function CatalogPagination({
           type="button"
           disabled={page <= 0}
           onClick={() => onPageChange(Math.max(0, page - 1))}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ChevronLeft size={19} />
-          មុន
+          <ChevronLeft size={18} />
         </button>
+
+        <span className="flex h-9 min-w-9 items-center justify-center rounded-lg bg-[#136C34] px-3 text-base font-semibold text-white">
+          {page + 1} / {pages}
+        </span>
 
         <button
           type="button"
-          disabled={page >= totalPages - 1}
-          onClick={() => onPageChange(Math.min(totalPages - 1, page + 1))}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={page >= pages - 1}
+          onClick={() => onPageChange(Math.min(pages - 1, page + 1))}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          បន្ទាប់
-          <ChevronRight size={19} />
+          <ChevronRight size={18} />
         </button>
       </div>
     </div>
@@ -1046,7 +1124,7 @@ function DeleteCatalogOptionModal({
       <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
-            <CircleMinus size={26} />
+            <Trash2 size={24} />
           </div>
 
           <button

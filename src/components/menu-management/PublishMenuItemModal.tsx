@@ -2,10 +2,14 @@
 
 import {
   AlertCircle,
+  Check,
+  Globe2,
   Heart,
   HeartPulse,
+  Info,
   Loader2,
   Plus,
+  RotateCcw,
   Save,
   ShieldAlert,
   Sparkles,
@@ -16,11 +20,15 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import ThumbnailImagePicker from "./ThumbnailImagePicker";
+import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
+import { readFoodRelationsStorage } from "@/src/lib/filterCatalogStorage";
 import GalleryImagePicker from "./GalleryImagePicker";
 import MenuItemSearchableSelect, {
   type SearchableOption,
 } from "./MenuItemSearchableSelect";
-import { useGetPublishedMenuItemDetailQuery } from "@/src/app/store/menuManagementApi";
+import {
+  useGetPublishedMenuItemDetailQuery,
+} from "@/src/app/store/menuManagementApi";
 
 import type { DietaryType } from "@/src/types/dietaryType";
 import type { MedicalCondition } from "@/src/types/medicalCondition";
@@ -71,6 +79,7 @@ type FormState = {
 type FieldErrors = Partial<
   Record<"storeUuid" | "foodUuid" | "name" | "price" | "thumbnail", string>
 >;
+
 
 const EMPTY: FormState = {
   storeUuid: "",
@@ -169,12 +178,19 @@ export default function PublishMenuItemModal({
   ingredients,
   dietaryTypes = [],
   allergens = [],
+  mealTypes = [],
+  ageGroups = [],
+  seasons = [],
+  weatherConditions = [],
+  events = [],
   medicalConditions = [],
   saving,
   fixedStoreUuid,
   defaultStoreUuid,
   onClose,
   onSubmit,
+  onEditFood,
+  onSaveFoodOnly,
 }: {
   open: boolean;
   item: MenuItemRecord | null;
@@ -183,6 +199,11 @@ export default function PublishMenuItemModal({
   ingredients: IngredientOption[];
   dietaryTypes?: DietaryType[];
   allergens?: unknown[];
+  mealTypes?: any[];
+  ageGroups?: any[];
+  seasons?: any[];
+  weatherConditions?: any[];
+  events?: any[];
   medicalConditions?: MedicalCondition[];
   saving: boolean;
   fixedStoreUuid?: string;
@@ -193,6 +214,8 @@ export default function PublishMenuItemModal({
     payload: MenuItemWritePayload,
     images: File[],
   ) => Promise<void>;
+  onEditFood?: (food: FoodRecord) => void;
+  onSaveFoodOnly?: (foodUuid: string, data: any) => Promise<void>;
 }) {
   const storeFixedId = fixedStoreUuid || defaultStoreUuid;
   const itemUuid = item?.uuid || (item as any)?.menuItemUuid || (item as any)?.id;
@@ -201,7 +224,7 @@ export default function PublishMenuItemModal({
     { skip: !open || !itemUuid },
   );
 
-  const activeItem = detailedItem || item;
+  const activeItem = item ? (detailedItem || item) : null;
 
   const [values, setValues] = useState<FormState>(EMPTY);
   const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>([]);
@@ -216,9 +239,7 @@ export default function PublishMenuItemModal({
   const bodyRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!open) return;
-
-    if (!activeItem) {
+    if (!open || !item || !activeItem) {
       setValues({
         ...EMPTY,
         storeUuid: storeFixedId || "",
@@ -240,6 +261,15 @@ export default function PublishMenuItemModal({
     setThumbnailFile(null);
     setExistingGallery(gallery);
     setGalleryFiles([]);
+
+    const isItemUuid = (candidate?: string | null) =>
+      Boolean(
+        candidate &&
+        activeItem &&
+        (candidate === activeItem.uuid ||
+         candidate === (activeItem as any).menuItemUuid ||
+         candidate === (activeItem as any).id)
+      );
 
     const rawStoreUuid = String(
       activeItem.storeUuid ||
@@ -266,20 +296,29 @@ export default function PublishMenuItemModal({
     const rawFoodUuid = String(
       activeItem.foodUuid ||
       activeItem.food?.uuid ||
-      (activeItem.food as any)?.id ||
+      (typeof activeItem.food === "object" && (activeItem.food as any)?.id) ||
       "",
     );
 
     const foundFood = foods.find(
       (f) =>
-        (rawFoodUuid && (String(f.uuid) === rawFoodUuid || String(f.id) === rawFoodUuid)) ||
+        (rawFoodUuid && !isItemUuid(rawFoodUuid) && (String(f.uuid) === rawFoodUuid || String(f.id) === rawFoodUuid)) ||
         (activeItem.food?.canonicalName &&
-          f.canonicalName?.toLowerCase() === activeItem.food.canonicalName?.toLowerCase()) ||
-        (activeItem.food?.localName && f.localName === activeItem.food.localName) ||
-        (activeItem.name && (f.canonicalName === activeItem.name || f.localName === activeItem.name)),
+          (f.canonicalName?.toLowerCase() === activeItem.food.canonicalName?.toLowerCase() ||
+           f.localName?.toLowerCase() === activeItem.food.canonicalName?.toLowerCase())) ||
+        (activeItem.food?.localName &&
+          (f.localName === activeItem.food.localName ||
+           f.canonicalName === activeItem.food.localName)) ||
+        (activeItem.name &&
+          (f.canonicalName?.toLowerCase() === activeItem.name.toLowerCase() ||
+           f.localName?.toLowerCase() === activeItem.name.toLowerCase())),
     );
 
-    const matchedFoodUuid = foundFood ? String(foundFood.uuid || foundFood.id || "") : rawFoodUuid;
+    const matchedFoodUuid = foundFood
+      ? String(foundFood.uuid || foundFood.id || "")
+      : (rawFoodUuid && !isItemUuid(rawFoodUuid) && foods.some((f) => String(f.uuid || f.id) === rawFoodUuid)
+          ? rawFoodUuid
+          : (foods[0]?.uuid || ""));
 
     setValues({
       storeUuid: matchedStoreUuid,
@@ -336,27 +375,48 @@ export default function PublishMenuItemModal({
       }),
     );
 
+    const targetFood = foundFood || (matchedFoodUuid ? foods.find((f) => String(f.uuid || f.id) === matchedFoodUuid) : undefined);
+    const storedFood = targetFood?.uuid ? readFoodRelationsStorage(targetFood.uuid) : null;
+
+    const rawDietary =
+      Array.isArray(activeItem.dietaryTypes) && activeItem.dietaryTypes.length > 0
+        ? activeItem.dietaryTypes
+        : Array.isArray(storedFood?.dietaryTypes) && storedFood.dietaryTypes.length > 0
+        ? storedFood.dietaryTypes
+        : Array.isArray(targetFood?.dietaryTypes) && targetFood.dietaryTypes.length > 0
+        ? targetFood.dietaryTypes
+        : Array.isArray(activeItem.food?.dietaryTypes) && activeItem.food.dietaryTypes.length > 0
+        ? activeItem.food.dietaryTypes
+        : [];
+
     setDietaryTypeRows(
-      (activeItem.dietaryTypes ?? activeItem.food?.dietaryTypes ?? []).map((raw: any) => {
-        const found = dietaryTypes.find(
-          (d) =>
-            d.uuid === raw.dietaryTypeUuid ||
-            d.uuid === raw.uuid ||
-            (raw.code && d.code === raw.code) ||
-            (raw.name && d.name === raw.name),
-        );
-        return {
-          dietaryTypeUuid:
-            found?.uuid || raw.dietaryTypeUuid || raw.uuid || "",
-          verificationStatus: raw.verificationStatus || "UNVERIFIED",
-          notes: raw.notes || "",
-        };
-      }).filter((d) => Boolean(d.dietaryTypeUuid)),
+      rawDietary
+        .map((raw: any) => {
+          const codeOrUuid =
+            typeof raw === "string"
+              ? raw
+              : raw.dietaryTypeUuid || raw.uuid || raw.code || raw.dietaryTypeCode || raw.id || "";
+          const rawName =
+            typeof raw === "string"
+              ? raw
+              : raw.name || raw.localName || raw.dietaryTypeName || "";
+          const found = dietaryTypes.find(
+            (d) =>
+              (codeOrUuid && (d.uuid === codeOrUuid || d.code === codeOrUuid || (d as any).id === codeOrUuid)) ||
+              (rawName && (d.name === rawName || (d as any).localName === rawName)),
+          );
+          return {
+            dietaryTypeUuid: found?.uuid || codeOrUuid,
+            verificationStatus: raw.verificationStatus || "VERIFIED",
+            notes: raw.notes || "",
+          };
+        })
+        .filter((d) => Boolean(d.dietaryTypeUuid)),
     );
 
     setError(null);
     setFieldErrors({});
-  }, [activeItem, open, stores, foods, ingredients, dietaryTypes]);
+  }, [activeItem, item, open, stores, foods, ingredients, dietaryTypes, storeFixedId]);
 
   const activeFoods = useMemo(
     () =>
@@ -429,18 +489,6 @@ export default function PublishMenuItemModal({
     [activeMedicalConditions],
   );
 
-  const availabilityStatusOptions: SearchableOption[] = useMemo(
-    () => [
-      { value: "AVAILABLE", label: "មានលក់" },
-      { value: "UNAVAILABLE", label: "មិនមានលក់" },
-      { value: "SOLD_OUT", label: "អស់ស្តុក" },
-      { value: "DISCONTINUED", label: "ឈប់លក់" },
-    ],
-    [],
-  );
-
-
-
   const verificationStatusOptions: SearchableOption[] = useMemo(
     () => [
       { value: "UNVERIFIED", label: "មិនទាន់ផ្ទៀងផ្ទាត់" },
@@ -454,6 +502,16 @@ export default function PublishMenuItemModal({
       { value: "ALLOWED", label: "សមរម្យ" },
       { value: "NOT_RECOMMENDED", label: "មិនណែនាំ" },
       { value: "RESTRICTED", label: "ហាមឃាត់" },
+    ],
+    [],
+  );
+
+  const availabilityStatusOptions: SearchableOption[] = useMemo(
+    () => [
+      { value: "AVAILABLE", label: "មានលក់" },
+      { value: "UNAVAILABLE", label: "មិនមានលក់" },
+      { value: "SOLD_OUT", label: "អស់ស្តុក" },
+      { value: "DISCONTINUED", label: "ឈប់លក់" },
     ],
     [],
   );
@@ -472,6 +530,41 @@ export default function PublishMenuItemModal({
       };
     });
     setFieldErrors((current) => ({ ...current, foodUuid: undefined }));
+
+    const storedFood = selectedUuid ? readFoodRelationsStorage(selectedUuid) : null;
+    const foodDietary =
+      Array.isArray(storedFood?.dietaryTypes) && storedFood.dietaryTypes.length > 0
+        ? storedFood.dietaryTypes
+        : Array.isArray(selectedFood?.dietaryTypes) && selectedFood.dietaryTypes.length > 0
+        ? selectedFood.dietaryTypes
+        : [];
+
+    if (foodDietary.length > 0) {
+      setDietaryTypeRows(
+        foodDietary
+          .map((raw: any) => {
+            const codeOrUuid =
+              typeof raw === "string"
+                ? raw
+                : raw.dietaryTypeUuid || raw.uuid || raw.code || raw.dietaryTypeCode || raw.id || "";
+            const rawName =
+              typeof raw === "string"
+                ? raw
+                : raw.name || raw.localName || raw.dietaryTypeName || "";
+            const found = dietaryTypes.find(
+              (d) =>
+                (codeOrUuid && (d.uuid === codeOrUuid || d.code === codeOrUuid || (d as any).id === codeOrUuid)) ||
+                (rawName && (d.name === rawName || (d as any).localName === rawName)),
+            );
+            return {
+              dietaryTypeUuid: found?.uuid || codeOrUuid,
+              verificationStatus: raw.verificationStatus || "VERIFIED",
+              notes: raw.notes || "",
+            };
+          })
+          .filter((d) => Boolean(d.dietaryTypeUuid)),
+      );
+    }
   };
 
   const updateIngredientRow = (
@@ -558,13 +651,29 @@ export default function PublishMenuItemModal({
           notes: row.notes.trim() || null,
         }));
 
+      const isUUID = (str?: string | null) =>
+        Boolean(str && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str));
+
       const dietaryTypePayload: MenuItemDietaryTypePayload[] = dietaryTypeRows
-        .filter((row) => row.dietaryTypeUuid)
-        .map((row) => ({
-          dietaryTypeUuid: row.dietaryTypeUuid,
-          verificationStatus: row.verificationStatus || "UNVERIFIED",
-          notes: row.notes.trim() || null,
-        }));
+        .map((r): MenuItemDietaryTypePayload | null => {
+          if (isUUID(r.dietaryTypeUuid)) {
+            return {
+              dietaryTypeUuid: r.dietaryTypeUuid,
+              verificationStatus: r.verificationStatus || "VERIFIED",
+              notes: r.notes.trim() || null,
+            };
+          }
+          const found = dietaryTypes.find((d) => d.code === r.dietaryTypeUuid || d.uuid === r.dietaryTypeUuid);
+          if (found?.uuid && isUUID(found.uuid)) {
+            return {
+              dietaryTypeUuid: found.uuid,
+              verificationStatus: r.verificationStatus || "VERIFIED",
+              notes: r.notes.trim() || null,
+            };
+          }
+          return null;
+        })
+        .filter((d): d is MenuItemDietaryTypePayload => d !== null);
 
       // Combine thumbnail file and gallery files for upload
       const allImages: File[] = [];
@@ -681,6 +790,7 @@ export default function PublishMenuItemModal({
               />
               <FieldError message={fieldErrors.foodUuid} />
             </label>
+
 
             <Field
               label="ឈ្មោះ ម៉ឺនុយ"

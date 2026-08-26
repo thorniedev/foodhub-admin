@@ -6,7 +6,6 @@ import {
   Globe,
   SlidersHorizontal,
   Utensils,
-  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -23,9 +22,8 @@ export const dashboardNav: NavItem[] = [
     icon: LayoutGrid,
     href: "/",
   },
-  {
+    {
     label: "អនុសាសន៍ & សវនកម្ម AI",
-    icon: Sparkles,
     href: "/admin/recommendations",
   },
 
@@ -35,12 +33,12 @@ export const dashboardNav: NavItem[] = [
     href: "/shops",
   },
   {
-    label: "ម៉ឺនុយ",
+    label: "មីនុយ",
     icon: Utensils,
     href: "/menu-items",
   },
   {
-    label: "គណនីអ្នកប្រើប្រាស់",
+    label: "អ្នកប្រើប្រាស់",
     icon: Users,
     href: "/users",
   },
@@ -84,6 +82,10 @@ export const dashboardNav: NavItem[] = [
         label: "រូបបេណឺ",
         href: "/dynamic-content/banners",
       },
+      // {
+      //   label: "មតិកែលម្អ",
+      //   href: "/dynamic-content/feedback",
+      // },
     ],
   },
   {
@@ -91,8 +93,12 @@ export const dashboardNav: NavItem[] = [
     icon: SlidersHorizontal,
     children: [
       {
-        label: "ប្រភេទម្ហូប",
+        label: "អនុប្រភេទម្ហូប",
         href: "/filter/food-categories",
+      },
+      {
+        label: "អនុប្រភេទភេសជ្ជៈ",
+        href: "/filter/drink-categories",
       },
       {
         label: "ម្ហូបតាមប្រទេស",
@@ -119,10 +125,6 @@ export const dashboardNav: NavItem[] = [
         href: "/filter/medical-conditions",
       },
       {
-        label: "កម្រិតហឹរ",
-        href: "/filter/spice-levels",
-      },
-      {
         label: "ពេលចម្អិន",
         href: "/filter/preparation-times",
       },
@@ -131,32 +133,12 @@ export const dashboardNav: NavItem[] = [
         href: "/filter/distances",
       },
       {
-        label: "គោលដៅសុខភាព",
-        href: "/filter/health-goals",
-      },
-      {
         label: "តំបន់",
         href: "/filter/regions",
       },
       {
         label: "គ្រឿងផ្សំ",
         href: "/filter/ingredients",
-      },
-      {
-        label: "សារធាតុចិញ្ចឹម",
-        href: "/filter/nutrition",
-      },
-      {
-        label: "តម្លៃ",
-        href: "/filter/price-levels",
-      },
-      {
-        label: "ការវាយតម្លៃ",
-        href: "/filter/ratings",
-      },
-      {
-        label: "កម្រិតណែនាំ AI",
-        href: "/filter/ai-scores",
       },
       {
         label: "រដូវកាល",

@@ -10,6 +10,7 @@ import {
 import type {
   WeatherCondition,
 } from "@/src/types/weather-condition";
+import { formatAdminDate } from "@/src/types/safetyResource";
 
 function activeOf(
   item: WeatherCondition,
@@ -40,22 +41,13 @@ export default function WeatherConditionTable({
     item: WeatherCondition,
   ) => void;
 }) {
-  if (
-    items.length === 0
-  ) {
+  if (items.length === 0) {
     return (
-      <div className="flex min-h-[320px] flex-col items-center justify-center px-5 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-primary-800">
-          <CloudRain
-            size={28}
-          />
-        </div>
-
-        <p className="mt-4 text-2xl font-black text-gray-800">
-          មិនទាន់មាន Weather Condition
+      <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+        <p className="text-lg font-medium text-gray-500">
+          មិនមានទិន្នន័យស្ថានភាពអាកាសធាតុ
         </p>
-
-        <p className="mt-2 max-w-md text-lg leading-7 text-gray-500">
+        <p className="mt-1 text-base text-gray-400">
           បន្ថែមស្ថានភាពអាកាសធាតុដូចជា Rainy, Sunny ឬ Cold។
         </p>
       </div>
@@ -63,170 +55,137 @@ export default function WeatherConditionTable({
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-[950px] w-full">
-        <thead className="bg-gray-50 text-left text-sm font-black uppercase tracking-wide text-gray-500">
-          <tr>
-            <th className="px-5 py-4">
-              Weather
-            </th>
+    <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <table className="w-full min-w-[700px] table-auto border-collapse text-left">
+          <thead>
+            <tr className="border-b border-gray-100 bg-gray-50/70">
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+                ឈ្មោះស្ថានភាពអាកាសធាតុ
+              </th>
 
-            <th className="px-5 py-4">
-              Code
-            </th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+                កូដ
+              </th>
 
-            <th className="px-5 py-4">
-              Local name
-            </th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+                ការពិពណ៌នា
+              </th>
 
-            <th className="px-5 py-4">
-              Description
-            </th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800">
+                ស្ថានភាព
+              </th>
 
-            <th className="px-5 py-4">
-              Status
-            </th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+                កែប្រែចុងក្រោយ
+              </th>
 
-            <th className="px-5 py-4 text-right">
-              សកម្មភាព
-            </th>
-          </tr>
-        </thead>
+              <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[120px]">
+                សកម្មភាព
+              </th>
+            </tr>
+          </thead>
 
-        <tbody className="divide-y divide-gray-100 bg-white">
-          {items.map(
-            (item) => {
-              const active =
-                activeOf(
-                  item,
-                );
+          <tbody>
+            {items.map((item) => {
+              const active = activeOf(item);
 
               return (
                 <tr
-                  key={
-                    item.uuid
-                  }
-                  className="transition hover:bg-emerald-50/20"
+                  key={item.uuid}
+                  className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
                 >
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-primary-800">
-                        <CloudRain
-                          size={
-                            20
-                          }
-                        />
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary-100 bg-primary-50 text-primary-800">
+                        <CloudRain size={20} />
                       </div>
 
-                      <p className="text-lg font-black text-gray-900">
-                        {
-                          item.name
-                        }
-                      </p>
+                      <div className="min-w-0">
+                        <p className="text-base font-semibold text-gray-800">
+                          {item.localName || item.name}
+                        </p>
+                        {item.name && item.localName && item.name !== item.localName && (
+                          <p className="text-base font-normal text-gray-400">
+                            {item.name}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </td>
 
-                  <td className="px-5 py-4">
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-black text-gray-600">
-                      {
-                        item.code
-                      }
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <span className="inline-flex rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-base font-semibold text-gray-700">
+                      {item.code || "—"}
                     </span>
                   </td>
 
-                  <td className="px-5 py-4 text-lg font-semibold text-gray-600">
-                    {item.localName ||
-                      "—"}
-                  </td>
-
-                  <td className="max-w-[320px] px-5 py-4 text-lg text-gray-500">
-                    <p className="line-clamp-2">
-                      {item.description ||
-                        "—"}
+                  <td className="max-w-[320px] px-4 py-3">
+                    <p className="line-clamp-2 text-base font-normal text-gray-500">
+                      {item.description || "—"}
                     </p>
                   </td>
 
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3 text-center">
                     <span
-                      className={`rounded-full px-3 py-1 text-sm font-black ${
+                      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${
                         active
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-gray-100 text-gray-500"
+                          ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+                          : "border-gray-200 bg-gray-50 text-gray-600"
                       }`}
                     >
-                      {active
-                        ? "ACTIVE"
-                        : "INACTIVE"}
+                      <span
+                        className={`h-2 w-2 shrink-0 rounded-full ${
+                          active ? "bg-emerald-500" : "bg-gray-400"
+                        }`}
+                      />
+                      {active ? "សកម្ម" : "អសកម្ម"}
                     </span>
                   </td>
 
-                  <td className="px-5 py-4">
-                    <div className="flex justify-end gap-2">
+                  <td className="whitespace-nowrap px-4 py-3 text-base font-normal text-gray-500">
+                    {formatAdminDate(item.updatedAt ?? item.createdAt ?? "")}
+                  </td>
+
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex items-center justify-center gap-2">
                       <button
                         type="button"
-                        onClick={() =>
-                          onView(
-                            item,
-                          )
-                        }
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition hover:bg-gray-50"
+                        onClick={() => onView(item)}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                        title="មើលព័ត៌មានលម្អិត"
                         aria-label="View"
                       >
-                        <Eye
-                          size={
-                            17
-                          }
-                        />
+                        <Eye size={18} />
                       </button>
 
                       <button
                         type="button"
-                        disabled={
-                          busy
-                        }
-                        onClick={() =>
-                          onEdit(
-                            item,
-                          )
-                        }
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-primary-800 disabled:opacity-50"
+                        disabled={busy}
+                        onClick={() => onEdit(item)}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        title="កែប្រែ"
                         aria-label="Edit"
                       >
-                        <Pencil
-                          size={
-                            17
-                          }
-                        />
+                        <Pencil size={18} />
                       </button>
 
                       <button
                         type="button"
-                        disabled={
-                          busy ||
-                          !active
-                        }
-                        onClick={() =>
-                          onDeactivate(
-                            item,
-                          )
-                        }
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-400 transition hover:bg-red-50 disabled:opacity-40"
+                        disabled={busy || !active}
+                        onClick={() => onDeactivate(item)}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        title="បិទ"
                         aria-label="Deactivate"
                       >
-                        <Trash2
-                          size={
-                            17
-                          }
-                        />
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </td>
                 </tr>
               );
-            },
-          )}
-        </tbody>
-      </table>
-    </div>
+            })}
+          </tbody>
+        </table>
+      </div>
   );
 }

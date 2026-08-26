@@ -106,7 +106,7 @@ export default function BannersTable({
                   <td className="px-5 py-4">
                     <div className="relative h-14 w-20 overflow-hidden rounded-lg bg-gray-100">
                       <Image
-                        src={resolveFoodHubCatalogImageUrl(banner.imageUrl) ?? "/Image/banner/placeholder.jpg"}
+                        src={resolveFoodHubCatalogImageUrl(banner.imageUrl || (banner as any).imageMediaUuid) ?? "/Image/banner/placeholder.jpg"}
                         alt=""
                         fill
                         className="object-cover"

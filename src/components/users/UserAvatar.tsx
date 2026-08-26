@@ -265,7 +265,7 @@ export default function UserAvatar({
   const activeImageUrl = !hasError && resolvedUrl ? resolvedUrl : fallbackImageUrl || null;
 
   return (
-    <div className={containerClassName}>
+    <div className={containerClassName} suppressHydrationWarning>
       {activeImageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -276,7 +276,7 @@ export default function UserAvatar({
           loading="lazy"
         />
       ) : (
-        <span className={textClassName}>{displayInitials}</span>
+        <span className={textClassName} suppressHydrationWarning>{displayInitials}</span>
       )}
     </div>
   );

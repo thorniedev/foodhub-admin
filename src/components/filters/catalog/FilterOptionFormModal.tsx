@@ -9,8 +9,6 @@ import {
 
 import {
   AlertTriangle,
-  Clock3,
-  Hash,
   Loader2,
   SlidersHorizontal,
   X,
@@ -37,20 +35,6 @@ const EMPTY_FORM: FilterCatalogOptionFormValues = {
   endTime: "",
   active: true,
 };
-
-/* =========================================================
-   FILTER OPTION FORM MODAL
-   UI concept follows ShopEditModal:
-   - sticky popup header
-   - grouped section cards
-   - text-3xl section titles
-   - text-lg minimum normal text
-   - h-[52px] inputs
-   - primary green labels/focus
-   - rounded-full footer actions
-   - hidden modal scrollbar
-   - body scroll lock
-========================================================= */
 
 export default function FilterOptionFormModal({
   open,
@@ -94,9 +78,9 @@ export default function FilterOptionFormModal({
       item
         ? {
             localName:
-              item.localName,
+              item.localName || item.name,
             name:
-              item.name,
+              item.localName || item.name,
             description:
               item.description ?? "",
             parentUuid:
@@ -214,6 +198,8 @@ export default function FilterOptionFormModal({
       await onSubmit(form);
     };
 
+  const isMealType = group.source === "MEAL_TYPE_API";
+
   return (
     <div
       className="
@@ -233,38 +219,29 @@ export default function FilterOptionFormModal({
       ================================================== */}
       <div
         className="
-          max-h-[94vh]
           w-full
           max-w-2xl
-          overflow-y-auto
+          overflow-hidden
           rounded-3xl
           border
           border-gray-100
           bg-white
           shadow-2xl
-          [scrollbar-width:none]
-          [-ms-overflow-style:none]
-          [&::-webkit-scrollbar]:hidden
         "
       >
         {/* =================================================
             HEADER
-            Same popup concept as ShopEditModal
         ================================================== */}
         <div
           className="
-            sticky
-            top-0
-            z-30
             flex
             items-center
             justify-between
             border-b
             border-gray-100
-            bg-white/95
+            bg-white
             px-6
             py-5
-            backdrop-blur-md
             sm:px-8
           "
         >
@@ -290,7 +267,7 @@ export default function FilterOptionFormModal({
             <div className="min-w-0">
               <p
                 className="
-                  text-3xl
+                  text-2xl
                   font-semibold
                   text-primary-800
                 "
@@ -302,7 +279,7 @@ export default function FilterOptionFormModal({
 
               <p
                 className="
-                  mt-1
+                  mt-0.5
                   truncate
                   text-lg
                   text-gray-500
@@ -349,162 +326,41 @@ export default function FilterOptionFormModal({
             handleSubmit
           }
           className="
-            space-y-6
+            space-y-4
             p-6
-            sm:p-8
+            sm:p-7
           "
         >
-          {/* =================================================
-              SECTION 1: BASIC INFORMATION
-          ================================================== */}
-          <Section>
-            <p className="mb-5 text-lg leading-7 text-gray-500">
-              សូមបំពេញឈ្មោះយ៉ាងហោចណាស់មួយ
-              ជាភាសាខ្មែរ ឬភាសាអង់គ្លេស។
-            </p>
+          {/* Names */}
+          {/* Name */}
+          <div>
+            <Field
+              label={`ឈ្មោះ ${group.labelKm}`}
+              value={form.localName || form.name}
+              onChange={(value) =>
+                setForm((previous) => ({
+                  ...previous,
+                  name: value,
+                  localName: value,
+                }))
+              }
+              placeholder={`ឧ. បញ្ចូលឈ្មោះ ${group.labelKm}`}
+            />
+          </div>
 
-            <div
-              className="
-                grid
-                gap-5
-                sm:grid-cols-2
-              "
-            >
-              <Field
-                label="ឈ្មោះសម្រាប់បង្ហាញ"
-                value={
-                  form.localName
-                }
-                onChange={(
-                  value,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      localName:
-                        value,
-                    }),
-                  )
-                }
-                placeholder={`ឧ. បញ្ចូលឈ្មោះ ${group.labelKm}`}
-              />
-
-              <Field
-                label="English name"
-                value={
-                  form.name
-                }
-                onChange={(
-                  value,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      name: value,
-                    }),
-                  )
-                }
-                placeholder={`e.g. Enter ${group.labelEn}`}
-              />
-            </div>
-
-            {/* Parent category */}
-            {group.source ===
-              "FOOD_CATEGORY_API" && (
-              <div className="mt-5">
-                <FieldLabel>
-                  ប្រភេទមេ
-                  (Parent Category)
-                </FieldLabel>
-
-                <select
-                  value={
-                    form.parentUuid ||
-                    ""
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    setForm(
-                      (
-                        previous,
-                      ) => ({
-                        ...previous,
-                        parentUuid:
-                          event.target
-                            .value,
-                      }),
-                    )
-                  }
-                  className="
-                    h-[52px]
-                    w-full
-                    rounded-xl
-                    border
-                    border-gray-200
-                    bg-gray-50
-                    px-4
-                    text-lg
-                    text-gray-800
-                    outline-none
-                    transition
-                    hover:border-gray-300
-                    focus:border-primary-600
-                    focus:bg-white
-                    focus:ring-4
-                    focus:ring-primary-100
-                  "
-                >
-                  <option value="">
-                    គ្មាន
-                    (Top Level)
-                  </option>
-
-                  {options
-                    ?.filter(
-                      (
-                        option,
-                      ) =>
-                        option.active &&
-                        option.uuid !==
-                          item?.uuid &&
-                        !option.parentUuid,
-                    )
-                    .map(
-                      (
-                        option,
-                      ) => (
-                        <option
-                          key={
-                            option.uuid
-                          }
-                          value={
-                            option.uuid
-                          }
-                        >
-                          {option.localName ||
-                            option.name}
-                        </option>
-                      ),
-                    )}
-                </select>
-              </div>
-            )}
-
-            {/* Description */}
-            <label className="mt-5 block">
+          {/* Parent category */}
+          {group.source ===
+            "FOOD_CATEGORY_API" && (
+            <div>
               <FieldLabel>
-                ការពិពណ៌នា
+                ប្រភេទមេ
+                (Parent Category)
               </FieldLabel>
 
-              <textarea
-                rows={4}
+              <select
                 value={
-                  form.description
+                  form.parentUuid ||
+                  ""
                 }
                 onChange={(
                   event,
@@ -514,83 +370,267 @@ export default function FilterOptionFormModal({
                       previous,
                     ) => ({
                       ...previous,
-                      description:
+                      parentUuid:
                         event.target
                           .value,
                     }),
                   )
                 }
-                placeholder="បញ្ចូលការពិពណ៌នា..."
                 className="
+                  h-[50px]
                   w-full
-                  resize-none
                   rounded-xl
                   border
                   border-gray-200
                   bg-gray-50
                   px-4
-                  py-3.5
                   text-lg
-                  leading-8
                   text-gray-800
                   outline-none
                   transition
-                  placeholder:text-gray-400
                   hover:border-gray-300
                   focus:border-primary-600
                   focus:bg-white
                   focus:ring-4
                   focus:ring-primary-100
                 "
-              />
-            </label>
-          </Section>
+              >
+                <option value="">
+                  គ្មាន
+                  (Top Level)
+                </option>
 
-          {/* =================================================
-              SECTION 2: TIME (for MEAL_TYPE_API)
-          ================================================== */}
-          {group.source === "MEAL_TYPE_API" && (
-            <Section
-              icon={<Clock3 size={22} />}
-              title="ពេលវេលា"
-            >
-              <div className="grid gap-5 sm:grid-cols-2">
-                <Field
-                  label="ម៉ោងចាប់ផ្តើម"
-                  type="time"
-                  step="1"
-                  required
-                  value={form.startTime || ""}
-                  onChange={(value) =>
-                    setForm((previous) => ({
-                      ...previous,
-                      startTime: value,
-                    }))
-                  }
-                />
-
-                <Field
-                  label="ម៉ោងបញ្ចប់"
-                  type="time"
-                  step="1"
-                  required
-                  value={form.endTime || ""}
-                  onChange={(value) =>
-                    setForm((previous) => ({
-                      ...previous,
-                      endTime: value,
-                    }))
-                  }
-                />
-              </div>
-            </Section>
+                {options
+                  ?.filter(
+                    (
+                      option,
+                    ) =>
+                      option.active &&
+                      option.uuid !==
+                        item?.uuid &&
+                      !option.parentUuid,
+                  )
+                  .map(
+                    (
+                      option,
+                    ) => (
+                      <option
+                        key={
+                          option.uuid
+                        }
+                        value={
+                          option.uuid
+                        }
+                      >
+                        {option.localName ||
+                          option.name}
+                      </option>
+                    ),
+                  )}
+              </select>
+            </div>
           )}
 
+          {/* Description */}
+          <div>
+            <FieldLabel>
+              ការពិពណ៌នា
+            </FieldLabel>
 
+            <textarea
+              rows={3}
+              value={
+                form.description
+              }
+              onChange={(
+                event,
+              ) =>
+                setForm(
+                  (
+                    previous,
+                  ) => ({
+                    ...previous,
+                    description:
+                      event.target
+                        .value,
+                  }),
+                )
+              }
+              placeholder="បញ្ចូលការពិពណ៌នា..."
+              className="
+                w-full
+                resize-none
+                rounded-xl
+                border
+                border-gray-200
+                bg-gray-50
+                px-4
+                py-3
+                text-lg
+                leading-8
+                text-gray-800
+                outline-none
+                transition
+                placeholder:text-gray-400
+                hover:border-gray-300
+                focus:border-primary-600
+                focus:bg-white
+                focus:ring-4
+                focus:ring-primary-100
+              "
+            />
+          </div>
 
-          {/* =================================================
-              VALIDATION ERROR
-          ================================================== */}
+          {/* Meal start/end time */}
+          {isMealType && (
+            <div
+              className="
+                grid
+                gap-4
+                sm:grid-cols-2
+              "
+            >
+              <Field
+                label="ម៉ោងចាប់ផ្តើម"
+                type="time"
+                step="1"
+                required
+                value={
+                  form.startTime ||
+                  ""
+                }
+                onChange={(
+                  value,
+                ) =>
+                  setForm(
+                    (
+                      previous,
+                    ) => ({
+                      ...previous,
+                      startTime:
+                        value,
+                    }),
+                  )
+                }
+              />
+
+              <Field
+                label="ម៉ោងបញ្ចប់"
+                type="time"
+                step="1"
+                required
+                value={
+                  form.endTime ||
+                  ""
+                }
+                onChange={(
+                  value,
+                ) =>
+                  setForm(
+                    (
+                      previous,
+                    ) => ({
+                      ...previous,
+                      endTime:
+                        value,
+                    }),
+                  )
+                }
+              />
+            </div>
+          )}
+
+          {/* Status */}
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              gap-4
+              rounded-2xl
+              border
+              border-gray-100
+              bg-gray-50
+              px-5
+              py-3.5
+            "
+          >
+            <div className="min-w-0">
+              <p
+                className="
+                  text-lg
+                  font-medium
+                  text-primary-800
+                "
+              >
+                ស្ថានភាព
+              </p>
+
+              <p
+                className="
+                  text-base
+                  text-gray-500
+                "
+              >
+                បើក ដើម្បីឱ្យស្លាកនេះសកម្មក្នុងប្រព័ន្ធ។
+              </p>
+            </div>
+
+            <button
+              type="button"
+              role="switch"
+              aria-checked={
+                form.active
+              }
+              onClick={() =>
+                setForm(
+                  (
+                    previous,
+                  ) => ({
+                    ...previous,
+                    active:
+                      !previous.active,
+                  }),
+                )
+              }
+              className={`
+                relative
+                h-7
+                w-12
+                shrink-0
+                rounded-full
+                transition
+                focus:outline-none
+                focus:ring-4
+                focus:ring-primary-100
+                ${
+                  form.active
+                    ? "bg-primary-700"
+                    : "bg-gray-300"
+                }
+              `}
+            >
+              <span
+                className={`
+                  absolute
+                  top-1
+                  h-5
+                  w-5
+                  rounded-full
+                  bg-white
+                  shadow-sm
+                  transition-all
+                  ${
+                    form.active
+                      ? "left-6"
+                      : "left-1"
+                  }
+                `}
+              />
+            </button>
+          </div>
+
+          {/* Validation error */}
           {validationError && (
             <div
               className="
@@ -601,15 +641,15 @@ export default function FilterOptionFormModal({
                 border
                 border-red-100
                 bg-red-50
-                px-5
-                py-4
+                px-4
+                py-3
                 text-lg
                 leading-7
                 text-red-600
               "
             >
               <AlertTriangle
-                size={21}
+                size={18}
                 className="
                   mt-0.5
                   shrink-0
@@ -622,9 +662,7 @@ export default function FilterOptionFormModal({
             </div>
           )}
 
-          {/* =================================================
-              ACTION BUTTONS
-          ================================================== */}
+          {/* Action buttons */}
           <div
             className="
               flex
@@ -632,7 +670,7 @@ export default function FilterOptionFormModal({
               gap-3
               border-t
               border-gray-100
-              pt-6
+              pt-4
               sm:flex-row
               sm:items-center
               sm:justify-end
@@ -695,7 +733,7 @@ export default function FilterOptionFormModal({
             >
               {saving && (
                 <Loader2
-                  size={20}
+                  size={18}
                   className="animate-spin"
                 />
               )}
@@ -704,7 +742,7 @@ export default function FilterOptionFormModal({
                 ? "កំពុងរក្សាទុក..."
                 : item
                   ? "រក្សាទុកការកែប្រែ"
-                  : "បន្ថែម"}
+                  : `បន្ថែម ${group.labelKm}`}
             </button>
           </div>
         </form>
@@ -714,101 +752,7 @@ export default function FilterOptionFormModal({
 }
 
 /* =========================================================
-   SECTION
-   Same section-card style as ShopEditModal
-========================================================= */
-
-function Section({
-  title,
-  icon,
-  children,
-}: {
-  title?: string;
-  icon?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section
-      className="
-        rounded-2xl
-        border
-        border-gray-100
-        bg-white
-        p-5
-        sm:p-6
-      "
-    >
-      {title && (
-        <div className="mb-6 flex items-center gap-3">
-          {icon && (
-            <div
-              className="
-                flex
-                h-11
-                w-11
-                shrink-0
-                items-center
-                justify-center
-                rounded-xl
-                bg-primary-50
-                text-primary-800
-              "
-            >
-              {icon}
-            </div>
-          )}
-
-          <p
-            className="
-              text-3xl
-              font-semibold
-              text-primary-800
-            "
-          >
-            {title}
-          </p>
-        </div>
-      )}
-
-      {children}
-    </section>
-  );
-}
-
-/* =========================================================
-   FIELD LABEL
-========================================================= */
-
-function FieldLabel({
-  children,
-  required = false,
-}: {
-  children: ReactNode;
-  required?: boolean;
-}) {
-  return (
-    <span
-      className="
-        mb-2
-        block
-        text-lg
-        font-medium
-        text-primary-800
-      "
-    >
-      {children}
-
-      {required && (
-        <span className="text-red-500">
-          {" "}*
-        </span>
-      )}
-    </span>
-  );
-}
-
-/* =========================================================
-   INPUT FIELD
+   REUSABLE FIELD
 ========================================================= */
 
 function Field({
@@ -816,9 +760,9 @@ function Field({
   value,
   onChange,
   type = "text",
-  step,
   placeholder,
-  required = false,
+  required,
+  step,
 }: {
   label: string;
   value: string;
@@ -826,43 +770,35 @@ function Field({
     value: string,
   ) => void;
   type?: string;
-  step?: string;
   placeholder?: string;
   required?: boolean;
+  step?: string;
 }) {
   return (
     <label className="block">
-      <FieldLabel
-        required={
-          required
-        }
-      >
+      <FieldLabel>
         {label}
+        {required
+          ? " *"
+          : ""}
       </FieldLabel>
 
       <input
         type={type}
-        min={type === "number" ? "0" : undefined}
         step={step}
-        required={required}
         value={value}
-        onKeyDown={(event) => {
-          if (type === "number" && (event.key === "-" || event.key === "e")) {
-            event.preventDefault();
-          }
-        }}
+        required={required}
+        placeholder={placeholder}
         onChange={(
           event,
-        ) => {
-          const val = event.target.value;
-          if (type === "number" && Number(val) < 0) return;
-          onChange(val);
-        }}
-        placeholder={
-          placeholder
+        ) =>
+          onChange(
+            event.target
+              .value,
+          )
         }
         className="
-          h-[52px]
+          h-[50px]
           w-full
           rounded-xl
           border
@@ -882,5 +818,25 @@ function Field({
         "
       />
     </label>
+  );
+}
+
+function FieldLabel({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <span
+      className="
+        mb-2
+        block
+        text-lg
+        font-medium
+        text-primary-800
+      "
+    >
+      {children}
+    </span>
   );
 }

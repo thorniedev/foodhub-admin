@@ -56,30 +56,22 @@ export default function HardDeleteDietaryTypeConfirmModal({
         </div>
 
         <div className="mt-5">
-          <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-xs font-black uppercase tracking-wider text-red-700 ring-1 ring-inset ring-red-200">
-            Permanent Action
-          </span>
+      
 
           <h3 className="mt-2 text-2xl font-black text-gray-900 sm:text-3xl">
-            លុបរបបអាហារជាអចិន្ត្រៃយ៍?
+            លុបរបបអាហារ?
           </h3>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-red-100 bg-red-50/70 p-4 text-sm leading-relaxed text-red-800">
+        <div className="mt-4 rounded-2xl border border-red-100 bg-red-50/70 p-4 text-lg leading-relaxed text-red-800">
           <p>
             អ្នកកំពុងលុបរបបអាហារ{" "}
             <span className="font-bold text-red-950">{item.name}</span> (Code:{" "}
             <code className="rounded bg-red-100 px-1.5 py-0.5 font-mono">{item.code}</code>)។
           </p>
-          <p className="mt-2 font-medium">
-            ⚠️ ការលុបនេះជាលក្ខណៈ <strong>Hard Delete</strong> ដែលនឹងលុបទិន្នន័យចេញពី Database ទាំងស្រុង ហើយ<strong>មិនអាចត្រឡប់ក្រោយវិញបានទេ</strong>។
-          </p>
+         
         </div>
 
-        <div className="mt-4 flex items-center gap-2 rounded-xl bg-gray-50 px-3 py-2 text-xs font-mono text-gray-600">
-          <span className="font-bold text-gray-400">Endpoint:</span>
-          <span>DELETE /api/v1/admin/dietary-types/{item.code}/hard</span>
-        </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3">
           <button

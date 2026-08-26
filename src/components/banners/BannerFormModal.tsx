@@ -12,6 +12,7 @@ import type {
 import { BANNER_CATEGORIES, BANNER_CATEGORY_LABELS } from "../../types/banner";
 import { resolveImageUrl } from "../../services/adminBannerApi";
 import { compressImage } from "../../utils/imageCompression";
+import BannerMediaImage from "./BannerMediaImage";
 
 const ACCEPTED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
@@ -283,11 +284,19 @@ export default function BannerFormModal({
                 {activeDisplayUrl ? (
                   <div className="relative flex flex-col items-center gap-5 rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:flex-row">
                     <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-gray-100 sm:w-60">
-                      <img
-                        src={activeDisplayUrl}
-                        alt="Banner Preview"
-                        className="h-full w-full object-cover"
-                      />
+                      {imagePreview ? (
+                        <img
+                          src={imagePreview}
+                          alt="Banner Preview"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <BannerMediaImage
+                          mediaUrlOrUuid={existingImageUrl}
+                          alt="Banner Preview"
+                          className="h-full w-full object-cover"
+                        />
+                      )}
                       <span className="absolute left-2.5 top-2.5 rounded-lg bg-black/60 px-3 py-1 text-lg font-bold text-white backdrop-blur-xs">
                         {imagePreview ? "រូបភាពថ្មី (New)" : "បច្ចុប្បន្ន (Current)"}
                       </span>

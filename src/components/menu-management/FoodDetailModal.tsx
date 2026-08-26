@@ -2,21 +2,32 @@
 
 import {
   Activity,
+  Calendar,
   Clock,
   CloudSun,
+  DollarSign,
+  ExternalLink,
   Flame,
   Globe2,
   Heart,
   Layers,
   Loader2,
   Pencil,
+  Sparkles,
+  Store,
   UsersRound,
   X,
 } from "lucide-react";
 
-import { useGetManagedFoodQuery } from "@/src/app/store/menuManagementApi";
+import {
+  useGetManagedFoodQuery,
+  useGetPublishedMenuItemsQuery,
+  useGetManagedFoodCategoriesQuery,
+  useGetManagedCuisinesQuery,
+} from "@/src/app/store/menuManagementApi";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
+import { readFoodRelationsStorage } from "@/src/lib/filterCatalogStorage";
 
 const SPICE_LABELS: Record<number, string> = {
   0: "0 - មិនហឹរ (No Spicy)",
@@ -27,20 +38,125 @@ const SPICE_LABELS: Record<number, string> = {
   5: "5 - ហឹរបំផុត (Extreme)",
 };
 
+// ─── Shared card ─────────────────────────────────────────────────────────────
+
+function InfoCard({
+  accentClass,
+  label,
+  icon,
+  children,
+}: {
+  accentClass: string;
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:shadow-sm">
+      <div className={`absolute left-0 top-0 h-full w-1 rounded-l-2xl ${accentClass}`} />
+      <div className="flex items-center gap-2 pl-2 text-sm font-semibold text-gray-400 mb-2">
+        {icon}
+        <span>{label}</span>
+      </div>
+      <div className="pl-2">{children}</div>
+    </div>
+  );
+}
+
+function TagRow({ items, color }: { items: any[]; color: string }) {
+  if (!items.length) return <span className="text-sm text-gray-400">—</span>;
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {items.map((it: any, i: number) => (
+        <span key={i} className={`inline-flex rounded-xl px-3 py-1 text-xs font-bold ${color}`}>
+          {it.localName || it.name || it.code || "—"}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// ─── Main modal ──────────────────────────────────────────────────────────────
+
 export default function FoodDetailModal({
   uuid,
   onClose,
   onEdit,
+  onEditMenuItem,
 }: {
   uuid: string | null;
   onClose: () => void;
   onEdit?: (item: any) => void;
+  onEditMenuItem?: (item: any) => void;
 }) {
-  const { data, isLoading, isError } = useGetManagedFoodQuery(uuid ?? "", {
+  const { data: rawData, isLoading, isError } = useGetManagedFoodQuery(uuid ?? "", {
     skip: !uuid,
   });
 
+  const categoriesQuery = useGetManagedFoodCategoriesQuery();
+  const cuisinesQuery = useGetManagedCuisinesQuery();
+
+  // Query menu items that use this food
+  const { data: menuItemsPage, isLoading: menuItemsLoading } = useGetPublishedMenuItemsQuery(
+    uuid ? { foodUuid: uuid, size: 20, page: 0 } : undefined,
+    { skip: !uuid },
+  );
+  const menuItems = menuItemsPage?.content ?? [];
+
   if (!uuid) return null;
+
+  const stored = uuid ? readFoodRelationsStorage(uuid) : null;
+
+  // If server returned all-null nutrition, prefer stored values.
+  const srvNut = rawData ? (rawData.nutritionData ?? (rawData as any).nutrition) : null;
+  const storedNut = stored?.nutritionData ?? stored?.nutrition;
+  // Only trust server nutrition when at least one field has a real non-zero value.
+  const srvHasNutrition = !!(
+    srvNut &&
+    (
+      (srvNut as any).calories ||
+      (srvNut as any).proteinGrams ||
+      (srvNut as any).protein ||
+      (srvNut as any).carbohydrateGrams ||
+      (srvNut as any).carbs ||
+      (srvNut as any).fatGrams ||
+      (srvNut as any).fat ||
+      (srvNut as any).fiberGrams ||
+      (srvNut as any).fiber
+    )
+  );
+  const mergedNutrition = srvHasNutrition ? srvNut : (storedNut ?? srvNut);
+
+  const categoryName =
+    rawData?.categoryName ||
+    rawData?.category?.name ||
+    (rawData?.category as any)?.localName ||
+    categoriesQuery.data?.find((c) => c.uuid === (rawData?.categoryUuid || (rawData?.category as any)?.uuid))?.name;
+
+  const cuisineName =
+    rawData?.cuisineName ||
+    rawData?.cuisine?.name ||
+    (rawData?.cuisine as any)?.localName ||
+    cuisinesQuery.data?.find((c) => c.uuid === (rawData?.cuisineUuid || (rawData?.cuisine as any)?.uuid))?.name;
+
+  const data = rawData
+    ? {
+        ...rawData,
+        categoryName,
+        cuisineName,
+        nutritionData: mergedNutrition,
+        mealTypes: (stored?.mealTypes?.length ? stored.mealTypes : (rawData as any)?.mealTypes) ?? [],
+        seasons: (stored?.seasons?.length ? stored.seasons : rawData.seasons) ?? [],
+        events: (stored?.events?.length ? stored.events : rawData.events) ?? [],
+        suitableWeather: (stored?.suitableWeather?.length ? stored.suitableWeather : (stored?.weatherConditions ?? rawData.suitableWeather)) ?? [],
+        ageRules: (stored?.ageRules?.length ? stored.ageRules : (stored?.ageGroups ?? rawData.ageRules)) ?? [],
+        dietaryTypes: (stored?.dietaryTypes?.length ? stored.dietaryTypes : rawData.dietaryTypes) ?? [],
+        allergens: (stored?.allergens?.length ? stored.allergens : rawData.allergens) ?? [],
+        preparationTimes: (stored?.preparationTimes?.length ? stored.preparationTimes : (rawData as any)?.preparationTimes) ?? [],
+        distances: (stored?.distances?.length ? stored.distances : (rawData as any)?.distances) ?? [],
+      }
+    : (stored as any);
+
 
   const images = (
     data?.images?.length
@@ -57,6 +173,7 @@ export default function FoodDetailModal({
   return (
     <div className="fixed inset-0 z-[150] overflow-y-auto bg-black/60 p-4 backdrop-blur-[4px] animate-in fade-in duration-200">
       <div className="mx-auto my-6 w-full max-w-4xl overflow-hidden rounded-[32px] bg-white shadow-[0_32px_80px_rgba(0,0,0,0.25)] animate-in zoom-in-95 duration-200">
+
         {/* ─── HERO BANNER ─── */}
         <div className="relative bg-gradient-to-br from-[#14833E] via-[#1a9e4d] to-[#0f6b32] px-7 pb-8 pt-7">
           <button
@@ -77,9 +194,7 @@ export default function FoodDetailModal({
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-4xl">
-                  🍽️
-                </div>
+                <div className="flex h-full w-full items-center justify-center text-4xl">🍽️</div>
               )}
             </div>
             <div className="min-w-0 flex-1 pr-10">
@@ -87,216 +202,175 @@ export default function FoodDetailModal({
                 {data?.localName || data?.canonicalName || "ព័ត៌មានមុខម្ហូប"}
               </p>
               {data?.canonicalName && data?.localName && (
-                <p className="mt-0.5 text-lg text-white/70">{data.canonicalName}</p>
+                <p className="mt-0.5 text-base text-white/70">{data.canonicalName}</p>
               )}
-              <p className="mt-1 text-lg text-white/60">ព័ត៌មានលម្អិតពេញលេញអំពីមុខម្ហូប</p>
+              <p className="mt-1 text-sm text-white/60">ព័ត៌មានលម្អិតពេញលេញអំពីមុខម្ហូប</p>
             </div>
           </div>
 
           {/* Badges row */}
           {data && (
             <div className="mt-5 flex flex-wrap items-center gap-2.5">
-              <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-lg font-bold ${data.isActive === false
+              <span className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-bold ${
+                data.isActive === false
                   ? "border-white/20 bg-black/20 text-white/70"
                   : "border-white/30 bg-white/20 text-white"
-                }`}>
-                <span className={`h-2.5 w-2.5 rounded-full ${data.isActive === false ? "bg-gray-400" : "bg-emerald-300"}`} />
+              }`}>
+                <span className={`h-2 w-2 rounded-full ${data.isActive === false ? "bg-gray-400" : "bg-emerald-300"}`} />
                 {data.isActive === false ? "អសកម្ម" : "សកម្ម"}
               </span>
               {data.categoryName && (
-                <span className="rounded-full bg-white/15 px-4 py-1.5 text-lg font-bold text-white border border-white/20">
+                <span className="rounded-full bg-white/15 px-3.5 py-1.5 text-sm font-bold text-white border border-white/20">
                   {extractKhmerOnlyName(data.categoryName)}
                 </span>
               )}
               {data.cuisineName && (
-                <span className="rounded-full bg-white/15 px-4 py-1.5 text-lg font-bold text-white border border-white/20">
+                <span className="rounded-full bg-white/15 px-3.5 py-1.5 text-sm font-bold text-white border border-white/20">
                   {data.cuisineName}
                 </span>
               )}
+              {/* Menu items count badge */}
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 border border-white/25 px-3.5 py-1.5 text-sm font-bold text-white">
+                <Store size={13} />
+                {menuItemsLoading ? "..." : `${menuItems.length} ម៉ឺនុយ`}
+              </span>
             </div>
           )}
         </div>
 
+        {/* ─── BODY ─── */}
         <div className="p-7">
           {isLoading ? (
             <div className="flex min-h-64 flex-col items-center justify-center gap-4">
               <Loader2 size={40} className="animate-spin text-[#137A3D]" />
-              <p className="text-lg font-semibold text-gray-500">
+              <p className="text-base font-semibold text-gray-500">
                 កំពុងទាញយកព័ត៌មានលម្អិតមុខម្ហូប...
               </p>
             </div>
           ) : isError ? (
-            <div className="my-6 rounded-2xl bg-red-50 p-5 text-center text-lg font-semibold text-red-600">
+            <div className="my-6 rounded-2xl bg-red-50 p-5 text-center text-base font-semibold text-red-600">
               មិនអាចទាញយកព័ត៌មានលម្អិតមុខម្ហូបនេះបានទេ។
             </div>
           ) : data ? (
             <div className="mt-4 space-y-5">
-              {/* Description + Spice */}
-              {(data.description || spice !== undefined) && (
-                <div className="space-y-3">
-                  {data.description && (
-                    <p className="text-lg leading-relaxed text-gray-600">{data.description}</p>
-                  )}
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5 text-lg font-bold text-gray-700">
-                      <Flame size={20} className={spice > 0 ? "text-orange-500" : "text-gray-300"} />
-                      <span>កម្រិតហឹរ:</span>
-                    </div>
-                    <span className="text-lg font-bold text-orange-600">
-                      {SPICE_LABELS[spice] || `${spice} / 5`}
-                    </span>
-                  </div>
-                </div>
+
+              {/* Description */}
+              {data.description && (
+                <p className="text-base leading-relaxed text-gray-600">{data.description}</p>
               )}
 
-              {/* Category & Cuisine Grid */}
+              {/* Spice */}
+              <div className="flex items-center gap-3">
+                <Flame size={18} className={spice > 0 ? "text-orange-500" : "text-gray-300"} />
+                <span className="text-sm font-bold text-gray-600">កម្រិតហឹរ:</span>
+                <div className="flex gap-1">
+                  {[0,1,2,3,4,5].map(lvl => (
+                    <span key={lvl} className={`h-3.5 w-3.5 rounded-full border ${
+                      lvl <= spice ? "bg-orange-400 border-orange-300" : "bg-gray-100 border-gray-200"
+                    }`} />
+                  ))}
+                </div>
+                <span className="text-sm font-bold text-orange-600">
+                  {SPICE_LABELS[spice] || `${spice} / 5`}
+                </span>
+              </div>
+
+              {/* Category & Cuisine */}
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-blue-200/60 hover:bg-blue-50/30">
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-blue-200 transition group-hover:bg-blue-400" />
-                  <div className="flex items-center gap-2 pl-2 text-lg font-semibold text-gray-400">
-                    <Layers size={18} />
-                    <span>ប្រភេទមុខម្ហូប</span>
-                  </div>
-                  <p className="mt-2 pl-2 text-xl font-bold text-gray-900">
+                <InfoCard accentClass="bg-blue-300" label="ប្រភេទមុខម្ហូប" icon={<Layers size={15} />}>
+                  <p className="text-base font-bold text-gray-900">
                     {data.categoryName ? extractKhmerOnlyName(data.categoryName) : "—"}
                   </p>
-                </div>
-
-                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-amber-200/60 hover:bg-amber-50/30">
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-amber-200 transition group-hover:bg-amber-400" />
-                  <div className="flex items-center gap-2 pl-2 text-lg font-semibold text-gray-400">
-                    <Globe2 size={18} />
-                    <span>ម្ហូបតាមប្រទេស</span>
-                  </div>
-                  <p className="mt-2 pl-2 text-xl font-bold text-gray-900">
-                    {data.cuisineName || "—"}
-                  </p>
-                </div>
+                </InfoCard>
+                <InfoCard accentClass="bg-amber-300" label="ម្ហូបតាមប្រទេស (Cuisine)" icon={<Globe2 size={15} />}>
+                  <p className="text-base font-bold text-gray-900">{data.cuisineName || "—"}</p>
+                </InfoCard>
               </div>
 
-              {/* Nutrition Data */}
+              {/* Nutrition */}
               {data.nutritionData && (
-                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-[#14833E]/30 hover:bg-emerald-50/30">
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-[#14833E]/30 transition group-hover:bg-[#14833E]" />
-                  <div className="flex items-center gap-2.5 pl-2 text-lg font-semibold text-gray-400">
-                    <Activity size={18} className="text-[#14833E]" />
-                    <span>សារធាតុចិញ្ចឹម (Nutrition)</span>
+                <InfoCard accentClass="bg-emerald-400" label="សារធាតុចិញ្ចឹម (Nutrition)" icon={<Activity size={15} className="text-[#14833E]" />}>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                    {[
+                      { label: "កាឡូរី", val: data.nutritionData.calories, unit: "kcal", cls: "bg-emerald-50 text-emerald-800" },
+                      { label: "ខ្លាញ់", val: data.nutritionData.fatGrams, unit: "g", cls: "bg-orange-50 text-orange-800" },
+                      { label: "សរសៃ", val: data.nutritionData.fiberGrams, unit: "g", cls: "bg-violet-50 text-violet-800" },
+                      { label: "ប្រូតេអ៊ីន", val: data.nutritionData.proteinGrams, unit: "g", cls: "bg-blue-50 text-blue-800" },
+                      { label: "កាបូអ៊ីដ្រាត", val: data.nutritionData.carbohydrateGrams ?? (data.nutritionData as any).carbsGrams, unit: "g", cls: "bg-amber-50 text-amber-800" },
+                    ].map(n => (
+                      <div key={n.label} className={`rounded-2xl ${n.cls} p-3 text-center`}>
+                        <p className="text-xs font-bold text-gray-500">{n.label}</p>
+                        <p className="mt-0.5 text-base font-black">{n.val ?? 0} <span className="text-xs font-medium">{n.unit}</span></p>
+                      </div>
+                    ))}
                   </div>
-
-                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
-                    <div className="rounded-2xl bg-emerald-50 p-3.5 text-center">
-                      <p className="text-lg font-bold text-gray-500">កាឡូរី</p>
-                      <p className="mt-1 text-2xl font-black text-emerald-800">{data.nutritionData.calories ?? 0} kcal</p>
-                    </div>
-                    <div className="rounded-2xl bg-orange-50/60 p-3.5 text-center">
-                      <p className="text-lg font-bold text-gray-500">ខ្លាញ់</p>
-                      <p className="mt-1 text-2xl font-black text-orange-800">{data.nutritionData.fatGrams ?? 0} g</p>
-                    </div>
-                    <div className="rounded-2xl bg-violet-50/60 p-3.5 text-center">
-                      <p className="text-lg font-bold text-gray-500">សរសៃ</p>
-                      <p className="mt-1 text-2xl font-black text-violet-800">{data.nutritionData.fiberGrams ?? 0} g</p>
-                    </div>
-                    <div className="rounded-2xl bg-blue-50/60 p-3.5 text-center">
-                      <p className="text-lg font-bold text-gray-500">ប្រូតេអ៊ីន</p>
-                      <p className="mt-1 text-2xl font-black text-blue-800">{data.nutritionData.proteinGrams ?? 0} g</p>
-                    </div>
-                    <div className="rounded-2xl bg-amber-50/60 p-3.5 text-center">
-                      <p className="text-lg font-bold text-gray-500">កាបូអ៊ីដ្រាត</p>
-                      <p className="mt-1 text-2xl font-black text-amber-800">{data.nutritionData.carbohydrateGrams ?? 0} g</p>
-                    </div>
-                  </div>
-                </div>
+                </InfoCard>
               )}
 
-              {/* Filter Tags: Meal Types, Age Groups, Dietary Types, Seasons */}
+              {/* Filter Tags Grid */}
               <div className="grid gap-3 sm:grid-cols-2">
                 {/* Meal Types */}
-                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-emerald-200/60 hover:bg-emerald-50/30">
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-[#14833E]/30 transition group-hover:bg-[#14833E]" />
-                  <div className="flex items-center gap-2 pl-2 text-lg font-semibold text-gray-400">
-                    <Clock size={16} />
-                    <span>ពេលទទួលទាន</span>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {Array.isArray(data.mealTypes) && data.mealTypes.length > 0 ? (
-                      data.mealTypes.map((m: any, idx: number) => (
-                        <span key={idx} className="rounded-xl bg-emerald-100 px-3.5 py-1.5 text-lg font-bold text-emerald-800">
-                          {m.name || m.code}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-lg text-gray-400">គ្រប់ពេល</span>
-                    )}
-                  </div>
-                </div>
+                <InfoCard accentClass="bg-emerald-400" label="ពេលទទួលទាន" icon={<Clock size={15} />}>
+                  <TagRow
+                    items={Array.isArray(data.mealTypes) ? data.mealTypes as any[] : []}
+                    color="bg-emerald-100 text-emerald-800"
+                  />
+                </InfoCard>
 
                 {/* Age Groups */}
-                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-blue-200/60 hover:bg-blue-50/30">
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-blue-200 transition group-hover:bg-blue-400" />
-                  <div className="flex items-center gap-2 pl-2 text-lg font-semibold text-gray-400">
-                    <UsersRound size={16} />
-                    <span>ក្រុមអាយុ</span>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {Array.isArray(data.ageRules) && data.ageRules.length > 0 ? (
-                      data.ageRules.map((a: any, idx: number) => (
-                        <span key={idx} className="rounded-xl bg-blue-100 px-3.5 py-1.5 text-lg font-bold text-blue-800">{a.name || a.code}</span>
-                      ))
-                    ) : Array.isArray((data as any).ageGroups) && (data as any).ageGroups.length > 0 ? (
-                      (data as any).ageGroups.map((a: any, idx: number) => (
-                        <span key={idx} className="rounded-xl bg-blue-100 px-3.5 py-1.5 text-lg font-bold text-blue-800">{a.name || a.code}</span>
-                      ))
-                    ) : (
-                      <span className="text-lg text-gray-400">គ្រប់វ័យ</span>
-                    )}
-                  </div>
-                </div>
+                <InfoCard accentClass="bg-blue-300" label="ក្រុមអាយុ" icon={<UsersRound size={15} />}>
+                  <TagRow
+                    items={
+                      Array.isArray(data.ageRules) && (data.ageRules as any[]).length > 0
+                        ? data.ageRules as any[]
+                        : Array.isArray((data as any).ageGroups)
+                        ? (data as any).ageGroups
+                        : []
+                    }
+                    color="bg-blue-100 text-blue-800"
+                  />
+                </InfoCard>
 
                 {/* Dietary Types */}
-                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-rose-200/60 hover:bg-rose-50/30">
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-rose-200 transition group-hover:bg-rose-400" />
-                  <div className="flex items-center gap-2 pl-2 text-lg font-semibold text-gray-400">
-                    <Heart size={16} />
-                    <span>របបអាហារ</span>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {Array.isArray(data.dietaryTypes) && data.dietaryTypes.length > 0 ? (
-                      data.dietaryTypes.map((d: any, idx: number) => (
-                        <span key={idx} className="rounded-xl bg-rose-100 px-3.5 py-1.5 text-lg font-bold text-rose-800">{d.name || d.code}</span>
-                      ))
-                    ) : (
-                      <span className="text-lg text-gray-400">គ្មាន</span>
-                    )}
-                  </div>
-                </div>
+                <InfoCard accentClass="bg-rose-300" label="របបអាហារ" icon={<Heart size={15} />}>
+                  <TagRow
+                    items={Array.isArray(data.dietaryTypes) ? data.dietaryTypes as any[] : []}
+                    color="bg-rose-100 text-rose-800"
+                  />
+                </InfoCard>
 
-                {/* Seasons / Weather */}
-                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-amber-200/60 hover:bg-amber-50/30">
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-amber-200 transition group-hover:bg-amber-400" />
-                  <div className="flex items-center gap-2 pl-2 text-lg font-semibold text-gray-400">
-                    <CloudSun size={16} />
-                    <span>រដូវកាល & អាកាសធាតុ</span>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {Array.isArray(data.seasons) && data.seasons.map((s: any, idx: number) => (
-                      <span key={`s-${idx}`} className="rounded-xl bg-amber-100 px-3.5 py-1.5 text-lg font-bold text-amber-800">{s.localName || s.name || s.code}</span>
+                {/* Seasons + Weather */}
+                <InfoCard accentClass="bg-amber-300" label="រដូវកាល & អាកាសធាតុ" icon={<CloudSun size={15} />}>
+                  <div className="flex flex-wrap gap-1.5">
+                    {Array.isArray(data.seasons) && (data.seasons as any[]).map((s: any, idx: number) => (
+                      <span key={`s-${idx}`} className="rounded-xl bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
+                        {s.localName || s.name || s.code}
+                      </span>
                     ))}
-                    {Array.isArray(data.suitableWeather) && data.suitableWeather.map((w: any, idx: number) => (
-                      <span key={`w-${idx}`} className="rounded-xl bg-sky-100 px-3.5 py-1.5 text-lg font-bold text-sky-800">{w.localName || w.name || w.code}</span>
+                    {Array.isArray(data.suitableWeather) && (data.suitableWeather as any[]).map((w: any, idx: number) => (
+                      <span key={`w-${idx}`} className="rounded-xl bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800">
+                        {w.localName || w.name || w.code}
+                      </span>
                     ))}
-                    {(!data.seasons || data.seasons.length === 0) && (!data.suitableWeather || data.suitableWeather.length === 0) && (
-                      <span className="text-lg text-gray-400">គ្រប់រដូវកាល</span>
+                    {(!data.seasons || (data.seasons as any[]).length === 0) &&
+                     (!data.suitableWeather || (data.suitableWeather as any[]).length === 0) && (
+                      <span className="text-sm text-gray-400">គ្រប់រដូវកាល</span>
                     )}
                   </div>
-                </div>
+                </InfoCard>
               </div>
 
-              {/* Gallery Images if multiple */}
+              {/* Events */}
+              {Array.isArray(data.events) && (data.events as any[]).length > 0 && (
+                <InfoCard accentClass="bg-violet-300" label="ព្រឹត្តិការណ៍" icon={<Sparkles size={15} />}>
+                  <TagRow items={data.events as any[]} color="bg-violet-100 text-violet-800" />
+                </InfoCard>
+              )}
+
+              {/* Gallery Images */}
               {images.length > 1 && (
-                <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-gray-200">
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-gray-200 transition group-hover:bg-gray-400" />
-                  <p className="pl-2 text-lg font-semibold text-gray-400">រូបភាពទាំងអស់ ({images.length})</p>
-                  <div className="mt-3 flex flex-wrap gap-3">
+                <InfoCard accentClass="bg-gray-300" label={`រូបភាពទាំងអស់ (${images.length})`} icon={<span className="text-base">🖼</span>}>
+                  <div className="flex flex-wrap gap-2.5">
                     {images.map((img, idx) => (
                       <img
                         key={idx}
@@ -306,8 +380,111 @@ export default function FoodDetailModal({
                       />
                     ))}
                   </div>
-                </div>
+                </InfoCard>
               )}
+
+              {/* ══════════════════════════════════════════════════════
+                  MENU ITEMS SECTION — stores that sell this food
+                  ══════════════════════════════════════════════════════ */}
+              <div className="mt-2 rounded-2xl border border-[#14833E]/20 bg-emerald-50/40 overflow-hidden">
+                {/* Section header */}
+                <div className="flex items-center justify-between border-b border-[#14833E]/10 px-5 py-4">
+                  <div className="flex items-center gap-2.5">
+                    <Store size={18} className="text-[#14833E]" />
+                    <div>
+                      <p className="text-base font-bold text-emerald-900">
+                        ម៉ឺនុយដែលប្រើប្រាស់មុខម្ហូបនេះ
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        ហាងដែលមានលក់ {data?.localName || data?.canonicalName}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-[#14833E]/10 px-3 py-1 text-xs font-bold text-[#14833E]">
+                    {menuItemsLoading ? "..." : `${menuItems.length} ម៉ឺនុយ`}
+                  </span>
+                </div>
+
+                <div className="p-4">
+                  {menuItemsLoading ? (
+                    <div className="flex items-center justify-center gap-2 py-6">
+                      <Loader2 size={20} className="animate-spin text-[#14833E]" />
+                      <span className="text-sm text-gray-500">កំពុងទាញយកម៉ឺនុយ...</span>
+                    </div>
+                  ) : menuItems.length === 0 ? (
+                    <p className="py-4 text-center text-sm text-gray-400">
+                      មិនទាន់មានហាងណាបន្ថែមមុខម្ហូបនេះទេ
+                    </p>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {menuItems.map((mi: any, idx: number) => {
+                        const miImg = mi.primaryMediaUrls?.[0] || mi.thumbnail || mi.imageUrl || mi.primaryMediaUuid;
+                        const price = Number(mi.price ?? 0);
+                        const isAvail = mi.availabilityStatus !== "UNAVAILABLE";
+
+                        return (
+                          <div
+                            key={mi.uuid || idx}
+                            className="flex items-center gap-3 rounded-xl bg-white border border-emerald-100 px-4 py-3 shadow-sm hover:shadow-md transition"
+                          >
+                            {/* Thumbnail */}
+                            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                              {miImg ? (
+                                <img
+                                  src={resolveFoodHubCatalogImageUrl(miImg) || miImg}
+                                  alt={mi.name || ""}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-xl">🍜</div>
+                              )}
+                            </div>
+
+                            {/* Info */}
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-bold text-gray-900">{mi.name || "—"}</p>
+                              {mi.store && (
+                                <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+                                  <Store size={11} />
+                                  {mi.store.storeName || mi.store.name || mi.store.localName || "—"}
+                                  {mi.store.city && ` · ${mi.store.city}`}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Price + Status */}
+                            <div className="flex shrink-0 flex-col items-end gap-1">
+                              <span className="flex items-center gap-1 text-sm font-black text-gray-800">
+                                <DollarSign size={12} />
+                                {price.toFixed(2)}
+                              </span>
+                              <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold ${
+                                isAvail
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : "bg-red-100 text-red-700"
+                              }`}>
+                                {isAvail ? "មានលក់" : "អស់/បិទ"}
+                              </span>
+                            </div>
+
+                            {/* Edit / View action */}
+                            {onEditMenuItem && (
+                              <button
+                                type="button"
+                                title="កែប្រែម៉ឺនុយ"
+                                onClick={() => { onClose(); onEditMenuItem(mi); }}
+                                className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#14833E]/30 bg-emerald-50 text-[#14833E] transition hover:bg-emerald-100"
+                              >
+                                <ExternalLink size={14} />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
 
             </div>
           ) : null}
@@ -319,18 +496,17 @@ export default function FoodDetailModal({
                 <button
                   type="button"
                   onClick={() => { onClose(); onEdit(data); }}
-                  className="inline-flex items-center gap-2 rounded-full border border-[#14833E] px-6 py-3 text-lg font-bold text-[#14833E] transition hover:bg-emerald-50"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#14833E] px-6 py-2.5 text-sm font-bold text-[#14833E] transition hover:bg-emerald-50"
                 >
-                  <Pencil size={18} />
-                  កែប្រែ
+                  <Pencil size={16} />
+                  កែប្រែ Food
                 </button>
               )}
             </div>
-
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-12 items-center rounded-full bg-[#14833E] px-8 text-lg font-bold text-white shadow-lg shadow-[#14833E]/25 transition hover:bg-[#0f6b32] focus:outline-none focus:ring-4 focus:ring-[#14833E]/30"
+              className="inline-flex h-11 items-center rounded-full bg-[#14833E] px-8 text-sm font-bold text-white shadow-lg shadow-[#14833E]/25 transition hover:bg-[#0f6b32] focus:outline-none focus:ring-4 focus:ring-[#14833E]/30"
             >
               បិទ
             </button>
