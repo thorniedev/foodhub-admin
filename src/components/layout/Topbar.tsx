@@ -70,7 +70,6 @@ export default function Topbar() {
         <div className="hidden shrink-0 items-center gap-3 sm:flex" suppressHydrationWarning>
           <UserAvatar
             name={adminName}
-            userUuid={admin?.uuid}
             avatarMediaUuid={avatarMediaUuid}
             imageUrl={avatarImageUrl}
             containerClassName="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-700 text-sm font-bold uppercase text-white shadow-sm"

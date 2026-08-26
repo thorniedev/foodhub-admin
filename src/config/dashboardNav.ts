@@ -6,6 +6,7 @@ import {
   Globe,
   SlidersHorizontal,
   Utensils,
+  Bot,
   type LucideIcon,
 } from "lucide-react";
 
@@ -22,8 +23,9 @@ export const dashboardNav: NavItem[] = [
     icon: LayoutGrid,
     href: "/",
   },
-    {
+  {
     label: "អនុសាសន៍ & សវនកម្ម AI",
+    icon: Bot,
     href: "/admin/recommendations",
   },
 

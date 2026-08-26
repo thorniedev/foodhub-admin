@@ -31,7 +31,7 @@ import {
 } from "@/src/app/store/menuManagementApi";
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
-import { readFoodRelationsStorage } from "@/src/lib/filterCatalogStorage";
+import { readFoodRelationsStorage, readMenuItemRelationsStorage } from "@/src/lib/filterCatalogStorage";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -185,6 +185,7 @@ export default function MenuItemDetailModal({
 
   const catalogFood = foodUuid ? foodsQuery.data?.content?.find((f) => f.uuid === foodUuid) : null;
   const storedFood = foodUuid ? readFoodRelationsStorage(foodUuid) : null;
+  const storedMenuItem = uuid ? readMenuItemRelationsStorage(uuid) : null;
 
   const categoryName =
     rawFood?.categoryName ||
@@ -224,13 +225,13 @@ export default function MenuItemDetailModal({
         categoryName,
         cuisineName,
         nutritionData: srvHasNutrition ? srvNut : (storedNut ?? srvNut),
-        mealTypes: (storedFood?.mealTypes?.length ? storedFood.mealTypes : (baseFood.mealTypes?.length ? baseFood.mealTypes : (storedFood?.mealTypes ?? []))),
-        ageRules: (storedFood?.ageRules?.length ? storedFood.ageRules : (storedFood?.ageGroups?.length ? storedFood.ageGroups : (baseFood.ageRules?.length ? baseFood.ageRules : (baseFood.ageGroups ?? [])))),
-        seasons: (storedFood?.seasons?.length ? storedFood.seasons : (baseFood.seasons?.length ? baseFood.seasons : [])),
-        suitableWeather: (storedFood?.suitableWeather?.length ? storedFood.suitableWeather : (storedFood?.weatherConditions?.length ? storedFood.weatherConditions : (baseFood.suitableWeather?.length ? baseFood.suitableWeather : (baseFood.weatherConditions ?? [])))),
-        events: (storedFood?.events?.length ? storedFood.events : (baseFood.events?.length ? baseFood.events : [])),
-        dietaryTypes: (storedFood?.dietaryTypes?.length ? storedFood.dietaryTypes : (baseFood.dietaryTypes?.length ? baseFood.dietaryTypes : [])),
-        allergens: (storedFood?.allergens?.length ? storedFood.allergens : (baseFood.allergens?.length ? baseFood.allergens : [])),
+        mealTypes: (storedFood?.mealTypes !== undefined ? storedFood.mealTypes : (baseFood.mealTypes ?? [])),
+        ageRules: (storedFood?.ageRules !== undefined ? storedFood.ageRules : (storedFood?.ageGroups !== undefined ? storedFood.ageGroups : (baseFood.ageRules ?? baseFood.ageGroups ?? []))),
+        seasons: (storedFood?.seasons !== undefined ? storedFood.seasons : (baseFood.seasons ?? [])),
+        suitableWeather: (storedFood?.suitableWeather !== undefined ? storedFood.suitableWeather : (storedFood?.weatherConditions !== undefined ? storedFood.weatherConditions : (baseFood.suitableWeather ?? baseFood.weatherConditions ?? []))),
+        events: (storedFood?.events !== undefined ? storedFood.events : (baseFood.events ?? [])),
+        dietaryTypes: (storedMenuItem?.dietaryTypes !== undefined ? storedMenuItem.dietaryTypes : (data?.dietaryTypes !== undefined && Array.isArray(data.dietaryTypes) ? data.dietaryTypes : (storedFood?.dietaryTypes !== undefined ? storedFood.dietaryTypes : (baseFood.dietaryTypes ?? [])))),
+        allergens: (storedFood?.allergens !== undefined ? storedFood.allergens : (baseFood.allergens ?? [])),
       }
     : null;
   const spice = food?.defaultSpiceLevel ?? (storedFood as any)?.defaultSpiceLevel ?? 0;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import { AlertTriangle, ArrowLeft, CheckCircle2, Loader2, X } from "lucide-react";
@@ -256,9 +256,14 @@ export default function ShopDetailManager({
 
   const [notice, setNotice] = useState<{
     type: "success" | "error";
-
     text: string;
   } | null>(null);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => setNotice(null), 4500);
+    return () => clearTimeout(timer);
+  }, [notice]);
 
   if (!hasValidStoreUuid) {
     return (

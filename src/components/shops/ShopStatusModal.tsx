@@ -392,7 +392,6 @@ export default function ShopStatusModal({
           {step < 3 ? (
             <button
               type="button"
-              disabled={step === 1 && review === null}
               onClick={goNext}
               className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-[#137A3D] px-7 text-base font-semibold text-white shadow-sm transition hover:bg-[#0f6833] disabled:cursor-not-allowed disabled:opacity-40"
             >

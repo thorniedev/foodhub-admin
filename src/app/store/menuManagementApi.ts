@@ -753,7 +753,7 @@ function normalizePage<T>(
   const raw = unwrap(value) as any;
 
   const rawList = extractListFromRaw(raw);
-  const content = rawList.map((it: any) => normalizeMenuItemEntity(it));
+  const content = rawList as T[];
 
   return {
     content,
@@ -806,7 +806,7 @@ async function browserRequest<T>(
 
     if (response.status === 204) {
       return {
-        data: undefined as T,
+        data: (null as unknown as T),
       };
     }
 
@@ -969,7 +969,7 @@ export const menuManagementApi =
             // its store, so the store picker should never offer a store that
             // isn't already public-ready.
             const result = await browserRequest<unknown>(
-              "/api/admin/stores?page=0&size=100",
+              "/api/admin/stores?reviewStatus=APPROVED&accountStatus=ACTIVE&page=0&size=100",
             );
 
             if ("error" in result) {
@@ -1132,7 +1132,7 @@ export const menuManagementApi =
             }
 
             return {
-              data: undefined,
+              data: (null as unknown as void),
             };
           },
         }),
@@ -1216,7 +1216,7 @@ export const menuManagementApi =
             }
 
             return {
-              data: undefined,
+              data: (null as unknown as void),
             };
           },
         }),
@@ -1300,7 +1300,7 @@ export const menuManagementApi =
             }
 
             return {
-              data: undefined,
+              data: (null as unknown as void),
             };
           },
         }),
@@ -1867,7 +1867,7 @@ export const menuManagementApi =
             }
 
             return {
-              data: undefined,
+              data: (null as unknown as void),
             };
           },
         }),
@@ -1883,8 +1883,20 @@ export const menuManagementApi =
             const safeSize = Math.min(Math.max(1, p.size ?? 100), 100);
             const safePage = Math.max(0, p.page ?? 0);
 
-            // 1. If storeUuid is provided, first try GET /api/catalog/stores/{storeUuid}/menu-items
+            // 1. If storeUuid is provided, try admin and catalog store endpoints:
             if (p.storeUuid) {
+              const adminStoreRes = await browserRequest<unknown>(
+                `/api/admin/stores/${encodeURIComponent(
+                  p.storeUuid,
+                )}/menu-items?page=${safePage}&size=${safeSize}`,
+              );
+
+              // Only fall through to catalog if admin returned an actual error
+              if (!("error" in adminStoreRes)) {
+                const norm = normalizePage<MenuItemRecord>(adminStoreRes.data as never);
+                return { data: { ...norm, content: norm.content.map(normalizeMenuItemEntity) } };
+              }
+
               const catalogStoreRes = await browserRequest<unknown>(
                 `/api/catalog/stores/${encodeURIComponent(
                   p.storeUuid,
@@ -1893,9 +1905,7 @@ export const menuManagementApi =
 
               if (!("error" in catalogStoreRes)) {
                 const norm = normalizePage<MenuItemRecord>(catalogStoreRes.data as never);
-                if (norm.content && norm.content.length > 0) {
-                  return { data: norm };
-                }
+                return { data: { ...norm, content: norm.content.map(normalizeMenuItemEntity) } };
               }
             }
 
@@ -1915,9 +1925,8 @@ export const menuManagementApi =
               },
             );
 
-            // 3. Fallbacks if discovery search with POST returned error or empty:
-            const rawExtracted = extractListFromRaw(unwrap(result && "data" in result ? result.data : null));
-            if ("error" in result || rawExtracted.length === 0) {
+            // 3. Fallbacks if discovery search with POST returned error:
+            if ("error" in result) {
               const query = makeQuery({
                 page: safePage,
                 size: safeSize,
@@ -1926,19 +1935,11 @@ export const menuManagementApi =
                 storeUuid: p.storeUuid,
               });
 
-              const menuItemsRes = await browserRequest<unknown>(
-                `/api/menu-items${query}`,
+              const catalogRes = await browserRequest<unknown>(
+                `/api/catalog/menu-items${query}`,
               );
-
-              if (!("error" in menuItemsRes) && extractListFromRaw(unwrap(menuItemsRes.data)).length > 0) {
-                result = menuItemsRes;
-              } else {
-                const catalogRes = await browserRequest<unknown>(
-                  `/api/catalog/menu-items${query}`,
-                );
-                if (!("error" in catalogRes)) {
-                  result = catalogRes;
-                }
+              if (!("error" in catalogRes)) {
+                result = catalogRes;
               }
             }
 
@@ -1958,8 +1959,12 @@ export const menuManagementApi =
               };
             }
 
+            const norm = normalizePage<MenuItemRecord>(result.data as never);
             return {
-              data: normalizePage<MenuItemRecord>(result.data as never),
+              data: {
+                ...norm,
+                content: norm.content.map(normalizeMenuItemEntity),
+              },
             };
           },
           providesTags: (result) =>
@@ -2460,29 +2465,27 @@ export const menuManagementApi =
                     d.dietaryTypeUuid,
                   ),
               );
-              if (validDietary.length > 0) {
-                try {
-                  await browserRequest<unknown>(
-                    `/api/admin/menu-items/${encodeURIComponent(
-                      targetUuid,
-                    )}/dietary-types`,
-                    {
-                      method: "PUT",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({
-                        dietaryTypes: validDietary.map((d) => ({
-                          dietaryTypeUuid: d.dietaryTypeUuid,
-                          verificationStatus: d.verificationStatus || "VERIFIED",
-                          notes: d.notes || undefined,
-                        })),
-                      }),
+              try {
+                await browserRequest<unknown>(
+                  `/api/admin/menu-items/${encodeURIComponent(
+                    targetUuid,
+                  )}/dietary-types`,
+                  {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
                     },
-                  );
-                } catch (dtErr) {
-                  console.warn("[UPDATE DIETARY TYPES WARNING]", dtErr);
-                }
+                    body: JSON.stringify({
+                      dietaryTypes: validDietary.map((d) => ({
+                        dietaryTypeUuid: d.dietaryTypeUuid,
+                        verificationStatus: d.verificationStatus || "VERIFIED",
+                        notes: d.notes || undefined,
+                      })),
+                    }),
+                  },
+                );
+              } catch (dtErr) {
+                console.warn("[UPDATE DIETARY TYPES WARNING]", dtErr);
               }
             }
 
@@ -2595,7 +2598,7 @@ export const menuManagementApi =
             }
 
             return {
-              data: undefined,
+              data: (null as unknown as void),
             };
           },
         }),

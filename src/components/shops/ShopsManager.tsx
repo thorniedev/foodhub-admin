@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import {
   AlertCircle,
   AlertTriangle,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import {
+  shopApi,
   useDeleteShopMutation,
   useGetShopByUuidQuery,
   useGetShopsQuery,
@@ -104,6 +105,9 @@ export default function ShopsManager() {
   const [openFilter, setOpenFilter] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<StoreSort>("NEWEST");
 
+  const [isPending, startTransition] = useTransition();
+  const prefetchShops = shopApi.usePrefetch("getShops");
+
   const [editingUuid, setEditingUuid] = useState<string | null>(null);
   const [deletingStore, setDeletingStore] = useState<StoreType | null>(null);
   const [statusStore, setStatusStore] = useState<StoreType | null>(null);
@@ -133,8 +137,40 @@ export default function ShopsManager() {
     size,
   });
 
-  /* Optimized count queries and known status lookups */
   const isSearching = Boolean(serverQuery);
+
+  /* Background prefetch for instant tab switching with 0ms lag */
+  const handlePrefetchTab = useCallback(
+    (tabValue: StoreReviewFilter) => {
+      if (isSearching) return;
+      prefetchShops({
+        reviewStatus:
+          tabValue === "APPROVED" || tabValue === "PENDING" || tabValue === "REJECTED"
+            ? tabValue
+            : undefined,
+        accountStatus: tabValue === "APPROVED" ? "ACTIVE" : undefined,
+        page: 0,
+        size,
+      });
+    },
+    [isSearching, prefetchShops, size],
+  );
+
+  useEffect(() => {
+    if (!isSearching) {
+      prefetchShops({ reviewStatus: "APPROVED", accountStatus: "ACTIVE", page: 0, size });
+      prefetchShops({ reviewStatus: "PENDING", page: 0, size });
+      prefetchShops({ reviewStatus: "REJECTED", page: 0, size });
+      prefetchShops({ page: 0, size });
+    }
+  }, [isSearching, prefetchShops, size]);
+
+  const handleTabChange = useCallback((value: StoreReviewFilter) => {
+    startTransition(() => {
+      setFilter(value);
+      setPage(0);
+    });
+  }, []);
 
   const { data: approvedData } = useGetShopsQuery(
     {
@@ -418,7 +454,6 @@ export default function ShopsManager() {
       await updateShop({ storeUuid: editingUuid, body: values }).unwrap();
       setEditingUuid(null);
       setNotice({ type: "success", text: "បានកែប្រែ Store ដោយជោគជ័យ។" });
-      await refetch();
     } catch (requestError) {
       throw requestError;
     }
@@ -431,7 +466,6 @@ export default function ShopsManager() {
       await deleteShop(deletingStore.uuid).unwrap();
       setDeletingStore(null);
       setNotice({ type: "success", text: "បានលុបហាងដោយជោគជ័យ។" });
-      await refetch();
     } catch (requestError) {
       setNotice({ type: "error", text: getShopApiErrorMessage(requestError) });
     }
@@ -454,10 +488,8 @@ export default function ShopsManager() {
             <ShopsTabs
               value={filter}
               counts={counts}
-              onChange={(value) => {
-                setFilter(value);
-                setPage(0);
-              }}
+              onChange={handleTabChange}
+              onPrefetch={handlePrefetchTab}
             />
           </div>
 
@@ -687,7 +719,14 @@ export default function ShopsManager() {
         </div>
       )}
 
-      <section className="overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
+      <section className="relative overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm transition-all duration-300">
+        {/* Subtle animated top loading indicator */}
+        {(isFetching || isPending) && !isLoading && (
+          <div className="absolute top-0 left-0 right-0 z-20 h-1 w-full overflow-hidden bg-primary-100/60">
+            <div className="h-full w-full bg-primary-700 animate-pulse transition-all duration-300" />
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex min-h-[360px] items-center justify-center">
             <Loader2 size={30} className="animate-spin text-[#137A3D]" />
@@ -711,13 +750,15 @@ export default function ShopsManager() {
             <p className="mt-3 text-2xl text-[#F97316]">មិនមាន Store</p>
           </div>
         ) : (
-          <ShopsTable
-            stores={sortedStores}
-            disabled={updating || deleting || isFetching}
-            onEdit={(store) => setEditingUuid(store.uuid)}
-            onStatus={(store, action) => { setStatusStore(store); setStatusAction(action); }}
-            onDelete={(store) => setDeletingStore(store)}
-          />
+          <div className={`transition-opacity duration-200 ${isPending || isFetching ? "opacity-75" : "opacity-100"}`}>
+            <ShopsTable
+              stores={sortedStores}
+              disabled={updating || deleting || isFetching}
+              onEdit={(store) => setEditingUuid(store.uuid)}
+              onStatus={(store, action) => { setStatusStore(store); setStatusAction(action); }}
+              onDelete={(store) => setDeletingStore(store)}
+            />
+          </div>
         )}
 
         {!isLoading && !error && (
@@ -725,7 +766,7 @@ export default function ShopsManager() {
             page={data?.pageNumber ?? page}
             totalPages={data?.totalPages ?? 0}
             totalElements={data?.totalElements ?? 0}
-            disabled={isFetching}
+            disabled={isFetching || isPending}
             onPageChange={setPage}
           />
         )}

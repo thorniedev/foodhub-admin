@@ -21,7 +21,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import ThumbnailImagePicker from "./ThumbnailImagePicker";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
-import { readFoodRelationsStorage } from "@/src/lib/filterCatalogStorage";
+import { readFoodRelationsStorage, readMenuItemRelationsStorage, saveMenuItemRelationsStorage } from "@/src/lib/filterCatalogStorage";
 import GalleryImagePicker from "./GalleryImagePicker";
 import MenuItemSearchableSelect, {
   type SearchableOption,
@@ -29,6 +29,7 @@ import MenuItemSearchableSelect, {
 import {
   useGetPublishedMenuItemDetailQuery,
 } from "@/src/app/store/menuManagementApi";
+import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
 
 import type { DietaryType } from "@/src/types/dietaryType";
 import type { MedicalCondition } from "@/src/types/medicalCondition";
@@ -236,6 +237,16 @@ export default function PublishMenuItemModal({
   const [existingGallery, setExistingGallery] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [storeSearchInput, setStoreSearchInput] = useState("");
+  const { data: searchedShops } = useGetShopsQuery(
+    {
+      query: storeSearchInput.trim() || undefined,
+      reviewStatus: "APPROVED",
+      accountStatus: "ACTIVE",
+      size: 50,
+    },
+    { skip: !open || storeSearchInput.trim().length < 2 },
+  );
   const bodyRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -375,17 +386,26 @@ export default function PublishMenuItemModal({
       }),
     );
 
+    const currentMenuItemUuid =
+      activeItem.uuid ||
+      (activeItem as any).menuItemUuid ||
+      (activeItem as any).id ||
+      itemUuid;
+    const storedMenuItem = currentMenuItemUuid ? readMenuItemRelationsStorage(String(currentMenuItemUuid)) : null;
+
     const targetFood = foundFood || (matchedFoodUuid ? foods.find((f) => String(f.uuid || f.id) === matchedFoodUuid) : undefined);
     const storedFood = targetFood?.uuid ? readFoodRelationsStorage(targetFood.uuid) : null;
 
     const rawDietary =
-      Array.isArray(activeItem.dietaryTypes) && activeItem.dietaryTypes.length > 0
+      storedMenuItem?.dietaryTypes !== undefined && Array.isArray(storedMenuItem.dietaryTypes)
+        ? storedMenuItem.dietaryTypes
+        : activeItem.dietaryTypes !== undefined && Array.isArray(activeItem.dietaryTypes)
         ? activeItem.dietaryTypes
-        : Array.isArray(storedFood?.dietaryTypes) && storedFood.dietaryTypes.length > 0
+        : storedFood?.dietaryTypes !== undefined && Array.isArray(storedFood.dietaryTypes)
         ? storedFood.dietaryTypes
-        : Array.isArray(targetFood?.dietaryTypes) && targetFood.dietaryTypes.length > 0
+        : targetFood?.dietaryTypes !== undefined && Array.isArray(targetFood.dietaryTypes)
         ? targetFood.dietaryTypes
-        : Array.isArray(activeItem.food?.dietaryTypes) && activeItem.food.dietaryTypes.length > 0
+        : Array.isArray(activeItem.food?.dietaryTypes)
         ? activeItem.food.dietaryTypes
         : [];
 
@@ -440,10 +460,26 @@ export default function PublishMenuItemModal({
     [dietaryTypes],
   );
 
-  const storeOptions: SearchableOption[] = useMemo(
-    () => stores.map((s) => ({ value: String(s.uuid || s.id || ""), label: storeLabel(s) })),
-    [stores],
-  );
+  const storeOptions: SearchableOption[] = useMemo(() => {
+    const list: SearchableOption[] = [];
+    const seen = new Set<string>();
+
+    const add = (s: any) => {
+      if (!s) return;
+      const id = String(s.uuid || s.id || "");
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      list.push({
+        value: id,
+        label: storeLabel(s),
+      });
+    };
+
+    (stores ?? []).forEach(add);
+    (searchedShops?.contents ?? []).forEach(add);
+
+    return list;
+  }, [stores, searchedShops]);
 
   const foodOptions: SearchableOption[] = useMemo(
     () =>
@@ -707,6 +743,20 @@ export default function PublishMenuItemModal({
         allergenDeclarations: [],
       };
 
+      const targetMenuItemUuid =
+        itemUuid ||
+        activeItem?.uuid ||
+        (activeItem as any)?.menuItemUuid ||
+        (activeItem as any)?.id;
+
+      if (targetMenuItemUuid) {
+        saveMenuItemRelationsStorage(String(targetMenuItemUuid), {
+          dietaryTypes: dietaryTypePayload,
+          ingredients: ingredientPayload,
+          medicalConditions: medicalConditionRows,
+        });
+      }
+
       await onSubmit(targetStoreUuid, payload, allImages);
     } catch (submitError) {
       setError(
@@ -762,6 +812,7 @@ export default function PublishMenuItemModal({
                 disabled={Boolean(item) || Boolean(storeFixedId)}
                 value={effectiveStoreUuid}
                 options={storeOptions}
+                onSearchChange={setStoreSearchInput}
                 onChange={(next) => {
                   setValues((current) => ({ ...current, storeUuid: next }));
                   setFieldErrors((current) => ({ ...current, storeUuid: undefined }));
@@ -871,6 +922,12 @@ export default function PublishMenuItemModal({
               <Label>ការពិពណ៌នា</Label>
               <textarea
                 rows={3}
+                spellCheck={false}
+                autoComplete="off"
+                data-gramm="false"
+                data-gramm_editor="false"
+                data-enable-grammarly="false"
+                data-quillbot="false"
                 value={values.description}
                 placeholder="ការពិពណ៌នាអំពីមុខម្ហូបនេះសម្រាប់អតិថិជន..."
                 onChange={(event) =>

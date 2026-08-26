@@ -59,6 +59,7 @@ import type {
   FoodWritePayload,
   MenuItemRecord,
   MenuItemWritePayload,
+  StoreOption,
 } from "@/src/types/menu-management";
 
 import DeleteConfirmModal from "./DeleteConfirmModal";
@@ -136,9 +137,14 @@ export default function MenuItemsManager({
   const categoriesQuery = useGetManagedFoodCategoriesQuery();
   const cuisinesQuery = useGetManagedCuisinesQuery();
   const storesQuery = useGetManagedStoresQuery();
-  const allShopsListQuery = useGetShopsQuery({ size: 100 });
+  const allShopsListQuery = useGetShopsQuery({
+    reviewStatus: "APPROVED",
+    accountStatus: "ACTIVE",
+    size: 100,
+  });
   const approvedStoresCountQuery = useGetShopsQuery({
     reviewStatus: "APPROVED",
+    accountStatus: "ACTIVE",
     size: 1,
   });
 
@@ -227,6 +233,27 @@ export default function MenuItemsManager({
   const menuItems = menuItemsQuery.data?.content ?? [];
   const stores = storesQuery.data ?? [];
   const allCategories = categoriesQuery.data ?? [];
+
+  const allCombinedStores = useMemo(() => {
+    const list: StoreOption[] = [];
+    const seen = new Set<string>();
+
+    const addStore = (s: any) => {
+      if (!s) return;
+      const id = String(s.uuid || s.id || "");
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      list.push(s);
+    };
+
+    (allShopsListQuery.data?.contents ?? []).forEach(addStore);
+    (storesQuery.data ?? []).forEach(addStore);
+    menuItems.forEach((m) => {
+      if (m.store) addStore(m.store);
+    });
+
+    return list;
+  }, [allShopsListQuery.data, storesQuery.data, menuItems]);
 
   // CustomSelect Options Memoized - Combines all stores in the system
   const storeOptions = useMemo(() => {
@@ -944,6 +971,7 @@ export default function MenuItemsManager({
             allergens: (payload as any).allergens,
             preparationTimes: payload.preparationTimes,
             distances: payload.distances,
+            defaultSpiceLevel: payload.defaultSpiceLevel,
           });
         }
 
@@ -971,6 +999,7 @@ export default function MenuItemsManager({
             allergens: (payload as any).allergens,
             preparationTimes: payload.preparationTimes,
             distances: payload.distances,
+            defaultSpiceLevel: payload.defaultSpiceLevel,
           });
         }
 
@@ -1100,6 +1129,7 @@ export default function MenuItemsManager({
 
       await updateMenuItem({
         uuid: String(targetUuid),
+        storeUuid: softDeletingMenu.storeUuid || softDeletingMenu.store?.uuid || undefined,
         payload: {
           foodUuid: softDeletingMenu.foodUuid || softDeletingMenu.food?.uuid || "",
           menuItem: {
@@ -1576,7 +1606,7 @@ export default function MenuItemsManager({
         open={menuModalOpen}
         item={editingMenu}
         foods={foods}
-        stores={storesQuery.data ?? []}
+        stores={allCombinedStores}
         ingredients={ingredientsQuery.data ?? []}
         dietaryTypes={activeDietaryTypes}
         allergens={activeAllergens}

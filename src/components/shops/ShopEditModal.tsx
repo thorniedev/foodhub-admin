@@ -109,7 +109,7 @@ function toValidUuidOrNull(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const v = value.trim();
   const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return uuidRegex.test(v) ? v : null;
 }
 
@@ -187,8 +187,8 @@ export default function ShopEditModal({
       longitude: String(store.longitude ?? ""),
       phoneNumber: store.phoneNumber ?? "",
       email: store.email ?? "",
-      logoMediaUuid: "",
-      coverMediaUuid: "",
+      logoMediaUuid: store.logoMediaUuid ?? "",
+      coverMediaUuid: store.coverMediaUuid ?? "",
       priceLevel: store.priceLevel == null ? "" : String(store.priceLevel),
       hygieneRating: store.hygieneRating == null ? "" : String(store.hygieneRating),
       operatingStatus:

@@ -13,6 +13,7 @@ export default function MenuItemSearchableSelect({
   value,
   options,
   onChange,
+  onSearchChange,
   placeholder = "ជ្រើសរើស...",
   emptyLabel = "រកមិនឃើញលទ្ធផលទេ",
   disabled = false,
@@ -23,6 +24,7 @@ export default function MenuItemSearchableSelect({
   value: string;
   options: SearchableOption[];
   onChange: (value: string) => void;
+  onSearchChange?: (query: string) => void;
   placeholder?: string;
   emptyLabel?: string;
   disabled?: boolean;
@@ -50,6 +52,7 @@ export default function MenuItemSearchableSelect({
   const close = () => {
     setOpen(false);
     setQuery("");
+    onSearchChange?.("");
   };
 
   useEffect(() => {
@@ -135,7 +138,11 @@ export default function MenuItemSearchableSelect({
             <input
               ref={searchRef}
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                const nextQuery = event.target.value;
+                setQuery(nextQuery);
+                onSearchChange?.(nextQuery);
+              }}
               placeholder="ស្វែងរក..."
               className="h-8 w-full bg-transparent text-base text-gray-800 outline-none placeholder:text-gray-400"
             />

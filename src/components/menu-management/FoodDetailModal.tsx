@@ -96,13 +96,6 @@ export default function FoodDetailModal({
   const categoriesQuery = useGetManagedFoodCategoriesQuery();
   const cuisinesQuery = useGetManagedCuisinesQuery();
 
-  // Query menu items that use this food
-  const { data: menuItemsPage, isLoading: menuItemsLoading } = useGetPublishedMenuItemsQuery(
-    uuid ? { foodUuid: uuid, size: 20, page: 0 } : undefined,
-    { skip: !uuid },
-  );
-  const menuItems = menuItemsPage?.content ?? [];
-
   if (!uuid) return null;
 
   const stored = uuid ? readFoodRelationsStorage(uuid) : null;
@@ -145,15 +138,15 @@ export default function FoodDetailModal({
         categoryName,
         cuisineName,
         nutritionData: mergedNutrition,
-        mealTypes: (stored?.mealTypes?.length ? stored.mealTypes : (rawData as any)?.mealTypes) ?? [],
-        seasons: (stored?.seasons?.length ? stored.seasons : rawData.seasons) ?? [],
-        events: (stored?.events?.length ? stored.events : rawData.events) ?? [],
-        suitableWeather: (stored?.suitableWeather?.length ? stored.suitableWeather : (stored?.weatherConditions ?? rawData.suitableWeather)) ?? [],
-        ageRules: (stored?.ageRules?.length ? stored.ageRules : (stored?.ageGroups ?? rawData.ageRules)) ?? [],
-        dietaryTypes: (stored?.dietaryTypes?.length ? stored.dietaryTypes : rawData.dietaryTypes) ?? [],
-        allergens: (stored?.allergens?.length ? stored.allergens : rawData.allergens) ?? [],
-        preparationTimes: (stored?.preparationTimes?.length ? stored.preparationTimes : (rawData as any)?.preparationTimes) ?? [],
-        distances: (stored?.distances?.length ? stored.distances : (rawData as any)?.distances) ?? [],
+        mealTypes: (stored?.mealTypes !== undefined ? stored.mealTypes : (rawData as any)?.mealTypes) ?? [],
+        seasons: (stored?.seasons !== undefined ? stored.seasons : rawData.seasons) ?? [],
+        events: (stored?.events !== undefined ? stored.events : rawData.events) ?? [],
+        suitableWeather: (stored?.suitableWeather !== undefined ? stored.suitableWeather : (stored?.weatherConditions ?? rawData.suitableWeather)) ?? [],
+        ageRules: (stored?.ageRules !== undefined ? stored.ageRules : (stored?.ageGroups ?? rawData.ageRules)) ?? [],
+        dietaryTypes: (stored?.dietaryTypes !== undefined ? stored.dietaryTypes : rawData.dietaryTypes) ?? [],
+        allergens: (stored?.allergens !== undefined ? stored.allergens : rawData.allergens) ?? [],
+        preparationTimes: (stored?.preparationTimes !== undefined ? stored.preparationTimes : (rawData as any)?.preparationTimes) ?? [],
+        distances: (stored?.distances !== undefined ? stored.distances : (rawData as any)?.distances) ?? [],
       }
     : (stored as any);
 
@@ -229,11 +222,6 @@ export default function FoodDetailModal({
                   {data.cuisineName}
                 </span>
               )}
-              {/* Menu items count badge */}
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 border border-white/25 px-3.5 py-1.5 text-sm font-bold text-white">
-                <Store size={13} />
-                {menuItemsLoading ? "..." : `${menuItems.length} ម៉ឺនុយ`}
-              </span>
             </div>
           )}
         </div>
@@ -383,108 +371,7 @@ export default function FoodDetailModal({
                 </InfoCard>
               )}
 
-              {/* ══════════════════════════════════════════════════════
-                  MENU ITEMS SECTION — stores that sell this food
-                  ══════════════════════════════════════════════════════ */}
-              <div className="mt-2 rounded-2xl border border-[#14833E]/20 bg-emerald-50/40 overflow-hidden">
-                {/* Section header */}
-                <div className="flex items-center justify-between border-b border-[#14833E]/10 px-5 py-4">
-                  <div className="flex items-center gap-2.5">
-                    <Store size={18} className="text-[#14833E]" />
-                    <div>
-                      <p className="text-base font-bold text-emerald-900">
-                        ម៉ឺនុយដែលប្រើប្រាស់មុខម្ហូបនេះ
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        ហាងដែលមានលក់ {data?.localName || data?.canonicalName}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="rounded-full bg-[#14833E]/10 px-3 py-1 text-xs font-bold text-[#14833E]">
-                    {menuItemsLoading ? "..." : `${menuItems.length} ម៉ឺនុយ`}
-                  </span>
-                </div>
 
-                <div className="p-4">
-                  {menuItemsLoading ? (
-                    <div className="flex items-center justify-center gap-2 py-6">
-                      <Loader2 size={20} className="animate-spin text-[#14833E]" />
-                      <span className="text-sm text-gray-500">កំពុងទាញយកម៉ឺនុយ...</span>
-                    </div>
-                  ) : menuItems.length === 0 ? (
-                    <p className="py-4 text-center text-sm text-gray-400">
-                      មិនទាន់មានហាងណាបន្ថែមមុខម្ហូបនេះទេ
-                    </p>
-                  ) : (
-                    <div className="space-y-2.5">
-                      {menuItems.map((mi: any, idx: number) => {
-                        const miImg = mi.primaryMediaUrls?.[0] || mi.thumbnail || mi.imageUrl || mi.primaryMediaUuid;
-                        const price = Number(mi.price ?? 0);
-                        const isAvail = mi.availabilityStatus !== "UNAVAILABLE";
-
-                        return (
-                          <div
-                            key={mi.uuid || idx}
-                            className="flex items-center gap-3 rounded-xl bg-white border border-emerald-100 px-4 py-3 shadow-sm hover:shadow-md transition"
-                          >
-                            {/* Thumbnail */}
-                            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                              {miImg ? (
-                                <img
-                                  src={resolveFoodHubCatalogImageUrl(miImg) || miImg}
-                                  alt={mi.name || ""}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center text-xl">🍜</div>
-                              )}
-                            </div>
-
-                            {/* Info */}
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-bold text-gray-900">{mi.name || "—"}</p>
-                              {mi.store && (
-                                <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
-                                  <Store size={11} />
-                                  {mi.store.storeName || mi.store.name || mi.store.localName || "—"}
-                                  {mi.store.city && ` · ${mi.store.city}`}
-                                </p>
-                              )}
-                            </div>
-
-                            {/* Price + Status */}
-                            <div className="flex shrink-0 flex-col items-end gap-1">
-                              <span className="flex items-center gap-1 text-sm font-black text-gray-800">
-                                <DollarSign size={12} />
-                                {price.toFixed(2)}
-                              </span>
-                              <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold ${
-                                isAvail
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : "bg-red-100 text-red-700"
-                              }`}>
-                                {isAvail ? "មានលក់" : "អស់/បិទ"}
-                              </span>
-                            </div>
-
-                            {/* Edit / View action */}
-                            {onEditMenuItem && (
-                              <button
-                                type="button"
-                                title="កែប្រែម៉ឺនុយ"
-                                onClick={() => { onClose(); onEditMenuItem(mi); }}
-                                className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#14833E]/30 bg-emerald-50 text-[#14833E] transition hover:bg-emerald-100"
-                              >
-                                <ExternalLink size={14} />
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
 
             </div>
           ) : null}

@@ -230,7 +230,17 @@ export default function FoodFormModal({
       description: activeItem.description ?? "",
       categoryUuid: matchedCategoryUuid,
       cuisineUuid: matchedCuisineUuid,
-      defaultSpiceLevel: String(activeItem.defaultSpiceLevel ?? 0),
+      defaultSpiceLevel: String(
+        stored?.defaultSpiceLevel != null
+          ? stored.defaultSpiceLevel
+          : (stored as any)?.spiceLevel != null
+            ? (stored as any).spiceLevel
+            : activeItem.defaultSpiceLevel != null
+              ? activeItem.defaultSpiceLevel
+              : (activeItem as any)?.spiceLevel != null
+                ? (activeItem as any).spiceLevel
+                : 0,
+      ),
       calories:
         nutrition?.calories != null
           ? String(nutrition.calories)
@@ -276,7 +286,7 @@ export default function FoodFormModal({
 
     // Populate metadata relations if editing - prioritize stored relations saved by the user
     const rawSeasons =
-      Array.isArray(stored?.seasons) && stored.seasons.length > 0
+      stored?.seasons !== undefined && Array.isArray(stored.seasons)
         ? stored.seasons
         : Array.isArray(activeItem.seasons) && activeItem.seasons.length > 0
           ? activeItem.seasons
@@ -322,7 +332,7 @@ export default function FoodFormModal({
     );
 
     const rawEvents =
-      Array.isArray(stored?.events) && stored.events.length > 0
+      stored?.events !== undefined && Array.isArray(stored.events)
         ? stored.events
         : Array.isArray(activeItem.events) && activeItem.events.length > 0
           ? activeItem.events
@@ -368,9 +378,9 @@ export default function FoodFormModal({
     );
 
     const rawWeather =
-      Array.isArray(stored?.suitableWeather) && stored.suitableWeather.length > 0
+      stored?.suitableWeather !== undefined && Array.isArray(stored.suitableWeather)
         ? stored.suitableWeather
-        : Array.isArray(stored?.weatherConditions) && stored.weatherConditions.length > 0
+        : stored?.weatherConditions !== undefined && Array.isArray(stored.weatherConditions)
           ? stored.weatherConditions
           : Array.isArray(activeItem.suitableWeather) && activeItem.suitableWeather.length > 0
             ? activeItem.suitableWeather
@@ -422,7 +432,7 @@ export default function FoodFormModal({
     );
 
     const rawMealTypes =
-      Array.isArray(stored?.mealTypes) && stored.mealTypes.length > 0
+      stored?.mealTypes !== undefined && Array.isArray(stored.mealTypes)
         ? stored.mealTypes
         : Array.isArray(activeItem.mealTypes) && activeItem.mealTypes.length > 0
           ? activeItem.mealTypes
@@ -467,9 +477,9 @@ export default function FoodFormModal({
     );
 
     const rawAgeRules =
-      Array.isArray(stored?.ageRules) && stored.ageRules.length > 0
+      stored?.ageRules !== undefined && Array.isArray(stored.ageRules)
         ? stored.ageRules
-        : Array.isArray(stored?.ageGroups) && stored.ageGroups.length > 0
+        : stored?.ageGroups !== undefined && Array.isArray(stored.ageGroups)
           ? stored.ageGroups
           : Array.isArray(activeItem.ageRules) && activeItem.ageRules.length > 0
             ? activeItem.ageRules
@@ -514,7 +524,7 @@ export default function FoodFormModal({
     );
 
     const rawDietary =
-      Array.isArray(stored?.dietaryTypes) && stored.dietaryTypes.length > 0
+      stored?.dietaryTypes !== undefined && Array.isArray(stored.dietaryTypes)
         ? stored.dietaryTypes
         : Array.isArray(activeItem.dietaryTypes) && activeItem.dietaryTypes.length > 0
           ? activeItem.dietaryTypes
@@ -538,7 +548,7 @@ export default function FoodFormModal({
     );
 
     const rawAllergens =
-      Array.isArray(stored?.allergens) && stored.allergens.length > 0
+      stored?.allergens !== undefined && Array.isArray(stored.allergens)
         ? stored.allergens
         : Array.isArray(activeItem.allergens) && activeItem.allergens.length > 0
           ? activeItem.allergens
@@ -571,7 +581,7 @@ export default function FoodFormModal({
     );
 
     const rawPrepTimes =
-      Array.isArray(stored?.preparationTimes) && stored.preparationTimes.length > 0
+      stored?.preparationTimes !== undefined && Array.isArray(stored.preparationTimes)
         ? stored.preparationTimes
         : Array.isArray((activeItem as any)?.preparationTimes)
           ? (activeItem as any).preparationTimes
@@ -586,7 +596,7 @@ export default function FoodFormModal({
     );
 
     const rawDistances =
-      Array.isArray(stored?.distances) && stored.distances.length > 0
+      stored?.distances !== undefined && Array.isArray(stored.distances)
         ? stored.distances
         : Array.isArray((activeItem as any)?.distances)
           ? (activeItem as any).distances
@@ -1044,6 +1054,7 @@ export default function FoodFormModal({
           allergens: (payload as any).allergens,
           preparationTimes: payload.preparationTimes,
           distances: payload.distances,
+          defaultSpiceLevel: payload.defaultSpiceLevel,
         });
       }
     } catch (submitError) {
@@ -1143,20 +1154,22 @@ export default function FoodFormModal({
               />
             </div>
 
-            <div>
-              <Label>កម្រិតហឹរ (Spice Level 0-5)</Label>
-              <CustomSelect
-                value={values.defaultSpiceLevel}
-                onChange={(val) =>
-                  setValues((current) => ({
-                    ...current,
-                    defaultSpiceLevel: val,
-                  }))
-                }
-                options={spiceLevelSelectOptions}
-                placeholder="ជ្រើសកម្រិតហឹរ..."
-              />
-            </div>
+            {catalogType !== "DRINK" && (
+              <div>
+                <Label>កម្រិតហឹរ (Spice Level 0-5)</Label>
+                <CustomSelect
+                  value={values.defaultSpiceLevel}
+                  onChange={(val) =>
+                    setValues((current) => ({
+                      ...current,
+                      defaultSpiceLevel: val,
+                    }))
+                  }
+                  options={spiceLevelSelectOptions}
+                  placeholder="ជ្រើសកម្រិតហឹរ..."
+                />
+              </div>
+            )}
 
             <div className="flex flex-col justify-end">
               <Label>ស្ថានភាព</Label>
