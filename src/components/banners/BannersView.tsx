@@ -4,6 +4,8 @@ import {
   AlertCircle,
   Calendar,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Eye,
   EyeOff,
   Filter,
@@ -36,6 +38,7 @@ import {
 import { adminBannerApi, resolveImageUrl } from "../../services/adminBannerApi";
 import BannerFormModal from "./BannerFormModal";
 import BannerDeleteDialog from "./BannerDeleteDialog";
+import BannerMediaImage from "./BannerMediaImage";
 
 interface ToastItem {
   id: string;
@@ -495,29 +498,29 @@ export default function BannersView() {
       )}
 
       {/* ============================================================
-          3. TABLE (MATCHING EXACT USERS & SHOPS TABLE STYLES)
+          3. TABLE (MATCHING SHOPS TABLE STYLES)
       ============================================================ */}
-      <div className="w-full overflow-x-auto rounded-3xl border border-gray-100 bg-white shadow-sm [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <table className="w-full border-collapse text-left">
+      <div className="w-full min-w-0 max-w-full overflow-x-auto rounded-3xl border border-gray-100 bg-white shadow-sm [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <table className="w-full table-auto border-collapse text-left">
           {/* ================= HEAD ================= */}
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/60">
-              <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[280px]">
+            <tr className="border-b border-gray-100 bg-gray-50/70">
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800 min-w-[260px]">
                 ផ្ទាំងរូបភាព & ចំណងជើង
               </th>
-              <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[150px]">
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800 min-w-[140px]">
                 ប្រភេទ
               </th>
-              <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[140px]">
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800 min-w-[130px]">
                 ទីតាំង
               </th>
-              <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[160px]">
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800 min-w-[150px]">
                 កាលបរិច្ឆេទបង្កើត
               </th>
-              <th className="whitespace-nowrap px-6 py-4 text-center text-lg font-semibold text-primary-800 min-w-[140px]">
+              <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[130px]">
                 ស្ថានភាពផ្សាយ
               </th>
-              <th className="whitespace-nowrap px-6 py-4 text-center text-lg font-semibold text-primary-800 min-w-[140px]">
+              <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[120px]">
                 សកម្មភាព
               </th>
             </tr>
@@ -527,7 +530,7 @@ export default function BannersView() {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={6} className="py-20 text-center">
+                <td colSpan={6} className="px-6 py-20 text-center">
                   <div className="flex flex-col items-center justify-center gap-3">
                     <Loader2 size={32} className="animate-spin text-emerald-600" />
                     <p className="text-lg font-medium text-gray-500">
@@ -538,18 +541,13 @@ export default function BannersView() {
               </tr>
             ) : filteredBanners.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-16 text-center text-gray-400">
-                  <div className="flex flex-col items-center justify-center gap-3">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gray-50 text-gray-400">
-                      <ImageIcon size={28} />
-                    </div>
-                    <p className="text-lg font-medium text-gray-500">
-                      មិនមានទិន្នន័យផ្ទាំងបែនណឺ
-                    </p>
-                    <p className="max-w-md text-sm text-gray-400">
-                      ទិន្នន័យផ្ទាំងរូបភាពផ្សព្វផ្សាយនឹងបង្ហាញនៅទីនេះ
-                    </p>
-                  </div>
+                <td colSpan={6} className="px-6 py-16 text-center">
+                  <p className="text-lg font-medium text-gray-500">
+                    មិនមានទិន្នន័យផ្ទាំងបែនណឺ
+                  </p>
+                  <p className="mt-1 text-base text-gray-400">
+                    ទិន្នន័យផ្ទាំងរូបភាពផ្សព្វផ្សាយនឹងបង្ហាញនៅទីនេះ
+                  </p>
                 </td>
               </tr>
             ) : (
@@ -564,41 +562,35 @@ export default function BannersView() {
                     key={banner.id}
                     className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
                   >
-                    {/* 1. Thumbnail + Title & Description (Matching Users column layout) */}
-                    <td className="px-6 py-3.5">
-                      <div className="group flex items-center gap-3.5">
+                    {/* 1. Thumbnail + Title & Description */}
+                    <td className="px-4 py-3">
+                      <div className="group flex items-center gap-3">
                         <div
                           onClick={() => fullImageUrl && setPreviewImage({ url: fullImageUrl, title: banner.title })}
-                          className="relative flex h-14 w-24 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100"
+                          className="relative flex h-11 w-20 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100"
                           title="ចុចដើម្បីមើលរូបភាពពេញ"
                         >
-                          {fullImageUrl ? (
-                            <img
-                              src={fullImageUrl}
-                              alt={banner.title}
-                              className="h-full w-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLElement).style.display = "none";
-                              }}
-                            />
-                          ) : (
-                            <ImageIcon size={22} className="text-primary-800 shrink-0" />
-                          )}
+                          <BannerMediaImage
+                            mediaUrlOrUuid={banner.imageUrl || banner.imageMediaUuid}
+                            alt={banner.title}
+                            className="h-full w-full object-cover"
+                            fallbackIcon={<ImageIcon size={22} className="text-primary-800 shrink-0" />}
+                          />
                           <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition group-hover:opacity-100">
-                            <Maximize2 size={16} className="text-white" />
+                            <Maximize2 size={14} className="text-white" />
                           </div>
                         </div>
 
                         <div className="min-w-0">
-                          <p className="max-w-[280px] truncate text-base font-semibold text-gray-800 transition group-hover:text-primary-800">
+                          <p className="max-w-[240px] truncate text-base font-semibold text-gray-800 transition group-hover:text-primary-800">
                             {banner.title}
                           </p>
                           {banner.description ? (
-                            <p className="max-w-[280px] truncate text-sm text-gray-400">
+                            <p className="max-w-[240px] truncate text-base font-normal text-gray-500">
                               {banner.description}
                             </p>
                           ) : (
-                            <span className="text-sm italic text-gray-400">
+                            <span className="text-base italic text-gray-400">
                               គ្មានការពិពណ៌នា
                             </span>
                           )}
@@ -607,64 +599,67 @@ export default function BannersView() {
                     </td>
 
                     {/* 2. Category Badge */}
-                    <td className="whitespace-nowrap px-6 py-3.5">
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-100 bg-primary-50 px-3 py-1 text-xs font-bold text-primary-700">
-                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-100 bg-emerald-50 px-3.5 py-1 text-base font-semibold text-emerald-700">
+                        <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
                         {BANNER_CATEGORY_LABELS[banner.category] || banner.category}
                       </span>
                     </td>
 
                     {/* 3. Location */}
-                    <td className="whitespace-nowrap px-6 py-3.5">
-                      <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
-                        <MapPin size={15} className="text-primary-700 shrink-0" />
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <div className="flex items-center gap-1.5 text-base font-normal text-gray-500">
+                        <MapPin size={16} className="text-primary-700 shrink-0" />
                         <span>{banner.location || "—"}</span>
                       </div>
                     </td>
 
                     {/* 4. Created Date */}
-                    <td className="whitespace-nowrap px-6 py-3.5">
-                      <div className="flex items-center gap-2 text-base font-medium text-gray-500">
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <div className="flex items-center gap-2 text-base font-normal text-gray-500">
                         <Calendar size={16} className="text-primary-700 shrink-0" />
                         <span>{formatDate(banner.createdAt)}</span>
                       </div>
                     </td>
 
-                    {/* 5. Published Status Toggle Switch & Label */}
-                    <td className="whitespace-nowrap px-6 py-3.5 text-center">
-                      <div className="inline-flex flex-col items-center gap-1">
+                    {/* 5. Published Status Toggle Switch & Badge */}
+                    <td className="whitespace-nowrap px-4 py-3 text-center">
+                      <div className="inline-flex items-center justify-center gap-2">
                         <button
                           type="button"
                           disabled={isToggling}
                           onClick={() => void handleToggleStatus(banner)}
-                          className={`group/toggle relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50 ${
+                          className={`group/toggle relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50 ${
                             banner.isPublished ? "bg-[#137A3D]" : "bg-gray-300 hover:bg-gray-400"
                           }`}
                           title={banner.isPublished ? "ចុចដើម្បីបិទមិនបង្ហាញ (Hide / Draft)" : "ចុចដើម្បីបង្ហាញផ្សាយ (Show / Publish)"}
                           aria-label="Toggle banner status"
                         >
                           <span
-                            className={`inline-flex h-5 w-5 transform items-center justify-center rounded-full bg-white shadow-md transition-transform duration-200 ${
-                              banner.isPublished ? "translate-x-7" : "translate-x-1"
+                            className={`inline-flex h-4 w-4 transform items-center justify-center rounded-full bg-white shadow-md transition-transform duration-200 ${
+                              banner.isPublished ? "translate-x-6" : "translate-x-1"
                             }`}
                           >
                             {isToggling && (
-                              <Loader2 size={12} className="animate-spin text-gray-600" />
+                              <Loader2 size={10} className="animate-spin text-gray-600" />
                             )}
                           </span>
                         </button>
                         <span
-                          className={`text-xs font-bold ${
-                            banner.isPublished ? "text-emerald-700" : "text-gray-500"
+                          className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${
+                            banner.isPublished
+                              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+                              : "border-gray-200 bg-gray-50 text-gray-600"
                           }`}
                         >
-                          {banner.isPublished ? "បានផ្សាយ" : "ព្រាង (Draft)"}
+                          <span className={`h-2 w-2 shrink-0 rounded-full ${banner.isPublished ? "bg-emerald-500" : "bg-gray-400"}`} />
+                          {banner.isPublished ? "បានផ្សាយ" : "ព្រាង"}
                         </span>
                       </div>
                     </td>
 
-                    {/* 6. Actions (Matching Users & Shops Buttons) */}
-                    <td className="whitespace-nowrap px-6 py-3.5 text-center">
+                    {/* 6. Actions */}
+                    <td className="whitespace-nowrap px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
                         {fullImageUrl && (
                           <button
@@ -706,52 +701,33 @@ export default function BannersView() {
           </tbody>
         </table>
 
-        {/* ================= PAGINATION FOOTER ================= */}
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-100 bg-gray-50/60 px-6 py-4 sm:flex-row">
-          <div className="flex flex-wrap items-center gap-3 text-base font-medium text-gray-600">
-            <span>
-              បង្ហាញ <strong className="text-gray-900">{filteredBanners.length}</strong> នៃ{" "}
-              <strong className="text-gray-900">{totalElements}</strong> បែនណឺសរុប
-            </span>
-            <span>•</span>
-            <div className="flex items-center gap-2">
-              <span>ទំព័រនីមួយៗ:</span>
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setCurrentPage(0);
-                }}
-                className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-base font-semibold text-gray-700 outline-none"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-          </div>
+        {/* ================= PAGINATION (EXACT SHOPS PAGINATION STYLE) ================= */}
+        <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-base text-gray-500">
+            សរុប <span className="font-semibold text-gray-700">{totalElements}</span> ផ្ទាំងបែនណឺ
+          </p>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
               disabled={currentPage === 0 || isLoading}
               onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-              className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-base font-semibold text-gray-700 shadow-2xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              ថយក្រោយ
+              <ChevronLeft size={18} />
             </button>
 
-            <span className="px-3 text-base font-semibold text-gray-700">
-              ទំព័រ {currentPage + 1} / {totalPages || 1}
+            <span className="flex h-9 min-w-9 items-center justify-center rounded-lg bg-[#136C34] px-3 text-base font-semibold text-white">
+              {currentPage + 1} / {Math.max(totalPages, 1)}
             </span>
 
             <button
               type="button"
               disabled={currentPage >= totalPages - 1 || isLoading}
               onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-              className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-base font-semibold text-gray-700 shadow-2xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              បន្ទាប់
+              <ChevronRight size={18} />
             </button>
           </div>
         </div>

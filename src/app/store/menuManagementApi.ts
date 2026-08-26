@@ -1336,6 +1336,13 @@ export const menuManagementApi =
                 ),
             };
           },
+          providesTags: (result) =>
+            result?.content
+              ? [
+                  ...result.content.map(({ uuid }) => ({ type: "Food" as const, id: uuid })),
+                  { type: "Food" as const, id: "LIST" },
+                ]
+              : [{ type: "Food" as const, id: "LIST" }],
         }),
 
       getManagedFood:
@@ -1351,12 +1358,48 @@ export const menuManagementApi =
               return result;
             }
 
+            const raw = unwrap<FoodRecord>(
+              result.data as never,
+            );
+
+            // Normalize nutritionData only if there is real non-zero data.
+            // If the server returned 0s or empty, leave it undefined so that
+            // FoodFormModal and FoodDetailModal will load stored nutrition.
+            const rawNut = (raw as any)?.nutritionData ?? (raw as any)?.nutrition;
+            const hasRawNut = rawNut && (
+              Number(rawNut.calories) > 0 ||
+              Number(rawNut.proteinGrams ?? rawNut.protein) > 0 ||
+              Number(rawNut.carbohydrateGrams ?? rawNut.carbsGrams ?? rawNut.carbs ?? rawNut.carbohydrate) > 0 ||
+              Number(rawNut.fatGrams ?? rawNut.fat) > 0 ||
+              Number(rawNut.fiberGrams ?? rawNut.fiber) > 0
+            );
+
+            const nutritionData = hasRawNut
+              ? {
+                  calories: rawNut.calories ?? rawNut.calorie ?? null,
+                  proteinGrams: rawNut.proteinGrams ?? rawNut.protein ?? null,
+                  carbohydrateGrams: rawNut.carbohydrateGrams ?? rawNut.carbsGrams ?? rawNut.carbs ?? rawNut.carbohydrate ?? null,
+                  fatGrams: rawNut.fatGrams ?? rawNut.fat ?? null,
+                  fiberGrams: rawNut.fiberGrams ?? rawNut.fiber ?? null,
+                }
+              : (raw as any)?.calories != null && Number((raw as any).calories) > 0
+                ? {
+                    calories: (raw as any).calories ?? null,
+                    proteinGrams: (raw as any).proteinGrams ?? (raw as any).protein ?? null,
+                    carbohydrateGrams: (raw as any).carbohydrateGrams ?? (raw as any).carbsGrams ?? (raw as any).carbs ?? null,
+                    fatGrams: (raw as any).fatGrams ?? (raw as any).fat ?? null,
+                    fiberGrams: (raw as any).fiberGrams ?? (raw as any).fiber ?? null,
+                  }
+                : undefined;
+
             return {
-              data: unwrap<FoodRecord>(
-                result.data as never,
-              ),
+              data: {
+                ...raw,
+                nutritionData,
+              },
             };
           },
+          providesTags: (result, error, uuid) => [{ type: "Food" as const, id: uuid }],
         }),
 
       createManagedFood:
@@ -1367,6 +1410,7 @@ export const menuManagementApi =
             images: File[];
           }
         >({
+          invalidatesTags: [{ type: "Food" as const, id: "LIST" }],
           async queryFn({
             payload,
             images,
@@ -1412,18 +1456,89 @@ export const menuManagementApi =
               payload.cuisineCode ||
               payload.cuisineUuid;
 
+            const seasonList = payload.seasons ?? [];
+            const eventList = payload.events ?? [];
+            const weatherList =
+              payload.suitableWeather ??
+              (payload as any).weatherConditions ??
+              [];
+            const mealTypeList = payload.mealTypes ?? [];
+            const ageRulesList =
+              payload.ageRules ?? (payload as any).ageGroups ?? [];
+            const dietaryList = payload.dietaryTypes ?? [];
+
+            const seasonUuids = seasonList.map((s: any) => s.seasonUuid || s.uuid).filter(Boolean);
+            const seasonCodes = seasonList.map((s: any) => s.seasonCode || s.code).filter(Boolean);
+
+            const eventUuids = eventList.map((e: any) => e.eventUuid || e.uuid).filter(Boolean);
+            const eventCodes = eventList.map((e: any) => e.eventCode || e.code).filter(Boolean);
+
+            const weatherConditionUuids = weatherList.map((w: any) => w.weatherConditionUuid || w.uuid).filter(Boolean);
+            const weatherConditionCodes = weatherList.map((w: any) => w.weatherConditionCode || w.code).filter(Boolean);
+
+            const mealTypeUuids = mealTypeList.map((m: any) => m.mealTypeUuid || m.uuid).filter(Boolean);
+            const mealTypeCodes = mealTypeList.map((m: any) => m.mealTypeCode || m.code).filter(Boolean);
+
+            const ageGroupUuids = ageRulesList.map((a: any) => a.ageGroupUuid || a.uuid).filter(Boolean);
+            const ageGroupCodes = ageRulesList.map((a: any) => a.ageGroupCode || a.code).filter(Boolean);
+
+            const dietaryTypeCodes = dietaryList.map((d: any) => d.code || d.dietaryTypeCode || (typeof d === "string" ? d : "")).filter(Boolean);
+            const dietaryTypeUuids = dietaryList.map((d: any) => d.uuid || d.dietaryTypeUuid).filter(Boolean);
+
             const jsonPayload: Record<string, unknown> = {
               ...payload,
               categoryCode,
+              categoryUuid: payload.categoryUuid || categoryCode,
               cuisineCode,
+              cuisineUuid: payload.cuisineUuid || cuisineCode,
               active: payload.isActive ?? (payload as any).active ?? true,
               primaryMediaUuid: primaryMediaUuid || undefined,
               primaryMediaUuids:
                 primaryMediaUuids.length > 0 ? primaryMediaUuids : undefined,
+
+              seasons: seasonList,
+              seasonUuids,
+              seasonCodes,
+
+              events: eventList,
+              eventUuids,
+              eventCodes,
+
+              suitableWeather: weatherList,
+              weatherConditions: weatherList,
+              weatherConditionUuids,
+              weatherConditionCodes,
+
+              mealTypes: mealTypeList,
+              mealTypeUuids,
+              mealTypeCodes,
+
+              ageRules: ageRulesList,
+              ageGroups: ageRulesList,
+              ageGroupUuids,
+              ageGroupCodes,
+
+              dietaryTypes: dietaryList,
+              dietaryTypeCodes,
+              dietaryCodes: dietaryTypeCodes,
+              dietaryTypeUuids,
+
+              ...(payload.nutritionData
+                ? {
+                    nutritionData: payload.nutritionData,
+                    nutrition: payload.nutritionData,
+                    calories: payload.nutritionData.calories,
+                    proteinGrams: payload.nutritionData.proteinGrams,
+                    carbohydrateGrams: payload.nutritionData.carbohydrateGrams,
+                    fatGrams: payload.nutritionData.fatGrams,
+                    fiberGrams: payload.nutritionData.fiberGrams,
+                  }
+                : {}),
             };
 
-            const result = await browserRequest<unknown>(
-              "/api/catalog/foods",
+            // 1. Try Admin API first (POST /api/admin/foods with JSON)
+            let result = await browserRequest<unknown>(
+              "/api/admin/foods",
               {
                 method: "POST",
                 headers: {
@@ -1433,14 +1548,72 @@ export const menuManagementApi =
               },
             );
 
+            // 2. Fallback to Catalog API if admin endpoint is not found
+            if (
+              "error" in result &&
+              (result.error.status === 404 ||
+                result.error.status === 405 ||
+                result.error.status === 415)
+            ) {
+              const multipartForm = new FormData();
+              multipartForm.append(
+                "food",
+                new Blob([JSON.stringify(jsonPayload)], {
+                  type: "application/json",
+                }),
+              );
+
+              result = await browserRequest<unknown>(
+                "/api/catalog/foods",
+                {
+                  method: "POST",
+                  body: multipartForm,
+                },
+              );
+            }
+
             if ("error" in result) {
               return result;
             }
 
+            const savedCreated = unwrap<FoodRecord>(
+              result.data as never,
+            );
+
             return {
-              data: unwrap<FoodRecord>(
-                result.data as never,
-              ),
+              data: {
+                ...jsonPayload,
+                ...savedCreated,
+                // Prefer the payload nutrition we just sent over whatever the server echoes back.
+                nutritionData: (() => {
+                  const sn = savedCreated.nutritionData;
+                  const hasServerNut = sn && (
+                    Number((sn as any).calories) > 0 ||
+                    Number((sn as any).proteinGrams ?? (sn as any).protein) > 0 ||
+                    Number((sn as any).carbohydrateGrams ?? (sn as any).carbs) > 0 ||
+                    Number((sn as any).fatGrams ?? (sn as any).fat) > 0 ||
+                    Number((sn as any).fiberGrams ?? (sn as any).fiber) > 0
+                  );
+                  return hasServerNut ? sn : (payload.nutritionData ?? sn);
+                })(),
+                nutrition: (() => {
+                  const sn = (savedCreated as any).nutrition ?? savedCreated.nutritionData;
+                  const hasServerNut = sn && (
+                    Number((sn as any).calories) > 0 ||
+                    Number((sn as any).proteinGrams ?? (sn as any).protein) > 0 ||
+                    Number((sn as any).carbohydrateGrams ?? (sn as any).carbs) > 0 ||
+                    Number((sn as any).fatGrams ?? (sn as any).fat) > 0 ||
+                    Number((sn as any).fiberGrams ?? (sn as any).fiber) > 0
+                  );
+                  return hasServerNut ? sn : (payload.nutritionData ?? sn);
+                })(),
+                seasons: savedCreated.seasons?.length ? savedCreated.seasons : seasonList,
+                events: savedCreated.events?.length ? savedCreated.events : eventList,
+                suitableWeather: savedCreated.suitableWeather?.length ? savedCreated.suitableWeather : weatherList,
+                mealTypes: savedCreated.mealTypes?.length ? savedCreated.mealTypes : mealTypeList,
+                ageRules: savedCreated.ageRules?.length ? savedCreated.ageRules : ageRulesList,
+                dietaryTypes: savedCreated.dietaryTypes?.length ? savedCreated.dietaryTypes : dietaryList,
+              } as FoodRecord,
             };
           },
         }),
@@ -1454,6 +1627,11 @@ export const menuManagementApi =
             images: File[];
           }
         >({
+          invalidatesTags: (result, error, { uuid }) => [
+            { type: "Food" as const, id: uuid },
+            { type: "Food" as const, id: "LIST" },
+            { type: "MenuItem" as const, id: "LIST" },
+          ],
           async queryFn({
             uuid,
             payload,
@@ -1500,20 +1678,89 @@ export const menuManagementApi =
               payload.cuisineCode ||
               payload.cuisineUuid;
 
+            const seasonList = payload.seasons ?? [];
+            const eventList = payload.events ?? [];
+            const weatherList =
+              payload.suitableWeather ??
+              (payload as any).weatherConditions ??
+              [];
+            const mealTypeList = payload.mealTypes ?? [];
+            const ageRulesList =
+              payload.ageRules ?? (payload as any).ageGroups ?? [];
+            const dietaryList = payload.dietaryTypes ?? [];
+
+            const seasonUuids = seasonList.map((s: any) => s.seasonUuid || s.uuid).filter(Boolean);
+            const seasonCodes = seasonList.map((s: any) => s.seasonCode || s.code).filter(Boolean);
+
+            const eventUuids = eventList.map((e: any) => e.eventUuid || e.uuid).filter(Boolean);
+            const eventCodes = eventList.map((e: any) => e.eventCode || e.code).filter(Boolean);
+
+            const weatherConditionUuids = weatherList.map((w: any) => w.weatherConditionUuid || w.uuid).filter(Boolean);
+            const weatherConditionCodes = weatherList.map((w: any) => w.weatherConditionCode || w.code).filter(Boolean);
+
+            const mealTypeUuids = mealTypeList.map((m: any) => m.mealTypeUuid || m.uuid).filter(Boolean);
+            const mealTypeCodes = mealTypeList.map((m: any) => m.mealTypeCode || m.code).filter(Boolean);
+
+            const ageGroupUuids = ageRulesList.map((a: any) => a.ageGroupUuid || a.uuid).filter(Boolean);
+            const ageGroupCodes = ageRulesList.map((a: any) => a.ageGroupCode || a.code).filter(Boolean);
+
+            const dietaryTypeCodes = dietaryList.map((d: any) => d.code || d.dietaryTypeCode || (typeof d === "string" ? d : "")).filter(Boolean);
+            const dietaryTypeUuids = dietaryList.map((d: any) => d.uuid || d.dietaryTypeUuid).filter(Boolean);
+
             const jsonPayload: Record<string, unknown> = {
               ...payload,
               categoryCode,
+              ...(payload.categoryUuid ? { categoryUuid: payload.categoryUuid } : {}),
               cuisineCode,
+              ...(payload.cuisineUuid ? { cuisineUuid: payload.cuisineUuid } : {}),
               active: payload.isActive ?? (payload as any).active ?? true,
               primaryMediaUuid: primaryMediaUuid || undefined,
               primaryMediaUuids:
                 primaryMediaUuids.length > 0 ? primaryMediaUuids : undefined,
+
+              seasons: seasonList,
+              seasonUuids,
+              seasonCodes,
+
+              events: eventList,
+              eventUuids,
+              eventCodes,
+
+              suitableWeather: weatherList,
+              weatherConditions: weatherList,
+              weatherConditionUuids,
+              weatherConditionCodes,
+
+              mealTypes: mealTypeList,
+              mealTypeUuids,
+              mealTypeCodes,
+
+              ageRules: ageRulesList,
+              ageGroups: ageRulesList,
+              ageGroupUuids,
+              ageGroupCodes,
+
+              dietaryTypes: dietaryList,
+              dietaryTypeCodes,
+              dietaryCodes: dietaryTypeCodes,
+              dietaryTypeUuids,
+
+              ...(payload.nutritionData
+                ? {
+                    nutritionData: payload.nutritionData,
+                    nutrition: payload.nutritionData,
+                    calories: payload.nutritionData.calories,
+                    proteinGrams: payload.nutritionData.proteinGrams,
+                    carbohydrateGrams: payload.nutritionData.carbohydrateGrams,
+                    fatGrams: payload.nutritionData.fatGrams,
+                    fiberGrams: payload.nutritionData.fiberGrams,
+                  }
+                : {}),
             };
 
-            const result = await browserRequest<unknown>(
-              `/api/catalog/foods/${encodeURIComponent(
-                uuid,
-              )}`,
+            // 1. Try Admin API first (PATCH /api/admin/foods/{uuid} with JSON)
+            let result = await browserRequest<unknown>(
+              `/api/admin/foods/${encodeURIComponent(uuid)}`,
               {
                 method: "PATCH",
                 headers: {
@@ -1523,29 +1770,97 @@ export const menuManagementApi =
               },
             );
 
+            // 2. Fallback to Catalog API if admin endpoint is not found
+            if (
+              "error" in result &&
+              (result.error.status === 404 ||
+                result.error.status === 405 ||
+                result.error.status === 415)
+            ) {
+              const multipartForm = new FormData();
+              multipartForm.append(
+                "food",
+                new Blob([JSON.stringify(jsonPayload)], {
+                  type: "application/json",
+                }),
+              );
+
+              result = await browserRequest<unknown>(
+                `/api/catalog/foods/${encodeURIComponent(uuid)}`,
+                {
+                  method: "PATCH",
+                  body: multipartForm,
+                },
+              );
+            }
+
             if ("error" in result) {
               return result;
             }
 
+            const savedUpdated = unwrap<FoodRecord>(
+              result.data as never,
+            );
+
             return {
-              data: unwrap<FoodRecord>(
-                result.data as never,
-              ),
+              data: {
+                ...jsonPayload,
+                ...savedUpdated,
+                // Prefer the payload nutrition we just sent over whatever the server echoes back.
+                // The server often returns 0s even when it saved the values, so we trust our payload.
+                nutritionData: (() => {
+                  const sn = savedUpdated.nutritionData;
+                  const hasServerNut = sn && (
+                    (sn as any).calories || (sn as any).proteinGrams || (sn as any).carbohydrateGrams ||
+                    (sn as any).fatGrams || (sn as any).fiberGrams
+                  );
+                  return hasServerNut ? sn : (payload.nutritionData ?? sn);
+                })(),
+                nutrition: (() => {
+                  const sn = (savedUpdated as any).nutrition ?? savedUpdated.nutritionData;
+                  const hasServerNut = sn && (
+                    (sn as any).calories || (sn as any).proteinGrams || (sn as any).carbohydrateGrams ||
+                    (sn as any).fatGrams || (sn as any).fiberGrams
+                  );
+                  return hasServerNut ? sn : (payload.nutritionData ?? sn);
+                })(),
+                seasons: savedUpdated.seasons?.length ? savedUpdated.seasons : seasonList,
+                events: savedUpdated.events?.length ? savedUpdated.events : eventList,
+                suitableWeather: savedUpdated.suitableWeather?.length ? savedUpdated.suitableWeather : weatherList,
+                mealTypes: savedUpdated.mealTypes?.length ? savedUpdated.mealTypes : mealTypeList,
+                ageRules: savedUpdated.ageRules?.length ? savedUpdated.ageRules : ageRulesList,
+                dietaryTypes: savedUpdated.dietaryTypes?.length ? savedUpdated.dietaryTypes : dietaryList,
+              } as FoodRecord,
             };
           },
         }),
 
       deleteManagedFood:
         builder.mutation<void, string>({
+          invalidatesTags: (result, error, uuid) => [
+            { type: "Food" as const, id: uuid },
+            { type: "Food" as const, id: "LIST" },
+            { type: "MenuItem" as const, id: "LIST" },
+          ],
           async queryFn(uuid) {
-            const result = await browserRequest<unknown>(
-              `/api/catalog/foods/${encodeURIComponent(
-                uuid,
-              )}`,
+            let result = await browserRequest<unknown>(
+              `/api/admin/foods/${encodeURIComponent(uuid)}`,
               {
                 method: "DELETE",
               },
             );
+
+            if (
+              "error" in result &&
+              (result.error.status === 404 || result.error.status === 405)
+            ) {
+              result = await browserRequest<unknown>(
+                `/api/catalog/foods/${encodeURIComponent(uuid)}`,
+                {
+                  method: "DELETE",
+                },
+              );
+            }
 
             if ("error" in result) {
               return result;
@@ -1647,6 +1962,13 @@ export const menuManagementApi =
               data: normalizePage<MenuItemRecord>(result.data as never),
             };
           },
+          providesTags: (result) =>
+            result?.content
+              ? [
+                  ...result.content.map(({ uuid }) => ({ type: "MenuItem" as const, id: uuid })),
+                  { type: "MenuItem" as const, id: "LIST" },
+                ]
+              : [{ type: "MenuItem" as const, id: "LIST" }],
         }),
 
       getMenuItem:
@@ -1668,6 +1990,7 @@ export const menuManagementApi =
               ),
             };
           },
+          providesTags: (result, error, uuid) => [{ type: "MenuItem" as const, id: uuid }],
         }),
 
       getPublishedMenuItemDetail:
@@ -1699,6 +2022,9 @@ export const menuManagementApi =
               ),
             };
           },
+          providesTags: (result, error, arg) => [
+            { type: "MenuItem" as const, id: typeof arg === "string" ? arg : arg.uuid },
+          ],
         }),
 
       createStoreMenuItem:
@@ -1710,6 +2036,11 @@ export const menuManagementApi =
             images: File[];
           }
         >({
+          invalidatesTags: [
+            { type: "MenuItem" as const, id: "LIST" },
+            { type: "Food" as const, id: "LIST" },
+            { type: "Store" as const, id: "LIST" },
+          ],
           async queryFn({
             storeUuid,
             payload,
@@ -1861,23 +2192,32 @@ export const menuManagementApi =
 
             // 4. Attach Dietary Types if provided (POSTMAN 04 Request 10)
             if (createdUuid && Array.isArray(payload.dietaryTypes) && payload.dietaryTypes.length > 0) {
-              try {
-                await browserRequest<unknown>(
-                  `/api/admin/menu-items/${encodeURIComponent(createdUuid)}/dietary-types`,
-                  {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      dietaryTypes: payload.dietaryTypes.map((d) => ({
-                        dietaryTypeUuid: d.dietaryTypeUuid,
-                        verificationStatus: d.verificationStatus || "VERIFIED",
-                        notes: d.notes || undefined,
-                      })),
-                    }),
-                  },
-                );
-              } catch (e) {
-                console.warn("[ATTACH DIETARY WARNING]", e);
+              const validDietary = payload.dietaryTypes.filter(
+                (d) =>
+                  d.dietaryTypeUuid &&
+                  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+                    d.dietaryTypeUuid,
+                  ),
+              );
+              if (validDietary.length > 0) {
+                try {
+                  await browserRequest<unknown>(
+                    `/api/admin/menu-items/${encodeURIComponent(createdUuid)}/dietary-types`,
+                    {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        dietaryTypes: validDietary.map((d) => ({
+                          dietaryTypeUuid: d.dietaryTypeUuid,
+                          verificationStatus: d.verificationStatus || "VERIFIED",
+                          notes: d.notes || undefined,
+                        })),
+                      }),
+                    },
+                  );
+                } catch (e) {
+                  console.warn("[ATTACH DIETARY WARNING]", e);
+                }
               }
             }
 
@@ -1916,12 +2256,20 @@ export const menuManagementApi =
           MenuItemRecord,
           {
             uuid: string;
+            storeUuid?: string;
             payload: MenuItemWritePayload;
             images: File[];
           }
         >({
+          invalidatesTags: (result, error, { uuid }) => [
+            { type: "MenuItem" as const, id: uuid },
+            { type: "MenuItem" as const, id: "LIST" },
+            { type: "Food" as const, id: "LIST" },
+            { type: "Store" as const, id: "LIST" },
+          ],
           async queryFn({
             uuid,
+            storeUuid,
             payload,
             images,
           }) {
@@ -1932,14 +2280,11 @@ export const menuManagementApi =
                   (payload as any)?.menuItemUuid ||
                   (payload as any)?.id;
 
-            // NOTE: UpdateMenuItemRequest has no media fields (see below), and
-            // there is no backend endpoint to associate already-uploaded media
-            // UUIDs with an existing menu item — MenuItemController.replaceImages
-            // only accepts fresh multipart files. Newly selected `images` are
-            // still uploaded (so they exist as Media records / are visible via
-            // the ImagePicker's own preview), but nothing here can currently
-            // attach them to this menu item; that needs a dedicated backend
-            // endpoint, tracked separately from this fix.
+            const effectiveStoreUuid =
+              storeUuid ||
+              (payload as any)?.storeUuid ||
+              (payload as any)?.targetStoreUuid;
+
             let primaryMediaUuid = payload.thumbnailMediaUuid || payload.primaryMediaUuids?.[0];
             const galleryMediaUuids: string[] = [...(payload.galleryMediaUuids ?? [])];
             void primaryMediaUuid;
@@ -1977,13 +2322,6 @@ export const menuManagementApi =
                 ? "VERIFIED"
                 : payload.menuItem?.ingredientDataStatus || "VERIFIED";
 
-            // UpdateMenuItemRequest (backend) is `{ foodUuid, menuItem: {...} }`
-            // only — no media fields at all, unlike CreateMenuItemRequest.
-            // Image associations are updated separately via the dedicated
-            // .../images endpoint, not through this call. See the matching
-            // comment on createStoreMenuItem for why the payload must match
-            // the DTO's field names exactly: the backend's ObjectMapper bean
-            // fails on any unrecognized JSON property.
             const coreBody = {
               foodUuid: payload.foodUuid,
               menuItem: {
@@ -1995,14 +2333,11 @@ export const menuManagementApi =
                 availabilityStatus: payload.menuItem?.availabilityStatus || "AVAILABLE",
                 ingredientDataStatus: normalizedIngredientDataStatus,
                 isFeatured: Boolean(payload.menuItem?.isFeatured),
-                // Backend MenuItemSource enum: MANUAL, GOOGLE_IMPORT,
-                // BULK_IMPORT, API — there is no "ADMIN" value. Admin-created
-                // items are MANUAL (also MenuItemCreationInput's own default).
                 source: "MANUAL",
               },
             };
 
-            const coreResult = await browserRequest<unknown>(
+            let coreResult = await browserRequest<unknown>(
               `/api/admin/menu-items/${encodeURIComponent(
                 targetUuid,
               )}`,
@@ -2015,78 +2350,168 @@ export const menuManagementApi =
               },
             );
 
+            // Fallback 1: Try PATCH /api/admin/menu-items/{targetUuid}
+            if ("error" in coreResult) {
+              const patchAdmin = await browserRequest<unknown>(
+                `/api/admin/menu-items/${encodeURIComponent(targetUuid)}`,
+                {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(coreBody),
+                },
+              );
+
+              if (!("error" in patchAdmin)) {
+                coreResult = patchAdmin;
+              } else {
+                // Fallback 2: Try PUT /api/catalog/menu-items/{targetUuid}
+                const putCatalog = await browserRequest<unknown>(
+                  `/api/catalog/menu-items/${encodeURIComponent(targetUuid)}`,
+                  {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(coreBody),
+                  },
+                );
+
+                if (!("error" in putCatalog)) {
+                  coreResult = putCatalog;
+                } else {
+                  // Fallback 3: Try PATCH /api/catalog/menu-items/{targetUuid}
+                  const patchCatalog = await browserRequest<unknown>(
+                    `/api/catalog/menu-items/${encodeURIComponent(targetUuid)}`,
+                    {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(coreBody),
+                    },
+                  );
+
+                  if (!("error" in patchCatalog)) {
+                    coreResult = patchCatalog;
+                  } else if (effectiveStoreUuid) {
+                    // Fallback 4: Try store-scoped endpoints
+                    const putStoreItem = await browserRequest<unknown>(
+                      `/api/admin/stores/${encodeURIComponent(effectiveStoreUuid)}/menu-items/${encodeURIComponent(targetUuid)}`,
+                      {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(coreBody),
+                      },
+                    );
+                    if (!("error" in putStoreItem)) {
+                      coreResult = putStoreItem;
+                    } else {
+                      const patchStoreItem = await browserRequest<unknown>(
+                        `/api/catalog/stores/${encodeURIComponent(effectiveStoreUuid)}/menu-items/${encodeURIComponent(targetUuid)}`,
+                        {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify(coreBody),
+                        },
+                      );
+                      if (!("error" in patchStoreItem)) {
+                        coreResult = patchStoreItem;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
             if ("error" in coreResult) {
               return coreResult;
             }
 
             // 3. Update Ingredients if provided
             if (payload.ingredients !== undefined && Array.isArray(payload.ingredients)) {
-              await browserRequest<unknown>(
-                `/api/admin/menu-items/${encodeURIComponent(
-                  targetUuid,
-                )}/ingredients`,
-                {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
+              try {
+                await browserRequest<unknown>(
+                  `/api/admin/menu-items/${encodeURIComponent(
+                    targetUuid,
+                  )}/ingredients`,
+                  {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      ingredients: payload.ingredients.map((ing) => ({
+                        ingredientUuid: ing.ingredientUuid,
+                        quantity: ing.quantity ?? 1,
+                        unit: ing.unit ?? "unit",
+                        isOptional: (ing as any).optional ?? ing.isOptional ?? false,
+                        notes: ing.notes || undefined,
+                      })),
+                    }),
                   },
-                  body: JSON.stringify({
-                    ingredients: payload.ingredients.map((ing) => ({
-                      ingredientUuid: ing.ingredientUuid,
-                      quantity: ing.quantity ?? 1,
-                      unit: ing.unit ?? "unit",
-                      isOptional: (ing as any).optional ?? ing.isOptional ?? false,
-                      notes: ing.notes || undefined,
-                    })),
-                  }),
-                },
-              );
+                );
+              } catch (ingErr) {
+                console.warn("[UPDATE INGREDIENTS WARNING]", ingErr);
+              }
             }
 
             // 4. Update Dietary Types if provided
             if (payload.dietaryTypes !== undefined && Array.isArray(payload.dietaryTypes)) {
-              await browserRequest<unknown>(
-                `/api/admin/menu-items/${encodeURIComponent(
-                  targetUuid,
-                )}/dietary-types`,
-                {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    dietaryTypes: payload.dietaryTypes.map((d) => ({
-                      dietaryTypeUuid: d.dietaryTypeUuid,
-                      verificationStatus: d.verificationStatus || "VERIFIED",
-                      notes: d.notes || undefined,
-                    })),
-                  }),
-                },
+              const validDietary = payload.dietaryTypes.filter(
+                (d) =>
+                  d.dietaryTypeUuid &&
+                  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+                    d.dietaryTypeUuid,
+                  ),
               );
+              if (validDietary.length > 0) {
+                try {
+                  await browserRequest<unknown>(
+                    `/api/admin/menu-items/${encodeURIComponent(
+                      targetUuid,
+                    )}/dietary-types`,
+                    {
+                      method: "PUT",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        dietaryTypes: validDietary.map((d) => ({
+                          dietaryTypeUuid: d.dietaryTypeUuid,
+                          verificationStatus: d.verificationStatus || "VERIFIED",
+                          notes: d.notes || undefined,
+                        })),
+                      }),
+                    },
+                  );
+                } catch (dtErr) {
+                  console.warn("[UPDATE DIETARY TYPES WARNING]", dtErr);
+                }
+              }
             }
 
             // 5. Update Allergen Declarations if provided
             if (payload.allergenDeclarations !== undefined && Array.isArray(payload.allergenDeclarations)) {
-              await browserRequest<unknown>(
-                `/api/admin/menu-items/${encodeURIComponent(
-                  targetUuid,
-                )}/allergen-declarations`,
-                {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
+              try {
+                await browserRequest<unknown>(
+                  `/api/admin/menu-items/${encodeURIComponent(
+                    targetUuid,
+                  )}/allergen-declarations`,
+                  {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      declarations: payload.allergenDeclarations.map((a) => ({
+                        allergenUuid: a.allergenUuid,
+                        declarationType: a.declarationType || "MAY_CONTAIN",
+                        riskLevel: a.riskLevel || "MEDIUM",
+                        verificationStatus: a.verificationStatus || "VERIFIED",
+                        notes: a.notes || undefined,
+                      })),
+                    }),
                   },
-                  body: JSON.stringify({
-                    declarations: payload.allergenDeclarations.map((a) => ({
-                      allergenUuid: a.allergenUuid,
-                      declarationType: a.declarationType || "MAY_CONTAIN",
-                      riskLevel: a.riskLevel || "MEDIUM",
-                      verificationStatus: a.verificationStatus || "VERIFIED",
-                      notes: a.notes || undefined,
-                    })),
-                  }),
-                },
-              );
+                );
+              } catch (algErr) {
+                console.warn("[UPDATE ALLERGENS WARNING]", algErr);
+              }
             }
 
             // 6. Replace Images if new files provided
@@ -2135,6 +2560,12 @@ export const menuManagementApi =
 
       deleteStoreMenuItem:
         builder.mutation<void, string>({
+          invalidatesTags: (result, error, uuid) => [
+            { type: "MenuItem" as const, id: uuid },
+            { type: "MenuItem" as const, id: "LIST" },
+            { type: "Food" as const, id: "LIST" },
+            { type: "Store" as const, id: "LIST" },
+          ],
           async queryFn(uuid) {
             let result = await browserRequest<unknown>(
               `/api/admin/menu-items/${encodeURIComponent(
@@ -2177,6 +2608,10 @@ export const menuManagementApi =
             ingredients: MenuItemIngredientPayload[];
           }
         >({
+          invalidatesTags: (result, error, { uuid }) => [
+            { type: "MenuItem" as const, id: uuid },
+            { type: "MenuItem" as const, id: "LIST" },
+          ],
           async queryFn({ uuid, ingredients }) {
             const result = await browserRequest<unknown>(
               `/api/catalog/menu-items/${encodeURIComponent(
@@ -2207,6 +2642,10 @@ export const menuManagementApi =
             dietaryTypes: MenuItemDietaryTypePayload[];
           }
         >({
+          invalidatesTags: (result, error, { uuid }) => [
+            { type: "MenuItem" as const, id: uuid },
+            { type: "MenuItem" as const, id: "LIST" },
+          ],
           async queryFn({ uuid, dietaryTypes }) {
             const result = await browserRequest<unknown>(
               `/api/catalog/menu-items/${encodeURIComponent(
@@ -2237,6 +2676,10 @@ export const menuManagementApi =
             declarations: MenuItemAllergenDeclarationPayload[];
           }
         >({
+          invalidatesTags: (result, error, { uuid }) => [
+            { type: "MenuItem" as const, id: uuid },
+            { type: "MenuItem" as const, id: "LIST" },
+          ],
           async queryFn({ uuid, declarations }) {
             const result = await browserRequest<unknown>(
               `/api/catalog/menu-items/${encodeURIComponent(
@@ -2268,6 +2711,10 @@ export const menuManagementApi =
             gallery?: File[];
           }
         >({
+          invalidatesTags: (result, error, { uuid }) => [
+            { type: "MenuItem" as const, id: uuid },
+            { type: "MenuItem" as const, id: "LIST" },
+          ],
           async queryFn({ uuid, thumbnail, gallery = [] }) {
             const form = new FormData();
             if (thumbnail) {
@@ -2298,7 +2745,7 @@ export const menuManagementApi =
         }),
     }),
 
-    overrideExisting: false,
+    overrideExisting: true,
   });
 
 export const {

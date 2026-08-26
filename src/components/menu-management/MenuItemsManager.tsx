@@ -43,7 +43,7 @@ import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
 import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
 import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionApi";
 import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
-import { readFilterCatalog } from "@/src/lib/filterCatalogStorage";
+import { readFilterCatalog, saveFoodRelationsStorage } from "@/src/lib/filterCatalogStorage";
 import CustomSelect from "../ui/CustomSelect";
 
 import { getMenuManagementApiError } from "@/src/lib/menuManagementApiError";
@@ -148,11 +148,11 @@ export default function MenuItemsManager({
   const seasonsQuery = useGetManagedSeasonsQuery();
   const eventsQuery = useGetManagedEventsQuery();
   const weatherQuery = useGetWeatherConditionsQuery({ page: 0, size: 100 });
-  const mealTypesQuery = useGetMealTypesQuery({ page: 0, size: 100 }, { skip: !foodModalOpen });
+  const mealTypesQuery = useGetMealTypesQuery({ page: 0, size: 100 }, { skip: !modalActive });
   const ageGroupsQuery = useGetAgeGroupsQuery({ page: 0, size: 100 });
-  const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 }, { skip: !foodModalOpen });
-  const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 }, { skip: !foodModalOpen });
-  const medicalConditionsQuery = useGetMedicalConditionsQuery({ page: 0, size: 100 }, { skip: !foodModalOpen });
+  const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 }, { skip: !modalActive });
+  const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 }, { skip: !modalActive });
+  const medicalConditionsQuery = useGetMedicalConditionsQuery({ page: 0, size: 100 }, { skip: !modalActive });
 
   const activeWeatherConditions = useMemo(() => {
     const server = weatherQuery.data?.contents ?? [];
@@ -930,15 +930,49 @@ export default function MenuItemsManager({
           images,
         }).unwrap();
 
+        if (editingFood.uuid) {
+          saveFoodRelationsStorage(editingFood.uuid, {
+            nutritionData: payload.nutritionData,
+            nutrition: payload.nutritionData,
+            seasons: payload.seasons,
+            events: payload.events,
+            suitableWeather: payload.suitableWeather,
+            weatherConditions: payload.suitableWeather,
+            mealTypes: payload.mealTypes,
+            ageRules: payload.ageRules,
+            dietaryTypes: payload.dietaryTypes,
+            allergens: (payload as any).allergens,
+            preparationTimes: payload.preparationTimes,
+            distances: payload.distances,
+          });
+        }
+
         setNotice({
           type: "success",
           text: "បានកែប្រែ Food Catalog ដោយជោគជ័យ។",
         });
       } else {
-        await createFood({
+        const created = await createFood({
           payload,
           images,
         }).unwrap();
+
+        if (created?.uuid) {
+          saveFoodRelationsStorage(created.uuid, {
+            nutritionData: payload.nutritionData,
+            nutrition: payload.nutritionData,
+            seasons: payload.seasons,
+            events: payload.events,
+            suitableWeather: payload.suitableWeather,
+            weatherConditions: payload.suitableWeather,
+            mealTypes: payload.mealTypes,
+            ageRules: payload.ageRules,
+            dietaryTypes: payload.dietaryTypes,
+            allergens: (payload as any).allergens,
+            preparationTimes: payload.preparationTimes,
+            distances: payload.distances,
+          });
+        }
 
         setNotice({
           type: "success",
@@ -973,37 +1007,17 @@ export default function MenuItemsManager({
         (editingMenu as any)?.id;
 
       if (targetUuid && String(targetUuid) !== "undefined") {
-        try {
-          await updateMenuItem({
-            uuid: String(targetUuid),
-            payload,
-            images,
-          }).unwrap();
+        await updateMenuItem({
+          uuid: String(targetUuid),
+          storeUuid,
+          payload,
+          images,
+        }).unwrap();
 
-          setNotice({
-            type: "success",
-            text: "បានកែប្រែ ម៉ឺនុយ ដោយជោគជ័យ។",
-          });
-        } catch (updateErr: any) {
-          if (
-            updateErr?.status === 404 ||
-            updateErr?.data?.status === 404 ||
-            updateErr?.status === 400
-          ) {
-            await createMenuItem({
-              storeUuid,
-              payload,
-              images,
-            }).unwrap();
-
-            setNotice({
-              type: "success",
-              text: "បាន រក្សាទុក ម៉ឺនុយ ទៅហាងដោយជោគជ័យ។",
-            });
-          } else {
-            throw updateErr;
-          }
-        }
+        setNotice({
+          type: "success",
+          text: "បានកែប្រែ ម៉ឺនុយ ដោយជោគជ័យ។",
+        });
       } else {
         await createMenuItem({
           storeUuid,
@@ -1547,7 +1561,6 @@ export default function MenuItemsManager({
         allergens={activeAllergens}
         preparationTimes={preparationTimeOptions}
         distances={distanceOptions}
-        regions={regionOptions}
         saving={creatingFood || updatingFood}
         catalogType={catalogType}
         onClose={() => {
@@ -1567,6 +1580,11 @@ export default function MenuItemsManager({
         ingredients={ingredientsQuery.data ?? []}
         dietaryTypes={activeDietaryTypes}
         allergens={activeAllergens}
+        mealTypes={activeMealTypes}
+        ageGroups={activeAgeGroups}
+        seasons={activeSeasons}
+        weatherConditions={activeWeatherConditions}
+        events={activeEvents}
         medicalConditions={activeMedicalConditions}
         saving={creatingMenuItem || updatingMenuItem}
         onClose={() => {
@@ -1577,6 +1595,10 @@ export default function MenuItemsManager({
           setEditingMenu(null);
         }}
         onSubmit={saveMenuItem}
+        onEditFood={(food) => {
+          setEditingFood(food);
+          setFoodModalOpen(true);
+        }}
       />
 
       {/* Food Soft Delete Confirmation */}
@@ -1659,6 +1681,11 @@ export default function MenuItemsManager({
           setFoodDetailUuid(null);
           setEditingFood(item);
           setFoodModalOpen(true);
+        }}
+        onEditMenuItem={(mi) => {
+          setFoodDetailUuid(null);
+          setEditingMenu(mi);
+          setMenuModalOpen(true);
         }}
       />
     </div>

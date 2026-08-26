@@ -39,7 +39,6 @@ import AllergensPagination from "./AllergensPagination";
 import AllergensTable from "./AllergensTable";
 import AllergensTabs from "./AllergensTabs";
 import DeleteAllergenConfirmModal from "./DeleteAllergenConfirmModal";
-import HardDeleteAllergenConfirmModal from "./HardDeleteAllergenConfirmModal";
 
 /* =========================================================
    SORT TYPE
@@ -89,10 +88,6 @@ export default function AllergenManager() {
 
   const [deleting, setDeleting] = useState<Allergen | null>(null);
 
-  const [hardDeletingItem, setHardDeletingItem] = useState<Allergen | null>(
-    null,
-  );
-
   const [message, setMessage] = useState<ApiMessage | null>(null);
 
   /* =======================================================
@@ -125,9 +120,6 @@ export default function AllergenManager() {
   const [updateItem, { isLoading: isUpdating }] = useUpdateAllergenMutation();
 
   const [deleteItem, { isLoading: isDeleting }] = useDeleteAllergenMutation();
-
-  const [hardDeleteItem, { isLoading: isHardDeleting }] =
-    useHardDeleteAllergenMutation();
 
   const [restoreItem, { isLoading: isRestoring }] =
     useRestoreAllergenMutation();
@@ -300,7 +292,6 @@ export default function AllergenManager() {
     isCreating ||
     isUpdating ||
     isDeleting ||
-    isHardDeleting ||
     isRestoring;
 
   /* =======================================================
@@ -311,23 +302,23 @@ export default function AllergenManager() {
     value: AllergenSort;
     label: string;
   }[] = [
-    {
-      value: "A_Z",
-      label: "A → Z",
-    },
-    {
-      value: "Z_A",
-      label: "Z → A",
-    },
-    {
-      value: "NEWEST",
-      label: "ថ្មីបំផុត",
-    },
-    {
-      value: "OLDEST",
-      label: "ចាស់បំផុត",
-    },
-  ];
+      {
+        value: "A_Z",
+        label: "A → Z",
+      },
+      {
+        value: "Z_A",
+        label: "Z → A",
+      },
+      {
+        value: "NEWEST",
+        label: "ថ្មីបំផុត",
+      },
+      {
+        value: "OLDEST",
+        label: "ចាស់បំផុត",
+      },
+    ];
 
   /* =======================================================
      SAVE
@@ -446,34 +437,6 @@ export default function AllergenManager() {
       setMessage({
         type: "error",
         text: getApiErrorMessage(restoreError),
-      });
-    }
-  };
-
-  /* =======================================================
-     HARD DELETE
-  ======================================================= */
-
-  const handleHardDelete = async () => {
-    if (!hardDeletingItem) {
-      return;
-    }
-
-    try {
-      await hardDeleteItem(hardDeletingItem.code).unwrap();
-
-      setMessage({
-        type: "success",
-        text: `បានលុបអាឡែស៊ី "${hardDeletingItem.name || hardDeletingItem.code}" ជាអចិន្ត្រៃយ៍ដោយជោគជ័យ។`,
-      });
-
-      setHardDeletingItem(null);
-
-      await refetch();
-    } catch (hardDeleteError) {
-      setMessage({
-        type: "error",
-        text: getApiErrorMessage(hardDeleteError),
       });
     }
   };
@@ -671,11 +634,10 @@ export default function AllergenManager() {
                           {/* STATUS */}
 
                           <span
-                            className={`shrink-0 rounded-full px-2 py-1 text-lg font-bold ${
-                              item.active
+                            className={`shrink-0 rounded-full px-2 py-1 text-lg font-bold ${item.active
                                 ? "bg-primary-50 text-primary-700"
                                 : "bg-gray-100 text-gray-500"
-                            }`}
+                              }`}
                           >
                             {item.active ? "សកម្ម" : "អសកម្ម"}
                           </span>
@@ -696,19 +658,17 @@ export default function AllergenManager() {
             <button
               type="button"
               onClick={() => setSizeOpen((current) => !current)}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${
-                sizeOpen
+              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${sizeOpen
                   ? "border-primary-800 ring-2 ring-primary-100"
                   : "border-gray-200 hover:border-primary-800/50"
-              }`}
+                }`}
             >
               <span className="text-gray-700">{size} / ទំព័រ</span>
 
               <ChevronDown
                 size={17}
-                className={`text-gray-400 transition-transform duration-200 ${
-                  sizeOpen ? "rotate-180" : ""
-                }`}
+                className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
@@ -730,11 +690,10 @@ export default function AllergenManager() {
                         setPage(0);
                         setSizeOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${
-                        selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${selected
                           ? "bg-primary-50 text-primary-800"
                           : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
-                      }`}
+                        }`}
                     >
                       <span>{value} / ទំព័រ</span>
 
@@ -756,11 +715,10 @@ export default function AllergenManager() {
             <button
               type="button"
               onClick={() => setSortOpen((current) => !current)}
-              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
-                sortOpen
+              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen
                   ? "border-primary-800 bg-primary-50 text-primary-800"
                   : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
-              }`}
+                }`}
               aria-label="Sort allergens"
               title="Sort allergens"
             >
@@ -789,11 +747,10 @@ export default function AllergenManager() {
 
                         setSortOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${
-                        selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${selected
                           ? "bg-primary-50 text-primary-800"
                           : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
-                      }`}
+                        }`}
                     >
                       <span>{option.label}</span>
 
@@ -815,11 +772,10 @@ export default function AllergenManager() {
 
       {message && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-lg ${
-            message.type === "success"
+          className={`rounded-2xl border px-4 py-3 text-lg ${message.type === "success"
               ? "border-primary-100 bg-primary-50 text-primary-700"
               : "border-red-100 bg-red-50 text-red-600"
-          }`}
+            }`}
         >
           {message.text}
         </div>
@@ -850,7 +806,6 @@ export default function AllergenManager() {
             setFormOpen(true);
           }}
           onDelete={setDeleting}
-          onHardDelete={(item) => setHardDeletingItem(item)}
           onRestore={(item) => void handleRestore(item)}
         />
 
@@ -898,17 +853,6 @@ export default function AllergenManager() {
           }
         }}
         onConfirm={handleDelete}
-      />
-
-      <HardDeleteAllergenConfirmModal
-        item={hardDeletingItem}
-        deleting={isHardDeleting}
-        onClose={() => {
-          if (!isHardDeleting) {
-            setHardDeletingItem(null);
-          }
-        }}
-        onConfirm={handleHardDelete}
       />
 
       <AllergenDetailModal

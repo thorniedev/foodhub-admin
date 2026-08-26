@@ -7,10 +7,10 @@ import type {
   UpdateBannerPayload,
 } from "../types/banner";
 import { normalizeArrayPayload, normalizePageResponse } from "../utils/normalize";
+import { resolveFoodHubCatalogImageUrl } from "../lib/resolveFoodHubImageUrl";
 
 /**
  * Resolves full URL for an image path or media UUID.
- * Prepend NEXT_PUBLIC_API_URL to relative image paths like "/api/v1/media/{uuid}/file".
  */
 export function resolveImageUrl(
   imageUrlOrUuid: string | null | undefined,
@@ -19,6 +19,9 @@ export function resolveImageUrl(
 
   const trimmed = String(imageUrlOrUuid).trim();
   if (!trimmed || trimmed === "null" || trimmed === "undefined") return "";
+
+  const resolved = resolveFoodHubCatalogImageUrl(trimmed);
+  if (resolved) return resolved;
 
   if (
     trimmed.startsWith("http://") ||
@@ -29,32 +32,7 @@ export function resolveImageUrl(
     return trimmed;
   }
 
-  if (
-    trimmed.startsWith("/api/v1/") ||
-    trimmed.startsWith("/api/") ||
-    trimmed.startsWith("api/")
-  ) {
-    return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-  }
-
-  // If it's a UUID, map to /api/media/{uuid}
-  const UUID_REGEX =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (UUID_REGEX.test(trimmed)) {
-    return `/api/media/${trimmed}`;
-  }
-
-  const backendBaseUrl =
-    process.env.NEXT_PUBLIC_API_URL ||
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "https://api.mhoubahar.store";
-  const cleanBase = backendBaseUrl.replace(/\/+$/, "");
-
-  if (trimmed.startsWith("/")) {
-    return `${cleanBase}${trimmed}`;
-  }
-
-  return `${cleanBase}/${trimmed}`;
+  return trimmed;
 }
 
 /**

@@ -245,13 +245,16 @@ export default function Sidebar() {
           {/* ========================================= */}
 
           <div className="flex h-20 shrink-0 items-center justify-between px-6">
-            <Image
-              src="/Image/logo.png"
-              alt="MhouBahar"
-              width={90}
-              height={90}
-              priority
-            />
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/Image/foodHub-logo.png"
+                alt="FoodHub"
+                width={200}
+                height={80}
+                className="h-14 w-auto object-contain"
+                priority
+              />
+            </Link>
 
             <button
               type="button"

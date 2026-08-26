@@ -67,7 +67,7 @@ export default function Topbar() {
         </div>
 
         {/* CURRENT LOGGED-IN ADMIN */}
-        <div className="hidden shrink-0 items-center gap-3 sm:flex">
+        <div className="hidden shrink-0 items-center gap-3 sm:flex" suppressHydrationWarning>
           <UserAvatar
             name={adminName}
             userUuid={admin?.uuid}
@@ -77,12 +77,12 @@ export default function Topbar() {
             textClassName="text-sm font-bold uppercase text-white"
           />
 
-          <div className="min-w-0">
-            <p className="max-w-[160px] truncate text-sm font-bold text-gray-900">
+          <div className="min-w-0" suppressHydrationWarning>
+            <p className="max-w-[160px] truncate text-sm font-bold text-gray-900" suppressHydrationWarning>
               {adminLoading ? "..." : adminUsername}
             </p>
 
-            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700" suppressHydrationWarning>
               {adminLoading ? "..." : adminRole}
             </p>
           </div>

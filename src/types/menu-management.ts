@@ -652,10 +652,14 @@ export interface FoodRecord {
 
   mealTypes?: unknown[];
   ageRules?: unknown[];
+  ageGroups?: unknown[];
   dietaryTypes?: unknown[];
+  allergens?: unknown[];
   seasons?: unknown[];
   events?: unknown[];
   suitableWeather?: unknown[];
+  preparationTimes?: unknown[];
+  distances?: unknown[];
 
   isActive?: boolean;
   createdAt?: string | null;
@@ -778,9 +782,12 @@ export interface FoodWritePayload {
   mealTypes: FoodMealTypeRelation[];
   ageRules: FoodAgeRuleRelation[];
   dietaryTypes: FoodDietaryTypeRelation[];
+  allergens?: unknown[];
   seasons: FoodSeasonRelation[];
   events: FoodEventRelation[];
   suitableWeather: FoodWeatherRelation[];
+  preparationTimes?: unknown[];
+  distances?: unknown[];
   isActive: boolean;
   active?: boolean;
 }

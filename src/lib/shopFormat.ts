@@ -175,7 +175,7 @@ export function storeCoverCandidate(store: Store): string | null {
 }
 
 export interface StoreLiveStatusInfo {
-  status: "OPEN" | "CLOSED" | "TEMPORARILY_CLOSED" | "PERMANENTLY_CLOSED" | "UNKNOWN";
+  status: "OPEN" | "CLOSED" | "CLOSED_NOW" | "TEMPORARILY_CLOSED" | "PERMANENTLY_CLOSED" | "UNKNOWN";
   label: string;
   note: string;
   isPositive: boolean;
@@ -246,7 +246,7 @@ export function getStoreLiveStatus(store?: {
   if (op === "OPEN") {
     if (store.isOpenNow === false) {
       return {
-        status: "CLOSED",
+        status: "CLOSED_NOW",
         label: "បិទពេលនេះ",
         note: "ក្រៅម៉ោងដំណើរការ (បើកតាមកាលវិភាគ)",
         isPositive: false,

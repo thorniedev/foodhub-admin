@@ -90,15 +90,146 @@ export function createClientUuid(): string {
 }
 
 export function createCodeFromLabel(value: string): string {
-  const normalized = value
+  const trimmed = value.trim();
+  if (!trimmed) return `OPTION_${Date.now()}`;
+
+  const latinOnly = trimmed
+    .replace(/[^a-zA-Z0-9\s_-]/g, " ")
     .trim()
-    .normalize("NFKD")
-    .replace(/[^\p{L}\p{N}]+/gu, "_")
+    .replace(/\s+/g, "_")
+    .toUpperCase();
+
+  if (latinOnly.length >= 2) {
+    return latinOnly;
+  }
+
+  const clean = trimmed
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
     .replace(/^_+|_+$/g, "")
     .toUpperCase();
 
-  return (
-    normalized ||
-    `OPTION_${Date.now()}`
+  return clean || `OPTION_${Date.now()}`;
+}
+
+export function readCatalogCache(groupCode: string): FilterCatalogOption[] {
+  if (typeof window === "undefined") return [];
+  const cacheKey = `foodhub-admin-catalog-cache-${groupCode}`;
+  try {
+    const raw = window.localStorage.getItem(cacheKey);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function writeCatalogCache(
+  groupCode: string,
+  options: FilterCatalogOption[],
+) {
+  if (typeof window === "undefined") return;
+  const cacheKey = `foodhub-admin-catalog-cache-${groupCode}`;
+  try {
+    window.localStorage.setItem(cacheKey, JSON.stringify(options));
+  } catch {}
+}
+
+export function mergeCatalogWithCache(
+  groupCode: string,
+  serverItems: FilterCatalogOption[],
+): FilterCatalogOption[] {
+  const localCache = readCatalogCache(groupCode);
+  const map = new Map<string, FilterCatalogOption>();
+
+  // 1. Add all from local cache first (keyed strictly by UUID)
+  localCache.forEach((item) => {
+    if (item.uuid) {
+      map.set(item.uuid, item);
+    }
+  });
+
+  // 2. Overlay server items (keyed strictly by UUID)
+  serverItems.forEach((serverItem) => {
+    if (serverItem.uuid) {
+      const existing = map.get(serverItem.uuid);
+      map.set(serverItem.uuid, {
+        ...existing,
+        ...serverItem,
+        active: existing && existing.active === false ? false : (serverItem.active !== false),
+      });
+    }
+  });
+
+  const unique = Array.from(map.values());
+  writeCatalogCache(groupCode, unique);
+  return unique;
+}
+
+export function updateCatalogCacheActive(
+  groupCode: string,
+  uuid: string,
+  active: boolean,
+) {
+  const items = readCatalogCache(groupCode);
+  const updated = items.map((item) =>
+    item.uuid === uuid
+      ? { ...item, active, updatedAt: new Date().toISOString() }
+      : item,
   );
+  writeCatalogCache(groupCode, updated);
+}
+
+export const FOOD_RELATIONS_STORAGE_PREFIX = "foodhub-food-relations-";
+
+export interface StoredFoodRelations {
+  seasons?: any[];
+  events?: any[];
+  suitableWeather?: any[];
+  weatherConditions?: any[];
+  mealTypes?: any[];
+  ageRules?: any[];
+  ageGroups?: any[];
+  dietaryTypes?: any[];
+  allergens?: any[];
+  nutritionData?: any;
+  nutrition?: any;
+  preparationTimes?: any[];
+  distances?: any[];
+  regions?: any[];
+  updatedAt?: string;
+}
+
+export function saveFoodRelationsStorage(
+  foodUuid: string,
+  relations: StoredFoodRelations,
+) {
+  if (typeof window === "undefined" || !foodUuid) return;
+  try {
+    const key = `${FOOD_RELATIONS_STORAGE_PREFIX}${foodUuid}`;
+    window.localStorage.setItem(
+      key,
+      JSON.stringify({
+        ...relations,
+        updatedAt: new Date().toISOString(),
+      }),
+    );
+  } catch (err) {
+    console.warn("[FOOD RELATIONS STORAGE SAVE FAILED]", err);
+  }
+}
+
+export function readFoodRelationsStorage(
+  foodUuid: string,
+): StoredFoodRelations | null {
+  if (typeof window === "undefined" || !foodUuid) return null;
+  try {
+    const key = `${FOOD_RELATIONS_STORAGE_PREFIX}${foodUuid}`;
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw) as StoredFoodRelations;
+  } catch {
+    return null;
+  }
 }
