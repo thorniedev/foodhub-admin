@@ -21,6 +21,7 @@ import DashboardEmptyState from "./DashboardEmptyState";
 import { ChartSkeleton } from "./DashboardLoadingSkeleton";
 import {
   CHART_AXIS_TEXT,
+  CHART_CONTEXT_FILL_OPACITY,
   CHART_GRID,
   CHART_SERIES,
   formatCompact,
@@ -38,7 +39,9 @@ const BAR_METRICS: { value: BarMetric; label: string; color: string }[] = [
     label: "វគ្គណែនាំ",
     color: CHART_SERIES.sessions,
   },
-  { value: "itemViews", label: "ការមើលមុខម្ហូប", color: CHART_SERIES.views },
+  // Teal rather than the shared "views" green: in this chart the bars sit
+  // behind a green active-users area and must stay separable from it.
+  { value: "itemViews", label: "ការមើលមុខម្ហូប", color: CHART_SERIES.clicks },
 ];
 
 interface ActivityTrendChartProps {
@@ -175,14 +178,28 @@ export default function ActivityTrendChart({
                   minTickGap={24}
                 />
 
-                {/* One shared scale on purpose — a second y-axis would make the
-                    two series look comparable when they are not. */}
+                {/* Both people series share the left axis because they are the
+                    same unit and are meant to be compared. Event volume is a
+                    different unit, so it gets its own right axis instead of
+                    flattening the user lines against a much larger scale. */}
                 <YAxis
+                  yAxisId="people"
                   tickFormatter={formatCompact}
                   tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
                   width={56}
+                  allowDecimals={false}
+                />
+
+                <YAxis
+                  yAxisId="volume"
+                  orientation="right"
+                  tickFormatter={formatCompact}
+                  tick={{ fill: activeBar.color, fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={52}
                   allowDecimals={false}
                 />
 
@@ -207,7 +224,24 @@ export default function ActivityTrendChart({
                   }}
                 />
 
+                {/* Declared first so Recharts paints the volume bars behind the
+                    two user series rather than burying them. */}
+                <Bar
+                  isAnimationActive={false}
+                  yAxisId="volume"
+                  dataKey={barMetric}
+                  name={activeBar.label}
+                  fill={activeBar.color}
+                  fillOpacity={CHART_CONTEXT_FILL_OPACITY}
+                  stroke={activeBar.color}
+                  strokeOpacity={0.45}
+                  radius={[6, 6, 0, 0]}
+                  maxBarSize={22}
+                />
+
                 <Area
+                  isAnimationActive={false}
+                  yAxisId="people"
                   type="monotone"
                   dataKey="activeUsers"
                   name="អ្នកប្រើប្រាស់សកម្ម"
@@ -220,6 +254,8 @@ export default function ActivityTrendChart({
                 />
 
                 <Line
+                  isAnimationActive={false}
+                  yAxisId="people"
                   type="monotone"
                   dataKey="newUsers"
                   name="អ្នកប្រើប្រាស់ថ្មី"
@@ -227,14 +263,6 @@ export default function ActivityTrendChart({
                   strokeWidth={2.25}
                   dot={false}
                   activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff" }}
-                />
-
-                <Bar
-                  dataKey={barMetric}
-                  name={activeBar.label}
-                  fill={activeBar.color}
-                  radius={[8, 8, 0, 0]}
-                  maxBarSize={26}
                 />
               </ComposedChart>
             </ResponsiveContainer>

@@ -54,42 +54,29 @@ export default function DashboardKpiCard({
     )}>
       <div className={cn("absolute inset-x-0 top-0 h-1.5", styles.surface)} />
 
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span
-            aria-hidden="true"
-            className={cn(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border",
-              styles.surface,
-              styles.border,
-              styles.icon,
-            )}
-          >
-            {icon}
-          </span>
-
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <p className="truncate text-sm font-semibold text-gray-600">{label}</p>
-              {hint && <InfoTooltip label={hint} />}
-            </div>
-
-            <p className={cn("mt-3 text-3xl font-bold tabular-nums", styles.text)}>
-              {value}
-            </p>
-          </div>
-        </div>
-
+      <div className="flex min-w-0 items-start gap-3">
         <span
+          aria-hidden="true"
           className={cn(
-            "rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border",
             styles.surface,
             styles.border,
-            styles.text,
+            styles.icon,
           )}
         >
-          ផ្ទាល់
+          {icon}
         </span>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <p className="truncate text-sm font-semibold text-gray-600">{label}</p>
+            {hint && <InfoTooltip label={hint} />}
+          </div>
+
+          <p className={cn("mt-2 text-3xl font-bold tabular-nums", styles.text)}>
+            {value}
+          </p>
+        </div>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">

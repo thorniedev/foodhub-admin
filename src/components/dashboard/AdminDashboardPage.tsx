@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { AlertTriangle, Store, Users, Utensils } from "lucide-react";
 
 import {
   DASHBOARD_OVERVIEW_POLLING_INTERVAL_MS,
@@ -21,7 +20,6 @@ import {
   parseDashboardFilters,
   resolveDateRange,
 } from "@/src/lib/dashboardFilters";
-import { formatCount } from "./dashboard-theme";
 import type {
   DashboardFilters,
   LocationSummary,
@@ -249,51 +247,6 @@ export default function AdminDashboardPage() {
 
   const activeLocationLabel = filters.city ?? filters.province ?? null;
 
-  const headerSummary = useMemo(
-    () => [
-      {
-        label: "អ្នកប្រើប្រាស់សរុប",
-        value: formatCount(
-          overview.data?.totalUsers ??
-            (overview.data?.kpis?.activeUsers?.value as number) ??
-            0,
-        ),
-        icon: <Users size={16} aria-hidden="true" />,
-        tone: "blue" as const,
-      },
-      {
-        label: "ហាងសកម្ម",
-        value: formatCount(
-          overview.data?.totalActiveStores ??
-            (overview.data?.kpis?.activeStores?.value as number) ??
-            0,
-        ),
-        icon: <Store size={16} aria-hidden="true" />,
-        tone: "green" as const,
-      },
-      {
-        label: "មុខម្ហូបសរុប",
-        value: formatCount(
-          overview.data?.totalMenuItems ??
-            (overview.data?.kpis?.liveMenuItems?.value as number) ??
-            0,
-        ),
-        icon: <Utensils size={16} aria-hidden="true" />,
-        tone: "violet" as const,
-      },
-      {
-        label: "ចំណុចត្រូវដោះស្រាយ",
-        value: formatCount(
-          (overview.data?.totalPendingStores ?? 0) +
-            (overview.data?.totalSafetyBlocks ?? 0),
-        ),
-        icon: <AlertTriangle size={16} aria-hidden="true" />,
-        tone: "amber" as const,
-      },
-    ],
-    [overview.data],
-  );
-
   const exportMenu = (
     <DashboardExportMenu filters={filters} disabled={overview.isLoading} />
   );
@@ -306,7 +259,6 @@ export default function AdminDashboardPage() {
         lastUpdatedLabel={lastUpdatedLabel}
         isFetching={isFetchingAny}
         onRefresh={refreshAll}
-        summary={headerSummary}
       />
 
       <DashboardFilterBar

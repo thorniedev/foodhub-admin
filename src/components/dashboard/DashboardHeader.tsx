@@ -1,18 +1,10 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { LayoutGrid, RefreshCw } from "lucide-react";
 
 import { cn } from "@/src/lib/utils";
 import type { DashboardPeriod } from "@/src/types/adminDashboard";
-import { formatLongDate, TONE_STYLES, type Tone } from "./dashboard-theme";
-
-export interface DashboardHeaderStat {
-  label: string;
-  value: string;
-  icon: ReactNode;
-  tone: Tone;
-}
+import { formatLongDate } from "./dashboard-theme";
 
 interface DashboardHeaderProps {
   period: DashboardPeriod | null;
@@ -20,128 +12,94 @@ interface DashboardHeaderProps {
   lastUpdatedLabel: string | null;
   isFetching: boolean;
   onRefresh: () => void;
-  summary?: DashboardHeaderStat[];
 }
 
+/**
+ * Compact page header. Headline numbers deliberately live in the KPI grid
+ * only — repeating them here would duplicate the same figures on one screen.
+ */
 export default function DashboardHeader({
   period,
   fallbackRange,
   lastUpdatedLabel,
   isFetching,
   onRefresh,
-  summary = [],
 }: DashboardHeaderProps) {
   const activeFrom = period?.from || fallbackRange?.from;
   const activeTo = period?.to || fallbackRange?.to;
 
   return (
-    <section className="relative overflow-hidden rounded-[32px] border border-[#1d7a43] bg-[#14833E] px-5 py-5 text-white shadow-[0_14px_30px_rgba(20,131,62,0.18)] sm:px-7">
-      <div className="relative grid gap-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
-        <div className="space-y-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/10">
-              <LayoutGrid size={22} aria-hidden="true" />
-            </span>
+    <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-2xl border border-primary-100 bg-white px-4 py-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <span
+          aria-hidden="true"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-600 text-white"
+        >
+          <LayoutGrid size={20} />
+        </span>
 
-            <div className="min-w-0">
-              <p className="text-2xl font-bold text-white sm:text-3xl">
-                ទិន្នន័យវិភាគ FoodHub
-              </p>
+        <div className="min-w-0">
+          <h1 className="truncate text-lg font-bold text-gray-900">
+            ទិន្នន័យវិភាគ FoodHub
+          </h1>
 
-              <p className="mt-1 text-sm text-white/80 sm:text-base">
-                {activeFrom && activeTo ? (
-                  <>
-                    {formatLongDate(activeFrom)} – {formatLongDate(activeTo)}
-                    {period?.previousFrom && period?.previousTo && (
-                      <span className="text-white/60">
-                        {" "}
-                        · ធៀបនឹង {formatLongDate(period.previousFrom)} –{" "}
-                        {formatLongDate(period.previousTo)}
-                      </span>
-                    )}
-                  </>
-                ) : (
-                  "៣០ ថ្ងៃចុងក្រោយ"
+          <p className="mt-0.5 truncate text-sm text-gray-500 tabular-nums">
+            {activeFrom && activeTo ? (
+              <>
+                {formatLongDate(activeFrom)} – {formatLongDate(activeTo)}
+                {period?.previousFrom && period?.previousTo && (
+                  <span className="text-gray-400">
+                    {" · ធៀបនឹង "}
+                    {formatLongDate(period.previousFrom)} –{" "}
+                    {formatLongDate(period.previousTo)}
+                  </span>
                 )}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 text-sm font-semibold">
-            <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 text-white">
-              <span className="h-2 w-2 rounded-full bg-emerald-300" aria-hidden="true" />
-              ទិន្នន័យផ្ទាល់
-            </span>
-
-            <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 text-white/90">
-              {isFetching ? "កំពុងធ្វើបច្ចុប្បន្នភាព…" : "ស្ថានភាពល្អ"}
-            </span>
-
-            <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 text-white/75">
-              {lastUpdatedLabel
-                ? `ធ្វើបច្ចុប្បន្នភាព ${lastUpdatedLabel}`
-                : "ទើបផ្ទុកថ្មី"}
-            </span>
-          </div>
-        </div>
-
-        <div className="rounded-[28px] border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-          <div className="grid grid-cols-2 gap-3">
-            {summary.map((item) => {
-              const styles = TONE_STYLES[item.tone];
-
-              return (
-                <div
-                  key={item.label}
-                  className="rounded-2xl border border-white/10 bg-white/10 p-3 shadow-[0_1px_0_rgba(255,255,255,0.04)]"
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border",
-                        styles.surface,
-                        styles.border,
-                        styles.icon,
-                      )}
-                    >
-                      {item.icon}
-                    </span>
-
-                    <p className="min-w-0 truncate text-[11px] font-semibold text-white/70">
-                      {item.label}
-                    </p>
-                  </div>
-
-                  <p className="mt-2 text-2xl font-bold tabular-nums text-white">
-                    {item.value}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <p className="text-sm text-white/70">
-              ការវិភាគត្រូវបានភ្ជាប់ដោយផ្ទាល់ទៅ backend ផ្ទាល់។
-            </p>
-
-            <button
-              type="button"
-              onClick={onRefresh}
-              title="ផ្ទុកទិន្នន័យឡើងវិញ"
-              aria-label="ផ្ទុកទិន្នន័យឡើងវិញ"
-              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-4 text-sm font-bold text-primary-800 transition hover:bg-primary-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/30"
-            >
-              <RefreshCw
-                size={18}
-                aria-hidden="true"
-                className={cn(isFetching && "animate-spin")}
-              />
-              <span>ធ្វើបច្ចុប្បន្នភាព</span>
-            </button>
-          </div>
+              </>
+            ) : (
+              "៣០ ថ្ងៃចុងក្រោយ"
+            )}
+          </p>
         </div>
       </div>
-    </section>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className={cn(
+            "inline-flex min-h-9 items-center gap-2 rounded-full border px-3 text-sm font-semibold",
+            isFetching
+              ? "border-blue-200 bg-blue-50 text-blue-800"
+              : "border-primary-200 bg-primary-50 text-primary-800",
+          )}
+        >
+          <span
+            aria-hidden="true"
+            className={cn(
+              "h-2 w-2 rounded-full",
+              isFetching ? "animate-pulse bg-blue-600" : "bg-primary-600",
+            )}
+          />
+          {isFetching ? "កំពុងធ្វើបច្ចុប្បន្នភាព…" : "ទិន្នន័យផ្ទាល់"}
+        </span>
+
+        <span className="text-sm text-gray-500 tabular-nums">
+          {lastUpdatedLabel ? `ធ្វើបច្ចុប្បន្នភាព ${lastUpdatedLabel}` : "ទើបផ្ទុកថ្មី"}
+        </span>
+
+        <button
+          type="button"
+          onClick={onRefresh}
+          title="ផ្ទុកទិន្នន័យឡើងវិញ"
+          aria-label="ផ្ទុកទិន្នន័យឡើងវិញ"
+          className="inline-flex min-h-9 items-center gap-2 rounded-full border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 transition hover:border-primary-300 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+        >
+          <RefreshCw
+            size={16}
+            aria-hidden="true"
+            className={cn(isFetching && "animate-spin")}
+          />
+          <span>ធ្វើបច្ចុប្បន្នភាព</span>
+        </button>
+      </div>
+    </header>
   );
 }

@@ -33,7 +33,7 @@ type CategoryMetric = "views" | "clicks" | "bookmarks";
 const METRICS: { value: CategoryMetric; label: string; color: string }[] = [
   { value: "views", label: "ការមើល", color: CHART_SERIES.views },
   { value: "clicks", label: "ការចុច", color: CHART_SERIES.clicks },
-  { value: "bookmarks", label: "ការរក្សាទុក", color: CHART_SERIES.sessions },
+  { value: "bookmarks", label: "ការរក្សាទុក", color: CHART_SERIES.bookmarks },
 ];
 
 const TOP_CATEGORIES = 8;
@@ -65,7 +65,7 @@ export default function CategoryPerformanceChart({
       title="សមិទ្ធកម្មតាមប្រភេទម្ហូប"
       description={`ប្រភេទកំពូល ${TOP_CATEGORIES} តាម${activeMetric.label}`}
       icon={<Layers size={18} aria-hidden="true" />}
-      tone="violet"
+      tone="orange"
       hint="អ្នកមើលផ្សេងគ្នា ត្រូវបានរាប់ដាច់ដោយឡែកសម្រាប់ប្រភេទទាំងមូល មិនមែនបូកបញ្ចូលពីមុខម្ហូបនីមួយៗទេ។"
       actions={
         <div
@@ -158,6 +158,7 @@ export default function CategoryPerformanceChart({
               />
 
               <Bar
+                isAnimationActive={false}
                 dataKey={metric}
                 name={activeMetric.label}
                 fill={activeMetric.color}

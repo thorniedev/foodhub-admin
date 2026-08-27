@@ -178,6 +178,7 @@ export default function LocationPerformanceChart({
                 />
 
                 <Bar
+                  isAnimationActive={false}
                   dataKey={metric}
                   name={activeMetric.label}
                   radius={[0, 10, 10, 0]}

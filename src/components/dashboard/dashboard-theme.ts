@@ -8,23 +8,34 @@
 
 export const DASHBOARD_SURFACE = "#ffffff";
 
+/**
+ * Series colours are drawn from the FoodHub brand ramps in `globals.css`
+ * (green primary, orange secondary, yellow accent) plus one analytics blue.
+ * Each entry is >= 3:1 against the white card surface and stays separable
+ * under deuteranopia/protanopia, so no chart should invent its own colour.
+ */
 export const CHART_SERIES = {
-  /** FoodHub green — the primary/"our users" series. */
-  activeUsers: "#16a34a",
-  /** Analytics blue. */
+  /** FoodHub green (primary-700) — the "our people" series. */
+  activeUsers: "#15803d",
+  /** Analytics blue — the second people series. */
   newUsers: "#2563eb",
-  /** Amber — recommendation volume. */
-  sessions: "#d97706",
-  /** Violet — item views. */
-  views: "#7c3aed",
-  /** Teal — spare slot (clicks, bookmarks). */
+  /** FoodHub orange (secondary-600) — recommendation volume. */
+  sessions: "#ea580c",
+  /** FoodHub green (primary-600) — discovery/exposure volume. */
+  views: "#16a34a",
+  /** Teal — the click/engagement series. */
   clicks: "#0d9488",
+  /** FoodHub yellow (accent-600) — saves. */
+  bookmarks: "#ca8a04",
 } as const;
+
+/** Low-emphasis fill for context bars that sit behind a headline series. */
+export const CHART_CONTEXT_FILL_OPACITY = 0.22;
 
 export const CHART_GRID = "#e5e7eb";
 export const CHART_AXIS_TEXT = "#6b7280";
 
-export type Tone = "green" | "blue" | "amber" | "red" | "violet" | "gray";
+export type Tone = "green" | "blue" | "amber" | "red" | "orange" | "gray";
 
 export const TONE_STYLES: Record<
   Tone,
@@ -54,11 +65,11 @@ export const TONE_STYLES: Record<
     text: "text-red-800",
     border: "border-red-100",
   },
-  violet: {
-    surface: "bg-violet-50",
-    icon: "text-violet-700",
-    text: "text-violet-800",
-    border: "border-violet-100",
+  orange: {
+    surface: "bg-secondary-50",
+    icon: "text-secondary-700",
+    text: "text-secondary-800",
+    border: "border-secondary-100",
   },
   gray: {
     surface: "bg-gray-100",

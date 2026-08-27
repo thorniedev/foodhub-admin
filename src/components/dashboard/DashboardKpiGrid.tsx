@@ -55,7 +55,7 @@ const KPI_DEFINITIONS: KpiDefinition[] = [
     key: "recommendationSessions",
     label: "វគ្គណែនាំ",
     icon: <Sparkles size={20} aria-hidden="true" />,
-    tone: "violet",
+    tone: "orange",
     format: formatCount,
     hint: "ចំនួនវគ្គណែនាំម្ហូបដែលបានចាប់ផ្ដើមក្នុងចន្លោះកាលបរិច្ឆេទនេះ។",
   },
