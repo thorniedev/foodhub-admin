@@ -202,7 +202,12 @@ export default function Sidebar() {
           }
         `}
       >
-        {Icon && <Icon size={level === 0 ? 18 : 16} />}
+        {Icon && (
+          <Icon
+            size={level === 0 ? 18 : 16}
+            className={isActive && level === 0 ? "brightness-0 invert" : ""}
+          />
+        )}
 
         <span>{item.label}</span>
       </Link>

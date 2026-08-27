@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import Image from "next/image";
 import {
   Sparkles,
   Search,
@@ -200,8 +201,15 @@ export default function AdminRecommendationsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-zinc-200/80 dark:border-zinc-800">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-zinc-100">
-            <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 shadow-2xs">
-              <Sparkles className="w-6 h-6" />
+            <div className="p-2 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 shadow-2xs flex items-center justify-center">
+              <Image
+                src="/Image/ai-recommendation.png"
+                alt="AI Recommendation & Safety Audit"
+                width={26}
+                height={26}
+                className="w-6.5 h-6.5 object-contain dark:invert"
+                priority
+              />
             </div>
             AI Recommendation & Safety Audit
           </h1>
