@@ -2,12 +2,12 @@
 
 import {
   Calendar,
-  Coffee,
+  CupSoda,
   Hash,
   Layers,
   Pencil,
   ShieldCheck,
-  Utensils,
+  UtensilsCrossed,
   X,
 } from "lucide-react";
 import type { FoodCategory } from "@/src/types/foodCategory";
@@ -31,7 +31,7 @@ export default function SubCategoryDetailModal({
 
   const isDrink = mode === "DRINK";
   const active = item.isActive !== false;
-  const parentName = item.parentCategoryName || parentRootName || (isDrink ? "ភេសជ្ជៈ (DRINK)" : "ម្ហូបអាហារ (FOOD)");
+  const parentName = item.parentCategoryName || parentRootName || (isDrink ? "ភេសជ្ជៈ " : "ម្ហូបអាហារ ");
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "—";
@@ -62,7 +62,7 @@ export default function SubCategoryDetailModal({
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-50 text-primary-700">
-              {isDrink ? <Coffee size={22} /> : <Utensils size={22} />}
+              {isDrink ? <CupSoda size={22} /> : <UtensilsCrossed size={22} />}
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">{item.name}</h2>

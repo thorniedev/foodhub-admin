@@ -1,9 +1,9 @@
 import {
   Eye,
   Pencil,
+  Power,
   RotateCcw,
   Salad,
-  Trash2,
 } from "lucide-react";
 import type { DietaryType } from "@/src/types/dietaryType";
 import { formatAdminDate } from "@/src/types/safetyResource";
@@ -35,9 +35,6 @@ export default function DietaryTypesTable({
               </th>
               <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
                 កូដ
-              </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
-                ប្រភេទ
               </th>
               <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
                 ការពិពណ៌នា
@@ -76,13 +73,6 @@ export default function DietaryTypesTable({
                 <td className="whitespace-nowrap px-4 py-3">
                   <span className="inline-flex rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-base font-semibold text-gray-700">
                     {item.code || "—"}
-                  </span>
-                </td>
-
-                {/* Category */}
-                <td className="whitespace-nowrap px-4 py-3">
-                  <span className="inline-flex rounded-full bg-secondary-50 px-3.5 py-1 text-base font-semibold text-secondary-700 ring-1 ring-inset ring-secondary-100">
-                    {item.category}
                   </span>
                 </td>
 
@@ -144,10 +134,10 @@ export default function DietaryTypesTable({
                         type="button"
                         disabled={disabled}
                         onClick={() => onDelete(item)}
-                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
-                        title="បិទ"
+                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        title="បិទដំណើរការ"
                       >
-                        <Trash2 size={18} />
+                        <Power size={18} />
                       </button>
                     ) : (
                       <button
@@ -155,7 +145,7 @@ export default function DietaryTypesTable({
                         disabled={disabled}
                         onClick={() => onRestore(item)}
                         className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
-                        title="ស្ដារ"
+                        title="ស្ដារឡើងវិញ"
                       >
                         <RotateCcw size={18} />
                       </button>
@@ -167,7 +157,7 @@ export default function DietaryTypesTable({
 
             {items.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-6 py-16 text-center">
+                <td colSpan={6} className="px-6 py-16 text-center">
                   <p className="text-lg font-medium text-gray-500">
                     មិនមានទិន្នន័យរបបអាហារ
                   </p>

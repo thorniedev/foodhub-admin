@@ -18,10 +18,23 @@ function toCatalogOption(item: {
   code: string;
   name: string;
   description: string | null;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  isActive?: boolean;
+  active?: boolean;
+  is_active?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 }): FilterCatalogOption {
+  const activeValue =
+    item.is_active !== undefined
+      ? item.is_active
+      : item.isActive !== undefined
+        ? item.isActive
+        : item.active !== undefined
+          ? item.active
+          : true;
+
   return {
     uuid: item.uuid,
     groupCode: "CUISINE",
@@ -31,9 +44,9 @@ function toCatalogOption(item: {
     description: item.description,
     numericValue: null,
     unit: null,
-    active: item.isActive,
-    createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
+    active: Boolean(activeValue),
+    createdAt: item.createdAt || item.created_at || "",
+    updatedAt: item.updatedAt || item.updated_at || "",
   };
 }
 
@@ -82,8 +95,9 @@ export function useCuisineCatalog() {
         description:
           values.description.trim() ||
           null,
-        isActive:
-          values.active,
+        isActive: values.active,
+        is_active: values.active,
+        active: values.active,
       }).unwrap();
 
       await refetch();
@@ -108,8 +122,9 @@ export function useCuisineCatalog() {
           description:
             values.description.trim() ||
             null,
-          isActive:
-            values.active,
+          isActive: values.active,
+          is_active: values.active,
+          active: values.active,
         },
       }).unwrap();
 
@@ -130,6 +145,8 @@ export function useCuisineCatalog() {
         uuid,
         body: {
           isActive: active,
+          is_active: active,
+          active: active,
         },
       }).unwrap();
 

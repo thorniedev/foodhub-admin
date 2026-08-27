@@ -107,13 +107,21 @@ export default function DietaryTypeFormModal({
       return;
     }
 
-    await onSubmit({
-      ...values,
-      code,
-      name,
-      category,
-      description: values.description.trim(),
-    });
+    try {
+      await onSubmit({
+        ...values,
+        code,
+        name,
+        category,
+        description: values.description.trim(),
+      });
+    } catch (err: any) {
+      const errorMsg =
+        err?.data?.message ||
+        err?.message ||
+        (typeof err === "string" ? err : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។");
+      setLocalError(errorMsg);
+    }
   };
 
   return (

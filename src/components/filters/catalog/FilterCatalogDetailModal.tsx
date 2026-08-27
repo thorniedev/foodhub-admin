@@ -384,12 +384,14 @@ export default function FilterCatalogDetailModal({
           
 
             {/* Description */}
-            <div>
-              <FieldLabel>ការពិពណ៌នា</FieldLabel>
-              <div className="min-h-[84px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg leading-8 text-gray-800">
-                {displayItem?.description || "គ្មានការពិពណ៌នាឡើយ"}
+            {!isMealType && (
+              <div>
+                <FieldLabel>ការពិពណ៌នា</FieldLabel>
+                <div className="min-h-[84px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg leading-8 text-gray-800">
+                  {displayItem?.description || "គ្មានការពិពណ៌នាឡើយ"}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Meal type times */}
             {isMealType && (

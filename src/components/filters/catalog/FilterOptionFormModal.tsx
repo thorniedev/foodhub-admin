@@ -195,7 +195,15 @@ export default function FilterOptionFormModal({
 
       setValidationError("");
 
-      await onSubmit(form);
+      try {
+        await onSubmit(form);
+      } catch (err: any) {
+        const errorMsg =
+          err?.data?.message ||
+          err?.message ||
+          (typeof err === "string" ? err : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។");
+        setValidationError(errorMsg);
+      }
     };
 
   const isMealType = group.source === "MEAL_TYPE_API";
@@ -432,54 +440,56 @@ export default function FilterOptionFormModal({
           )}
 
           {/* Description */}
-          <div>
-            <FieldLabel>
-              ការពិពណ៌នា
-            </FieldLabel>
+          {!isMealType && (
+            <div>
+              <FieldLabel>
+                ការពិពណ៌នា
+              </FieldLabel>
 
-            <textarea
-              rows={3}
-              value={
-                form.description
-              }
-              onChange={(
-                event,
-              ) =>
-                setForm(
-                  (
-                    previous,
-                  ) => ({
-                    ...previous,
-                    description:
-                      event.target
-                        .value,
-                  }),
-                )
-              }
-              placeholder="បញ្ចូលការពិពណ៌នា..."
-              className="
-                w-full
-                resize-none
-                rounded-xl
-                border
-                border-gray-200
-                bg-gray-50
-                px-4
-                py-3
-                text-lg
-                leading-8
-                text-gray-800
-                outline-none
-                transition
-                placeholder:text-gray-400
-                hover:border-gray-300
-                focus:border-primary-600
-                focus:bg-white
-                focus:ring-4
-                focus:ring-primary-100
-              "
-            />
-          </div>
+              <textarea
+                rows={3}
+                value={
+                  form.description
+                }
+                onChange={(
+                  event,
+                ) =>
+                  setForm(
+                    (
+                      previous,
+                    ) => ({
+                      ...previous,
+                      description:
+                        event.target
+                          .value,
+                    }),
+                  )
+                }
+                placeholder="បញ្ចូលការពិពណ៌នា..."
+                className="
+                  w-full
+                  resize-none
+                  rounded-xl
+                  border
+                  border-gray-200
+                  bg-gray-50
+                  px-4
+                  py-3
+                  text-lg
+                  leading-8
+                  text-gray-800
+                  outline-none
+                  transition
+                  placeholder:text-gray-400
+                  hover:border-gray-300
+                  focus:border-primary-600
+                  focus:bg-white
+                  focus:ring-4
+                  focus:ring-primary-100
+                "
+              />
+            </div>
+          )}
 
           {/* Meal start/end time */}
           {isMealType && (

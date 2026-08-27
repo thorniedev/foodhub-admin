@@ -19,9 +19,20 @@ function toCatalogOption(item: {
   name: string;
   description: string | null;
   parentCategoryUuid: string | null;
-  isActive: boolean;
+  isActive?: boolean;
+  active?: boolean;
+  is_active?: boolean;
   createdAt: string;
 }): FilterCatalogOption {
+  const activeValue =
+    item.is_active !== undefined
+      ? item.is_active
+      : item.isActive !== undefined
+        ? item.isActive
+        : item.active !== undefined
+          ? item.active
+          : true;
+
   return {
     uuid: item.uuid,
     groupCode: "FOOD_CATEGORY",
@@ -32,9 +43,9 @@ function toCatalogOption(item: {
     parentUuid: item.parentCategoryUuid,
     numericValue: null,
     unit: null,
-    active: item.isActive,
+    active: Boolean(activeValue),
     createdAt: item.createdAt,
-    updatedAt: item.createdAt, // Fallback since updatedAt isn't clearly always there
+    updatedAt: item.createdAt,
   };
 }
 

@@ -362,7 +362,6 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
         activeCount={activeCount}
         inactiveCount={inactiveCount}
         onAdd={handleOpenCreate}
-        onRestoreAll={inactiveCount > 0 ? handleRestoreAll : undefined}
       />
 
       {/* Notice Message */}

@@ -19,12 +19,12 @@ import {
   Navigation,
   Pencil,
   Plus,
+  Power,
   RotateCcw,
   Search,
   SlidersHorizontal,
   Sparkles,
   Timer,
-  Trash2,
   UtensilsCrossed,
   X,
 } from "lucide-react";
@@ -265,18 +265,21 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
 
     try {
       if (editing) {
-        updateOption(editing.uuid, values);
+        await updateOption(editing.uuid, values);
       } else {
-        createOption(values);
+        await createOption(values);
       }
 
       setFormOpen(false);
       setEditing(null);
       setPage(0);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។",
-      );
+    } catch (error: any) {
+      const msg =
+        error?.data?.message ||
+        error?.message ||
+        (typeof error === "string" ? error : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។");
+      setErrorMessage(msg);
+      throw error;
     } finally {
       setSaving(false);
     }
@@ -366,6 +369,16 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
           setPage(0);
           setSizeOpen(false);
         }}
+        onReset={() => {
+          setSearch("");
+          setShowSuggestions(false);
+          setStatusFilter("ALL");
+          setSortMode("NEWEST");
+          setSize(20);
+          setSortOpen(false);
+          setSizeOpen(false);
+          setPage(0);
+        }}
       />
 
       {/* COMPONENT: ErrorNotice */}
@@ -445,6 +458,37 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
    Same visual language as UsersHeader / ShopsHeader.
 ========================================================= */
 
+function getFilterGroupIcon(groupCode: string, size = 20) {
+  switch (groupCode) {
+    case "PREPARATION_TIME":
+      return <Timer size={size} />;
+    case "DISTANCE":
+      return <Navigation size={size} />;
+    case "REGION":
+      return <MapPin size={size} />;
+    case "SEASON":
+      return <CloudSun size={size} />;
+    case "EVENT":
+      return <CalendarDays size={size} />;
+    case "MEAL_TIME":
+      return <Clock size={size} />;
+    case "FOOD_CATEGORY":
+      return <UtensilsCrossed size={size} />;
+    case "CUISINE":
+      return <Globe size={size} />;
+    case "COOKING_METHOD":
+      return <Flame size={size} />;
+    case "FOOD_STYLE":
+      return <Sparkles size={size} />;
+    case "TASTE":
+      return <Flame size={size} />;
+    case "TEXTURE":
+      return <Sparkles size={size} />;
+    default:
+      return <SlidersHorizontal size={size} />;
+  }
+}
+
 function CatalogHeader({
   group,
   total,
@@ -467,7 +511,7 @@ function CatalogHeader({
         <div className="min-w-0">
           <div className="flex items-start gap-4">
             <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-2xl bg-white/15">
-              <SlidersHorizontal size={25} />
+              {getFilterGroupIcon(group.code, 26)}
             </div>
 
             <div className="min-w-0">
@@ -508,6 +552,13 @@ function CatalogHeader({
    Suggested file: CatalogToolbar.tsx
 ========================================================= */
 
+const CATALOG_SORT_LABELS: Record<SortMode, string> = {
+  A_Z: "ឈ្មោះ (A-Z)",
+  Z_A: "ឈ្មោះ (Z-A)",
+  NEWEST: "ថ្មីបំផុត",
+  OLDEST: "ចាស់បំផុត",
+};
+
 function CatalogToolbar({
   groupLabel,
   search,
@@ -530,6 +581,7 @@ function CatalogToolbar({
   onSizeOpenChange,
   onSortChange,
   onSizeChange,
+  onReset,
 }: {
   groupLabel: string;
   search: string;
@@ -552,6 +604,7 @@ function CatalogToolbar({
   onSizeOpenChange: (open: boolean) => void;
   onSortChange: (value: SortMode) => void;
   onSizeChange: (value: number) => void;
+  onReset?: () => void;
 }) {
   const statusTabs = [
     {
@@ -571,89 +624,81 @@ function CatalogToolbar({
     },
   ];
 
-  const sortOptions = [
-    {
-      value: "A_Z" as const,
-      label: "A → Z",
-    },
-    {
-      value: "Z_A" as const,
-      label: "Z → A",
-    },
-    {
-      value: "NEWEST" as const,
-      label: "ថ្មីបំផុត",
-    },
-    {
-      value: "OLDEST" as const,
-      label: "ចាស់បំផុត",
-    },
-  ];
+  const hasActiveFilters = Boolean(
+    search.trim() || statusFilter !== "ALL" || sortMode !== "NEWEST" || size !== 20,
+  );
 
   return (
-    <section className=" ">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        {/* Status tabs */}
-        <div className="flex w-full min-w-0 gap-2 overflow-x-auto pb-1 xl:w-auto">
-          {statusTabs.map((tab) => {
-            const active = statusFilter === tab.value;
+    <div className="flex w-full flex-wrap items-center justify-between gap-3">
+      {/* Status Tabs (Left) */}
+      <div className="flex flex-wrap items-center gap-2">
+        {statusTabs.map((tab) => {
+          const active = statusFilter === tab.value;
 
-            return (
-              <button
-                key={tab.value}
-                type="button"
-                onClick={() => onStatusChange(tab.value)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => onStatusChange(tab.value)}
+              className={`group relative inline-flex h-11 cursor-pointer items-center gap-2 rounded-2xl px-4 text-base font-semibold transition-all duration-200 ease-out active:scale-95 ${
+                active
+                  ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
+                  : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span
+                className={`flex h-5.5 min-w-5.5 items-center justify-center rounded-full px-2 text-xs font-bold transition-colors duration-200 ${
                   active
-                    ? "bg-primary-800 text-white"
-                    : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
+                    ? "bg-white/20 text-white backdrop-blur-xs"
+                    : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
                 }`}
               >
-                {tab.label}
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-                <span
-                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
-                    active ? "bg-white/20 text-white" : "bg-white text-gray-500"
-                  }`}
-                >
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      {/* Controls (Right): Search + Sort + Page Size + Reset */}
+      <div className="flex min-w-[320px] flex-1 flex-wrap items-center justify-end gap-2.5">
+        {/* Search Input */}
+        <div className="relative min-w-[220px] max-w-[360px] flex-1">
+          <Search
+            size={17}
+            className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
+          />
+          <input
+            type="text"
+            value={search}
+            onChange={(event) => onSearchChange(event.target.value)}
+            onFocus={onSearchFocus}
+            placeholder={`ស្វែងរក${groupLabel}...`}
+            className="h-11 w-full rounded-2xl border border-gray-200 bg-white py-2 pl-11 pr-10 text-base text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={onClearSearch}
+              className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
+              aria-label="Clear search"
+            >
+              <X size={16} />
+            </button>
+          )}
 
-        {/* Search + controls */}
-        <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center xl:w-auto">
-          <div className="relative min-w-0 flex-1 sm:min-w-[340px]">
-            <Search
-              size={20}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-
-            <input
-              value={search}
-              onChange={(event) => onSearchChange(event.target.value)}
-              onFocus={onSearchFocus}
-              placeholder={`ស្វែងរក ${groupLabel}...`}
-              className="h-[52px] w-full rounded-full border border-gray-200 bg-gray-50 pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
-            />
-
-            {search && (
-              <button
-                type="button"
-                onClick={onClearSearch}
-                aria-label="Clear search"
-                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X size={18} />
-              </button>
-            )}
-
-            {showSuggestions && search.trim() && (
-              <div className="absolute left-0 top-[60px] z-[100] w-full min-w-[300px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+          {/* Suggestions dropdown */}
+          {showSuggestions && search.trim() && (
+            <div className="absolute left-0 top-[48px] z-[100] w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
+              <div className="border-b border-gray-100 bg-gray-50 px-4 py-2">
+                <p className="text-xs font-bold uppercase text-gray-500">
+                  លទ្ធផលស្វែងរក
+                </p>
+              </div>
+              <div className="max-h-[280px] overflow-y-auto p-1.5">
                 {suggestions.length === 0 ? (
-                  <p className="px-3 py-5 text-center text-lg text-gray-400">
+                  <p className="px-3 py-5 text-center text-sm text-gray-400">
                     មិនមានលទ្ធផល
                   </p>
                 ) : (
@@ -662,88 +707,134 @@ function CatalogToolbar({
                       key={item.uuid}
                       type="button"
                       onClick={() => onSuggestionSelect(item)}
-                      className="w-full rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
+                      className="flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left transition hover:bg-emerald-50"
                     >
-                      <p className="text-lg font-semibold text-gray-800">
+                      <span className="font-semibold text-gray-800">
                         {item.localName || item.name}
-                      </p>
-
-                      <p className="mt-1 text-lg text-gray-400">{item.code}</p>
+                      </span>
+                      <span className="font-mono text-xs text-gray-400">
+                        {item.code}
+                      </span>
                     </button>
                   ))
                 )}
               </div>
-            )}
-          </div>
-
-          {/* Page size */}
-          <div className="relative shrink-0">
-            <button
-              type="button"
-              onClick={() => onSizeOpenChange(!sizeOpen)}
-              className="flex h-[52px] min-w-[150px] items-center justify-between gap-3 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-700 transition hover:border-primary-200 hover:bg-primary-50"
-            >
-              {size} / ទំព័រ
-              <ChevronDown size={18} />
-            </button>
-
-            {sizeOpen && (
-              <div className="absolute right-0 top-[60px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                {[10, 20, 50].map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => onSizeChange(value)}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg transition ${
-                      size === value
-                        ? "bg-primary-50 font-medium text-primary-800"
-                        : "text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    {value} / ទំព័រ
-                    {size === value && <Check size={18} />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Sort */}
-          <div className="relative shrink-0">
-            <button
-              type="button"
-              onClick={() => onSortOpenChange(!sortOpen)}
-              aria-label="Sort"
-              title="Sort"
-              className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800"
-            >
-              <ArrowUpDown size={20} />
-            </button>
-
-            {sortOpen && (
-              <div className="absolute right-0 top-[60px] z-[100] w-[210px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                {sortOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => onSortChange(option.value)}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg transition ${
-                      sortMode === option.value
-                        ? "bg-primary-50 font-medium text-primary-800"
-                        : "text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    {option.label}
-
-                    {sortMode === option.value && <Check size={18} />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+
+        {/* Sort Dropdown */}
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => onSortOpenChange(!sortOpen)}
+            className={`flex h-11 items-center gap-2 rounded-2xl border bg-white px-3.5 text-base font-semibold transition ${
+              sortOpen
+                ? "border-primary-600 ring-2 ring-primary-100"
+                : "border-gray-200 hover:border-gray-300 text-gray-700"
+            }`}
+          >
+            <ArrowUpDown size={16} className="text-gray-400" />
+            <span>{CATALOG_SORT_LABELS[sortMode]}</span>
+            <ChevronDown
+              size={16}
+              className={`text-gray-400 transition-transform duration-200 ${
+                sortOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {sortOpen && (
+            <div className="absolute right-0 top-[48px] z-[110] w-[180px] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl">
+              <p className="px-3 py-1 text-xs font-semibold text-gray-400">
+                តម្រៀបតាម
+              </p>
+              {(Object.keys(CATALOG_SORT_LABELS) as SortMode[]).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    onSortChange(key);
+                    onSortOpenChange(false);
+                  }}
+                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
+                    sortMode === key
+                      ? "bg-primary-50 text-primary-800"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <span>{CATALOG_SORT_LABELS[key]}</span>
+                  {sortMode === key && (
+                    <Check size={16} className="text-primary-800" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Page Size Select */}
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => onSizeOpenChange(!sizeOpen)}
+            className={`flex h-11 min-w-[125px] items-center justify-between gap-2.5 rounded-2xl border bg-white px-4 text-base font-semibold transition ${
+              sizeOpen
+                ? "border-primary-600 ring-2 ring-primary-100"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <span className="text-gray-700">{size} / ទំព័រ</span>
+            <ChevronDown
+              size={16}
+              className={`text-gray-400 transition-transform duration-200 ${
+                sizeOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {sizeOpen && (
+            <div className="absolute right-0 top-[48px] z-[110] w-[160px] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl">
+              <p className="px-3 py-1 text-xs font-semibold text-gray-400">
+                ចំនួនក្នុងទំព័រ
+              </p>
+              {[10, 20, 50, 100].map((pageSize) => (
+                <button
+                  key={pageSize}
+                  type="button"
+                  onClick={() => {
+                    onSizeChange(pageSize);
+                    onSizeOpenChange(false);
+                  }}
+                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
+                    size === pageSize
+                      ? "bg-primary-50 text-primary-800"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <span>{pageSize} / ទំព័រ</span>
+                  {size === pageSize && (
+                    <Check size={16} className="text-primary-800" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Reset Filters Button */}
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 active:scale-95"
+            title="កំណត់ឡើងវិញ"
+          >
+            <RotateCcw size={16} />
+          </button>
+        )}
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -767,38 +858,23 @@ function ErrorNotice({ message }: { message: string }) {
    Suggested file: CatalogTable.tsx
 ========================================================= */
 
-function getFilterGroupIcon(groupCode: string) {
-  switch (groupCode) {
-    case "PREPARATION_TIME":
-      return <Timer size={20} />;
-    case "DISTANCE":
-      return <Navigation size={20} />;
-    case "REGION":
-      return <MapPin size={20} />;
-    case "SEASON":
-      return <CloudSun size={20} />;
-    case "EVENT":
-      return <CalendarDays size={20} />;
-    case "MEAL_TIME":
-      return <Clock size={20} />;
-    case "FOOD_CATEGORY":
-      return <UtensilsCrossed size={20} />;
-    case "CUISINE":
-      return <Globe size={20} />;
-    case "COOKING_METHOD":
-      return <Flame size={20} />;
-    case "FOOD_STYLE":
-      return <Sparkles size={20} />;
-    case "TASTE":
-      return <Flame size={20} />;
-    case "TEXTURE":
-      return <Sparkles size={20} />;
-    default:
-      return <SlidersHorizontal size={20} />;
-  }
-}
-
 function getOptionValueBadge(item: FilterCatalogOption) {
+  if (
+    [
+      "MEAL_TIME",
+      "FOOD_CATEGORY",
+      "CUISINE",
+      "SEASON",
+      "EVENT",
+      "COOKING_METHOD",
+      "FOOD_STYLE",
+      "TASTE",
+      "TEXTURE",
+    ].includes(item.groupCode || "")
+  ) {
+    return null;
+  }
+
   if (
     item.numericValue !== null &&
     item.numericValue !== undefined &&
@@ -813,9 +889,6 @@ function getOptionValueBadge(item: FilterCatalogOption) {
       return `កម្រិត ${item.numericValue}`;
     }
     return `${item.numericValue} ${unitLabel}`.trim();
-  }
-  if (item.startTime || item.endTime) {
-    return `${item.startTime || ""} – ${item.endTime || ""}`.trim();
   }
   return null;
 }
@@ -838,23 +911,12 @@ function CatalogTable({
   onRestore: (item: FilterCatalogOption) => void;
 }) {
   const hasValueColumn = useMemo(() => {
-    return (
-      [
-        "PREPARATION_TIME",
-        "DISTANCE",
-        "SPICE_LEVEL",
-        "MEAL_TIME",
-        "SEASON",
-        "EVENT",
-      ].includes(groupCode) ||
-      items.some(
-        (it) =>
-          (it.numericValue !== null && it.numericValue !== undefined) ||
-          it.startTime ||
-          it.endTime,
-      )
-    );
-  }, [groupCode, items]);
+    return ["PREPARATION_TIME", "DISTANCE", "SPICE_LEVEL"].includes(groupCode);
+  }, [groupCode]);
+
+  const hasDescriptionColumn = useMemo(() => {
+    return groupCode !== "MEAL_TIME";
+  }, [groupCode]);
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -875,9 +937,11 @@ function CatalogTable({
               </th>
             )}
 
-            <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
-              ការពិពណ៌នា
-            </th>
+            {hasDescriptionColumn && (
+              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+                ការពិពណ៌នា
+              </th>
+            )}
 
             <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800">
               ស្ថានភាព
@@ -942,11 +1006,13 @@ function CatalogTable({
                 )}
 
                 {/* Description */}
-                <td className="max-w-[340px] px-4 py-3">
-                  <p className="line-clamp-2 text-base font-normal text-gray-500">
-                    {item.description || "—"}
-                  </p>
-                </td>
+                {hasDescriptionColumn && (
+                  <td className="max-w-[340px] px-4 py-3">
+                    <p className="line-clamp-2 text-base font-normal text-gray-500">
+                      {item.description || "—"}
+                    </p>
+                  </td>
+                )}
 
                 {/* Status */}
                 <td className="px-4 py-3 text-center">
@@ -983,10 +1049,10 @@ function CatalogTable({
                       <button
                         type="button"
                         onClick={() => onDelete(item)}
-                        title="បិទ"
-                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100"
+                        title="បិទដំណើរការ"
+                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-100"
                       >
-                        <Trash2 size={18} />
+                        <Power size={18} />
                       </button>
                     ) : (
                       <button
@@ -1123,8 +1189,8 @@ function DeleteCatalogOptionModal({
     <div className="fixed inset-0 z-[160] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
       <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
-            <Trash2 size={24} />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 text-amber-600">
+            <Power size={28} />
           </div>
 
           <button
@@ -1138,11 +1204,11 @@ function DeleteCatalogOptionModal({
         </div>
 
         <p className="mt-5 text-3xl font-semibold text-primary-800">
-          បិទ {item.localName || item.name}?
+          បិទដំណើរការ {item.localName || item.name}?
         </p>
 
         <p className="mt-3 text-lg leading-8 text-gray-500">
-          វានឹងបាត់ពី Form បង្កើតម្ហូប ប៉ុន្តែមិនលុបចេញពី system ទាំងស្រុងទេ។
+          វានឹងប្តូរទៅជាអសកម្ម (Inactive) ហើយអាចស្ដារឡើងវិញបានគ្រប់ពេល។
         </p>
 
         <div className="mt-6 grid grid-cols-2 gap-3">
@@ -1157,9 +1223,9 @@ function DeleteCatalogOptionModal({
           <button
             type="button"
             onClick={onConfirm}
-            className="min-h-12 rounded-full bg-red-500 px-4 text-lg font-medium text-white transition hover:bg-red-600"
+            className="min-h-12 rounded-full bg-amber-600 px-4 text-lg font-medium text-white transition hover:bg-amber-700"
           >
-            បិទ
+            បិទដំណើរការ
           </button>
         </div>
       </div>

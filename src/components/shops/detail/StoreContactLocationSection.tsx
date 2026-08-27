@@ -102,7 +102,7 @@ export default function StoreContactLocationSection({
                   </button>
 
                   <a
-                    href={`https://www.google.com/maps?q=${lat},${lng}`}
+                    href={`https://www.google.com/maps/search/${encodeURIComponent(store.storeName)}/@${lat},${lng},17z`}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 rounded-full bg-[#136C34] px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#0F5F2E]"
