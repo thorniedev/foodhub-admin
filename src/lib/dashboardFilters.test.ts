@@ -28,7 +28,7 @@ describe("resolveDateRange", () => {
 
   it("supports the 7 and 90 day presets", () => {
     expect(resolveDateRange({ preset: "7d" }, TODAY).from).toBe("2026-08-21");
-    expect(resolveDateRange({ preset: "90d" }, TODAY).from).toBe("2026-05-31");
+    expect(resolveDateRange({ preset: "90d" }, TODAY).from).toBe("2026-05-30");
   });
 
   it("uses the explicit range for the custom preset", () => {

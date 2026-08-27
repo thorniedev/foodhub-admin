@@ -116,7 +116,7 @@ export default function AdminRecommendationsPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   // Inspector Modal / Slide-over State
-  const [selectedSessionUuid, setSelectedSessionUuid] = useState<string | null>(null);
+  const [selectedSession, setSelectedSession] = useState<AdminSessionSummary | null>(null);
   const [sessionDetail, setSessionDetail] = useState<AdminSessionDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -170,13 +170,13 @@ export default function AdminRecommendationsPage() {
   }, [sessions, totalElements]);
 
   // 2. Open Session Inspector
-  const handleInspect = async (uuid: string) => {
-    setSelectedSessionUuid(uuid);
+  const handleInspect = async (session: AdminSessionSummary) => {
+    setSelectedSession(session);
     setDetailLoading(true);
     setDetailError(null);
 
     try {
-      const detail = await fetchAdminSessionDetail(uuid);
+      const detail = await fetchAdminSessionDetail(session.uuid, undefined, session);
       setSessionDetail(detail);
     } catch (err: any) {
       console.warn("Backend detail fetch failed:", err?.message);
@@ -382,7 +382,7 @@ export default function AdminRecommendationsPage() {
                 return (
                   <TableRow
                     key={session.uuid}
-                    onClick={() => handleInspect(session.uuid)}
+                    onClick={() => handleInspect(session)}
                     className="cursor-pointer group hover:bg-amber-50/40 dark:hover:bg-amber-950/20 transition duration-150"
                   >
                     {/* Session Type & UUID Subtitle */}
@@ -520,7 +520,7 @@ export default function AdminRecommendationsPage() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleInspect(session.uuid);
+                          handleInspect(session);
                         }}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 transition shadow-2xs cursor-pointer group-hover:border-amber-400"
                       >
@@ -608,16 +608,16 @@ export default function AdminRecommendationsPage() {
 
       {/* Slide-over Inspector Drawer */}
       <SessionInspectorDrawer
-        sessionUuid={selectedSessionUuid}
+        sessionUuid={selectedSession?.uuid ?? null}
         sessionDetail={sessionDetail}
         loading={detailLoading}
         error={detailError}
         onClose={() => {
-          setSelectedSessionUuid(null);
+          setSelectedSession(null);
           setSessionDetail(null);
           setDetailError(null);
         }}
-        onRefresh={() => selectedSessionUuid && handleInspect(selectedSessionUuid)}
+        onRefresh={() => selectedSession && handleInspect(selectedSession)}
       />
     </div>
   );

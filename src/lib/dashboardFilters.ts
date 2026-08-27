@@ -303,7 +303,7 @@ export const dashboardFilterFormSchema = z
         ctx.addIssue({
           code: "custom",
           path: ["radiusKm"],
-          message: `កាំត្រូវធំជាង 0 និងមិនលើស ${DASHBOARD_MAX_RADIUS_KM} គ.ម`,
+          message: `កាំត្រូវធំជាង 0 និងមិនលើស ${DASHBOARD_MAX_RADIUS_KM}`,
         });
       }
 

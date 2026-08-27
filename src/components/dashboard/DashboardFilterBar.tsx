@@ -113,6 +113,7 @@ export default function DashboardFilterBar({
   return (
     <form
       onSubmit={submit}
+      noValidate
       aria-label="តម្រងទិន្នន័យវិភាគ"
       className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5"
     >
