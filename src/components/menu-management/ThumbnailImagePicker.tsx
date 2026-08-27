@@ -81,14 +81,23 @@ export default function ThumbnailImagePicker({
           if (!cancelled) {
             const url =
               data?.url || data?.payload?.url || data?.data?.url || data?.accessUrl;
-            setResolvedExistingUrl(url || resolveFoodHubCatalogImageUrl(trimmed) || trimmed);
-            setLoadingExisting(false);
+            if (url) {
+              setResolvedExistingUrl(url);
+              setLoadingExisting(false);
+            } else {
+              setResolvedExistingUrl(null);
+              setImgError(true);
+              setLoadingExisting(false);
+              if (onExistingChange) onExistingChange(null);
+            }
           }
         })
         .catch(() => {
           if (!cancelled) {
-            setResolvedExistingUrl(resolveFoodHubCatalogImageUrl(trimmed) || trimmed);
+            setResolvedExistingUrl(null);
+            setImgError(true);
             setLoadingExisting(false);
+            if (onExistingChange) onExistingChange(null);
           }
         });
     } else {
@@ -99,7 +108,7 @@ export default function ThumbnailImagePicker({
     return () => {
       cancelled = true;
     };
-  }, [existingUrl]);
+  }, [existingUrl, onExistingChange]);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

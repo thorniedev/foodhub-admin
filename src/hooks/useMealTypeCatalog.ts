@@ -75,15 +75,16 @@ export function useMealTypeCatalog() {
       const label =
         values.name.trim() ||
         values.localName.trim();
+      const code =
+        values.code?.trim().toUpperCase() ||
+        createCodeFromLabel(label);
 
       const startTime = values.startTime || "00:00:00";
       const endTime = values.endTime || "23:59:00";
       const order = Number(values.numericValue) || 1;
 
       await createMealType({
-        code: createCodeFromLabel(
-          label,
-        ),
+        code,
         name: label,
         defaultStartTime: startTime,
         default_start_time: startTime,
@@ -114,20 +115,26 @@ export function useMealTypeCatalog() {
       const endTime = values.endTime || "23:59:00";
       const order = Number(values.numericValue) || 1;
 
+      const body: any = {
+        name: label,
+        defaultStartTime: startTime,
+        default_start_time: startTime,
+        defaultEndTime: endTime,
+        default_end_time: endTime,
+        displayOrder: order,
+        display_order: order,
+        isActive: values.active,
+        is_active: values.active,
+        active: values.active,
+      };
+
+      if (values.code?.trim()) {
+        body.code = values.code.trim().toUpperCase();
+      }
+
       await updateMealType({
         uuid,
-        body: {
-          name: label,
-          defaultStartTime: startTime,
-          default_start_time: startTime,
-          defaultEndTime: endTime,
-          default_end_time: endTime,
-          displayOrder: order,
-          display_order: order,
-          isActive: values.active,
-          is_active: values.active,
-          active: values.active,
-        },
+        body,
       }).unwrap();
 
       await refetch();

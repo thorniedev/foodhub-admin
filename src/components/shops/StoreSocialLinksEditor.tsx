@@ -121,7 +121,7 @@ export default function StoreSocialLinksEditor({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-base text-gray-500">
+        <p className="text-lg text-gray-500">
           អតិបរមា {MAX_STORE_SOCIAL_LINKS} links · មួយ platform មួយ link
         </p>
 
@@ -158,7 +158,7 @@ export default function StoreSocialLinksEditor({
 
       <div className="space-y-3">
         {links.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 p-8 text-center text-base text-gray-400">
+          <div className="rounded-2xl border border-dashed border-gray-200 p-8 text-center text-lg text-gray-400">
             មិនមាន Social links
           </div>
         ) : (
@@ -180,7 +180,7 @@ export default function StoreSocialLinksEditor({
                     onChange={(event) =>
                       update(index, "platform", event.target.value)
                     }
-                    className="h-11 rounded-xl border border-gray-200 bg-white px-3 text-base outline-none focus:border-[#136C34] disabled:opacity-60"
+                    className="h-12 rounded-xl border border-gray-200 bg-white px-3 text-lg outline-none focus:border-[#136C34] disabled:opacity-60"
                   >
                     {/* Keep an unexpected value from the API visible rather than
                         silently rewriting it to the first option. */}
@@ -209,7 +209,7 @@ export default function StoreSocialLinksEditor({
                       update(index, "profileUrl", event.target.value)
                     }
                     placeholder={placeholder}
-                    className="h-11 rounded-xl border border-gray-200 bg-white px-3 text-base outline-none focus:border-[#136C34] disabled:opacity-60"
+                    className="h-12 rounded-xl border border-gray-200 bg-white px-3 text-lg outline-none focus:border-[#136C34] disabled:opacity-60"
                   />
 
                   <input
@@ -220,7 +220,7 @@ export default function StoreSocialLinksEditor({
                     onChange={(event) =>
                       update(index, "displayOrder", event.target.value)
                     }
-                    className="h-11 rounded-xl border border-gray-200 bg-white px-3 text-base outline-none focus:border-[#136C34] disabled:opacity-60"
+                    className="h-12 rounded-xl border border-gray-200 bg-white px-3 text-lg outline-none focus:border-[#136C34] disabled:opacity-60"
                   />
 
                   <button
@@ -231,7 +231,7 @@ export default function StoreSocialLinksEditor({
                         links.filter((_, itemIndex) => itemIndex !== index),
                       )
                     }
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 disabled:opacity-50"
+                    className="flex h-12 w-12 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 disabled:opacity-50"
                     aria-label="Remove social link"
                   >
                     <Trash2 size={18} />
@@ -239,7 +239,7 @@ export default function StoreSocialLinksEditor({
                 </div>
 
                 {link.profileUrl.trim() && error && (
-                  <p className="mt-2 text-base text-red-600">{error}</p>
+                  <p className="mt-2 text-lg text-red-600">{error}</p>
                 )}
               </div>
             );

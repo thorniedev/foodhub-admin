@@ -21,6 +21,8 @@ import { useGetPublishedMenuItemsQuery } from "@/src/app/store/menuManagementApi
 
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
 
+import { readLocalMenuItems } from "@/src/lib/filterCatalogStorage";
+
 import type { MenuItemRecord } from "@/src/types/menu-management";
 
 import { Section } from "./StoreOverviewSection";
@@ -83,9 +85,26 @@ export default function StoreMenuItemsSection({
     },
   );
 
+  const localItems = useMemo(() => readLocalMenuItems(), [data]);
+
   // Sort items by numeric ID descending, timestamp descending, or array reverse to guarantee NEWEST items FIRST!
   const sortedItems = useMemo(() => {
-    const raw = data?.content ?? [];
+    const serverList = data?.content ?? [];
+    const map = new Map<string, MenuItemRecord>();
+
+    localItems.forEach((m) => {
+      if (m?.uuid && String(m.storeUuid || m.store?.uuid || "") === String(storeUuid)) {
+        map.set(m.uuid, m);
+      }
+    });
+
+    serverList.forEach((m) => {
+      if (m?.uuid) {
+        map.set(m.uuid, m);
+      }
+    });
+
+    const raw = Array.from(map.values());
     return [...raw].sort((a, b) => {
       // 1. Sort by numeric ID descending if available
       const idA =
@@ -134,7 +153,7 @@ export default function StoreMenuItemsSection({
       // 3. Fallback: Reverse array order so newest appended items appear first
       return raw.indexOf(b) - raw.indexOf(a);
     });
-  }, [data?.content]);
+  }, [data?.content, localItems, storeUuid]);
 
   const totalPages = Math.ceil(sortedItems.length / ITEMS_PER_PAGE) || 1;
 
@@ -154,17 +173,17 @@ export default function StoreMenuItemsSection({
           <button
             type="button"
             onClick={onAddMenuItem}
-            className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-2xl bg-primary-800 px-5 text-base font-semibold text-white shadow-xs transition hover:bg-primary-900 active:scale-95"
+            className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-2xl bg-primary-800 px-5 text-lg font-semibold text-white shadow-xs transition hover:bg-primary-900 active:scale-95"
           >
-            <Plus size={18} />
+            <Plus size={19} />
             បង្កើតម៉ឺនុយ
           </button>
         ) : (
           <Link
             href={`/menu-items?storeUuid=${storeUuid}&tab=WEBSITE`}
-            className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-2xl bg-primary-800 px-5 text-base font-semibold text-white shadow-xs transition hover:bg-primary-900 active:scale-95"
+            className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-2xl bg-primary-800 px-5 text-lg font-semibold text-white shadow-xs transition hover:bg-primary-900 active:scale-95"
           >
-            <Plus size={18} />
+            <Plus size={19} />
             គ្រប់គ្រងម៉ឺនុយ
           </Link>
         )
@@ -272,7 +291,7 @@ export default function StoreMenuItemsSection({
                 rounded-full
                 bg-[#137A3D]
                 px-6
-                text-base
+                text-lg
                 font-semibold
                 text-white
                 transition
@@ -295,7 +314,7 @@ export default function StoreMenuItemsSection({
                 rounded-full
                 bg-[#137A3D]
                 px-6
-                text-base
+                text-lg
                 font-semibold
                 text-white
                 transition
@@ -390,7 +409,7 @@ export default function StoreMenuItemsSection({
                     <div>
                       {/* Name */}
                       <p
-                        className="text-base font-bold text-gray-900 transition group-hover:text-primary-800 line-clamp-1"
+                        className="text-lg font-bold text-gray-900 transition group-hover:text-primary-800 line-clamp-1"
                         title={item.name}
                       >
                         {item.name}
@@ -399,7 +418,7 @@ export default function StoreMenuItemsSection({
                       {/* Canonical Name */}
                       {item.food?.canonicalName && item.food.canonicalName !== item.name && (
                         <p
-                          className="mt-0.5 text-xs text-gray-500 line-clamp-1"
+                          className="mt-0.5 text-base text-gray-500 line-clamp-1"
                           title={item.food.canonicalName}
                         >
                           {item.food.canonicalName}
@@ -410,10 +429,10 @@ export default function StoreMenuItemsSection({
                     {/* Price, Prep Time, and Availability status UNDER Image */}
                     <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-100">
                       <div className="flex items-baseline gap-1">
-                        <span className="text-base font-bold text-primary-800">
+                        <span className="text-xl font-bold text-primary-800">
                           ${Number(item.price ?? 0).toFixed(2)}
                         </span>
-                        <span className="text-xs font-semibold text-gray-400">
+                        <span className="text-sm font-semibold text-gray-400">
                           {item.currencyCode || "USD"}
                         </span>
                       </div>
@@ -421,15 +440,15 @@ export default function StoreMenuItemsSection({
                       <div className="flex items-center gap-1.5">
                         {/* PREPARATION TIME */}
                         {item.preparationTimeMinutes != null && (
-                          <div className="inline-flex items-center gap-1 rounded-md border border-amber-100 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">
-                            <Clock size={12} className="text-amber-600" />
+                          <div className="inline-flex items-center gap-1 rounded-md border border-amber-100 bg-amber-50 px-2 py-0.5 text-sm font-semibold text-amber-800">
+                            <Clock size={14} className="text-amber-600" />
                             <span>{item.preparationTimeMinutes} min</span>
                           </div>
                         )}
 
                         {/* AVAILABILITY STATUS */}
                         <div
-                          className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
+                          className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-base font-semibold ${
                             available
                               ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
                               : "bg-gray-100 text-gray-600 border border-gray-200"
@@ -462,7 +481,7 @@ export default function StoreMenuItemsSection({
           {/* PAGINATION CONTROLS */}
           {totalPages > 1 && (
             <div className="mt-6 flex flex-col items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50/50 p-3.5 sm:flex-row">
-              <p className="text-sm font-semibold text-gray-500">
+              <p className="text-lg font-semibold text-gray-500">
                 បង្ហាញ {Math.min((currentPage - 1) * ITEMS_PER_PAGE + 1, sortedItems.length)} -{" "}
                 {Math.min(currentPage * ITEMS_PER_PAGE, sortedItems.length)} នៃ {sortedItems.length} ម៉ឺនុយ
               </p>
@@ -472,10 +491,10 @@ export default function StoreMenuItemsSection({
                   type="button"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label="ទំព័រមុន"
                 >
-                  <ChevronLeft size={18} />
+                  <ChevronLeft size={20} />
                 </button>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
@@ -483,7 +502,7 @@ export default function StoreMenuItemsSection({
                     key={page}
                     type="button"
                     onClick={() => setCurrentPage(page)}
-                    className={`flex h-9 min-w-[36px] cursor-pointer items-center justify-center rounded-xl px-3 text-sm font-bold transition ${
+                    className={`flex h-10 min-w-[40px] cursor-pointer items-center justify-center rounded-xl px-3 text-lg font-bold transition ${
                       currentPage === page
                         ? "bg-primary-800 text-white shadow-xs"
                         : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
@@ -497,10 +516,10 @@ export default function StoreMenuItemsSection({
                   type="button"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                  className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label="ទំព័របន្ទាប់"
                 >
-                  <ChevronRight size={18} />
+                  <ChevronRight size={20} />
                 </button>
               </div>
             </div>

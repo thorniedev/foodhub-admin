@@ -16,10 +16,10 @@ import {
   Flame,
   Globe,
   MapPin,
+  MinusCircle,
   Navigation,
   Pencil,
   Plus,
-  Power,
   RotateCcw,
   Search,
   SlidersHorizontal,
@@ -537,10 +537,10 @@ function CatalogHeader({
         <button
           type="button"
           onClick={onCreate}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-xl font-normal text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
         >
-          <Plus size={20} />
-          បន្ថែម {group.labelKm}
+          <Plus size={22} />
+          បន្ថែម{group.labelKm}
         </button>
       </div>
     </section>
@@ -633,14 +633,14 @@ function CatalogToolbar({
       {/* Status Tabs (Left) */}
       <div className="flex flex-wrap items-center gap-2">
         {statusTabs.map((tab) => {
-          const active = statusFilter === tab.value;
+          const active = tab.value === statusFilter;
 
           return (
             <button
               key={tab.value}
               type="button"
               onClick={() => onStatusChange(tab.value)}
-              className={`group relative inline-flex h-11 cursor-pointer items-center gap-2 rounded-2xl px-4 text-base font-semibold transition-all duration-200 ease-out active:scale-95 ${
+              className={`group relative inline-flex h-12 cursor-pointer items-center gap-2.5 rounded-full px-5 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
                 active
                   ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
                   : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
@@ -648,7 +648,7 @@ function CatalogToolbar({
             >
               <span>{tab.label}</span>
               <span
-                className={`flex h-5.5 min-w-5.5 items-center justify-center rounded-full px-2 text-xs font-bold transition-colors duration-200 ${
+                className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2.5 text-lg font-normal transition-colors duration-200 ${
                   active
                     ? "bg-white/20 text-white backdrop-blur-xs"
                     : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
@@ -675,7 +675,7 @@ function CatalogToolbar({
             onChange={(event) => onSearchChange(event.target.value)}
             onFocus={onSearchFocus}
             placeholder={`ស្វែងរក${groupLabel}...`}
-            className="h-11 w-full rounded-2xl border border-gray-200 bg-white py-2 pl-11 pr-10 text-base text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+            className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
           />
           {search && (
             <button
@@ -684,21 +684,21 @@ function CatalogToolbar({
               className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
               aria-label="Clear search"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           )}
 
           {/* Suggestions dropdown */}
           {showSuggestions && search.trim() && (
-            <div className="absolute left-0 top-[48px] z-[100] w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
-              <div className="border-b border-gray-100 bg-gray-50 px-4 py-2">
-                <p className="text-xs font-bold uppercase text-gray-500">
+            <div className="absolute left-0 top-[52px] z-[100] w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
+              <div className="border-b border-gray-100 bg-gray-50 px-4 py-2.5">
+                <p className="text-base font-bold uppercase text-gray-500">
                   លទ្ធផលស្វែងរក
                 </p>
               </div>
               <div className="max-h-[280px] overflow-y-auto p-1.5">
                 {suggestions.length === 0 ? (
-                  <p className="px-3 py-5 text-center text-sm text-gray-400">
+                  <p className="px-3 py-5 text-center text-lg text-gray-400">
                     មិនមានលទ្ធផល
                   </p>
                 ) : (
@@ -709,10 +709,10 @@ function CatalogToolbar({
                       onClick={() => onSuggestionSelect(item)}
                       className="flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left transition hover:bg-emerald-50"
                     >
-                      <span className="font-semibold text-gray-800">
+                      <span className="text-lg font-normal text-gray-800">
                         {item.localName || item.name}
                       </span>
-                      <span className="font-mono text-xs text-gray-400">
+                      <span className="font-mono text-lg text-gray-400">
                         {item.code}
                       </span>
                     </button>
@@ -723,62 +723,12 @@ function CatalogToolbar({
           )}
         </div>
 
-        {/* Sort Dropdown */}
-        <div className="relative shrink-0">
-          <button
-            type="button"
-            onClick={() => onSortOpenChange(!sortOpen)}
-            className={`flex h-11 items-center gap-2 rounded-2xl border bg-white px-3.5 text-base font-semibold transition ${
-              sortOpen
-                ? "border-primary-600 ring-2 ring-primary-100"
-                : "border-gray-200 hover:border-gray-300 text-gray-700"
-            }`}
-          >
-            <ArrowUpDown size={16} className="text-gray-400" />
-            <span>{CATALOG_SORT_LABELS[sortMode]}</span>
-            <ChevronDown
-              size={16}
-              className={`text-gray-400 transition-transform duration-200 ${
-                sortOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {sortOpen && (
-            <div className="absolute right-0 top-[48px] z-[110] w-[180px] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl">
-              <p className="px-3 py-1 text-xs font-semibold text-gray-400">
-                តម្រៀបតាម
-              </p>
-              {(Object.keys(CATALOG_SORT_LABELS) as SortMode[]).map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => {
-                    onSortChange(key);
-                    onSortOpenChange(false);
-                  }}
-                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
-                    sortMode === key
-                      ? "bg-primary-50 text-primary-800"
-                      : "text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  <span>{CATALOG_SORT_LABELS[key]}</span>
-                  {sortMode === key && (
-                    <Check size={16} className="text-primary-800" />
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Page Size Select */}
         <div className="relative shrink-0">
           <button
             type="button"
             onClick={() => onSizeOpenChange(!sizeOpen)}
-            className={`flex h-11 min-w-[125px] items-center justify-between gap-2.5 rounded-2xl border bg-white px-4 text-base font-semibold transition ${
+            className={`flex h-12 min-w-[140px] items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition ${
               sizeOpen
                 ? "border-primary-600 ring-2 ring-primary-100"
                 : "border-gray-200 hover:border-gray-300"
@@ -786,7 +736,7 @@ function CatalogToolbar({
           >
             <span className="text-gray-700">{size} / ទំព័រ</span>
             <ChevronDown
-              size={16}
+              size={18}
               className={`text-gray-400 transition-transform duration-200 ${
                 sizeOpen ? "rotate-180" : ""
               }`}
@@ -794,9 +744,9 @@ function CatalogToolbar({
           </button>
 
           {sizeOpen && (
-            <div className="absolute right-0 top-[48px] z-[110] w-[160px] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl">
-              <p className="px-3 py-1 text-xs font-semibold text-gray-400">
-                ចំនួនក្នុងទំព័រ
+            <div className="absolute right-0 top-[52px] z-[110] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+              <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+                ទំហំទំព័រ
               </p>
               {[10, 20, 50, 100].map((pageSize) => (
                 <button
@@ -806,7 +756,7 @@ function CatalogToolbar({
                     onSizeChange(pageSize);
                     onSizeOpenChange(false);
                   }}
-                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
+                  className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
                     size === pageSize
                       ? "bg-primary-50 text-primary-800"
                       : "text-gray-700 hover:bg-gray-50"
@@ -814,6 +764,50 @@ function CatalogToolbar({
                 >
                   <span>{pageSize} / ទំព័រ</span>
                   {size === pageSize && (
+                    <Check size={18} className="text-primary-800" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Sort Dropdown */}
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => onSortOpenChange(!sortOpen)}
+            className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${
+              sortOpen
+                ? "border-primary-800 bg-primary-50 text-primary-800"
+                : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
+            }`}
+            title="តម្រៀប"
+          >
+            <ArrowUpDown size={18} />
+          </button>
+
+          {sortOpen && (
+            <div className="absolute right-0 top-[56px] z-[110] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+              <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+                តម្រៀប
+              </p>
+              {(Object.keys(CATALOG_SORT_LABELS) as SortMode[]).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    onSortChange(key);
+                    onSortOpenChange(false);
+                  }}
+                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg transition ${
+                    sortMode === key
+                      ? "bg-primary-50 text-primary-800"
+                      : "text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  <span>{CATALOG_SORT_LABELS[key]}</span>
+                  {sortMode === key && (
                     <Check size={16} className="text-primary-800" />
                   )}
                 </button>
@@ -827,10 +821,10 @@ function CatalogToolbar({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 active:scale-95"
+            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 active:scale-95"
             title="កំណត់ឡើងវិញ"
           >
-            <RotateCcw size={16} />
+            <RotateCcw size={18} />
           </button>
         )}
       </div>
@@ -923,35 +917,33 @@ function CatalogTable({
       <table className="w-full min-w-[700px] table-auto border-collapse text-left">
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/70">
-            <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
               {groupLabel}
             </th>
 
-            <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
               កូដ
             </th>
 
             {hasValueColumn && (
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+              <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
                 តម្លៃ / ឯកតា
               </th>
             )}
 
             {hasDescriptionColumn && (
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+              <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
                 ការពិពណ៌នា
               </th>
             )}
 
-            <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800">
+            <th className="whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800">
               ស្ថានភាព
             </th>
 
-            <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
-              កែប្រែចុងក្រោយ
-            </th>
+      
 
-            <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[120px]">
+            <th className="whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800 min-w-[120px]">
               សកម្មភាព
             </th>
           </tr>
@@ -973,21 +965,16 @@ function CatalogTable({
                       {getFilterGroupIcon(item.groupCode || groupCode)}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-base font-semibold text-gray-800">
+                      <p className="text-lg font-normal text-gray-800">
                         {item.localName || item.name}
                       </p>
-                      {item.name && item.localName && item.name !== item.localName && (
-                        <p className="text-base font-normal text-gray-400">
-                          {item.name}
-                        </p>
-                      )}
                     </div>
                   </div>
                 </td>
 
                 {/* Code */}
                 <td className="whitespace-nowrap px-4 py-3">
-                  <span className="inline-flex rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-base font-semibold text-gray-700">
+                  <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-lg font-normal text-gray-700">
                     {item.code || "—"}
                   </span>
                 </td>
@@ -996,11 +983,11 @@ function CatalogTable({
                 {hasValueColumn && (
                   <td className="whitespace-nowrap px-4 py-3">
                     {valBadge ? (
-                      <span className="inline-flex rounded-full bg-secondary-50 px-3.5 py-1 text-base font-semibold text-secondary-700 ring-1 ring-inset ring-secondary-100">
+                      <span className="inline-flex rounded-full bg-secondary-50 px-3.5 py-1 text-lg font-normal text-secondary-700 ring-1 ring-inset ring-secondary-100">
                         {valBadge}
                       </span>
                     ) : (
-                      <span className="text-base font-normal text-gray-400">—</span>
+                      <span className="text-lg font-normal text-gray-400">—</span>
                     )}
                   </td>
                 )}
@@ -1008,7 +995,7 @@ function CatalogTable({
                 {/* Description */}
                 {hasDescriptionColumn && (
                   <td className="max-w-[340px] px-4 py-3">
-                    <p className="line-clamp-2 text-base font-normal text-gray-500">
+                    <p className="line-clamp-2 text-lg font-normal text-gray-500">
                       {item.description || "—"}
                     </p>
                   </td>
@@ -1019,10 +1006,7 @@ function CatalogTable({
                   <CatalogStatusBadge active={item.active} />
                 </td>
 
-                {/* Last Updated */}
-                <td className="whitespace-nowrap px-4 py-3 text-base font-normal text-gray-500">
-                  {formatAdminDate(item.updatedAt || item.createdAt)}
-                </td>
+             
 
                 {/* Actions */}
                 <td className="px-4 py-3 text-center">
@@ -1052,7 +1036,7 @@ function CatalogTable({
                         title="បិទដំណើរការ"
                         className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-100"
                       >
-                        <Power size={18} />
+                        <MinusCircle size={18} />
                       </button>
                     ) : (
                       <button
@@ -1076,10 +1060,10 @@ function CatalogTable({
                 colSpan={hasValueColumn ? 7 : 6}
                 className="px-6 py-16 text-center"
               >
-                <p className="text-lg font-medium text-gray-500">
+                <p className="text-xl font-medium text-gray-500">
                   មិនមានទិន្នន័យ
                 </p>
-                <p className="mt-1 text-base text-gray-400">
+                <p className="mt-1 text-lg text-gray-400">
                   សូមសាកល្បងស្វែងរក ឬជ្រើស filter ផ្សេងទៀត។
                 </p>
               </td>
@@ -1100,14 +1084,14 @@ function CatalogTable({
 function CatalogStatusBadge({ active }: { active: boolean }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${
         active
           ? "border-emerald-100 bg-emerald-50 text-emerald-700"
           : "border-gray-200 bg-gray-50 text-gray-600"
       }`}
     >
       <span
-        className={`h-2 w-2 shrink-0 rounded-full ${
+        className={`h-2.5 w-2.5 shrink-0 rounded-full ${
           active ? "bg-emerald-500" : "bg-gray-400"
         }`}
       />
@@ -1136,7 +1120,7 @@ function CatalogPagination({
 
   return (
     <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-base text-gray-500">
+      <p className="text-lg text-gray-500">
         សរុប <span className="font-semibold text-gray-700">{totalElements}</span> ទិន្នន័យ
       </p>
 
@@ -1145,12 +1129,12 @@ function CatalogPagination({
           type="button"
           disabled={page <= 0}
           onClick={() => onPageChange(Math.max(0, page - 1))}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={20} />
         </button>
 
-        <span className="flex h-9 min-w-9 items-center justify-center rounded-lg bg-[#136C34] px-3 text-base font-semibold text-white">
+        <span className="flex h-10 min-w-10 items-center justify-center rounded-lg bg-[#136C34] px-3.5 text-lg font-semibold text-white">
           {page + 1} / {pages}
         </span>
 
@@ -1158,9 +1142,9 @@ function CatalogPagination({
           type="button"
           disabled={page >= pages - 1}
           onClick={() => onPageChange(Math.min(pages - 1, page + 1))}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ChevronRight size={18} />
+          <ChevronRight size={20} />
         </button>
       </div>
     </div>
@@ -1190,7 +1174,7 @@ function DeleteCatalogOptionModal({
       <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 text-amber-600">
-            <Power size={28} />
+            <MinusCircle size={28} />
           </div>
 
           <button

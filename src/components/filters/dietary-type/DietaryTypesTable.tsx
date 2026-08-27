@@ -1,7 +1,7 @@
 import {
   Eye,
+  MinusCircle,
   Pencil,
-  Power,
   RotateCcw,
   Salad,
 } from "lucide-react";
@@ -30,22 +30,20 @@ export default function DietaryTypesTable({
       <table className="w-full min-w-[700px] table-auto border-collapse text-left">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/70">
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+              <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
                 របបអាហារ
               </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+              <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
                 កូដ
               </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+              <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
                 ការពិពណ៌នា
               </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800">
+              <th className="whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800">
                 ស្ថានភាព
               </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
-                កែប្រែចុងក្រោយ
-              </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[120px]">
+             
+              <th className="whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800 min-w-[120px]">
                 សកម្មភាព
               </th>
             </tr>
@@ -63,7 +61,7 @@ export default function DietaryTypesTable({
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary-100 bg-primary-50 text-primary-800">
                       <Salad size={20} />
                     </div>
-                    <p className="text-base font-semibold text-gray-800">
+                    <p className="text-lg font-normal text-gray-800">
                       {item.name}
                     </p>
                   </div>
@@ -71,14 +69,14 @@ export default function DietaryTypesTable({
 
                 {/* Code */}
                 <td className="whitespace-nowrap px-4 py-3">
-                  <span className="inline-flex rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-base font-semibold text-gray-700">
+                  <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-lg font-normal text-gray-700">
                     {item.code || "—"}
                   </span>
                 </td>
 
                 {/* Description */}
                 <td className="max-w-[360px] px-4 py-3">
-                  <p className="line-clamp-2 text-base font-normal text-gray-500">
+                  <p className="line-clamp-2 text-lg font-normal text-gray-500">
                     {item.description || "—"}
                   </p>
                 </td>
@@ -86,14 +84,14 @@ export default function DietaryTypesTable({
                 {/* Status */}
                 <td className="px-4 py-3 text-center">
                   <span
-                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${
+                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${
                       item.active
                         ? "border-emerald-100 bg-emerald-50 text-emerald-700"
                         : "border-gray-200 bg-gray-50 text-gray-600"
                     }`}
                   >
                     <span
-                      className={`h-2 w-2 shrink-0 rounded-full ${
+                      className={`h-2.5 w-2.5 shrink-0 rounded-full ${
                         item.active ? "bg-emerald-500" : "bg-gray-400"
                       }`}
                     />
@@ -101,10 +99,6 @@ export default function DietaryTypesTable({
                   </span>
                 </td>
 
-                {/* Updated date */}
-                <td className="whitespace-nowrap px-4 py-3 text-base font-normal text-gray-500">
-                  {formatAdminDate(item.updatedAt)}
-                </td>
 
                 {/* Actions */}
                 <td className="px-4 py-3 text-center">
@@ -137,7 +131,7 @@ export default function DietaryTypesTable({
                         className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
                         title="បិទដំណើរការ"
                       >
-                        <Power size={18} />
+                        <MinusCircle size={18} />
                       </button>
                     ) : (
                       <button
@@ -161,7 +155,7 @@ export default function DietaryTypesTable({
                   <p className="text-lg font-medium text-gray-500">
                     មិនមានទិន្នន័យរបបអាហារ
                   </p>
-                  <p className="mt-1 text-base text-gray-400">
+                  <p className="mt-1 text-lg text-gray-400">
                     ទិន្នន័យរបបអាហារនឹងបង្ហាញនៅទីនេះ
                   </p>
                 </td>

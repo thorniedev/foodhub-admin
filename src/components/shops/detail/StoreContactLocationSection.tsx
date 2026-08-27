@@ -74,28 +74,28 @@ export default function StoreContactLocationSection({
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 bg-gray-50/90 px-4 py-3 backdrop-blur-sm">
-                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                  <Compass size={16} className="text-primary-700" />
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 bg-gray-50/90 px-4 py-3.5 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-lg font-semibold text-gray-700">
+                  <Compass size={18} className="text-primary-700" />
                   <span>
                     {lat.toFixed(6)}, {lng.toFixed(6)}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <button
                     type="button"
                     onClick={handleCopyCoordinates}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-bold text-gray-700 transition hover:bg-gray-50"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-2 text-base font-bold text-gray-700 shadow-2xs transition hover:bg-gray-50"
                   >
                     {copiedCoords ? (
                       <>
-                        <Check size={13} className="text-emerald-600" />
+                        <Check size={16} className="text-emerald-600" />
                         <span className="text-emerald-700">បានចម្លង</span>
                       </>
                     ) : (
                       <>
-                        <Copy size={13} />
+                        <Copy size={16} />
                         <span>ចម្លងកូអរដោនេ</span>
                       </>
                     )}
@@ -105,9 +105,9 @@ export default function StoreContactLocationSection({
                     href={`https://www.google.com/maps/search/${encodeURIComponent(store.storeName)}/@${lat},${lng},17z`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-full bg-[#136C34] px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#0F5F2E]"
+                    className="inline-flex items-center gap-2 rounded-full bg-[#136C34] px-4 py-2 text-base font-bold text-white shadow-xs transition hover:bg-[#0F5F2E]"
                   >
-                    <ExternalLink size={13} />
+                    <ExternalLink size={16} />
                     <span>បើកក្នុង Google Maps</span>
                   </a>
                 </div>

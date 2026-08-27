@@ -35,7 +35,7 @@ export const dashboardNav: NavItem[] = [
     href: "/shops",
   },
   {
-    label: "មីនុយ",
+    label: "ម៉ឺនុយ",
     icon: Utensils,
     href: "/menu-items",
   },

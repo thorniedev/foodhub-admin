@@ -1,9 +1,9 @@
 import {
   Eye,
   HeartPulse,
+  MinusCircle,
   Pencil,
   RotateCcw,
-  Trash2,
 } from "lucide-react";
 import type { MedicalCondition } from "@/src/types/medicalCondition";
 import { formatAdminDate } from "@/src/types/safetyResource";
@@ -30,22 +30,20 @@ export default function MedicalConditionsTable({
       <table className="w-full min-w-[700px] table-auto border-collapse text-left">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/70">
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+              <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
                 ស្ថានភាពសុខភាព
               </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+              <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
                 កូដ
               </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+              <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
                 ការពិពណ៌នា
               </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800">
+              <th className="whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800">
                 ស្ថានភាព
               </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
-                កែប្រែចុងក្រោយ
-              </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[120px]">
+     
+              <th className="whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800 min-w-[120px]">
                 សកម្មភាព
               </th>
             </tr>
@@ -63,7 +61,7 @@ export default function MedicalConditionsTable({
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary-100 bg-primary-50 text-primary-800">
                       <HeartPulse size={20} />
                     </div>
-                    <p className="text-base font-semibold text-gray-800">
+                    <p className="text-lg font-normal text-gray-800">
                       {item.name}
                     </p>
                   </div>
@@ -71,14 +69,14 @@ export default function MedicalConditionsTable({
 
                 {/* Code */}
                 <td className="whitespace-nowrap px-4 py-3">
-                  <span className="inline-flex rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-base font-semibold text-gray-700">
+                  <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-lg font-normal text-gray-700">
                     {item.code || "—"}
                   </span>
                 </td>
 
                 {/* Description */}
                 <td className="max-w-[340px] px-4 py-3">
-                  <p className="line-clamp-2 text-base font-normal text-gray-500">
+                  <p className="line-clamp-2 text-lg font-normal text-gray-500">
                     {item.description || "—"}
                   </p>
                 </td>
@@ -86,24 +84,19 @@ export default function MedicalConditionsTable({
                 {/* Status */}
                 <td className="px-4 py-3 text-center">
                   <span
-                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${
+                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${
                       item.active
                         ? "border-emerald-100 bg-emerald-50 text-emerald-700"
                         : "border-gray-200 bg-gray-50 text-gray-600"
                     }`}
                   >
                     <span
-                      className={`h-2 w-2 shrink-0 rounded-full ${
+                      className={`h-2.5 w-2.5 shrink-0 rounded-full ${
                         item.active ? "bg-emerald-500" : "bg-gray-400"
                       }`}
                     />
                     {item.active ? "សកម្ម" : "អសកម្ម"}
                   </span>
-                </td>
-
-                {/* Updated */}
-                <td className="whitespace-nowrap px-4 py-3 text-base font-normal text-gray-500">
-                  {formatAdminDate(item.updatedAt)}
                 </td>
 
                 {/* Action */}
@@ -134,10 +127,10 @@ export default function MedicalConditionsTable({
                         type="button"
                         disabled={disabled}
                         onClick={() => onDelete(item)}
-                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
-                        title="បិទ"
+                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        title="បិទដំណើរការ"
                       >
-                        <Trash2 size={18} />
+                        <MinusCircle size={18} />
                       </button>
                     ) : (
                       <button
@@ -145,7 +138,7 @@ export default function MedicalConditionsTable({
                         disabled={disabled}
                         onClick={() => onRestore(item)}
                         className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
-                        title="ស្ដារ"
+                        title="ស្ដារឡើងវិញ"
                       >
                         <RotateCcw size={18} />
                       </button>
@@ -161,8 +154,8 @@ export default function MedicalConditionsTable({
                   <p className="text-lg font-medium text-gray-500">
                     មិនមានទិន្នន័យស្ថានភាពសុខភាព
                   </p>
-                  <p className="mt-1 text-base text-gray-400">
-                    ទិន្នន័យស្ថានភាពសុខភាពនឹងបង្ហាញនៅទីនេះ
+                  <p className="mt-1 text-lg text-gray-400">
+                    សូមចុចប៊ូតុងខាងលើដើម្បីបន្ថែមស្ថានភាពសុខភាពថ្មី
                   </p>
                 </td>
               </tr>

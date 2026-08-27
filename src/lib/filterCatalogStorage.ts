@@ -239,6 +239,7 @@ export const MENU_ITEM_RELATIONS_STORAGE_PREFIX = "foodhub-menu-item-relations-"
 
 export interface StoredMenuItemRelations {
   dietaryTypes?: any[];
+  allergenDeclarations?: any[];
   ingredients?: any[];
   medicalConditions?: any[];
   updatedAt?: string;
@@ -275,4 +276,36 @@ export function readMenuItemRelationsStorage(
   } catch {
     return null;
   }
+}
+
+export const CREATED_MENU_ITEMS_STORAGE_KEY = "foodhub-created-menu-items-v1";
+
+export function readLocalMenuItems(): any[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(CREATED_MENU_ITEMS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveLocalMenuItem(item: any) {
+  if (typeof window === "undefined" || !item) return;
+  try {
+    const existing = readLocalMenuItems();
+    const updated = [item, ...existing.filter((x: any) => x.uuid !== item.uuid)];
+    window.localStorage.setItem(CREATED_MENU_ITEMS_STORAGE_KEY, JSON.stringify(updated));
+  } catch {}
+}
+
+export function deleteLocalMenuItem(uuid: string) {
+  if (typeof window === "undefined" || !uuid) return;
+  try {
+    const existing = readLocalMenuItems();
+    const updated = existing.filter((x: any) => x.uuid !== uuid);
+    window.localStorage.setItem(CREATED_MENU_ITEMS_STORAGE_KEY, JSON.stringify(updated));
+  } catch {}
 }

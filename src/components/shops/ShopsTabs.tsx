@@ -39,7 +39,7 @@ export default function ShopsTabs({
             onClick={() => onChange(tab.value)}
             onMouseEnter={() => onPrefetch?.(tab.value)}
             onFocus={() => onPrefetch?.(tab.value)}
-            className={`group relative inline-flex h-11 cursor-pointer items-center gap-2 rounded-2xl px-4 text-base font-semibold transition-all duration-200 ease-out active:scale-95 ${
+            className={`group relative inline-flex h-12 cursor-pointer items-center gap-2.5 rounded-2xl px-5 text-lg font-semibold transition-all duration-200 ease-out active:scale-95 ${
               active
                 ? "bg-primary-800 text-white shadow-md shadow-primary-900/15 border border-primary-800"
                 : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
@@ -47,7 +47,7 @@ export default function ShopsTabs({
           >
             <span>{tab.label}</span>
             <span
-              className={`flex h-5.5 min-w-5.5 items-center justify-center rounded-full px-2 text-xs font-bold transition-colors duration-200 ${
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2.5 text-lg font-bold transition-colors duration-200 ${
                 active
                   ? "bg-white/20 text-white backdrop-blur-xs"
                   : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"

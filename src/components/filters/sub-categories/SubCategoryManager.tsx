@@ -241,12 +241,21 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
 
   const handleSave = async (payload: FoodCategoryPayload) => {
     try {
+      const targetParentUuid =
+        editing && editing.uuid === rootCategory.uuid
+          ? null
+          : payload.parentCategoryUuid || rootCategory.uuid;
+
+      if (editing && targetParentUuid === editing.uuid) {
+        throw new Error("អនុប្រភេទមិនអាចកំណត់ជាប្រភេទមេរបស់ខ្លួនឯងបានទេ។");
+      }
+
       if (editing) {
         await updateFoodCategory({
           uuid: editing.uuid,
           body: {
             ...payload,
-            parentCategoryUuid: rootCategory.uuid,
+            parentCategoryUuid: targetParentUuid,
           },
         }).unwrap();
         setNotice({
@@ -256,7 +265,7 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
       } else {
         await createFoodCategory({
           ...payload,
-          parentCategoryUuid: rootCategory.uuid,
+          parentCategoryUuid: targetParentUuid,
         }).unwrap();
         setNotice({
           type: "success",
@@ -284,7 +293,6 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
         uuid: item.uuid,
         body: {
           isActive: newStatus,
-          parentCategoryUuid: rootCategory.uuid,
         },
       }).unwrap();
       setNotice({

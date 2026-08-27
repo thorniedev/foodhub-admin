@@ -96,7 +96,7 @@ export default function FilterTagsSidebarSection() {
                   href={
                     item.href
                   }
-                  className={`block rounded-xl px-3 py-2 text-sm transition ${active
+                  className={`block rounded-xl px-3 py-2 text-lg transition ${active
                       ? "bg-[#136C34] text-white"
                       : "text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
                     }`}

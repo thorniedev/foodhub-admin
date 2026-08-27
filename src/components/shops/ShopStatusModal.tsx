@@ -241,8 +241,8 @@ export default function ShopStatusModal({
         {/* ── Header ── */}
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <div>
-            <p className="text-lg font-bold text-gray-900">គ្រប់គ្រងស្ថានភាព</p>
-            <p className="mt-0.5 truncate text-sm text-gray-400">{store.storeName}</p>
+            <p className="text-xl font-bold text-gray-900">គ្រប់គ្រងស្ថានភាព</p>
+            <p className="mt-0.5 truncate text-base text-gray-500">{store.storeName}</p>
           </div>
           <button
             type="button"
@@ -261,7 +261,7 @@ export default function ShopStatusModal({
             <div key={s.num} className="flex flex-1 items-center gap-2">
               <div className="flex items-center gap-1.5">
                 <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold transition ${
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-base font-bold transition ${
                     step === s.num
                       ? "bg-[#137A3D] text-white"
                       : step > s.num
@@ -272,7 +272,7 @@ export default function ShopStatusModal({
                   {step > s.num ? "✓" : s.num}
                 </span>
                 <span
-                  className={`text-xs font-semibold ${
+                  className={`text-base font-semibold ${
                     step === s.num ? "text-gray-800" : "text-gray-400"
                   }`}
                 >
@@ -294,8 +294,8 @@ export default function ShopStatusModal({
             <div className="space-y-2">
               {String(store.reviewStatus || "").toUpperCase() === "PENDING" && (
                 <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5">
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-amber-500" />
-                  <p className="text-sm font-semibold text-amber-700">ស្ថានភាពបច្ចុប្បន្ន: កំពុងរង់ចាំពិនិត្យ</p>
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-amber-500" />
+                  <p className="text-lg font-semibold text-amber-700">ស្ថានភាពបច្ចុប្បន្ន: កំពុងរង់ចាំពិនិត្យ</p>
                 </div>
               )}
               {REVIEW_OPTIONS.map((opt) => (
@@ -309,18 +309,18 @@ export default function ShopStatusModal({
               ))}
               {review === "REJECTED" && (
                 <div className="pt-1">
-                  <p className="mb-1.5 text-sm font-semibold text-gray-600">មូលហេតុបដិសេធ</p>
+                  <p className="mb-1.5 text-lg font-semibold text-gray-700">មូលហេតុបដិសេធ</p>
                   <textarea
                     rows={3}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="សរសេរមូលហេតុ..."
-                    className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-[#137A3D] focus:bg-white focus:ring-2 focus:ring-[#137A3D]/15"
+                    className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-[#137A3D] focus:bg-white focus:ring-2 focus:ring-[#137A3D]/15"
                   />
                 </div>
               )}
               {review === null && (
-                <p className="pt-1 text-center text-xs text-gray-400">ជ្រើសរើសស្ថានភាពពិនិត្យខាងលើ</p>
+                <p className="pt-1 text-center text-base text-gray-400">ជ្រើសរើសស្ថានភាពពិនិត្យខាងលើ</p>
               )}
             </div>
           )}
@@ -357,8 +357,8 @@ export default function ShopStatusModal({
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
-              <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+            <div className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-lg font-medium text-red-600">
+              <AlertTriangle size={18} className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
@@ -372,7 +372,7 @@ export default function ShopStatusModal({
               type="button"
               disabled={isLoading}
               onClick={onClose}
-              className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-gray-200 bg-white px-6 text-base font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white px-6 text-lg font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
             >
               បោះបង់
             </button>
@@ -381,9 +381,9 @@ export default function ShopStatusModal({
               type="button"
               disabled={isLoading}
               onClick={goBack}
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-gray-200 bg-white px-5 text-base font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-2xl border border-gray-200 bg-white px-5 text-lg font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={18} />
               ត្រឡប់
             </button>
           )}
@@ -393,19 +393,19 @@ export default function ShopStatusModal({
             <button
               type="button"
               onClick={goNext}
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-[#137A3D] px-7 text-base font-semibold text-white shadow-sm transition hover:bg-[#0f6833] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-2xl bg-[#137A3D] px-7 text-lg font-semibold text-white shadow-sm transition hover:bg-[#0f6833] disabled:cursor-not-allowed disabled:opacity-40"
             >
               បន្ទាប់
-              <ArrowRight size={16} />
+              <ArrowRight size={18} />
             </button>
           ) : (
             <button
               type="button"
               disabled={isLoading}
               onClick={() => void save()}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#137A3D] px-7 text-base font-semibold text-white shadow-sm transition hover:bg-[#0f6833] disabled:opacity-60"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#137A3D] px-7 text-lg font-semibold text-white shadow-sm transition hover:bg-[#0f6833] disabled:opacity-60"
             >
-              {isLoading && <Loader2 size={17} className="animate-spin" />}
+              {isLoading && <Loader2 size={18} className="animate-spin" />}
               {isLoading ? "កំពុងរក្សាទុក..." : "រក្សាទុក"}
             </button>
           )}
@@ -450,17 +450,17 @@ function OptionCard({
       }`}
     >
       <span
-        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
           isActive ? `${opt.ring} ring-4` : "ring-2 ring-gray-200"
         }`}
       >
-        <span className={`h-2.5 w-2.5 rounded-full transition ${isActive ? opt.dot : "bg-gray-300"}`} />
+        <span className={`h-3 w-3 rounded-full transition ${isActive ? opt.dot : "bg-gray-300"}`} />
       </span>
       <div className="flex-1">
-        <p className={`text-base font-bold ${isActive ? opt.text : "text-gray-700"}`}>{opt.label}</p>
-        <p className={`text-xs ${isActive ? opt.text : "text-gray-400"}`}>{opt.desc}</p>
+        <p className={`text-lg font-bold ${isActive ? opt.text : "text-gray-700"}`}>{opt.label}</p>
+        <p className={`text-base ${isActive ? opt.text : "text-gray-400"}`}>{opt.desc}</p>
       </div>
-      {isActive && <span className={`text-sm font-bold ${opt.text}`}>✓</span>}
+      {isActive && <span className={`text-lg font-bold ${opt.text}`}>✓</span>}
     </button>
   );
 }

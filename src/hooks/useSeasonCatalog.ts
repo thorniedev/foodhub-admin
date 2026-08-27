@@ -50,10 +50,11 @@ export function useSeasonCatalog() {
   const createOption = useCallback(
     async (values: FilterCatalogOptionFormValues) => {
       const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase() || createCodeFromLabel(label);
 
       await createSeason({
-        code: createCodeFromLabel(label),
-        name: values.name.trim() || values.localName.trim(),
+        code,
+        name: label,
         localName: values.localName.trim() || null,
         description: values.description.trim() || null,
         isActive: values.active,
@@ -66,14 +67,21 @@ export function useSeasonCatalog() {
 
   const updateOption = useCallback(
     async (uuid: string, values: FilterCatalogOptionFormValues) => {
+      const label = values.name.trim() || values.localName.trim();
+      const payload: any = {
+        name: label,
+        localName: values.localName.trim() || null,
+        description: values.description.trim() || null,
+        isActive: values.active,
+      };
+
+      if (values.code?.trim()) {
+        payload.code = values.code.trim().toUpperCase();
+      }
+
       await updateSeason({
         uuid,
-        payload: {
-          name: values.name.trim() || values.localName.trim(),
-          localName: values.localName.trim() || null,
-          description: values.description.trim() || null,
-          isActive: values.active,
-        },
+        payload,
       }).unwrap();
 
       await refetch();

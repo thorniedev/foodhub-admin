@@ -84,14 +84,13 @@ export function useCuisineCatalog() {
       const label =
         values.name.trim() ||
         values.localName.trim();
+      const code =
+        values.code?.trim().toUpperCase() ||
+        createCodeFromLabel(label);
 
       await createCuisine({
-        code: createCodeFromLabel(
-          label,
-        ),
-        name:
-          values.name.trim() ||
-          values.localName.trim(),
+        code,
+        name: label,
         description:
           values.description.trim() ||
           null,
@@ -113,19 +112,27 @@ export function useCuisineCatalog() {
       uuid: string,
       values: FilterCatalogOptionFormValues,
     ) => {
+      const label =
+        values.name.trim() ||
+        values.localName.trim();
+
+      const body: any = {
+        name: label,
+        description:
+          values.description.trim() ||
+          null,
+        isActive: values.active,
+        is_active: values.active,
+        active: values.active,
+      };
+
+      if (values.code?.trim()) {
+        body.code = values.code.trim().toUpperCase();
+      }
+
       await updateCuisine({
         uuid,
-        body: {
-          name:
-            values.name.trim() ||
-            values.localName.trim(),
-          description:
-            values.description.trim() ||
-            null,
-          isActive: values.active,
-          is_active: values.active,
-          active: values.active,
-        },
+        body,
       }).unwrap();
 
       await refetch();

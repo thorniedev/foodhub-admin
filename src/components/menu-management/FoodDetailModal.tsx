@@ -191,7 +191,7 @@ export default function FoodDetailModal({
               )}
             </div>
             <div className="min-w-0 flex-1 pr-10">
-              <p className="truncate text-3xl font-black text-white">
+              <p className="truncate text-3xl font-black text-amber-300">
                 {data?.localName || data?.canonicalName || "ព័ត៌មានមុខម្ហូប"}
               </p>
               {data?.canonicalName && data?.localName && (

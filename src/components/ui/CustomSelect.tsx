@@ -85,7 +85,7 @@ export default function CustomSelect({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}
-        className={`flex h-12 w-full items-center justify-between rounded-2xl border bg-white px-4 text-left text-base transition outline-none disabled:cursor-not-allowed disabled:bg-gray-50 ${
+        className={`flex h-12 w-full items-center justify-between rounded-2xl border bg-white px-4 text-left text-lg transition outline-none disabled:cursor-not-allowed disabled:bg-gray-50 ${
           error
             ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
             : open
@@ -118,7 +118,7 @@ export default function CustomSelect({
           {isSearchable && (
             <div className="relative mb-1.5 p-1">
               <Search
-                size={15}
+                size={16}
                 className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
               />
               <input
@@ -127,7 +127,7 @@ export default function CustomSelect({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="ស្វែងរក..."
-                className="h-9 w-full rounded-xl border border-gray-200 bg-gray-50 pl-8 pr-7 text-sm text-gray-800 outline-none transition focus:border-primary-600 focus:bg-white focus:ring-2 focus:ring-primary-100"
+                className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50 pl-9 pr-7 text-base text-gray-800 outline-none transition focus:border-primary-600 focus:bg-white focus:ring-2 focus:ring-primary-100"
               />
               {searchQuery && (
                 <button
@@ -135,7 +135,7 @@ export default function CustomSelect({
                   onClick={() => setSearchQuery("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <X size={14} />
+                  <X size={16} />
                 </button>
               )}
             </div>
@@ -144,7 +144,7 @@ export default function CustomSelect({
           {/* Options List */}
           <div className="overflow-y-auto max-h-64 space-y-0.5 pr-0.5">
             {filteredOptions.length === 0 ? (
-              <div className="px-3.5 py-4 text-center text-xs font-semibold text-gray-400">
+              <div className="px-3.5 py-4 text-center text-base font-semibold text-gray-400">
                 មិនរកឃើញទិន្នន័យ
               </div>
             ) : (
@@ -158,7 +158,7 @@ export default function CustomSelect({
                       onChange(opt.value);
                       setOpen(false);
                     }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-base transition ${
+                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg transition ${
                       isSelected
                         ? "bg-primary-50/80 font-semibold text-primary-800"
                         : "text-gray-700 hover:bg-emerald-50/60 hover:text-primary-800"
@@ -167,7 +167,7 @@ export default function CustomSelect({
                     <div className="min-w-0 flex-1">
                       <p className="truncate">{opt.label}</p>
                       {opt.description && (
-                        <p className="mt-0.5 truncate text-xs font-normal text-gray-400">
+                        <p className="mt-0.5 truncate text-base font-normal text-gray-400">
                           {opt.description}
                         </p>
                       )}
@@ -175,7 +175,7 @@ export default function CustomSelect({
 
                     {isSelected && (
                       <Check
-                        size={16}
+                        size={18}
                         className="ml-2 shrink-0 text-primary-800"
                       />
                     )}

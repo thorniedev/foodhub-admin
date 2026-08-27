@@ -95,7 +95,7 @@ export default function ShopsTable({
                     </div>
 
                     <div className="min-w-0">
-                      <p className="max-w-[160px] truncate text-base font-semibold text-gray-800 transition group-hover:text-primary-800">
+                      <p className="max-w-[180px] truncate text-lg font-semibold text-gray-800 transition group-hover:text-primary-800">
                         {store.storeName}
                       </p>
                     </div>
@@ -104,9 +104,9 @@ export default function ShopsTable({
 
                 {/* Location */}
                 <td className="px-3 py-3">
-                  <div className="flex max-w-[160px] items-center gap-1.5">
-                    <MapPin size={16} strokeWidth={2} className="shrink-0 text-primary-700" />
-                    <span className="line-clamp-1 text-base font-normal text-gray-500">
+                  <div className="flex max-w-[180px] items-center gap-1.5">
+                    <MapPin size={18} strokeWidth={2} className="shrink-0 text-primary-700" />
+                    <span className="line-clamp-1 text-lg font-normal text-gray-500">
                       {displayStoreLocation(store) || "—"}
                     </span>
                   </div>
@@ -162,10 +162,10 @@ export default function ShopsTable({
           {stores.length === 0 && (
             <tr>
               <td colSpan={6} className="px-6 py-16 text-center">
-                <p className="text-lg font-medium text-gray-500">
+                <p className="text-xl font-medium text-gray-500">
                   មិនមានទិន្នន័យហាង
                 </p>
-                <p className="mt-1 text-base text-gray-400">
+                <p className="mt-1 text-lg text-gray-400">
                   ទិន្នន័យហាងនឹងបង្ហាញនៅទីនេះ
                 </p>
               </td>
@@ -261,9 +261,9 @@ function ShopRowActions({
                 setOpen(false);
                 onStatus(store, "ACCOUNT");
               }}
-              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-50"
+              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-lg font-semibold text-amber-700 transition hover:bg-amber-50"
             >
-              <Settings2 size={16} />
+              <Settings2 size={18} />
               <span>គ្រប់គ្រងស្ថានភាព</span>
             </button>
 
@@ -274,9 +274,9 @@ function ShopRowActions({
                   setOpen(false);
                   onDelete(store);
                 }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-lg font-semibold text-red-600 transition hover:bg-red-50"
               >
-                <Trash2 size={16} />
+                <Trash2 size={18} />
                 <span>លុបចេញពីប្រព័ន្ធ</span>
               </button>
             )}
@@ -303,10 +303,10 @@ export function ReviewStatusBadge({ status }: { status?: string | null }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-semibold border ${className}`}
       title={info.note}
     >
-      <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
+      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClassName}`} />
       {info.label}
     </span>
   );
@@ -328,10 +328,10 @@ export function AccountStatusBadge({ status }: { status?: string | null }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-semibold border ${className}`}
       title={info.note}
     >
-      <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
+      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClassName}`} />
       {info.label}
     </span>
   );
@@ -357,10 +357,10 @@ export function LiveStatusBadge({ store }: { store: Store }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-semibold border ${className}`}
       title={info.note}
     >
-      <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
+      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClassName}`} />
       {info.label}
     </span>
   );

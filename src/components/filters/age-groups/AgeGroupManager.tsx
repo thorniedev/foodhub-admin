@@ -832,7 +832,7 @@ export default function AgeGroupManager() {
                 false,
               );
             }}
-            className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${
+            className={`flex h-12 min-w-[125px] items-center justify-between gap-3 rounded-full border bg-white px-4 text-lg font-normal transition ${
               sizeOpen
                 ? "border-primary-800 ring-2 ring-primary-100"
                 : "border-gray-200 hover:border-primary-800/50"
@@ -856,7 +856,10 @@ export default function AgeGroupManager() {
           </button>
 
           {sizeOpen && (
-            <div className="absolute right-0 top-[52px] z-[100] w-[170px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+            <div className="absolute right-0 top-[56px] z-[100] w-[170px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+              <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+                ទំហំទំព័រ
+              </p>
               {[
                 10,
                 20,
@@ -937,7 +940,7 @@ export default function AgeGroupManager() {
                 false,
               );
             }}
-            className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
+            className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${
               sortOpen
                 ? "border-primary-800 bg-primary-50 text-primary-800"
                 : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
@@ -952,7 +955,7 @@ export default function AgeGroupManager() {
           </button>
 
           {sortOpen && (
-            <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+            <div className="absolute right-0 top-[56px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
               <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
                 តម្រៀប
               </p>

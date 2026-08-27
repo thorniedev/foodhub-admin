@@ -83,9 +83,9 @@ export default function AgeGroupsHeader({
             gap-2
             rounded-full
             bg-white
-            px-5
-            text-lg
-            font-bold
+            px-6
+            text-xl
+            font-normal
             text-primary-800
             shadow-sm
             transition
@@ -96,7 +96,7 @@ export default function AgeGroupsHeader({
             sm:w-fit
           "
         >
-          <Plus size={20} />
+          <Plus size={22} />
 
           បន្ថែមក្រុមអាយុ
         </button>

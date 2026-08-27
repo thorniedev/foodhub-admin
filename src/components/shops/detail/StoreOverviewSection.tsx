@@ -119,7 +119,7 @@ export default function StoreOverviewSection({ store }: { store: Store }) {
           label="ស្ថានភាពពិនិត្យ"
           customValue={
             <div className="flex flex-col gap-1">
-              <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold border ${
+              <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3.5 py-1 text-lg font-bold border ${
                 reviewStatus.isPositive
                   ? "bg-emerald-50 text-[#137A3D] border-emerald-200"
                   : reviewStatus.isDanger
@@ -127,13 +127,13 @@ export default function StoreOverviewSection({ store }: { store: Store }) {
                     : "bg-amber-50 text-amber-800 border-amber-200"
               }`}>
                 {reviewStatus.isPositive ? (
-                  <CheckCircle size={14} className="text-emerald-600" />
+                  <CheckCircle size={16} className="text-emerald-600" />
                 ) : (
-                  <span className={`h-2 w-2 shrink-0 rounded-full ${reviewStatus.isDanger ? "bg-red-500" : "bg-amber-500"}`} />
+                  <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${reviewStatus.isDanger ? "bg-red-500" : "bg-amber-500"}`} />
                 )}
                 {reviewStatus.label}
               </span>
-              <p className="text-xs text-gray-500">{reviewStatus.note}</p>
+              <p className="text-base text-gray-500">{reviewStatus.note}</p>
             </div>
           }
         />
@@ -143,7 +143,7 @@ export default function StoreOverviewSection({ store }: { store: Store }) {
           label="ស្ថានភាពដំណើរការ"
           customValue={
             <div className="flex flex-col gap-1">
-              <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold border ${
+              <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3.5 py-1 text-lg font-bold border ${
                 liveStatus.isPositive
                   ? "bg-emerald-50 text-[#137A3D] border-emerald-200"
                   : liveStatus.isDanger
@@ -151,13 +151,13 @@ export default function StoreOverviewSection({ store }: { store: Store }) {
                     : "bg-amber-50 text-amber-800 border-amber-200"
               }`}>
                 {liveStatus.isPositive ? (
-                  <CheckCircle size={14} className="text-emerald-600" />
+                  <CheckCircle size={16} className="text-emerald-600" />
                 ) : (
-                  <span className={`h-2 w-2 shrink-0 rounded-full ${liveStatus.isDanger ? "bg-red-500" : "bg-amber-500"}`} />
+                  <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${liveStatus.isDanger ? "bg-red-500" : "bg-amber-500"}`} />
                 )}
                 {liveStatus.label}
               </span>
-              <p className="text-xs text-gray-500">{liveStatus.note}</p>
+              <p className="text-base text-gray-500">{liveStatus.note}</p>
             </div>
           }
         />
@@ -167,7 +167,7 @@ export default function StoreOverviewSection({ store }: { store: Store }) {
           label="ស្ថានភាពគណនី"
           customValue={
             <div className="flex flex-col gap-1">
-              <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold border ${
+              <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3.5 py-1 text-lg font-bold border ${
                 accountStatus.isPositive
                   ? "bg-emerald-50 text-[#137A3D] border-emerald-200"
                   : accountStatus.isDanger
@@ -175,13 +175,13 @@ export default function StoreOverviewSection({ store }: { store: Store }) {
                     : "bg-gray-100 text-gray-700 border-gray-200"
               }`}>
                 {accountStatus.isPositive ? (
-                  <CheckCircle size={14} className="text-emerald-600" />
+                  <CheckCircle size={16} className="text-emerald-600" />
                 ) : (
-                  <span className={`h-2 w-2 shrink-0 rounded-full ${accountStatus.isDanger ? "bg-red-500" : "bg-gray-400"}`} />
+                  <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${accountStatus.isDanger ? "bg-red-500" : "bg-gray-400"}`} />
                 )}
                 {accountStatus.label}
               </span>
-              <p className="text-xs text-gray-500">{accountStatus.note}</p>
+              <p className="text-base text-gray-500">{accountStatus.note}</p>
             </div>
           }
         />

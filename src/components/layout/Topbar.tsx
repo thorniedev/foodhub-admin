@@ -46,11 +46,10 @@ export default function Topbar() {
           <Menu size={22} />
         </button>
 
-        <div className="flex min-w-0 items-center overflow-visible  gap-2 text-base font-semibold text-primary-800 md:text-3xl">
+        <div className="flex min-w-0 items-center overflow-visible gap-2.5 text-lg font-normal text-primary-800 md:text-2xl">
           {parent && (
             <>
               <span className="hidden text-gray-400 sm:inline">{parent}</span>
-
               <span className="hidden text-gray-300 sm:inline">›</span>
             </>
           )}
@@ -62,12 +61,15 @@ export default function Topbar() {
       {/* RIGHT */}
       <div className="flex w-full flex-wrap items-center justify-between gap-3 md:w-auto md:flex-nowrap md:justify-end md:gap-5">
         {/* Search */}
-        <div className="order-3 w-full flex-1 md:order-0 md:mx-4 md:w-auto md:max-w-xl lg:min-w-[420px]">
+        <div className="order-3 w-full flex-1 md:order-0 md:mx-4 md:w-auto md:max-w-3xl lg:min-w-[500px] xl:min-w-[620px]">
           <GlobalAdminSearch />
         </div>
 
         {/* CURRENT LOGGED-IN ADMIN */}
-        <div className="hidden shrink-0 items-center gap-3 sm:flex" suppressHydrationWarning>
+        <div
+          className="hidden shrink-0 items-center gap-3 sm:flex"
+          suppressHydrationWarning
+        >
           <UserAvatar
             name={adminName}
             avatarMediaUuid={avatarMediaUuid}
@@ -77,11 +79,17 @@ export default function Topbar() {
           />
 
           <div className="min-w-0" suppressHydrationWarning>
-            <p className="max-w-[160px] truncate text-sm font-bold text-gray-900" suppressHydrationWarning>
+            <p
+              className="max-w-[160px] truncate text-sm font-bold text-gray-900"
+              suppressHydrationWarning
+            >
               {adminLoading ? "..." : adminUsername}
             </p>
 
-            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700" suppressHydrationWarning>
+            <p
+              className="text-[11px] font-bold uppercase tracking-wider text-emerald-700"
+              suppressHydrationWarning
+            >
               {adminLoading ? "..." : adminRole}
             </p>
           </div>

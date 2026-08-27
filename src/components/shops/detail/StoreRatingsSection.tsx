@@ -55,9 +55,9 @@ function ReviewStatusBadge({ status }: { status: string }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-bold ring-1 ring-inset ${badgeStyle}`}
+      className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-lg font-bold ring-1 ring-inset ${badgeStyle}`}
     >
-      <span className={`h-2 w-2 shrink-0 rounded-full ${dotStyle}`} />
+      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotStyle}`} />
       {labelKhmer}
     </span>
   );

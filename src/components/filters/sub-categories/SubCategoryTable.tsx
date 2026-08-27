@@ -12,10 +12,10 @@ import {
   Fish,
   GlassWater,
   Milk,
+  MinusCircle,
   MoreVertical,
   Pencil,
   Pizza,
-  Power,
   Salad,
   Sandwich,
   Soup,
@@ -173,7 +173,7 @@ function MoreMenu({
             }}
             className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
           >
-            <Power
+            <MinusCircle
               size={15}
               className={active ? "text-amber-500" : "text-emerald-500"}
             />
@@ -219,8 +219,8 @@ export default function SubCategoryTable({
     return (
       <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
         <p className="text-lg font-medium text-gray-500">{emptyText}</p>
-        <p className="mt-1 text-base text-gray-400">
-          ចុចប៊ូតុង &quot;បន្ថែមអនុប្រភេទ...&quot; ដើម្បីបង្កើតថ្មី។
+        <p className="mt-1 text-lg text-gray-400">
+          បន្ថែមអនុប្រភេទថ្មីដើម្បីងាយស្រួលគ្រប់គ្រង។
         </p>
       </div>
     );
@@ -231,22 +231,20 @@ export default function SubCategoryTable({
       <table className="w-full min-w-[600px] table-auto border-collapse text-left">
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/70">
-            <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
               ឈ្មោះអនុប្រភេទ
             </th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
               កូដ
             </th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
+            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
               ការពិពណ៌នា
             </th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800">
+            <th className="whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800">
               ស្ថានភាព
             </th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800">
-              កាលបរិច្ឆេទបង្កើត
-            </th>
-            <th className="min-w-[110px] whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800">
+           
+            <th className="min-w-[110px] whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800">
               សកម្មភាព
             </th>
           </tr>
@@ -267,7 +265,7 @@ export default function SubCategoryTable({
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary-100 bg-primary-50 text-primary-800">
                       {getSubCategoryIcon(item, mode)}
                     </div>
-                    <p className="text-base font-semibold text-gray-800">
+                    <p className="text-lg font-normal text-gray-800">
                       {item.name}
                     </p>
                   </div>
@@ -275,27 +273,27 @@ export default function SubCategoryTable({
 
                 {/* Code */}
                 <td className="whitespace-nowrap px-4 py-3">
-                  <span className="inline-flex rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-base font-semibold text-gray-700">
+                  <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-lg font-normal text-gray-700">
                     {item.code}
                   </span>
                 </td>
 
                 {/* Description */}
-                <td className="max-w-xs truncate px-4 py-3 text-base font-normal text-gray-500">
+                <td className="max-w-xs truncate px-4 py-3 text-lg font-normal text-gray-500">
                   {item.description || "—"}
                 </td>
 
                 {/* Status */}
                 <td className="px-4 py-3 text-center">
                   <span
-                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1 text-base font-semibold ${
+                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1 text-lg font-normal ${
                       active
                         ? "border-emerald-100 bg-emerald-50 text-emerald-700"
                         : "border-gray-200 bg-gray-50 text-gray-600"
                     }`}
                   >
                     <span
-                      className={`h-2 w-2 shrink-0 rounded-full ${
+                      className={`h-2.5 w-2.5 shrink-0 rounded-full ${
                         active ? "bg-emerald-500" : "bg-gray-400"
                       }`}
                     />
@@ -303,10 +301,7 @@ export default function SubCategoryTable({
                   </span>
                 </td>
 
-                {/* Created Date */}
-                <td className="whitespace-nowrap px-4 py-3 text-base font-normal text-gray-500">
-                  {formatAdminDate(item.createdAt)}
-                </td>
+               
 
                 {/* Actions */}
                 <td className="px-4 py-3">

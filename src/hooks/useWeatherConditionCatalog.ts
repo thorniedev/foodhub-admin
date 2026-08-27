@@ -54,10 +54,11 @@ export function useWeatherConditionCatalog() {
   const createOption = useCallback(
     async (values: FilterCatalogOptionFormValues) => {
       const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase() || createCodeFromLabel(label);
 
       await createWeather({
-        code: createCodeFromLabel(label),
-        name: values.name.trim() || values.localName.trim(),
+        code,
+        name: label,
         localName: values.localName.trim() || null,
         description: values.description.trim() || null,
         isActive: values.active,
@@ -71,15 +72,22 @@ export function useWeatherConditionCatalog() {
 
   const updateOption = useCallback(
     async (uuid: string, values: FilterCatalogOptionFormValues) => {
+      const label = values.name.trim() || values.localName.trim();
+      const body: any = {
+        name: label,
+        localName: values.localName.trim() || null,
+        description: values.description.trim() || null,
+        isActive: values.active,
+        active: values.active,
+      };
+
+      if (values.code?.trim()) {
+        body.code = values.code.trim().toUpperCase();
+      }
+
       await updateWeather({
         uuid,
-        body: {
-          name: values.name.trim() || values.localName.trim(),
-          localName: values.localName.trim() || null,
-          description: values.description.trim() || null,
-          isActive: values.active,
-          active: values.active,
-        },
+        body,
       }).unwrap();
 
       await refetch();
