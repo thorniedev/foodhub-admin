@@ -83,6 +83,21 @@ function readMessage(data: unknown): string | null {
   return null;
 }
 
+/**
+ * True when the backend had no handler mapped for the requested path.
+ *
+ * The analytics reports are newer than some deployed backend builds, so a 404
+ * here means "this report is not available on the connected server", not "this
+ * filter matched no rows". The two must never render the same way.
+ */
+export function isEndpointUnavailable(error: unknown): boolean {
+  if (!isRecord(error) || !("status" in error)) {
+    return false;
+  }
+
+  return (error as FetchBaseQueryError).status === 404;
+}
+
 export function getAdminApiErrorMessage(error: unknown): string {
   if (!error) {
     return "មានបញ្ហាមិនស្គាល់។ សូមសាកល្បងម្តងទៀត។";

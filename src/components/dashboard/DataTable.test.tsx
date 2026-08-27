@@ -124,4 +124,26 @@ describe("DataTable", () => {
     expect(screen.getByRole("button", { name: "ទំព័រមុន" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "ទំព័របន្ទាប់" })).toBeDisabled();
   });
+
+  it("reports a 404 as a missing report rather than a failed request", () => {
+    renderTable({
+      error: { status: 404, data: { message: "Resource has not been found" } },
+      reportName: "សមិទ្ធកម្មហាង",
+    });
+
+    // The admin must be able to tell "this build has no such report" apart
+    // from "the request broke", so it is a status, not an alert.
+    const state = screen.getByRole("status");
+    expect(state).toBeInTheDocument();
+    expect(state).toHaveTextContent("សមិទ្ធកម្មហាង");
+    expect(state).toHaveTextContent("404");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("still shows a real error state for non-404 failures", () => {
+    renderTable({ error: { status: 500, data: { message: "boom" } } });
+
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
 });

@@ -15,8 +15,10 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/src/lib/utils";
+import { isEndpointUnavailable } from "@/src/lib/adminApiError";
 import DashboardEmptyState from "./DashboardEmptyState";
 import DashboardErrorState from "./DashboardErrorState";
+import DashboardUnavailableState from "./DashboardUnavailableState";
 import { TableSkeleton } from "./DashboardLoadingSkeleton";
 
 declare module "@tanstack/react-table" {
@@ -47,6 +49,8 @@ export interface DataTableProps<TData> {
   onRetry?: () => void;
   emptyTitle?: string;
   emptyDescription?: string;
+  /** Human name of the report, used when the server exposes no such endpoint. */
+  reportName?: string;
   getRowId?: (row: TData, index: number) => string;
   caption: string;
 }
@@ -66,6 +70,7 @@ export default function DataTable<TData>({
   onRetry,
   emptyTitle,
   emptyDescription,
+  reportName,
   getRowId,
   caption,
 }: DataTableProps<TData>) {
@@ -80,6 +85,18 @@ export default function DataTable<TData>({
   });
 
   if (error) {
+    // A 404 means the server exposes no such report, which is an operational
+    // fact the admin can act on — not a generic request failure.
+    if (isEndpointUnavailable(error)) {
+      return (
+        <DashboardUnavailableState
+          reportName={reportName}
+          onRetry={onRetry}
+          compact
+        />
+      );
+    }
+
     return <DashboardErrorState error={error} onRetry={onRetry} compact />;
   }
 

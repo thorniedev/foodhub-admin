@@ -158,6 +158,7 @@ export default function TopStoresTable({
     >
       <DataTable<StorePerformance>
         caption="តារាងសមិទ្ធកម្មហាង"
+        reportName="សមិទ្ធកម្មហាង"
         columns={columns}
         data={page?.contents ?? []}
         page={pageIndex}

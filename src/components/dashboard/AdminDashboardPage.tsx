@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Layers, MapPin } from "lucide-react";
 
 import {
   DASHBOARD_OVERVIEW_POLLING_INTERVAL_MS,
@@ -25,6 +26,8 @@ import type {
   LocationSummary,
 } from "@/src/types/adminDashboard";
 
+import { isEndpointUnavailable } from "@/src/lib/adminApiError";
+
 import ActionItemsPanel from "./ActionItemsPanel";
 import ActivityTrendChart from "./ActivityTrendChart";
 import CategoryPerformanceChart from "./CategoryPerformanceChart";
@@ -36,7 +39,9 @@ import DashboardKpiGrid from "./DashboardKpiGrid";
 import { KpiGridSkeleton } from "./DashboardLoadingSkeleton";
 import LocationPerformanceChart from "./LocationPerformanceChart";
 import PopularItemsTable from "./PopularItemsTable";
+import SectionCard from "./SectionCard";
 import TopStoresTable from "./TopStoresTable";
+import DashboardUnavailableState from "./DashboardUnavailableState";
 
 function uniqueSorted(values: (string | null | undefined)[]): string[] {
   return Array.from(
@@ -231,19 +236,24 @@ export default function AdminDashboardPage() {
     return [];
   }, [categories.data, overview.data?.categorySummary]);
 
-  const isLocation404 =
+  // A 404 used to be folded into the chart's "no data" state, which reported a
+  // missing endpoint as an empty result. Surface it as its own state instead so
+  // an outdated backend is visible rather than silently shown as zero activity.
+  const locationUnavailable =
     locations.isError &&
-    (locations.error as { status?: number })?.status === 404;
+    isEndpointUnavailable(locations.error) &&
+    locationsData.length === 0;
 
-  const isCategory404 =
+  const categoryUnavailable =
     categories.isError &&
-    (categories.error as { status?: number })?.status === 404;
+    isEndpointUnavailable(categories.error) &&
+    categoriesData.length === 0;
 
   const showLocationError =
-    locations.isError && !isLocation404 && locationsData.length === 0;
+    locations.isError && !locationUnavailable && locationsData.length === 0;
 
   const showCategoryError =
-    categories.isError && !isCategory404 && categoriesData.length === 0;
+    categories.isError && !categoryUnavailable && categoriesData.length === 0;
 
   const activeLocationLabel = filters.city ?? filters.province ?? null;
 
@@ -289,7 +299,19 @@ export default function AdminDashboardPage() {
       />
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        {showLocationError ? (
+        {locationUnavailable ? (
+          <SectionCard
+            title="សមិទ្ធកម្មតាមទីតាំង"
+            icon={<MapPin size={18} aria-hidden="true" />}
+            tone="amber"
+          >
+            <DashboardUnavailableState
+              reportName="សមិទ្ធកម្មតាមទីតាំង"
+              onRetry={() => void locations.refetch()}
+              compact
+            />
+          </SectionCard>
+        ) : showLocationError ? (
           <DashboardErrorState
             error={locations.error}
             title="មិនអាចផ្ទុកទិន្នន័យទីតាំងបានទេ"
@@ -305,7 +327,19 @@ export default function AdminDashboardPage() {
           />
         )}
 
-        {showCategoryError ? (
+        {categoryUnavailable ? (
+          <SectionCard
+            title="សមិទ្ធកម្មតាមប្រភេទម្ហូប"
+            icon={<Layers size={18} aria-hidden="true" />}
+            tone="amber"
+          >
+            <DashboardUnavailableState
+              reportName="សមិទ្ធកម្មតាមប្រភេទម្ហូប"
+              onRetry={() => void categories.refetch()}
+              compact
+            />
+          </SectionCard>
+        ) : showCategoryError ? (
           <DashboardErrorState
             error={categories.error}
             title="មិនអាចផ្ទុកទិន្នន័យប្រភេទម្ហូបបានទេ"

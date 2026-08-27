@@ -140,6 +140,7 @@ export default function PopularItemsTable({
     >
       <DataTable<ItemPerformance>
         caption="តារាងមុខម្ហូបពេញនិយម"
+        reportName="មុខម្ហូបពេញនិយម"
         columns={columns}
         data={page?.contents ?? []}
         page={pageIndex}
