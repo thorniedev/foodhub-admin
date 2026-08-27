@@ -5,6 +5,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  LabelList,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -64,6 +65,7 @@ export default function CategoryPerformanceChart({
       title="សមិទ្ធកម្មតាមប្រភេទម្ហូប"
       description={`ប្រភេទកំពូល ${TOP_CATEGORIES} តាម${activeMetric.label}`}
       icon={<Layers size={18} aria-hidden="true" />}
+      tone="violet"
       hint="អ្នកមើលផ្សេងគ្នា ត្រូវបានរាប់ដាច់ដោយឡែកសម្រាប់ប្រភេទទាំងមូល មិនមែនបូកបញ្ចូលពីមុខម្ហូបនីមួយៗទេ។"
       actions={
         <div
@@ -159,9 +161,18 @@ export default function CategoryPerformanceChart({
                 dataKey={metric}
                 name={activeMetric.label}
                 fill={activeMetric.color}
-                radius={[0, 4, 4, 0]}
+                radius={[0, 10, 10, 0]}
                 maxBarSize={22}
-              />
+                background={{ fill: "#eef2f7" }}
+              >
+                <LabelList
+                  dataKey={metric}
+                  position="right"
+                  offset={8}
+                  formatter={(value: number) => formatCompact(value)}
+                  style={{ fill: CHART_AXIS_TEXT, fontSize: 12, fontWeight: 600 }}
+                />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>

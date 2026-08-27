@@ -128,17 +128,99 @@ export function normalizeOverview(response: unknown): DashboardOverview {
 
   if (!isRecord(payload)) return EMPTY_OVERVIEW;
 
+  const rawKpis = (
+    payload.kpis && typeof payload.kpis === "object" ? payload.kpis : {}
+  ) as Record<string, unknown>;
+
+  const totalUsers = typeof payload.totalUsers === "number" ? payload.totalUsers : 0;
+  const activeUsers =
+    typeof (payload as { activeUsers?: number }).activeUsers === "number"
+      ? (payload as { activeUsers?: number }).activeUsers!
+      : totalUsers;
+  const newUsers =
+    typeof (payload as { newUsers?: number }).newUsers === "number"
+      ? (payload as { newUsers?: number }).newUsers!
+      : 0;
+  const totalActiveStores =
+    typeof payload.totalActiveStores === "number" ? payload.totalActiveStores : 0;
+  const totalPendingStores =
+    typeof payload.totalPendingStores === "number" ? payload.totalPendingStores : 0;
+  const totalMenuItems =
+    typeof payload.totalMenuItems === "number" ? payload.totalMenuItems : 0;
+  const totalRecommendations =
+    typeof payload.totalRecommendationsServed === "number"
+      ? payload.totalRecommendationsServed
+      : typeof (payload as { recommendationSessions?: number }).recommendationSessions === "number"
+        ? (payload as { recommendationSessions?: number }).recommendationSessions!
+        : 0;
+  const totalBookmarks =
+    typeof payload.totalBookmarks === "number"
+      ? payload.totalBookmarks
+      : typeof (payload as { bookmarks?: number }).bookmarks === "number"
+        ? (payload as { bookmarks?: number }).bookmarks!
+        : 0;
+  const totalSafetyBlocks =
+    typeof payload.totalSafetyBlocks === "number"
+      ? payload.totalSafetyBlocks
+      : typeof (payload as { safetyBlocks?: number }).safetyBlocks === "number"
+        ? (payload as { safetyBlocks?: number }).safetyBlocks!
+        : 0;
+
+  const synthesizedKpis: Record<string, unknown> = {
+    activeUsers: rawKpis.activeUsers ?? {
+      value: activeUsers,
+      previousValue: null,
+      changePercent: null,
+    },
+    newUsers: rawKpis.newUsers ?? {
+      value: newUsers,
+      previousValue: null,
+      changePercent: null,
+    },
+    recommendationSessions: rawKpis.recommendationSessions ?? {
+      value: totalRecommendations,
+      previousValue: null,
+      changePercent: null,
+    },
+    recommendationSuccessRate: rawKpis.recommendationSuccessRate ?? {
+      value: totalRecommendations > 0 ? 100 : null,
+      previousValue: null,
+      changePercent: null,
+    },
+    activeStores: rawKpis.activeStores ?? {
+      value: totalActiveStores,
+      previousValue: null,
+      changePercent: null,
+    },
+    liveMenuItems: rawKpis.liveMenuItems ?? {
+      value: totalMenuItems,
+      previousValue: null,
+      changePercent: null,
+    },
+    bookmarks: rawKpis.bookmarks ?? {
+      value: totalBookmarks,
+      previousValue: null,
+      changePercent: null,
+    },
+    openDataIssues: rawKpis.openDataIssues ?? {
+      value: totalPendingStores + totalSafetyBlocks,
+      previousValue: null,
+      changePercent: null,
+    },
+    ...rawKpis,
+  };
+
   return {
     ...EMPTY_OVERVIEW,
     ...payload,
     period: { ...EMPTY_OVERVIEW.period, ...(payload.period ?? {}) },
-    kpis: payload.kpis ?? {},
-    activityTrend: payload.activityTrend ?? [],
-    topStores: payload.topStores ?? [],
-    popularItems: payload.popularItems ?? [],
-    locationSummary: payload.locationSummary ?? [],
-    categorySummary: payload.categorySummary ?? [],
-    actionItems: payload.actionItems ?? [],
+    kpis: synthesizedKpis as DashboardOverview["kpis"],
+    activityTrend: Array.isArray(payload.activityTrend) ? payload.activityTrend : [],
+    topStores: Array.isArray(payload.topStores) ? payload.topStores : [],
+    popularItems: Array.isArray(payload.popularItems) ? payload.popularItems : [],
+    locationSummary: Array.isArray(payload.locationSummary) ? payload.locationSummary : [],
+    categorySummary: Array.isArray(payload.categorySummary) ? payload.categorySummary : [],
+    actionItems: Array.isArray(payload.actionItems) ? payload.actionItems : [],
   };
 }
 

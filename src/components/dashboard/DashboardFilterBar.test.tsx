@@ -27,7 +27,7 @@ describe("DashboardFilterBar", () => {
   it("does not fire a request while the draft is being edited", () => {
     const { onApply } = renderBar();
 
-    fireEvent.change(screen.getByLabelText("ក្រុង"), {
+    fireEvent.change(screen.getByPlaceholderText(/Daun Penh/), {
       target: { value: "Phnom Penh" },
     });
 
@@ -37,7 +37,7 @@ describe("DashboardFilterBar", () => {
   it("applies the draft filters only when the apply button is pressed", async () => {
     const { onApply } = renderBar();
 
-    fireEvent.change(screen.getByLabelText("ក្រុង"), {
+    fireEvent.change(screen.getByPlaceholderText(/Daun Penh/), {
       target: { value: "Phnom Penh" },
     });
     fireEvent.click(screen.getByRole("button", { name: /អនុវត្តតម្រង/ }));
@@ -62,17 +62,20 @@ describe("DashboardFilterBar", () => {
   it("reveals the date inputs for the custom preset without applying", async () => {
     const { onApply } = renderBar();
 
-    fireEvent.click(screen.getByRole("button", { name: "ជ្រើសឯង" }));
+    fireEvent.click(screen.getByRole("button", { name: "ជ្រើសកាលបរិច្ឆេទ" }));
 
-    expect(await screen.findByLabelText("ពីថ្ងៃ")).toBeInTheDocument();
-    expect(screen.getByLabelText("ដល់ថ្ងៃ")).toBeInTheDocument();
+    expect(await screen.findByLabelText(/កាលបរិច្ឆេទចាប់ផ្ដើម/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/កាលបរិច្ឆេទបញ្ចប់/)).toBeInTheDocument();
     expect(onApply).not.toHaveBeenCalled();
   });
 
   it("blocks a latitude without a longitude and shows the reason", async () => {
     const { onApply } = renderBar();
 
-    fireEvent.change(screen.getByLabelText(/រយៈទទឹង/), {
+    // Expand advanced geo panel
+    fireEvent.click(screen.getByRole("button", { name: /បង្ហាញតម្រងកាំភូមិសាស្ត្រ/ }));
+
+    fireEvent.change(screen.getByPlaceholderText("11.5564"), {
       target: { value: "11.5564" },
     });
     fireEvent.click(screen.getByRole("button", { name: /អនុវត្តតម្រង/ }));
@@ -86,13 +89,17 @@ describe("DashboardFilterBar", () => {
   it("rejects a radius above the 50 km cap before any request is made", async () => {
     const { onApply } = renderBar();
 
-    fireEvent.change(screen.getByLabelText(/រយៈទទឹង/), {
+    // Expand advanced geo panel
+    fireEvent.click(screen.getByRole("button", { name: /បង្ហាញតម្រងកាំភូមិសាស្ត្រ/ }));
+
+    fireEvent.change(screen.getByPlaceholderText("11.5564"), {
       target: { value: "11.5564" },
     });
-    fireEvent.change(screen.getByLabelText(/រយៈបណ្ដោយ/), {
+    fireEvent.change(screen.getByPlaceholderText("104.9282"), {
       target: { value: "104.9282" },
     });
-    fireEvent.change(screen.getByLabelText(/កាំ/), { target: { value: "80" } });
+    const radiusInput = screen.getByPlaceholderText("5");
+    fireEvent.change(radiusInput, { target: { value: "80" } });
     fireEvent.click(screen.getByRole("button", { name: /អនុវត្តតម្រង/ }));
 
     expect(
@@ -106,12 +113,29 @@ describe("DashboardFilterBar", () => {
       filters: { preset: "90d", city: "Phnom Penh", categoryCode: "SOUP" },
     });
 
-    const city = screen.getByLabelText("ក្រុង") as HTMLInputElement;
+    const city = screen.getByPlaceholderText(/Daun Penh/) as HTMLInputElement;
     expect(city.value).toBe("Phnom Penh");
 
     fireEvent.click(screen.getByRole("button", { name: /កំណត់ឡើងវិញ/ }));
 
     expect(onReset).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(city.value).toBe(""));
+  });
+
+  it("allows selecting a popular geo hub preset", async () => {
+    renderBar();
+
+    // Expand advanced geo panel
+    fireEvent.click(screen.getByRole("button", { name: /បង្ហាញតម្រងកាំភូមិសាស្ត្រ/ }));
+
+    const bkkBtn = screen.getByRole("button", { name: /បឹងកេងកង ១/ });
+    expect(bkkBtn).toBeInTheDocument();
+    fireEvent.click(bkkBtn);
+
+    const latInput = screen.getByPlaceholderText("11.5564") as HTMLInputElement;
+    const lngInput = screen.getByPlaceholderText("104.9282") as HTMLInputElement;
+
+    expect(latInput.value).toBe("11.5529");
+    expect(lngInput.value).toBe("104.9256");
   });
 });

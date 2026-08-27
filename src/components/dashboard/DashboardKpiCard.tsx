@@ -48,34 +48,55 @@ export default function DashboardKpiCard({
   const ChangeIcon = flat ? Minus : rising ? ArrowUpRight : ArrowDownRight;
 
   return (
-    <article className="flex flex-col justify-between rounded-2xl border border-gray-200 bg-white p-5 transition hover:border-gray-300">
+    <article className={cn(
+      "group relative flex flex-col justify-between overflow-hidden rounded-[24px] border border-gray-200 bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-[0_8px_24px_rgba(16,24,40,0.06)]",
+      styles.border,
+    )}>
+      <div className={cn("absolute inset-x-0 top-0 h-1.5", styles.surface)} />
+
       <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <p className="truncate text-base font-medium text-gray-600">{label}</p>
-          {hint && <InfoTooltip label={hint} />}
+        <div className="flex min-w-0 items-center gap-3">
+          <span
+            aria-hidden="true"
+            className={cn(
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border",
+              styles.surface,
+              styles.border,
+              styles.icon,
+            )}
+          >
+            {icon}
+          </span>
+
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="truncate text-sm font-semibold text-gray-600">{label}</p>
+              {hint && <InfoTooltip label={hint} />}
+            </div>
+
+            <p className={cn("mt-3 text-3xl font-bold tabular-nums", styles.text)}>
+              {value}
+            </p>
+          </div>
         </div>
 
         <span
-          aria-hidden="true"
           className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
+            "rounded-full border px-2.5 py-1 text-[11px] font-semibold",
             styles.surface,
-            styles.icon,
+            styles.border,
+            styles.text,
           )}
         >
-          {icon}
+          ផ្ទាល់
         </span>
       </div>
 
-      <p className="mt-3 text-3xl font-bold text-gray-900 tabular-nums">
-        {value}
-      </p>
-
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         {change ? (
           <span
             className={cn(
-              "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm font-semibold tabular-nums",
+              "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-semibold tabular-nums",
               changeClassName,
             )}
           >
@@ -83,7 +104,7 @@ export default function DashboardKpiCard({
             {change}
           </span>
         ) : (
-          <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-sm font-medium text-gray-500">
+          <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-sm font-medium text-gray-500">
             គ្មានទិន្នន័យប្រៀបធៀប
           </span>
         )}

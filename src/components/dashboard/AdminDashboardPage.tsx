@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { AlertTriangle, Store, Users, Utensils } from "lucide-react";
 
 import {
   DASHBOARD_OVERVIEW_POLLING_INTERVAL_MS,
@@ -18,7 +19,9 @@ import {
   DEFAULT_TABLE_PAGE_SIZE,
   dashboardFiltersToSearchParams,
   parseDashboardFilters,
+  resolveDateRange,
 } from "@/src/lib/dashboardFilters";
+import { formatCount } from "./dashboard-theme";
 import type {
   DashboardFilters,
   LocationSummary,
@@ -211,7 +214,85 @@ export default function AdminDashboardPage() {
     [filters, writeFilters],
   );
 
+  const fallbackRange = useMemo(
+    () => resolveDateRange(filters),
+    [filters],
+  );
+
+  const locationsData = useMemo(() => {
+    if (locations.data && locations.data.length > 0) return locations.data;
+    if (overview.data?.locationSummary && overview.data.locationSummary.length > 0)
+      return overview.data.locationSummary;
+    return [];
+  }, [locations.data, overview.data?.locationSummary]);
+
+  const categoriesData = useMemo(() => {
+    if (categories.data && categories.data.length > 0) return categories.data;
+    if (overview.data?.categorySummary && overview.data.categorySummary.length > 0)
+      return overview.data.categorySummary;
+    return [];
+  }, [categories.data, overview.data?.categorySummary]);
+
+  const isLocation404 =
+    locations.isError &&
+    (locations.error as { status?: number })?.status === 404;
+
+  const isCategory404 =
+    categories.isError &&
+    (categories.error as { status?: number })?.status === 404;
+
+  const showLocationError =
+    locations.isError && !isLocation404 && locationsData.length === 0;
+
+  const showCategoryError =
+    categories.isError && !isCategory404 && categoriesData.length === 0;
+
   const activeLocationLabel = filters.city ?? filters.province ?? null;
+
+  const headerSummary = useMemo(
+    () => [
+      {
+        label: "អ្នកប្រើប្រាស់សរុប",
+        value: formatCount(
+          overview.data?.totalUsers ??
+            (overview.data?.kpis?.activeUsers?.value as number) ??
+            0,
+        ),
+        icon: <Users size={16} aria-hidden="true" />,
+        tone: "blue" as const,
+      },
+      {
+        label: "ហាងសកម្ម",
+        value: formatCount(
+          overview.data?.totalActiveStores ??
+            (overview.data?.kpis?.activeStores?.value as number) ??
+            0,
+        ),
+        icon: <Store size={16} aria-hidden="true" />,
+        tone: "green" as const,
+      },
+      {
+        label: "មុខម្ហូបសរុប",
+        value: formatCount(
+          overview.data?.totalMenuItems ??
+            (overview.data?.kpis?.liveMenuItems?.value as number) ??
+            0,
+        ),
+        icon: <Utensils size={16} aria-hidden="true" />,
+        tone: "violet" as const,
+      },
+      {
+        label: "ចំណុចត្រូវដោះស្រាយ",
+        value: formatCount(
+          (overview.data?.totalPendingStores ?? 0) +
+            (overview.data?.totalSafetyBlocks ?? 0),
+        ),
+        icon: <AlertTriangle size={16} aria-hidden="true" />,
+        tone: "amber" as const,
+      },
+    ],
+    [overview.data],
+  );
 
   const exportMenu = (
     <DashboardExportMenu filters={filters} disabled={overview.isLoading} />
@@ -221,9 +302,11 @@ export default function AdminDashboardPage() {
     <div className="space-y-5 pb-8">
       <DashboardHeader
         period={overview.data?.period ?? null}
+        fallbackRange={fallbackRange}
         lastUpdatedLabel={lastUpdatedLabel}
         isFetching={isFetchingAny}
         onRefresh={refreshAll}
+        summary={headerSummary}
       />
 
       <DashboardFilterBar
@@ -254,7 +337,7 @@ export default function AdminDashboardPage() {
       />
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        {locations.isError ? (
+        {showLocationError ? (
           <DashboardErrorState
             error={locations.error}
             title="មិនអាចផ្ទុកទិន្នន័យទីតាំងបានទេ"
@@ -263,14 +346,14 @@ export default function AdminDashboardPage() {
           />
         ) : (
           <LocationPerformanceChart
-            data={locations.data ?? []}
-            isLoading={locations.isLoading}
+            data={locationsData}
+            isLoading={locations.isLoading && overview.isLoading}
             onSelectLocation={applyLocation}
             activeLocationLabel={activeLocationLabel}
           />
         )}
 
-        {categories.isError ? (
+        {showCategoryError ? (
           <DashboardErrorState
             error={categories.error}
             title="មិនអាចផ្ទុកទិន្នន័យប្រភេទម្ហូបបានទេ"
@@ -279,8 +362,8 @@ export default function AdminDashboardPage() {
           />
         ) : (
           <CategoryPerformanceChart
-            data={categories.data ?? []}
-            isLoading={categories.isLoading}
+            data={categoriesData}
+            isLoading={categories.isLoading && overview.isLoading}
           />
         )}
       </div>

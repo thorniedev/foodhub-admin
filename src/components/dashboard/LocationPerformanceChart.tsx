@@ -6,6 +6,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -69,6 +70,7 @@ export default function LocationPerformanceChart({
       title="សមិទ្ធកម្មតាមទីតាំង"
       description={`ទីតាំងកំពូល ${TOP_LOCATIONS} តាម${activeMetric.label}`}
       icon={<MapPin size={18} aria-hidden="true" />}
+      tone="blue"
       hint="ដាក់ជាក្រុមតាមក្រុងមុន បន្ទាប់មកខេត្ត។ ហាងដែលគ្មានទាំងពីរនឹងបង្ហាញជា Unknown។"
       actions={
         <div
@@ -178,9 +180,18 @@ export default function LocationPerformanceChart({
                 <Bar
                   dataKey={metric}
                   name={activeMetric.label}
-                  radius={[0, 4, 4, 0]}
+                  radius={[0, 10, 10, 0]}
                   maxBarSize={22}
+                  background={{ fill: "#eef2f7" }}
                 >
+                  <LabelList
+                    dataKey={metric}
+                    position="right"
+                    offset={8}
+                    formatter={(value: number) => formatCompact(value)}
+                    style={{ fill: CHART_AXIS_TEXT, fontSize: 12, fontWeight: 600 }}
+                  />
+
                   {rows.map((row) => (
                     <Cell
                       key={row.location}

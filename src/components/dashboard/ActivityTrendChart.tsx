@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import {
+  Area,
   Bar,
   CartesianGrid,
   ComposedChart,
-  Legend,
   Line,
   ResponsiveContainer,
   Tooltip,
@@ -50,6 +50,7 @@ export default function ActivityTrendChart({
   data,
   isLoading = false,
 }: ActivityTrendChartProps) {
+  const activeUsersFillId = useId().replace(/:/g, "");
   const [barMetric, setBarMetric] = useState<BarMetric>("recommendationSessions");
   const activeBar = BAR_METRICS.find((metric) => metric.value === barMetric)!;
 
@@ -70,6 +71,7 @@ export default function ActivityTrendChart({
       title="និន្នាការសកម្មភាព"
       description="អ្នកប្រើប្រាស់សកម្ម អ្នកប្រើប្រាស់ថ្មី និងបរិមាណណែនាំ តាមថ្ងៃ"
       icon={<Activity size={18} aria-hidden="true" />}
+      tone="green"
       hint="ថ្ងៃដែលគ្មានសកម្មភាពត្រូវបានបំពេញដោយសូន្យ ដើម្បីកុំឱ្យក្រាហ្វិកលោតរំលងថ្ងៃ។"
       actions={
         <div
@@ -108,96 +110,135 @@ export default function ActivityTrendChart({
           description="មិនមានការមើល ការចុច ឬវគ្គណែនាំណាមួយត្រូវបានកត់ត្រាទេ។"
         />
       ) : (
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-              data={data}
-              margin={{ top: 8, right: 8, bottom: 0, left: -12 }}
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+            <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 text-emerald-700">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: CHART_SERIES.activeUsers }}
+                aria-hidden="true"
+              />
+              អ្នកប្រើប្រាស់សកម្ម
+            </span>
+
+            <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 text-blue-700">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: CHART_SERIES.newUsers }}
+                aria-hidden="true"
+              />
+              អ្នកប្រើប្រាស់ថ្មី
+            </span>
+
+            <span
+              className="inline-flex min-h-8 items-center gap-1.5 rounded-full border px-2.5"
+              style={{
+                borderColor: `${activeBar.color}33`,
+                backgroundColor: `${activeBar.color}14`,
+                color: activeBar.color,
+              }}
             >
-              <CartesianGrid
-                stroke={CHART_GRID}
-                strokeDasharray="3 3"
-                vertical={false}
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: activeBar.color }}
+                aria-hidden="true"
               />
+              {activeBar.label}
+            </span>
+          </div>
 
-              <XAxis
-                dataKey="date"
-                tickFormatter={formatShortDate}
-                tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
-                tickLine={false}
-                axisLine={{ stroke: CHART_GRID }}
-                minTickGap={24}
-              />
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart
+                data={data}
+                margin={{ top: 10, right: 10, bottom: 0, left: -12 }}
+              >
+                <defs>
+                  <linearGradient id={activeUsersFillId} x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="5%" stopColor={CHART_SERIES.activeUsers} stopOpacity={0.28} />
+                    <stop offset="95%" stopColor={CHART_SERIES.activeUsers} stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
 
-              {/* One shared scale on purpose — a second y-axis would make the
-                  two series look comparable when they are not. */}
-              <YAxis
-                tickFormatter={formatCompact}
-                tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
-                tickLine={false}
-                axisLine={false}
-                width={56}
-                allowDecimals={false}
-              />
+                <CartesianGrid
+                  stroke={CHART_GRID}
+                  strokeDasharray="3 3"
+                  vertical={false}
+                />
 
-              <Tooltip
-                cursor={{ fill: "rgba(17,24,39,0.04)" }}
-                content={({ active, payload, label }) => {
-                  if (!active || !payload?.length) return null;
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={formatShortDate}
+                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={{ stroke: CHART_GRID }}
+                  minTickGap={24}
+                />
 
-                  const rows: ChartTooltipRow[] = payload.map((entry) => ({
-                    key: String(entry.dataKey),
-                    color: String(entry.color ?? entry.stroke ?? "#9ca3af"),
-                    label: String(entry.name ?? entry.dataKey),
-                    value: formatCount(Number(entry.value ?? 0)),
-                  }));
+                {/* One shared scale on purpose — a second y-axis would make the
+                    two series look comparable when they are not. */}
+                <YAxis
+                  tickFormatter={formatCompact}
+                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={56}
+                  allowDecimals={false}
+                />
 
-                  return (
-                    <ChartTooltip
-                      title={formatLongDate(String(label))}
-                      rows={rows}
-                    />
-                  );
-                }}
-              />
+                <Tooltip
+                  cursor={{ fill: "rgba(17,24,39,0.04)" }}
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload?.length) return null;
 
-              <Legend
-                verticalAlign="bottom"
-                height={32}
-                iconType="circle"
-                iconSize={9}
-                wrapperStyle={{ fontSize: 13, color: CHART_AXIS_TEXT }}
-              />
+                    const rows: ChartTooltipRow[] = payload.map((entry) => ({
+                      key: String(entry.dataKey),
+                      color: String(entry.color ?? entry.stroke ?? "#9ca3af"),
+                      label: String(entry.name ?? entry.dataKey),
+                      value: formatCount(Number(entry.value ?? 0)),
+                    }));
 
-              <Bar
-                dataKey={barMetric}
-                name={activeBar.label}
-                fill={activeBar.color}
-                radius={[4, 4, 0, 0]}
-                maxBarSize={26}
-              />
+                    return (
+                      <ChartTooltip
+                        title={formatLongDate(String(label))}
+                        rows={rows}
+                      />
+                    );
+                  }}
+                />
 
-              <Line
-                type="monotone"
-                dataKey="activeUsers"
-                name="អ្នកប្រើប្រាស់សកម្ម"
-                stroke={CHART_SERIES.activeUsers}
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 4, strokeWidth: 2, stroke: "#ffffff" }}
-              />
+                <Area
+                  type="monotone"
+                  dataKey="activeUsers"
+                  name="អ្នកប្រើប្រាស់សកម្ម"
+                  stroke={CHART_SERIES.activeUsers}
+                  strokeWidth={2.5}
+                  fill={`url(#${activeUsersFillId})`}
+                  fillOpacity={1}
+                  dot={false}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff" }}
+                />
 
-              <Line
-                type="monotone"
-                dataKey="newUsers"
-                name="អ្នកប្រើប្រាស់ថ្មី"
-                stroke={CHART_SERIES.newUsers}
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 4, strokeWidth: 2, stroke: "#ffffff" }}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
+                <Line
+                  type="monotone"
+                  dataKey="newUsers"
+                  name="អ្នកប្រើប្រាស់ថ្មី"
+                  stroke={CHART_SERIES.newUsers}
+                  strokeWidth={2.25}
+                  dot={false}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff" }}
+                />
+
+                <Bar
+                  dataKey={barMetric}
+                  name={activeBar.label}
+                  fill={activeBar.color}
+                  radius={[8, 8, 0, 0]}
+                  maxBarSize={26}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       )}
     </SectionCard>

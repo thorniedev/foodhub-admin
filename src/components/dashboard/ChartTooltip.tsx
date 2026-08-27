@@ -25,7 +25,7 @@ export default function ChartTooltip({
   if (rows.length === 0) return null;
 
   return (
-    <div className="min-w-44 rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-lg">
+    <div className="min-w-48 rounded-2xl border border-gray-200 bg-white/95 px-4 py-3 shadow-[0_16px_30px_rgba(16,24,40,0.12)] backdrop-blur-sm">
       <p className="text-sm font-semibold text-gray-900">{title}</p>
 
       <ul className="mt-1.5 space-y-1">
