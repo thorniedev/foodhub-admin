@@ -658,7 +658,7 @@ export default function AllergenManager() {
             <button
               type="button"
               onClick={() => setSizeOpen((current) => !current)}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${sizeOpen
+              className={`flex h-12 min-w-[125px] items-center justify-between gap-3 rounded-full border bg-white px-4 text-lg font-normal transition ${sizeOpen
                   ? "border-primary-800 ring-2 ring-primary-100"
                   : "border-gray-200 hover:border-primary-800/50"
                 }`}
@@ -673,11 +673,10 @@ export default function AllergenManager() {
             </button>
 
             {sizeOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[150px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg  text-secondary-600">
-                  ចំនួនក្នុងទំព័រ
+              <div className="absolute right-0 top-[56px] z-[100] w-[170px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+                  ទំហំទំព័រ
                 </p>
-
                 {[10, 20, 50].map((value) => {
                   const selected = size === value;
 
@@ -690,7 +689,7 @@ export default function AllergenManager() {
                         setPage(0);
                         setSizeOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-normal transition ${selected
                           ? "bg-primary-50 text-primary-800"
                           : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
                         }`}
@@ -715,12 +714,12 @@ export default function AllergenManager() {
             <button
               type="button"
               onClick={() => setSortOpen((current) => !current)}
-              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen
+              className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${sortOpen
                   ? "border-primary-800 bg-primary-50 text-primary-800"
                   : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
                 }`}
               aria-label="Sort allergens"
-              title="Sort allergens"
+              title="តម្រៀប"
             >
               <ArrowUpDown size={18} />
             </button>
@@ -730,8 +729,8 @@ export default function AllergenManager() {
             ========================================== */}
 
             {sortOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg uppercase tracking-wide text-secondary-600">
+              <div className="absolute right-0 top-[56px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
                   តម្រៀប
                 </p>
 
@@ -747,7 +746,7 @@ export default function AllergenManager() {
 
                         setSortOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg transition ${selected
                           ? "bg-primary-50 text-primary-800"
                           : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
                         }`}

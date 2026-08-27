@@ -121,8 +121,8 @@ export default function Sidebar() {
               w-full
               items-center
               justify-between
-              rounded-lg
-              px-3
+              rounded-xl
+              px-3.5
               py-2.5
               transition
 
@@ -133,7 +133,7 @@ export default function Sidebar() {
             `}
           >
             <span
-              className={`flex items-center gap-3 font-medium ${level === 0 ? "text-lg" : "text-sm"
+              className={`flex items-center gap-3 font-medium ${level === 0 ? "text-xl" : "text-lg"
                 }`}
             >
               {Icon && <Icon size={level === 0 ? 22 : 18} />}
@@ -172,24 +172,24 @@ export default function Sidebar() {
           flex
           items-center
           gap-3
-          px-3
+          px-3.5
           py-2.5
           transition
 
           ${level === 0
-            ? "rounded-full text-lg font-medium"
-            : "rounded-lg text-lg"
+            ? "rounded-full text-xl font-medium"
+            : "rounded-xl text-lg font-normal"
           }
 
           ${isActive
             ? level === 0
-              ? "bg-[#136C34] text-white"
-              : "bg-emerald-50 font-semibold text-[#136C34]"
+              ? "bg-[#136C34] text-white font-medium"
+              : "bg-emerald-50 font-medium text-[#136C34]"
             : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
           }
         `}
       >
-        {Icon && <Icon size={level === 0 ? 18 : 16} />}
+        {Icon && <Icon size={level === 0 ? 20 : 16} />}
 
         <span>{item.label}</span>
       </Link>
@@ -223,7 +223,7 @@ export default function Sidebar() {
           z-50
           flex
           h-screen
-          w-64
+          w-72
           flex-col
           overflow-hidden
           border-r

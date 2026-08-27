@@ -244,20 +244,34 @@ export default function WeatherConditionFormModal({
             sm:p-7
           "
         >
-          {/* Name */}
-          <Field
-            label="ឈ្មោះស្ថានភាពអាកាសធាតុ"
-            value={values.localName || values.name}
-            required
-            onChange={(value) =>
-              setValues((previous) => ({
-                ...previous,
-                name: value,
-                localName: value,
-              }))
-            }
-            placeholder="ឧ. ភ្លៀង / មានពពក"
-          />
+          {/* Name & Code */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field
+              label="ឈ្មោះស្ថានភាពអាកាសធាតុ"
+              value={values.localName || values.name}
+              required
+              onChange={(value) =>
+                setValues((previous) => ({
+                  ...previous,
+                  name: value,
+                  localName: value,
+                }))
+              }
+              placeholder="ឧ. ភ្លៀង / មានពពក"
+            />
+
+            <Field
+              label="កូដ (Code)"
+              value={values.code}
+              onChange={(value) =>
+                setValues((previous) => ({
+                  ...previous,
+                  code: value.toUpperCase(),
+                }))
+              }
+              placeholder="ឧ. RAIN / SUNNY"
+            />
+          </div>
 
           {/* Description */}
           <div>
@@ -438,7 +452,7 @@ export default function WeatherConditionFormModal({
                 bg-white
                 px-7
                 text-lg
-                font-medium
+                font-normal
                 text-gray-600
                 transition
                 hover:border-primary-200
@@ -467,7 +481,7 @@ export default function WeatherConditionFormModal({
                 bg-primary-800
                 px-7
                 text-lg
-                font-medium
+                font-normal
                 text-white
                 transition
                 hover:bg-primary-900

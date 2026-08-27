@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { CircleOff, Leaf, Plus, ShieldCheck } from "lucide-react";
+import { CircleOff, HeartPulse, Plus, ShieldCheck } from "lucide-react";
 
 interface Props {
   total: number;
@@ -9,7 +9,7 @@ interface Props {
   onAdd: () => void;
 }
 
-export default function IngredientsHeader({
+export default function MedicalConditionsHeader({
   total,
   activeCount,
   inactiveCount,
@@ -38,16 +38,16 @@ export default function IngredientsHeader({
 
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
-              <Leaf size={25} />
+              <HeartPulse size={25} />
             </div>
 
             <div className="min-w-0">
               <p className="text-5xl font-bold text-accent-400">
-                គ្រប់គ្រងគ្រឿងផ្សំ
+                ស្ថានភាពសុខភាព
               </p>
 
               <p className="mt-6 max-w-2xl text-xl leading-8 text-white/85">
-                គ្រប់គ្រងគ្រឿងផ្សំដែលប្រើសម្រាប់ម្ហូប និងការត្រងក្នុង FoodHub។
+                គ្រប់គ្រង បន្ថែម កែប្រែ និងលុបស្ថានភាពសុខភាពដែលប្រើក្នុងប្រព័ន្ធ FoodHub។
               </p>
             </div>
           </div>
@@ -58,8 +58,8 @@ export default function IngredientsHeader({
 
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <StatCard
-              icon={<Leaf size={20} />}
-              label="គ្រឿងផ្សំសរុប"
+              icon={<HeartPulse size={20} />}
+              label="សរុប"
               value={total}
             />
 
@@ -93,9 +93,9 @@ export default function IngredientsHeader({
             gap-2
             rounded-full
             bg-white
-            px-5
-            text-lg
-            font-bold
+            px-6
+            text-xl
+            font-normal
             text-primary-800
             shadow-sm
             transition
@@ -106,8 +106,8 @@ export default function IngredientsHeader({
             sm:w-fit
           "
         >
-          <Plus size={20} />
-          បន្ថែមគ្រឿងផ្សំ
+          <Plus size={22} />
+          បន្ថែមស្ថានភាពសុខភាព
         </button>
       </div>
     </section>

@@ -49,7 +49,7 @@ export default function AgeGroupsTabs({
             key={tab.value}
             type="button"
             onClick={() => onChange(tab.value)}
-            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-normal transition ${
               selected
                 ? "bg-primary-800 text-white"
                 : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
@@ -58,7 +58,7 @@ export default function AgeGroupsTabs({
             {tab.label}
 
             <span
-              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-normal ${
                 selected ? "bg-white/20 text-white" : "bg-white text-gray-500"
               }`}
             >

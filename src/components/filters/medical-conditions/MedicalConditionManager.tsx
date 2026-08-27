@@ -802,7 +802,7 @@ export default function MedicalConditionManager() {
                               {/* STATUS */}
 
                               <span
-                                className={`shrink-0 rounded-full px-2 py-1 text-lg font-bold ${item.active
+                                className={`shrink-0 rounded-full px-2 py-1 text-lg font-normal ${item.active
                                     ? "bg-primary-50 text-primary-700"
                                     : "bg-gray-100 text-gray-500"
                                   }`}
@@ -830,17 +830,14 @@ export default function MedicalConditionManager() {
               type="button"
               onClick={() => {
                 setSizeOpen(
-                  (
-                    current,
-                  ) =>
-                    !current,
+                  (current) => !current,
                 );
 
                 setSortOpen(
                   false,
                 );
               }}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${sizeOpen
+              className={`flex h-12 min-w-[125px] items-center justify-between gap-3 rounded-full border bg-white px-4 text-lg font-normal transition ${sizeOpen
                   ? "border-primary-800 ring-2 ring-primary-100"
                   : "border-gray-200 hover:border-primary-800/50"
                 }`}
@@ -860,9 +857,9 @@ export default function MedicalConditionManager() {
             </button>
 
             {sizeOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[160px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+              <div className="absolute right-0 top-[56px] z-[100] w-[170px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
                 <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
-                  ចំនួនក្នុងទំព័រ
+                  ទំហំទំព័រ
                 </p>
 
                 {[10, 20, 50].map(
@@ -890,7 +887,7 @@ export default function MedicalConditionManager() {
                             false,
                           );
                         }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${selected
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-normal transition ${selected
                             ? "bg-primary-50 text-primary-800"
                             : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
                           }`}
@@ -935,12 +932,12 @@ export default function MedicalConditionManager() {
                   false,
                 );
               }}
-              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen
+              className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${sortOpen
                   ? "border-primary-800 bg-primary-50 text-primary-800"
                   : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
                 }`}
               aria-label="Sort medical conditions"
-              title="Sort medical conditions"
+              title="តម្រៀប"
             >
               <ArrowUpDown
                 size={18}
@@ -948,8 +945,8 @@ export default function MedicalConditionManager() {
             </button>
 
             {sortOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg uppercase tracking-wide text-secondary-600">
+              <div className="absolute right-0 top-[56px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
                   តម្រៀប
                 </p>
 
@@ -976,7 +973,7 @@ export default function MedicalConditionManager() {
                             false,
                           );
                         }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${selected
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-normal transition ${selected
                             ? "bg-primary-50 text-primary-800"
                             : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
                           }`}
@@ -1040,7 +1037,7 @@ export default function MedicalConditionManager() {
               className="text-red-400"
             />
 
-            <p className="mt-3 text-lg font-bold text-gray-800">
+            <p className="mt-3 text-lg font-normal text-gray-800">
               មិនអាចទាញយកទិន្នន័យស្ថានភាពសុខភាពបានទេ
             </p>
 

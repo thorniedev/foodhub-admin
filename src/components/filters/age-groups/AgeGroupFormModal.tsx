@@ -2,13 +2,9 @@
 
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 
-import { AlertTriangle, CalendarRange, Loader2, Users, X } from "lucide-react";
+import { AlertTriangle, Loader2, Users, X } from "lucide-react";
 
 import type { AgeGroup, AgeGroupFormValues } from "@/src/types/ageGroup";
-
-/* =========================================================
-   DEFAULT VALUES
-========================================================= */
 
 const EMPTY_FORM: AgeGroupFormValues = {
   code: "",
@@ -19,10 +15,6 @@ const EMPTY_FORM: AgeGroupFormValues = {
   isActive: true,
 };
 
-/* =========================================================
-   PROPS
-========================================================= */
-
 type Props = {
   open: boolean;
   item: AgeGroup | null;
@@ -30,21 +22,6 @@ type Props = {
   onClose: () => void;
   onSubmit: (values: AgeGroupFormValues) => Promise<void>;
 };
-
-/* =========================================================
-   AGE GROUP FORM MODAL
-   UI concept follows ShopEditModal:
-   - sticky modal header
-   - primary icon surface
-   - text-3xl modal title
-   - grouped white section cards
-   - text-lg minimum normal content
-   - h-[52px] inputs
-   - primary green labels/focus
-   - rounded-full footer actions
-   - hidden modal scrollbar
-   - body scroll lock
-========================================================= */
 
 export default function AgeGroupFormModal({
   open,
@@ -54,12 +31,7 @@ export default function AgeGroupFormModal({
   onSubmit,
 }: Props) {
   const [form, setForm] = useState<AgeGroupFormValues>(EMPTY_FORM);
-
   const [validationError, setValidationError] = useState("");
-
-  /* =======================================================
-     LOAD FORM VALUES
-  ======================================================= */
 
   useEffect(() => {
     if (!open) {
@@ -82,17 +54,12 @@ export default function AgeGroupFormModal({
     setValidationError("");
   }, [open, item]);
 
-  /* =======================================================
-     LOCK PAGE SCROLL
-  ======================================================= */
-
   useEffect(() => {
     if (!open) {
       return;
     }
 
     const previousOverflow = document.body.style.overflow;
-
     document.body.style.overflow = "hidden";
 
     return () => {
@@ -104,24 +71,26 @@ export default function AgeGroupFormModal({
     return null;
   }
 
-  /* =======================================================
-     SUBMIT
-  ======================================================= */
-
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const code = form.code.trim().toUpperCase();
-
     const name = form.name.trim();
-
     const minAge = Number(form.minAge);
-
     const maxAge = Number(form.maxAge);
 
-    if (!code || !name || !form.minAge.trim() || !form.maxAge.trim()) {
-      setValidationError("សូមបំពេញ កូដ ឈ្មោះ អាយុអប្បបរមា និងអាយុអតិបរមា។");
+    if (!name) {
+      setValidationError("សូមបំពេញឈ្មោះក្រុមអាយុ។");
+      return;
+    }
 
+    if (!code) {
+      setValidationError("សូមបំពេញកូដក្រុមអាយុ។");
+      return;
+    }
+
+    if (!form.minAge.trim() || !form.maxAge.trim()) {
+      setValidationError("សូមបំពេញអាយុអប្បបរមា និងអាយុអតិបរមា។");
       return;
     }
 
@@ -132,13 +101,11 @@ export default function AgeGroupFormModal({
       maxAge < 0
     ) {
       setValidationError("អាយុត្រូវតែជាចំនួនគត់ និងមិនតិចជាង 0។");
-
       return;
     }
 
     if (maxAge < minAge) {
       setValidationError("អាយុអតិបរមាត្រូវធំជាង ឬស្មើអាយុអប្បបរមា។");
-
       return;
     }
 
@@ -155,96 +122,22 @@ export default function AgeGroupFormModal({
   };
 
   return (
-    <div
-      className="
-        fixed
-        inset-0
-        z-[150]
-        flex
-        items-center
-        justify-center
-        bg-black/40
-        p-4
-        backdrop-blur-[3px]
-      "
-    >
-      {/* =================================================
-          MODAL CONTAINER
-      ================================================== */}
-      <div
-        className="
-          max-h-[94vh]
-          w-full
-          max-w-2xl
-          overflow-y-auto
-          rounded-3xl
-          border
-          border-gray-100
-          bg-white
-          shadow-2xl
-          [scrollbar-width:none]
-          [-ms-overflow-style:none]
-          [&::-webkit-scrollbar]:hidden
-        "
-      >
-        {/* =================================================
-            HEADER
-            Same concept as ShopEditModal
-        ================================================== */}
-        <div
-          className="
-            sticky
-            top-0
-            z-30
-            flex
-            items-center
-            justify-between
-            border-b
-            border-gray-100
-            bg-white/95
-            px-6
-            py-5
-            backdrop-blur-md
-            sm:px-8
-          "
-        >
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
+      <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl">
+        {/* HEADER */}
+        <div className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-5 sm:px-8">
           <div className="flex min-w-0 items-center gap-4">
-            <div
-              className="
-                flex
-                h-12
-                w-12
-                shrink-0
-                items-center
-                justify-center
-                rounded-xl
-                bg-primary-50
-                text-primary-800
-              "
-            >
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
               <Users size={24} />
             </div>
 
             <div className="min-w-0">
-              <p
-                className="
-                  text-3xl
-                  font-semibold
-                  text-primary-800
-                "
-              >
-                {item ? "កែប្រែក្រុមអាយុ" : "បន្ថែមក្រុមអាយុថ្មី"}
+              <p className="text-2xl font-semibold text-primary-800">
+                {item ? "កែប្រែក្រុមអាយុ" : "បន្ថែម ក្រុមអាយុ"}
               </p>
 
-              <p
-                className="
-                  mt-1
-                  text-lg
-                  leading-7
-                  text-gray-500
-                "
-              >
-                កំណត់ចន្លោះអាយុដែលប្រព័ន្ធនឹងប្រើ សម្រាប់ការណែនាំម្ហូប។
+              <p className="mt-0.5 truncate text-lg text-gray-500">
+                Age Groups
               </p>
             </div>
           </div>
@@ -254,315 +147,141 @@ export default function AgeGroupFormModal({
             disabled={saving}
             onClick={onClose}
             aria-label="Close"
-            className="
-              flex
-              h-11
-              w-11
-              shrink-0
-              items-center
-              justify-center
-              rounded-full
-              text-gray-400
-              transition
-              hover:bg-gray-100
-              hover:text-gray-700
-              focus:outline-none
-              focus:ring-4
-              focus:ring-gray-100
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-            "
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <X size={22} />
           </button>
         </div>
 
-        {/* =================================================
-            FORM
-        ================================================== */}
-        <form
-          onSubmit={handleSubmit}
-          className="
-            space-y-6
-            p-6
-            sm:p-8
-          "
-        >
-          {/* =================================================
-              SECTION 1: BASIC INFORMATION
-          ================================================== */}
-          <Section icon={<Users size={22} />} title="ព័ត៌មានក្រុមអាយុ">
-            <div
-              className="
-                grid
-                grid-cols-1
-                gap-5
-                sm:grid-cols-2
-              "
-            >
-              <Field
-                label="កូដ"
-                value={form.code}
-                onChange={(value) =>
-                  setForm((previous) => ({
-                    ...previous,
-                    code: value,
-                  }))
-                }
-                placeholder="ADULT"
-                required
-              />
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="space-y-4 p-6 sm:p-7">
+          {/* Name & Code */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field
+              label="ឈ្មោះ ក្រុមអាយុ"
+              value={form.name}
+              onChange={(value) =>
+                setForm((prev) => ({
+                  ...prev,
+                  name: value,
+                }))
+              }
+              placeholder="ឧ. កុមារ, មនុស្សពេញវ័យ"
+              required
+            />
 
-              <Field
-                label="ឈ្មោះ"
-                value={form.name}
-                onChange={(value) =>
-                  setForm((previous) => ({
-                    ...previous,
-                    name: value,
-                  }))
-                }
-                placeholder="Adult"
-                required
-              />
+            <Field
+              label="កូដ (Code)"
+              value={form.code}
+              onChange={(value) =>
+                setForm((prev) => ({
+                  ...prev,
+                  code: value.toUpperCase(),
+                }))
+              }
+              placeholder="ឧ. CHILD, ADULT"
+              required
+            />
+          </div>
+
+          {/* Min Age & Max Age */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field
+              label="អាយុអប្បបរមា (Min Age)"
+              type="number"
+              value={form.minAge}
+              onChange={(value) =>
+                setForm((prev) => ({
+                  ...prev,
+                  minAge: value,
+                }))
+              }
+              placeholder="ឧ. 0"
+              required
+            />
+
+            <Field
+              label="អាយុអតិបរមា (Max Age)"
+              type="number"
+              value={form.maxAge}
+              onChange={(value) =>
+                setForm((prev) => ({
+                  ...prev,
+                  maxAge: value,
+                }))
+              }
+              placeholder="ឧ. 12"
+              required
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <FieldLabel>ការពិពណ៌នា</FieldLabel>
+
+            <textarea
+              rows={3}
+              value={form.description}
+              onChange={(event) =>
+                setForm((prev) => ({
+                  ...prev,
+                  description: event.target.value,
+                }))
+              }
+              placeholder="បញ្ចូលការពិពណ៌នាអំពីក្រុមអាយុ..."
+              className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg leading-8 text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+            />
+          </div>
+
+          {/* Status */}
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-3.5">
+            <div className="min-w-0">
+              <p className="text-lg font-medium text-primary-800">
+                ស្ថានភាព
+              </p>
+
+              <p className="text-base text-gray-500">
+                បើក ដើម្បីឱ្យក្រុមអាយុនេះសកម្មក្នុងប្រព័ន្ធ។
+              </p>
             </div>
 
-            <div
-              className="
-                mt-5
-                grid
-                grid-cols-1
-                gap-5
-                sm:grid-cols-2
-              "
+            <button
+              type="button"
+              role="switch"
+              aria-checked={form.isActive}
+              onClick={() =>
+                setForm((prev) => ({
+                  ...prev,
+                  isActive: !prev.isActive,
+                }))
+              }
+              className={`relative h-7 w-12 shrink-0 rounded-full transition focus:outline-none focus:ring-4 focus:ring-primary-100 ${
+                form.isActive ? "bg-primary-700" : "bg-gray-300"
+              }`}
             >
-              <Field
-                label="អាយុអប្បបរមា"
-                type="number"
-                min="0"
-                value={form.minAge}
-                onChange={(value) =>
-                  setForm((previous) => ({
-                    ...previous,
-                    minAge: value,
-                  }))
-                }
-                placeholder="18"
-                required
+              <span
+                className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-all ${
+                  form.isActive ? "left-6" : "left-1"
+                }`}
               />
+            </button>
+          </div>
 
-              <Field
-                label="អាយុអតិបរមា"
-                type="number"
-                min="0"
-                value={form.maxAge}
-                onChange={(value) =>
-                  setForm((previous) => ({
-                    ...previous,
-                    maxAge: value,
-                  }))
-                }
-                placeholder="59"
-                required
-              />
-            </div>
-
-            {/* Description */}
-            <label className="mt-5 block">
-              <FieldLabel>ការពិពណ៌នា</FieldLabel>
-
-              <textarea
-                rows={4}
-                value={form.description}
-                onChange={(event) =>
-                  setForm((previous) => ({
-                    ...previous,
-                    description: event.target.value,
-                  }))
-                }
-                placeholder="សរសេរការពិពណ៌នាអំពីក្រុមអាយុ..."
-                className="
-                  w-full
-                  resize-none
-                  rounded-xl
-                  border
-                  border-gray-200
-                  bg-gray-50
-                  px-4
-                  py-3.5
-                  text-lg
-                  leading-8
-                  text-gray-800
-                  outline-none
-                  transition
-                  placeholder:text-gray-400
-                  hover:border-gray-300
-                  focus:border-primary-600
-                  focus:bg-white
-                  focus:ring-4
-                  focus:ring-primary-100
-                "
-              />
-            </label>
-          </Section>
-
-          {/* =================================================
-              SECTION 2: STATUS
-          ================================================== */}
-          <Section icon={<CalendarRange size={22} />} title="ស្ថានភាព">
-            <div
-              className="
-                flex
-                items-center
-                justify-between
-                gap-5
-                rounded-2xl
-                border
-                border-gray-100
-                bg-gray-50
-                px-5
-                py-4
-              "
-            >
-              <div className="min-w-0">
-                <p
-                  className="
-                    text-lg
-                    font-medium
-                    text-primary-800
-                  "
-                >
-                  សកម្ម
-                </p>
-
-                <p
-                  className="
-                    mt-1
-                    text-lg
-                    leading-7
-                    text-gray-500
-                  "
-                >
-                  បើក ដើម្បីឱ្យក្រុមអាយុនេះសកម្ម និងអាចប្រើបានក្នុងប្រព័ន្ធ។
-                </p>
-              </div>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={form.isActive}
-                onClick={() =>
-                  setForm((previous) => ({
-                    ...previous,
-                    isActive: !previous.isActive,
-                  }))
-                }
-                className={`
-                  relative
-                  h-7
-                  w-12
-                  shrink-0
-                  rounded-full
-                  transition
-                  focus:outline-none
-                  focus:ring-4
-                  focus:ring-primary-100
-                  ${form.isActive ? "bg-primary-700" : "bg-gray-300"}
-                `}
-              >
-                <span
-                  className={`
-                    absolute
-                    top-1
-                    h-5
-                    w-5
-                    rounded-full
-                    bg-white
-                    shadow-sm
-                    transition-all
-                    ${form.isActive ? "left-6" : "left-1"}
-                  `}
-                />
-              </button>
-            </div>
-          </Section>
-
-          {/* =================================================
-              VALIDATION ERROR
-          ================================================== */}
+          {/* Validation error */}
           {validationError && (
-            <div
-              className="
-                flex
-                items-start
-                gap-3
-                rounded-2xl
-                border
-                border-red-100
-                bg-red-50
-                px-5
-                py-4
-                text-lg
-                leading-7
-                text-red-600
-              "
-            >
-              <AlertTriangle
-                size={21}
-                className="
-                  mt-0.5
-                  shrink-0
-                "
-              />
-
+            <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-lg leading-7 text-red-600">
+              <AlertTriangle size={18} className="mt-0.5 shrink-0" />
               <span>{validationError}</span>
             </div>
           )}
 
-          {/* =================================================
-              ACTION BUTTONS
-              Same concept as ShopEditModal
-          ================================================== */}
-          <div
-            className="
-              flex
-              flex-col-reverse
-              gap-3
-              border-t
-              border-gray-100
-              pt-6
-              sm:flex-row
-              sm:items-center
-              sm:justify-end
-            "
-          >
+          {/* Action buttons */}
+          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-end">
             <button
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="
-                inline-flex
-                min-h-12
-                items-center
-                justify-center
-                rounded-full
-                border
-                border-gray-200
-                bg-white
-                px-7
-                text-lg
-                font-medium
-                text-gray-600
-                transition
-                hover:border-primary-200
-                hover:bg-primary-50
-                hover:text-primary-800
-                focus:outline-none
-                focus:ring-4
-                focus:ring-primary-100
-                disabled:cursor-not-allowed
-                disabled:opacity-50
-              "
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-normal text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               បោះបង់
             </button>
@@ -570,34 +289,14 @@ export default function AgeGroupFormModal({
             <button
               type="submit"
               disabled={saving}
-              className="
-                inline-flex
-                min-h-12
-                items-center
-                justify-center
-                gap-2
-                rounded-full
-                bg-primary-800
-                px-7
-                text-lg
-                font-medium
-                text-white
-                transition
-                hover:bg-primary-900
-                focus:outline-none
-                focus:ring-4
-                focus:ring-primary-200
-                disabled:cursor-not-allowed
-                disabled:opacity-60
-              "
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary-800 px-7 text-lg font-normal text-white transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving && <Loader2 size={20} className="animate-spin" />}
-
               {saving
                 ? "កំពុងរក្សាទុក..."
                 : item
                   ? "រក្សាទុកការកែប្រែ"
-                  : "បន្ថែម"}
+                  : "បន្ថែម ក្រុមអាយុ"}
             </button>
           </div>
         </form>
@@ -605,68 +304,6 @@ export default function AgeGroupFormModal({
     </div>
   );
 }
-
-/* =========================================================
-   SECTION
-   Same section-card concept as ShopEditModal
-========================================================= */
-
-function Section({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section
-      className="
-        rounded-2xl
-        border
-        border-gray-100
-        bg-white
-        p-5
-        sm:p-6
-      "
-    >
-      <div className="mb-6 flex items-center gap-3">
-        <div
-          className="
-            flex
-            h-11
-            w-11
-            shrink-0
-            items-center
-            justify-center
-            rounded-xl
-            bg-primary-50
-            text-primary-800
-          "
-        >
-          {icon}
-        </div>
-
-        <p
-          className="
-            text-3xl
-            font-semibold
-            text-primary-800
-          "
-        >
-          {title}
-        </p>
-      </div>
-
-      {children}
-    </section>
-  );
-}
-
-/* =========================================================
-   FIELD LABEL
-========================================================= */
 
 function FieldLabel({
   children,
@@ -676,42 +313,27 @@ function FieldLabel({
   required?: boolean;
 }) {
   return (
-    <span
-      className="
-        mb-2
-        block
-        text-lg
-        font-medium
-        text-primary-800
-      "
-    >
+    <span className="mb-2 block text-lg font-medium text-primary-800">
       {children}
-
       {required && <span className="text-red-500"> *</span>}
     </span>
   );
 }
 
-/* =========================================================
-   INPUT FIELD
-========================================================= */
-
 function Field({
   label,
   value,
   onChange,
-  type = "text",
-  min,
   placeholder,
   required = false,
+  type = "text",
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  type?: string;
-  min?: string;
   placeholder?: string;
   required?: boolean;
+  type?: string;
 }) {
   return (
     <label className="block">
@@ -719,30 +341,11 @@ function Field({
 
       <input
         type={type}
-        min={min}
-        required={required}
         value={value}
+        required={required}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="
-          h-[52px]
-          w-full
-          rounded-xl
-          border
-          border-gray-200
-          bg-gray-50
-          px-4
-          text-lg
-          text-gray-800
-          outline-none
-          transition
-          placeholder:text-gray-400
-          hover:border-gray-300
-          focus:border-primary-600
-          focus:bg-white
-          focus:ring-4
-          focus:ring-primary-100
-        "
+        className="h-[52px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
       />
     </label>
   );

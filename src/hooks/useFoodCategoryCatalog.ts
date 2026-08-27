@@ -83,14 +83,13 @@ export function useFoodCategoryCatalog() {
       const label =
         values.name.trim() ||
         values.localName.trim();
+      const code =
+        values.code?.trim().toUpperCase() ||
+        createCodeFromLabel(label);
 
       await createFoodCategory({
-        code: createCodeFromLabel(
-          label,
-        ),
-        name:
-          values.name.trim() ||
-          values.localName.trim(),
+        code,
+        name: label,
         description:
           values.description.trim() ||
           null,
@@ -113,20 +112,28 @@ export function useFoodCategoryCatalog() {
       uuid: string,
       values: FilterCatalogOptionFormValues,
     ) => {
+      const label =
+        values.name.trim() ||
+        values.localName.trim();
+
+      const body: any = {
+        name: label,
+        description:
+          values.description.trim() ||
+          null,
+        isActive:
+          values.active,
+        parentCategoryUuid:
+          values.parentUuid || null,
+      };
+
+      if (values.code?.trim()) {
+        body.code = values.code.trim().toUpperCase();
+      }
+
       await updateFoodCategory({
         uuid,
-        body: {
-          name:
-            values.name.trim() ||
-            values.localName.trim(),
-          description:
-            values.description.trim() ||
-            null,
-          isActive:
-            values.active,
-          parentCategoryUuid:
-            values.parentUuid || null,
-        },
+        body,
       }).unwrap();
 
       await refetch();

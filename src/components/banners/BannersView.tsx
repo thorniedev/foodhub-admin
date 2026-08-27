@@ -514,9 +514,7 @@ export default function BannersView() {
               <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800 min-w-[130px]">
                 ទីតាំង
               </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800 min-w-[150px]">
-                កាលបរិច្ឆេទបង្កើត
-              </th>
+         
               <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[130px]">
                 ស្ថានភាពផ្សាយ
               </th>
@@ -614,13 +612,7 @@ export default function BannersView() {
                       </div>
                     </td>
 
-                    {/* 4. Created Date */}
-                    <td className="whitespace-nowrap px-4 py-3">
-                      <div className="flex items-center gap-2 text-base font-normal text-gray-500">
-                        <Calendar size={16} className="text-primary-700 shrink-0" />
-                        <span>{formatDate(banner.createdAt)}</span>
-                      </div>
-                    </td>
+                
 
                     {/* 5. Published Status Toggle Switch & Badge */}
                     <td className="whitespace-nowrap px-4 py-3 text-center">

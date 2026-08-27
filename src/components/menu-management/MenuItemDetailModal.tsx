@@ -725,9 +725,7 @@ export default function MenuItemDetailModal({
                 <SectionCard icon={<Calendar size={15} />} title="ថ្ងៃបង្កើត" color="gray">
                   <p className="text-sm font-bold text-gray-800">{fmtDate(data.createdAt)}</p>
                 </SectionCard>
-                <SectionCard icon={<Calendar size={15} />} title="ថ្ងៃកែប្រែចុងក្រោយ" color="gray">
-                  <p className="text-sm font-bold text-gray-800">{fmtDate(data.updatedAt)}</p>
-                </SectionCard>
+          
               </div>
 
               {/* ── Gallery images ─── */}

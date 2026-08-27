@@ -574,8 +574,8 @@ export default function DietaryTypeManager() {
 
               {sizeOpen && (
                 <div className="absolute right-0 top-[60px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                  <p className="px-3 pb-2 pt-1 text-lg font-medium text-primary-800">
-                    ចំនួនក្នុងទំព័រ
+                  <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+                    ទំហំទំព័រ
                   </p>
 
                   {[10, 20, 50].map((value) => {
@@ -614,19 +614,19 @@ export default function DietaryTypeManager() {
 
                   setSizeOpen(false);
                 }}
-                className={`flex h-[52px] w-[52px] items-center justify-center rounded-full border transition ${sortOpen
-                    ? "border-primary-600 bg-primary-50 text-primary-800 ring-4 ring-primary-100"
-                    : "border-gray-200 bg-white text-gray-600 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800"
+                className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${sortOpen
+                    ? "border-primary-800 bg-primary-50 text-primary-800"
+                    : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
                   }`}
                 aria-label="Sort dietary types"
-                title="Sort dietary types"
+                title="តម្រៀប"
               >
-                <ArrowUpDown size={20} />
+                <ArrowUpDown size={18} />
               </button>
 
               {sortOpen && (
-                <div className="absolute right-0 top-[60px] z-[100] w-[210px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                  <p className="px-3 pb-2 pt-1 text-lg font-medium text-primary-800">
+                <div className="absolute right-0 top-[56px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                  <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
                     តម្រៀប
                   </p>
 
@@ -641,14 +641,16 @@ export default function DietaryTypeManager() {
                           setSortBy(option.value);
                           setSortOpen(false);
                         }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-lg font-medium transition ${selected
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg transition ${selected
                             ? "bg-primary-50 text-primary-800"
                             : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
                           }`}
                       >
                         <span>{option.label}</span>
 
-                        {selected && <Check size={18} />}
+                        {selected && (
+                          <Check size={16} className="text-primary-800" />
+                        )}
                       </button>
                     );
                   })}
