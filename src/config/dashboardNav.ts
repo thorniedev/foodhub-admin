@@ -6,6 +6,7 @@ import {
   Globe,
   SlidersHorizontal,
   Utensils,
+  ClipboardList,
   type LucideIcon,
 } from "lucide-react";
 
@@ -14,6 +15,7 @@ export interface NavItem {
   href?: string;
   icon?: LucideIcon;
   children?: NavItem[];
+  requiredRole?: string;
 }
 
 export const dashboardNav: NavItem[] = [
@@ -22,9 +24,15 @@ export const dashboardNav: NavItem[] = [
     icon: LayoutGrid,
     href: "/",
   },
-    {
+  {
     label: "អនុសាសន៍ & សវនកម្ម AI",
     href: "/admin/recommendations",
+  },
+  {
+    label: "កំណត់ត្រាសវនកម្ម",
+    icon: ClipboardList,
+    href: "/audit-logs",
+    requiredRole: "SUPER_ADMIN",
   },
 
   {
