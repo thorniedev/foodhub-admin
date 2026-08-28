@@ -36,13 +36,13 @@ export default function SectionCard({
   return (
     <section
       className={cn(
-        "relative flex flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm",
+        "relative flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm",
         className,
       )}
     >
       <div className={cn("h-1.5 w-full", styles.surface)} />
 
-      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-gray-100/90 bg-gradient-to-r from-gray-50/75 via-white to-white p-5">
+      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-gray-100/90 bg-gray-50/60 p-4 sm:p-5">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3.5">
             {icon && (
@@ -60,12 +60,12 @@ export default function SectionCard({
 
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-2xl font-medium text-gray-800">{title}</p>
+                <p className="text-lg font-semibold text-gray-800">{title}</p>
                 {hint && <InfoTooltip label={hint} />}
               </div>
 
               {description && (
-                <p className="mt-1 text-lg font-normal text-gray-500">{description}</p>
+                <p className="mt-1 text-sm leading-6 text-gray-500">{description}</p>
               )}
             </div>
           </div>

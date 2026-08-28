@@ -49,7 +49,7 @@ export default function DashboardKpiCard({
 
   return (
     <article className={cn(
-      "group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-gray-100 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-gray-200 hover:shadow-md",
+      "group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-gray-200 hover:shadow-md",
       styles.border,
     )}>
       <div className={cn("absolute inset-x-0 top-0 h-1.5", styles.surface)} />
@@ -69,11 +69,11 @@ export default function DashboardKpiCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <p className="truncate text-lg font-normal text-gray-600">{label}</p>
+            <p className="truncate text-sm font-medium text-gray-600">{label}</p>
             {hint && <InfoTooltip label={hint} />}
           </div>
 
-          <p className={cn("mt-1.5 text-3xl font-medium tabular-nums", styles.text)}>
+          <p className={cn("mt-1.5 text-2xl font-semibold tabular-nums", styles.text)}>
             {value}
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function DashboardKpiCard({
         {change ? (
           <span
             className={cn(
-              "inline-flex items-center gap-1 rounded-full px-3 py-1 text-lg font-normal tabular-nums",
+              "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium tabular-nums",
               changeClassName,
             )}
           >

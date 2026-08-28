@@ -29,7 +29,7 @@ export default function DashboardHeader({
   const activeTo = period?.to || fallbackRange?.to;
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+    <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex min-w-0 items-center gap-3.5">
         <span
           aria-hidden="true"
