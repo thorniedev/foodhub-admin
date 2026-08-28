@@ -262,7 +262,7 @@ export default function AdminDashboardPage() {
   );
 
   return (
-    <div className="space-y-5 pb-8">
+    <div className="flex flex-col gap-6 pb-10">
       <DashboardHeader
         period={overview.data?.period ?? null}
         fallbackRange={fallbackRange}

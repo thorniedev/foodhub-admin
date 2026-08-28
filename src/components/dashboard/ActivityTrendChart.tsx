@@ -92,7 +92,7 @@ export default function ActivityTrendChart({
                 aria-pressed={active}
                 onClick={() => setBarMetric(metric.value)}
                 className={cn(
-                  "min-h-10 cursor-pointer rounded-full px-4 text-lg font-normal transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                  "min-h-9 cursor-pointer rounded-full px-3 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
                   active
                     ? "bg-white text-gray-800 shadow-sm"
                     : "text-gray-600 hover:text-gray-800",
@@ -113,8 +113,8 @@ export default function ActivityTrendChart({
           description="មិនមានការមើល ការចុច ឬវគ្គណែនាំណាមួយត្រូវបានកត់ត្រាទេ។"
         />
       ) : (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2.5 text-lg font-normal">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
             <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 text-emerald-700">
               <span
                 className="h-2.5 w-2.5 rounded-full"
@@ -150,7 +150,7 @@ export default function ActivityTrendChart({
             </span>
           </div>
 
-          <div className="h-[300px] w-full">
+          <div className="h-[280px] w-full sm:h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={data}
