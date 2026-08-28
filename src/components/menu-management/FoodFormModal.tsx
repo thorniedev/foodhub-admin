@@ -1,15 +1,20 @@
 "use client";
 
 import {
+  CalendarDays,
   Clock,
+  Cloud,
   CupSoda,
+  Leaf,
   Loader2,
   MapPin,
   Plus,
   Save,
   ShieldAlert,
   Soup,
+  Sun,
   Trash2,
+  Users,
   UtensilsCrossed,
   X,
 } from "lucide-react";
@@ -230,7 +235,17 @@ export default function FoodFormModal({
       description: activeItem.description ?? "",
       categoryUuid: matchedCategoryUuid,
       cuisineUuid: matchedCuisineUuid,
-      defaultSpiceLevel: String(activeItem.defaultSpiceLevel ?? 0),
+      defaultSpiceLevel: String(
+        stored?.defaultSpiceLevel != null
+          ? stored.defaultSpiceLevel
+          : (stored as any)?.spiceLevel != null
+            ? (stored as any).spiceLevel
+            : activeItem.defaultSpiceLevel != null
+              ? activeItem.defaultSpiceLevel
+              : (activeItem as any)?.spiceLevel != null
+                ? (activeItem as any).spiceLevel
+                : 0,
+      ),
       calories:
         nutrition?.calories != null
           ? String(nutrition.calories)
@@ -276,7 +291,7 @@ export default function FoodFormModal({
 
     // Populate metadata relations if editing - prioritize stored relations saved by the user
     const rawSeasons =
-      Array.isArray(stored?.seasons) && stored.seasons.length > 0
+      stored?.seasons !== undefined && Array.isArray(stored.seasons)
         ? stored.seasons
         : Array.isArray(activeItem.seasons) && activeItem.seasons.length > 0
           ? activeItem.seasons
@@ -322,7 +337,7 @@ export default function FoodFormModal({
     );
 
     const rawEvents =
-      Array.isArray(stored?.events) && stored.events.length > 0
+      stored?.events !== undefined && Array.isArray(stored.events)
         ? stored.events
         : Array.isArray(activeItem.events) && activeItem.events.length > 0
           ? activeItem.events
@@ -368,9 +383,9 @@ export default function FoodFormModal({
     );
 
     const rawWeather =
-      Array.isArray(stored?.suitableWeather) && stored.suitableWeather.length > 0
+      stored?.suitableWeather !== undefined && Array.isArray(stored.suitableWeather)
         ? stored.suitableWeather
-        : Array.isArray(stored?.weatherConditions) && stored.weatherConditions.length > 0
+        : stored?.weatherConditions !== undefined && Array.isArray(stored.weatherConditions)
           ? stored.weatherConditions
           : Array.isArray(activeItem.suitableWeather) && activeItem.suitableWeather.length > 0
             ? activeItem.suitableWeather
@@ -422,7 +437,7 @@ export default function FoodFormModal({
     );
 
     const rawMealTypes =
-      Array.isArray(stored?.mealTypes) && stored.mealTypes.length > 0
+      stored?.mealTypes !== undefined && Array.isArray(stored.mealTypes)
         ? stored.mealTypes
         : Array.isArray(activeItem.mealTypes) && activeItem.mealTypes.length > 0
           ? activeItem.mealTypes
@@ -467,9 +482,9 @@ export default function FoodFormModal({
     );
 
     const rawAgeRules =
-      Array.isArray(stored?.ageRules) && stored.ageRules.length > 0
+      stored?.ageRules !== undefined && Array.isArray(stored.ageRules)
         ? stored.ageRules
-        : Array.isArray(stored?.ageGroups) && stored.ageGroups.length > 0
+        : stored?.ageGroups !== undefined && Array.isArray(stored.ageGroups)
           ? stored.ageGroups
           : Array.isArray(activeItem.ageRules) && activeItem.ageRules.length > 0
             ? activeItem.ageRules
@@ -514,7 +529,7 @@ export default function FoodFormModal({
     );
 
     const rawDietary =
-      Array.isArray(stored?.dietaryTypes) && stored.dietaryTypes.length > 0
+      stored?.dietaryTypes !== undefined && Array.isArray(stored.dietaryTypes)
         ? stored.dietaryTypes
         : Array.isArray(activeItem.dietaryTypes) && activeItem.dietaryTypes.length > 0
           ? activeItem.dietaryTypes
@@ -538,7 +553,7 @@ export default function FoodFormModal({
     );
 
     const rawAllergens =
-      Array.isArray(stored?.allergens) && stored.allergens.length > 0
+      stored?.allergens !== undefined && Array.isArray(stored.allergens)
         ? stored.allergens
         : Array.isArray(activeItem.allergens) && activeItem.allergens.length > 0
           ? activeItem.allergens
@@ -571,7 +586,7 @@ export default function FoodFormModal({
     );
 
     const rawPrepTimes =
-      Array.isArray(stored?.preparationTimes) && stored.preparationTimes.length > 0
+      stored?.preparationTimes !== undefined && Array.isArray(stored.preparationTimes)
         ? stored.preparationTimes
         : Array.isArray((activeItem as any)?.preparationTimes)
           ? (activeItem as any).preparationTimes
@@ -586,7 +601,7 @@ export default function FoodFormModal({
     );
 
     const rawDistances =
-      Array.isArray(stored?.distances) && stored.distances.length > 0
+      stored?.distances !== undefined && Array.isArray(stored.distances)
         ? stored.distances
         : Array.isArray((activeItem as any)?.distances)
           ? (activeItem as any).distances
@@ -1044,6 +1059,7 @@ export default function FoodFormModal({
           allergens: (payload as any).allergens,
           preparationTimes: payload.preparationTimes,
           distances: payload.distances,
+          defaultSpiceLevel: payload.defaultSpiceLevel,
         });
       }
     } catch (submitError) {
@@ -1070,10 +1086,10 @@ export default function FoodFormModal({
               )}
             </div>
             <div>
-              <p className="text-2xl font-black text-[#137A3D]">
+              <p className="text-3xl font-normal text-[#137A3D]">
                 {modalTitle}
               </p>
-              <p className="mt-0.5 text-base text-gray-500">
+              <p className="mt-1 text-lg font-normal text-gray-500">
                 {modalSubtitle}
               </p>
             </div>
@@ -1125,6 +1141,7 @@ export default function FoodFormModal({
                 }
                 options={categorySelectOptions}
                 placeholder={catalogType === "DRINK" ? "ជ្រើសប្រភេទភេសជ្ជៈ..." : "ជ្រើសប្រភេទម្ហូប..."}
+                pill
               />
             </div>
 
@@ -1140,23 +1157,27 @@ export default function FoodFormModal({
                 }
                 options={cuisineSelectOptions}
                 placeholder="ជ្រើសម្ហូបតាមប្រទេស..."
+                pill
               />
             </div>
 
-            <div>
-              <Label>កម្រិតហឹរ (Spice Level 0-5)</Label>
-              <CustomSelect
-                value={values.defaultSpiceLevel}
-                onChange={(val) =>
-                  setValues((current) => ({
-                    ...current,
-                    defaultSpiceLevel: val,
-                  }))
-                }
-                options={spiceLevelSelectOptions}
-                placeholder="ជ្រើសកម្រិតហឹរ..."
-              />
-            </div>
+            {catalogType !== "DRINK" && (
+              <div>
+                <Label>កម្រិតហឹរ (Spice Level 0-5)</Label>
+                <CustomSelect
+                  value={values.defaultSpiceLevel}
+                  onChange={(val) =>
+                    setValues((current) => ({
+                      ...current,
+                      defaultSpiceLevel: val,
+                    }))
+                  }
+                  options={spiceLevelSelectOptions}
+                  placeholder="ជ្រើសកម្រិតហឹរ..."
+                  pill
+                />
+              </div>
+            )}
 
             <div className="flex flex-col justify-end">
               <Label>ស្ថានភាព</Label>
@@ -1168,13 +1189,13 @@ export default function FoodFormModal({
                     isActive: !current.isActive,
                   }))
                 }
-                className={`flex h-11 w-full items-center justify-between rounded-2xl border px-4 transition cursor-pointer ${
+                className={`flex h-12 w-full items-center justify-between rounded-full border px-5 transition cursor-pointer ${
                   values.isActive
                     ? "border-emerald-200 bg-emerald-50/60 text-emerald-800"
                     : "border-gray-200 bg-gray-50 text-gray-500"
                 }`}
               >
-                <span className="text-base font-bold">
+                <span className="text-lg font-normal">
                   {values.isActive ? "សកម្ម (Active)" : "អសកម្ម (Inactive)"}
                 </span>
                 <div
@@ -1202,14 +1223,15 @@ export default function FoodFormModal({
                     description: event.target.value,
                   }))
                 }
-                className={`${inputClass} h-auto py-3.5`}
+                className="w-full rounded-3xl border border-gray-200 bg-white px-5 py-3.5 text-lg font-normal text-gray-700 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100 placeholder:text-gray-400 placeholder:font-normal"
+                placeholder="បញ្ចូលការពិពណ៌នា..."
               />
             </label>
           </div>
 
           {/* Nutrition Section */}
           <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
-            <p className="mb-4 text-2xl font-black text-gray-900">សារធាតុចិញ្ចឹម (Nutrition)</p>
+            <p className="mb-4 text-2xl font-normal text-gray-800">សារធាតុចិញ្ចឹម (Nutrition)</p>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {[
@@ -1247,21 +1269,21 @@ export default function FoodFormModal({
           </div>
 
           {/* Dietary Types Metadata Section */}
-          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-black text-gray-900">របបអាហារ (Dietary Types)</p>
-                <p className="mt-1 text-lg text-gray-500">កំណត់របបអាហារដែលត្រូវគ្នា (Gluten Free, Vegan, Halal, etc.)</p>
+          <div className="rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50/40 to-white p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                  <Leaf size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-normal text-gray-800">របបអាហារ <span className="text-lg font-normal text-gray-400">(Dietary Types)</span></p>
+                  <p className="mt-0.5 text-lg font-normal text-gray-500">Gluten Free, Vegan, Halal, etc.</p>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() =>
-                  setDietaryTypeRows((current) => [
-                    ...current,
-                    { code: "", name: "" },
-                  ])
-                }
-                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
+                onClick={() => setDietaryTypeRows((current) => [...current, { code: "", name: "" }])}
+                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-emerald-700 active:scale-95 cursor-pointer"
               >
                 <Plus size={18} />
                 បន្ថែមរបបអាហារ
@@ -1269,35 +1291,37 @@ export default function FoodFormModal({
             </div>
 
             {dietaryTypeRows.length === 0 ? (
-              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសរបបអាហារ</p>
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-emerald-200 bg-white/70 px-5 py-4">
+                <Leaf size={18} className="shrink-0 text-emerald-400" />
+                <p className="text-lg font-normal text-gray-400">មិនទាន់បានជ្រើសរបបអាហារ</p>
+              </div>
             ) : (
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-2.5">
                 {dietaryTypeRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <div className="flex-1 min-w-[240px]">
+                  <div key={idx} className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-emerald-100 hover:shadow">
+                    <div className="flex-1 min-w-[220px]">
                       <CustomSelect
                         value={row.code}
                         onChange={(val) => {
                           const found = dietaryTypes.find((d) => d.code === val);
                           setDietaryTypeRows((prev) =>
                             prev.map((r, i) =>
-                              i === idx
-                                ? { ...r, code: val, name: found?.name ?? val }
-                                : r,
+                              i === idx ? { ...r, code: val, name: found?.name ?? val } : r,
                             ),
                           );
                         }}
                         options={dietaryTypeSelectOptions}
                         placeholder="ជ្រើសរបបអាហារ..."
+                        searchable
+                        pill
                       />
                     </div>
-
                     <button
                       type="button"
                       onClick={() => setDietaryTypeRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 ))}
@@ -1306,21 +1330,21 @@ export default function FoodFormModal({
           </div>
 
           {/* Allergens Metadata Section */}
-          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-black text-gray-900">សារធាតុបង្កអាឡែស៊ី (Allergens)</p>
-                <p className="mt-1 text-lg text-gray-500">កំណត់សារធាតុដែលអាចបង្កអាឡែស៊ី (Peanuts, Seafood, Dairy, etc.)</p>
+          <div className="rounded-3xl border border-rose-100 bg-gradient-to-br from-rose-50/40 to-white p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+                  <ShieldAlert size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-normal text-gray-800">សារធាតុបង្កអាឡែស៊ី <span className="text-lg font-normal text-gray-400">(Allergens)</span></p>
+                  <p className="mt-0.5 text-lg font-normal text-gray-500">Peanuts, Seafood, Dairy, etc.</p>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() =>
-                  setAllergenRows((current) => [
-                    ...current,
-                    { allergenUuid: "", riskLevel: "MEDIUM", notes: "" },
-                  ])
-                }
-                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
+                onClick={() => setAllergenRows((current) => [...current, { allergenUuid: "", riskLevel: "MEDIUM", notes: "" }])}
+                className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-rose-700 active:scale-95 cursor-pointer"
               >
                 <Plus size={18} />
                 បន្ថែមអាឡែស៊ី
@@ -1328,12 +1352,15 @@ export default function FoodFormModal({
             </div>
 
             {allergenRows.length === 0 ? (
-              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសសារធាតុបង្កអាឡែស៊ី</p>
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-rose-200 bg-white/70 px-5 py-4">
+                <ShieldAlert size={18} className="shrink-0 text-rose-400" />
+                <p className="text-lg font-normal text-gray-400">មិនទាន់បានជ្រើសសារធាតុបង្កអាឡែស៊ី</p>
+              </div>
             ) : (
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-2.5">
                 {allergenRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
-                    <div className="flex-1 min-w-[220px]">
+                  <div key={idx} className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-rose-100 hover:shadow">
+                    <div className="flex-1 min-w-[200px]">
                       <CustomSelect
                         value={row.allergenUuid}
                         onChange={(val) => {
@@ -1343,22 +1370,10 @@ export default function FoodFormModal({
                         }}
                         options={allergenSelectOptions}
                         placeholder="ជ្រើសសារធាតុបង្កអាឡែស៊ី..."
+                        searchable
+                        pill
                       />
                     </div>
-
-                    <div className="w-44">
-                      <CustomSelect
-                        value={row.riskLevel || "MEDIUM"}
-                        onChange={(val) => {
-                          setAllergenRows((prev) =>
-                            prev.map((r, i) => (i === idx ? { ...r, riskLevel: val } : r)),
-                          );
-                        }}
-                        options={allergenRiskSelectOptions}
-                        placeholder="កម្រិតហានិភ័យ..."
-                      />
-                    </div>
-
                     <input
                       type="text"
                       placeholder="កំណត់ចំណាំ (Notes)..."
@@ -1369,15 +1384,14 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
                         );
                       }}
-                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
+                      className="h-12 flex-1 min-w-[180px] rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 outline-none placeholder:font-normal placeholder:text-gray-400 focus:border-rose-400 focus:ring-2 focus:ring-rose-100"
                     />
-
                     <button
                       type="button"
                       onClick={() => setAllergenRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 ))}
@@ -1386,21 +1400,21 @@ export default function FoodFormModal({
           </div>
 
           {/* Meal Types Metadata Section */}
-          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-black text-gray-900">ពេលទទួលទាន (Meal Types)</p>
-                <p className="mt-1 text-lg text-gray-500">កំណត់ពេលទទួលទាន (Breakfast, Lunch, Dinner, etc.)</p>
+          <div className="rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50/40 to-white p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                  <UtensilsCrossed size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-normal text-gray-800">ពេលទទួលទាន <span className="text-lg font-normal text-gray-400">(Meal Types)</span></p>
+                  <p className="mt-0.5 text-lg font-normal text-gray-500">Breakfast, Lunch, Dinner, etc.</p>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() =>
-                  setMealTypeRows((current) => [
-                    ...current,
-                    { mealTypeUuid: "", suitabilityScore: 1.0 },
-                  ])
-                }
-                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
+                onClick={() => setMealTypeRows((current) => [...current, { mealTypeUuid: "", suitabilityScore: 1.0 }])}
+                className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-blue-700 active:scale-95 cursor-pointer"
               >
                 <Plus size={18} />
                 បន្ថែមពេលទទួលទាន
@@ -1408,11 +1422,14 @@ export default function FoodFormModal({
             </div>
 
             {mealTypeRows.length === 0 ? (
-              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសពេលទទួលទាន</p>
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-blue-200 bg-white/70 px-5 py-4">
+                <UtensilsCrossed size={18} className="shrink-0 text-blue-400" />
+                <p className="text-lg font-normal text-gray-400">មិនទាន់បានជ្រើសពេលទទួលទាន</p>
+              </div>
             ) : (
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-2.5">
                 {mealTypeRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                  <div key={idx} className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-blue-100 hover:shadow">
                     <div className="flex-1 min-w-[220px]">
                       <CustomSelect
                         value={row.mealTypeUuid}
@@ -1423,37 +1440,16 @@ export default function FoodFormModal({
                         }}
                         options={mealTypeSelectOptions}
                         placeholder="ជ្រើសពេលទទួលទាន..."
+                        searchable
+                        pill
                       />
                     </div>
-
-                    <input
-                      type="number"
-                      step="0.05"
-                      min="0"
-                      max="1"
-                      placeholder="Suitability Score (0-1)"
-                      value={row.suitabilityScore ?? 1.0}
-                      onKeyDown={(e) => {
-                        if (e.key === "-" || e.key === "e") {
-                          e.preventDefault();
-                        }
-                      }}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        if (val < 0) return;
-                        setMealTypeRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
-                        );
-                      }}
-                      className="h-11 w-44 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
-                    />
-
                     <button
                       type="button"
                       onClick={() => setMealTypeRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 ))}
@@ -1462,25 +1458,26 @@ export default function FoodFormModal({
           </div>
 
           {/* Age Rules Section */}
-          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-black text-gray-900">ក្រុមអាយុ (Age Groups)</p>
-                <p className="mt-1 text-lg text-gray-500">កំណត់លក្ខខណ្ឌសាកសមសម្រាប់ក្រុមអាយុ</p>
+          <div className="rounded-3xl border border-violet-100 bg-gradient-to-br from-violet-50/40 to-white p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+                  <Users size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-normal text-gray-800">ក្រុមអាយុ <span className="text-lg font-normal text-gray-400">(Age Groups)</span></p>
+                  <p className="mt-0.5 text-lg font-normal text-gray-500">កំណត់លក្ខខណ្ឌសាកសមសម្រាប់ក្រុមអាយុ</p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() =>
                   setAgeRuleRows((current) => [
                     ...current,
-                    {
-                      ageGroupUuid: "",
-                      ruleResult: "ALLOWED",
-                      reasonText: "Suitable as a normal serving.",
-                    },
+                    { ageGroupUuid: "", ruleResult: "ALLOWED", reasonText: "Suitable as a normal serving." },
                   ])
                 }
-                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
+                className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-violet-700 active:scale-95 cursor-pointer"
               >
                 <Plus size={18} />
                 បន្ថែមក្រុមអាយុ
@@ -1488,11 +1485,14 @@ export default function FoodFormModal({
             </div>
 
             {ageRuleRows.length === 0 ? (
-              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសក្រុមអាយុ</p>
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-violet-200 bg-white/70 px-5 py-4">
+                <Users size={18} className="shrink-0 text-violet-400" />
+                <p className="text-lg font-normal text-gray-400">មិនទាន់បានជ្រើសក្រុមអាយុ</p>
+              </div>
             ) : (
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-2.5">
                 {ageRuleRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                  <div key={idx} className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-violet-100 hover:shadow">
                     <div className="flex-1 min-w-[200px]">
                       <CustomSelect
                         value={row.ageGroupUuid}
@@ -1503,9 +1503,10 @@ export default function FoodFormModal({
                         }}
                         options={ageGroupSelectOptions}
                         placeholder="ជ្រើសក្រុមអាយុ..."
+                        searchable
+                        pill
                       />
                     </div>
-
                     <div className="w-48">
                       <CustomSelect
                         value={row.ruleResult || "ALLOWED"}
@@ -1516,9 +1517,9 @@ export default function FoodFormModal({
                         }}
                         options={ageRuleResultSelectOptions}
                         placeholder="លទ្ធផល..."
+                        pill
                       />
                     </div>
-
                     <input
                       type="text"
                       placeholder="ហេតុផល (Reason)..."
@@ -1529,15 +1530,14 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
                         );
                       }}
-                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
+                      className="h-12 flex-1 min-w-[180px] rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 outline-none placeholder:font-normal placeholder:text-gray-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
                     />
-
                     <button
                       type="button"
                       onClick={() => setAgeRuleRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 ))}
@@ -1546,21 +1546,21 @@ export default function FoodFormModal({
           </div>
 
           {/* Seasons Metadata Section */}
-          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-black text-gray-900">រដូវកាល (Seasons)</p>
-                <p className="mt-1 text-lg text-gray-500">កំណត់រដូវកាលដែលសាកសមសម្រាប់មុខម្ហូប/ភេសជ្ជៈនេះ</p>
+          <div className="rounded-3xl border border-amber-100 bg-gradient-to-br from-amber-50/40 to-white p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                  <Sun size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-normal text-gray-800">រដូវកាល <span className="text-lg font-normal text-gray-400">(Seasons)</span></p>
+                  <p className="mt-0.5 text-lg font-normal text-gray-500">កំណត់រដូវកាលដែលសាកសមសម្រាប់មុខម្ហូប/ភេសជ្ជៈ</p>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() =>
-                  setSeasonRows((current) => [
-                    ...current,
-                    { seasonUuid: "", suitabilityScore: 1.0, reasonText: "" },
-                  ])
-                }
-                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
+                onClick={() => setSeasonRows((current) => [...current, { seasonUuid: "", suitabilityScore: 1.0, reasonText: "" }])}
+                className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-5 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-amber-600 active:scale-95 cursor-pointer"
               >
                 <Plus size={18} />
                 បន្ថែមរដូវកាល
@@ -1568,11 +1568,14 @@ export default function FoodFormModal({
             </div>
 
             {seasonRows.length === 0 ? (
-              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសរដូវកាល</p>
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-amber-200 bg-white/70 px-5 py-4">
+                <Sun size={18} className="shrink-0 text-amber-400" />
+                <p className="text-lg font-normal text-gray-400">មិនទាន់បានជ្រើសរដូវកាល</p>
+              </div>
             ) : (
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-2.5">
                 {seasonRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                  <div key={idx} className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-amber-100 hover:shadow">
                     <div className="flex-1 min-w-[200px]">
                       <CustomSelect
                         value={row.seasonUuid}
@@ -1583,31 +1586,10 @@ export default function FoodFormModal({
                         }}
                         options={seasonSelectOptions}
                         placeholder="ជ្រើសរដូវកាល..."
+                        searchable
+                        pill
                       />
                     </div>
-
-                    <input
-                      type="number"
-                      step="0.05"
-                      min="0"
-                      max="1"
-                      placeholder="Score (0-1)"
-                      value={row.suitabilityScore ?? 1.0}
-                      onKeyDown={(e) => {
-                        if (e.key === "-" || e.key === "e") {
-                          e.preventDefault();
-                        }
-                      }}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        if (val < 0) return;
-                        setSeasonRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
-                        );
-                      }}
-                      className="h-11 w-32 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
-                    />
-
                     <input
                       type="text"
                       placeholder="ហេតុផល (Reason)..."
@@ -1618,15 +1600,14 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
                         );
                       }}
-                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
+                      className="h-12 flex-1 min-w-[180px] rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 outline-none placeholder:font-normal placeholder:text-gray-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
                     />
-
                     <button
                       type="button"
                       onClick={() => setSeasonRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 ))}
@@ -1635,21 +1616,21 @@ export default function FoodFormModal({
           </div>
 
           {/* Events Metadata Section */}
-          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-black text-gray-900">ព្រឹត្តិការណ៍ / បុណ្យទាន (Events)</p>
-                <p className="mt-1 text-lg text-gray-500">កំណត់ពិធីបុណ្យ ឬព្រឹត្តិការណ៍ដែលពាក់ព័ន្ធ</p>
+          <div className="rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50/40 to-white p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-pink-100 text-pink-600">
+                  <CalendarDays size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-normal text-gray-800">ព្រឹត្តិការណ៍ / បុណ្យទាន <span className="text-lg font-normal text-gray-400">(Events)</span></p>
+                  <p className="mt-0.5 text-lg font-normal text-gray-500">កំណត់ពិធីបុណ្យ ឬព្រឹត្តិការណ៍ដែលពាក់ព័ន្ធ</p>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() =>
-                  setEventRows((current) => [
-                    ...current,
-                    { eventUuid: "", relevanceScore: 0.9, reasonText: "" },
-                  ])
-                }
-                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
+                onClick={() => setEventRows((current) => [...current, { eventUuid: "", relevanceScore: 0.9, reasonText: "" }])}
+                className="inline-flex items-center gap-1.5 rounded-full bg-pink-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-pink-700 active:scale-95 cursor-pointer"
               >
                 <Plus size={18} />
                 បន្ថែមព្រឹត្តិការណ៍
@@ -1657,11 +1638,14 @@ export default function FoodFormModal({
             </div>
 
             {eventRows.length === 0 ? (
-              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសព្រឹត្តិការណ៍</p>
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-pink-200 bg-white/70 px-5 py-4">
+                <CalendarDays size={18} className="shrink-0 text-pink-400" />
+                <p className="text-lg font-normal text-gray-400">មិនទាន់បានជ្រើសព្រឹត្តិការណ៍</p>
+              </div>
             ) : (
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-2.5">
                 {eventRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                  <div key={idx} className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-pink-100 hover:shadow">
                     <div className="flex-1 min-w-[200px]">
                       <CustomSelect
                         value={row.eventUuid}
@@ -1672,31 +1656,10 @@ export default function FoodFormModal({
                         }}
                         options={eventSelectOptions}
                         placeholder="ជ្រើសព្រឹត្តិការណ៍..."
+                        searchable
+                        pill
                       />
                     </div>
-
-                    <input
-                      type="number"
-                      step="0.05"
-                      min="0"
-                      max="1"
-                      placeholder="Score (0-1)"
-                      value={row.relevanceScore ?? 0.9}
-                      onKeyDown={(e) => {
-                        if (e.key === "-" || e.key === "e") {
-                          e.preventDefault();
-                        }
-                      }}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        if (val < 0) return;
-                        setEventRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, relevanceScore: val } : r)),
-                        );
-                      }}
-                      className="h-11 w-32 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
-                    />
-
                     <input
                       type="text"
                       placeholder="ហេតុផល (Reason)..."
@@ -1707,15 +1670,14 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
                         );
                       }}
-                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
+                      className="h-12 flex-1 min-w-[180px] rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 outline-none placeholder:font-normal placeholder:text-gray-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
                     />
-
                     <button
                       type="button"
                       onClick={() => setEventRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 ))}
@@ -1724,21 +1686,21 @@ export default function FoodFormModal({
           </div>
 
           {/* Weather Conditions Metadata Section */}
-          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-black text-gray-900">ស្ថានភាពអាកាសធាតុ (Weather Conditions)</p>
-                <p className="mt-1 text-lg text-gray-500">កំណត់អាកាសធាតុដែលសាកសមសម្រាប់មុខម្ហូប/ភេសជ្ជៈនេះ</p>
+          <div className="rounded-3xl border border-sky-100 bg-gradient-to-br from-sky-50/40 to-white p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-600">
+                  <Cloud size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-normal text-gray-800">ស្ថានភាពអាកាសធាតុ <span className="text-lg font-normal text-gray-400">(Weather)</span></p>
+                  <p className="mt-0.5 text-lg font-normal text-gray-500">កំណត់អាកាសធាតុដែលសាកសមសម្រាប់មុខម្ហូប/ភេសជ្ជៈ</p>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() =>
-                  setWeatherRows((current) => [
-                    ...current,
-                    { weatherConditionUuid: "", suitabilityScore: 0.8, reasonText: "" },
-                  ])
-                }
-                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
+                onClick={() => setWeatherRows((current) => [...current, { weatherConditionUuid: "", suitabilityScore: 0.8, reasonText: "" }])}
+                className="inline-flex items-center gap-1.5 rounded-full bg-sky-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-sky-700 active:scale-95 cursor-pointer"
               >
                 <Plus size={18} />
                 បន្ថែមអាកាសធាតុ
@@ -1746,11 +1708,14 @@ export default function FoodFormModal({
             </div>
 
             {weatherRows.length === 0 ? (
-              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសអាកាសធាតុ</p>
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-sky-200 bg-white/70 px-5 py-4">
+                <Cloud size={18} className="shrink-0 text-sky-400" />
+                <p className="text-lg font-normal text-gray-400">មិនទាន់បានជ្រើសអាកាសធាតុ</p>
+              </div>
             ) : (
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-2.5">
                 {weatherRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                  <div key={idx} className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-sky-100 hover:shadow">
                     <div className="flex-1 min-w-[200px]">
                       <CustomSelect
                         value={row.weatherConditionUuid}
@@ -1761,31 +1726,10 @@ export default function FoodFormModal({
                         }}
                         options={weatherSelectOptions}
                         placeholder="ជ្រើសអាកាសធាតុ..."
+                        searchable
+                        pill
                       />
                     </div>
-
-                    <input
-                      type="number"
-                      step="0.05"
-                      min="0"
-                      max="1"
-                      placeholder="Score (0-1)"
-                      value={row.suitabilityScore ?? 0.8}
-                      onKeyDown={(e) => {
-                        if (e.key === "-" || e.key === "e") {
-                          e.preventDefault();
-                        }
-                      }}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        if (val < 0) return;
-                        setWeatherRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, suitabilityScore: val } : r)),
-                        );
-                      }}
-                      className="h-11 w-32 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
-                    />
-
                     <input
                       type="text"
                       placeholder="ហេតុផល (Reason)..."
@@ -1796,15 +1740,14 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, reasonText: val } : r)),
                         );
                       }}
-                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
+                      className="h-12 flex-1 min-w-[180px] rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 outline-none placeholder:font-normal placeholder:text-gray-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
                     />
-
                     <button
                       type="button"
                       onClick={() => setWeatherRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 ))}
@@ -1813,21 +1756,21 @@ export default function FoodFormModal({
           </div>
 
           {/* Preparation Times Section */}
-          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-black text-gray-900">ពេលចម្អិន (Preparation Times)</p>
-                <p className="mt-1 text-lg text-gray-500">កំណត់រយៈពេលរៀបចំ ឬចម្អិនមុខម្ហូប/ភេសជ្ជៈនេះ</p>
+          <div className="rounded-3xl border border-teal-100 bg-gradient-to-br from-teal-50/40 to-white p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
+                  <Clock size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-normal text-gray-800">ពេលចម្អិន <span className="text-lg font-normal text-gray-400">(Preparation Times)</span></p>
+                  <p className="mt-0.5 text-lg font-normal text-gray-500">កំណត់រយៈពេលរៀបចំ ឬចម្អិនមុខម្ហូប/ភេសជ្ជៈ</p>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() =>
-                  setPreparationTimeRows((current) => [
-                    ...current,
-                    { optionUuid: "", notes: "" },
-                  ])
-                }
-                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
+                onClick={() => setPreparationTimeRows((current) => [...current, { optionUuid: "", notes: "" }])}
+                className="inline-flex items-center gap-1.5 rounded-full bg-teal-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-teal-700 active:scale-95 cursor-pointer"
               >
                 <Plus size={18} />
                 បន្ថែមពេលចម្អិន
@@ -1835,11 +1778,14 @@ export default function FoodFormModal({
             </div>
 
             {preparationTimeRows.length === 0 ? (
-              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសពេលចម្អិន</p>
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-teal-200 bg-white/70 px-5 py-4">
+                <Clock size={18} className="shrink-0 text-teal-400" />
+                <p className="text-lg font-normal text-gray-400">មិនទាន់បានជ្រើសពេលចម្អិន</p>
+              </div>
             ) : (
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-2.5">
                 {preparationTimeRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                  <div key={idx} className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-teal-100 hover:shadow">
                     <div className="flex-1 min-w-[220px]">
                       <CustomSelect
                         value={row.optionUuid}
@@ -1850,9 +1796,10 @@ export default function FoodFormModal({
                         }}
                         options={preparationTimeSelectOptions}
                         placeholder="ជ្រើសពេលចម្អិន..."
+                        searchable
+                        pill
                       />
                     </div>
-
                     <input
                       type="text"
                       placeholder="កំណត់ចំណាំ (Notes)..."
@@ -1863,15 +1810,14 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
                         );
                       }}
-                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
+                      className="h-12 flex-1 min-w-[180px] rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 outline-none placeholder:font-normal placeholder:text-gray-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
                     />
-
                     <button
                       type="button"
                       onClick={() => setPreparationTimeRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 ))}
@@ -1880,21 +1826,21 @@ export default function FoodFormModal({
           </div>
 
           {/* Distances Section */}
-          <div className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-black text-gray-900">ចម្ងាយដឹកជញ្ជូន (Distances)</p>
-                <p className="mt-1 text-lg text-gray-500">កំណត់កម្រិតចម្ងាយសមស្របសម្រាប់ការដឹកជញ្ជូនមុខម្ហូបនេះ</p>
+          <div className="rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50/40 to-white p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+                  <MapPin size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-normal text-gray-800">ចម្ងាយដឹកជញ្ជូន <span className="text-lg font-normal text-gray-400">(Distances)</span></p>
+                  <p className="mt-0.5 text-lg font-normal text-gray-500">កំណត់កម្រិតចម្ងាយសមស្របសម្រាប់ការដឹកជញ្ជូន</p>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() =>
-                  setDistanceRows((current) => [
-                    ...current,
-                    { optionUuid: "", notes: "" },
-                  ])
-                }
-                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-lg font-bold text-[#137A3D] hover:bg-emerald-100 transition active:scale-95"
+                onClick={() => setDistanceRows((current) => [...current, { optionUuid: "", notes: "" }])}
+                className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-indigo-700 active:scale-95 cursor-pointer"
               >
                 <Plus size={18} />
                 បន្ថែមចម្ងាយ
@@ -1902,11 +1848,14 @@ export default function FoodFormModal({
             </div>
 
             {distanceRows.length === 0 ? (
-              <p className="mt-4 text-lg italic text-gray-400">មិនទាន់បានជ្រើសចម្ងាយ</p>
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-indigo-200 bg-white/70 px-5 py-4">
+                <MapPin size={18} className="shrink-0 text-indigo-400" />
+                <p className="text-lg font-normal text-gray-400">មិនទាន់បានជ្រើសចម្ងាយ</p>
+              </div>
             ) : (
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-2.5">
                 {distanceRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-xs border border-gray-100">
+                  <div key={idx} className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-indigo-100 hover:shadow">
                     <div className="flex-1 min-w-[220px]">
                       <CustomSelect
                         value={row.optionUuid}
@@ -1917,9 +1866,10 @@ export default function FoodFormModal({
                         }}
                         options={distanceSelectOptions}
                         placeholder="ជ្រើសកម្រិតចម្ងាយ..."
+                        searchable
+                        pill
                       />
                     </div>
-
                     <input
                       type="text"
                       placeholder="កំណត់ចំណាំ (Notes)..."
@@ -1930,15 +1880,14 @@ export default function FoodFormModal({
                           prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
                         );
                       }}
-                      className="h-11 flex-1 min-w-[200px] rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
+                      className="h-12 flex-1 min-w-[180px] rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 outline-none placeholder:font-normal placeholder:text-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
                     />
-
                     <button
                       type="button"
                       onClick={() => setDistanceRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 ))}
@@ -1961,7 +1910,7 @@ export default function FoodFormModal({
           />
 
           {error && (
-            <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg font-semibold text-red-600">
+            <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg font-normal text-red-600">
               {error}
             </div>
           )}
@@ -1971,7 +1920,7 @@ export default function FoodFormModal({
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="rounded-2xl border border-gray-200 px-7 py-3.5 text-xl font-bold text-gray-600 hover:bg-gray-50 transition"
+              className="rounded-full border border-gray-200 px-8 py-3.5 text-xl font-normal text-gray-600 hover:bg-gray-50 transition cursor-pointer"
             >
               បោះបង់
             </button>
@@ -1980,7 +1929,7 @@ export default function FoodFormModal({
               type="button"
               disabled={saving}
               onClick={() => void submit()}
-              className="inline-flex items-center gap-2.5 rounded-2xl bg-[#137A3D] px-7 py-3.5 text-xl font-bold text-white shadow-md hover:bg-emerald-800 disabled:opacity-60 transition active:scale-95"
+              className="inline-flex items-center gap-2.5 rounded-full bg-[#137A3D] px-8 py-3.5 text-xl font-normal text-white shadow-md hover:bg-emerald-800 disabled:opacity-60 transition active:scale-95 cursor-pointer"
             >
               {saving ? (
                 <Loader2 size={22} className="animate-spin" />
@@ -1997,7 +1946,7 @@ export default function FoodFormModal({
 }
 
 const inputClass =
-  "h-11 w-full rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-800 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100 placeholder:text-gray-400 placeholder:font-normal";
+  "h-12 w-full rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100 placeholder:text-gray-400 placeholder:font-normal";
 
 function Label({
   children,
@@ -2011,20 +1960,20 @@ function Label({
     const cleanText = children.replace(/\s*\*/g, "").trim();
 
     return (
-      <span className="mb-2 flex items-center gap-1 text-base font-bold text-gray-800">
+      <span className="mb-2 flex items-center gap-1 text-lg font-normal text-gray-700">
         <span>{cleanText}</span>
         {(hasAsterisk || required) && (
-          <span className="text-red-500 font-bold ml-0.5">*</span>
+          <span className="text-red-500 font-normal ml-0.5">*</span>
         )}
       </span>
     );
   }
 
   return (
-    <span className="mb-2 flex items-center gap-1 text-base font-bold text-gray-800">
+    <span className="mb-2 flex items-center gap-1 text-lg font-normal text-gray-700">
       <span>{children}</span>
       {required && (
-        <span className="text-red-500 font-bold ml-0.5">*</span>
+        <span className="text-red-500 font-normal ml-0.5">*</span>
       )}
     </span>
   );

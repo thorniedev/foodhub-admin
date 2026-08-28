@@ -122,6 +122,7 @@ export const foodCategoryApi = baseApi.injectEndpoints({
             page,
             size,
             sort: "name,asc",
+            ...(includeInactive ? { includeInactive: true } : {}),
           },
         };
       },

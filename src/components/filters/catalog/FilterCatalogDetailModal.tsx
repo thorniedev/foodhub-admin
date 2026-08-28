@@ -373,23 +373,34 @@ export default function FilterCatalogDetailModal({
           </div>
         ) : (
           <div className="space-y-4 p-6 sm:p-7">
-            {/* Name */}
-            <div>
-              <FieldLabel>ឈ្មោះ</FieldLabel>
-              <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
-                {displayItem?.localName || displayItem?.name || "—"}
+            {/* Name & Code */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <FieldLabel>ឈ្មោះ</FieldLabel>
+                <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-medium text-gray-800">
+                  {displayItem?.localName || displayItem?.name || "—"}
+                </div>
+              </div>
+
+              <div>
+                <FieldLabel>កូដ (Code)</FieldLabel>
+                <div className="flex min-h-[50px] w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 font-mono text-lg font-semibold text-gray-800">
+                  {displayItem?.code || "—"}
+                </div>
               </div>
             </div>
 
           
 
             {/* Description */}
-            <div>
-              <FieldLabel>ការពិពណ៌នា</FieldLabel>
-              <div className="min-h-[84px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg leading-8 text-gray-800">
-                {displayItem?.description || "គ្មានការពិពណ៌នាឡើយ"}
+            {!isMealType && (
+              <div>
+                <FieldLabel>ការពិពណ៌នា</FieldLabel>
+                <div className="min-h-[84px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg leading-8 text-gray-800">
+                  {displayItem?.description || "គ្មានការពិពណ៌នាឡើយ"}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Meal type times */}
             {isMealType && (
@@ -432,10 +443,10 @@ export default function FilterCatalogDetailModal({
             {/* Status (Clickable toggle badge) */}
             <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-3.5">
               <div className="min-w-0">
-                <p className="text-lg font-medium text-primary-800">
+                <p className="text-lg font-normal text-primary-800">
                   ស្ថានភាព
                 </p>
-                <p className="text-base text-gray-500">
+                <p className="text-lg font-normal text-gray-500">
                   {isActive
                     ? "បើកដំណើរការក្នុងប្រព័ន្ធ"
                     : "បិទដំណើរការ"}

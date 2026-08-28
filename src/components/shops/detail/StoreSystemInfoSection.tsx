@@ -94,11 +94,7 @@ export default function StoreSystemInfoSection({ store }: { store: Store }) {
           icon={<CheckCircle2 size={19} />}
         />
 
-        <Item
-          label="កាលបរិច្ឆេទបង្កើត"
-          value={store.createdAt ? new Date(store.createdAt).toLocaleString("km-KH") : undefined}
-          icon={<Calendar size={19} />}
-        />
+  
 
         <Item
           label="កែប្រែចុងក្រោយ"

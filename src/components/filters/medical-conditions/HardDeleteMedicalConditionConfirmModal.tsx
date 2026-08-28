@@ -56,16 +56,16 @@ export default function HardDeleteMedicalConditionConfirmModal({
         </div>
 
         <div className="mt-5">
-          <h3 className="mt-2 text-2xl font-black text-gray-900 sm:text-3xl">
+          <h3 className="mt-2 text-2xl font-normal text-gray-900">
             លុបស្ថានភាពសុខភាព?
           </h3>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-red-100 bg-red-50/70 p-4 text-sm leading-relaxed text-red-800">
+        <div className="mt-4 rounded-2xl border border-red-100 bg-red-50/70 p-4 text-lg leading-relaxed text-red-800 font-normal">
           <p>
             អ្នកកំពុងលុបស្ថានភាពសុខភាព{" "}
-            <span className="font-bold text-red-950">{item.name}</span> (Code:{" "}
-            <code className="rounded bg-red-100 px-1.5 py-0.5 font-mono">
+            <span className="font-normal text-red-950">{item.name}</span> (Code:{" "}
+            <code className="rounded bg-red-100 px-1.5 py-0.5 font-mono text-lg">
               {item.code}
             </code>
             )។
@@ -77,7 +77,7 @@ export default function HardDeleteMedicalConditionConfirmModal({
             type="button"
             disabled={deleting}
             onClick={onClose}
-            className="min-h-12 rounded-full border border-gray-200 px-4 text-lg font-medium text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+            className="min-h-12 rounded-full border border-gray-200 px-4 text-lg font-normal text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
           >
             បោះបង់
           </button>
@@ -86,7 +86,7 @@ export default function HardDeleteMedicalConditionConfirmModal({
             type="button"
             disabled={deleting}
             onClick={() => void onConfirm()}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-600 px-4 text-lg font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-60"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-600 px-4 text-lg font-normal text-white shadow-sm transition hover:bg-red-700 disabled:opacity-60"
           >
             {deleting && <Loader2 size={20} className="animate-spin" />}
             {deleting ? "កំពុងលុប..." : "លុបជាអចិន្ត្រៃយ៍"}

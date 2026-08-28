@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Leaf,
   LoaderCircle,
+  RotateCcw,
   Search,
   X,
 } from "lucide-react";
@@ -130,11 +131,6 @@ export default function IngredientManager() {
     setSearch,
   ] = useState("");
 
-  const [
-    showSuggestions,
-    setShowSuggestions,
-  ] = useState(false);
-
   /* =====================================================
      STATUS
   ===================================================== */
@@ -227,20 +223,17 @@ export default function IngredientManager() {
 //   page: 0,
 //   size: 100,
 //   sort: "name,asc",
-// });
-
-
-const {
-  data,
-  error,
-  isLoading,
-  isFetching,
-  refetch,
-} = useGetIngredientsQuery({
-  page: 0,
-  size: 20,
-  sort: "name,asc",
-});
+  const {
+    data,
+    error,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useGetIngredientsQuery({
+    page: 0,
+    size: 1000,
+    sort: "name,asc",
+  });
 
   /* =====================================================
      MUTATIONS
@@ -328,30 +321,7 @@ const {
         .includes(query),
     );
 
-  /* =====================================================
-     SUGGESTIONS
-  ===================================================== */
 
-  const suggestions =
-    useMemo(() => {
-      if (
-        !normalizedSearch
-      ) {
-        return [];
-      }
-
-      return items
-        .filter((item) =>
-          matchesSearch(
-            item,
-            normalizedSearch,
-          ),
-        )
-        .slice(0, 8);
-    }, [
-      items,
-      normalizedSearch,
-    ]);
 
   /* =====================================================
      FILTER + SORT
@@ -663,7 +633,7 @@ const {
     };
 
   return (
-    <div className="space-y-5">
+    <div className="w-full min-w-0 max-w-full space-y-5">
       {/* =================================================
           HEADER
       ================================================== */}
@@ -692,416 +662,177 @@ const {
           TABS + TOOLBAR
       ================================================== */}
 
-      <div className="flex w-full flex-nowrap items-center justify-between gap-4 overflow-visible">
-        {/* LEFT */}
+      <div className="flex w-full flex-wrap items-center justify-between gap-3">
+        {/* LEFT: Status Tabs */}
+        <IngredientsTabs
+          value={statusFilter}
+          allCount={items.length}
+          activeCount={activeCount}
+          inactiveCount={inactiveCount}
+          onChange={(value) => {
+            setStatusFilter(value);
+            setPage(0);
+          }}
+        />
 
-        <div className="shrink-0">
-          <IngredientsTabs
-            value={
-              statusFilter
-            }
-            allCount={
-              items.length
-            }
-            activeCount={
-              activeCount
-            }
-            inactiveCount={
-              inactiveCount
-            }
-            onChange={(
-              value,
-            ) => {
-              setStatusFilter(
-                value,
-              );
-
-              setPage(0);
-
-              setShowSuggestions(
-                false,
-              );
-            }}
-          />
-        </div>
-
-        {/* RIGHT */}
-
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        {/* RIGHT: Search + Size + Sort + Reset */}
+        <div className="flex min-w-[320px] flex-1 flex-wrap items-center justify-end gap-2.5">
           {/* SEARCH */}
-
-          <div className="relative">
+          <div className="relative min-w-[220px] max-w-[360px] flex-1">
             <Search
-              size={18}
+              size={17}
               className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
             />
-
             <input
-              value={
-                search
-              }
-              onChange={(
-                event,
-              ) => {
-                const value =
-                  event.target
-                    .value;
-
-                setSearch(
-                  value,
-                );
-
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value);
                 setPage(0);
-
-                setShowSuggestions(
-                  value
-                    .trim()
-                    .length >
-                    0,
-                );
               }}
-              onFocus={() => {
-                if (
-                  search.trim()
-                ) {
-                  setShowSuggestions(
-                    true,
-                  );
-                }
-              }}
-              onKeyDown={(
-                event,
-              ) => {
-                if (
-                  event.key ===
-                    "Escape" ||
-                  event.key ===
-                    "Enter"
-                ) {
-                  setShowSuggestions(
-                    false,
-                  );
-                }
-              }}
-              placeholder="ស្វែងរកឈ្មោះ កូដ ឬការពិពណ៌នា..."
-              className="h-[52px] w-[390px] rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              placeholder="ស្វែងរកគ្រឿងផ្សំ..."
+              className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
             />
-
             {search && (
               <button
                 type="button"
                 onClick={() => {
                   setSearch("");
-
-                  setShowSuggestions(
-                    false,
-                  );
-
                   setPage(0);
                 }}
                 className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
+                aria-label="Clear search"
               >
-                <X
-                  size={
-                    16
-                  }
-                />
+                <X size={18} />
               </button>
             )}
-
-            {/* SEARCH SUGGESTIONS */}
-
-            {showSuggestions &&
-              normalizedSearch && (
-                <div className="absolute left-0 top-[56px] z-[100] w-[390px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
-                  {suggestions.length ===
-                  0 ? (
-                    <div className="px-5 py-6 text-center">
-                      <Leaf
-                        size={
-                          30
-                        }
-                        className="mx-auto text-secondary-600"
-                      />
-
-                      <p className="mt-2 text-lg text-secondary-600">
-                        មិនមានគ្រឿងផ្សំដែលត្រូវគ្នា
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="max-h-[340px] overflow-y-auto p-2">
-                      {suggestions.map(
-                        (
-                          item,
-                        ) => (
-                          <button
-                            key={
-                              item.uuid
-                            }
-                            type="button"
-                            onMouseDown={(
-                              event,
-                            ) =>
-                              event.preventDefault()
-                            }
-                            onClick={() => {
-                              setSearch(
-                                item.name,
-                              );
-
-                              setShowSuggestions(
-                                false,
-                              );
-
-                              setPage(
-                                0,
-                              );
-                            }}
-                            className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
-                          >
-                            <div className="min-w-0">
-                              <p className="truncate text-lg font-semibold text-gray-800">
-                                {
-                                  item.name
-                                }
-                              </p>
-
-                              <div className="mt-1 flex items-center gap-2">
-                                <span className="rounded-md bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">
-                                  {
-                                    item.code
-                                  }
-                                </span>
-
-                                {item.description && (
-                                  <span className="max-w-[200px] truncate text-xs text-gray-400">
-                                    {
-                                      item.description
-                                    }
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-
-                            <span
-                              className={`shrink-0 rounded-full px-2 py-1 text-xs ${
-                                item.isActive
-                                  ? "bg-primary-50 text-primary-700"
-                                  : "bg-gray-100 text-gray-500"
-                              }`}
-                            >
-                              {item.isActive
-                                ? "សកម្ម"
-                                : "អសកម្ម"}
-                            </span>
-                          </button>
-                        ),
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
           </div>
 
           {/* PAGE SIZE */}
-
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => {
-                setSizeOpen(
-                  (
-                    current,
-                  ) =>
-                    !current,
-                );
-
-                setSortOpen(
-                  false,
-                );
-
-                setShowSuggestions(
-                  false,
-                );
+                setSizeOpen((current) => !current);
+                setSortOpen(false);
               }}
-              className={`flex h-12 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${
+              className={`flex h-12 min-w-[140px] items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition ${
                 sizeOpen
-                  ? "border-primary-800 ring-2 ring-primary-100"
-                  : "border-gray-200 hover:border-primary-800/50"
+                  ? "border-primary-600 ring-2 ring-primary-100"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
-              <span className="text-gray-700">
-                {size} /
-                ទំព័រ
-              </span>
-
+              <span className="text-gray-700">{size} / ទំព័រ</span>
               <ChevronDown
-                size={
-                  17
-                }
-                className={`text-gray-400 transition-transform ${
-                  sizeOpen
-                    ? "rotate-180"
-                    : ""
+                size={18}
+                className={`text-gray-400 transition-transform duration-200 ${
+                  sizeOpen ? "rotate-180" : ""
                 }`}
               />
             </button>
 
             {sizeOpen && (
-              <div className="absolute right-0 top-[56px] z-[100] w-[170px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                {[
-                  10,
-                  20,
-                  50,
-                ].map(
-                  (
-                    value,
-                  ) => {
-                    const selected =
-                      size ===
-                      value;
-
-                    return (
-                      <button
-                        key={
-                          value
-                        }
-                        type="button"
-                        onClick={() => {
-                          setSize(
-                            value,
-                          );
-
-                          setPage(
-                            0,
-                          );
-
-                          setSizeOpen(
-                            false,
-                          );
-                        }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left ${
-                          selected
-                            ? "bg-primary-50 text-primary-800"
-                            : "text-gray-600 hover:bg-gray-50"
-                        }`}
-                      >
-                        <span>
-                          {
-                            value
-                          }{" "}
-                          /
-                          ទំព័រ
-                        </span>
-
-                        {selected && (
-                          <Check
-                            size={
-                              16
-                            }
-                          />
-                        )}
-                      </button>
-                    );
-                  },
-                )}
+              <div className="absolute right-0 top-[52px] z-[110] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-600">
+                  ទំហំទំព័រ
+                </p>
+                {[10, 20, 50, 100].map((value) => {
+                  const selected = size === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => {
+                        setSize(value);
+                        setPage(0);
+                        setSizeOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                        selected
+                          ? "bg-primary-50 text-primary-800"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>{value} / ទំព័រ</span>
+                      {selected && (
+                        <Check size={18} className="text-primary-800" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
 
           {/* SORT */}
-
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => {
-                setSortOpen(
-                  (
-                    current,
-                  ) =>
-                    !current,
-                );
-
-                setSizeOpen(
-                  false,
-                );
-
-                setShowSuggestions(
-                  false,
-                );
+                setSortOpen((current) => !current);
+                setSizeOpen(false);
               }}
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl border transition ${
+              className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${
                 sortOpen
                   ? "border-primary-800 bg-primary-50 text-primary-800"
                   : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
               }`}
+              title="តម្រៀប"
             >
-              <ArrowUpDown
-                size={
-                  18
-                }
-              />
+              <ArrowUpDown size={18} />
             </button>
 
             {sortOpen && (
-              <div className="absolute right-0 top-[56px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+              <div className="absolute right-0 top-[52px] z-[110] w-[200px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-600">
                   តម្រៀប
                 </p>
-
-                {sortOptions.map(
-                  (
-                    option,
-                  ) => {
-                    const selected =
-                      sortMode ===
-                      option.value;
-
-                    return (
-                      <button
-                        key={
-                          option.value
-                        }
-                        type="button"
-                        onClick={() => {
-                          setSortMode(
-                            option.value,
-                          );
-
-                          setSortOpen(
-                            false,
-                          );
-
-                          setPage(
-                            0,
-                          );
-                        }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left ${
-                          selected
-                            ? "bg-primary-50 text-primary-800"
-                            : "text-gray-600 hover:bg-gray-50"
-                        }`}
-                      >
-                        <span>
-                          {
-                            option.label
-                          }
-                        </span>
-
-                        {selected && (
-                          <Check
-                            size={
-                              16
-                            }
-                          />
-                        )}
-                      </button>
-                    );
-                  },
-                )}
+                {sortOptions.map((option) => {
+                  const selected = sortMode === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setSortMode(option.value);
+                        setSortOpen(false);
+                        setPage(0);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                        selected
+                          ? "bg-primary-50 text-primary-800"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>{option.label}</span>
+                      {selected && (
+                        <Check size={18} className="text-primary-800" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
+
+          {/* RESET BUTTON */}
+          {(search.trim() || statusFilter !== "ALL" || sortMode !== "A_Z" || size !== 20) && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setStatusFilter("ALL");
+                setSortMode("A_Z");
+                setSize(20);
+                setSortOpen(false);
+                setSizeOpen(false);
+                setPage(0);
+              }}
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95"
+              title="កំណត់ឡើងវិញ"
+            >
+              <RotateCcw size={18} />
+            </button>
+          )}
         </div>
       </div>
 

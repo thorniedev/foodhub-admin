@@ -39,9 +39,34 @@ import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
 
 import StoreMediaUploader from "./StoreMediaUploader";
 
+/**
+ * Payload delivered to the parent form via `onImport`.
+ * Includes all structured address fields so the form can auto-fill.
+ */
+export interface GooglePlacesImportPayload {
+  placeId: string;
+  displayName: string;
+  latitude: number | null;
+  longitude: number | null;
+  timezone: string;
+  logoMediaUuid: string;
+  coverMediaUuid: string;
+  address: {
+    commune: string | null;
+    district: string | null;
+    city: string | null;
+    province: string | null;
+    postalCode: string | null;
+    formattedAddress: string | null;
+  };
+  rawPreview: GooglePlacePreview | null;
+}
+
 interface GooglePlacesImportModalProps {
   open: boolean;
   onClose: () => void;
+  /** When provided, fills the parent form instead of directly creating the store. */
+  onImport?: (payload: GooglePlacesImportPayload) => void;
 }
 
 function getPlaceAddress(result: GooglePlaceResult): string {
@@ -101,9 +126,109 @@ function getPreviewNumber(
   return null;
 }
 
+/**
+ * Extract a single address component by matching any of the given Google
+ * Places `types`. Returns the `longText` (full name) of the first match.
+ */
+function getComponentByTypes(
+  components: Array<{ longText?: string; shortText?: string; types?: string[] }>,
+  ...targetTypes: string[]
+): string | null {
+  for (const c of components) {
+    const types = c.types ?? [];
+    if (targetTypes.some((t) => types.includes(t))) {
+      return c.longText?.trim() || c.shortText?.trim() || null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Parse a Google Places preview response into structured address fields.
+ *
+ * Google Places API (v1 New) returns an `addressComponents` array:
+ *   [{ longText, shortText, types: ["sublocality_level_1", ...] }, ...]
+ *
+ * Cambodia mapping (and generic international fallback):
+ *   commune / sangkat  → sublocality_level_1, sublocality, neighborhood, ward
+ *   district / khan    → administrative_area_level_2, sublocality_level_2
+ *   city / town        → locality, postal_town, administrative_area_level_3
+ *   province / capital → administrative_area_level_1
+ *   postalCode         → postal_code
+ */
+function readAddressFromPreview(preview: GooglePlacePreview): {
+  commune:          string | null;
+  district:         string | null;
+  city:             string | null;
+  province:         string | null;
+  postalCode:       string | null;
+  formattedAddress: string | null;
+} {
+  /* ── Try addressComponents array first (Google Places API v1) ── */
+  const rawComponents = (preview as Record<string, unknown>)["addressComponents"];
+
+  if (Array.isArray(rawComponents) && rawComponents.length > 0) {
+    type RawComp = { longText?: string; shortText?: string; types?: string[] };
+    const comps = rawComponents as RawComp[];
+
+    return {
+      /* Commune / Sangkat / Ward / Neighborhood */
+      commune: getComponentByTypes(
+        comps,
+        "sublocality_level_1",
+        "sublocality",
+        "neighborhood",
+        "ward",
+        "quarter",
+      ),
+      /* District / Khan / County */
+      district: getComponentByTypes(
+        comps,
+        "administrative_area_level_2",
+        "sublocality_level_2",
+      ),
+      /* City / Town / Municipality */
+      city: getComponentByTypes(
+        comps,
+        "locality",
+        "postal_town",
+        "administrative_area_level_3",
+      ),
+      /* Province / Capital City / State */
+      province: getComponentByTypes(
+        comps,
+        "administrative_area_level_1",
+      ),
+      postalCode: getComponentByTypes(comps, "postal_code"),
+      formattedAddress: getPreviewString(
+        preview,
+        "formattedAddress",
+        "shortFormattedAddress",
+        "address",
+      ),
+    };
+  }
+
+  /* ── Fallback: backend already normalised to flat keys ── */
+  return {
+    commune:          getPreviewString(preview, "commune",  "sublocality", "neighborhood"),
+    district:         getPreviewString(preview, "district", "administrative_area_level_2"),
+    city:             getPreviewString(preview, "city",     "locality"),
+    province:         getPreviewString(preview, "province", "administrative_area_level_1"),
+    postalCode:       getPreviewString(preview, "postalCode", "postal_code"),
+    formattedAddress: getPreviewString(
+      preview,
+      "formattedAddress",
+      "shortFormattedAddress",
+      "address",
+    ),
+  };
+}
+
 export default function GooglePlacesImportModal({
   open,
   onClose,
+  onImport,
 }: GooglePlacesImportModalProps) {
   const router = useRouter();
 
@@ -119,6 +244,12 @@ export default function GooglePlacesImportModal({
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
 
   const [preview, setPreview] = useState<GooglePlacePreview | null>(null);
+
+  /*
+   * Structured address extracted from the preview's addressComponents.
+   * Always re-derived when preview changes (see selectPlace).
+   */
+  const [resolvedAddress, setResolvedAddress] = useState<ReturnType<typeof readAddressFromPreview> | null>(null);
 
   const [timezone, setTimezone] = useState("Asia/Phnom_Penh");
 
@@ -272,8 +403,15 @@ export default function GooglePlacesImportModal({
       const response = await getPreview(id).unwrap();
 
       setPreview(response);
+
+      /*
+       * Parse addressComponents immediately so the preview card and the
+       * onImport payload both have structured address data.
+       */
+      setResolvedAddress(readAddressFromPreview(response));
     } catch (requestError) {
       setPreview(null);
+      setResolvedAddress(null);
 
       setError(getShopApiErrorMessage(requestError));
     }
@@ -326,15 +464,67 @@ export default function GooglePlacesImportModal({
     try {
       setError(null);
 
+      /*
+       * ── onImport path ──────────────────────────────────────────────────
+       * When a parent form provides onImport, we hand the structured data
+       * back instead of creating the store ourselves. This lets the admin
+       * review and adjust the data in the form before saving.
+       */
+      if (onImport) {
+        const lat = preview
+          ? getPreviewNumber(preview, "latitude", "lat")
+          : null;
+        const lng = preview
+          ? getPreviewNumber(preview, "longitude", "lng", "lon")
+          : null;
+
+        const displayName = preview
+          ? (getPreviewString(preview, "displayName", "name", "storeName") ?? query.trim())
+          : query.trim();
+
+        onImport({
+          placeId:        selectedPlaceId,
+          displayName,
+          latitude:       lat,
+          longitude:      lng,
+          timezone:       timezone.trim() || "Asia/Phnom_Penh",
+          logoMediaUuid,
+          coverMediaUuid,
+          address: {
+            commune:          resolvedAddress?.commune          ?? null,
+            district:         resolvedAddress?.district         ?? null,
+            city:             resolvedAddress?.city             ?? null,
+            province:         resolvedAddress?.province         ?? null,
+            postalCode:       resolvedAddress?.postalCode       ?? null,
+            formattedAddress: resolvedAddress?.formattedAddress ?? null,
+          },
+          rawPreview: preview,
+        });
+
+        onClose();
+        return;
+      }
+
+      /*
+       * ── Direct-create path ─────────────────────────────────────────────
+       * No parent form — create the store directly via the backend API.
+       * Pass all resolved address fields as overrides so the backend
+       * doesn't have to re-parse addressComponents itself.
+       */
       const store = await createStoreFromGoogle({
         placeId: selectedPlaceId,
 
         overrides: {
-          timezone: timezone.trim(),
-
-          logoMediaUuid: logoMediaUuid || null,
-
+          timezone:       timezone.trim(),
+          logoMediaUuid:  logoMediaUuid  || null,
           coverMediaUuid: coverMediaUuid || null,
+
+          /* Address overrides — fill what the backend might leave null */
+          commune:  resolvedAddress?.commune  || null,
+          district: resolvedAddress?.district || null,
+          city:     resolvedAddress?.city     || null,
+          province: resolvedAddress?.province || null,
+          postalCode: resolvedAddress?.postalCode || null,
         },
       }).unwrap();
 
@@ -422,7 +612,7 @@ export default function GooglePlacesImportModal({
                 នាំចូលព័ត៌មានពី Google Maps
               </p>
 
-              <p className="mt-1 text-base leading-relaxed text-gray-500">
+              <p className="mt-1 text-lg leading-relaxed text-gray-500">
                 ស្វែងរកទីតាំងហាង ពិនិត្យព័ត៌មាន បន្ថែមរូបភាពបើចាំបាច់ រួចបង្កើតហាងដោយស្វ័យប្រវត្តិ។
               </p>
             </div>
@@ -619,7 +809,7 @@ export default function GooglePlacesImportModal({
 
               {/* URL Tip helper */}
               {(query.includes("maps.app.goo.gl") || query.includes("google.com/maps") || query.includes("http")) && (
-                <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-base leading-6 text-amber-800">
+                <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-lg leading-7 text-amber-800">
                   💡 <strong>សម្គាល់៖</strong> Google Maps ស្វែងរកតាម <strong>ឈ្មោះហាង</strong> (ឧទាហរណ៍៖ <em>Brown Coffee</em>, <em>Starbucks BKK</em>)។ សូមបញ្ចូលឈ្មោះហាងជំនួសឱ្យ Link ផែនទី។
                 </div>
               )}

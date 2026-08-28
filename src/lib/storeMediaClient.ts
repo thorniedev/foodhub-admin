@@ -25,6 +25,34 @@ async function readError(response: Response): Promise<string> {
   }
 }
 
+function unwrapMediaResponse(json: unknown): MediaFileResponse {
+  if (!json || typeof json !== "object") {
+    throw new Error("Invalid response format from Media service.");
+  }
+
+  const record = json as Record<string, unknown>;
+  const nested = (record.payload ?? record.data ?? record) as Record<
+    string,
+    unknown
+  >;
+
+  const uuid =
+    typeof nested.uuid === "string" && nested.uuid.trim()
+      ? nested.uuid.trim()
+      : typeof record.uuid === "string" && record.uuid.trim()
+        ? record.uuid.trim()
+        : null;
+
+  if (!uuid) {
+    throw new Error("Media service did not return a valid media UUID.");
+  }
+
+  return {
+    ...nested,
+    uuid,
+  } as unknown as MediaFileResponse;
+}
+
 export async function uploadStoreMediaFile(
   file: File,
   purpose: StoreMediaPurpose,
@@ -44,7 +72,8 @@ export async function uploadStoreMediaFile(
     throw new Error(await readError(response));
   }
 
-  return (await response.json()) as MediaFileResponse;
+  const json = await response.json();
+  return unwrapMediaResponse(json);
 }
 
 export async function importStoreMediaFromUrl(
@@ -68,5 +97,7 @@ export async function importStoreMediaFromUrl(
     throw new Error(await readError(response));
   }
 
-  return (await response.json()) as MediaFileResponse;
+  const json = await response.json();
+  return unwrapMediaResponse(json);
 }
+

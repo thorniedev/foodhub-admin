@@ -107,13 +107,21 @@ export default function DietaryTypeFormModal({
       return;
     }
 
-    await onSubmit({
-      ...values,
-      code,
-      name,
-      category,
-      description: values.description.trim(),
-    });
+    try {
+      await onSubmit({
+        ...values,
+        code,
+        name,
+        category,
+        description: values.description.trim(),
+      });
+    } catch (err: any) {
+      const errorMsg =
+        err?.data?.message ||
+        err?.message ||
+        (typeof err === "string" ? err : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។");
+      setLocalError(errorMsg);
+    }
   };
 
   return (
@@ -291,7 +299,7 @@ export default function DietaryTypeFormModal({
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-medium text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-normal text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               បោះបង់
             </button>
@@ -299,7 +307,7 @@ export default function DietaryTypeFormModal({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary-800 px-7 text-lg font-medium text-white transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary-800 px-7 text-lg font-normal text-white transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving && <Loader2 size={20} className="animate-spin" />}
 

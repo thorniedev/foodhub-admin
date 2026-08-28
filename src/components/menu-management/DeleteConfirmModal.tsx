@@ -47,11 +47,11 @@ export default function DeleteConfirmModal({
           </button>
         </div>
 
-        <p className="mt-6 text-2xl font-bold text-gray-900">
+        <p className="mt-6 text-2xl font-normal text-gray-800">
           {title}
         </p>
 
-        <p className="mt-3 text-lg leading-7 text-gray-600">
+        <p className="mt-3 text-lg leading-7 font-normal text-gray-600">
           {description}
         </p>
 
@@ -60,7 +60,7 @@ export default function DeleteConfirmModal({
             type="button"
             disabled={deleting}
             onClick={onClose}
-            className="rounded-2xl border border-gray-200 px-6 py-3 text-lg font-bold text-gray-600 hover:bg-gray-50 transition"
+            className="rounded-full border border-gray-200 px-6 py-3 text-lg font-normal text-gray-600 hover:bg-gray-50 transition"
           >
             បោះបង់
           </button>
@@ -69,7 +69,7 @@ export default function DeleteConfirmModal({
             type="button"
             disabled={deleting}
             onClick={onConfirm}
-            className={`inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-lg font-bold text-white disabled:opacity-60 transition active:scale-95 ${
+            className={`inline-flex items-center gap-2 rounded-full px-6 py-3 text-lg font-normal text-white disabled:opacity-60 transition active:scale-95 ${
               isHard
                 ? "bg-red-600 hover:bg-red-700"
                 : "bg-amber-600 hover:bg-amber-700"

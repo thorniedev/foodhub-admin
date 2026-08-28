@@ -84,7 +84,8 @@ export async function fetchAdminSessions(
  */
 export async function fetchAdminSessionDetail(
   sessionUuid: string,
-  token?: string
+  token?: string,
+  fallbackSession?: AdminSessionSummary,
 ): Promise<AdminSessionDetail> {
   const base = getBaseApiUrl();
   const headers = getHeaders(token);
@@ -108,12 +109,15 @@ export async function fetchAdminSessionDetail(
     }),
   ]);
 
-  if (!sessionRes.ok) {
+  const sessionData = sessionRes.ok
+    ? normalizePayload<AdminSessionDetail>(await sessionRes.json(), {} as AdminSessionDetail)
+    : fallbackSession
+      ? fallbackSession
+      : null;
+
+  if (!sessionData) {
     throw new Error(`HTTP ${sessionRes.status}: Failed to fetch session metadata`);
   }
-
-  const sessionRaw = await sessionRes.json();
-  const sessionData = normalizePayload<AdminSessionDetail>(sessionRaw, {} as AdminSessionDetail);
 
   let items: AdminRecommendedItem[] = [];
   if (itemsRes.ok) {
@@ -129,6 +133,13 @@ export async function fetchAdminSessionDetail(
 
   return {
     ...sessionData,
+    uuid: sessionData.uuid ?? sessionUuid,
+    mode: sessionData.mode ?? fallbackSession?.mode ?? "SINGLE",
+    status: sessionData.status ?? fallbackSession?.status ?? "READY",
+    candidateCount: sessionData.candidateCount ?? fallbackSession?.candidateCount ?? 0,
+    eligibleCount: sessionData.eligibleCount ?? fallbackSession?.eligibleCount ?? 0,
+    startedAt: sessionData.startedAt ?? fallbackSession?.startedAt ?? new Date().toISOString(),
+    createdAt: sessionData.createdAt ?? fallbackSession?.createdAt ?? new Date().toISOString(),
     items,
     safetyChecks,
   };

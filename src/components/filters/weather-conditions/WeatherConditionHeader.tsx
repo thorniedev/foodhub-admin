@@ -89,9 +89,9 @@ export default function WeatherConditionHeader({
               border
               border-white/25
               bg-white/15
-              px-5
-              text-lg
-              font-bold
+              px-6
+              text-xl
+              font-normal
               text-white
               transition
               hover:bg-white/20
@@ -121,9 +121,9 @@ export default function WeatherConditionHeader({
               gap-2
               rounded-full
               bg-white
-              px-5
-              text-lg
-              font-bold
+              px-6
+              text-xl
+              font-normal
               text-primary-800
               shadow-sm
               transition
@@ -134,8 +134,8 @@ export default function WeatherConditionHeader({
               sm:w-fit
             "
           >
-            <Plus size={20} />
-            បន្ថែម Weather
+            <Plus size={22} />
+            បន្ថែមស្ថានភាពអាកាសធាតុ
           </button>
         </div>
       </div>

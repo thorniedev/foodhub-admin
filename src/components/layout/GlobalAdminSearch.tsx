@@ -212,7 +212,7 @@ export default function GlobalAdminSearch() {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-xl">
+    <div ref={containerRef} className="relative w-full max-w-3xl">
       {/* SEARCH BAR INPUT & REINDEX BUTTON */}
       <div className="relative">
         <Search
@@ -229,7 +229,7 @@ export default function GlobalAdminSearch() {
             setInputQuery(e.target.value);
             setIsOpen(true);
           }}
-          className="w-full rounded-full border border-gray-200 py-2.5 pl-11 pr-10 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
+          className="w-full rounded-full border border-gray-200 py-2.5 pl-11 pr-10 text-base outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
         />
 
         {inputQuery && (

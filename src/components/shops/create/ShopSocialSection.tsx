@@ -391,7 +391,7 @@ export default function ShopSocialSection({
                 </div>
 
                 {link.profileUrl.trim() && error && (
-                  <p className="mt-2 text-base text-red-600">{error}</p>
+                  <p className="mt-2 text-lg text-red-600">{error}</p>
                 )}
               </div>
             );

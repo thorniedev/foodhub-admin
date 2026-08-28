@@ -11,7 +11,6 @@ import {
   AlertTriangle,
   HeartPulse,
   Loader2,
-  Settings2,
   X,
 } from "lucide-react";
 
@@ -99,14 +98,22 @@ export default function MedicalConditionFormModal({
       event.preventDefault();
 
       const code =
-        form.code.trim();
+        form.code.trim().toUpperCase();
 
       const name =
         form.name.trim();
 
-      if (!code || !name) {
+      if (!name) {
         setValidationError(
-          "សូមបំពេញកូដ និងឈ្មោះស្ថានភាពសុខភាព។",
+          "សូមបំពេញឈ្មោះស្ថានភាពសុខភាព។",
+        );
+
+        return;
+      }
+
+      if (!code) {
+        setValidationError(
+          "សូមបំពេញកូដស្ថានភាពសុខភាព។",
         );
 
         return;
@@ -125,22 +132,23 @@ export default function MedicalConditionFormModal({
 
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
-      <div className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-gray-100 bg-white shadow-2xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-gray-100 bg-white/95 px-6 py-5 backdrop-blur-md sm:px-8">
+      <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl">
+        {/* HEADER */}
+        <div className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-5 sm:px-8">
           <div className="flex min-w-0 items-center gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
               <HeartPulse size={24} />
             </div>
 
             <div className="min-w-0">
-              <p className="text-3xl font-semibold text-primary-800">
+              <p className="text-2xl font-semibold text-primary-800">
                 {item
                   ? "កែប្រែស្ថានភាពសុខភាព"
-                  : "បន្ថែមស្ថានភាពសុខភាពថ្មី"}
+                  : "បន្ថែម ស្ថានភាពសុខភាព"}
               </p>
 
-              <p className="mt-1 text-lg leading-7 text-gray-500">
-                គ្រប់គ្រងស្ថានភាពសុខភាពសម្រាប់ការណែនាំ និងសុវត្ថិភាពអាហារ។
+              <p className="mt-0.5 truncate text-lg text-gray-500">
+                Medical Conditions
               </p>
             </div>
           </div>
@@ -156,130 +164,115 @@ export default function MedicalConditionFormModal({
           </button>
         </div>
 
+        {/* FORM */}
         <form
           onSubmit={handleSubmit}
-          className="space-y-6 p-6 sm:p-8"
+          className="space-y-4 p-6 sm:p-7"
         >
-          <Section
-            title="ព័ត៌មានស្ថានភាពសុខភាព"
-            icon={
-              <HeartPulse
-                size={22}
-              />
-            }
-          >
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field
-                label="កូដ"
-                value={form.code}
-                onChange={(value) =>
-                  setForm(
-                    (previous) => ({
-                      ...previous,
-                      code: value,
-                    }),
-                  )
-                }
-                placeholder="DIABETES"
-                required
-              />
+          {/* Name & Code */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field
+              label="ឈ្មោះ ស្ថានភាពសុខភាព"
+              value={form.name}
+              onChange={(value) =>
+                setForm(
+                  (previous) => ({
+                    ...previous,
+                    name: value,
+                  }),
+                )
+              }
+              placeholder="ឧ. ទឹកនោមផ្អែម"
+              required
+            />
 
-              <Field
-                label="ឈ្មោះ"
-                value={form.name}
-                onChange={(value) =>
-                  setForm(
-                    (previous) => ({
-                      ...previous,
-                      name: value,
-                    }),
-                  )
-                }
-                placeholder="Diabetes"
-                required
-              />
+            <Field
+              label="កូដ (Code)"
+              value={form.code}
+              onChange={(value) =>
+                setForm(
+                  (previous) => ({
+                    ...previous,
+                    code: value.toUpperCase(),
+                  }),
+                )
+              }
+              placeholder="ឧ. DIABETES"
+              required
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <FieldLabel>
+              ការពិពណ៌នា
+            </FieldLabel>
+
+            <textarea
+              rows={3}
+              value={
+                form.description
+              }
+              onChange={(event) =>
+                setForm(
+                  (previous) => ({
+                    ...previous,
+                    description:
+                      event.target.value,
+                  }),
+                )
+              }
+              placeholder="សរសេរការពិពណ៌នាអំពីស្ថានភាពសុខភាព..."
+              className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg leading-8 text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+            />
+          </div>
+
+          {/* Status */}
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-3.5">
+            <div className="min-w-0">
+              <p className="text-lg font-medium text-primary-800">
+                ស្ថានភាព
+              </p>
+
+              <p className="text-base text-gray-500">
+                បើក ដើម្បីឱ្យកំណត់ត្រាស្ថានភាពសុខភាពនេះសកម្មក្នុងប្រព័ន្ធ។
+              </p>
             </div>
 
-            <label className="mt-5 block">
-              <FieldLabel>
-                ការពិពណ៌នា
-              </FieldLabel>
-
-              <textarea
-                rows={4}
-                value={
-                  form.description
-                }
-                onChange={(event) =>
-                  setForm(
-                    (previous) => ({
-                      ...previous,
-                      description:
-                        event.target.value,
-                    }),
-                  )
-                }
-                placeholder="សរសេរការពិពណ៌នាអំពីស្ថានភាពសុខភាព..."
-                className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-lg leading-8 text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
-              />
-            </label>
-          </Section>
-
-          <Section
-            title="ស្ថានភាព"
-            icon={
-              <Settings2
-                size={22}
-              />
-            }
-          >
-            <div className="flex items-center justify-between gap-5 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4">
-              <div className="min-w-0">
-                <p className="text-lg font-medium text-primary-800">
-                  សកម្ម
-                </p>
-
-                <p className="mt-1 text-lg leading-7 text-gray-500">
-                  បើក ដើម្បីឱ្យកំណត់ត្រានេះសកម្មក្នុងប្រព័ន្ធ។
-                </p>
-              </div>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={
+            <button
+              type="button"
+              role="switch"
+              aria-checked={form.active}
+              onClick={() =>
+                setForm(
+                  (previous) => ({
+                    ...previous,
+                    active:
+                      !previous.active,
+                  }),
+                )
+              }
+              className={`relative h-7 w-12 shrink-0 rounded-full transition focus:outline-none focus:ring-4 focus:ring-primary-100 ${
+                form.active
+                  ? "bg-primary-700"
+                  : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-all ${
                   form.active
-                }
-                onClick={() =>
-                  setForm(
-                    (previous) => ({
-                      ...previous,
-                      active:
-                        !previous.active,
-                    }),
-                  )
-                }
-                className={`relative h-7 w-12 shrink-0 rounded-full transition focus:outline-none focus:ring-4 focus:ring-primary-100 ${
-                  form.active
-                    ? "bg-primary-700"
-                    : "bg-gray-300"
+                    ? "left-6"
+                    : "left-1"
                 }`}
-              >
-                <span
-                  className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-all ${
-                    form.active
-                      ? "left-6"
-                      : "left-1"
-                  }`}
-                />
-              </button>
-            </div>
-          </Section>
+              />
+            </button>
+          </div>
 
+          {/* Validation error */}
           {validationError && (
-            <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg leading-7 text-red-600">
+            <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-lg leading-7 text-red-600">
               <AlertTriangle
-                size={21}
+                size={18}
                 className="mt-0.5 shrink-0"
               />
 
@@ -289,12 +282,13 @@ export default function MedicalConditionFormModal({
             </div>
           )}
 
-          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-end">
+          {/* Action buttons */}
+          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-end">
             <button
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-medium text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-normal text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               បោះបង់
             </button>
@@ -302,7 +296,7 @@ export default function MedicalConditionFormModal({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary-800 px-7 text-lg font-medium text-white transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary-800 px-7 text-lg font-normal text-white transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving && (
                 <Loader2
@@ -315,38 +309,12 @@ export default function MedicalConditionFormModal({
                 ? "កំពុងរក្សាទុក..."
                 : item
                   ? "រក្សាទុកការកែប្រែ"
-                  : "បន្ថែម"}
+                  : "បន្ថែម ស្ថានភាពសុខភាព"}
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
-}
-
-function Section({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
-      <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
-          {icon}
-        </div>
-
-        <p className="text-3xl font-semibold text-primary-800">
-          {title}
-        </p>
-      </div>
-
-      {children}
-    </section>
   );
 }
 

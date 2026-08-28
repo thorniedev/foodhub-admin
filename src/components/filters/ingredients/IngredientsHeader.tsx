@@ -56,9 +56,9 @@ export default function IngredientsHeader({
         <button
           type="button"
           onClick={onAdd}
-          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-fit"
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-6 text-xl font-normal text-primary-800 shadow-sm transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-fit"
         >
-          <Plus size={20} />
+          <Plus size={22} />
           បន្ថែមគ្រឿងផ្សំ
         </button>
       </div>

@@ -21,10 +21,8 @@ interface Props {
   totalCount: number;
   activeCount: number;
   inactiveCount: number;
-  suggestions: WeatherCondition[];
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
-  onSuggestionSelect: (item: WeatherCondition) => void;
   onStatusChange: (value: StatusFilter) => void;
   onSortChange: (value: SortMode) => void;
   onSizeChange: (value: number) => void;
@@ -57,17 +55,14 @@ export default function WeatherConditionToolbar({
   totalCount,
   activeCount,
   inactiveCount,
-  suggestions,
   onSearchChange,
   onClearSearch,
-  onSuggestionSelect,
   onStatusChange,
   onSortChange,
   onSizeChange,
 }: Props) {
   const [sortOpen, setSortOpen] = useState(false);
   const [sizeOpen, setSizeOpen] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const sizeContainerRef = useRef<HTMLDivElement>(null);
@@ -76,12 +71,6 @@ export default function WeatherConditionToolbar({
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
-      if (
-        searchContainerRef.current &&
-        !searchContainerRef.current.contains(target)
-      ) {
-        setShowSuggestions(false);
-      }
       if (
         sizeContainerRef.current &&
         !sizeContainerRef.current.contains(target)
@@ -133,7 +122,7 @@ export default function WeatherConditionToolbar({
                 key={tab.value}
                 type="button"
                 onClick={() => onStatusChange(tab.value)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-normal transition ${
                   active
                     ? "bg-primary-800 text-white"
                     : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
@@ -142,7 +131,7 @@ export default function WeatherConditionToolbar({
                 {tab.label}
 
                 <span
-                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
+                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-normal ${
                     active ? "bg-white/20 text-white" : "bg-white text-gray-500"
                   }`}
                 >
@@ -170,12 +159,6 @@ export default function WeatherConditionToolbar({
               onChange={(event) => {
                 const value = event.target.value;
                 onSearchChange(value);
-                setShowSuggestions(value.trim().length > 0);
-              }}
-              onFocus={() => {
-                if (search.trim()) {
-                  setShowSuggestions(true);
-                }
               }}
               placeholder="ស្វែងរក ស្ថានភាពអាកាសធាតុ..."
               className="h-[52px] w-full rounded-full border border-gray-200 bg-gray-50 pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
@@ -186,61 +169,12 @@ export default function WeatherConditionToolbar({
                 type="button"
                 onClick={() => {
                   onClearSearch();
-                  setShowSuggestions(false);
                 }}
                 aria-label="Clear search"
                 className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
               >
                 <X size={18} />
               </button>
-            )}
-
-            {showSuggestions && search.trim() && (
-              <div className="absolute left-0 top-[60px] z-[100] w-full min-w-[300px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                {suggestions.length === 0 ? (
-                  <p className="px-3 py-5 text-center text-lg text-gray-400">
-                    មិនមានលទ្ធផល
-                  </p>
-                ) : (
-                  suggestions.map((item) => {
-                    const active = item.isActive ?? item.active ?? true;
-                    return (
-                      <button
-                        key={item.uuid}
-                        type="button"
-                        onClick={() => {
-                          onSuggestionSelect(item);
-                          setShowSuggestions(false);
-                        }}
-                        className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-lg font-semibold text-gray-800">
-                            {item.localName || item.name}
-                          </p>
-                          <p className="mt-0.5 truncate text-sm text-gray-400">
-                            {item.code}
-                          </p>
-                        </div>
-                        <span
-                          className={`inline-flex items-center gap-1.5 shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                            active
-                              ? "bg-primary-50 text-primary-700"
-                              : "bg-gray-100 text-gray-500"
-                          }`}
-                        >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              active ? "bg-primary-600" : "bg-gray-400"
-                            }`}
-                          />
-                          {active ? "សកម្ម" : "អសកម្ម"}
-                        </span>
-                      </button>
-                    );
-                  })
-                )}
-              </div>
             )}
           </div>
 
@@ -251,7 +185,6 @@ export default function WeatherConditionToolbar({
               onClick={() => {
                 setSizeOpen((prev) => !prev);
                 setSortOpen(false);
-                setShowSuggestions(false);
               }}
               className="flex h-[52px] min-w-[150px] items-center justify-between gap-3 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-700 transition hover:border-primary-200 hover:bg-primary-50"
             >
@@ -261,6 +194,9 @@ export default function WeatherConditionToolbar({
 
             {sizeOpen && (
               <div className="absolute right-0 top-[60px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+                  ទំហំទំព័រ
+                </p>
                 {[10, 20, 50].map((value) => (
                   <button
                     key={value}
@@ -290,17 +226,24 @@ export default function WeatherConditionToolbar({
               onClick={() => {
                 setSortOpen((prev) => !prev);
                 setSizeOpen(false);
-                setShowSuggestions(false);
               }}
               aria-label="Sort"
-              title="Sort"
-              className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800"
+              title="តម្រៀប"
+              className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${
+                sortOpen
+                  ? "border-primary-800 bg-primary-50 text-primary-800"
+                  : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
+              }`}
             >
-              <ArrowUpDown size={20} />
+              <ArrowUpDown size={18} />
             </button>
 
             {sortOpen && (
-              <div className="absolute right-0 top-[60px] z-[100] w-[210px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+              <div className="absolute right-0 top-[56px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+                  តម្រៀប
+                </p>
+
                 {sortOptions.map((option) => (
                   <button
                     key={option.value}
@@ -309,14 +252,16 @@ export default function WeatherConditionToolbar({
                       onSortChange(option.value);
                       setSortOpen(false);
                     }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg transition ${
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg transition ${
                       sortMode === option.value
-                        ? "bg-primary-50 font-medium text-primary-800"
+                        ? "bg-primary-50 text-primary-800"
                         : "text-gray-600 hover:bg-gray-50"
                     }`}
                   >
-                    {option.label}
-                    {sortMode === option.value && <Check size={18} />}
+                    <span>{option.label}</span>
+                    {sortMode === option.value && (
+                      <Check size={16} className="text-primary-800" />
+                    )}
                   </button>
                 ))}
               </div>

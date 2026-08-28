@@ -72,9 +72,9 @@ export default function StoreProfileHeader({
         {/* Top Control: Back Button */}
         <Link
           href="/shops"
-          className="absolute left-5 top-5 z-20 inline-flex items-center gap-2 rounded-xl bg-black/35 px-4 py-2 text-base font-semibold text-white backdrop-blur-md transition hover:bg-black/50"
+          className="absolute left-5 top-5 z-20 inline-flex items-center gap-2 rounded-xl bg-black/35 px-4 py-2 text-lg font-semibold text-white backdrop-blur-md transition hover:bg-black/50"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={20} />
           ហាង
         </Link>
 
@@ -106,8 +106,8 @@ export default function StoreProfileHeader({
               <h1 className="truncate text-2xl font-extrabold sm:text-3xl lg:text-4xl drop-shadow-xs">
                 {store.storeName}
               </h1>
-              <div className="mt-1.5 flex items-start gap-1.5 text-base text-white/90">
-                <MapPin size={17} className="mt-0.5 shrink-0 text-emerald-300" />
+              <div className="mt-1.5 flex items-start gap-1.5 text-lg text-white/90">
+                <MapPin size={19} className="mt-0.5 shrink-0 text-emerald-300" />
                 <span className="line-clamp-1">
                   {displayStoreLocation(store) || "មិនមានអាសយដ្ឋាន"}
                 </span>
@@ -132,15 +132,15 @@ export default function StoreProfileHeader({
             {store.phoneNumber ? (
               <a
                 href={`tel:${store.phoneNumber}`}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/15 px-3.5 py-2 text-sm font-semibold text-white shadow-xs backdrop-blur-sm transition hover:border-white/40 hover:bg-white/25"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/15 px-4 py-2.5 text-lg font-semibold text-white shadow-xs backdrop-blur-sm transition hover:border-white/40 hover:bg-white/25"
                 title="ចុចដើម្បីហៅ"
               >
-                <Phone size={15} className="text-emerald-200" />
+                <Phone size={18} className="text-emerald-200" />
                 <span>{store.phoneNumber}</span>
               </a>
             ) : (
-              <div className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-sm font-medium text-white/50">
-                <Phone size={15} className="text-white/30" />
+              <div className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-lg font-medium text-white/50">
+                <Phone size={18} className="text-white/30" />
                 <span>មិនមានលេខទូរស័ព្ទ</span>
               </div>
             )}
@@ -148,15 +148,15 @@ export default function StoreProfileHeader({
             {store.email ? (
               <a
                 href={`mailto:${store.email}`}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/15 px-3.5 py-2 text-sm font-semibold text-white shadow-xs backdrop-blur-sm transition hover:border-white/40 hover:bg-white/25"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/15 px-4 py-2.5 text-lg font-semibold text-white shadow-xs backdrop-blur-sm transition hover:border-white/40 hover:bg-white/25"
                 title="ចុចដើម្បីផ្ញើអ៊ីមែល"
               >
-                <Mail size={15} className="text-emerald-200" />
+                <Mail size={18} className="text-emerald-200" />
                 <span className="max-w-[220px] truncate">{store.email}</span>
               </a>
             ) : (
-              <div className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-sm font-medium text-white/50">
-                <Mail size={15} className="text-white/30" />
+              <div className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-lg font-medium text-white/50">
+                <Mail size={18} className="text-white/30" />
                 <span>មិនមានអ៊ីមែល</span>
               </div>
             )}
@@ -169,9 +169,9 @@ export default function StoreProfileHeader({
               disabled={busy}
               onClick={onEdit}
               title="កែប្រែ"
-              className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/25 active:scale-95 disabled:opacity-50"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/25 active:scale-95 disabled:opacity-50"
             >
-              <Pencil size={18} />
+              <Pencil size={19} />
             </button>
 
             <button
@@ -179,9 +179,9 @@ export default function StoreProfileHeader({
               disabled={busy}
               onClick={() => onStatus("REVIEW")}
               title="គ្រប់គ្រងស្ថានភាព"
-              className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-amber-200 transition hover:bg-amber-400/30 hover:text-amber-100 active:scale-95 disabled:opacity-50"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-amber-200 transition hover:bg-amber-400/30 hover:text-amber-100 active:scale-95 disabled:opacity-50"
             >
-              <Settings2 size={18} />
+              <Settings2 size={19} />
             </button>
 
             <button
@@ -189,9 +189,9 @@ export default function StoreProfileHeader({
               disabled={busy}
               onClick={onHours}
               title="កំណត់ម៉ោងដំណើរការ"
-              className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-emerald-200 transition hover:bg-emerald-400/30 hover:text-emerald-100 active:scale-95 disabled:opacity-50"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-emerald-200 transition hover:bg-emerald-400/30 hover:text-emerald-100 active:scale-95 disabled:opacity-50"
             >
-              <Clock3 size={18} />
+              <Clock3 size={19} />
             </button>
 
             {onDelete && (
@@ -200,9 +200,9 @@ export default function StoreProfileHeader({
                 disabled={busy}
                 onClick={onDelete}
                 title="លុបហាង"
-                className="flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-white/10 text-rose-200 transition hover:bg-rose-500/30 hover:text-rose-100 active:scale-95 disabled:opacity-50"
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-rose-200 transition hover:bg-rose-500/30 hover:text-rose-100 active:scale-95 disabled:opacity-50"
               >
-                <Trash2 size={18} />
+                <Trash2 size={19} />
               </button>
             )}
           </div>
@@ -212,7 +212,7 @@ export default function StoreProfileHeader({
         <div className="relative z-10 mt-5 grid gap-3 sm:grid-cols-3">
           {/* 1. Review Status */}
           <StatusKpiCard
-            icon={<ShieldCheck size={20} />}
+            icon={<ShieldCheck size={22} />}
             label="ស្ថានភាពពិនិត្យ (Review)"
             value={reviewStatus.label}
             note={reviewStatus.note}
@@ -227,7 +227,7 @@ export default function StoreProfileHeader({
 
           {/* 2. Operating Status */}
           <StatusKpiCard
-            icon={<Clock3 size={20} />}
+            icon={<Clock3 size={22} />}
             label="ស្ថានភាពដំណើរការ (Operating)"
             value={liveStatus.label}
             note={liveStatus.note}
@@ -242,7 +242,7 @@ export default function StoreProfileHeader({
 
           {/* 3. Account Status */}
           <StatusKpiCard
-            icon={<UserCheck size={20} />}
+            icon={<UserCheck size={22} />}
             label="ស្ថានភាពគណនី (Account)"
             value={accountStatus.label}
             note={accountStatus.note}
@@ -300,19 +300,19 @@ function StatusKpiCard({
       <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 to-transparent" />
 
       <div className="relative flex items-center gap-3">
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl backdrop-blur-sm ring-1 shadow-xs ${toneStyles.iconBox}`}>
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl backdrop-blur-sm ring-1 shadow-xs ${toneStyles.iconBox}`}>
           {icon}
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-white/75">{label}</p>
-            <span className={`h-2 w-2 shrink-0 rounded-full ${toneStyles.dot} animate-pulse`} />
+            <p className="text-base font-semibold text-white/85">{label}</p>
+            <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${toneStyles.dot} animate-pulse`} />
           </div>
-          <p className={`mt-0.5 truncate text-base drop-shadow-xs ${toneStyles.text}`} title={value}>
+          <p className={`mt-0.5 truncate text-xl font-bold drop-shadow-xs ${toneStyles.text}`} title={value}>
             {value}
           </p>
-          <p className="mt-0.5 text-xs text-white/70 truncate" title={note}>
+          <p className="mt-0.5 text-base text-white/75 truncate" title={note}>
             {note}
           </p>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import {
   AlertCircle,
   AlertTriangle,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import {
+  shopApi,
   useDeleteShopMutation,
   useGetShopByUuidQuery,
   useGetShopsQuery,
@@ -104,6 +105,9 @@ export default function ShopsManager() {
   const [openFilter, setOpenFilter] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<StoreSort>("NEWEST");
 
+  const [isPending, startTransition] = useTransition();
+  const prefetchShops = shopApi.usePrefetch("getShops");
+
   const [editingUuid, setEditingUuid] = useState<string | null>(null);
   const [deletingStore, setDeletingStore] = useState<StoreType | null>(null);
   const [statusStore, setStatusStore] = useState<StoreType | null>(null);
@@ -133,8 +137,40 @@ export default function ShopsManager() {
     size,
   });
 
-  /* Optimized count queries and known status lookups */
   const isSearching = Boolean(serverQuery);
+
+  /* Background prefetch for instant tab switching with 0ms lag */
+  const handlePrefetchTab = useCallback(
+    (tabValue: StoreReviewFilter) => {
+      if (isSearching) return;
+      prefetchShops({
+        reviewStatus:
+          tabValue === "APPROVED" || tabValue === "PENDING" || tabValue === "REJECTED"
+            ? tabValue
+            : undefined,
+        accountStatus: tabValue === "APPROVED" ? "ACTIVE" : undefined,
+        page: 0,
+        size,
+      });
+    },
+    [isSearching, prefetchShops, size],
+  );
+
+  useEffect(() => {
+    if (!isSearching) {
+      prefetchShops({ reviewStatus: "APPROVED", accountStatus: "ACTIVE", page: 0, size });
+      prefetchShops({ reviewStatus: "PENDING", page: 0, size });
+      prefetchShops({ reviewStatus: "REJECTED", page: 0, size });
+      prefetchShops({ page: 0, size });
+    }
+  }, [isSearching, prefetchShops, size]);
+
+  const handleTabChange = useCallback((value: StoreReviewFilter) => {
+    startTransition(() => {
+      setFilter(value);
+      setPage(0);
+    });
+  }, []);
 
   const { data: approvedData } = useGetShopsQuery(
     {
@@ -418,7 +454,6 @@ export default function ShopsManager() {
       await updateShop({ storeUuid: editingUuid, body: values }).unwrap();
       setEditingUuid(null);
       setNotice({ type: "success", text: "បានកែប្រែ Store ដោយជោគជ័យ។" });
-      await refetch();
     } catch (requestError) {
       throw requestError;
     }
@@ -431,7 +466,6 @@ export default function ShopsManager() {
       await deleteShop(deletingStore.uuid).unwrap();
       setDeletingStore(null);
       setNotice({ type: "success", text: "បានលុបហាងដោយជោគជ័យ។" });
-      await refetch();
     } catch (requestError) {
       setNotice({ type: "error", text: getShopApiErrorMessage(requestError) });
     }
@@ -454,18 +488,16 @@ export default function ShopsManager() {
             <ShopsTabs
               value={filter}
               counts={counts}
-              onChange={(value) => {
-                setFilter(value);
-                setPage(0);
-              }}
+              onChange={handleTabChange}
+              onPrefetch={handlePrefetchTab}
             />
           </div>
 
-          <div className="flex flex-1 items-center justify-end gap-3 min-w-[320px]">
+          <div className="flex min-w-[320px] flex-1 flex-wrap items-center justify-end gap-2.5">
             {/* Search Input */}
-            <div className="relative flex-1 max-w-[440px]">
+            <div className="relative min-w-[240px] max-w-[420px] flex-1">
               <Search
-                size={17}
+                size={18}
                 className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
               />
               <input
@@ -487,35 +519,35 @@ export default function ShopsManager() {
                   if (event.key === "Escape") setShowSuggestions(false);
                 }}
                 placeholder="ស្វែងរកហាង (ឈ្មោះ, ទីតាំង)..."
-                className="h-11 w-full rounded-2xl border border-gray-200 bg-white py-2 pl-11 pr-10 text-base text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+                className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
               />
               {searchInput && (
                 <button
                   type="button"
                   onClick={handleClearSearch}
-                  className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
+                  className="absolute right-3.5 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700 cursor-pointer"
                   aria-label="Clear search"
                 >
-                  <X size={16} />
+                  <X size={18} />
                 </button>
               )}
 
               {showSuggestions && searchInput.trim().length >= 2 && (
-                <div className="absolute left-0 top-[48px] z-[100] w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
+                <div className="absolute left-0 top-[52px] z-[100] w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
                   {suggestionsLoading ? (
-                    <div className="flex items-center justify-center gap-2 px-5 py-6 text-sm text-gray-500">
-                      <Loader2 size={18} className="animate-spin text-primary-800" />
+                    <div className="flex items-center justify-center gap-2 px-5 py-6 text-lg font-normal text-gray-500">
+                      <Loader2 size={20} className="animate-spin text-primary-800" />
                       កំពុងស្វែងរក...
                     </div>
                   ) : suggestions.length === 0 ? (
                     <div className="px-5 py-6 text-center">
-                      <Store size={28} className="mx-auto text-amber-500" />
-                      <p className="mt-1 text-sm font-semibold text-amber-600">មិនមានហាងដែលត្រូវគ្នា</p>
+                      <Store size={32} className="mx-auto text-amber-500" />
+                      <p className="mt-1 text-lg font-normal text-amber-600">មិនមានហាងដែលត្រូវគ្នា</p>
                     </div>
                   ) : (
                     <>
-                      <div className="border-b border-gray-100 px-4 py-2 bg-gray-50">
-                        <p className="text-xs font-bold text-gray-500 uppercase">លទ្ធផលស្វែងរក</p>
+                      <div className="border-b border-gray-100 px-4 py-2.5 bg-gray-50">
+                        <p className="text-base font-normal text-gray-500 uppercase">លទ្ធផលស្វែងរក</p>
                       </div>
                       <div className="max-h-[300px] overflow-y-auto p-1.5">
                         {suggestions.map((store) => {
@@ -527,23 +559,23 @@ export default function ShopsManager() {
                               type="button"
                               onMouseDown={(event) => event.preventDefault()}
                               onClick={() => handleSelectSuggestion(store)}
-                              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-emerald-50"
+                              className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-emerald-50"
                             >
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-primary-800">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-primary-800">
                                 {logoCandidate ? (
                                   <StoreMediaImage
                                     mediaUuid={logoCandidate}
                                     alt={`${store.storeName} logo`}
                                     className="h-full w-full object-cover"
-                                    fallbackIcon={<Store size={18} />}
+                                    fallbackIcon={<Store size={20} />}
                                   />
                                 ) : (
-                                  <Store size={18} />
+                                  <Store size={20} />
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-bold text-gray-800">{store.storeName}</p>
-                                <p className="truncate text-xs text-gray-400">
+                                <p className="truncate text-lg font-normal text-gray-800">{store.storeName}</p>
+                                <p className="truncate text-base font-normal text-gray-400">
                                   {[store.addressLine, store.city].filter(Boolean).join(", ") || "No address"}
                                 </p>
                               </div>
@@ -562,16 +594,16 @@ export default function ShopsManager() {
               <button
                 type="button"
                 onClick={() => setSizeOpen((c) => !c)}
-                className={`flex h-11 min-w-[125px] items-center justify-between gap-2.5 rounded-2xl border bg-white px-4 text-base font-semibold transition ${
+                className={`flex h-12 min-w-[140px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition ${
                   sizeOpen ? "border-primary-600 ring-2 ring-primary-100" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <span className="text-gray-700">{size} / ទំព័រ</span>
-                <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""}`} />
+                <ChevronDown size={18} className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""}`} />
               </button>
               {sizeOpen && (
-                <div className="absolute right-0 top-[48px] z-[110] w-[160px] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl">
-                  <p className="px-3 py-1 text-xs font-semibold text-gray-400">ចំនួនក្នុងទំព័រ</p>
+                <div className="absolute right-0 top-[52px] z-[110] w-[180px] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl">
+                  <p className="px-3 py-1.5 text-base font-normal text-gray-400">ចំនួនក្នុងទំព័រ</p>
                   {[10, 20, 50].map((value) => {
                     const selected = size === value;
                     return (
@@ -579,11 +611,11 @@ export default function ShopsManager() {
                         key={value}
                         type="button"
                         onClick={() => { setSize(value); setPage(0); setSizeOpen(false); }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${selected ? "bg-primary-50 text-primary-800" : "text-gray-700 hover:bg-gray-50"
+                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected ? "bg-primary-50 text-primary-800" : "text-gray-700 hover:bg-gray-50"
                           }`}
                       >
                         <span>{value} / ទំព័រ</span>
-                        {selected && <Check size={16} className="text-primary-800" />}
+                        {selected && <Check size={18} className="text-primary-800" />}
                       </button>
                     );
                   })}
@@ -593,40 +625,38 @@ export default function ShopsManager() {
           </div>
         </div>
 
-        {/* ROW 2: Filter Controls (City, Open/Close, Sort, Reset) */}
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-xs">
-          <div className="flex items-center gap-2 px-1 text-base font-semibold text-gray-700 shrink-0">
-            <Filter size={17} className="text-primary-800" />
-            <span>តម្រងស្វែងរក:</span>
-          </div>
-
+        {/* ROW 2: Filter Controls (City, Open/Close, Sort, Reset) - Transparent / Pill Style */}
+        <div className="flex flex-wrap items-center gap-2.5">
           {/* City Filter */}
-          <div className="min-w-[170px] flex-1 sm:flex-none">
+          <div className="min-w-[180px] max-w-[220px] flex-1 shrink-0">
             <CustomSelect
               value={cityFilter}
               onChange={(val) => { setCityFilter(val); setPage(0); }}
               options={CITY_OPTIONS}
               placeholder="ក្រុង/ខេត្ត"
+              pill
             />
           </div>
 
           {/* Open/Close Filter */}
-          <div className="min-w-[170px] flex-1 sm:flex-none">
+          <div className="min-w-[180px] max-w-[220px] flex-1 shrink-0">
             <CustomSelect
               value={openFilter}
               onChange={(val) => { setOpenFilter(val); setPage(0); }}
               options={OPEN_OPTIONS}
-              placeholder="បើក/បិទ"
+              placeholder="ស្ថានភាពហាងទាំងអស់"
+              pill
             />
           </div>
 
           {/* Sort By Filter */}
-          <div className="min-w-[170px] flex-1 sm:flex-none ml-auto">
+          <div className="min-w-[160px] max-w-[200px] flex-1 shrink-0">
             <CustomSelect
               value={sortBy}
               onChange={(val) => setSortBy(val as StoreSort)}
               options={SORT_OPTIONS}
               placeholder="តម្រៀបតាម"
+              pill
             />
           </div>
 
@@ -635,10 +665,10 @@ export default function ShopsManager() {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="inline-flex h-11 items-center gap-1.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 text-base font-semibold text-amber-700 transition hover:bg-amber-100 active:scale-95 shrink-0"
+              className="flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full border border-red-200 bg-white px-5 text-lg font-normal text-red-600 transition hover:bg-red-50 active:scale-95"
               title="សម្អាតតម្រងទាំងអស់"
             >
-              <RotateCcw size={16} />
+              <RotateCcw size={18} />
               <span>សម្អាតតម្រង</span>
             </button>
           )}
@@ -671,7 +701,7 @@ export default function ShopsManager() {
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold leading-relaxed">
+              <p className="text-lg font-semibold leading-relaxed">
                 {notice.text}
               </p>
             </div>
@@ -681,13 +711,20 @@ export default function ShopsManager() {
               className="ml-2 flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
               aria-label="Close"
             >
-              <X size={15} />
+              <X size={16} />
             </button>
           </div>
         </div>
       )}
 
-      <section className="overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
+      <section className="relative overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm transition-all duration-300">
+        {/* Subtle animated top loading indicator */}
+        {(isFetching || isPending) && !isLoading && (
+          <div className="absolute top-0 left-0 right-0 z-20 h-1 w-full overflow-hidden bg-primary-100/60">
+            <div className="h-full w-full bg-primary-700 animate-pulse transition-all duration-300" />
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex min-h-[360px] items-center justify-center">
             <Loader2 size={30} className="animate-spin text-[#137A3D]" />
@@ -711,13 +748,15 @@ export default function ShopsManager() {
             <p className="mt-3 text-2xl text-[#F97316]">មិនមាន Store</p>
           </div>
         ) : (
-          <ShopsTable
-            stores={sortedStores}
-            disabled={updating || deleting || isFetching}
-            onEdit={(store) => setEditingUuid(store.uuid)}
-            onStatus={(store, action) => { setStatusStore(store); setStatusAction(action); }}
-            onDelete={(store) => setDeletingStore(store)}
-          />
+          <div className={`transition-opacity duration-200 ${isPending || isFetching ? "opacity-75" : "opacity-100"}`}>
+            <ShopsTable
+              stores={sortedStores}
+              disabled={updating || deleting || isFetching}
+              onEdit={(store) => setEditingUuid(store.uuid)}
+              onStatus={(store, action) => { setStatusStore(store); setStatusAction(action); }}
+              onDelete={(store) => setDeletingStore(store)}
+            />
+          </div>
         )}
 
         {!isLoading && !error && (
@@ -725,7 +764,7 @@ export default function ShopsManager() {
             page={data?.pageNumber ?? page}
             totalPages={data?.totalPages ?? 0}
             totalElements={data?.totalElements ?? 0}
-            disabled={isFetching}
+            disabled={isFetching || isPending}
             onPageChange={setPage}
           />
         )}

@@ -638,68 +638,18 @@ export default function UsersManager() {
       ================================================== */}
 
       <div className="flex w-full flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <UsersTabs
-            value={statusFilter}
-            counts={counts}
-            onChange={(value) => {
-              setStatusFilter(value);
+        <UsersTabs
+          value={statusFilter}
+          counts={counts}
+          onChange={(value) => {
+            setStatusFilter(value);
+            setPage(0);
+          }}
+        />
 
-              setPage(0);
-            }}
-          />
-
-          {/* ROLE FILTER */}
-          <div className="inline-flex items-center rounded-full bg-gray-100/90 p-1 ring-1 ring-gray-200/70 shadow-inner">
-            <button
-              type="button"
-              onClick={() => {
-                setRoleFilter("ALL");
-                setPage(0);
-              }}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-150 ${
-                roleFilter === "ALL"
-                  ? "bg-white text-gray-800 shadow-sm"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              តួនាទីទាំងអស់ ({roleCounts.all})
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setRoleFilter("ADMIN");
-                setPage(0);
-              }}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-150 ${
-                roleFilter === "ADMIN"
-                  ? "bg-primary-800 text-white shadow-sm"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              Admin ({roleCounts.admin})
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setRoleFilter("USER");
-                setPage(0);
-              }}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-150 ${
-                roleFilter === "USER"
-                  ? "bg-primary-800 text-white shadow-sm"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              User ({roleCounts.user})
-            </button>
-          </div>
-        </div>
-
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex min-w-[320px] flex-1 flex-wrap items-center justify-end gap-2.5">
           {/* SEARCH */}
-
-          <div className="relative">
+          <div className="relative min-w-[240px] max-w-[420px] flex-1">
             <Search
               size={18}
               className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
@@ -709,11 +659,8 @@ export default function UsersManager() {
               value={search}
               onChange={(event) => {
                 const value = event.target.value;
-
                 setSearch(value);
-
                 setPage(0);
-
                 setShowSuggestions(value.trim().length > 0);
               }}
               onFocus={() => {
@@ -725,13 +672,12 @@ export default function UsersManager() {
                 if (event.key === "Escape") {
                   setShowSuggestions(false);
                 }
-
                 if (event.key === "Enter") {
                   setShowSuggestions(false);
                 }
               }}
-              placeholder="ស្វែងរកឈ្មោះ, គណនីគណនីអ្នកប្រើប្រាស់ ឬ អ៊ីមែល..."
-              className="h-11 w-[430px] rounded-2xl border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              placeholder="ស្វែងរកឈ្មោះ, គណនី ឬ អ៊ីមែល..."
+              className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
             />
 
             {search && (
@@ -739,15 +685,13 @@ export default function UsersManager() {
                 type="button"
                 onClick={() => {
                   setSearch("");
-
                   setShowSuggestions(false);
-
                   setPage(0);
                 }}
-                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
+                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700 cursor-pointer"
                 aria-label="Clear search"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             )}
 
@@ -756,15 +700,14 @@ export default function UsersManager() {
                 {suggestions.length === 0 ? (
                   <div className="px-5 py-6 text-center">
                     <Users size={32} className="mx-auto text-secondary-500" />
-
-                    <p className="mt-2 text-lg text-secondary-500">
+                    <p className="mt-2 text-lg font-normal text-secondary-500">
                       មិនមានអ្នកប្រើដែលត្រូវគ្នា
                     </p>
                   </div>
                 ) : (
                   <>
                     <div className="border-b border-gray-100 px-5 py-3">
-                      <p className="text-lg text-secondary-500">
+                      <p className="text-lg font-normal text-secondary-500">
                         លទ្ធផលស្វែងរក
                       </p>
                     </div>
@@ -786,35 +729,33 @@ export default function UsersManager() {
                             }}
                             onClick={() => {
                               setSearch(name);
-
                               setShowSuggestions(false);
-
                               setPage(0);
                             }}
-                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
+                            className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
                           >
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
                               <UserRound size={20} />
                             </div>
 
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-base font-semibold text-gray-800">
+                              <p className="truncate text-base font-normal text-gray-800">
                                 {name}
                               </p>
 
-                              <p className="mt-0.5 truncate text-sm text-gray-400">
+                              <p className="mt-0.5 truncate text-sm font-normal text-gray-400">
                                 @{user.username}
                               </p>
 
                               {user.primaryEmail && (
-                                <p className="mt-0.5 truncate text-sm text-gray-400">
+                                <p className="mt-0.5 truncate text-sm font-normal text-gray-400">
                                   {user.primaryEmail}
                                 </p>
                               )}
                             </div>
 
                             <span
-                              className={`shrink-0 rounded-full px-2.5 py-1 text-sm ${user.status === "ACTIVE"
+                              className={`shrink-0 rounded-full px-2.5 py-1 text-sm font-normal ${user.status === "ACTIVE"
                                 ? "bg-primary-50 text-primary-700"
                                 : user.status === "SUSPENDED"
                                   ? "bg-secondary-50 text-secondary-600"
@@ -836,18 +777,15 @@ export default function UsersManager() {
           </div>
 
           {/* PAGE SIZE */}
-
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => {
                 setSizeOpen((current) => !current);
-
                 setSortOpen(false);
-
                 setShowSuggestions(false);
               }}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-sm font-semibold transition ${sizeOpen
+              className={`flex h-12 min-w-[140px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition ${sizeOpen
                 ? "border-primary-600 ring-2 ring-primary-100"
                 : "border-gray-200 hover:border-primary-600/50"
                 }`}
@@ -855,15 +793,15 @@ export default function UsersManager() {
               <span className="text-gray-700">{size} / ទំព័រ</span>
 
               <ChevronDown
-                size={17}
+                size={18}
                 className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
                   }`}
               />
             </button>
 
             {sizeOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[170px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg text-secondary-500">
+              <div className="absolute right-0 top-[52px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+                <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-500">
                   ចំនួនក្នុងទំព័រ
                 </p>
 
@@ -876,12 +814,10 @@ export default function UsersManager() {
                       type="button"
                       onClick={() => {
                         setSize(value);
-
                         setPage(0);
-
                         setSizeOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
+                      className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected
                         ? "bg-primary-50 text-primary-700"
                         : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
                         }`}
@@ -889,7 +825,7 @@ export default function UsersManager() {
                       <span>{value} / ទំព័រ</span>
 
                       {selected && (
-                        <Check size={16} className="text-primary-700" />
+                        <Check size={18} className="text-primary-700" />
                       )}
                     </button>
                   );
@@ -899,30 +835,27 @@ export default function UsersManager() {
           </div>
 
           {/* SORT */}
-
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => {
                 setSortOpen((current) => !current);
-
                 setSizeOpen(false);
-
                 setShowSuggestions(false);
               }}
-              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen
-                ? "border-primary-600 bg-primary-50 text-primary-700"
-                : "border-gray-200 bg-white text-gray-600 hover:border-primary-600 hover:bg-primary-50 hover:text-primary-700"
+              className={`flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border transition ${sortOpen
+                ? "border-primary-800 bg-primary-50 text-primary-800"
+                : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
                 }`}
               aria-label="Sort users"
-              title="Sort users"
+              title="តម្រៀប"
             >
               <ArrowUpDown size={18} />
             </button>
 
             {sortOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg text-secondary-500">
+              <div className="absolute right-0 top-[52px] z-[100] w-[200px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+                <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-500">
                   តម្រៀប
                 </p>
 
@@ -935,10 +868,9 @@ export default function UsersManager() {
                       type="button"
                       onClick={() => {
                         setSortBy(option.value);
-
                         setSortOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-base font-semibold transition ${selected
+                      className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected
                         ? "bg-primary-50 text-primary-700"
                         : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
                         }`}
@@ -946,7 +878,7 @@ export default function UsersManager() {
                       <span>{option.label}</span>
 
                       {selected && (
-                        <Check size={16} className="text-primary-700" />
+                        <Check size={18} className="text-primary-700" />
                       )}
                     </button>
                   );

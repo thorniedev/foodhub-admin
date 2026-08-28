@@ -63,13 +63,13 @@ export default function DeleteMedicalConditionConfirmModal({
           </button>
         </div>
 
-        <p className="mt-5 text-3xl font-semibold text-primary-800">
+        <p className="mt-5 text-2xl font-normal text-primary-800">
           បិទស្ថានភាពសុខភាពនេះ?
         </p>
 
-        <p className="mt-3 text-lg leading-8 text-gray-500">
+        <p className="mt-3 text-lg leading-8 font-normal text-gray-500">
           ស្ថានភាពសុខភាព{" "}
-          <span className="font-semibold text-gray-800">
+          <span className="font-normal text-gray-800">
             {item.name}
           </span>{" "}
           នឹងត្រូវបិទ ហើយអាចស្ដារឡើងវិញនៅពេលក្រោយ។
@@ -80,7 +80,7 @@ export default function DeleteMedicalConditionConfirmModal({
             type="button"
             onClick={onClose}
             disabled={deleting}
-            className="min-h-12 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-12 rounded-full border border-gray-200 bg-white px-4 text-lg font-normal text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             បោះបង់
           </button>
@@ -91,7 +91,7 @@ export default function DeleteMedicalConditionConfirmModal({
               void onConfirm()
             }
             disabled={deleting}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-500 px-4 text-lg font-medium text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-500 px-4 text-lg font-normal text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {deleting && (
               <Loader2

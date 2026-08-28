@@ -6,7 +6,9 @@ export interface FoodCategory {
   code: string;
   name: string;
   description: string | null;
-  isActive: boolean;
+  isActive?: boolean;
+  active?: boolean;
+  is_active?: boolean;
   createdAt: string;
   subCategories?: FoodCategory[];
 }
@@ -17,4 +19,6 @@ export interface FoodCategoryPayload {
   description?: string | null;
   parentCategoryUuid?: string | null;
   isActive?: boolean;
+  active?: boolean;
+  is_active?: boolean;
 }

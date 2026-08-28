@@ -193,9 +193,9 @@ export default function ImagePicker({
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-xl font-bold text-gray-800">{label}</span>
+        <span className="text-xl font-normal text-gray-700">{label}</span>
 
-        <span className="text-lg font-bold text-gray-400">
+        <span className="text-lg font-normal text-gray-500">
           {totalCount}/{MAX_FILES}
         </span>
       </div>
@@ -233,7 +233,7 @@ export default function ImagePicker({
               className="h-full w-full object-cover"
             />
 
-            <span className="absolute left-2 top-2 rounded-lg bg-emerald-600 px-2.5 py-1 text-lg font-bold text-white shadow">
+            <span className="absolute left-2 top-2 rounded-full bg-emerald-600 px-3 py-1 text-base font-normal text-white shadow">
               រូបថ្មី #{index + 1}
             </span>
 
@@ -246,7 +246,7 @@ export default function ImagePicker({
               className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-red-500 text-white shadow-md transition hover:bg-red-600 hover:scale-110 active:scale-95"
               title="ដករូបភាពនេះចេញ"
             >
-              <Minus size={18} strokeWidth={3} />
+              <Minus size={18} strokeWidth={2.5} />
             </button>
           </div>
         ))}
@@ -256,15 +256,15 @@ export default function ImagePicker({
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="flex aspect-square flex-col items-center justify-center rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/60 text-[#137A3D] transition hover:bg-emerald-50 hover:border-emerald-400 active:scale-95"
+            className="flex aspect-square flex-col items-center justify-center rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/60 text-[#137A3D] transition hover:bg-emerald-50 hover:border-emerald-400 active:scale-95 cursor-pointer"
           >
             <ImagePlus size={28} />
-            <span className="mt-2 text-lg font-bold">+ បន្ថែមរូប</span>
+            <span className="mt-2 text-lg font-normal">+ បន្ថែមរូប</span>
           </button>
         )}
       </div>
 
-      {error && <p className="mt-3 text-lg font-semibold text-red-500">{error}</p>}
+      {error && <p className="mt-3 text-lg font-normal text-red-500">{error}</p>}
     </div>
   );
 }

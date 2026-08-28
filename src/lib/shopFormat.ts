@@ -128,20 +128,8 @@ export function storeLogoCandidate(store: Store): string | null {
     record.avatarMediaUuid,
     record.avatarUrl,
     record.avatar,
-    record.imageUrl,
-    record.image,
-    record.images,
-    record.primaryMediaUuid,
-    record.primaryMediaUuids,
-    record.primaryMediaUrls,
-    record.media,
-    record.mediaFiles,
-    store.coverMediaUuid,
-    store.coverImageUrl,
-    record.cover,
-    record.coverMedia,
-    isRecord(store.externalSource) ? store.externalSource.photos : null,
-    isRecord(store.externalSource) ? store.externalSource.photoUrls : null,
+    isRecord(store.externalSource) ? store.externalSource.logo : null,
+    isRecord(store.externalSource) ? store.externalSource.icon : null,
   );
 }
 
@@ -167,10 +155,6 @@ export function storeCoverCandidate(store: Store): string | null {
     record.mediaFiles,
     isRecord(store.externalSource) ? store.externalSource.photos : null,
     isRecord(store.externalSource) ? store.externalSource.photoUrls : null,
-    store.logoMediaUuid,
-    store.logoUrl,
-    record.logo,
-    record.logoMedia,
   );
 }
 

@@ -54,9 +54,9 @@ export default function StoreHoursSection({
             <button
               type="button"
               onClick={onEditHours}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary-800 px-4 py-1.5 text-sm font-bold text-white shadow-xs transition hover:bg-primary-900"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary-800 px-5 py-2 text-lg font-bold text-white shadow-xs transition hover:bg-primary-900"
             >
-              <Pencil size={14} />
+              <Pencil size={16} />
               កំណត់ម៉ោងដំណើរការ
             </button>
           )}
@@ -84,7 +84,7 @@ export default function StoreHoursSection({
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <div
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                       isSpecial
                         ? "bg-secondary-50 text-secondary-600"
                         : isToday
@@ -92,23 +92,23 @@ export default function StoreHoursSection({
                           : "bg-primary-50 text-primary-800"
                     }`}
                   >
-                    <CalendarClock size={18} />
+                    <CalendarClock size={20} />
                   </div>
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-base font-semibold text-gray-800">
+                      <p className="text-lg font-semibold text-gray-800">
                         {title}
                       </p>
 
                       {isToday && (
-                        <span className="rounded-full bg-[#137A3D] px-2 py-0.2 text-[11px] font-bold text-white">
+                        <span className="rounded-full bg-[#137A3D] px-2.5 py-0.5 text-sm font-bold text-white">
                           ថ្ងៃនេះ
                         </span>
                       )}
                     </div>
 
-                    <p className="mt-0.5 text-sm text-gray-500">
+                    <p className="mt-0.5 text-base text-gray-500">
                       {hour.scheduleType}
                       {hour.reason ? ` · ${hour.reason}` : ""}
                     </p>
@@ -116,7 +116,7 @@ export default function StoreHoursSection({
                 </div>
 
                 <div
-                  className={`inline-flex min-h-8 shrink-0 items-center justify-center rounded-full border px-3.5 text-sm font-semibold ${
+                  className={`inline-flex min-h-9 shrink-0 items-center justify-center rounded-full border px-4 text-lg font-semibold ${
                     hour.isClosed
                       ? "border-red-100 bg-red-50 text-red-600"
                       : "border-emerald-100 bg-white text-emerald-800"

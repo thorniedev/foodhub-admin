@@ -85,11 +85,13 @@ export function useFilterCatalog(groupCode?: string) {
       const label =
         values.name.trim() ||
         values.localName.trim();
+      const code =
+        values.code?.trim().toUpperCase() || createCodeFromLabel(label);
 
       const next: FilterCatalogOption = {
         uuid: createClientUuid(),
         groupCode,
-        code: createCodeFromLabel(label),
+        code,
         name: values.name.trim() || values.localName.trim(),
         localName:
           values.localName.trim() || values.name.trim(),
@@ -115,7 +117,7 @@ export function useFilterCatalog(groupCode?: string) {
 
       if (duplicate) {
         throw new Error(
-          "មានទិន្នន័យនេះរួចហើយ។ សូមប្រើឈ្មោះផ្សេង។",
+          "មានទិន្នន័យនេះរួចហើយ។ សូមប្រើឈ្មោះ ឬកូដផ្សេង។",
         );
       }
 
@@ -149,6 +151,9 @@ export function useFilterCatalog(groupCode?: string) {
         );
       }
 
+      const updatedCode =
+        values.code?.trim().toUpperCase() || existing.code;
+
       const next =
         current.map(
           (item) => {
@@ -160,6 +165,7 @@ export function useFilterCatalog(groupCode?: string) {
 
             return {
               ...item,
+              code: updatedCode,
               name:
                 values.name.trim() ||
                 values.localName.trim(),

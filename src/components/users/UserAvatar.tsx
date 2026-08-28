@@ -115,8 +115,8 @@ async function fetchUserAvatarMediaUuid(userUuid: string): Promise<string | null
         },
       );
 
-      // 2. Fallback to standard user profiles endpoint
-      if (!response.ok) {
+      // 2. Fallback to standard user profiles endpoint only if 404
+      if (!response.ok && response.status === 404) {
         response = await fetch(
           `/api/users/${encodeURIComponent(userUuid)}/profiles?page=0&size=10`,
           {

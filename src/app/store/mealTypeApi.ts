@@ -114,6 +114,8 @@ export const mealTypeApi = baseApi.injectEndpoints({
         const page = queryParams.page ?? 0;
         const size = queryParams.size ?? 20;
 
+        const includeInactive = queryParams.includeInactive ?? false;
+
         return {
           url: "/api/catalog/meal-types",
           method: "GET",
