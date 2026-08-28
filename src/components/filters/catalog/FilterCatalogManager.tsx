@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
+import Pagination from "@/src/components/ui/Pagination";
 
 import {
   AlertTriangle,
@@ -172,30 +173,11 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  const [showSuggestions, setShowSuggestions] = useState(false);
-
   const normalizedSearch = search.trim().toLowerCase();
 
   const activeCount = groupOptions.filter((item) => item.active).length;
 
   const inactiveCount = groupOptions.length - activeCount;
-
-  const suggestions = useMemo(() => {
-    if (!normalizedSearch) {
-      return [];
-    }
-
-    return groupOptions
-      .filter((item) =>
-        [item.localName, item.name, item.code, item.description ?? ""].some(
-          (value) =>
-            String(value ?? "")
-              .toLowerCase()
-              .includes(normalizedSearch),
-        ),
-      )
-      .slice(0, 8);
-  }, [groupOptions, normalizedSearch]);
 
   const filtered = useMemo(() => {
     return groupOptions.filter((item) => {
@@ -299,7 +281,6 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
 
   const clearSearch = () => {
     setSearch("");
-    setShowSuggestions(false);
     setPage(0);
   };
 
@@ -323,27 +304,14 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         size={size}
         sortOpen={sortOpen}
         sizeOpen={sizeOpen}
-        showSuggestions={showSuggestions}
-        suggestions={suggestions}
         totalCount={groupOptions.length}
         activeCount={activeCount}
         inactiveCount={inactiveCount}
         onSearchChange={(value) => {
           setSearch(value);
-          setShowSuggestions(value.trim().length > 0);
           setPage(0);
-        }}
-        onSearchFocus={() => {
-          if (search.trim()) {
-            setShowSuggestions(true);
-          }
         }}
         onClearSearch={clearSearch}
-        onSuggestionSelect={(item) => {
-          setSearch(item.localName || item.name);
-          setShowSuggestions(false);
-          setPage(0);
-        }}
         onStatusChange={(value) => {
           setStatusFilter(value);
           setPage(0);
@@ -371,7 +339,6 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         }}
         onReset={() => {
           setSearch("");
-          setShowSuggestions(false);
           setStatusFilter("ALL");
           setSortMode("NEWEST");
           setSize(20);
@@ -567,15 +534,11 @@ function CatalogToolbar({
   size,
   sortOpen,
   sizeOpen,
-  showSuggestions,
-  suggestions,
   totalCount,
   activeCount,
   inactiveCount,
   onSearchChange,
-  onSearchFocus,
   onClearSearch,
-  onSuggestionSelect,
   onStatusChange,
   onSortOpenChange,
   onSizeOpenChange,
@@ -590,15 +553,11 @@ function CatalogToolbar({
   size: number;
   sortOpen: boolean;
   sizeOpen: boolean;
-  showSuggestions: boolean;
-  suggestions: FilterCatalogOption[];
   totalCount: number;
   activeCount: number;
   inactiveCount: number;
   onSearchChange: (value: string) => void;
-  onSearchFocus: () => void;
   onClearSearch: () => void;
-  onSuggestionSelect: (item: FilterCatalogOption) => void;
   onStatusChange: (value: StatusFilter) => void;
   onSortOpenChange: (open: boolean) => void;
   onSizeOpenChange: (open: boolean) => void;
@@ -673,7 +632,6 @@ function CatalogToolbar({
             type="text"
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
-            onFocus={onSearchFocus}
             placeholder={`ស្វែងរក${groupLabel}...`}
             className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
           />
@@ -686,40 +644,6 @@ function CatalogToolbar({
             >
               <X size={18} />
             </button>
-          )}
-
-          {/* Suggestions dropdown */}
-          {showSuggestions && search.trim() && (
-            <div className="absolute left-0 top-[52px] z-[100] w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
-              <div className="border-b border-gray-100 bg-gray-50 px-4 py-2.5">
-                <p className="text-base font-bold uppercase text-gray-500">
-                  លទ្ធផលស្វែងរក
-                </p>
-              </div>
-              <div className="max-h-[280px] overflow-y-auto p-1.5">
-                {suggestions.length === 0 ? (
-                  <p className="px-3 py-5 text-center text-lg text-gray-400">
-                    មិនមានលទ្ធផល
-                  </p>
-                ) : (
-                  suggestions.map((item) => (
-                    <button
-                      key={item.uuid}
-                      type="button"
-                      onClick={() => onSuggestionSelect(item)}
-                      className="flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left transition hover:bg-emerald-50"
-                    >
-                      <span className="text-lg font-normal text-gray-800">
-                        {item.localName || item.name}
-                      </span>
-                      <span className="font-mono text-lg text-gray-400">
-                        {item.code}
-                      </span>
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
           )}
         </div>
 
@@ -788,8 +712,8 @@ function CatalogToolbar({
           </button>
 
           {sortOpen && (
-            <div className="absolute right-0 top-[56px] z-[110] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-              <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+            <div className="absolute right-0 top-[52px] z-[110] w-[200px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+              <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-600">
                 តម្រៀប
               </p>
               {(Object.keys(CATALOG_SORT_LABELS) as SortMode[]).map((key) => (
@@ -800,15 +724,15 @@ function CatalogToolbar({
                     onSortChange(key);
                     onSortOpenChange(false);
                   }}
-                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg transition ${
+                  className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
                     sortMode === key
                       ? "bg-primary-50 text-primary-800"
-                      : "text-gray-600 hover:bg-gray-50"
+                      : "text-gray-700 hover:bg-gray-50"
                   }`}
                 >
                   <span>{CATALOG_SORT_LABELS[key]}</span>
                   {sortMode === key && (
-                    <Check size={16} className="text-primary-800" />
+                    <Check size={18} className="text-primary-800" />
                   )}
                 </button>
               ))}
@@ -821,7 +745,7 @@ function CatalogToolbar({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 active:scale-95"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95"
             title="កំណត់ឡើងវិញ"
           >
             <RotateCcw size={18} />
@@ -1116,38 +1040,16 @@ function CatalogPagination({
   totalElements: number;
   onPageChange: (page: number) => void;
 }) {
-  const pages = Math.max(totalPages, 1);
-
   return (
-    <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-lg text-gray-500">
-        សរុប <span className="font-semibold text-gray-700">{totalElements}</span> ទិន្នន័យ
-      </p>
-
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          disabled={page <= 0}
-          onClick={() => onPageChange(Math.max(0, page - 1))}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <ChevronLeft size={20} />
-        </button>
-
-        <span className="flex h-10 min-w-10 items-center justify-center rounded-lg bg-[#136C34] px-3.5 text-lg font-semibold text-white">
-          {page + 1} / {pages}
-        </span>
-
-        <button
-          type="button"
-          disabled={page >= pages - 1}
-          onClick={() => onPageChange(Math.min(pages - 1, page + 1))}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <ChevronRight size={20} />
-        </button>
-      </div>
-    </div>
+    <Pagination
+      page={page}
+      totalPages={totalPages}
+      totalElements={totalElements}
+      unit="ទិន្នន័យ"
+      zeroIndexed={true}
+      onPageChange={onPageChange}
+      className="border-t border-gray-100"
+    />
   );
 }
 
@@ -1187,11 +1089,11 @@ function DeleteCatalogOptionModal({
           </button>
         </div>
 
-        <p className="mt-5 text-3xl font-semibold text-primary-800">
+        <p className="mt-5 text-2xl font-normal text-primary-800">
           បិទដំណើរការ {item.localName || item.name}?
         </p>
 
-        <p className="mt-3 text-lg leading-8 text-gray-500">
+        <p className="mt-3 text-lg leading-8 font-normal text-gray-500">
           វានឹងប្តូរទៅជាអសកម្ម (Inactive) ហើយអាចស្ដារឡើងវិញបានគ្រប់ពេល។
         </p>
 
@@ -1199,7 +1101,7 @@ function DeleteCatalogOptionModal({
           <button
             type="button"
             onClick={onClose}
-            className="min-h-12 rounded-full border border-gray-200 px-4 text-lg font-medium text-gray-600 transition hover:bg-gray-50"
+            className="min-h-12 rounded-full border border-gray-200 px-4 text-lg font-normal text-gray-600 transition hover:bg-gray-50"
           >
             បោះបង់
           </button>
@@ -1207,7 +1109,7 @@ function DeleteCatalogOptionModal({
           <button
             type="button"
             onClick={onConfirm}
-            className="min-h-12 rounded-full bg-amber-600 px-4 text-lg font-medium text-white transition hover:bg-amber-700"
+            className="min-h-12 rounded-full bg-amber-600 px-4 text-lg font-normal text-white transition hover:bg-amber-700"
           >
             បិទដំណើរការ
           </button>

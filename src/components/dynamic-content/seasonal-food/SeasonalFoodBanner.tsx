@@ -27,7 +27,8 @@ export default function SeasonalFoodBanner({
               រូបភាពអាហារតាមរដូវកាល
             </p>
             <p className="text-emerald-50 text-sm sm:text-base lg:text-lg mt-2 sm:mt-3 max-w-md">
-              គ្រប់គ្រងរូបភាព និងខ្លឹមសារអាហារពិសេសសម្រាប់រដូវកាលនីមួយៗ ដែលបង្ហាញនៅលើកម្មវិធីអតិថិជន
+              គ្រប់គ្រងរូបភាព និងខ្លឹមសារអាហារពិសេសសម្រាប់រដូវកាលនីមួយៗ
+              ដែលបង្ហាញនៅលើកម្មវិធីអតិថិជន
             </p>
           </div>
         </div>
@@ -43,15 +44,21 @@ export default function SeasonalFoodBanner({
 
       <div className="flex items-center gap-3 sm:gap-4 mt-6 flex-wrap">
         <div className="bg-white/10 rounded-xl px-4 py-3 min-w-[120px] sm:min-w-[140px] flex-1 sm:flex-none">
-          <p className="text-sm sm:text-base lg:text-lg text-emerald-50">សរុបទាំងអស់</p>
+          <p className="text-sm sm:text-base lg:text-lg text-emerald-50">
+            សរុបទាំងអស់
+          </p>
           <p className="text-xl font-bold">{total}</p>
         </div>
         <div className="bg-white/10 rounded-xl px-4 py-3 min-w-[120px] sm:min-w-[140px] flex-1 sm:flex-none">
-          <p className="text-sm sm:text-base lg:text-lg text-emerald-50">កំពុងបង្ហាញ</p>
+          <p className="text-sm sm:text-base lg:text-lg text-emerald-50">
+            កំពុងបង្ហាញ
+          </p>
           <p className="text-xl font-bold">{activeCount}</p>
         </div>
         <div className="bg-white/10 rounded-xl px-4 py-3 min-w-[120px] sm:min-w-[140px] flex-1 sm:flex-none">
-          <p className="text-sm sm:text-base lg:text-lg text-emerald-50">កំពុងរង់ចាំ</p>
+          <p className="text-sm sm:text-base lg:text-lg text-emerald-50">
+            កំពុងរង់ចាំ
+          </p>
           <p className="text-xl font-bold">{pendingCount}</p>
         </div>
       </div>

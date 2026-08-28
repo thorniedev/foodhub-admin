@@ -93,7 +93,7 @@ function SectionCard({
         >
           {icon}
         </div>
-        <h3 className="text-xl font-bold leading-7 text-gray-900">{title}</h3>
+        <h3 className="text-xl font-normal leading-7 text-gray-900">{title}</h3>
       </div>
       {children}
     </section>
@@ -109,7 +109,7 @@ function TagPill({
 }) {
   return (
     <span
-      className={`inline-flex min-h-10 items-center rounded-xl border px-3.5 py-1.5 text-lg font-semibold leading-7 ${className}`}
+      className={`inline-flex min-h-10 items-center rounded-full border px-3.5 py-1.5 text-lg font-normal leading-7 ${className}`}
     >
       {label}
     </span>
@@ -780,7 +780,7 @@ export default function MenuItemDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-12 items-center rounded-xl border border-gray-200 bg-white px-5 text-lg font-semibold text-gray-700 transition hover:bg-gray-50"
+            className="inline-flex h-12 items-center rounded-full border border-gray-200 bg-white px-6 text-lg font-normal text-gray-700 transition hover:bg-gray-50"
           >
             បិទ
           </button>
@@ -788,7 +788,7 @@ export default function MenuItemDetailModal({
             <button
               type="button"
               onClick={() => { onClose(); onEdit(data); }}
-              className="inline-flex h-12 items-center gap-2 rounded-xl bg-[#14833E] px-6 text-lg font-semibold text-white shadow-xs transition hover:bg-[#106C34] active:scale-[0.98]"
+              className="inline-flex h-12 items-center gap-2 rounded-full bg-[#14833E] px-7 text-lg font-normal text-white shadow-xs transition hover:bg-[#106C34] active:scale-[0.98]"
             >
               <Pencil size={20} />
               <span>កែប្រែព័ត៌មាន</span>

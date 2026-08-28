@@ -31,28 +31,28 @@ export default function ShopsTable({
       <table className="w-full table-auto border-collapse text-left">
         {/* ================= HEADER ================= */}
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/70">
-            <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[140px]">
+          <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-normal text-primary-800">
+            <th className="whitespace-nowrap px-3 py-3.5 font-normal min-w-[140px]">
               ហាង
             </th>
 
-            <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[130px]">
+            <th className="whitespace-nowrap px-3 py-3.5 font-normal min-w-[130px]">
               ទីតាំង
             </th>
 
-            <th className="whitespace-nowrap px-2 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[95px]">
+            <th className="whitespace-nowrap px-2 py-3.5 text-center font-normal min-w-[95px]">
               ការពិនិត្យ
             </th>
 
-            <th className="whitespace-nowrap px-2 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[85px]">
+            <th className="whitespace-nowrap px-2 py-3.5 text-center font-normal min-w-[85px]">
               គណនី
             </th>
 
-            <th className="whitespace-nowrap px-2 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[80px]">
+            <th className="whitespace-nowrap px-2 py-3.5 text-center font-normal min-w-[80px]">
               បើកឥឡូវ
             </th>
 
-            <th className="whitespace-nowrap px-3 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[110px]">
+            <th className="whitespace-nowrap px-3 py-3.5 text-center font-normal min-w-[110px]">
               សកម្មភាព
             </th>
           </tr>
@@ -95,7 +95,7 @@ export default function ShopsTable({
                     </div>
 
                     <div className="min-w-0">
-                      <p className="max-w-[180px] truncate text-lg font-semibold text-gray-800 transition group-hover:text-primary-800">
+                      <p className="max-w-[180px] truncate text-lg font-normal text-gray-800 transition group-hover:text-primary-800">
                         {store.storeName}
                       </p>
                     </div>
@@ -303,7 +303,7 @@ export function ReviewStatusBadge({ status }: { status?: string | null }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-semibold border ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${className}`}
       title={info.note}
     >
       <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClassName}`} />
@@ -328,7 +328,7 @@ export function AccountStatusBadge({ status }: { status?: string | null }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-semibold border ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${className}`}
       title={info.note}
     >
       <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClassName}`} />
@@ -357,7 +357,7 @@ export function LiveStatusBadge({ store }: { store: Store }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-semibold border ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${className}`}
       title={info.note}
     >
       <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClassName}`} />

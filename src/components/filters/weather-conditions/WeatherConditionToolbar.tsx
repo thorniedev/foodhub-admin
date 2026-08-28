@@ -21,10 +21,8 @@ interface Props {
   totalCount: number;
   activeCount: number;
   inactiveCount: number;
-  suggestions: WeatherCondition[];
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
-  onSuggestionSelect: (item: WeatherCondition) => void;
   onStatusChange: (value: StatusFilter) => void;
   onSortChange: (value: SortMode) => void;
   onSizeChange: (value: number) => void;
@@ -57,17 +55,14 @@ export default function WeatherConditionToolbar({
   totalCount,
   activeCount,
   inactiveCount,
-  suggestions,
   onSearchChange,
   onClearSearch,
-  onSuggestionSelect,
   onStatusChange,
   onSortChange,
   onSizeChange,
 }: Props) {
   const [sortOpen, setSortOpen] = useState(false);
   const [sizeOpen, setSizeOpen] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const sizeContainerRef = useRef<HTMLDivElement>(null);
@@ -76,12 +71,6 @@ export default function WeatherConditionToolbar({
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
-      if (
-        searchContainerRef.current &&
-        !searchContainerRef.current.contains(target)
-      ) {
-        setShowSuggestions(false);
-      }
       if (
         sizeContainerRef.current &&
         !sizeContainerRef.current.contains(target)
@@ -170,12 +159,6 @@ export default function WeatherConditionToolbar({
               onChange={(event) => {
                 const value = event.target.value;
                 onSearchChange(value);
-                setShowSuggestions(value.trim().length > 0);
-              }}
-              onFocus={() => {
-                if (search.trim()) {
-                  setShowSuggestions(true);
-                }
               }}
               placeholder="ស្វែងរក ស្ថានភាពអាកាសធាតុ..."
               className="h-[52px] w-full rounded-full border border-gray-200 bg-gray-50 pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
@@ -186,61 +169,12 @@ export default function WeatherConditionToolbar({
                 type="button"
                 onClick={() => {
                   onClearSearch();
-                  setShowSuggestions(false);
                 }}
                 aria-label="Clear search"
                 className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
               >
                 <X size={18} />
               </button>
-            )}
-
-            {showSuggestions && search.trim() && (
-              <div className="absolute left-0 top-[60px] z-[100] w-full min-w-[300px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                {suggestions.length === 0 ? (
-                  <p className="px-3 py-5 text-center text-lg text-gray-400">
-                    មិនមានលទ្ធផល
-                  </p>
-                ) : (
-                  suggestions.map((item) => {
-                    const active = item.isActive ?? item.active ?? true;
-                    return (
-                      <button
-                        key={item.uuid}
-                        type="button"
-                        onClick={() => {
-                          onSuggestionSelect(item);
-                          setShowSuggestions(false);
-                        }}
-                        className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-lg font-normal text-gray-800">
-                            {item.localName || item.name}
-                          </p>
-                          <p className="mt-0.5 truncate text-lg text-gray-400">
-                            {item.code}
-                          </p>
-                        </div>
-                        <span
-                          className={`inline-flex items-center gap-1.5 shrink-0 rounded-full px-3 py-1 text-lg font-normal ${
-                            active
-                              ? "bg-primary-50 text-primary-700"
-                              : "bg-gray-100 text-gray-500"
-                          }`}
-                        >
-                          <span
-                            className={`h-2 w-2 rounded-full ${
-                              active ? "bg-primary-600" : "bg-gray-400"
-                            }`}
-                          />
-                          {active ? "សកម្ម" : "អសកម្ម"}
-                        </span>
-                      </button>
-                    );
-                  })
-                )}
-              </div>
             )}
           </div>
 
@@ -251,7 +185,6 @@ export default function WeatherConditionToolbar({
               onClick={() => {
                 setSizeOpen((prev) => !prev);
                 setSortOpen(false);
-                setShowSuggestions(false);
               }}
               className="flex h-[52px] min-w-[150px] items-center justify-between gap-3 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-700 transition hover:border-primary-200 hover:bg-primary-50"
             >
@@ -293,7 +226,6 @@ export default function WeatherConditionToolbar({
               onClick={() => {
                 setSortOpen((prev) => !prev);
                 setSizeOpen(false);
-                setShowSuggestions(false);
               }}
               aria-label="Sort"
               title="តម្រៀប"

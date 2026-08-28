@@ -61,12 +61,12 @@ export default function SubCategoryDetailModal({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-50 text-primary-700">
-              {isDrink ? <CupSoda size={22} /> : <UtensilsCrossed size={22} />}
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-50 text-primary-700">
+              {isDrink ? <CupSoda size={24} /> : <UtensilsCrossed size={24} />}
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{item.name}</h2>
-              <p className="font-mono text-xs text-gray-400">{item.code}</p>
+              <h2 className="text-2xl font-normal text-gray-800">{item.name}</h2>
+              <p className="font-mono text-lg font-normal text-gray-500">{item.code}</p>
             </div>
           </div>
 
@@ -75,7 +75,7 @@ export default function SubCategoryDetailModal({
             onClick={onClose}
             className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
@@ -84,29 +84,29 @@ export default function SubCategoryDetailModal({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {/* Parent Category */}
             <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
-                <Layers size={15} />
+              <div className="flex items-center gap-2 text-lg font-normal text-gray-500">
+                <Layers size={18} />
                 <span>ប្រភេទមេ (Parent Root)</span>
               </div>
-              <p className="mt-1 font-bold text-primary-800">{parentName}</p>
+              <p className="mt-1 text-lg font-normal text-primary-800">{parentName}</p>
             </div>
 
             {/* Status */}
             <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
-                <ShieldCheck size={15} />
+              <div className="flex items-center gap-2 text-lg font-normal text-gray-500">
+                <ShieldCheck size={18} />
                 <span>ស្ថានភាព</span>
               </div>
               <div className="mt-1">
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-bold ${
+                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1 text-lg font-normal ${
                     active
                       ? "bg-emerald-50 text-emerald-700"
                       : "bg-gray-100 text-gray-500"
                   }`}
                 >
                   <span
-                    className={`h-1.5 w-1.5 rounded-full ${
+                    className={`h-2 w-2 rounded-full ${
                       active ? "bg-emerald-500" : "bg-gray-400"
                     }`}
                   />
@@ -117,22 +117,22 @@ export default function SubCategoryDetailModal({
 
             {/* Code */}
             <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
-                <Hash size={15} />
+              <div className="flex items-center gap-2 text-lg font-normal text-gray-500">
+                <Hash size={18} />
                 <span>កូដសម្គាល់</span>
               </div>
-              <p className="mt-1 font-mono text-sm font-bold text-gray-800">
+              <p className="mt-1 font-mono text-lg font-normal text-gray-800">
                 {item.code}
               </p>
             </div>
 
             {/* Created At */}
             <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
-                <Calendar size={15} />
+              <div className="flex items-center gap-2 text-lg font-normal text-gray-500">
+                <Calendar size={18} />
                 <span>កាលបរិច្ឆេទបង្កើត</span>
               </div>
-              <p className="mt-1 text-sm font-semibold text-gray-700">
+              <p className="mt-1 text-lg font-normal text-gray-700">
                 {formatDate(item.createdAt)}
               </p>
             </div>
@@ -140,8 +140,8 @@ export default function SubCategoryDetailModal({
 
           {/* Description */}
           <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
-            <p className="text-xs font-bold text-gray-400">ការពិពណ៌នា</p>
-            <p className="mt-1 text-sm leading-relaxed text-gray-700">
+            <p className="text-lg font-normal text-gray-500">ការពិពណ៌នា</p>
+            <p className="mt-1 text-lg font-normal leading-relaxed text-gray-700">
               {item.description || "មិនមានការពិពណ៌នាទេ។"}
             </p>
           </div>
@@ -152,7 +152,7 @@ export default function SubCategoryDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-gray-200 px-5 py-2 text-sm font-bold text-gray-600 transition hover:bg-gray-50"
+            className="rounded-full border border-gray-200 px-6 py-2.5 text-lg font-normal text-gray-600 transition hover:bg-gray-50"
           >
             បិទ
           </button>
@@ -162,9 +162,9 @@ export default function SubCategoryDetailModal({
               onClose();
               onEdit(item);
             }}
-            className="inline-flex items-center gap-2 rounded-full bg-primary-800 px-6 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-primary-900"
+            className="inline-flex items-center gap-2 rounded-full bg-primary-800 px-6 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-primary-900"
           >
-            <Pencil size={16} />
+            <Pencil size={18} />
             <span>កែប្រែ</span>
           </button>
         </div>

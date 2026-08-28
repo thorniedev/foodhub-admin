@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import {
   Apple,
   Beef,
@@ -13,7 +12,6 @@ import {
   GlassWater,
   Milk,
   MinusCircle,
-  MoreVertical,
   Pencil,
   Pizza,
   Salad,
@@ -25,7 +23,6 @@ import {
   Zap,
 } from "lucide-react";
 import type { FoodCategory } from "@/src/types/foodCategory";
-import { formatAdminDate } from "@/src/types/safetyResource";
 
 type Props = {
   items: FoodCategory[];
@@ -125,81 +122,6 @@ function getSubCategoryIcon(item: FoodCategory, mode: "FOOD" | "DRINK") {
   return <UtensilsCrossed size={20} />;
 }
 
-// ─── Three-dot dropdown menu ────────────────────────────────────────────────
-function MoreMenu({
-  item,
-  busy,
-  onToggleActive,
-  onDelete,
-}: {
-  item: FoodCategory;
-  busy: boolean;
-  onToggleActive: (item: FoodCategory) => void;
-  onDelete: (item: FoodCategory) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const active = item.isActive !== false;
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    if (open) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((p) => !p)}
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 text-gray-500 transition hover:bg-gray-200 focus:outline-none"
-      >
-        <MoreVertical size={17} />
-      </button>
-
-      {open && (
-        <div className="absolute right-0 top-full z-50 mt-1.5 min-w-[170px] overflow-hidden rounded-2xl border border-gray-100 bg-white py-1.5 shadow-xl shadow-gray-200/70">
-          {/* Toggle Active */}
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => {
-              onToggleActive(item);
-              setOpen(false);
-            }}
-            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
-          >
-            <MinusCircle
-              size={15}
-              className={active ? "text-amber-500" : "text-emerald-500"}
-            />
-            {active ? "បិទដំណើរការ" : "បើកដំណើរការ"}
-          </button>
-
-          <div className="mx-3 my-1 border-t border-gray-100" />
-
-          {/* Delete */}
-          <button
-            type="button"
-            onClick={() => {
-              onDelete(item);
-              setOpen(false);
-            }}
-            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
-          >
-            <Trash2 size={15} />
-            លុប
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── Main Table ──────────────────────────────────────────────────────────────
 export default function SubCategoryTable({
   items,
@@ -230,21 +152,21 @@ export default function SubCategoryTable({
     <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full min-w-[600px] table-auto border-collapse text-left">
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/70">
-            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
+          <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-normal text-primary-800">
+            <th className="py-4 pl-6 pr-4 font-normal">
               ឈ្មោះអនុប្រភេទ
             </th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
+            <th className="px-4 py-4 font-normal">
               កូដ
             </th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">
+            <th className="px-4 py-4 font-normal">
               ការពិពណ៌នា
             </th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800">
+            <th className="px-4 py-4 text-center font-normal">
               ស្ថានភាព
             </th>
            
-            <th className="min-w-[110px] whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800">
+            <th className="min-w-[130px] py-4 pl-4 pr-6 text-center font-normal">
               សកម្មភាព
             </th>
           </tr>
@@ -260,7 +182,7 @@ export default function SubCategoryTable({
                 className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
               >
                 {/* Name with Icon */}
-                <td className="px-4 py-3">
+                <td className="py-3.5 pl-6 pr-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary-100 bg-primary-50 text-primary-800">
                       {getSubCategoryIcon(item, mode)}
@@ -272,19 +194,19 @@ export default function SubCategoryTable({
                 </td>
 
                 {/* Code */}
-                <td className="whitespace-nowrap px-4 py-3">
+                <td className="whitespace-nowrap px-4 py-3.5">
                   <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-lg font-normal text-gray-700">
                     {item.code}
                   </span>
                 </td>
 
                 {/* Description */}
-                <td className="max-w-xs truncate px-4 py-3 text-lg font-normal text-gray-500">
+                <td className="max-w-xs truncate px-4 py-3.5 text-lg font-normal text-gray-500">
                   {item.description || "—"}
                 </td>
 
                 {/* Status */}
-                <td className="px-4 py-3 text-center">
+                <td className="px-4 py-3.5 text-center">
                   <span
                     className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1 text-lg font-normal ${
                       active
@@ -301,38 +223,54 @@ export default function SubCategoryTable({
                   </span>
                 </td>
 
-               
-
                 {/* Actions */}
-                <td className="px-4 py-3">
+                <td className="py-3.5 pl-4 pr-6">
                   <div className="flex items-center justify-center gap-2">
-                    {/* View */}
+                    {/* 1. View */}
                     <button
                       type="button"
                       onClick={() => onView(item)}
                       title="មើលព័ត៌មានលម្អិត"
-                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none"
+                      className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none"
                     >
                       <Eye size={17} />
                     </button>
 
-                    {/* Edit */}
+                    {/* 2. Edit */}
                     <button
                       type="button"
                       onClick={() => onEdit(item)}
                       title="កែប្រែ"
-                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none"
+                      className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none"
                     >
                       <Pencil size={17} />
                     </button>
 
-                    {/* More (toggle + delete) */}
-                    <MoreMenu
-                      item={item}
-                      busy={busy}
-                      onToggleActive={onToggleActive}
-                      onDelete={onDelete}
-                    />
+                    {/* 3. Toggle Active (Circle Minus) */}
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => onToggleActive(item)}
+                      title={active ? "បិទដំណើរការ" : "បើកដំណើរការ"}
+                      className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition focus:outline-none disabled:opacity-50 ${
+                        active
+                          ? "bg-amber-50 text-amber-600 hover:bg-amber-100"
+                          : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+                      }`}
+                    >
+                      <MinusCircle size={17} />
+                    </button>
+
+                    {/* 4. Delete (Trash) */}
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => onDelete(item)}
+                      title="លុប"
+                      className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none disabled:opacity-50"
+                    >
+                      <Trash2 size={17} />
+                    </button>
                   </div>
                 </td>
               </tr>

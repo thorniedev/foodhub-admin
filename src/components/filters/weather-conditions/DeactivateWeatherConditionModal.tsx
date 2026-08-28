@@ -42,12 +42,12 @@ export default function DeactivateWeatherConditionModal({
           </button>
         </div>
 
-        <p className="mt-5 text-3xl font-black text-gray-900">
+        <p className="mt-5 text-2xl font-normal text-gray-800">
           បិទ Weather Condition?
         </p>
 
-        <p className="mt-3 text-lg leading-7 text-gray-500">
-          <span className="font-black text-gray-800">
+        <p className="mt-3 text-lg leading-7 font-normal text-gray-500">
+          <span className="font-normal text-gray-800">
             {item.name}
           </span>{" "}
           នឹងត្រូវ Deactivate តាម DELETE endpoint។
@@ -58,7 +58,7 @@ export default function DeactivateWeatherConditionModal({
             type="button"
             disabled={deleting}
             onClick={onClose}
-            className="rounded-full border border-gray-200 px-5 py-3 text-lg font-bold text-gray-600"
+            className="rounded-full border border-gray-200 px-6 py-3 text-lg font-normal text-gray-600 hover:bg-gray-50"
           >
             បោះបង់
           </button>
@@ -67,11 +67,11 @@ export default function DeactivateWeatherConditionModal({
             type="button"
             disabled={deleting}
             onClick={onConfirm}
-            className="inline-flex items-center gap-2 rounded-full bg-red-500 px-5 py-3 text-lg font-black text-white disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-full bg-red-500 px-6 py-3 text-lg font-normal text-white disabled:opacity-60 hover:bg-red-600"
           >
             {deleting && (
               <Loader2
-                size={18}
+                size={20}
                 className="animate-spin"
               />
             )}

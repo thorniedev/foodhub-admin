@@ -309,18 +309,18 @@ export default function ShopStatusModal({
               ))}
               {review === "REJECTED" && (
                 <div className="pt-1">
-                  <p className="mb-1.5 text-lg font-semibold text-gray-700">មូលហេតុបដិសេធ</p>
+                  <p className="mb-1.5 text-lg font-normal text-gray-700">មូលហេតុបដិសេធ</p>
                   <textarea
                     rows={3}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="សរសេរមូលហេតុ..."
-                    className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-[#137A3D] focus:bg-white focus:ring-2 focus:ring-[#137A3D]/15"
+                    className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg font-normal text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-[#137A3D] focus:bg-white focus:ring-2 focus:ring-[#137A3D]/15"
                   />
                 </div>
               )}
               {review === null && (
-                <p className="pt-1 text-center text-base text-gray-400">ជ្រើសរើសស្ថានភាពពិនិត្យខាងលើ</p>
+                <p className="pt-1 text-center text-lg font-normal text-gray-400">ជ្រើសរើសស្ថានភាពពិនិត្យខាងលើ</p>
               )}
             </div>
           )}
@@ -357,8 +357,8 @@ export default function ShopStatusModal({
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-lg font-medium text-red-600">
-              <AlertTriangle size={18} className="mt-0.5 shrink-0" />
+            <div className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-lg font-normal text-red-600">
+              <AlertTriangle size={20} className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
@@ -372,7 +372,7 @@ export default function ShopStatusModal({
               type="button"
               disabled={isLoading}
               onClick={onClose}
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white px-6 text-lg font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-6 text-lg font-normal text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
             >
               បោះបង់
             </button>
@@ -381,7 +381,7 @@ export default function ShopStatusModal({
               type="button"
               disabled={isLoading}
               onClick={goBack}
-              className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-2xl border border-gray-200 bg-white px-5 text-lg font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
             >
               <ArrowLeft size={18} />
               ត្រឡប់
@@ -393,7 +393,7 @@ export default function ShopStatusModal({
             <button
               type="button"
               onClick={goNext}
-              className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-2xl bg-[#137A3D] px-7 text-lg font-semibold text-white shadow-sm transition hover:bg-[#0f6833] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-full bg-[#137A3D] px-7 text-lg font-normal text-white shadow-sm transition hover:bg-[#0f6833] disabled:cursor-not-allowed disabled:opacity-40"
             >
               បន្ទាប់
               <ArrowRight size={18} />
@@ -403,9 +403,9 @@ export default function ShopStatusModal({
               type="button"
               disabled={isLoading}
               onClick={() => void save()}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#137A3D] px-7 text-lg font-semibold text-white shadow-sm transition hover:bg-[#0f6833] disabled:opacity-60"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#137A3D] px-7 text-lg font-normal text-white shadow-sm transition hover:bg-[#0f6833] disabled:opacity-60"
             >
-              {isLoading && <Loader2 size={18} className="animate-spin" />}
+              {isLoading && <Loader2 size={20} className="animate-spin" />}
               {isLoading ? "កំពុងរក្សាទុក..." : "រក្សាទុក"}
             </button>
           )}

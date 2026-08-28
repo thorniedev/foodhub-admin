@@ -145,10 +145,10 @@ export default function ThumbnailImagePicker({
     <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-xs">
       <div className="mb-4 flex items-start justify-between">
         <div>
-          <p className="text-[18px] font-bold text-primary-900">{label}</p>
-          <p className="mt-0.5 text-base text-gray-500">{sublabel}</p>
+          <p className="text-xl font-normal text-gray-800">{label}</p>
+          <p className="mt-0.5 text-lg font-normal text-gray-500">{sublabel}</p>
         </div>
-        <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-800 border border-primary-100">
+        <span className="rounded-full bg-emerald-50 px-4 py-1.5 text-base font-normal text-[#137A3D] border border-emerald-100">
           ចាំបាច់ (Required)
         </span>
       </div>
@@ -163,7 +163,7 @@ export default function ThumbnailImagePicker({
 
       {loadingExisting ? (
         <div className="flex h-48 w-full items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#137A3D]" />
         </div>
       ) : activeDisplayUrl ? (
         <div className="relative flex flex-col items-center gap-5 sm:flex-row">
@@ -172,7 +172,7 @@ export default function ThumbnailImagePicker({
             {imgError ? (
               <div className="flex h-full w-full flex-col items-center justify-center bg-gray-50 p-3 text-center text-gray-400">
                 <span className="text-4xl">🍜</span>
-                <span className="mt-2 text-sm font-bold text-gray-500 leading-tight">
+                <span className="mt-2 text-base font-normal text-gray-500 leading-tight">
                   មិនអាចទាញយករូបភាព
                 </span>
               </div>
@@ -185,14 +185,14 @@ export default function ThumbnailImagePicker({
                 onError={() => setImgError(true)}
               />
             )}
-            <span className="absolute left-2 top-2 rounded-lg bg-emerald-600 px-2 py-0.5 text-xs font-bold text-white shadow">
+            <span className="absolute left-2 top-2 rounded-full bg-emerald-600 px-3 py-1 text-base font-normal text-white shadow">
               {previewUrl ? "រូបថ្មី (New)" : "Thumbnail"}
             </span>
           </div>
 
           {/* Action buttons */}
           <div className="flex flex-1 flex-col justify-center gap-2.5">
-            <p className="text-base font-semibold text-gray-700">
+            <p className="text-lg font-normal text-gray-700">
               {previewUrl
                 ? "បានជ្រើសរូបភាពថ្មីរួចរាល់"
                 : imgError
@@ -203,22 +203,22 @@ export default function ThumbnailImagePicker({
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
-                className="inline-flex h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-gray-700 whitespace-nowrap shadow-xs transition hover:border-emerald-400 hover:bg-emerald-50/50 hover:text-emerald-700 active:scale-95"
+                className="inline-flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 whitespace-nowrap shadow-xs transition hover:border-emerald-400 hover:bg-emerald-50/50 hover:text-emerald-700 active:scale-95"
               >
-                <RefreshCw size={16} />
+                <RefreshCw size={18} />
                 <span>ផ្លាស់ប្តូររូបភាព (Change)</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleRemove}
-                className="inline-flex h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-2xl border border-red-200 bg-red-50/60 px-4 text-base font-semibold text-red-600 whitespace-nowrap transition hover:bg-red-100 active:scale-95"
+                className="inline-flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-red-200 bg-red-50/60 px-5 text-lg font-normal text-red-600 whitespace-nowrap transition hover:bg-red-100 active:scale-95"
               >
-                <Trash2 size={16} />
+                <Trash2 size={18} />
                 <span>ដកចេញ (Remove)</span>
               </button>
             </div>
-            <p className="text-sm text-gray-400">
+            <p className="text-base font-normal text-gray-400">
               អនុញ្ញាតទម្រង់ PNG, JPEG, WebP (អតិបរមា 10MB)
             </p>
           </div>
@@ -233,14 +233,14 @@ export default function ThumbnailImagePicker({
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100 text-[#137A3D]">
             <UploadCloud size={24} />
           </div>
-          <span className="mt-2 text-base font-bold">+ បង្ហោះរូបភាព Thumbnail (Upload Thumbnail)</span>
-          <span className="mt-0.5 text-sm text-gray-500">
+          <span className="mt-2 text-lg font-normal">+ បង្ហោះរូបភាព Thumbnail (Upload Thumbnail)</span>
+          <span className="mt-0.5 text-base font-normal text-gray-500">
             ចុចដើម្បីជ្រើសរើសរូបភាពចម្បង (PNG, JPEG, WebP)
           </span>
         </button>
       )}
 
-      {displayError && <p className="mt-3 text-sm font-semibold text-red-500">{displayError}</p>}
+      {displayError && <p className="mt-3 text-lg font-normal text-red-500">{displayError}</p>}
     </div>
   );
 }

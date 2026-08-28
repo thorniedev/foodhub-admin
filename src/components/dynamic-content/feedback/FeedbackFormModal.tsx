@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Star, X } from "lucide-react";
-import { Feedback, FeedbackCategory, FeedbackStatus } from "@/src/types/feedback";
+import {
+  Feedback,
+  FeedbackCategory,
+  FeedbackStatus,
+} from "@/src/types/feedback";
 
 interface FeedbackFormModalProps {
   open: boolean;
@@ -64,24 +68,33 @@ export default function FeedbackFormModal({
           <h2 className="text-lg font-bold text-gray-800">
             {initialData ? "កែសម្រួលមតិកែលម្អ" : "បន្ថែមមតិកែលម្អថ្មី"}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
             <X size={20} />
           </button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">ឈ្មោះអតិថិជន</label>
+            <label className="text-sm text-gray-600 mb-1 block">
+              ឈ្មោះអតិថិជន
+            </label>
             <input
               type="text"
               value={form.customerName}
-              onChange={(e) => setForm({ ...form, customerName: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, customerName: e.target.value })
+              }
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">ផ្លូវរូបភាព (avatar path)</label>
+            <label className="text-sm text-gray-600 mb-1 block">
+              ផ្លូវរូបភាព (avatar path)
+            </label>
             <input
               type="text"
               value={form.avatar}
@@ -97,7 +110,10 @@ export default function FeedbackFormModal({
               <select
                 value={form.category}
                 onChange={(e) =>
-                  setForm({ ...form, category: e.target.value as FeedbackCategory })
+                  setForm({
+                    ...form,
+                    category: e.target.value as FeedbackCategory,
+                  })
                 }
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
@@ -109,7 +125,9 @@ export default function FeedbackFormModal({
               </select>
             </div>
             <div>
-              <label className="text-sm text-gray-600 mb-1 block">ស្ថានភាព</label>
+              <label className="text-sm text-gray-600 mb-1 block">
+                ស្ថានភាព
+              </label>
               <select
                 value={form.status}
                 onChange={(e) =>
@@ -127,7 +145,9 @@ export default function FeedbackFormModal({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">ការវាយតម្លៃ</label>
+            <label className="text-sm text-gray-600 mb-1 block">
+              ការវាយតម្លៃ
+            </label>
             <div className="flex items-center gap-1">
               {Array.from({ length: 5 }, (_, i) => {
                 const value = i + 1;
@@ -152,7 +172,9 @@ export default function FeedbackFormModal({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">សារមតិកែលម្អ</label>
+            <label className="text-sm text-gray-600 mb-1 block">
+              សារមតិកែលម្អ
+            </label>
             <textarea
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}

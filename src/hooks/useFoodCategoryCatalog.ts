@@ -86,13 +86,8 @@ export function useFoodCategoryCatalog() {
       const code =
         values.code?.trim().toUpperCase() ||
         createCodeFromLabel(label);
-      const code =
-        values.code?.trim().toUpperCase() ||
-        createCodeFromLabel(label);
 
       await createFoodCategory({
-        code,
-        name: label,
         code,
         name: label,
         description:

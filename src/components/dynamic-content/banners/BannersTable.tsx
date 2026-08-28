@@ -87,14 +87,14 @@ export default function BannersTable({
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] border-collapse text-left">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50">
-                <th className="px-5 py-4 text-xl font-bold text-[#136C34]">រូបភាព</th>
-                <th className="px-5 py-4 text-xl font-bold text-[#136C34]">ចំណងជើង</th>
-                <th className="px-5 py-4 text-xl font-bold text-[#136C34]">ប្រភេទ</th>
-                <th className="px-5 py-4 text-xl font-bold text-[#136C34]">ទីតាំង</th>
-                <th className="px-5 py-4 text-center text-xl font-bold text-[#136C34]">បង្ហាញ</th>
-                <th className="px-5 py-4 text-xl font-bold text-[#136C34]">បង្កើតនៅ</th>
-                <th className="px-5 py-4 text-right text-xl font-bold text-[#136C34]">សកម្មភាព</th>
+              <tr className="border-b border-gray-100 bg-gray-50/50 text-left text-lg font-normal text-primary-800">
+                <th className="px-5 py-4 font-normal">រូបភាព</th>
+                <th className="px-5 py-4 font-normal">ចំណងជើង</th>
+                <th className="px-5 py-4 font-normal">ប្រភេទ</th>
+                <th className="px-5 py-4 font-normal">ទីតាំង</th>
+                <th className="px-5 py-4 text-center font-normal">បង្ហាញ</th>
+                <th className="px-5 py-4 font-normal">បង្កើតនៅ</th>
+                <th className="px-5 py-4 text-right font-normal">សកម្មភាព</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -104,7 +104,7 @@ export default function BannersTable({
                   className="border-b border-gray-100 last:border-0 hover:bg-gray-50/60"
                 >
                   <td className="px-5 py-4">
-                    <div className="relative h-14 w-20 overflow-hidden rounded-lg bg-gray-100">
+                    <div className="relative h-14 w-20 overflow-hidden rounded-2xl bg-gray-100">
                       <Image
                         src={resolveFoodHubCatalogImageUrl(banner.imageUrl || (banner as any).imageMediaUuid) ?? "/Image/banner/placeholder.jpg"}
                         alt=""
@@ -114,10 +114,10 @@ export default function BannersTable({
                       />
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-lg text-gray-800">{banner.title}</td>
+                  <td className="px-5 py-4 text-lg font-normal text-gray-800">{banner.title}</td>
                   <td className="px-5 py-4">
                     <span
-                      className={`rounded-full px-3 py-1 text-sm font-medium ${
+                      className={`inline-flex rounded-full border border-gray-100 px-3.5 py-1 text-lg font-normal ${
                         CATEGORY_BADGE_STYLES[banner.category] ??
                         "bg-gray-100 text-gray-600"
                       }`}
@@ -125,14 +125,14 @@ export default function BannersTable({
                       {BANNER_CATEGORY_LABELS[banner.category]}
                     </span>
                   </td>
-                  <td className="px-5 py-4 text-base text-gray-500">
+                  <td className="px-5 py-4 text-lg font-normal text-gray-500">
                     {banner.location ? (
                       <span className="inline-flex items-center gap-1">
-                        <MapPin size={14} />
+                        <MapPin size={16} />
                         {banner.location}
                       </span>
                     ) : (
-                      "-"
+                      "—"
                     )}
                   </td>
                   <td className="px-5 py-4 text-center">
@@ -158,7 +158,7 @@ export default function BannersTable({
                       />
                     </button>
                   </td>
-                  <td className="px-5 py-4 text-sm text-gray-500">
+                  <td className="px-5 py-4 text-lg font-normal text-gray-500">
                     {formatShortDate(banner.createdAt)}
                   </td>
                   <td className="px-5 py-4">

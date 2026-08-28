@@ -848,65 +848,49 @@ export default function PublishMenuItemModal({
   const effectiveStoreUuid = storeFixedId || values.storeUuid;
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-start justify-center overflow-y-auto bg-slate-950/55 px-4 py-6 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="my-4 flex w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-white shadow-[0_28px_90px_rgba(15,23,42,0.24)] animate-in zoom-in-95 duration-150">
-        {/* Hero header */}
-        <div className="relative shrink-0 overflow-hidden bg-gradient-to-r from-[#14833E] to-[#0F6D35] px-7 py-6 text-white">
-          <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-white/[0.06]" />
-          <div className="pointer-events-none absolute -bottom-24 right-40 h-44 w-44 rounded-full bg-white/[0.04]" />
-
-          <div className="relative flex items-start justify-between gap-5">
-            <div className="flex min-w-0 items-start gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/15 shadow-inner backdrop-blur-sm">
-                <UtensilsCrossed size={27} />
-              </div>
-
-              <div className="min-w-0">
-                <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[18px] font-semibold text-white/90">
-                    <BadgeCheck size={18} />
-                    FoodHub Menu Management
-                  </span>
-                  <span className="inline-flex items-center rounded-full border border-white/20 bg-white/15 px-3 py-1 text-[18px] font-bold text-white shadow-xs backdrop-blur-sm">
-                    {item ? "កែប្រែម៉ឺនុយ" : "បង្កើតម៉ឺនុយថ្មី"}
-                  </span>
-                </div>
-
-                <h2 className="text-[28px] font-black leading-tight tracking-tight text-amber-300 sm:text-[32px]">
-                  {item ? "កែប្រែ ម៉ឺនុយ" : "បង្កើត ម៉ឺនុយ សម្រាប់ហាង"}
-                </h2>
-                <p className="mt-2 max-w-4xl text-[18px] font-medium leading-8 text-white/80">
-                  {storeFixedId
-                    ? "ជ្រើសរើសមុខម្ហូបមេ កំណត់តម្លៃ គ្រឿងផ្សំ និងរូបភាពដើម្បីដាក់លក់ក្នុងហាងនេះ។"
-                    : "ជ្រើសរើសហាង និងមុខម្ហូបមេ រួចកំណត់ព័ត៌មានលម្អិត ដើម្បីផ្សាយម៉ឺនុយលើ FoodHub។"}
-                </p>
-              </div>
+    <div className="fixed inset-0 z-[150] overflow-y-auto bg-black/45 p-4 backdrop-blur-xs">
+      <div className="mx-auto my-6 w-full max-w-4xl rounded-[30px] bg-white shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-gray-100 px-7 py-6">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#137A3D] border border-emerald-100">
+              <UtensilsCrossed size={24} />
             </div>
-
-            <button
-              type="button"
-              disabled={saving}
-              onClick={onClose}
-              aria-label="បិទ"
-              className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <X size={24} />
-            </button>
+            <div>
+              <p className="text-3xl font-normal text-[#137A3D]">
+                {item ? "កែប្រែ ម៉ឺនុយ" : "បង្កើត ម៉ឺនុយ សម្រាប់ហាង"}
+              </p>
+              <p className="mt-1 text-lg font-normal text-gray-500">
+                {storeFixedId
+                  ? "ជ្រើសរើសមុខម្ហូបមេ កំណត់តម្លៃ គ្រឿងផ្សំ និងរូបភាពដើម្បីដាក់លក់ក្នុងហាងនេះ។"
+                  : "ជ្រើសរើសហាង និងមុខម្ហូបមេ រួចកំណត់ព័ត៌មានលម្អិត ដើម្បីផ្សាយម៉ឺនុយលើ FoodHub។"}
+              </p>
+            </div>
           </div>
+
+          <button
+            type="button"
+            disabled={saving}
+            onClick={onClose}
+            aria-label="បិទ"
+            className="rounded-full p-2.5 text-gray-400 hover:bg-gray-100 transition cursor-pointer"
+          >
+            <X size={22} />
+          </button>
         </div>
 
         {/* Scrollable body */}
-        <div ref={bodyRef} className="flex-1 space-y-6 overflow-y-auto bg-[#F8FAF9] p-6 sm:p-7">
+        <div ref={bodyRef} className="space-y-6 p-7">
           {/* Basic information */}
-          <section className="rounded-[26px] border border-slate-200/80 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.03)] sm:p-6">
-            <div className="mb-6 flex flex-col gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3.5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#14833E] ring-1 ring-emerald-100">
-                  <Store size={24} />
+          <section className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
+            <div className="mb-5 flex flex-col gap-4 border-b border-gray-200/60 pb-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-[#137A3D]">
+                  <Store size={20} />
                 </div>
                 <div>
-                  <h3 className="text-[22px] font-black text-slate-900">ព័ត៌មានមូលដ្ឋាន</h3>
-                  <p className="mt-1 text-[18px] font-medium leading-7 text-slate-500">
+                  <h3 className="text-2xl font-normal text-gray-800">ព័ត៌មានមូលដ្ឋាន</h3>
+                  <p className="mt-0.5 text-lg font-normal text-gray-500">
                     កំណត់ហាង មុខម្ហូបមេ ឈ្មោះ តម្លៃ និងស្ថានភាពលក់។
                   </p>
                 </div>
@@ -922,8 +906,8 @@ export default function PublishMenuItemModal({
               </div>
             </div>
 
-            <div className="grid gap-x-5 gap-y-6 md:grid-cols-2">
-              <label>
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
                 <Label required>ហាង</Label>
                 <MenuItemSearchableSelect
                   disabled={Boolean(item) || Boolean(storeFixedId)}
@@ -934,31 +918,31 @@ export default function PublishMenuItemModal({
                     setValues((current) => ({ ...current, storeUuid: next }));
                     setFieldErrors((current) => ({ ...current, storeUuid: undefined }));
                   }}
-                  placeholder="ជ្រើសរើសហាង"
+                  placeholder="ជ្រើសរើសហាង..."
                   invalid={Boolean(fieldErrors.storeUuid)}
                   ariaLabel="ជ្រើសរើសហាង"
                 />
                 {(Boolean(item) || Boolean(storeFixedId)) && (
-                  <p className="mt-2 flex items-center gap-2 text-[18px] font-semibold leading-7 text-emerald-700">
-                    <BadgeCheck size={19} className="shrink-0" />
+                  <p className="mt-2 flex items-center gap-2 text-base font-normal text-emerald-700">
+                    <BadgeCheck size={18} className="shrink-0" />
                     ហាងត្រូវបានកំណត់រួចហើយ មិនអាចផ្លាស់ប្តូរបានទេ។
                   </p>
                 )}
                 <FieldError message={fieldErrors.storeUuid} />
-              </label>
+              </div>
 
-              <label>
+              <div>
                 <Label required>រើសមុខម៉ឺនុយ</Label>
                 <MenuItemSearchableSelect
                   value={values.foodUuid}
                   options={foodOptions}
                   onChange={handleFoodSelect}
-                  placeholder="រើសមុខម៉ឺនុយ"
+                  placeholder="រើសមុខម៉ឺនុយ..."
                   invalid={Boolean(fieldErrors.foodUuid)}
                   ariaLabel="រើសមុខម៉ឺនុយ"
                 />
                 <FieldError message={fieldErrors.foodUuid} />
-              </label>
+              </div>
 
               <Field
                 label="ឈ្មោះ ម៉ឺនុយ"
@@ -1017,7 +1001,7 @@ export default function PublishMenuItemModal({
                 }
               />
 
-              <label>
+              <div>
                 <Label>ស្ថានភាព</Label>
                 <MenuItemSearchableSelect
                   value={values.availabilityStatus}
@@ -1028,15 +1012,15 @@ export default function PublishMenuItemModal({
                       availabilityStatus: next,
                     }))
                   }
-                  placeholder="ជ្រើសរើសស្ថានភាព"
+                  placeholder="ជ្រើសរើសស្ថានភាព..."
                   ariaLabel="ជ្រើសរើសស្ថានភាព"
                 />
-              </label>
+              </div>
 
-              <label className="md:col-span-2">
+              <div className="md:col-span-2">
                 <Label>ការពិពណ៌នា</Label>
                 <textarea
-                  rows={4}
+                  rows={3}
                   spellCheck={false}
                   autoComplete="off"
                   data-gramm="false"
@@ -1051,16 +1035,16 @@ export default function PublishMenuItemModal({
                       description: event.target.value,
                     }))
                   }
-                  className={`${inputClass} min-h-32 resize-y py-4 leading-8`}
+                  className="w-full rounded-3xl border border-gray-200 bg-white px-5 py-3.5 text-lg font-normal text-gray-700 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100 placeholder:text-gray-400 placeholder:font-normal"
                 />
-              </label>
+              </div>
             </div>
           </section>
 
           {/* Ingredients */}
-          <section className="rounded-[26px] border border-slate-200/80 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.03)] sm:p-6">
+          <section className="rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50/40 to-white p-6">
             <TabIntro
-              icon={<Sparkles size={24} />}
+              icon={<Sparkles size={20} />}
               title="គ្រឿងផ្សំ"
               description="កំណត់គ្រឿងផ្សំ បរិមាណ ខ្នាត និងជម្រើសសម្រាប់មុខម្ហូបនេះ។"
               onAdd={() =>
@@ -1079,123 +1063,94 @@ export default function PublishMenuItemModal({
             />
 
             {ingredientRows.length > 0 ? (
-              <div className="mt-5 space-y-3">
-                {/* Table header */}
-                <div className="hidden items-center gap-3 px-3 text-[18px] font-bold text-slate-700 lg:grid lg:grid-cols-[40px_2.4fr_1fr_1fr_1.1fr_48px]">
-                  <span>#</span>
-                  <span>គ្រឿងផ្សំ</span>
-                  <span>បរិមាណ</span>
-                  <span>ខ្នាត</span>
-                  <span className="text-center">ជាជម្រើស</span>
-                  <span className="text-center">លុប</span>
-                </div>
-
-                {/* Rows list */}
-                <div className="space-y-3">
-                  {ingredientRows.map((row, index) => (
-                    <div
-                      key={index}
-                      style={{ zIndex: ingredientRows.length - index + 20 }}
-                      className="relative grid items-center gap-3 rounded-2xl border border-slate-200/90 bg-slate-50/60 p-3.5 transition hover:border-emerald-200 hover:bg-emerald-50/20 lg:grid-cols-[40px_2.4fr_1fr_1fr_1.1fr_48px]"
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100/70 text-[18px] font-black text-emerald-800">
-                        {index + 1}
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">
-                          គ្រឿងផ្សំ
-                        </span>
-                        <MenuItemSearchableSelect
-                          value={row.ingredientUuid}
-                          options={ingredientOptions}
-                          onChange={(next) =>
-                            updateIngredientRow(index, { ingredientUuid: next })
-                          }
-                          placeholder="ជ្រើសរើសគ្រឿងផ្សំ"
-                          ariaLabel="ជ្រើសរើសគ្រឿងផ្សំ"
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">
-                          បរិមាណ
-                        </span>
-                        <input
-                          type="number"
-                          min="0"
-                          step="any"
-                          placeholder="0"
-                          value={row.quantity}
-                          onKeyDown={(e) => {
-                            if (e.key === "-" || e.key === "e") e.preventDefault();
-                          }}
-                          onChange={(event) => {
-                            const val = event.target.value;
-                            if (Number(val) < 0) return;
-                            updateIngredientRow(index, { quantity: val });
-                          }}
-                          className={inputClass}
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">
-                          ខ្នាត
-                        </span>
-                        <input
-                          placeholder="g, ml..."
-                          value={row.unit}
-                          onChange={(event) =>
-                            updateIngredientRow(index, { unit: event.target.value })
-                          }
-                          className={inputClass}
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">
-                          ជម្រើស
-                        </span>
-                        <label className="flex min-h-14 cursor-pointer items-center justify-center gap-2.5 rounded-2xl border border-slate-200 bg-white px-3 text-[18px] font-semibold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50/40">
-                          <input
-                            type="checkbox"
-                            checked={row.isOptional}
-                            onChange={(event) =>
-                              updateIngredientRow(index, {
-                                isOptional: event.target.checked,
-                              })
-                            }
-                            className="h-5 w-5 rounded accent-[#14833E]"
-                          />
-                          <span className="whitespace-nowrap">ជាជម្រើស</span>
-                        </label>
-                      </div>
-
-                      <div className="flex justify-end lg:justify-center">
-                        <RemoveRowButton
-                          onClick={() =>
-                            setIngredientRows((current) =>
-                              current.filter((_, rowIndex) => rowIndex !== index),
-                            )
-                          }
-                        />
-                      </div>
+              <div className="mt-4 space-y-2.5">
+                {ingredientRows.map((row, index) => (
+                  <div
+                    key={index}
+                    style={{ zIndex: ingredientRows.length - index + 20 }}
+                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-emerald-100 hover:shadow"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-base font-normal text-emerald-800">
+                      {index + 1}
                     </div>
-                  ))}
-                </div>
+
+                    <div className="flex-1 min-w-[200px]">
+                      <MenuItemSearchableSelect
+                        value={row.ingredientUuid}
+                        options={ingredientOptions}
+                        onChange={(next) =>
+                          updateIngredientRow(index, { ingredientUuid: next })
+                        }
+                        placeholder="ជ្រើសរើសគ្រឿងផ្សំ..."
+                        ariaLabel="ជ្រើសរើសគ្រឿងផ្សំ"
+                      />
+                    </div>
+
+                    <div className="w-28">
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        placeholder="បរិមាណ"
+                        value={row.quantity}
+                        onKeyDown={(e) => {
+                          if (e.key === "-" || e.key === "e") e.preventDefault();
+                        }}
+                        onChange={(event) => {
+                          const val = event.target.value;
+                          if (Number(val) < 0) return;
+                          updateIngredientRow(index, { quantity: val });
+                        }}
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div className="w-28">
+                      <input
+                        placeholder="ខ្នាត (g, ml)"
+                        value={row.unit}
+                        onChange={(event) =>
+                          updateIngredientRow(index, { unit: event.target.value })
+                        }
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <label className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-base font-normal text-gray-700 transition hover:border-emerald-200 hover:bg-emerald-50/40">
+                      <input
+                        type="checkbox"
+                        checked={row.isOptional}
+                        onChange={(event) =>
+                          updateIngredientRow(index, {
+                            isOptional: event.target.checked,
+                          })
+                        }
+                        className="h-4 w-4 rounded accent-[#137A3D]"
+                      />
+                      <span className="whitespace-nowrap">ជាជម្រើស</span>
+                    </label>
+
+                    <RemoveRowButton
+                      onClick={() =>
+                        setIngredientRows((current) =>
+                          current.filter((_, rowIndex) => rowIndex !== index),
+                        )
+                      }
+                    />
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="mt-5">
+              <div className="mt-4">
                 <EmptyRowsHint text="មិនទាន់បានបន្ថែមគ្រឿងផ្សំទេ។" />
               </div>
             )}
           </section>
 
           {/* Dietary types */}
-          <section className="rounded-[26px] border border-slate-200/80 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.03)] sm:p-6">
+          <section className="rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50/40 to-white p-6">
             <TabIntro
-              icon={<Heart size={24} />}
+              icon={<Heart size={20} />}
               title="របបអាហារ"
               description="សម្គាល់របបអាហារ និងស្ថានភាពផ្ទៀងផ្ទាត់សម្រាប់ម៉ឺនុយនេះ។"
               onAdd={() =>
@@ -1212,98 +1167,75 @@ export default function PublishMenuItemModal({
             />
 
             {dietaryTypeRows.length > 0 ? (
-              <div className="mt-5 space-y-3">
-                {/* Table header */}
-                <div className="hidden items-center gap-3 px-3 text-[18px] font-bold text-slate-700 lg:grid lg:grid-cols-[40px_2fr_1.6fr_2fr_48px]">
-                  <span>#</span>
-                  <span>ប្រភេទរបបអាហារ</span>
-                  <span>ស្ថានភាពផ្ទៀងផ្ទាត់</span>
-                  <span>កំណត់ចំណាំ</span>
-                  <span className="text-center">លុប</span>
-                </div>
-
-                {/* Rows list */}
-                <div className="space-y-3">
-                  {dietaryTypeRows.map((row, index) => (
-                    <div
-                      key={index}
-                      style={{ zIndex: dietaryTypeRows.length - index + 20 }}
-                      className="relative grid items-center gap-3 rounded-2xl border border-slate-200/90 bg-slate-50/60 p-3.5 transition hover:border-emerald-200 hover:bg-emerald-50/20 lg:grid-cols-[40px_2fr_1.6fr_2fr_48px]"
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100/70 text-[18px] font-black text-emerald-800">
-                        {index + 1}
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">
-                          ប្រភេទរបបអាហារ
-                        </span>
-                        <MenuItemSearchableSelect
-                          value={row.dietaryTypeUuid}
-                          options={dietaryTypeOptions}
-                          onChange={(next) =>
-                            updateDietaryTypeRow(index, { dietaryTypeUuid: next })
-                          }
-                          placeholder="ជ្រើស Dietary Type"
-                          ariaLabel="ជ្រើស Dietary Type"
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">
-                          ស្ថានភាពផ្ទៀងផ្ទាត់
-                        </span>
-                        <MenuItemSearchableSelect
-                          value={row.verificationStatus}
-                          options={verificationStatusOptions}
-                          onChange={(next) =>
-                            updateDietaryTypeRow(index, {
-                              verificationStatus: next,
-                            })
-                          }
-                          placeholder="ជ្រើសរើសស្ថានភាព"
-                          ariaLabel="ជ្រើសរើសស្ថានភាព"
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">
-                          កំណត់ចំណាំ
-                        </span>
-                        <input
-                          placeholder="កំណត់ចំណាំ (Notes)"
-                          value={row.notes}
-                          onChange={(event) =>
-                            updateDietaryTypeRow(index, { notes: event.target.value })
-                          }
-                          className={inputClass}
-                        />
-                      </div>
-
-                      <div className="flex justify-end lg:justify-center">
-                        <RemoveRowButton
-                          onClick={() =>
-                            setDietaryTypeRows((current) =>
-                              current.filter((_, rowIndex) => rowIndex !== index),
-                            )
-                          }
-                        />
-                      </div>
+              <div className="mt-4 space-y-2.5">
+                {dietaryTypeRows.map((row, index) => (
+                  <div
+                    key={index}
+                    style={{ zIndex: dietaryTypeRows.length - index + 20 }}
+                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-emerald-100 hover:shadow"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-base font-normal text-emerald-800">
+                      {index + 1}
                     </div>
-                  ))}
-                </div>
+
+                    <div className="flex-1 min-w-[200px]">
+                      <MenuItemSearchableSelect
+                        value={row.dietaryTypeUuid}
+                        options={dietaryTypeOptions}
+                        onChange={(next) =>
+                          updateDietaryTypeRow(index, { dietaryTypeUuid: next })
+                        }
+                        placeholder="ជ្រើស Dietary Type..."
+                        ariaLabel="ជ្រើស Dietary Type"
+                      />
+                    </div>
+
+                    <div className="w-44">
+                      <MenuItemSearchableSelect
+                        value={row.verificationStatus}
+                        options={verificationStatusOptions}
+                        onChange={(next) =>
+                          updateDietaryTypeRow(index, {
+                            verificationStatus: next,
+                          })
+                        }
+                        placeholder="ជ្រើសរើសស្ថានភាព..."
+                        ariaLabel="ជ្រើសរើសស្ថានភាព"
+                      />
+                    </div>
+
+                    <div className="flex-1 min-w-[180px]">
+                      <input
+                        placeholder="កំណត់ចំណាំ (Notes)..."
+                        value={row.notes}
+                        onChange={(event) =>
+                          updateDietaryTypeRow(index, { notes: event.target.value })
+                        }
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <RemoveRowButton
+                      onClick={() =>
+                        setDietaryTypeRows((current) =>
+                          current.filter((_, rowIndex) => rowIndex !== index),
+                        )
+                      }
+                    />
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="mt-5">
+              <div className="mt-4">
                 <EmptyRowsHint text="មិនទាន់បានកំណត់របបអាហារទេ។" />
               </div>
             )}
           </section>
 
           {/* Allergen Declarations */}
-          <section className="rounded-[26px] border border-slate-200/80 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.03)] sm:p-6">
+          <section className="rounded-3xl border border-rose-100 bg-gradient-to-br from-rose-50/40 to-white p-6">
             <TabIntro
-              icon={<ShieldAlert size={24} />}
+              icon={<ShieldAlert size={20} />}
               title="សារធាតុអាឡែហ្ស៊ី (Allergens)"
               description="សម្គាល់ប្រភេទអាឡែហ្ស៊ី ប្រភេទការប្រកាស និងកម្រិតហានិភ័យ។"
               onAdd={() =>
@@ -1322,122 +1254,100 @@ export default function PublishMenuItemModal({
             />
 
             {allergenRows.length > 0 ? (
-              <div className="mt-5 space-y-3">
-                <div className="hidden items-center gap-3 px-3 text-[18px] font-bold text-slate-700 lg:grid lg:grid-cols-[40px_2fr_1.4fr_1.4fr_1.4fr_48px]">
-                  <span>#</span>
-                  <span>អាឡែហ្ស៊ី</span>
-                  <span>ប្រភេទ</span>
-                  <span>កម្រិតហានិភ័យ</span>
-                  <span>ផ្ទៀងផ្ទាត់</span>
-                  <span className="text-center">លុប</span>
-                </div>
-
-                <div className="space-y-3">
-                  {allergenRows.map((row, index) => (
-                    <div
-                      key={index}
-                      style={{ zIndex: allergenRows.length - index + 20 }}
-                      className="relative grid items-center gap-3 rounded-2xl border border-slate-200/90 bg-slate-50/60 p-3.5 transition hover:border-red-200 hover:bg-red-50/10 lg:grid-cols-[40px_2fr_1.4fr_1.4fr_1.4fr_48px]"
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100/70 text-[18px] font-black text-red-700">
-                        {index + 1}
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">អាឡែហ្ស៊ី</span>
-                        <MenuItemSearchableSelect
-                          value={row.allergenUuid}
-                          options={(allergens as any[]).map((a: any) => ({
-                            value: a.uuid || a.id || "",
-                            label: (a as any).localName || a.name || a.code || "",
-                            sublabel: a.code,
-                          }))}
-                          onChange={(next) =>
-                            setAllergenRows((current) =>
-                              current.map((r, i) => i === index ? { ...r, allergenUuid: next } : r)
-                            )
-                          }
-                          placeholder="ជ្រើសអាឡែហ្ស៊ី"
-                          ariaLabel="ជ្រើសអាឡែហ្ស៊ី"
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">ប្រភេទ</span>
-                        <MenuItemSearchableSelect
-                          value={row.declarationType}
-                          options={[
-                            { value: "CONTAINS", label: "មាន" },
-                            { value: "MAY_CONTAIN", label: "អាចមាន" },
-                          ]}
-                          onChange={(next) =>
-                            setAllergenRows((current) =>
-                              current.map((r, i) => i === index ? { ...r, declarationType: next } : r)
-                            )
-                          }
-                          placeholder="ប្រភេទ"
-                          ariaLabel="ជ្រើសប្រភេទ"
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">កម្រិតហានិភ័យ</span>
-                        <MenuItemSearchableSelect
-                          value={row.riskLevel}
-                          options={[
-                            { value: "LOW", label: "ទាប" },
-                            { value: "MEDIUM", label: "មជ្ឈម" },
-                            { value: "HIGH", label: "ខ្ពស់" },
-                          ]}
-                          onChange={(next) =>
-                            setAllergenRows((current) =>
-                              current.map((r, i) => i === index ? { ...r, riskLevel: next } : r)
-                            )
-                          }
-                          placeholder="កម្រិត"
-                          ariaLabel="ជ្រើសកម្រិតហានិភ័យ"
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">ផ្ទៀងផ្ទាត់</span>
-                        <MenuItemSearchableSelect
-                          value={row.verificationStatus}
-                          options={verificationStatusOptions}
-                          onChange={(next) =>
-                            setAllergenRows((current) =>
-                              current.map((r, i) => i === index ? { ...r, verificationStatus: next } : r)
-                            )
-                          }
-                          placeholder="ស្ថានភាព"
-                          ariaLabel="ជ្រើសស្ថានភាពផ្ទៀងផ្ទាត់"
-                        />
-                      </div>
-
-                      <div className="flex justify-end lg:justify-center">
-                        <RemoveRowButton
-                          onClick={() =>
-                            setAllergenRows((current) =>
-                              current.filter((_, rowIndex) => rowIndex !== index)
-                            )
-                          }
-                        />
-                      </div>
+              <div className="mt-4 space-y-2.5">
+                {allergenRows.map((row, index) => (
+                  <div
+                    key={index}
+                    style={{ zIndex: allergenRows.length - index + 20 }}
+                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-rose-100 hover:shadow"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-base font-normal text-rose-700">
+                      {index + 1}
                     </div>
-                  ))}
-                </div>
+
+                    <div className="flex-1 min-w-[200px]">
+                      <MenuItemSearchableSelect
+                        value={row.allergenUuid}
+                        options={(allergens as any[]).map((a: any) => ({
+                          value: a.uuid || a.id || "",
+                          label: (a as any).localName || a.name || a.code || "",
+                          sublabel: a.code,
+                        }))}
+                        onChange={(next) =>
+                          setAllergenRows((current) =>
+                            current.map((r, i) => i === index ? { ...r, allergenUuid: next } : r)
+                          )
+                        }
+                        placeholder="ជ្រើសអាឡែហ្ស៊ី..."
+                        ariaLabel="ជ្រើសអាឡែហ្ស៊ី"
+                      />
+                    </div>
+
+                    <div className="w-36">
+                      <MenuItemSearchableSelect
+                        value={row.declarationType}
+                        options={[
+                          { value: "CONTAINS", label: "មាន" },
+                          { value: "MAY_CONTAIN", label: "អាចមាន" },
+                        ]}
+                        onChange={(next) =>
+                          setAllergenRows((current) =>
+                            current.map((r, i) => i === index ? { ...r, declarationType: next } : r)
+                          )
+                        }
+                        placeholder="ប្រភេទ..."
+                        ariaLabel="ជ្រើសប្រភេទ"
+                      />
+                    </div>
+
+                    <div className="w-36">
+                      <MenuItemSearchableSelect
+                        value={row.verificationStatus}
+                        options={verificationStatusOptions}
+                        onChange={(next) =>
+                          setAllergenRows((current) =>
+                            current.map((r, i) => i === index ? { ...r, verificationStatus: next } : r)
+                          )
+                        }
+                        placeholder="ស្ថានភាព..."
+                        ariaLabel="ជ្រើសស្ថានភាពផ្ទៀងផ្ទាត់"
+                      />
+                    </div>
+
+                    <div className="flex-1 min-w-[160px]">
+                      <input
+                        placeholder="កំណត់ចំណាំ (Notes)..."
+                        value={row.notes}
+                        onChange={(event) =>
+                          setAllergenRows((current) =>
+                            current.map((r, i) => i === index ? { ...r, notes: event.target.value } : r)
+                          )
+                        }
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <RemoveRowButton
+                      onClick={() =>
+                        setAllergenRows((current) =>
+                          current.filter((_, rowIndex) => rowIndex !== index)
+                        )
+                      }
+                    />
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="mt-5">
+              <div className="mt-4">
                 <EmptyRowsHint text="មិនទាន់បានកំណត់សារធាតុអាឡែហ្ស៊ីទេ។" />
               </div>
             )}
           </section>
 
           {/* Medical conditions */}
-          <section className="rounded-[26px] border border-slate-200/80 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.03)] sm:p-6">
+          <section className="rounded-3xl border border-violet-100 bg-gradient-to-br from-violet-50/40 to-white p-6">
             <TabIntro
-              icon={<HeartPulse size={24} />}
+              icon={<HeartPulse size={20} />}
               title="ស្ថានភាពសុខភាព"
               description="កំណត់ថាម៉ឺនុយនេះសមរម្យ គួរប្រុងប្រយ័ត្ន ឬហាមឃាត់សម្រាប់ស្ថានភាពសុខភាពណាមួយ។"
               onAdd={() =>
@@ -1454,74 +1364,54 @@ export default function PublishMenuItemModal({
             />
 
             {medicalConditionRows.length > 0 ? (
-              <div className="mt-5 space-y-3">
-                {/* Table header */}
-                <div className="hidden items-center gap-3 px-3 text-[18px] font-bold text-slate-700 lg:grid lg:grid-cols-[40px_2fr_1.6fr_2fr_48px]">
-                  <span>#</span>
-                  <span>ស្ថានភាពសុខភាព</span>
-                  <span>សមរម្យភាព</span>
-                  <span>កំណត់ចំណាំ</span>
-                  <span className="text-center">លុប</span>
-                </div>
+              <div className="mt-4 space-y-2.5">
+                {medicalConditionRows.map((row, index) => (
+                  <div
+                    key={index}
+                    style={{ zIndex: medicalConditionRows.length - index + 20 }}
+                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-violet-100 hover:shadow"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-100 text-base font-normal text-violet-800">
+                      {index + 1}
+                    </div>
 
-                {/* Rows list */}
-                <div className="space-y-3">
-                  {medicalConditionRows.map((row, index) => (
-                    <div
-                      key={index}
-                      style={{ zIndex: medicalConditionRows.length - index + 20 }}
-                      className="relative grid items-center gap-3 rounded-2xl border border-slate-200/90 bg-slate-50/60 p-3.5 transition hover:border-emerald-200 hover:bg-emerald-50/20 lg:grid-cols-[40px_2fr_1.6fr_2fr_48px]"
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100/70 text-[18px] font-black text-emerald-800">
-                        {index + 1}
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">
-                          ស្ថានភាពសុខភាព
-                        </span>
-                        <MenuItemSearchableSelect
-                          value={row.medicalConditionUuid}
-                          options={medicalConditionOptions}
-                          onChange={(next) =>
-                            setMedicalConditionRows((current) =>
-                              current.map((r, i) =>
-                                i === index ? { ...r, medicalConditionUuid: next } : r,
-                              ),
-                            )
-                          }
-                          placeholder="ជ្រើសស្ថានភាពសុខភាព"
-                          ariaLabel="ជ្រើសស្ថានភាពសុខភាព"
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-                        <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">
-                          សមរម្យភាព
-                        </span>
-                        <MenuItemSearchableSelect
-                          value={row.suitabilityStatus}
-                          options={suitabilityStatusOptions}
-                          onChange={(next) =>
-                            setMedicalConditionRows((current) =>
-                              current.map((r, i) =>
-                                i === index
-                                  ? { ...r, suitabilityStatus: next }
-                                  : r,
+                    <div className="flex-1 min-w-[200px]">
+                      <MenuItemSearchableSelect
+                        value={row.medicalConditionUuid}
+                        options={medicalConditionOptions}
+                        onChange={(next) =>
+                          setMedicalConditionRows((current) =>
+                            current.map((r, i) =>
+                              i === index ? { ...r, medicalConditionUuid: next } : r,
                             ),
                           )
                         }
-                        placeholder="ជ្រើសរើសសមរម្យភាព"
+                        placeholder="ជ្រើសស្ថានភាពសុខភាព..."
+                        ariaLabel="ជ្រើសស្ថានភាពសុខភាព"
+                      />
+                    </div>
+
+                    <div className="w-48">
+                      <MenuItemSearchableSelect
+                        value={row.suitabilityStatus}
+                        options={suitabilityStatusOptions}
+                        onChange={(next) =>
+                          setMedicalConditionRows((current) =>
+                            current.map((r, i) =>
+                              i === index
+                                ? { ...r, suitabilityStatus: next }
+                                : r,
+                            ),
+                          )
+                        }
+                        placeholder="ជ្រើសរើសសមរម្យភាព..."
                         ariaLabel="ជ្រើសរើសសមរម្យភាព"
                       />
                     </div>
 
-                    <div className="min-w-0">
-                      <span className="mb-1 block text-[16px] font-semibold text-slate-500 lg:hidden">
-                        កំណត់ចំណាំ
-                      </span>
+                    <div className="flex-1 min-w-[180px]">
                       <input
-                        placeholder="កំណត់ចំណាំ (Notes)"
+                        placeholder="កំណត់ចំណាំ (Notes)..."
                         value={row.notes}
                         onChange={(event) =>
                           setMedicalConditionRows((current) =>
@@ -1534,35 +1424,32 @@ export default function PublishMenuItemModal({
                       />
                     </div>
 
-                    <div className="flex justify-end lg:justify-center">
-                      <RemoveRowButton
-                        onClick={() =>
-                          setMedicalConditionRows((current) =>
-                            current.filter((_, rowIndex) => rowIndex !== index),
-                          )
-                        }
-                      />
-                    </div>
+                    <RemoveRowButton
+                      onClick={() =>
+                        setMedicalConditionRows((current) =>
+                          current.filter((_, rowIndex) => rowIndex !== index),
+                        )
+                      }
+                    />
                   </div>
                 ))}
               </div>
-            </div>
             ) : (
-              <div className="mt-5">
+              <div className="mt-4">
                 <EmptyRowsHint text="មិនទាន់បានកំណត់ស្ថានភាពសុខភាពទេ។" />
               </div>
             )}
           </section>
 
           {/* Images */}
-          <section className="rounded-[26px] border border-slate-200/80 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.03)] sm:p-6">
-            <div className="mb-5 flex items-start gap-3.5 border-b border-slate-100 pb-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#14833E] ring-1 ring-emerald-100">
-                <ImagePlus size={24} />
+          <section className="rounded-3xl border border-gray-100 bg-gray-50/50 p-6">
+            <div className="mb-5 flex items-center gap-3 border-b border-gray-200/60 pb-5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-[#137A3D]">
+                <ImagePlus size={20} />
               </div>
               <div>
-                <h3 className="text-[22px] font-black text-slate-900">រូបភាពម៉ឺនុយ</h3>
-                <p className="mt-1 text-[18px] font-medium leading-7 text-slate-500">
+                <h3 className="text-2xl font-normal text-gray-800">រូបភាពម៉ឺនុយ</h3>
+                <p className="mt-0.5 text-lg font-normal text-gray-500">
                   បន្ថែម Thumbnail មួយ និង Gallery រហូតដល់ ៤ រូប ដើម្បីបង្ហាញម៉ឺនុយឱ្យច្បាស់។
                 </p>
               </div>
@@ -1596,46 +1483,40 @@ export default function PublishMenuItemModal({
               />
             </div>
           </section>
-        </div>
 
-        {/* Sticky footer */}
-        <div className="sticky bottom-0 z-10 shrink-0 border-t border-slate-200 bg-white/95 px-7 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.04)] backdrop-blur">
           {error && (
-            <div className="mb-4 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-[18px] font-semibold leading-7 text-red-700">
-              <AlertCircle size={22} className="mt-0.5 shrink-0" />
-              <span>{error}</span>
+            <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg font-normal text-red-600">
+              <div className="flex items-center gap-2">
+                <AlertCircle size={20} className="shrink-0" />
+                <span>{error}</span>
+              </div>
             </div>
           )}
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[18px] font-medium text-slate-500">
-              <span className="font-bold text-red-500">*</span> សូមបំពេញព័ត៌មានចាំបាច់មុនរក្សាទុក។
-            </p>
+          {/* Footer buttons */}
+          <div className="flex justify-end gap-4 border-t border-gray-100 pt-6">
+            <button
+              type="button"
+              disabled={saving}
+              onClick={onClose}
+              className="rounded-full border border-gray-200 px-8 py-3.5 text-xl font-normal text-gray-600 hover:bg-gray-50 transition cursor-pointer"
+            >
+              បោះបង់
+            </button>
 
-            <div className="flex items-center justify-end gap-3">
-              <button
-                type="button"
-                disabled={saving}
-                onClick={onClose}
-                className="inline-flex h-[52px] min-h-[52px] cursor-pointer items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 text-[18px] font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                បោះបង់
-              </button>
-
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => void submit()}
-                className="inline-flex min-h-[52px] cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-[#14833E] px-7 py-3 text-[18px] font-bold text-white shadow-[0_8px_18px_rgba(20,131,62,0.22)] transition hover:bg-[#106C34] hover:shadow-[0_10px_22px_rgba(20,131,62,0.28)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {saving ? (
-                  <Loader2 size={21} className="animate-spin" />
-                ) : (
-                  <Save size={21} />
-                )}
-                {item ? "រក្សាទុកការកែប្រែ" : "រក្សាទុកមុខម្ហូប"}
-              </button>
-            </div>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => void submit()}
+              className="inline-flex items-center gap-2.5 rounded-full bg-[#137A3D] px-8 py-3.5 text-xl font-normal text-white shadow-md hover:bg-emerald-800 disabled:opacity-60 transition active:scale-95 cursor-pointer"
+            >
+              {saving ? (
+                <Loader2 size={22} className="animate-spin" />
+              ) : (
+                <Save size={22} />
+              )}
+              {item ? "រក្សាទុកការកែប្រែ" : "រក្សាទុកមុខម្ហូប"}
+            </button>
           </div>
         </div>
       </div>
@@ -1644,7 +1525,7 @@ export default function PublishMenuItemModal({
 }
 
 const inputClass =
-  "min-h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[18px] font-semibold leading-7 text-slate-800 outline-none transition placeholder:font-medium placeholder:text-slate-400 hover:border-slate-300 focus:border-[#14833E] focus:ring-4 focus:ring-emerald-100/70 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
+  "h-12 w-full rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 outline-none transition placeholder:font-normal placeholder:text-gray-400 focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500";
 
 function Label({
   children,
@@ -1654,16 +1535,16 @@ function Label({
   required?: boolean;
 }) {
   return (
-    <span className="mb-2.5 block text-[18px] font-bold leading-7 text-slate-800">
-      {children}
-      {required && <span className="ml-1.5 text-red-500">*</span>}
+    <span className="mb-2 flex items-center gap-1 text-lg font-normal text-gray-700">
+      <span>{children}</span>
+      {required && <span className="ml-0.5 text-red-500 font-normal">*</span>}
     </span>
   );
 }
 
 function MiniLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="mb-2 block text-[18px] font-semibold leading-7 text-slate-600">
+    <span className="mb-2 block text-lg font-normal text-gray-600">
       {children}
     </span>
   );
@@ -1672,9 +1553,9 @@ function MiniLabel({ children }: { children: React.ReactNode }) {
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <p className="mt-2 flex items-start gap-2 text-[18px] font-semibold leading-7 text-red-600">
-      <AlertCircle size={20} className="mt-0.5 shrink-0" />
-      {message}
+    <p className="mt-1.5 flex items-center gap-1.5 text-base font-normal text-red-600">
+      <AlertCircle size={16} className="shrink-0" />
+      <span>{message}</span>
     </p>
   );
 }
@@ -1703,7 +1584,7 @@ function Field({
   error?: string;
 }) {
   return (
-    <label>
+    <div>
       <Label required={required}>{label}</Label>
       <input
         type={type}
@@ -1736,12 +1617,12 @@ function Field({
         }}
         className={`${inputClass} ${
           invalid
-            ? "border-red-300 bg-red-50/40 focus:border-red-500 focus:ring-red-100/70"
+            ? "border-red-300 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
             : ""
         }`}
       />
       <FieldError message={error} />
-    </label>
+    </div>
   );
 }
 
@@ -1759,14 +1640,14 @@ function TabIntro({
   addLabel: string;
 }) {
   return (
-    <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-start gap-3.5">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#14833E] ring-1 ring-emerald-100">
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-[#137A3D]">
           {icon}
         </div>
         <div>
-          <h3 className="text-[22px] font-black text-slate-900">{title}</h3>
-          <p className="mt-1 max-w-3xl text-[18px] font-medium leading-7 text-slate-500">
+          <h3 className="text-2xl font-normal text-gray-800">{title}</h3>
+          <p className="mt-0.5 text-lg font-normal text-gray-500">
             {description}
           </p>
         </div>
@@ -1775,9 +1656,9 @@ function TabIntro({
       <button
         type="button"
         onClick={onAdd}
-        className="inline-flex min-h-12 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-[18px] font-bold text-[#14833E] whitespace-nowrap transition hover:bg-emerald-100 active:scale-[0.98]"
+        className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-emerald-700 active:scale-95 cursor-pointer whitespace-nowrap"
       >
-        <Plus size={20} />
+        <Plus size={18} />
         {addLabel}
       </button>
     </div>
@@ -1792,7 +1673,7 @@ function InfoBadge({
   children: React.ReactNode;
 }) {
   return (
-    <span className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-[18px] font-bold text-slate-700">
+    <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-1.5 text-base font-normal text-gray-600">
       {icon}
       {children}
     </span>
@@ -1801,7 +1682,7 @@ function InfoBadge({
 
 function EmptyRowsHint({ text }: { text: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-5 py-7 text-center text-[18px] font-semibold leading-7 text-slate-500">
+    <div className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-200 bg-white/70 px-5 py-4 text-center text-lg font-normal text-gray-400">
       {text}
     </div>
   );
@@ -1812,11 +1693,11 @@ function RemoveRowButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-red-200 bg-white text-red-500 transition hover:bg-red-50 hover:text-red-600 active:scale-95"
+      className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 active:scale-95"
       title="លុបជួរនេះចេញ"
       aria-label="លុបជួរនេះចេញ"
     >
-      <Trash2 size={21} />
+      <Trash2 size={18} />
     </button>
   );
 }

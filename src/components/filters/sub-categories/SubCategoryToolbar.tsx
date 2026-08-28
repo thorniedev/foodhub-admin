@@ -22,15 +22,11 @@ type Props = {
   size: number;
   sortOpen: boolean;
   sizeOpen: boolean;
-  showSuggestions: boolean;
-  suggestions: FoodCategory[];
   totalCount: number;
   activeCount: number;
   inactiveCount: number;
   onSearchChange: (value: string) => void;
-  onSearchFocus: () => void;
   onClearSearch: () => void;
-  onSuggestionSelect: (item: FoodCategory) => void;
   onStatusFilterChange: (status: SubCategoryStatusFilter) => void;
   onSortModeChange: (sort: SubCategorySortMode) => void;
   onSizeChange: (size: number) => void;
@@ -64,15 +60,11 @@ export default function SubCategoryToolbar({
   size,
   sortOpen,
   sizeOpen,
-  showSuggestions,
-  suggestions,
   totalCount,
   activeCount,
   inactiveCount,
   onSearchChange,
-  onSearchFocus,
   onClearSearch,
-  onSuggestionSelect,
   onStatusFilterChange,
   onSortModeChange,
   onSizeChange,
@@ -158,7 +150,6 @@ export default function SubCategoryToolbar({
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            onFocus={onSearchFocus}
             placeholder={placeholder}
             className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
           />
@@ -171,34 +162,6 @@ export default function SubCategoryToolbar({
             >
               <X size={18} />
             </button>
-          )}
-
-          {/* Autocomplete suggestions dropdown */}
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute left-0 top-[52px] z-[100] w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
-              <div className="border-b border-gray-100 bg-gray-50 px-4 py-2.5">
-                <p className="text-base font-bold uppercase text-gray-500">
-                  លទ្ធផលស្វែងរក
-                </p>
-              </div>
-              <div className="max-h-[280px] overflow-y-auto p-1.5">
-                {suggestions.map((item) => (
-                  <button
-                    key={item.uuid}
-                    type="button"
-                    onClick={() => onSuggestionSelect(item)}
-                    className="flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left transition hover:bg-emerald-50"
-                  >
-                    <span className="text-lg font-normal text-gray-800">
-                      {item.name}
-                    </span>
-                    <span className="font-mono text-lg text-gray-400">
-                      {item.code}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
           )}
         </div>
 
@@ -270,8 +233,8 @@ export default function SubCategoryToolbar({
           </button>
 
           {sortOpen && (
-            <div className="absolute right-0 top-[56px] z-[110] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-              <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+            <div className="absolute right-0 top-[52px] z-[110] w-[200px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+              <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-600">
                 តម្រៀប
               </p>
               {(Object.keys(SORT_LABELS) as SubCategorySortMode[]).map((key) => {
@@ -284,15 +247,15 @@ export default function SubCategoryToolbar({
                       onSortModeChange(key);
                       onCloseDropdowns();
                     }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg transition ${
+                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
                       selected
                         ? "bg-primary-50 text-primary-800"
-                        : "text-gray-600 hover:bg-gray-50"
+                        : "text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     <span>{SORT_LABELS[key]}</span>
                     {selected && (
-                      <Check size={16} className="text-primary-800" />
+                      <Check size={18} className="text-primary-800" />
                     )}
                   </button>
                 );
@@ -306,10 +269,10 @@ export default function SubCategoryToolbar({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 active:scale-95"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95"
             title="កំណត់ឡើងវិញ"
           >
-            <RotateCcw size={16} />
+            <RotateCcw size={18} />
           </button>
         )}
       </div>

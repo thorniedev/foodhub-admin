@@ -16,6 +16,7 @@ import {
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
+import Pagination from "@/src/components/ui/Pagination";
 
 import { useGetPublishedMenuItemsQuery } from "@/src/app/store/menuManagementApi";
 
@@ -480,49 +481,15 @@ export default function StoreMenuItemsSection({
 
           {/* PAGINATION CONTROLS */}
           {totalPages > 1 && (
-            <div className="mt-6 flex flex-col items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50/50 p-3.5 sm:flex-row">
-              <p className="text-lg font-semibold text-gray-500">
-                បង្ហាញ {Math.min((currentPage - 1) * ITEMS_PER_PAGE + 1, sortedItems.length)} -{" "}
-                {Math.min(currentPage * ITEMS_PER_PAGE, sortedItems.length)} នៃ {sortedItems.length} ម៉ឺនុយ
-              </p>
-
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="ទំព័រមុន"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => setCurrentPage(page)}
-                    className={`flex h-10 min-w-[40px] cursor-pointer items-center justify-center rounded-xl px-3 text-lg font-bold transition ${
-                      currentPage === page
-                        ? "bg-primary-800 text-white shadow-xs"
-                        : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                <button
-                  type="button"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="ទំព័របន្ទាប់"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalElements={sortedItems.length}
+              pageSize={ITEMS_PER_PAGE}
+              unit="ម៉ឺនុយ"
+              onPageChange={(page) => setCurrentPage(page)}
+              className="mt-6"
+            />
           )}
         </>
       )}

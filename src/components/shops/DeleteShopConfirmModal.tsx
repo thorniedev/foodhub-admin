@@ -80,13 +80,13 @@ export default function DeleteShopConfirmModal({
         <div className="mt-5 text-center">
           <h3
             id="delete-store-title"
-            className="text-2xl font-bold tracking-tight text-gray-900 whitespace-nowrap"
+            className="text-2xl font-normal tracking-tight text-gray-900 whitespace-nowrap"
           >
             លុប Store ជាអចិន្ត្រៃយ៍?
           </h3>
-          <p className="mt-2 text-lg leading-relaxed text-gray-600">
+          <p className="mt-2 text-lg leading-relaxed text-gray-600 font-normal">
             ហាង{" "}
-            <span className="font-bold text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200/80">
+            <span className="font-normal text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200/80">
               {store.storeName}
             </span>{" "}
             នឹងត្រូវបានលុបចេញពីប្រព័ន្ធទាំងស្រុង។
@@ -95,7 +95,7 @@ export default function DeleteShopConfirmModal({
 
         {/* Store Address Info */}
         {address && (
-          <div className="mt-3.5 rounded-xl border border-gray-100 bg-gray-50/80 px-3.5 py-2 text-center text-base text-gray-600 truncate">
+          <div className="mt-3.5 rounded-xl border border-gray-100 bg-gray-50/80 px-3.5 py-2 text-center text-lg font-normal text-gray-600 truncate">
             {address}
           </div>
         )}
@@ -103,7 +103,7 @@ export default function DeleteShopConfirmModal({
         {/* Callout Notice */}
         <div className="mt-4 flex items-start gap-3 rounded-2xl border border-red-200/90 bg-red-50/40 p-4 text-left">
           <AlertTriangle size={20} className="mt-0.5 shrink-0 text-red-600" />
-          <p className="text-base font-medium leading-relaxed text-red-800">
+          <p className="text-lg font-normal leading-relaxed text-red-800">
             សកម្មភាពនេះមិនអាចស្តារឡើងវិញបានឡើយ។ ទិន្នន័យទាំងអស់របស់ហាងនេះនឹងត្រូវលុបជាអចិន្ត្រៃយ៍។
           </p>
         </div>
@@ -114,7 +114,7 @@ export default function DeleteShopConfirmModal({
             type="button"
             disabled={loading}
             onClick={onClose}
-            className="flex h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-lg font-bold text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50"
+            className="flex h-12 items-center justify-center rounded-full border border-gray-200 bg-white text-lg font-normal text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50"
           >
             បោះបង់
           </button>
@@ -123,11 +123,11 @@ export default function DeleteShopConfirmModal({
             type="button"
             disabled={loading}
             onClick={() => void onConfirm()}
-            className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#990000] px-4 text-lg font-bold text-white shadow-md shadow-red-950/20 transition hover:bg-[#800000] active:scale-[0.98] disabled:opacity-60"
+            className="flex h-12 items-center justify-center gap-2 rounded-full bg-[#990000] px-4 text-lg font-normal text-white shadow-md shadow-red-950/20 transition hover:bg-[#800000] active:scale-[0.98] disabled:opacity-60"
           >
             {loading ? (
               <>
-                <Loader2 size={18} className="animate-spin" />
+                <Loader2 size={20} className="animate-spin" />
                 កំពុងលុប...
               </>
             ) : (

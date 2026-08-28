@@ -4,6 +4,7 @@ import {
   AlertCircle,
   Calendar,
   CheckCircle2,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -335,91 +336,50 @@ export default function BannersView() {
       </section>
 
       {/* ============================================================
-          2. TABS + TOOLBAR (MATCHING USERSTABS & USERSMANAGER)
+          2. TABS + TOOLBAR (MATCHING MENU ITEMS FORMAT)
       ============================================================ */}
-      <div className="flex w-full flex-wrap items-center justify-between gap-4">
+      <div className="flex w-full flex-wrap items-center justify-between gap-3">
         {/* Left Status Tabs */}
-        <div className="flex max-w-full items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {/* Tab: ALL */}
-          <button
-            type="button"
-            onClick={() => {
-              setPublishedFilter("ALL");
-              setCurrentPage(0);
-            }}
-            className={`group inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
-              publishedFilter === "ALL"
-                ? "bg-primary-800 text-white shadow-md shadow-primary-900/20"
-                : "bg-white text-gray-500 shadow-sm ring-1 ring-gray-100 hover:bg-gray-50 hover:text-gray-700 hover:shadow-md"
-            }`}
-          >
-            <span>ទាំងអស់</span>
-            <span
-              className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-bold transition-all duration-200 ${
-                publishedFilter === "ALL"
-                  ? "bg-white/20 text-white"
-                  : "bg-gray-100 text-gray-400"
-              }`}
-            >
-              {totalElements}
-            </span>
-          </button>
-
-          {/* Tab: PUBLISHED */}
-          <button
-            type="button"
-            onClick={() => {
-              setPublishedFilter("PUBLISHED");
-              setCurrentPage(0);
-            }}
-            className={`group inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
-              publishedFilter === "PUBLISHED"
-                ? "bg-emerald-600 text-white shadow-md shadow-emerald-900/20"
-                : "bg-white text-gray-500 shadow-sm ring-1 ring-gray-100 hover:bg-gray-50 hover:text-gray-700 hover:shadow-md"
-            }`}
-          >
-            <span>បានផ្សាយ</span>
-            <span
-              className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-bold transition-all duration-200 ${
-                publishedFilter === "PUBLISHED"
-                  ? "bg-white/20 text-white"
-                  : "bg-gray-100 text-gray-400"
-              }`}
-            >
-              {publishedCount}
-            </span>
-          </button>
-
-          {/* Tab: DRAFT */}
-          <button
-            type="button"
-            onClick={() => {
-              setPublishedFilter("DRAFT");
-              setCurrentPage(0);
-            }}
-            className={`group inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
-              publishedFilter === "DRAFT"
-                ? "bg-amber-500 text-white shadow-md shadow-amber-900/20"
-                : "bg-white text-gray-500 shadow-sm ring-1 ring-gray-100 hover:bg-gray-50 hover:text-gray-700 hover:shadow-md"
-            }`}
-          >
-            <span>ព្រាង</span>
-            <span
-              className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-bold transition-all duration-200 ${
-                publishedFilter === "DRAFT"
-                  ? "bg-white/20 text-white"
-                  : "bg-gray-100 text-gray-400"
-              }`}
-            >
-              {draftCount}
-            </span>
-          </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {[
+            { id: "ALL", label: "ទាំងអស់", count: totalElements },
+            { id: "PUBLISHED", label: "បានផ្សាយ", count: publishedCount },
+            { id: "DRAFT", label: "ព្រាង", count: draftCount },
+          ].map((tab) => {
+            const active = publishedFilter === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setPublishedFilter(tab.id as any);
+                  setCurrentPage(0);
+                }}
+                className={`group relative inline-flex h-12 shrink-0 cursor-pointer items-center gap-2.5 rounded-full px-5 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
+                  active
+                    ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
+                    : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
+                }`}
+              >
+                <span>{tab.label}</span>
+                <span
+                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2.5 text-lg font-normal transition-colors duration-200 ${
+                    active
+                      ? "bg-white/20 text-white backdrop-blur-xs"
+                      : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Right Search + Category + Refresh */}
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex min-w-[320px] flex-1 flex-wrap items-center justify-end gap-2.5">
           {/* Search Input */}
-          <div className="relative">
+          <div className="relative min-w-[240px] max-w-[380px] flex-1">
             <Search
               size={18}
               className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
@@ -428,28 +388,28 @@ export default function BannersView() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ស្វែងរកតាមចំណងជើង ឬការពិពណ៌នា..."
-              className="h-11 w-[260px] sm:w-[320px] lg:w-[360px] rounded-2xl border border-gray-200 bg-white py-2 pl-11 pr-10 text-base text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
+                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700 cursor-pointer"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             )}
           </div>
 
           {/* Category Dropdown */}
-          <div className="relative">
+          <div className="relative shrink-0">
             <select
               value={selectedCategory}
               onChange={(e) => {
                 setSelectedCategory(e.target.value as BannerCategory | "ALL");
                 setCurrentPage(0);
               }}
-              className="h-11 appearance-none rounded-2xl border border-gray-200 bg-white pl-4 pr-10 text-base font-semibold text-gray-700 outline-none transition hover:bg-gray-50 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              className="h-12 min-w-[150px] appearance-none rounded-full border border-gray-200 bg-white pl-5 pr-11 text-lg font-normal text-gray-700 outline-none transition hover:bg-gray-50 focus:border-primary-600 focus:ring-2 focus:ring-primary-100 cursor-pointer"
             >
               <option value="ALL">ប្រភេទទាំងអស់</option>
               {BANNER_CATEGORIES.map((cat) => (
@@ -458,9 +418,9 @@ export default function BannersView() {
                 </option>
               ))}
             </select>
-            <Filter
-              size={15}
-              className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+            <ChevronDown
+              size={18}
+              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
             />
           </div>
 
@@ -470,10 +430,10 @@ export default function BannersView() {
             onClick={() => void fetchBanners(true)}
             disabled={isLoading || isFetching}
             title="ទាញយកឡើងវិញ"
-            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 shadow-2xs transition hover:bg-gray-50 hover:text-[#136C34] disabled:opacity-50"
+            className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800 disabled:opacity-50"
           >
             <RefreshCw
-              size={17}
+              size={18}
               className={isFetching ? "animate-spin text-emerald-600" : ""}
             />
           </button>
@@ -504,21 +464,21 @@ export default function BannersView() {
         <table className="w-full table-auto border-collapse text-left">
           {/* ================= HEAD ================= */}
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/70">
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800 min-w-[260px]">
+            <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-normal text-primary-800">
+              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[260px]">
                 ផ្ទាំងរូបភាព & ចំណងជើង
               </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800 min-w-[140px]">
+              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[140px]">
                 ប្រភេទ
               </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-lg font-semibold text-primary-800 min-w-[130px]">
+              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[130px]">
                 ទីតាំង
               </th>
          
-              <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[130px]">
+              <th className="whitespace-nowrap px-4 py-3.5 text-center font-normal min-w-[130px]">
                 ស្ថានភាពផ្សាយ
               </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[120px]">
+              <th className="whitespace-nowrap px-4 py-3.5 text-center font-normal min-w-[120px]">
                 សកម្មភាព
               </th>
             </tr>
@@ -528,10 +488,10 @@ export default function BannersView() {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={6} className="px-6 py-20 text-center">
+                <td colSpan={5} className="px-6 py-20 text-center">
                   <div className="flex flex-col items-center justify-center gap-3">
                     <Loader2 size={32} className="animate-spin text-emerald-600" />
-                    <p className="text-lg font-medium text-gray-500">
+                    <p className="text-lg font-normal text-gray-500">
                       កំពុងទាញយកទិន្នន័យបែនណឺ...
                     </p>
                   </div>
@@ -539,11 +499,11 @@ export default function BannersView() {
               </tr>
             ) : filteredBanners.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-16 text-center">
-                  <p className="text-lg font-medium text-gray-500">
+                <td colSpan={5} className="px-6 py-16 text-center">
+                  <p className="text-lg font-normal text-gray-500">
                     មិនមានទិន្នន័យផ្ទាំងបែនណឺ
                   </p>
-                  <p className="mt-1 text-base text-gray-400">
+                  <p className="mt-1 text-lg font-normal text-gray-400">
                     ទិន្នន័យផ្ទាំងរូបភាពផ្សព្វផ្សាយនឹងបង្ហាញនៅទីនេះ
                   </p>
                 </td>
@@ -580,7 +540,7 @@ export default function BannersView() {
                         </div>
 
                         <div className="min-w-0">
-                          <p className="max-w-[240px] truncate text-base font-semibold text-gray-800 transition group-hover:text-primary-800">
+                          <p className="max-w-[240px] truncate text-lg font-normal text-gray-800 transition group-hover:text-primary-800">
                             {banner.title}
                           </p>
                           {banner.description ? (
@@ -588,7 +548,7 @@ export default function BannersView() {
                               {banner.description}
                             </p>
                           ) : (
-                            <span className="text-base italic text-gray-400">
+                            <span className="text-base italic font-normal text-gray-400">
                               គ្មានការពិពណ៌នា
                             </span>
                           )}
@@ -598,23 +558,21 @@ export default function BannersView() {
 
                     {/* 2. Category Badge */}
                     <td className="whitespace-nowrap px-4 py-3">
-                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-100 bg-emerald-50 px-3.5 py-1 text-base font-semibold text-emerald-700">
-                        <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-100 bg-emerald-50 px-3.5 py-1 text-lg font-normal text-emerald-700">
+                        <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500" />
                         {BANNER_CATEGORY_LABELS[banner.category] || banner.category}
                       </span>
                     </td>
 
                     {/* 3. Location */}
                     <td className="whitespace-nowrap px-4 py-3">
-                      <div className="flex items-center gap-1.5 text-base font-normal text-gray-500">
-                        <MapPin size={16} className="text-primary-700 shrink-0" />
+                      <div className="flex items-center gap-1.5 text-lg font-normal text-gray-500">
+                        <MapPin size={18} className="text-primary-700 shrink-0" />
                         <span>{banner.location || "—"}</span>
                       </div>
                     </td>
 
-                
-
-                    {/* 5. Published Status Toggle Switch & Badge */}
+                    {/* 4. Published Status Toggle Switch & Badge */}
                     <td className="whitespace-nowrap px-4 py-3 text-center">
                       <div className="inline-flex items-center justify-center gap-2">
                         <button
@@ -638,26 +596,26 @@ export default function BannersView() {
                           </span>
                         </button>
                         <span
-                          className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-base font-semibold border ${
+                          className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${
                             banner.isPublished
                               ? "border-emerald-100 bg-emerald-50 text-emerald-700"
                               : "border-gray-200 bg-gray-50 text-gray-600"
                           }`}
                         >
-                          <span className={`h-2 w-2 shrink-0 rounded-full ${banner.isPublished ? "bg-emerald-500" : "bg-gray-400"}`} />
+                          <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${banner.isPublished ? "bg-emerald-500" : "bg-gray-400"}`} />
                           {banner.isPublished ? "បានផ្សាយ" : "ព្រាង"}
                         </span>
                       </div>
                     </td>
 
-                    {/* 6. Actions */}
+                    {/* 5. Actions */}
                     <td className="whitespace-nowrap px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
                         {fullImageUrl && (
                           <button
                             type="button"
                             onClick={() => setPreviewImage({ url: fullImageUrl, title: banner.title })}
-                            className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
                             title="មើលរូបភាពពេញ"
                           >
                             <Eye size={18} />
@@ -670,7 +628,7 @@ export default function BannersView() {
                             setEditingBanner(banner);
                             setIsFormModalOpen(true);
                           }}
-                          className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100"
                           title="កែប្រែ"
                         >
                           <Pencil size={18} />
@@ -679,7 +637,7 @@ export default function BannersView() {
                         <button
                           type="button"
                           onClick={() => setDeletingBanner(banner)}
-                          className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100"
+                          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100"
                           title="លុប"
                         >
                           <Trash2 size={18} />

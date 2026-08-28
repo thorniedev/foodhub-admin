@@ -51,20 +51,20 @@ export default function UsersTable({
       <table className="w-full border-collapse text-left">
         {/* ================= HEAD ================= */}
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/60">
-            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[280px]">
+          <tr className="border-b border-gray-100 bg-gray-50/60 text-left text-lg font-normal text-primary-800">
+            <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[280px]">
               គណនីអ្នកប្រើប្រាស់
             </th>
-            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[170px]">
+            <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[170px]">
               កាលបរិច្ឆេទបង្កើត
             </th>
-            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[140px]">
+            <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[140px]">
               ផ្ទៀងផ្ទាត់
             </th>
-            <th className="whitespace-nowrap px-6 py-4 text-lg font-semibold text-primary-800 min-w-[140px]">
+            <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[140px]">
               ស្ថានភាព
             </th>
-            <th className="whitespace-nowrap px-6 py-4 text-end text-lg font-semibold text-primary-800 min-w-[160px] pr-6">
+            <th className="whitespace-nowrap px-6 py-4 text-end font-normal min-w-[160px] pr-6">
               សកម្មភាព
             </th>
           </tr>
@@ -136,7 +136,7 @@ export default function UsersTable({
                         userUuid={user.uuid}
                         avatarMediaUuid={avatarMediaUuid}
                         imageUrl={imageUrl}
-                        containerClassName="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100 text-base font-bold"
+                        containerClassName="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100 text-lg font-normal"
                       />
                       <span
                         className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${
@@ -150,15 +150,15 @@ export default function UsersTable({
                     </div>
 
                     <div className="min-w-0">
-                      <p className="max-w-[280px] truncate text-base font-semibold text-gray-800 transition group-hover:text-primary-800">
+                      <p className="max-w-[280px] truncate text-lg font-normal text-gray-800 transition group-hover:text-primary-800">
                         {name}
                       </p>
                       {subtext && (
-                        <p className="max-w-[280px] truncate text-sm text-gray-400">
+                        <p className="max-w-[280px] truncate text-base font-normal text-gray-400">
                           {subtext}
                         </p>
                       )}
-                      <span className="mt-1 inline-flex rounded-full border border-primary-100 bg-primary-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-700">
+                      <span className="mt-1 inline-flex rounded-full border border-primary-100 bg-primary-50 px-2.5 py-0.5 text-sm font-normal uppercase tracking-wide text-primary-700">
                         {role}
                       </span>
                     </div>
@@ -167,8 +167,8 @@ export default function UsersTable({
 
                 {/* Created Date */}
                 <td className="whitespace-nowrap px-6 py-3.5">
-                  <div className="flex items-center gap-2 text-base font-medium text-gray-500">
-                    <Calendar size={16} className="text-primary-700 shrink-0" />
+                  <div className="flex items-center gap-2 text-lg font-normal text-gray-600">
+                    <Calendar size={18} className="text-primary-700 shrink-0" />
                     <span>{user.createdAt ? formatDateKhmer(user.createdAt) : "—"}</span>
                   </div>
                 </td>
@@ -176,13 +176,13 @@ export default function UsersTable({
                 {/* Verified */}
                 <td className="whitespace-nowrap px-6 py-3.5">
                   {user.emailVerified ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-100">
-                      <CheckCircle size={13} />
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3.5 py-1 text-lg font-normal text-emerald-700 border border-emerald-100">
+                      <CheckCircle size={16} />
                       បានផ្ទៀងផ្ទាត់
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 border border-amber-100">
-                      <XCircle size={13} />
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3.5 py-1 text-lg font-normal text-amber-700 border border-amber-100">
+                      <XCircle size={16} />
                       មិនទាន់
                     </span>
                   )}
@@ -390,9 +390,9 @@ export function StatusBadge({ status }: { status: string }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-semibold border ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${className}`}
     >
-      <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
+      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClassName}`} />
       {label}
     </span>
   );
