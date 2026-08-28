@@ -3,6 +3,7 @@
 import {
   AlertCircle,
   Calendar,
+  Check,
   CheckCircle2,
   ChevronDown,
   ChevronLeft,
@@ -23,7 +24,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   AdminBannerResponse,
   BannerCategory,
@@ -58,6 +59,8 @@ export default function BannersView() {
 
   // Filters & Pagination state
   const [selectedCategory, setSelectedCategory] = useState<BannerCategory | "ALL">("ALL");
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const categoryContainerRef = useRef<HTMLDivElement>(null);
   const [publishedFilter, setPublishedFilter] = useState<"ALL" | "PUBLISHED" | "DRAFT">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
@@ -87,6 +90,25 @@ export default function BannersView() {
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
+
+  // Close category dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        categoryContainerRef.current &&
+        !categoryContainerRef.current.contains(event.target as Node)
+      ) {
+        setCategoryOpen(false);
+      }
+    };
+
+    if (categoryOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [categoryOpen]);
 
   // Fetch banners from API
   const fetchBanners = useCallback(async (isBackground = false) => {
@@ -402,26 +424,78 @@ export default function BannersView() {
           </div>
 
           {/* Category Dropdown */}
-          <div className="relative shrink-0">
-            <select
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value as BannerCategory | "ALL");
-                setCurrentPage(0);
-              }}
-              className="h-12 min-w-[150px] appearance-none rounded-full border border-gray-200 bg-white pl-5 pr-11 text-lg font-normal text-gray-700 outline-none transition hover:bg-gray-50 focus:border-primary-600 focus:ring-2 focus:ring-primary-100 cursor-pointer"
+          <div ref={categoryContainerRef} className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => setCategoryOpen((prev) => !prev)}
+              className={`flex h-12 min-w-[160px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-5 text-lg font-normal transition outline-none ${
+                categoryOpen
+                  ? "border-primary-600 ring-2 ring-primary-100"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
             >
-              <option value="ALL">ប្រភេទទាំងអស់</option>
-              {BANNER_CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {BANNER_CATEGORY_LABELS[cat] || cat}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              size={18}
-              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-            />
+              <span className="truncate text-gray-700">
+                {selectedCategory === "ALL"
+                  ? "ប្រភេទទាំងអស់"
+                  : BANNER_CATEGORY_LABELS[selectedCategory] || selectedCategory}
+              </span>
+              <ChevronDown
+                size={18}
+                className={`shrink-0 text-gray-400 transition-transform duration-200 ${
+                  categoryOpen ? "rotate-180 text-primary-700" : ""
+                }`}
+              />
+            </button>
+
+            {categoryOpen && (
+              <div className="absolute right-0 top-[52px] z-[110] w-[210px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+                <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-600">
+                  ប្រភេទ
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory("ALL");
+                    setCurrentPage(0);
+                    setCategoryOpen(false);
+                  }}
+                  className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                    selectedCategory === "ALL"
+                      ? "bg-primary-50 text-primary-800"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <span>ប្រភេទទាំងអស់</span>
+                  {selectedCategory === "ALL" && (
+                    <Check size={18} className="text-primary-800" />
+                  )}
+                </button>
+                {BANNER_CATEGORIES.map((cat) => {
+                  const selected = selectedCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCategory(cat);
+                        setCurrentPage(0);
+                        setCategoryOpen(false);
+                      }}
+                      className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                        selected
+                          ? "bg-primary-50 text-primary-800"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>{BANNER_CATEGORY_LABELS[cat] || cat}</span>
+                      {selected && (
+                        <Check size={18} className="text-primary-800" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Refresh Button */}
