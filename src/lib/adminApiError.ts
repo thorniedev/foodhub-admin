@@ -91,11 +91,26 @@ function readMessage(data: unknown): string | null {
  * filter matched no rows". The two must never render the same way.
  */
 export function isEndpointUnavailable(error: unknown): boolean {
-  if (!isRecord(error) || !("status" in error)) {
+  if (!isRecord(error)) {
     return false;
   }
 
-  return (error as FetchBaseQueryError).status === 404;
+  const status = (error as FetchBaseQueryError).status;
+  const originalStatus = (error as { originalStatus?: unknown }).originalStatus;
+
+  if (status === 404 || originalStatus === 404) {
+    return true;
+  }
+
+  const message =
+    "data" in error ? readMessage((error as FetchBaseQueryError).data) : null;
+
+  return Boolean(
+    message &&
+      /resource has not been found|not found|endpoint not found|no such report/i.test(
+        message,
+      ),
+  );
 }
 
 export function getAdminApiErrorMessage(error: unknown): string {

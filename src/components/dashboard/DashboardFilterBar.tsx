@@ -71,7 +71,7 @@ export default function DashboardFilterBar({
 }: DashboardFilterBarProps) {
   const today = todayInDashboardZone();
   const [showAdvancedGeo, setShowAdvancedGeo] = useState(
-    Boolean(filters.latitude && filters.longitude),
+    filters.latitude !== undefined && filters.longitude !== undefined,
   );
 
   const defaultValues = useMemo(
@@ -96,7 +96,7 @@ export default function DashboardFilterBar({
   // Keep the draft in sync when filters change from outside (URL, reset).
   useEffect(() => {
     reset(defaultValues);
-    if (defaultValues.latitude && defaultValues.longitude) {
+    if (defaultValues.latitude !== "" && defaultValues.longitude !== "") {
       setShowAdvancedGeo(true);
     }
   }, [defaultValues, reset]);
@@ -244,9 +244,9 @@ export default function DashboardFilterBar({
       {isCustom && (
         <div className="mt-4 grid grid-cols-1 gap-3 rounded-2xl border border-primary-100 bg-primary-50/40 p-4 sm:grid-cols-2 dark:border-slate-800 dark:bg-slate-950/40 animate-in fade-in duration-200">
           <label className="block space-y-1.5">
-            <span className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300">
-              <CalendarDays size={14} className="text-primary-700 dark:text-emerald-400" />
-              <span>កាលបរិច្ឆេទចាប់ផ្ដើម (From Date)</span>
+              <span className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300">
+                <CalendarDays size={14} className="text-primary-700 dark:text-emerald-400" />
+              <span>កាលបរិច្ឆេទចាប់ផ្ដើម</span>
             </span>
             <input
               type="date"
@@ -260,9 +260,9 @@ export default function DashboardFilterBar({
           </label>
 
           <label className="block space-y-1.5">
-            <span className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300">
-              <CalendarDays size={14} className="text-primary-700 dark:text-emerald-400" />
-              <span>កាលបរិច្ឆេទបញ្ចប់ (To Date)</span>
+              <span className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300">
+                <CalendarDays size={14} className="text-primary-700 dark:text-emerald-400" />
+              <span>កាលបរិច្ឆេទបញ្ចប់</span>
             </span>
             <input
               type="date"
@@ -283,7 +283,7 @@ export default function DashboardFilterBar({
         <div className="space-y-1.5">
           <label className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300">
             <MapPin size={15} className="text-primary-700 dark:text-emerald-400" />
-            <span>រាជធានី / ខេត្ត (Province / Region)</span>
+            <span>រាជធានី / ខេត្ត</span>
           </label>
           <Controller
             control={control}
@@ -309,7 +309,7 @@ export default function DashboardFilterBar({
         <div className="space-y-1.5">
           <label className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300">
             <Utensils size={15} className="text-primary-700 dark:text-emerald-400" />
-            <span>ប្រភេទម្ហូប (Food Category)</span>
+            <span>ប្រភេទម្ហូប</span>
           </label>
           <Controller
             control={control}
@@ -333,7 +333,7 @@ export default function DashboardFilterBar({
         <label className="block space-y-1.5">
           <span className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300">
             <Compass size={15} className="text-primary-700 dark:text-emerald-400" />
-            <span>ក្រុង / ខណ្ឌ (City / Area)</span>
+            <span>ក្រុង / ខណ្ឌ</span>
           </span>
           <input
             type="text"
@@ -362,7 +362,7 @@ export default function DashboardFilterBar({
           {showAdvancedGeo ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           {latitude && longitude && (
             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-              📍 កំពុងប្រើកូអរដោនេ
+              📍 ទីតាំងជាក់លាក់
             </span>
           )}
         </button>
@@ -374,7 +374,7 @@ export default function DashboardFilterBar({
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-gray-700 dark:text-slate-300">
-                  ជ្រើសរើសតំបន់ពេញនិយមរហ័ស (Quick Area Hubs)
+                  ទីតាំងពេញនិយម
                 </span>
                 {latitude && longitude && (
                   <button
@@ -414,7 +414,7 @@ export default function DashboardFilterBar({
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 pt-2 border-t border-gray-200/60 dark:border-slate-800">
               <label className="block space-y-1">
                 <span className="block text-[11px] font-bold text-gray-600 dark:text-slate-400">
-                  រយៈទទឹង (Latitude)
+                  រយៈទទឹង
                 </span>
                 <input
                   type="number"
@@ -433,7 +433,7 @@ export default function DashboardFilterBar({
 
               <label className="block space-y-1">
                 <span className="block text-[11px] font-bold text-gray-600 dark:text-slate-400">
-                  រយៈបណ្ដោយ (Longitude)
+                  រយៈបណ្ដោយ
                 </span>
                 <input
                   type="number"
@@ -452,9 +452,9 @@ export default function DashboardFilterBar({
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[11px] font-bold text-gray-600 dark:text-slate-400">
-                  <span>កាំស្វែងរក (Radius)</span>
+                  <span>កាំស្វែងរក</span>
                   <span className="font-bold text-primary-800 dark:text-emerald-400">
-                    {radiusKm ? `${radiusKm} km` : "5 km (លំនាំដើម)"}
+                    {radiusKm ? `${radiusKm} km` : "5 km"}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -472,7 +472,7 @@ export default function DashboardFilterBar({
                     min={1}
                     max={DASHBOARD_MAX_RADIUS_KM}
                     placeholder="5"
-                    aria-label="កាំ (គ.ម)"
+                    aria-label="កាំស្វែងរក (គ.ម)"
                     {...register("radiusKm")}
                     className="w-16 h-9 rounded-xl border border-gray-200 text-center text-xs font-bold text-gray-800 dark:bg-slate-900 dark:border-slate-800 dark:text-white"
                   />
@@ -533,7 +533,7 @@ export default function DashboardFilterBar({
 
           {latitude && longitude && (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-              🎯 កាំ {radiusKm || 5} គ.ម
+              🎯 {radiusKm || 5} km ជុំវិញទីតាំង
               <button
                 type="button"
                 onClick={clearGeoCoordinates}

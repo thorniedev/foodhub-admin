@@ -382,7 +382,7 @@ export default function AdminRecommendationsPage() {
                 return (
                   <TableRow
                     key={session.uuid}
-                    onClick={() => handleInspect(session.uuid)}
+                    onClick={() => handleInspect(session)}
                     className="cursor-pointer group hover:bg-gray-50/70 dark:hover:bg-amber-950/20 transition duration-150"
                   >
                     {/* Session Type & UUID Subtitle */}
