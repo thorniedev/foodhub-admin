@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import Pagination from "@/src/components/ui/Pagination";
 
 type Props = {
   page: number;
@@ -15,40 +15,21 @@ export default function SubCategoryPagination({
   page,
   totalPages,
   totalElements,
+  pageSize,
   disabled = false,
   onPageChange,
 }: Props) {
-  const pages = Math.max(totalPages, 1);
-
   return (
-    <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-lg text-gray-500">
-        សរុប <span className="font-semibold text-gray-700">{totalElements}</span> អនុប្រភេទ
-      </p>
-
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          disabled={disabled || page <= 0}
-          onClick={() => onPageChange(Math.max(0, page - 1))}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <ChevronLeft size={20} />
-        </button>
-
-        <span className="flex h-10 min-w-10 items-center justify-center rounded-lg bg-[#136C34] px-3.5 text-lg font-semibold text-white">
-          {page + 1} / {pages}
-        </span>
-
-        <button
-          type="button"
-          disabled={disabled || page >= pages - 1}
-          onClick={() => onPageChange(Math.min(pages - 1, page + 1))}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <ChevronRight size={20} />
-        </button>
-      </div>
-    </div>
+    <Pagination
+      page={page}
+      totalPages={totalPages}
+      totalElements={totalElements}
+      pageSize={pageSize}
+      unit="អនុប្រភេទ"
+      disabled={disabled}
+      zeroIndexed={true}
+      onPageChange={onPageChange}
+      className="border-t border-gray-100"
+    />
   );
 }

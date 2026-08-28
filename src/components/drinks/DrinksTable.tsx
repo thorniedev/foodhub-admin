@@ -25,18 +25,18 @@ export default function DrinksTable({
   onToggleStatus,
 }: DrinksTableProps) {
   return (
-    <div className="bg-white border border-gray-100 rounded-xl overflow-x-auto">
-      <table className="w-full text-sm min-w-[900px]">
+    <div className="bg-white border border-gray-100 rounded-3xl overflow-x-auto">
+      <table className="w-full text-lg font-normal min-w-[900px]">
         <thead>
-          <tr className="border-b border-gray-100 text-left text-base lg:text-lg text-[#136C34]">
-            <th className="py-3 px-4 font-medium">លេខសម្គាល់និងឈ្មោះភេសជ្ជៈ</th>
-            <th className="py-3 px-4 font-medium">ឈ្មោះហាង</th>
-            <th className="py-3 px-4 font-medium">ប្រភេទ</th>
-            <th className="py-3 px-4 font-medium">កម្រិតជាតិស្ករ</th>
-            <th className="py-3 px-4 font-medium">ចម្ងាយ</th>
-            <th className="py-3 px-4 font-medium">ពេលវេលា</th>
-            <th className="py-3 px-4 font-medium">ការពិពណ៌នា</th>
-            <th className="py-3 px-4 font-medium text-right">សកម្មភាព</th>
+          <tr className="border-b border-gray-100 text-left text-lg font-normal text-primary-800 bg-gray-50/70">
+            <th className="py-3.5 px-4 font-normal">លេខសម្គាល់និងឈ្មោះភេសជ្ជៈ</th>
+            <th className="py-3.5 px-4 font-normal">ឈ្មោះហាង</th>
+            <th className="py-3.5 px-4 font-normal">ប្រភេទ</th>
+            <th className="py-3.5 px-4 font-normal">កម្រិតជាតិស្ករ</th>
+            <th className="py-3.5 px-4 font-normal">ចម្ងាយ</th>
+            <th className="py-3.5 px-4 font-normal">ពេលវេលា</th>
+            <th className="py-3.5 px-4 font-normal">ការពិពណ៌នា</th>
+            <th className="py-3.5 px-4 font-normal text-right">សកម្មភាព</th>
           </tr>
         </thead>
         <tbody>
@@ -45,33 +45,33 @@ export default function DrinksTable({
               key={item.id}
               className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
             >
-              <td className="py-3 px-4">
+              <td className="py-3.5 px-4">
                 <div className="flex items-center gap-3">
-                  <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                  <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-gray-100 shrink-0">
                     <Image
                       src={item.image || "/Image/fallback.png"}
                       alt={item.name}
                       className="object-cover"
-                      width={44}
-                      height={44}
+                      width={48}
+                      height={48}
                     />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-800">{item.name}</p>
-                    <p className="text-xs text-gray-400">{item.id}</p>
+                    <p className="text-lg font-normal text-gray-800">{item.name}</p>
+                    <p className="text-sm font-normal text-gray-400">{item.id}</p>
                   </div>
                 </div>
               </td>
-              <td className="py-3 px-4 text-gray-600">{item.shopName}</td>
-              <td className="py-3 px-4">
-                <span className="bg-emerald-50 text-emerald-600 text-xs font-medium px-2.5 py-1 rounded-full">
+              <td className="py-3.5 px-4 text-lg font-normal text-gray-700">{item.shopName}</td>
+              <td className="py-3.5 px-4">
+                <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-lg font-normal px-3 py-1 rounded-full">
                   {TYPE_LABEL[item.drinkType]}
                 </span>
               </td>
-              <td className="py-3 px-4 text-gray-600">{item.sugarLevel}</td>
-              <td className="py-3 px-4 text-gray-600">{item.distance}</td>
-              <td className="py-3 px-4 text-gray-600">{item.portionSize}</td>
-              <td className="py-3 px-4 text-gray-500 max-w-xs truncate">
+              <td className="py-3.5 px-4 text-lg font-normal text-gray-700">{item.sugarLevel}</td>
+              <td className="py-3.5 px-4 text-lg font-normal text-gray-700">{item.distance}</td>
+              <td className="py-3.5 px-4 text-lg font-normal text-gray-700">{item.portionSize}</td>
+              <td className="py-3.5 px-4 text-lg font-normal text-gray-500 max-w-xs truncate">
                 {item.description}
               </td>
               <td className="py-3 px-4">

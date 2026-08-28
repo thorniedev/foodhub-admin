@@ -43,20 +43,20 @@ export default function DeleteBannerConfirmModal({
                 </Dialog.Close>
               </div>
 
-              <Dialog.Title className="mt-5 text-2xl font-black text-gray-900">
+              <Dialog.Title className="mt-5 text-2xl font-normal text-gray-800">
                 តើអ្នកប្រាកដជាចង់លុបបែនណឺនេះមែនទេ?
               </Dialog.Title>
 
-              <Dialog.Description className="mt-3 rounded-2xl border border-gray-100 bg-gray-50/80 p-4 text-sm">
-                <p className="font-bold text-gray-900">{banner.title}</p>
-                <p className="mt-1 text-xs text-gray-500">
+              <Dialog.Description className="mt-3 rounded-2xl border border-gray-100 bg-gray-50/80 p-4 text-lg font-normal">
+                <p className="font-normal text-gray-900">{banner.title}</p>
+                <p className="mt-1 text-lg font-normal text-gray-500">
                   {banner.category}
                   {banner.location ? ` · ${banner.location}` : ""}
                 </p>
               </Dialog.Description>
 
-              <div className="mt-3 flex items-center gap-2 text-xs text-amber-600">
-                <AlertTriangle size={15} className="shrink-0" />
+              <div className="mt-3 flex items-center gap-2 text-lg font-normal text-amber-600">
+                <AlertTriangle size={20} className="shrink-0" />
                 <span>សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។ បែនណឺនេះនឹងត្រូវលុបចេញជាអចិន្ត្រៃយ៍។</span>
               </div>
 
@@ -65,7 +65,7 @@ export default function DeleteBannerConfirmModal({
                   type="button"
                   disabled={loading}
                   onClick={onClose}
-                  className="rounded-xl border border-gray-200 px-5 py-2.5 text-base font-bold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+                  className="rounded-full border border-gray-200 px-6 py-3 text-lg font-normal text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
                 >
                   បោះបង់
                 </button>
@@ -74,12 +74,12 @@ export default function DeleteBannerConfirmModal({
                   type="button"
                   disabled={loading}
                   onClick={() => void onConfirm()}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-base font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-6 py-3 text-lg font-normal text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
                 >
                   {loading ? (
-                    <Loader2 size={18} className="animate-spin" />
+                    <Loader2 size={20} className="animate-spin" />
                   ) : (
-                    <Trash2 size={18} />
+                    <Trash2 size={20} />
                   )}
                   {loading ? "កំពុងលុប..." : "លុបបែនណឺ"}
                 </button>

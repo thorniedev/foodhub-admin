@@ -43,12 +43,11 @@ export default function AllergensHeader({
 
             <div className="min-w-0">
               <p className="text-5xl font-bold text-accent-400">
-                គ្រប់គ្រងអាឡែស៊ី
+                អាឡែហ្ស៊ី
               </p>
 
               <p className="mt-6 max-w-2xl text-xl leading-8 text-white/85">
-                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារប្រភេទអាឡែស៊ី
-                ដែលប្រើក្នុងប្រព័ន្ធ ម្ហូបអាហារ។
+                គ្រប់គ្រង បន្ថែម កែប្រែ បិទ និងស្ដារប្រភេទអាឡែហ្ស៊ីដែលប្រើក្នុងប្រព័ន្ធ FoodHub។
               </p>
             </div>
           </div>
@@ -66,13 +65,13 @@ export default function AllergensHeader({
 
             <StatCard
               icon={<ShieldCheck size={20} />}
-              label="សកម្មក្នុងទំព័រ"
+              label="សកម្ម"
               value={activeCount}
             />
 
             <StatCard
               icon={<CircleOff size={20} />}
-              label="អសកម្មក្នុងទំព័រ"
+              label="អសកម្ម"
               value={inactiveCount}
             />
           </div>

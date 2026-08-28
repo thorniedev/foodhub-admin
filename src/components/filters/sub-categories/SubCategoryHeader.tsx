@@ -38,8 +38,8 @@ export default function SubCategoryHeader({
             </div>
 
             <div className="min-w-0">
-              <p className="text-3xl font-bold text-accent-400">{title}</p>
-              <p className="mt-2 max-w-2xl text-xl leading-7 text-white/85">
+              <p className="text-5xl font-bold text-accent-400">{title}</p>
+              <p className="mt-6 max-w-2xl text-xl leading-8 text-white/85">
                 {description}
               </p>
             </div>

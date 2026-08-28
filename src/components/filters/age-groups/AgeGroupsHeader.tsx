@@ -1,20 +1,23 @@
 import type { ReactNode } from "react";
 
 import {
-  Layers3,
+  CircleOff,
   Plus,
+  ShieldCheck,
   UsersRound,
 } from "lucide-react";
 
 type Props = {
   total: number;
-  currentPageCount: number;
+  activeCount: number;
+  inactiveCount: number;
   onAdd: () => void;
 };
 
 export default function AgeGroupsHeader({
   total,
-  currentPageCount,
+  activeCount,
+  inactiveCount,
   onAdd,
 }: Props) {
   return (
@@ -40,7 +43,7 @@ export default function AgeGroupsHeader({
 
             <div className="min-w-0">
               <p className="text-5xl font-bold text-accent-400">
-                គ្រប់គ្រងក្រុមអាយុ
+                ក្រុមអាយុ
               </p>
 
               <p className="mt-6 max-w-2xl text-xl leading-8 text-white/85">
@@ -53,17 +56,23 @@ export default function AgeGroupsHeader({
           {/* =================================================
               STATISTICS
           ================================================== */}
-          <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <StatCard
               icon={<UsersRound size={20} />}
-              label="ក្រុមអាយុសកម្មសរុប"
+              label="សរុប"
               value={total}
             />
 
             <StatCard
-              icon={<Layers3 size={20} />}
-              label="ក្នុងទំព័រនេះ"
-              value={currentPageCount}
+              icon={<ShieldCheck size={20} />}
+              label="សកម្ម"
+              value={activeCount}
+            />
+
+            <StatCard
+              icon={<CircleOff size={20} />}
+              label="អសកម្ម"
+              value={inactiveCount}
             />
           </div>
         </div>

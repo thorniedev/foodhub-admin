@@ -493,9 +493,9 @@ export default function ShopsManager() {
             />
           </div>
 
-          <div className="flex flex-1 items-center justify-end gap-3 min-w-[320px]">
+          <div className="flex min-w-[320px] flex-1 flex-wrap items-center justify-end gap-2.5">
             {/* Search Input */}
-            <div className="relative flex-1 max-w-[440px]">
+            <div className="relative min-w-[240px] max-w-[420px] flex-1">
               <Search
                 size={18}
                 className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
@@ -519,13 +519,13 @@ export default function ShopsManager() {
                   if (event.key === "Escape") setShowSuggestions(false);
                 }}
                 placeholder="ស្វែងរកហាង (ឈ្មោះ, ទីតាំង)..."
-                className="h-12 w-full rounded-2xl border border-gray-200 bg-white py-2.5 pl-12 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+                className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
               />
               {searchInput && (
                 <button
                   type="button"
                   onClick={handleClearSearch}
-                  className="absolute right-3.5 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
+                  className="absolute right-3.5 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700 cursor-pointer"
                   aria-label="Clear search"
                 >
                   <X size={18} />
@@ -535,19 +535,19 @@ export default function ShopsManager() {
               {showSuggestions && searchInput.trim().length >= 2 && (
                 <div className="absolute left-0 top-[52px] z-[100] w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
                   {suggestionsLoading ? (
-                    <div className="flex items-center justify-center gap-2 px-5 py-6 text-lg text-gray-500">
+                    <div className="flex items-center justify-center gap-2 px-5 py-6 text-lg font-normal text-gray-500">
                       <Loader2 size={20} className="animate-spin text-primary-800" />
                       កំពុងស្វែងរក...
                     </div>
                   ) : suggestions.length === 0 ? (
                     <div className="px-5 py-6 text-center">
                       <Store size={32} className="mx-auto text-amber-500" />
-                      <p className="mt-1 text-lg font-semibold text-amber-600">មិនមានហាងដែលត្រូវគ្នា</p>
+                      <p className="mt-1 text-lg font-normal text-amber-600">មិនមានហាងដែលត្រូវគ្នា</p>
                     </div>
                   ) : (
                     <>
                       <div className="border-b border-gray-100 px-4 py-2.5 bg-gray-50">
-                        <p className="text-base font-bold text-gray-500 uppercase">លទ្ធផលស្វែងរក</p>
+                        <p className="text-base font-normal text-gray-500 uppercase">លទ្ធផលស្វែងរក</p>
                       </div>
                       <div className="max-h-[300px] overflow-y-auto p-1.5">
                         {suggestions.map((store) => {
@@ -559,7 +559,7 @@ export default function ShopsManager() {
                               type="button"
                               onMouseDown={(event) => event.preventDefault()}
                               onClick={() => handleSelectSuggestion(store)}
-                              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-emerald-50"
+                              className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-emerald-50"
                             >
                               <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-primary-800">
                                 {logoCandidate ? (
@@ -574,8 +574,8 @@ export default function ShopsManager() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="truncate text-lg font-bold text-gray-800">{store.storeName}</p>
-                                <p className="truncate text-base text-gray-400">
+                                <p className="truncate text-lg font-normal text-gray-800">{store.storeName}</p>
+                                <p className="truncate text-base font-normal text-gray-400">
                                   {[store.addressLine, store.city].filter(Boolean).join(", ") || "No address"}
                                 </p>
                               </div>
@@ -594,7 +594,7 @@ export default function ShopsManager() {
               <button
                 type="button"
                 onClick={() => setSizeOpen((c) => !c)}
-                className={`flex h-12 min-w-[135px] items-center justify-between gap-2.5 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${
+                className={`flex h-12 min-w-[140px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition ${
                   sizeOpen ? "border-primary-600 ring-2 ring-primary-100" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
@@ -603,7 +603,7 @@ export default function ShopsManager() {
               </button>
               {sizeOpen && (
                 <div className="absolute right-0 top-[52px] z-[110] w-[180px] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl">
-                  <p className="px-3 py-1.5 text-base font-semibold text-gray-400">ចំនួនក្នុងទំព័រ</p>
+                  <p className="px-3 py-1.5 text-base font-normal text-gray-400">ចំនួនក្នុងទំព័រ</p>
                   {[10, 20, 50].map((value) => {
                     const selected = size === value;
                     return (
@@ -611,7 +611,7 @@ export default function ShopsManager() {
                         key={value}
                         type="button"
                         onClick={() => { setSize(value); setPage(0); setSizeOpen(false); }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-semibold transition ${selected ? "bg-primary-50 text-primary-800" : "text-gray-700 hover:bg-gray-50"
+                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected ? "bg-primary-50 text-primary-800" : "text-gray-700 hover:bg-gray-50"
                           }`}
                       >
                         <span>{value} / ទំព័រ</span>
@@ -625,40 +625,38 @@ export default function ShopsManager() {
           </div>
         </div>
 
-        {/* ROW 2: Filter Controls (City, Open/Close, Sort, Reset) */}
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-xs">
-          <div className="flex items-center gap-2 px-1 text-lg font-semibold text-gray-700 shrink-0">
-            <Filter size={18} className="text-primary-800" />
-            <span>តម្រងស្វែងរក:</span>
-          </div>
-
+        {/* ROW 2: Filter Controls (City, Open/Close, Sort, Reset) - Transparent / Pill Style */}
+        <div className="flex flex-wrap items-center gap-2.5">
           {/* City Filter */}
-          <div className="min-w-[170px] flex-1 sm:flex-none">
+          <div className="min-w-[180px] max-w-[220px] flex-1 shrink-0">
             <CustomSelect
               value={cityFilter}
               onChange={(val) => { setCityFilter(val); setPage(0); }}
               options={CITY_OPTIONS}
               placeholder="ក្រុង/ខេត្ត"
+              pill
             />
           </div>
 
           {/* Open/Close Filter */}
-          <div className="min-w-[170px] flex-1 sm:flex-none">
+          <div className="min-w-[180px] max-w-[220px] flex-1 shrink-0">
             <CustomSelect
               value={openFilter}
               onChange={(val) => { setOpenFilter(val); setPage(0); }}
               options={OPEN_OPTIONS}
-              placeholder="បើក/បិទ"
+              placeholder="ស្ថានភាពហាងទាំងអស់"
+              pill
             />
           </div>
 
           {/* Sort By Filter */}
-          <div className="min-w-[170px] flex-1 sm:flex-none ml-auto">
+          <div className="min-w-[160px] max-w-[200px] flex-1 shrink-0">
             <CustomSelect
               value={sortBy}
               onChange={(val) => setSortBy(val as StoreSort)}
               options={SORT_OPTIONS}
               placeholder="តម្រៀបតាម"
+              pill
             />
           </div>
 
@@ -667,7 +665,7 @@ export default function ShopsManager() {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 text-lg font-semibold text-amber-700 transition hover:bg-amber-100 active:scale-95 shrink-0"
+              className="flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full border border-red-200 bg-white px-5 text-lg font-normal text-red-600 transition hover:bg-red-50 active:scale-95"
               title="សម្អាតតម្រងទាំងអស់"
             >
               <RotateCcw size={18} />

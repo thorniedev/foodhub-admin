@@ -24,12 +24,12 @@ export default function IngredientsTable({
     <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full min-w-[700px] table-auto border-collapse text-left">
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/70">
-            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">គ្រឿងផ្សំ</th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">កូដ</th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">ការពិពណ៌នា</th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800">ស្ថានភាព</th>
-            <th className="min-w-[120px] whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800">សកម្មភាព</th>
+          <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-normal text-primary-800">
+            <th className="py-4 pl-6 pr-4 font-normal">គ្រឿងផ្សំ</th>
+            <th className="px-4 py-4 font-normal">កូដ</th>
+            <th className="px-4 py-4 font-normal">ការពិពណ៌នា</th>
+            <th className="px-4 py-4 text-center font-normal">ស្ថានភាព</th>
+            <th className="min-w-[120px] py-4 pl-4 pr-6 text-center font-normal">សកម្មភាព</th>
           </tr>
         </thead>
 
@@ -37,7 +37,7 @@ export default function IngredientsTable({
           {items.map((item) => (
             <tr key={item.uuid} className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70">
               {/* Name */}
-              <td className="px-4 py-3">
+              <td className="py-3.5 pl-6 pr-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary-100 bg-primary-50 text-primary-800">
                     <Leaf size={20} />
@@ -47,19 +47,19 @@ export default function IngredientsTable({
               </td>
 
               {/* Code */}
-              <td className="whitespace-nowrap px-4 py-3">
+              <td className="whitespace-nowrap px-4 py-3.5">
                 <span className="inline-flex rounded-lg bg-gray-100 px-3 py-1 font-mono text-lg font-normal text-gray-700">
                   {item.code || "—"}
                 </span>
               </td>
 
               {/* Description */}
-              <td className="max-w-[380px] px-4 py-3">
+              <td className="max-w-[380px] px-4 py-3.5">
                 <p className="line-clamp-2 text-lg font-normal text-gray-500">{item.description || "—"}</p>
               </td>
 
               {/* Status */}
-              <td className="px-4 py-3 text-center">
+              <td className="whitespace-nowrap px-4 py-3.5 text-center">
                 <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1 text-lg font-normal ${item.isActive ? "border-emerald-100 bg-emerald-50 text-emerald-700" : "border-gray-200 bg-gray-50 text-gray-600"}`}>
                   <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.isActive ? "bg-emerald-500" : "bg-gray-400"}`} />
                   {item.isActive ? "សកម្ម" : "អសកម្ម"}
@@ -67,7 +67,7 @@ export default function IngredientsTable({
               </td>
 
               {/* Actions */}
-              <td className="px-4 py-3">
+              <td className="py-3.5 pl-4 pr-6">
                 <div className="flex items-center justify-center gap-2">
                   <button
                     type="button"

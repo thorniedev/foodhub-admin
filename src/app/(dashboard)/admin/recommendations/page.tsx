@@ -309,29 +309,29 @@ export default function AdminRecommendationsPage() {
       </div>
 
       {/* ShadCN Sessions Explorer Table */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl shadow-xs overflow-hidden">
         <Table>
           <TableHeader className="bg-zinc-50/80 dark:bg-zinc-800/60 border-b border-zinc-200/80 dark:border-zinc-800">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="py-3.5 px-5 font-semibold text-xs text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
+              <TableHead className="py-3.5 px-5 font-normal text-lg text-primary-800 dark:text-zinc-400">
                 Session Type & Info
               </TableHead>
-              <TableHead className="py-3.5 px-5 font-semibold text-xs text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
+              <TableHead className="py-3.5 px-5 font-normal text-lg text-primary-800 dark:text-zinc-400">
                 User / Requester
               </TableHead>
-              <TableHead className="py-3.5 px-5 font-semibold text-xs text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
+              <TableHead className="py-3.5 px-5 font-normal text-lg text-primary-800 dark:text-zinc-400">
                 Safety Filter Rate
               </TableHead>
-              <TableHead className="py-3.5 px-5 font-semibold text-xs text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
+              <TableHead className="py-3.5 px-5 font-normal text-lg text-primary-800 dark:text-zinc-400">
                 Latency
               </TableHead>
-              <TableHead className="py-3.5 px-5 font-semibold text-xs text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
+              <TableHead className="py-3.5 px-5 font-normal text-lg text-primary-800 dark:text-zinc-400">
                 Status
               </TableHead>
-              <TableHead className="py-3.5 px-5 font-semibold text-xs text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
+              <TableHead className="py-3.5 px-5 font-normal text-lg text-primary-800 dark:text-zinc-400">
                 Date & Time
               </TableHead>
-              <TableHead className="py-3.5 px-5 text-right font-semibold text-xs text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
+              <TableHead className="py-3.5 px-5 text-right font-normal text-lg text-primary-800 dark:text-zinc-400">
                 Action
               </TableHead>
             </TableRow>
@@ -375,24 +375,24 @@ export default function AdminRecommendationsPage() {
                   <TableRow
                     key={session.uuid}
                     onClick={() => handleInspect(session.uuid)}
-                    className="cursor-pointer group hover:bg-amber-50/40 dark:hover:bg-amber-950/20 transition duration-150"
+                    className="cursor-pointer group hover:bg-gray-50/70 dark:hover:bg-amber-950/20 transition duration-150"
                   >
                     {/* Session Type & UUID Subtitle */}
                     <TableCell className="px-5 py-4">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border shadow-2xs ${
+                            className={`inline-flex items-center gap-1.5 text-lg font-normal px-3.5 py-1 rounded-full border shadow-2xs ${
                               isGroup
                                 ? "bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800"
                                 : "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800"
                             }`}
                           >
-                            {isGroup ? <Users className="w-3.5 h-3.5" /> : <Utensils className="w-3.5 h-3.5" />}
+                            {isGroup ? <Users className="w-4 h-4" /> : <Utensils className="w-4 h-4" />}
                             {isGroup ? "Group Dining" : "Solo Recommendation"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 dark:text-zinc-500 font-mono">
+                        <div className="flex items-center gap-1.5 text-sm text-zinc-400 dark:text-zinc-500 font-mono">
                           <span>UUID:</span>
                           <span className="bg-zinc-100 dark:bg-zinc-800/80 px-1.5 py-0.5 rounded text-zinc-600 dark:text-zinc-300">
                             {shortUuid}
@@ -404,9 +404,9 @@ export default function AdminRecommendationsPage() {
                             className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition opacity-0 group-hover:opacity-100"
                           >
                             {copiedUuid === session.uuid ? (
-                              <Check className="w-3 h-3 text-emerald-600" />
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
                             ) : (
-                              <Copy className="w-3 h-3" />
+                              <Copy className="w-3.5 h-3.5" />
                             )}
                           </button>
                         </div>
@@ -417,15 +417,15 @@ export default function AdminRecommendationsPage() {
                     <TableCell className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs border ${userDisplay.colorTheme.bg}`}
+                          className={`w-10 h-10 rounded-full flex items-center justify-center font-normal text-sm border ${userDisplay.colorTheme.bg}`}
                         >
                           {userDisplay.initial}
                         </div>
                         <div className="space-y-0.5">
-                          <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                          <p className="text-lg font-normal text-zinc-900 dark:text-zinc-100">
                             {userDisplay.primary}
                           </p>
-                          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                          <p className="text-sm text-zinc-500 dark:text-zinc-400">
                             {userDisplay.secondary}
                           </p>
                         </div>
@@ -435,12 +435,12 @@ export default function AdminRecommendationsPage() {
                     {/* Safety Filter Rate */}
                     <TableCell className="px-5 py-4">
                       <div className="space-y-1.5 max-w-[150px]">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                        <div className="flex items-center justify-between text-lg font-normal">
+                          <span className="text-emerald-600 dark:text-emerald-400">
                             {safeCandidates} <span className="text-zinc-400 font-normal">/ {totalCandidates} Safe</span>
                           </span>
                           <span
-                            className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${
+                            className={`text-sm font-normal px-2 py-0.5 rounded ${
                               safeRate === 100
                                 ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
                                 : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
@@ -462,8 +462,8 @@ export default function AdminRecommendationsPage() {
 
                     {/* Latency with Zap badge */}
                     <TableCell className="px-5 py-4">
-                      <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800/60 px-2.5 py-1 rounded-lg text-xs font-mono">
-                        <Zap className="w-3.5 h-3.5 text-emerald-500 fill-emerald-500" />
+                      <span className="inline-flex items-center gap-1.5 font-normal text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800/60 px-3 py-1 rounded-full text-lg font-mono">
+                        <Zap className="w-4 h-4 text-emerald-500 fill-emerald-500" />
                         {latency} ms
                       </span>
                     </TableCell>
@@ -471,7 +471,7 @@ export default function AdminRecommendationsPage() {
                     {/* Status */}
                     <TableCell className="px-5 py-4">
                       <span
-                        className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border shadow-2xs ${
+                        className={`inline-flex items-center gap-1.5 text-lg font-normal px-3.5 py-1 rounded-full border shadow-2xs ${
                           isReady
                             ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
                             : isFailed
@@ -482,7 +482,7 @@ export default function AdminRecommendationsPage() {
                         }`}
                       >
                         <span
-                          className={`w-1.5 h-1.5 rounded-full ${
+                          className={`w-2 h-2 rounded-full ${
                             isReady
                               ? "bg-emerald-500 animate-pulse"
                               : isFailed
@@ -497,10 +497,10 @@ export default function AdminRecommendationsPage() {
                     {/* Date & Time */}
                     <TableCell className="px-5 py-4">
                       <div className="space-y-0.5">
-                        <p className="text-xs font-medium text-zinc-900 dark:text-zinc-100">
+                        <p className="text-lg font-normal text-zinc-900 dark:text-zinc-100">
                           {formattedDate}
                         </p>
-                        <p className="text-[11px] text-zinc-400 dark:text-zinc-500">
+                        <p className="text-sm text-zinc-400 dark:text-zinc-500">
                           {formattedTime}
                         </p>
                       </div>
@@ -514,9 +514,9 @@ export default function AdminRecommendationsPage() {
                           e.stopPropagation();
                           handleInspect(session.uuid);
                         }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 transition shadow-2xs cursor-pointer group-hover:border-amber-400"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-lg font-normal text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 transition shadow-2xs cursor-pointer group-hover:border-amber-400"
                       >
-                        <Eye className="w-3.5 h-3.5" />
+                        <Eye className="w-4 h-4" />
                         <span>Inspect</span>
                       </button>
                     </TableCell>

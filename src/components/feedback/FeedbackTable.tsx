@@ -56,16 +56,16 @@ export default function FeedbackTable({
   onCycleStatus,
 }: FeedbackTableProps) {
   return (
-    <div className="bg-white border border-gray-100 rounded-xl overflow-x-auto">
-      <table className="w-full text-sm">
+    <div className="bg-white border border-gray-100 rounded-3xl overflow-x-auto">
+      <table className="w-full text-lg font-normal min-w-[800px]">
         <thead>
-          <tr className="border-b border-gray-100 text-left text-gray-500">
-            <th className="py-3 px-4 font-medium">អតិថិជន</th>
-            <th className="py-3 px-4 font-medium">សារ</th>
-            <th className="py-3 px-4 font-medium">ការវាយតម្លៃ</th>
-            <th className="py-3 px-4 font-medium">ប្រភេទ</th>
-            <th className="py-3 px-4 font-medium">ស្ថានភាព</th>
-            <th className="py-3 px-4 font-medium text-right">សកម្មភាព</th>
+          <tr className="border-b border-gray-100 text-left text-lg font-normal text-primary-800 bg-gray-50/70">
+            <th className="py-3.5 px-4 font-normal">អតិថិជន</th>
+            <th className="py-3.5 px-4 font-normal">សារ</th>
+            <th className="py-3.5 px-4 font-normal">ការវាយតម្លៃ</th>
+            <th className="py-3.5 px-4 font-normal">ប្រភេទ</th>
+            <th className="py-3.5 px-4 font-normal">ស្ថានភាព</th>
+            <th className="py-3.5 px-4 font-normal text-right">សកម្មភាព</th>
           </tr>
         </thead>
         <tbody>
@@ -74,41 +74,41 @@ export default function FeedbackTable({
               key={item.id}
               className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 align-top"
             >
-              <td className="py-3 px-4">
+              <td className="py-3.5 px-4">
                 <div className="flex items-center gap-3">
-                  <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                  <div className="relative w-11 h-11 rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center">
                     {item.avatar ? (
                       <Image
                         src={item.avatar}
                         alt={item.customerName}
                         fill
                         className="object-cover"
-                        sizes="36px"
+                        sizes="44px"
                       />
                     ) : (
-                      <User size={16} className="text-gray-400" />
+                      <User size={18} className="text-gray-400" />
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-800">{item.customerName}</p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-lg font-normal text-gray-800">{item.customerName}</p>
+                    <p className="text-sm font-normal text-gray-400">
                       {formatPhnomPenhDate(item.createdAt)}
                     </p>
                   </div>
                 </div>
               </td>
-              <td className="py-3 px-4 text-gray-500 max-w-md">
+              <td className="py-3.5 px-4 text-lg font-normal text-gray-600 max-w-md">
                 {item.message}
               </td>
-              <td className="py-3 px-4">
+              <td className="py-3.5 px-4">
                 <RatingStars rating={item.rating} />
               </td>
-              <td className="py-3 px-4 text-gray-600">
+              <td className="py-3.5 px-4 text-lg font-normal text-gray-600">
                 {CATEGORY_LABEL[item.category]}
               </td>
-              <td className="py-3 px-4">
+              <td className="py-3.5 px-4">
                 <span
-                  className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                  className={`text-lg font-normal px-3.5 py-1 rounded-full border border-gray-100 ${
                     STATUS_BADGE[item.status]
                   }`}
                 >

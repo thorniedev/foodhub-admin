@@ -204,7 +204,10 @@ export default function BannerFormModal({
                     />
                   </div>
                   {errors.category && (
-                    <p id="banner-category-error" className="mt-1 text-sm text-red-500">
+                    <p
+                      id="banner-category-error"
+                      className="mt-1 text-sm text-red-500"
+                    >
                       {errors.category.message}
                     </p>
                   )}
@@ -233,14 +236,19 @@ export default function BannerFormModal({
                           maxLength={100}
                           aria-invalid={Boolean(errors.location)}
                           aria-describedby={
-                            errors.location ? "banner-location-error" : undefined
+                            errors.location
+                              ? "banner-location-error"
+                              : undefined
                           }
                           className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
                         />
                       )}
                     />
                     {errors.location && (
-                      <p id="banner-location-error" className="mt-1 text-sm text-red-500">
+                      <p
+                        id="banner-location-error"
+                        className="mt-1 text-sm text-red-500"
+                      >
                         {errors.location.message}
                       </p>
                     )}
@@ -260,11 +268,16 @@ export default function BannerFormModal({
                   {...register("title")}
                   maxLength={255}
                   aria-invalid={Boolean(errors.title)}
-                  aria-describedby={errors.title ? "banner-title-error" : undefined}
+                  aria-describedby={
+                    errors.title ? "banner-title-error" : undefined
+                  }
                   className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
                 />
                 {errors.title && (
-                  <p id="banner-title-error" className="mt-1 text-sm text-red-500">
+                  <p
+                    id="banner-title-error"
+                    className="mt-1 text-sm text-red-500"
+                  >
                     {errors.title.message}
                   </p>
                 )}
@@ -311,14 +324,19 @@ export default function BannerFormModal({
                       onBlur={field.onBlur}
                       aria-invalid={Boolean(errors.description)}
                       aria-describedby={
-                        errors.description ? "banner-description-error" : undefined
+                        errors.description
+                          ? "banner-description-error"
+                          : undefined
                       }
                       className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
                     />
                   )}
                 />
                 {errors.description && (
-                  <p id="banner-description-error" className="mt-1 text-sm text-red-500">
+                  <p
+                    id="banner-description-error"
+                    className="mt-1 text-sm text-red-500"
+                  >
                     {errors.description.message}
                   </p>
                 )}
@@ -326,13 +344,16 @@ export default function BannerFormModal({
 
               {!editing && (
                 <p className="text-sm text-gray-400">
-                  បែនណឺថ្មីនឹងមិនត្រូវបានបង្ហាញជាសាធារណៈទេ រហូតដល់អ្នកបើកសកម្មភាព
-                  &ldquo;បង្ហាញ&rdquo; នៅក្នុងតារាង។
+                  បែនណឺថ្មីនឹងមិនត្រូវបានបង្ហាញជាសាធារណៈទេ
+                  រហូតដល់អ្នកបើកសកម្មភាព &ldquo;បង្ហាញ&rdquo; នៅក្នុងតារាង។
                 </p>
               )}
 
               {formError && (
-                <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+                <p
+                  role="alert"
+                  className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600"
+                >
                   {formError}
                 </p>
               )}
@@ -351,7 +372,9 @@ export default function BannerFormModal({
                   disabled={isSubmitting}
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#136C34] px-5 py-2.5 text-lg text-white transition hover:bg-[#0f592b] disabled:opacity-60"
                 >
-                  {isSubmitting && <Loader2 size={17} className="animate-spin" />}
+                  {isSubmitting && (
+                    <Loader2 size={17} className="animate-spin" />
+                  )}
                   {isSubmitting ? "កំពុងរក្សាទុក..." : "រក្សាទុក"}
                 </button>
               </div>

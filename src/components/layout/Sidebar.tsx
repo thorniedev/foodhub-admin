@@ -133,7 +133,7 @@ export default function Sidebar() {
             `}
           >
             <span
-              className={`flex items-center gap-3 font-medium ${level === 0 ? "text-xl" : "text-lg"
+              className={`flex items-center gap-3 font-normal ${level === 0 ? "text-xl" : "text-lg"
                 }`}
             >
               {Icon && <Icon size={level === 0 ? 22 : 18} />}
@@ -177,15 +177,15 @@ export default function Sidebar() {
           transition
 
           ${level === 0
-            ? "rounded-full text-xl font-medium"
+            ? "rounded-full text-xl font-normal"
             : "rounded-xl text-lg font-normal"
           }
 
           ${isActive
             ? level === 0
-              ? "bg-[#136C34] text-white font-medium"
-              : "bg-emerald-50 font-medium text-[#136C34]"
-            : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+              ? "bg-[#136C34] text-white font-normal"
+              : "bg-emerald-50 font-normal text-[#136C34]"
+            : "text-gray-500 hover:bg-gray-50 hover:text-gray-700 font-normal"
           }
         `}
       >

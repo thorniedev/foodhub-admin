@@ -376,16 +376,16 @@ export default function FoodDetailModal({
             </div>
           ) : null}
 
-          {/* Footer */}
+          {/* ─── FOOTER ─── */}
           <div className="mt-6 flex items-center justify-between">
             <div>
               {data && onEdit && (
                 <button
                   type="button"
                   onClick={() => { onClose(); onEdit(data); }}
-                  className="inline-flex items-center gap-2 rounded-full border border-[#14833E] px-6 py-2.5 text-sm font-bold text-[#14833E] transition hover:bg-emerald-50"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#14833E] px-7 py-3 text-lg font-normal text-[#14833E] transition hover:bg-emerald-50"
                 >
-                  <Pencil size={16} />
+                  <Pencil size={18} />
                   កែប្រែ Food
                 </button>
               )}
@@ -393,7 +393,7 @@ export default function FoodDetailModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-11 items-center rounded-full bg-[#14833E] px-8 text-sm font-bold text-white shadow-lg shadow-[#14833E]/25 transition hover:bg-[#0f6b32] focus:outline-none focus:ring-4 focus:ring-[#14833E]/30"
+              className="inline-flex h-12 items-center rounded-full bg-[#14833E] px-8 text-lg font-normal text-white shadow-lg shadow-[#14833E]/25 transition hover:bg-[#0f6b32] focus:outline-none focus:ring-4 focus:ring-[#14833E]/30"
             >
               បិទ
             </button>

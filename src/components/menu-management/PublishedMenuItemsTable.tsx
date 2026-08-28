@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Eye, MinusCircle, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Eye, MinusCircle, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import MenuItemAvatar from "./MenuItemAvatar";
+import Pagination from "@/src/components/ui/Pagination";
 
 import type {
   FoodCategoryOption,
@@ -61,7 +62,7 @@ function renderCategoryCell(
   }
 
   return (
-    <span className="inline-block max-w-[180px] truncate rounded-xl bg-emerald-50 px-3.5 py-1 text-lg font-semibold text-emerald-800 border border-emerald-100/80">
+    <span className="inline-block max-w-[180px] truncate rounded-xl bg-emerald-50 px-3.5 py-1 text-lg font-normal text-emerald-800 border border-emerald-100/80">
       {displayCategory}
     </span>
   );
@@ -141,9 +142,8 @@ function MenuItemRowActions({
 
         {open && (
           <div
-            className={`absolute right-0 z-[100] min-w-max whitespace-nowrap overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150 ${
-              openUpward ? "bottom-full mb-2" : "top-full mt-2"
-            }`}
+            className={`absolute right-0 z-[100] min-w-[195px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150 ${openUpward ? "bottom-full mb-2" : "top-full mt-2"
+              }`}
           >
             {/* Soft Delete / Disable */}
             {onSoftDelete && (
@@ -153,9 +153,9 @@ function MenuItemRowActions({
                   setOpen(false);
                   onSoftDelete(item);
                 }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-amber-700 transition hover:bg-amber-50 whitespace-nowrap"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-normal text-amber-700 transition hover:bg-amber-50"
               >
-                <MinusCircle size={18} className="shrink-0" />
+                <MinusCircle size={18} />
                 <span>ផ្អាកលក់</span>
               </button>
             )}
@@ -167,9 +167,9 @@ function MenuItemRowActions({
                 setOpen(false);
                 onHardDelete(item);
               }}
-              className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-red-600 transition hover:bg-red-50 whitespace-nowrap"
+              className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-normal text-red-600 transition hover:bg-red-50"
             >
-              <Trash2 size={18} className="shrink-0" />
+              <Trash2 size={18} />
               <span>លុបចេញពីប្រព័ន្ធ</span>
             </button>
           </div>
@@ -235,28 +235,28 @@ export default function PublishedMenuItemsTable({
         <table className="w-full table-auto border-collapse text-left">
           {/* ================= HEADER ================= */}
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/70">
-              <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[140px]">
+            <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-normal text-primary-800">
+              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[140px]">
                 ម៉ឺនុយ
               </th>
 
-              <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[130px]">
+              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[130px]">
                 ហាង
               </th>
 
-              <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[130px]">
+              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[130px]">
                 ប្រភេទ
               </th>
 
-              <th className="whitespace-nowrap px-3 py-3.5 text-lg font-semibold text-primary-800 min-w-[90px]">
+              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[90px]">
                 តម្លៃ
               </th>
 
-              <th className="whitespace-nowrap px-2 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[95px]">
+              <th className="whitespace-nowrap px-4 py-3.5 text-center font-normal min-w-[95px]">
                 ស្ថានភាព
               </th>
 
-              <th className="whitespace-nowrap px-3 py-3.5 text-center text-lg font-semibold text-primary-800 min-w-[110px]">
+              <th className="whitespace-nowrap px-4 py-3.5 text-center font-normal min-w-[110px]">
                 សកម្មភាព
               </th>
             </tr>
@@ -284,12 +284,12 @@ export default function PublishedMenuItemsTable({
                       </div>
 
                       <div className="min-w-0">
-                        <p className="max-w-[200px] truncate text-lg font-bold text-gray-900">
+                        <p className="max-w-[200px] truncate text-lg font-normal text-gray-800">
                           {item.name}
                         </p>
 
                         {item.isFeatured && (
-                          <span className="mt-0.5 inline-block rounded-full bg-amber-50 px-2.5 py-0.5 text-base font-semibold text-amber-700 border border-amber-100">
+                          <span className="mt-0.5 inline-block rounded-full bg-amber-50 px-2.5 py-0.5 text-base font-normal text-amber-700 border border-amber-100">
                             ពិសេស
                           </span>
                         )}
@@ -298,28 +298,28 @@ export default function PublishedMenuItemsTable({
                   </td>
 
                   {/* Store Name */}
-                  <td className="px-3 py-3.5">
-                    <span className="line-clamp-1 text-lg font-semibold text-gray-700">
+                  <td className="px-4 py-3.5">
+                    <span className="line-clamp-1 text-lg font-normal text-gray-700">
                       {storeName(item, stores)}
                     </span>
                   </td>
 
                   {/* Category */}
-                  <td className="px-3 py-3.5">
+                  <td className="px-4 py-3.5">
                     {renderCategoryCell(item, foods, categories)}
                   </td>
 
                   {/* Price */}
-                  <td className="px-3 py-3.5">
-                    <span className="text-xl font-bold text-emerald-800">
+                  <td className="px-4 py-3.5">
+                    <span className="text-xl font-normal text-emerald-800">
                       ${Number(item.price ?? 0).toFixed(2)}
                     </span>
                   </td>
 
                   {/* Status Badge */}
-                  <td className="px-2 py-3.5 text-center">
+                  <td className="px-4 py-3.5 text-center">
                     <span
-                      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-lg font-semibold border ${isAvailable
+                      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${isAvailable
                         ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                         : "bg-red-50 text-red-600 border-red-100"
                         }`}
@@ -333,7 +333,7 @@ export default function PublishedMenuItemsTable({
                   </td>
 
                   {/* Actions */}
-                  <td className="px-3 py-3.5">
+                  <td className="px-4 py-3.5">
                     <MenuItemRowActions
                       item={item}
                       disabled={busy}
@@ -354,49 +354,16 @@ export default function PublishedMenuItemsTable({
 
       {/* PAGINATION CONTROLS */}
       {totalPages > 1 && (
-        <div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50/50 p-3.5 sm:flex-row">
-          <p className="text-lg font-semibold text-gray-600">
-            បង្ហាញ {Math.min((currentPage - 1) * itemsPerPage + 1, items.length)} -{" "}
-            {Math.min(currentPage * itemsPerPage, items.length)} នៃ {items.length} ម៉ឺនុយ
-          </p>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
-              aria-label="ទំព័រមុន"
-            >
-              <ChevronLeft size={20} />
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                type="button"
-                onClick={() => setCurrentPage(page)}
-                className={`flex h-10 min-w-[40px] cursor-pointer items-center justify-center rounded-xl px-3 text-lg font-bold transition ${
-                  currentPage === page
-                    ? "bg-primary-800 text-white shadow-xs"
-                    : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              type="button"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
-              aria-label="ទំព័របន្ទាប់"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalElements={items.length}
+          pageSize={itemsPerPage}
+          unit="ម៉ឺនុយ"
+          disabled={busy}
+          onPageChange={(page) => setCurrentPage(page)}
+          className="mt-4"
+        />
       )}
     </div>
   );

@@ -35,16 +35,16 @@ export default function DeleteSubCategoryConfirmModal({
             <AlertTriangle size={28} />
           </div>
 
-          <h3 className="mt-4 text-xl font-bold text-gray-900">
+          <h3 className="mt-4 text-xl font-normal text-gray-800">
             តើអ្នកពិតជាចង់លុបអនុប្រភេទនេះមែនទេ?
           </h3>
 
           <div className="mt-3 w-full rounded-2xl bg-gray-50 p-4">
-            <p className="font-bold text-gray-800">{item.name}</p>
-            <p className="mt-1 font-mono text-xs text-gray-400">{item.code}</p>
+            <p className="text-xl font-normal text-gray-800">{item.name}</p>
+            <p className="mt-1 font-mono text-lg font-normal text-gray-500">{item.code}</p>
           </div>
 
-          <p className="mt-3 text-sm text-gray-500">
+          <p className="mt-3 text-lg font-normal text-gray-500">
             សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។ សូមប្រាកដថាគ្មានមុខម្ហូប/ភេសជ្ជៈណាកំពុងប្រើប្រាស់អនុប្រភេទនេះមុននឹងលុប។
           </p>
 
@@ -53,7 +53,7 @@ export default function DeleteSubCategoryConfirmModal({
               type="button"
               disabled={deleting}
               onClick={onClose}
-              className="flex-1 rounded-full border border-gray-200 py-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-50 focus:outline-none"
+              className="flex-1 rounded-full border border-gray-200 py-3 text-lg font-normal text-gray-700 transition hover:bg-gray-50 focus:outline-none"
             >
               បោះបង់
             </button>
@@ -62,9 +62,9 @@ export default function DeleteSubCategoryConfirmModal({
               type="button"
               disabled={deleting}
               onClick={onConfirm}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-red-600 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-500/20 disabled:opacity-60"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-red-600 py-3 text-lg font-normal text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-500/20 disabled:opacity-60"
             >
-              {deleting && <Loader2 size={16} className="animate-spin" />}
+              {deleting && <Loader2 size={20} className="animate-spin" />}
               <span>យល់ព្រមលុប</span>
             </button>
           </div>
