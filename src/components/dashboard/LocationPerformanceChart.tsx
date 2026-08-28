@@ -76,7 +76,7 @@ export default function LocationPerformanceChart({
         <div
           role="group"
           aria-label="ជ្រើសរើសរង្វាស់ទីតាំង"
-          className="flex items-center gap-1 rounded-full bg-gray-100 p-1"
+          className="flex items-center gap-1.5 rounded-full bg-gray-100 p-1"
         >
           {METRICS.map((option) => {
             const active = option.value === metric;
@@ -88,10 +88,10 @@ export default function LocationPerformanceChart({
                 aria-pressed={active}
                 onClick={() => setMetric(option.value)}
                 className={cn(
-                  "min-h-9 rounded-full px-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                  "min-h-10 cursor-pointer rounded-full px-4 text-lg font-normal transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
                   active
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900",
+                    ? "bg-white text-gray-800 shadow-sm"
+                    : "text-gray-600 hover:text-gray-800",
                 )}
               >
                 {option.label}
@@ -110,13 +110,13 @@ export default function LocationPerformanceChart({
         />
       ) : (
         <>
-          <div className="h-[300px] w-full">
+          <div className="h-[360px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={rows}
                 layout="vertical"
-                margin={{ top: 4, right: 16, bottom: 0, left: 0 }}
-                barCategoryGap={6}
+                margin={{ top: 4, right: 30, bottom: 0, left: 0 }}
+                barCategoryGap={8}
               >
                 <CartesianGrid
                   stroke={CHART_GRID}
@@ -127,7 +127,7 @@ export default function LocationPerformanceChart({
                 <XAxis
                   type="number"
                   tickFormatter={formatCompact}
-                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
+                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 18 }}
                   tickLine={false}
                   axisLine={{ stroke: CHART_GRID }}
                   allowDecimals={false}
@@ -136,10 +136,10 @@ export default function LocationPerformanceChart({
                 <YAxis
                   type="category"
                   dataKey="location"
-                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
+                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 18 }}
                   tickLine={false}
                   axisLine={false}
-                  width={124}
+                  width={180}
                 />
 
                 <Tooltip
@@ -182,15 +182,15 @@ export default function LocationPerformanceChart({
                   dataKey={metric}
                   name={activeMetric.label}
                   radius={[0, 10, 10, 0]}
-                  maxBarSize={22}
+                  maxBarSize={24}
                   background={{ fill: "#eef2f7" }}
                 >
                   <LabelList
                     dataKey={metric}
                     position="right"
-                    offset={8}
+                    offset={10}
                     formatter={(value: number) => formatCompact(value)}
-                    style={{ fill: CHART_AXIS_TEXT, fontSize: 12, fontWeight: 600 }}
+                    style={{ fill: CHART_AXIS_TEXT, fontSize: 18, fontWeight: 400 }}
                   />
 
                   {rows.map((row) => (
@@ -210,9 +210,9 @@ export default function LocationPerformanceChart({
           </div>
 
           {onSelectLocation && (
-            <div className="mt-3 flex flex-wrap gap-2 border-t border-gray-100 pt-3">
-              <span className="w-full text-sm text-gray-500">
-                ចុចទីតាំង ដើម្បីត្រងផ្ទាំងទាំងមូលតាមទីតាំងនោះ
+            <div className="mt-4 flex flex-wrap gap-2.5 border-t border-gray-100 pt-4">
+              <span className="w-full text-lg font-normal text-gray-500">
+                ចុចទីតាំង ដើម្បីត្រងផ្ទាំងទាំងមូលតាមទីតាំងនោះ:
               </span>
 
               {rows.map((row) => {
@@ -225,14 +225,14 @@ export default function LocationPerformanceChart({
                     aria-pressed={active}
                     onClick={() => onSelectLocation(row)}
                     className={cn(
-                      "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                      "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-4 text-lg font-normal transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
                       active
                         ? "border-primary-300 bg-primary-50 text-primary-800"
-                        : "border-gray-200 text-gray-700 hover:border-primary-200 hover:bg-primary-50/60",
+                        : "border-gray-200 bg-white text-gray-700 hover:border-primary-200 hover:bg-primary-50/60",
                     )}
                   >
-                    <MapPin size={14} aria-hidden="true" />
-                    {row.location}
+                    <MapPin size={18} aria-hidden="true" className="text-primary-700" />
+                    <span>{row.location}</span>
                   </button>
                 );
               })}

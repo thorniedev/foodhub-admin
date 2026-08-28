@@ -52,22 +52,22 @@ export default function ProfileDetailPanel({
 }: ProfileDetailPanelProps) {
   if (loading) {
     return (
-      <section className="flex min-h-[520px] min-w-0 items-center justify-center rounded-2xl border border-gray-100 bg-white">
-        <Loader2 size={30} className="animate-spin text-primary-800" />
+      <section className="flex min-h-[520px] min-w-0 items-center justify-center rounded-3xl border border-gray-100 bg-white">
+        <Loader2 size={36} className="animate-spin text-primary-800" />
       </section>
     );
   }
 
   if (error) {
     return (
-      <section className="flex min-h-[520px] min-w-0 flex-col items-center justify-center rounded-2xl border border-red-100 bg-white px-6 text-center">
-        <AlertTriangle size={38} className="text-red-400" />
+      <section className="flex min-h-[520px] min-w-0 flex-col items-center justify-center rounded-3xl border border-red-100 bg-white px-6 text-center">
+        <AlertTriangle size={40} className="text-red-400" />
 
-        <p className="mt-3 text-2xl font-semibold text-primary-800">
+        <p className="mt-3 text-2xl font-medium text-primary-800">
           មិនអាចផ្ទុកព័ត៌មានលម្អិតនៃ Profile បានទេ
         </p>
 
-        <p className="mt-2 max-w-md text-lg leading-8 text-gray-500">
+        <p className="mt-2 max-w-md text-lg font-normal leading-relaxed text-gray-500">
           {getAdminApiErrorMessage(error)}
         </p>
       </section>
@@ -76,18 +76,18 @@ export default function ProfileDetailPanel({
 
   if (!profile) {
     return (
-      <section className="flex min-h-[520px] min-w-0 flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white px-6 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 text-gray-400">
+      <section className="flex min-h-[520px] min-w-0 flex-col items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-white px-6 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 text-gray-400">
           <User size={34} />
         </div>
 
-        <p className="mt-4 text-2xl font-bold text-gray-800">
+        <p className="mt-4 text-2xl font-medium text-gray-800">
           {!hasProfiles
             ? "គណនីអ្នកប្រើប្រាស់នេះមិនទាន់មានប្រវត្តិរូបនៅឡើយទេ"
             : "ជ្រើសរើសប្រវត្តិរូបមួយ"}
         </p>
 
-        <p className="mt-2 max-w-md text-base leading-7 text-gray-500">
+        <p className="mt-2 max-w-md text-lg font-normal leading-relaxed text-gray-500">
           {!hasProfiles
             ? "ប្រវត្តិរូបនឹងបង្ហាញនៅទីនេះ នៅពេលដែលគណនីអ្នកប្រើប្រាស់បង្កើតប្រវត្តិរូបក្នុងកម្មវិធី។"
             : "ចុចជ្រើសរើសប្រវត្តិរូបនៅខាងឆ្វេង ដើម្បីមើលព័ត៌មានលម្អិត។"}
@@ -97,10 +97,10 @@ export default function ProfileDetailPanel({
           <button
             type="button"
             onClick={onCreateProfile}
-            className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-primary-800 px-6 py-3 text-base font-bold text-white shadow-md shadow-primary-900/20 transition-all hover:bg-primary-900 hover:scale-[1.02] active:scale-95"
+            className="mt-6 inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-primary-800 px-6 text-lg font-normal text-white shadow-md shadow-primary-900/20 transition-all hover:bg-primary-900 active:scale-95"
           >
-            <Plus size={18} />
-            បង្កើតប្រវត្តិរូបឥឡូវនេះ
+            <Plus size={20} />
+            <span>បង្កើតប្រវត្តិរូបឥឡូវនេះ</span>
           </button>
         )}
       </section>

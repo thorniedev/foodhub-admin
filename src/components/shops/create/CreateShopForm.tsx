@@ -360,7 +360,7 @@ export default function CreateShopForm() {
           PAGE HEADER
       ================================================== */}
 
-      <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
+      <section className="relative overflow-hidden rounded-3xl bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
         <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full bg-white/5" />
         <div className="pointer-events-none absolute -bottom-24 right-20 h-64 w-64 rounded-full bg-white/5" />
 
@@ -371,8 +371,8 @@ export default function CreateShopForm() {
               href="/shops"
               className="
                 inline-flex min-h-11 items-center justify-center gap-2
-                rounded-full bg-white/15 px-4 text-lg font-medium text-white
-                transition hover:bg-white/20 focus:outline-none focus:ring-4 focus:ring-white/20
+                rounded-full bg-white/15 px-5 text-lg font-normal text-white
+                transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/20
               "
             >
               <ArrowLeft size={20} />
@@ -380,12 +380,12 @@ export default function CreateShopForm() {
             </Link>
 
             <div className="mt-6 flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15">
                 <Store size={25} />
               </div>
               <div className="min-w-0">
-                <p className="text-5xl font-bold text-accent-400">បង្កើតហាងថ្មី</p>
-                <p className="mt-6 max-w-2xl text-xl leading-8 text-white/85">
+                <p className="text-4xl sm:text-5xl font-medium text-amber-300">បង្កើតហាងថ្មី</p>
+                <p className="mt-3 max-w-2xl text-lg font-normal leading-relaxed text-white/85">
                   បំពេញព័ត៌មានហាងដោយដៃ ឬប្រើ Google Maps ដើម្បីនាំចូលព័ត៌មានហាងដោយស្វ័យប្រវត្តិ។
                 </p>
               </div>
@@ -399,10 +399,10 @@ export default function CreateShopForm() {
               onClick={fillSampleData}
               className="
                 inline-flex min-h-12 w-full shrink-0 whitespace-nowrap items-center justify-center
-                gap-2 rounded-full border border-white/25 bg-white/15 px-5 py-2.5
-                text-lg font-medium text-white backdrop-blur-sm transition
+                gap-2 rounded-full border border-white/25 bg-white/15 px-6 py-2.5
+                text-lg font-normal text-white backdrop-blur-sm transition
                 hover:bg-white/25 active:scale-95
-                focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-auto
+                focus:outline-none focus:ring-2 focus:ring-white/20 sm:w-auto
               "
             >
               <Sparkles size={18} />
@@ -414,10 +414,10 @@ export default function CreateShopForm() {
               onClick={() => setGoogleOpen(true)}
               className="
                 inline-flex min-h-12 w-full shrink-0 whitespace-nowrap items-center justify-center
-                gap-2 rounded-full bg-white px-5 py-2.5
-                text-lg font-bold text-primary-800 shadow-sm transition
+                gap-2 rounded-full bg-white px-6 py-2.5
+                text-lg font-normal text-primary-800 shadow-sm transition
                 hover:bg-primary-50 active:scale-95
-                focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-auto
+                focus:outline-none focus:ring-2 focus:ring-white/20 sm:w-auto
               "
             >
               <MapPinned size={20} className="text-primary-700 shrink-0" />
@@ -486,18 +486,18 @@ export default function CreateShopForm() {
         />
 
         {/* CONTACT */}
-        <section className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
+        <section className="rounded-3xl border border-gray-100 bg-white p-6 sm:p-8">
           <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
-              <Phone size={22} />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-800">
+              <Phone size={24} />
             </div>
-            <p className="text-2xl font-bold text-[#0F5A2C]">ទំនាក់ទំនង</p>
+            <p className="text-2xl font-medium text-[#0F5A2C]">ទំនាក់ទំនង</p>
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             {/* Phone */}
             <label className="block">
-              <span className="mb-2 flex items-center gap-2 text-lg font-medium text-primary-800">
+              <span className="mb-2 flex items-center gap-2 text-lg font-normal text-gray-700">
                 <Phone size={19} className="text-primary-700" />
                 លេខទូរស័ព្ទ
               </span>
@@ -506,23 +506,23 @@ export default function CreateShopForm() {
                 type="tel"
                 placeholder="ឧ. +855 12 345 678"
                 className={`
-                  h-[52px] w-full rounded-xl border bg-gray-50 px-4
-                  text-lg text-gray-800 outline-none transition
+                  h-12 w-full rounded-full border bg-gray-50 px-5
+                  text-lg font-normal text-gray-800 outline-none transition
                   placeholder:text-gray-400 hover:border-gray-300
-                  focus:bg-white focus:ring-4
+                  focus:bg-white focus:ring-2 focus:ring-primary-100
                   ${errors.phoneNumber
-                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                    : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"}
+                    ? "border-red-400 focus:border-red-500"
+                    : "border-gray-200 focus:border-primary-600"}
                 `}
               />
               {errors.phoneNumber && (
-                <p className="mt-1 text-lg text-red-600">{errors.phoneNumber.message}</p>
+                <p className="mt-1 text-lg font-normal text-red-600">{errors.phoneNumber.message}</p>
               )}
             </label>
 
             {/* Email */}
             <label className="block">
-              <span className="mb-2 flex items-center gap-2 text-lg font-medium text-primary-800">
+              <span className="mb-2 flex items-center gap-2 text-lg font-normal text-gray-700">
                 <Mail size={19} className="text-primary-700" />
                 អ៊ីមែល
               </span>
@@ -531,17 +531,17 @@ export default function CreateShopForm() {
                 type="email"
                 placeholder="example@foodhub.com"
                 className={`
-                  h-[52px] w-full rounded-xl border bg-gray-50 px-4
-                  text-lg text-gray-800 outline-none transition
+                  h-12 w-full rounded-full border bg-gray-50 px-5
+                  text-lg font-normal text-gray-800 outline-none transition
                   placeholder:text-gray-400 hover:border-gray-300
-                  focus:bg-white focus:ring-4
+                  focus:bg-white focus:ring-2 focus:ring-primary-100
                   ${errors.email
-                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                    : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"}
+                    ? "border-red-400 focus:border-red-500"
+                    : "border-gray-200 focus:border-primary-600"}
                 `}
               />
               {errors.email && (
-                <p className="mt-1 text-lg text-red-600">{errors.email.message}</p>
+                <p className="mt-1 text-lg font-normal text-red-600">{errors.email.message}</p>
               )}
             </label>
           </div>
@@ -574,14 +574,14 @@ export default function CreateShopForm() {
 
         {/* VALIDATION BANNER — visible when Zod rejects the submit */}
         {validationFailed && !error && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-lg leading-7 text-amber-800">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-lg font-normal leading-7 text-amber-800">
             ⚠️ សូមបំពេញព័ត៌មានដែលចាំបាច់ (ចំណាំ: ឈ្មោះហាង, អាសយដ្ឋាន, Latitude, Longitude) មុននឹងបង្កើតហាង។
           </div>
         )}
 
         {/* API ERROR BANNER */}
         {error && (
-          <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg leading-7 text-red-600">
+          <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg font-normal leading-7 text-red-600">
             {error}
           </div>
         )}
@@ -594,7 +594,7 @@ export default function CreateShopForm() {
           className="
             fixed bottom-4 left-4 right-4 z-[80]
             flex flex-col-reverse gap-3
-            rounded-2xl border border-gray-100 bg-white/95 p-3
+            rounded-3xl border border-gray-100 bg-white/95 p-3
             shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-xl
 
             sm:left-auto sm:right-6
@@ -607,9 +607,9 @@ export default function CreateShopForm() {
             className="
               inline-flex min-h-[52px] w-full items-center justify-center
               rounded-full border border-gray-200 bg-white px-7
-              text-lg font-medium text-gray-600 transition
+              text-lg font-normal text-gray-600 transition
               hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800
-              focus:outline-none focus:ring-4 focus:ring-primary-100 sm:w-auto
+              focus:outline-none focus:ring-2 focus:ring-primary-100 sm:w-auto
             "
           >
             បោះបង់
@@ -621,9 +621,9 @@ export default function CreateShopForm() {
             className="
               inline-flex min-h-[52px] w-full items-center justify-center gap-2
               rounded-full bg-primary-800 px-7
-              text-lg font-semibold text-white shadow-sm transition
+              text-lg font-normal text-white shadow-sm transition
               hover:bg-primary-900
-              focus:outline-none focus:ring-4 focus:ring-primary-200
+              focus:outline-none focus:ring-2 focus:ring-primary-200
               disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto
             "
           >

@@ -75,27 +75,27 @@ export default function ActionItemsPanel({
                 className="flex flex-wrap items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
               >
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2.5">
                     <StatusBadge tone={severityTone(item.severity)}>
                       {labelFor(SEVERITY_LABELS, item.severity)}
                     </StatusBadge>
 
-                    <span className="text-sm font-semibold text-gray-500">
+                    <span className="text-lg font-normal text-gray-500">
                       {labelFor(ISSUE_TYPE_LABELS, item.issueType)}
                     </span>
                   </div>
 
-                  <p className="mt-1.5 truncate text-base font-semibold text-gray-900">
+                  <p className="mt-1.5 truncate text-xl font-medium text-gray-800">
                     {item.entityName}
                   </p>
 
                   {item.relatedName && (
-                    <p className="truncate text-sm text-gray-500">
+                    <p className="truncate text-lg font-normal text-gray-400">
                       {item.relatedName}
                     </p>
                   )}
 
-                  <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                  <p className="mt-1 text-lg font-normal leading-relaxed text-gray-600">
                     {recommendation}
                   </p>
                 </div>
@@ -103,10 +103,10 @@ export default function ActionItemsPanel({
                 {href && (
                   <Link
                     href={href}
-                    className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-gray-200 px-3 text-base font-semibold text-gray-700 transition hover:border-primary-300 hover:bg-primary-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                    className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 shadow-sm transition hover:border-primary-300 hover:bg-primary-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                   >
-                    ដោះស្រាយ
-                    <ArrowUpRight size={16} aria-hidden="true" />
+                    <span>ដោះស្រាយ</span>
+                    <ArrowUpRight size={18} aria-hidden="true" />
                   </Link>
                 )}
               </li>

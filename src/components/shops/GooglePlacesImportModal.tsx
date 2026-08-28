@@ -599,7 +599,7 @@ export default function GooglePlacesImportModal({
                 shrink-0
                 items-center
                 justify-center
-                rounded-xl
+                rounded-full
                 bg-primary-50
                 text-primary-800
               "
@@ -608,11 +608,11 @@ export default function GooglePlacesImportModal({
             </div>
 
             <div className="min-w-0">
-              <p className="text-2xl font-bold text-[#0F5A2C]">
+              <p className="text-2xl sm:text-3xl font-medium text-[#0F5A2C]">
                 នាំចូលព័ត៌មានពី Google Maps
               </p>
 
-              <p className="mt-1 text-lg leading-relaxed text-gray-500">
+              <p className="mt-1 text-lg font-normal leading-relaxed text-gray-500">
                 ស្វែងរកទីតាំងហាង ពិនិត្យព័ត៌មាន បន្ថែមរូបភាពបើចាំបាច់ រួចបង្កើតហាងដោយស្វ័យប្រវត្តិ។
               </p>
             </div>
@@ -631,13 +631,13 @@ export default function GooglePlacesImportModal({
               items-center
               justify-center
               rounded-full
-              text-gray-400
+              bg-gray-100
+              text-gray-500
               transition
-              hover:bg-gray-100
-              hover:text-gray-700
+              hover:bg-gray-200
               focus:outline-none
-              focus:ring-4
-              focus:ring-gray-100
+              focus:ring-2
+              focus:ring-gray-200
               disabled:cursor-not-allowed
               disabled:opacity-50
             "
@@ -666,12 +666,12 @@ export default function GooglePlacesImportModal({
           <section
             className="
     min-w-0
-    rounded-2xl
+    rounded-3xl
     border
     border-gray-100
     bg-white
-    p-5
-    sm:p-6
+    p-6
+    sm:p-8
     lg:col-span-5
     lg:sticky
     lg:top-[118px]
@@ -684,25 +684,25 @@ export default function GooglePlacesImportModal({
                 <div
                   className="
                     flex
-                    h-11
-                    w-11
+                    h-12
+                    w-12
                     shrink-0
                     items-center
                     justify-center
-                    rounded-xl
+                    rounded-full
                     bg-primary-50
                     text-primary-800
                   "
                 >
-                  <Search size={22} />
+                  <Search size={24} />
                 </div>
 
-                <p className="text-2xl font-bold text-[#0F5A2C]">
+                <p className="text-2xl font-medium text-[#0F5A2C]">
                   ស្វែងរកតាម Google Maps
                 </p>
               </div>
 
-              <p className="mt-2 text-lg leading-7 text-gray-500">
+              <p className="mt-2 text-lg font-normal leading-7 text-gray-500">
                 ស្វែងរកតាមឈ្មោះហាង ភោជនីយដ្ឋាន ហាងកាហ្វេ ឬអាជីវកម្ម (ឧទាហរណ៍៖ Brown Coffee, Starbucks, Amazon...)។
               </p>
             </div>
@@ -740,15 +740,16 @@ export default function GooglePlacesImportModal({
                     }}
                     onKeyDown={handleKeyDown}
                     className="
-                      h-[52px]
+                      h-12
                       w-full
-                      rounded-xl
+                      rounded-full
                       border
                       border-gray-200
                       bg-gray-50
                       pl-12
                       pr-12
                       text-lg
+                      font-normal
                       text-gray-800
                       outline-none
                       transition
@@ -756,7 +757,7 @@ export default function GooglePlacesImportModal({
                       hover:border-gray-300
                       focus:border-primary-600
                       focus:bg-white
-                      focus:ring-4
+                      focus:ring-2
                       focus:ring-primary-100
                     "
                   />
@@ -782,21 +783,21 @@ export default function GooglePlacesImportModal({
                   onClick={() => void runSearch()}
                   className="
                     inline-flex
-                    min-h-[52px]
+                    min-h-12
                     shrink-0
                     items-center
                     justify-center
                     gap-2
-                    rounded-xl
+                    rounded-full
                     bg-primary-800
-                    px-6
+                    px-7
                     text-lg
-                    font-medium
+                    font-normal
                     text-white
                     transition
                     hover:bg-primary-900
                     focus:outline-none
-                    focus:ring-4
+                    focus:ring-2
                     focus:ring-primary-200
                     disabled:cursor-not-allowed
                     disabled:opacity-50
@@ -809,7 +810,7 @@ export default function GooglePlacesImportModal({
 
               {/* URL Tip helper */}
               {(query.includes("maps.app.goo.gl") || query.includes("google.com/maps") || query.includes("http")) && (
-                <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-lg leading-7 text-amber-800">
+                <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-lg font-normal leading-7 text-amber-800">
                   💡 <strong>សម្គាល់៖</strong> Google Maps ស្វែងរកតាម <strong>ឈ្មោះហាង</strong> (ឧទាហរណ៍៖ <em>Brown Coffee</em>, <em>Starbucks BKK</em>)។ សូមបញ្ចូលឈ្មោះហាងជំនួសឱ្យ Link ផែនទី។
                 </div>
               )}
@@ -833,7 +834,7 @@ export default function GooglePlacesImportModal({
                   "
                 >
                   {searching && (
-                    <div className="flex items-center gap-3 px-5 py-5 text-lg text-gray-500">
+                    <div className="flex items-center gap-3 px-5 py-5 text-lg font-normal text-gray-500">
                       <Loader2
                         size={20}
                         className="animate-spin text-primary-700"
@@ -892,10 +893,11 @@ export default function GooglePlacesImportModal({
                                 shrink-0
                                 items-center
                                 justify-center
-                                rounded-xl
+                                rounded-full
+                                transition
                                 ${active
                                   ? "bg-primary-800 text-white"
-                                  : "bg-primary-50 text-primary-800"
+                                  : "bg-primary-50 text-primary-700"
                                 }
                               `}
                             >
@@ -903,12 +905,12 @@ export default function GooglePlacesImportModal({
                             </div>
 
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-lg font-semibold text-gray-800">
+                              <p className="truncate text-lg font-medium text-gray-800">
                                 {title}
                               </p>
 
                               {address && (
-                                <p className="mt-1 line-clamp-2 text-lg leading-7 text-gray-500">
+                                <p className="mt-1 line-clamp-2 text-lg font-normal leading-7 text-gray-500">
                                   {address}
                                 </p>
                               )}
@@ -936,7 +938,7 @@ export default function GooglePlacesImportModal({
                           w-14
                           items-center
                           justify-center
-                          rounded-2xl
+                          rounded-full
                           bg-gray-50
                           text-gray-300
                         "
@@ -944,7 +946,7 @@ export default function GooglePlacesImportModal({
                         <MapPin size={26} />
                       </div>
 
-                      <p className="mt-3 text-lg font-medium text-gray-600">
+                      <p className="mt-3 text-lg font-normal text-gray-600">
                         មិនមានទីតាំងត្រូវគ្នាឡើយ
                       </p>
                     </div>
@@ -957,11 +959,11 @@ export default function GooglePlacesImportModal({
               <div
                 className="
                   mt-6
-                  rounded-2xl
+                  rounded-3xl
                   border
                   border-gray-100
                   bg-gray-50
-                  p-5
+                  p-6
                 "
               >
                 <div className="flex items-start gap-3">
@@ -973,7 +975,7 @@ export default function GooglePlacesImportModal({
                       shrink-0
                       items-center
                       justify-center
-                      rounded-xl
+                      rounded-full
                       bg-white
                       text-primary-700
                     "
@@ -981,7 +983,7 @@ export default function GooglePlacesImportModal({
                     <MapPin size={20} />
                   </div>
 
-                  <p className="text-lg leading-7 text-gray-500">
+                  <p className="text-lg font-normal leading-7 text-gray-500">
                     ជ្រើសរើសទីតាំងហាងពីលទ្ធផលស្វែងរកខាងលើ ដើម្បីផ្ទុកព័ត៌មានលម្អិតរបស់ហាង។
                   </p>
                 </div>
@@ -996,25 +998,25 @@ export default function GooglePlacesImportModal({
           <section className="min-w-0 space-y-6 lg:col-span-7">
             {/* PREVIEW */}
 
-            <div className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
+            <div className="rounded-3xl border border-gray-100 bg-white p-6 sm:p-8">
               <div className="flex items-center gap-3">
                 <div
                   className="
                     flex
-                    h-11
-                    w-11
+                    h-12
+                    w-12
                     shrink-0
                     items-center
                     justify-center
-                    rounded-xl
+                    rounded-full
                     bg-primary-50
                     text-primary-800
                   "
                 >
-                  <Store size={22} />
+                  <Store size={24} />
                 </div>
 
-                <p className="text-2xl font-bold text-[#0F5A2C]">
+                <p className="text-2xl font-medium text-[#0F5A2C]">
                   ព័ត៌មានមើលជាមុន (Preview)
                 </p>
               </div>
@@ -1026,7 +1028,7 @@ export default function GooglePlacesImportModal({
                     className="animate-spin text-primary-700"
                   />
 
-                  <p className="mt-3 text-lg text-gray-500">
+                  <p className="mt-3 text-lg font-normal text-gray-500">
                     កំពុងផ្ទុកព័ត៌មានទីតាំង...
                   </p>
                 </div>
@@ -1041,7 +1043,7 @@ export default function GooglePlacesImportModal({
                       w-16
                       items-center
                       justify-center
-                      rounded-2xl
+                      rounded-full
                       bg-primary-50
                       text-primary-700
                     "
@@ -1049,11 +1051,11 @@ export default function GooglePlacesImportModal({
                     <MapPin size={28} />
                   </div>
 
-                  <p className="mt-4 text-lg font-medium text-gray-600">
+                  <p className="mt-4 text-lg font-normal text-gray-600">
                     សូមជ្រើសរើសទីតាំង
                   </p>
 
-                  <p className="mt-2 max-w-sm text-lg leading-7 text-gray-500">
+                  <p className="mt-2 max-w-sm text-lg font-normal leading-7 text-gray-500">
                     ស្វែងរកឈ្មោះហាង ឬអាជីវកម្ម រួចចុចជ្រើសរើសពីលទ្ធផលដើម្បីមើលព័ត៌មានលម្អិត។
                   </p>
                 </div>
@@ -1062,31 +1064,31 @@ export default function GooglePlacesImportModal({
 
             {/* TIMEZONE */}
 
-            <div className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
+            <div className="rounded-3xl border border-gray-100 bg-white p-6 sm:p-8">
               <div className="mb-5 flex items-center gap-3">
                 <div
                   className="
                     flex
-                    h-11
-                    w-11
+                    h-12
+                    w-12
                     shrink-0
                     items-center
                     justify-center
-                    rounded-xl
+                    rounded-full
                     bg-primary-50
                     text-primary-800
                   "
                 >
-                  <Globe2 size={22} />
+                  <Globe2 size={24} />
                 </div>
 
-                <p className="text-2xl font-bold text-[#0F5A2C]">
+                <p className="text-2xl font-medium text-[#0F5A2C]">
                   ការកំណត់បន្ថែម
                 </p>
               </div>
 
               <label className="block">
-                <span className="mb-2 block text-lg font-medium text-primary-800">
+                <span className="mb-2 block text-lg font-normal text-gray-700">
                   តំបន់ពេលវេលា (Timezone)
                 </span>
 
@@ -1095,14 +1097,15 @@ export default function GooglePlacesImportModal({
                   onChange={(event) => setTimezone(event.target.value)}
                   placeholder="Asia/Phnom_Penh"
                   className="
-                    h-[52px]
+                    h-12
                     w-full
-                    rounded-xl
+                    rounded-full
                     border
                     border-gray-200
                     bg-gray-50
-                    px-4
+                    px-5
                     text-lg
+                    font-normal
                     text-gray-800
                     outline-none
                     transition
@@ -1110,7 +1113,7 @@ export default function GooglePlacesImportModal({
                     hover:border-gray-300
                     focus:border-primary-600
                     focus:bg-white
-                    focus:ring-4
+                    focus:ring-2
                     focus:ring-primary-100
                   "
                 />
@@ -1149,6 +1152,7 @@ export default function GooglePlacesImportModal({
                   px-5
                   py-4
                   text-lg
+                  font-normal
                   leading-7
                   text-red-600
                 "
@@ -1199,14 +1203,14 @@ export default function GooglePlacesImportModal({
               bg-white
               px-7
               text-lg
-              font-medium
+              font-normal
               text-gray-600
               transition
               hover:border-primary-200
               hover:bg-primary-50
               hover:text-primary-800
               focus:outline-none
-              focus:ring-4
+              focus:ring-2
               focus:ring-primary-100
               disabled:cursor-not-allowed
               disabled:opacity-50
@@ -1231,12 +1235,12 @@ export default function GooglePlacesImportModal({
               bg-primary-800
               px-7
               text-lg
-              font-medium
+              font-normal
               text-white
               transition
               hover:bg-primary-900
               focus:outline-none
-              focus:ring-4
+              focus:ring-2
               focus:ring-primary-200
               disabled:cursor-not-allowed
               disabled:opacity-50

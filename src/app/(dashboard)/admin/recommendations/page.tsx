@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Sparkles,
   Search,
@@ -29,12 +30,10 @@ import {
 } from "@/src/types/adminRecommendation";
 import {
   fetchAdminSessions,
-  fetchAdminSessionDetail,
   calculateKpiMetrics,
   getSessionLatency,
 } from "@/src/services/adminRecommendationService";
 import KpiMetricsSection from "@/src/components/recommendations/KpiMetricsSection";
-import SessionInspectorDrawer from "@/src/components/recommendations/SessionInspectorDrawer";
 import {
   Table,
   TableHeader,
@@ -104,6 +103,7 @@ function getUserDisplay(session: AdminSessionSummary) {
 }
 
 export default function AdminRecommendationsPage() {
+  const router = useRouter();
   const [sessions, setSessions] = useState<AdminSessionSummary[]>([]);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -114,12 +114,6 @@ export default function AdminRecommendationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-
-  // Inspector Modal / Slide-over State
-  const [selectedSession, setSelectedSession] = useState<AdminSessionSummary | null>(null);
-  const [sessionDetail, setSessionDetail] = useState<AdminSessionDetail | null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [detailError, setDetailError] = useState<string | null>(null);
   const [copiedUuid, setCopiedUuid] = useState<string | null>(null);
 
   // 1. Fetch sessions from API
@@ -169,22 +163,9 @@ export default function AdminRecommendationsPage() {
     return calculateKpiMetrics(sessions, totalElements);
   }, [sessions, totalElements]);
 
-  // 2. Open Session Inspector
-  const handleInspect = async (session: AdminSessionSummary) => {
-    setSelectedSession(session);
-    setDetailLoading(true);
-    setDetailError(null);
-
-    try {
-      const detail = await fetchAdminSessionDetail(session.uuid, undefined, session);
-      setSessionDetail(detail);
-    } catch (err: any) {
-      console.warn("Backend detail fetch failed:", err?.message);
-      setSessionDetail(null);
-      setDetailError(err?.message || "Could not load live session audit details.");
-    } finally {
-      setDetailLoading(false);
-    }
+  // 2. Open Dedicated Session Inspector Page
+  const handleInspect = (session: AdminSessionSummary) => {
+    router.push(`/admin/recommendations/${session.uuid}`);
   };
 
   // 1-click UUID copy helper
@@ -196,24 +177,24 @@ export default function AdminRecommendationsPage() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="space-y-5 pb-8 w-full">
       {/* Header Section */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-zinc-200/80 dark:border-zinc-800">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-zinc-200/80 dark:border-zinc-800">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-zinc-100">
-            <div className="p-2 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 shadow-2xs flex items-center justify-center">
+          <h1 className="text-3xl font-medium flex items-center gap-3 text-zinc-800 dark:text-zinc-100">
+            <div className="p-2.5 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 shadow-sm flex items-center justify-center">
               <Image
                 src="/Image/ai-recommendation.png"
                 alt="AI Recommendation & Safety Audit"
-                width={26}
-                height={26}
-                className="w-6.5 h-6.5 object-contain dark:invert"
+                width={28}
+                height={28}
+                className="w-7 h-7 object-contain dark:invert"
                 priority
               />
             </div>
             AI Recommendation & Safety Audit
           </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+          <p className="text-lg font-normal text-zinc-500 dark:text-zinc-400 mt-1">
             Real-time audit log of AI recommendations, multi-strategy score breakdowns, and zero-tolerance allergen safety decisions.
           </p>
         </div>
@@ -223,18 +204,18 @@ export default function AdminRecommendationsPage() {
             type="button"
             onClick={loadSessions}
             disabled={loading}
-            className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-xs disabled:opacity-50 cursor-pointer"
+            className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-zinc-800 hover:bg-zinc-700 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 px-6 text-lg font-normal transition shadow-sm disabled:opacity-50"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
             <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {fetchError && (
-        <div className="p-3.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 rounded-2xl flex items-center justify-between text-xs text-amber-800 dark:text-amber-300">
-          <div className="flex items-center gap-2">
-            <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
+        <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 rounded-3xl flex items-center justify-between text-lg font-normal text-amber-800 dark:text-amber-300">
+          <div className="flex items-center gap-2.5">
+            <Info className="w-5 h-5 text-amber-600 flex-shrink-0" />
             <span>
               <strong>Live backend unavailable:</strong> No mock recommendation sessions are shown in production mode.
             </span>
@@ -242,7 +223,7 @@ export default function AdminRecommendationsPage() {
           <button
             type="button"
             onClick={loadSessions}
-            className="font-semibold underline hover:text-amber-900 ml-4 flex-shrink-0 cursor-pointer"
+            className="font-medium underline hover:text-amber-900 ml-4 flex-shrink-0 cursor-pointer text-lg"
           >
             Retry Connection
           </button>
@@ -253,11 +234,11 @@ export default function AdminRecommendationsPage() {
       <KpiMetricsSection kpis={kpis} loading={loading} />
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-zinc-900 p-4 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-white dark:bg-zinc-900 p-5 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl shadow-sm">
         {/* Search */}
-        <div className="flex items-center gap-3 flex-1 min-w-[260px]">
+        <div className="flex items-center gap-3 flex-1 min-w-[280px]">
           <div className="relative w-full max-w-md">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
               placeholder="Search by Username, User ID, or UUID..."
@@ -266,16 +247,16 @@ export default function AdminRecommendationsPage() {
                 setSearchQuery(e.target.value);
                 setPage(0);
               }}
-              className="w-full pl-10 pr-4 py-2 border border-zinc-200 dark:border-zinc-700 bg-zinc-50/70 dark:bg-zinc-800 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
+              className="w-full h-12 pl-11 pr-5 border border-zinc-200 dark:border-zinc-700 bg-zinc-50/70 dark:bg-zinc-800 rounded-full text-lg font-normal text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
             />
           </div>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-4">
           {/* Mode Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider hidden sm:inline">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-normal text-zinc-500 uppercase tracking-wider hidden sm:inline">
               Mode:
             </span>
             <select
@@ -284,7 +265,7 @@ export default function AdminRecommendationsPage() {
                 setModeFilter(e.target.value);
                 setPage(0);
               }}
-              className="px-3 py-2 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+              className="h-12 px-4 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-full text-lg font-normal text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
             >
               <option value="ALL">All Modes</option>
               <option value="SINGLE">🍽️ Solo Rec (Single)</option>
@@ -293,8 +274,8 @@ export default function AdminRecommendationsPage() {
           </div>
 
           {/* Status Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider hidden sm:inline">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-normal text-zinc-500 uppercase tracking-wider hidden sm:inline">
               Status:
             </span>
             <select
@@ -303,7 +284,7 @@ export default function AdminRecommendationsPage() {
                 setStatusFilter(e.target.value);
                 setPage(0);
               }}
-              className="px-3 py-2 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+              className="h-12 px-4 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-full text-lg font-normal text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
               <option value="READY">Ready</option>
@@ -387,53 +368,36 @@ export default function AdminRecommendationsPage() {
                   >
                     {/* Session Type & UUID Subtitle */}
                     <TableCell className="px-5 py-4">
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`inline-flex items-center gap-1.5 text-lg font-normal px-3.5 py-1 rounded-full border shadow-2xs ${
+                            className={`inline-flex items-center gap-2 text-lg font-normal px-4 py-1 rounded-full border shadow-xs ${
                               isGroup
                                 ? "bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800"
                                 : "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800"
                             }`}
                           >
-                            {isGroup ? <Users className="w-4 h-4" /> : <Utensils className="w-4 h-4" />}
-                            {isGroup ? "Group Dining" : "Solo Recommendation"}
+                            {isGroup ? <Users className="w-5 h-5" /> : <Utensils className="w-5 h-5" />}
+                            <span>{isGroup ? "Group Dining" : "Solo Recommendation"}</span>
                           </span>
                         </div>
-                        <div className="flex items-center gap-1.5 text-sm text-zinc-400 dark:text-zinc-500 font-mono">
-                          <span>UUID:</span>
-                          <span className="bg-zinc-100 dark:bg-zinc-800/80 px-1.5 py-0.5 rounded text-zinc-600 dark:text-zinc-300">
-                            {shortUuid}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={(e) => handleCopyUuid(session.uuid, e)}
-                            title="Copy full UUID"
-                            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition opacity-0 group-hover:opacity-100"
-                          >
-                            {copiedUuid === session.uuid ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-600" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        </div>
+                        
                       </div>
                     </TableCell>
 
                     {/* User / Requester */}
                     <TableCell className="px-5 py-4">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3.5">
                         <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center font-normal text-sm border ${userDisplay.colorTheme.bg}`}
+                          className={`w-12 h-12 rounded-full flex items-center justify-center font-normal text-lg border shrink-0 ${userDisplay.colorTheme.bg}`}
                         >
                           {userDisplay.initial}
                         </div>
-                        <div className="space-y-0.5">
-                          <p className="text-lg font-normal text-zinc-900 dark:text-zinc-100">
+                        <div className="space-y-0.5 min-w-0">
+                          <p className="text-xl font-medium text-zinc-800 dark:text-zinc-100 truncate">
                             {userDisplay.primary}
                           </p>
-                          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                          <p className="text-lg font-normal text-zinc-400 dark:text-zinc-500 truncate">
                             {userDisplay.secondary}
                           </p>
                         </div>
@@ -442,13 +406,13 @@ export default function AdminRecommendationsPage() {
 
                     {/* Safety Filter Rate */}
                     <TableCell className="px-5 py-4">
-                      <div className="space-y-1.5 max-w-[150px]">
+                      <div className="space-y-2 min-w-[170px]">
                         <div className="flex items-center justify-between text-lg font-normal">
-                          <span className="text-emerald-600 dark:text-emerald-400">
+                          <span className="text-emerald-700 dark:text-emerald-400">
                             {safeCandidates} <span className="text-zinc-400 font-normal">/ {totalCandidates} Safe</span>
                           </span>
                           <span
-                            className={`text-sm font-normal px-2 py-0.5 rounded ${
+                            className={`text-lg font-normal px-2.5 py-0.5 rounded-full ${
                               safeRate === 100
                                 ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
                                 : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
@@ -470,16 +434,16 @@ export default function AdminRecommendationsPage() {
 
                     {/* Latency with Zap badge */}
                     <TableCell className="px-5 py-4">
-                      <span className="inline-flex items-center gap-1.5 font-normal text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800/60 px-3 py-1 rounded-full text-lg font-mono">
+                      <span className="inline-flex items-center gap-1.5 font-normal text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800/60 px-4 py-1 rounded-full text-lg font-mono">
                         <Zap className="w-4 h-4 text-emerald-500 fill-emerald-500" />
-                        {latency} ms
+                        <span>{latency} ms</span>
                       </span>
                     </TableCell>
 
                     {/* Status */}
                     <TableCell className="px-5 py-4">
                       <span
-                        className={`inline-flex items-center gap-1.5 text-lg font-normal px-3.5 py-1 rounded-full border shadow-2xs ${
+                        className={`inline-flex items-center gap-2 text-lg font-normal px-4 py-1 rounded-full border shadow-xs ${
                           isReady
                             ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
                             : isFailed
@@ -490,7 +454,7 @@ export default function AdminRecommendationsPage() {
                         }`}
                       >
                         <span
-                          className={`w-2 h-2 rounded-full ${
+                          className={`w-2.5 h-2.5 rounded-full ${
                             isReady
                               ? "bg-emerald-500 animate-pulse"
                               : isFailed
@@ -498,17 +462,17 @@ export default function AdminRecommendationsPage() {
                               : "bg-amber-500 animate-pulse"
                           }`}
                         />
-                        {session.status}
+                        <span>{session.status}</span>
                       </span>
                     </TableCell>
 
                     {/* Date & Time */}
                     <TableCell className="px-5 py-4">
                       <div className="space-y-0.5">
-                        <p className="text-lg font-normal text-zinc-900 dark:text-zinc-100">
+                        <p className="text-lg font-normal text-zinc-800 dark:text-zinc-100">
                           {formattedDate}
                         </p>
-                        <p className="text-sm text-zinc-400 dark:text-zinc-500">
+                        <p className="text-lg font-normal text-zinc-400 dark:text-zinc-500">
                           {formattedTime}
                         </p>
                       </div>
@@ -522,9 +486,9 @@ export default function AdminRecommendationsPage() {
                           e.stopPropagation();
                           handleInspect(session);
                         }}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-lg font-normal text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 transition shadow-2xs cursor-pointer group-hover:border-amber-400"
+                        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-5 text-lg font-normal text-amber-700 shadow-xs transition hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-400 dark:hover:bg-amber-900/60"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-5 h-5" />
                         <span>Inspect</span>
                       </button>
                     </TableCell>
@@ -536,8 +500,8 @@ export default function AdminRecommendationsPage() {
                 <TableCell colSpan={7} className="h-48 text-center">
                   <div className="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 gap-2">
                     <Layers className="w-8 h-8 opacity-40" />
-                    <p className="text-sm font-medium">No recommendation sessions found</p>
-                    <p className="text-xs">Try adjusting your filters or search keywords</p>
+                    <p className="text-xl font-medium">No recommendation sessions found</p>
+                    <p className="text-lg font-normal">Try adjusting your filters or search keywords</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -547,22 +511,22 @@ export default function AdminRecommendationsPage() {
 
         {/* Pagination Bar */}
         {totalElements > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-t border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-t border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 text-lg font-normal text-zinc-500 dark:text-zinc-400">
             <div className="flex items-center gap-2">
               <span>Showing</span>
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+              <span className="font-medium text-zinc-800 dark:text-zinc-100">
                 {page * pageSize + 1} - {Math.min(totalElements, (page + 1) * pageSize)}
               </span>
               <span>of</span>
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+              <span className="font-medium text-zinc-800 dark:text-zinc-100">
                 {totalElements.toLocaleString()}
               </span>
               <span>sessions</span>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-5">
               {/* Page size selector */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <span>Per page:</span>
                 <select
                   value={pageSize}
@@ -570,7 +534,7 @@ export default function AdminRecommendationsPage() {
                     setPageSize(Number(e.target.value));
                     setPage(0);
                   }}
-                  className="px-2 py-1 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg text-xs font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none cursor-pointer"
+                  className="h-10 px-3.5 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-full text-lg font-normal text-zinc-800 dark:text-zinc-200 focus:outline-none cursor-pointer"
                 >
                   <option value={10}>10</option>
                   <option value={15}>15</option>
@@ -580,45 +544,31 @@ export default function AdminRecommendationsPage() {
               </div>
 
               {/* Page navigation */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0 || loading}
-                  className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                  className="h-10 w-10 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
-                <span className="px-2 py-1 font-semibold text-zinc-800 dark:text-zinc-200">
+                <span className="px-3 py-1 font-medium text-zinc-800 dark:text-zinc-200">
                   {page + 1} / {Math.max(1, totalPages)}
                 </span>
                 <button
                   type="button"
                   onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                   disabled={page >= totalPages - 1 || loading}
-                  className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                  className="h-10 w-10 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             </div>
           </div>
         )}
       </div>
-
-      {/* Slide-over Inspector Drawer */}
-      <SessionInspectorDrawer
-        sessionUuid={selectedSession?.uuid ?? null}
-        sessionDetail={sessionDetail}
-        loading={detailLoading}
-        error={detailError}
-        onClose={() => {
-          setSelectedSession(null);
-          setSessionDetail(null);
-          setDetailError(null);
-        }}
-        onRefresh={() => selectedSession && handleInspect(selectedSession)}
-      />
     </div>
   );
 }

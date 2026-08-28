@@ -126,21 +126,21 @@ export default function StoreMediaUploader({
   const previewHeight = variant === "logo" ? "h-56" : "h-64";
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+    <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white">
       {/* =====================================================
           HEADER
       ====================================================== */}
-      <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3.5">
+      <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-6 py-4">
         <div className="min-w-0 flex-1">
-          <p className="text-lg font-bold text-primary-800">{label}</p>
-          <p className="text-sm text-gray-500">
+          <p className="text-lg font-medium text-[#0F5A2C]">{label}</p>
+          <p className="text-lg font-normal text-gray-400">
             PNG, JPG, GIF ឬ WebP · អតិបរមា 10 MB
           </p>
         </div>
 
         {mediaUuid && (
-          <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-[#137A3D] whitespace-nowrap">
-            <CheckCircle2 size={16} className="shrink-0" />
+          <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-4 py-1.5 text-lg font-normal text-[#137A3D] whitespace-nowrap">
+            <CheckCircle2 size={18} className="shrink-0" />
             បានភ្ជាប់រូបភាព
           </div>
         )}
@@ -172,7 +172,7 @@ export default function StoreMediaUploader({
             items-center
             justify-center
             overflow-hidden
-            rounded-2xl
+            rounded-3xl
             border-2
             border-dashed
             border-gray-200
@@ -180,11 +180,11 @@ export default function StoreMediaUploader({
             text-center
             outline-none
             transition
-            hover:border-secondary-300
-            hover:bg-secondary-50/40
-            focus:border-secondary-400
-            focus:ring-4
-            focus:ring-secondary-100
+            hover:border-primary-300
+            hover:bg-primary-50/30
+            focus:border-primary-400
+            focus:ring-2
+            focus:ring-primary-100
             disabled:cursor-not-allowed
             disabled:opacity-70
           `}
@@ -204,7 +204,7 @@ export default function StoreMediaUploader({
               />
 
               <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/40 group-focus:bg-black/40">
-                <div className="translate-y-2 rounded-full bg-white/95 px-5 py-3 text-lg font-semibold text-secondary-700 opacity-0 shadow-lg transition group-hover:translate-y-0 group-hover:opacity-100 group-focus:translate-y-0 group-focus:opacity-100">
+                <div className="translate-y-2 rounded-full bg-white/95 px-6 py-3 text-lg font-normal text-gray-800 opacity-0 shadow-lg transition group-hover:translate-y-0 group-hover:opacity-100 group-focus:translate-y-0 group-focus:opacity-100">
                   <span className="inline-flex items-center gap-2">
                     <Upload size={20} />
                     ចុចដើម្បីប្តូររូបភាព
@@ -214,15 +214,15 @@ export default function StoreMediaUploader({
             </>
           ) : (
             <div className="px-5">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary-50 text-secondary-600 transition group-hover:bg-secondary-100 group-hover:text-secondary-700">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-50 text-primary-700 transition group-hover:bg-primary-100 group-hover:text-primary-800">
                 <ImageIcon size={32} />
               </div>
 
-              <p className="mt-2 text-lg font-semibold text-secondary-600">
+              <p className="mt-2 text-lg font-medium text-primary-800">
                 ផ្ទុកឡើងរូបភាព
               </p>
 
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-lg font-normal text-gray-500">
                 ជ្រើសរើសរូបភាពពីឧបករណ៍របស់អ្នក
               </p>
             </div>
@@ -233,13 +233,13 @@ export default function StoreMediaUploader({
             LOADING OVERLAY
         ==================================================== */}
         {loading && (
-          <div className="absolute inset-5 z-20 flex items-center justify-center rounded-2xl bg-white/90 backdrop-blur-sm">
+          <div className="absolute inset-5 z-20 flex items-center justify-center rounded-3xl bg-white/90 backdrop-blur-sm">
             <div className="text-center">
               <Loader2
-                size={28}
+                size={32}
                 className="mx-auto animate-spin text-primary-700"
               />
-              <p className="mt-2 text-sm font-medium text-gray-600">
+              <p className="mt-2 text-lg font-normal text-gray-600">
                 កំពុងផ្ទុកឡើង...
               </p>
             </div>
@@ -253,10 +253,10 @@ export default function StoreMediaUploader({
           <button
             type="button"
             onClick={clearImage}
-            className="absolute right-6 top-6 z-30 inline-flex items-center justify-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-red-600 shadow-md transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
+            className="absolute right-7 top-7 z-30 inline-flex items-center justify-center gap-1.5 rounded-full bg-white px-4 py-2 text-lg font-normal text-red-600 shadow-md transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-100"
             aria-label={`Remove ${label}`}
           >
-            <Trash2 size={15} />
+            <Trash2 size={18} />
             លុប
           </button>
         )}
@@ -265,13 +265,13 @@ export default function StoreMediaUploader({
       {/* =====================================================
           HELPER / ERROR
       ====================================================== */}
-      <div className="border-t border-gray-100 px-4 py-2.5">
+      <div className="border-t border-gray-100 px-6 py-3.5">
         {error ? (
-          <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm leading-5 text-red-600">
+          <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-2.5 text-lg font-normal leading-relaxed text-red-600">
             {error}
           </div>
         ) : (
-          <p className="text-sm text-gray-500">
+          <p className="text-lg font-normal text-gray-500">
             {mediaUuid
               ? "ចុចលើរូបភាព ដើម្បីជ្រើសរើសរូបថ្មីជំនួស។"
               : "ជ្រើសរើសរូបភាពពីឧបករណ៍របស់អ្នក"}

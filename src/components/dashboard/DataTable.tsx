@@ -124,7 +124,7 @@ export default function DataTable<TData>({
         <table className="w-full min-w-[860px] border-collapse text-left">
           <caption className="sr-only">{caption}</caption>
 
-          <thead className="sticky top-0 z-10 bg-gray-50">
+          <thead className="sticky top-0 z-10 bg-gray-50/80">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -135,7 +135,7 @@ export default function DataTable<TData>({
                       key={header.id}
                       scope="col"
                       className={cn(
-                        "border-b border-gray-200 px-4 py-3 text-base font-semibold whitespace-nowrap text-gray-600",
+                        "border-b border-gray-100 px-4 py-3.5 text-lg font-normal whitespace-nowrap text-gray-600",
                         meta?.align === "right" && "text-right",
                         meta?.hideOnMobile && "hidden md:table-cell",
                       )}
@@ -166,7 +166,7 @@ export default function DataTable<TData>({
                     <td
                       key={cell.id}
                       className={cn(
-                        "px-4 py-3 align-middle text-base text-gray-800",
+                        "px-4 py-3.5 align-middle text-lg font-normal text-gray-800",
                         meta?.align === "right" && "text-right tabular-nums",
                         meta?.hideOnMobile && "hidden md:table-cell",
                       )}
@@ -182,17 +182,17 @@ export default function DataTable<TData>({
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">
-        <p className="text-base text-gray-600 tabular-nums" aria-live="polite">
+        <p className="text-lg font-normal text-gray-600 tabular-nums" aria-live="polite">
           បង្ហាញ {firstRow}–{lastRow} ក្នុងចំណោម {totalElements}
         </p>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="flex items-center gap-2 text-base text-gray-600">
-            ជួរក្នុងមួយទំព័រ
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-lg font-normal text-gray-600">
+            <span>ជួរក្នុងមួយទំព័រ</span>
             <select
               value={size}
               onChange={(event) => onSizeChange(Number(event.target.value))}
-              className="h-10 rounded-xl border border-gray-200 bg-white px-2 text-base text-gray-800 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-100"
+              className="h-11 rounded-full border border-gray-200 bg-white px-3 text-lg font-normal text-gray-800 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-100"
             >
               {PAGE_SIZES.map((option) => (
                 <option key={option} value={option}>
@@ -202,13 +202,13 @@ export default function DataTable<TData>({
             </select>
           </label>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <PagerButton
               label="ទំព័រដំបូង"
               disabled={page <= 0}
               onClick={() => onPageChange(0)}
             >
-              <ChevronsLeft size={18} aria-hidden="true" />
+              <ChevronsLeft size={20} aria-hidden="true" />
             </PagerButton>
 
             <PagerButton
@@ -216,10 +216,10 @@ export default function DataTable<TData>({
               disabled={page <= 0}
               onClick={() => onPageChange(page - 1)}
             >
-              <ChevronLeft size={18} aria-hidden="true" />
+              <ChevronLeft size={20} aria-hidden="true" />
             </PagerButton>
 
-            <span className="px-2 text-base font-semibold text-gray-700 tabular-nums">
+            <span className="px-3 text-lg font-normal text-gray-700 tabular-nums">
               {page + 1} / {Math.max(totalPages, 1)}
             </span>
 
@@ -228,7 +228,7 @@ export default function DataTable<TData>({
               disabled={page >= lastPage}
               onClick={() => onPageChange(page + 1)}
             >
-              <ChevronRight size={18} aria-hidden="true" />
+              <ChevronRight size={20} aria-hidden="true" />
             </PagerButton>
 
             <PagerButton
@@ -236,7 +236,7 @@ export default function DataTable<TData>({
               disabled={page >= lastPage}
               onClick={() => onPageChange(lastPage)}
             >
-              <ChevronsRight size={18} aria-hidden="true" />
+              <ChevronsRight size={20} aria-hidden="true" />
             </PagerButton>
           </div>
         </div>
@@ -263,7 +263,7 @@ function PagerButton({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-600 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-40"
+      className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-40"
     >
       {children}
     </button>

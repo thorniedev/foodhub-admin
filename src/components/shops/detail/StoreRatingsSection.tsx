@@ -11,7 +11,7 @@ export default function StoreRatingsSection({ store }: { store: Store }) {
 
   return (
     <Section title="ការវាយតម្លៃ & ស្ថានភាពពិនិត្យ" icon={<Star size={22} />}>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Item
           label="កម្រិតអនាម័យ"
           value={hygieneRating > 0 ? `${formatRating(store.hygieneRating)} / 5.0` : "មិនមានកំណត់"}
@@ -55,10 +55,10 @@ function ReviewStatusBadge({ status }: { status: string }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-lg font-bold ring-1 ring-inset ${badgeStyle}`}
+      className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-lg font-normal ring-1 ring-inset ${badgeStyle}`}
     >
       <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotStyle}`} />
-      {labelKhmer}
+      <span>{labelKhmer}</span>
     </span>
   );
 }

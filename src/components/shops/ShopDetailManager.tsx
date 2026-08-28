@@ -299,22 +299,22 @@ export default function ShopDetailManager({
 
   if (!hasValidStoreUuid) {
     return (
-      <div className="p-4 ">
-        <div className="flex min-h-[500px] items-center justify-center rounded-[30px] border border-red-100 bg-white px-6 shadow-sm">
+      <div className="p-4">
+        <div className="flex min-h-[500px] items-center justify-center rounded-3xl border border-red-100 bg-white px-6 shadow-sm">
           <div className="max-w-lg text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
               <AlertTriangle size={32} className="text-red-500" />
             </div>
 
-            <p className="mt-5 text-2xl font-black text-gray-900">
+            <p className="mt-5 text-2xl font-medium text-gray-800">
               Invalid Store UUID
             </p>
 
-            <p className="mt-3 text-sm leading-6 text-gray-500">
+            <p className="mt-3 text-lg font-normal leading-relaxed text-gray-500">
               The Store UUID was not received correctly from the URL.
             </p>
 
-            <div className="mt-4 rounded-2xl bg-gray-50 p-4 text-left font-mono text-xs text-gray-500">
+            <div className="mt-4 rounded-2xl bg-gray-50 p-4 text-left font-mono text-lg font-normal text-gray-500">
               <p>prop: {String(storeUuid ?? "undefined")}</p>
 
               <p className="mt-1">
@@ -329,10 +329,10 @@ export default function ShopDetailManager({
             <button
               type="button"
               onClick={() => router.push("/shops")}
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#137A3D] px-6 py-3 text-lg font-bold text-white transition hover:bg-[#0f6833]"
+              className="mt-6 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-[#137A3D] px-6 text-lg font-normal text-white transition hover:bg-[#0f6833]"
             >
               <ArrowLeft size={19} />
-              Back to Stores
+              <span>Back to Stores</span>
             </button>
           </div>
         </div>
@@ -346,9 +346,9 @@ export default function ShopDetailManager({
   if (storeLoading) {
     return (
       <div className="flex min-h-[65vh] flex-col items-center justify-center">
-        <Loader2 size={36} className="animate-spin text-[#137A3D]" />
+        <Loader2 size={40} className="animate-spin text-[#137A3D]" />
 
-        <p className="mt-3 text-lg font-semibold text-gray-500">
+        <p className="mt-3 text-xl font-medium text-gray-500">
           Loading Store...
         </p>
       </div>
@@ -360,22 +360,22 @@ export default function ShopDetailManager({
   ======================================================= */
   if (storeError || !store) {
     return (
-      <div className="p-4 ">
-        <div className="flex min-h-[500px] items-center justify-center rounded-[30px] border border-red-100 bg-white px-6 shadow-sm">
+      <div className="p-4">
+        <div className="flex min-h-[500px] items-center justify-center rounded-3xl border border-red-100 bg-white px-6 shadow-sm">
           <div className="max-w-lg text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
               <AlertTriangle size={32} className="text-red-500" />
             </div>
 
-            <p className="mt-5 text-2xl font-black text-gray-900">
+            <p className="mt-5 text-2xl font-medium text-gray-800">
               មិនអាចទាញយក Store detail
             </p>
 
-            <p className="mt-3 text-lg leading-7 text-gray-600">
+            <p className="mt-3 text-lg font-normal leading-relaxed text-gray-600">
               {getShopApiErrorMessage(storeError)}
             </p>
 
-            <p className="mt-3 break-all font-mono text-base text-gray-400">
+            <p className="mt-3 break-all font-mono text-lg font-normal text-gray-400">
               UUID: {resolvedStoreUuid}
             </p>
 
@@ -383,7 +383,7 @@ export default function ShopDetailManager({
               <button
                 type="button"
                 onClick={() => void refetchStore()}
-                className="rounded-xl bg-[#137A3D] px-6 py-3 text-lg font-bold text-white transition hover:bg-[#0f6833]"
+                className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full bg-[#137A3D] px-6 text-lg font-normal text-white transition hover:bg-[#0f6833]"
               >
                 សាកល្បងម្តងទៀត
               </button>
@@ -391,10 +391,10 @@ export default function ShopDetailManager({
               <button
                 type="button"
                 onClick={() => router.push("/shops")}
-                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-lg font-bold text-gray-700 transition hover:bg-gray-50"
+                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-gray-200 bg-white px-6 text-lg font-normal text-gray-700 transition hover:bg-gray-50"
               >
                 <ArrowLeft size={19} />
-                Stores
+                <span>Stores</span>
               </button>
             </div>
           </div>
@@ -519,22 +519,22 @@ export default function ShopDetailManager({
       ================================================== */}
       {notice && (
         <div
-          className={`flex items-center justify-between rounded-2xl border px-5 py-4 text-lg font-bold shadow-2xs transition-all ${
+          className={`flex items-center justify-between rounded-3xl border px-6 py-4 text-lg font-medium shadow-2xs transition-all ${
             notice.type === "success"
               ? "border-emerald-200 bg-emerald-50/90 text-emerald-800"
               : "border-red-200 bg-red-50 text-red-700"
           }`}
         >
-          <div className="flex items-center gap-2.5">
-            <CheckCircle2 size={20} className={notice.type === "success" ? "text-emerald-600" : "text-red-500"} />
+          <div className="flex items-center gap-3">
+            <CheckCircle2 size={22} className={notice.type === "success" ? "text-emerald-600" : "text-red-500"} />
             <span>{notice.text}</span>
           </div>
           <button
             type="button"
             onClick={() => setNotice(null)}
-            className="cursor-pointer rounded-lg p-1 text-gray-500 hover:bg-black/5 hover:text-gray-700 transition"
+            className="cursor-pointer rounded-full p-1.5 text-gray-500 hover:bg-black/5 hover:text-gray-700 transition"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
       )}

@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { MinusCircle, MoreVertical, Pencil, UsersRound } from "lucide-react";
+import { MinusCircle, Pencil, UsersRound } from "lucide-react";
 import type { AgeGroup } from "@/src/types/ageGroup";
 import { formatAdminDate } from "@/src/types/safetyResource";
 
@@ -11,53 +10,6 @@ type Props = {
   onEdit: (item: AgeGroup) => void;
   onDelete: (item: AgeGroup) => void;
 };
-
-function MoreMenu({
-  item,
-  disabled,
-  onDelete,
-}: {
-  item: AgeGroup;
-  disabled: boolean;
-  onDelete: (item: AgeGroup) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    if (open) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((p) => !p)}
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 text-gray-500 transition hover:bg-gray-200 focus:outline-none"
-      >
-        <MoreVertical size={17} />
-      </button>
-
-      {open && (
-        <div className="absolute right-0 top-full z-50 mt-1.5 min-w-max whitespace-nowrap overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl shadow-gray-200/70 animate-in fade-in zoom-in-95 duration-150">
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => { onDelete(item); setOpen(false); }}
-            className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2 text-sm font-semibold text-amber-600 transition hover:bg-amber-50 whitespace-nowrap disabled:opacity-50"
-          >
-            <MinusCircle size={16} className="shrink-0" />
-            <span>បិទដំណើរការ</span>
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function AgeGroupsTable({
   items,
@@ -126,11 +78,19 @@ export default function AgeGroupsTable({
                     disabled={disabled}
                     onClick={() => onEdit(item)}
                     title="កែប្រែ"
-                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    <Pencil size={17} />
+                    <Pencil size={18} />
                   </button>
-                  <MoreMenu item={item} disabled={disabled} onDelete={onDelete} />
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => onDelete(item)}
+                    title="បិទដំណើរការ"
+                    className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-amber-50 text-amber-600 transition hover:bg-amber-100 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <MinusCircle size={18} />
+                  </button>
                 </div>
               </td>
             </tr>

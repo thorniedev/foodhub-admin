@@ -39,25 +39,25 @@ export default function RelatedProfilesPanel({
   const totalPages = Math.max(data?.totalPages ?? 0, 1);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
-      <div className="border-b border-gray-100 p-5">
+    <section className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-xs">
+      <div className="border-b border-gray-100 p-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
-            <Users size={20} />
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 text-primary-800">
+            <Users size={22} />
           </div>
 
           <div>
-            <p className="text-[20px] font-bold text-primary-800">
+            <p className="text-2xl font-medium text-primary-800">
               បញ្ជីប្រវត្តិរូប
             </p>
 
-            <p className="mt-0.5 text-[18px] text-gray-500">
+            <p className="mt-0.5 text-lg font-normal text-gray-500">
               {data?.totalElements ?? 0} ប្រវត្តិរូប
             </p>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="mt-5 flex flex-wrap items-center gap-2.5">
           {[
             { value: "ALL" as const, label: "ទាំងអស់" },
             { value: "ACTIVE" as const, label: "សកម្ម" },
@@ -70,10 +70,10 @@ export default function RelatedProfilesPanel({
                 key={item.value}
                 type="button"
                 onClick={() => onFilterChange(item.value)}
-                className={`rounded-full px-3 py-1.5 text-lg transition ${
+                className={`cursor-pointer rounded-full px-4 py-2 text-lg font-normal transition ${
                   selected
-                    ? "bg-primary-800 text-white"
-                    : "bg-gray-50 text-gray-500 hover:bg-primary-50 hover:text-primary-800"
+                    ? "bg-primary-800 text-white shadow-xs"
+                    : "bg-gray-50 text-gray-600 hover:bg-primary-50 hover:text-primary-800"
                 }`}
               >
                 {item.label}
@@ -83,15 +83,15 @@ export default function RelatedProfilesPanel({
         </div>
       </div>
 
-      <div className="max-h-[640px] space-y-3 overflow-y-auto p-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="max-h-[640px] space-y-3 overflow-y-auto p-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {loading ? (
           <div className="flex min-h-48 items-center justify-center">
-            <Loader2 size={28} className="animate-spin text-primary-800" />
+            <Loader2 size={32} className="animate-spin text-primary-800" />
           </div>
         ) : profiles.length === 0 ? (
           <div className="flex min-h-48 flex-col items-center justify-center text-center text-gray-400">
-            <Users size={34} />
-            <p className="mt-2 text-lg">មិនមានប្រវត្តិរូប</p>
+            <Users size={36} />
+            <p className="mt-2 text-lg font-normal">មិនមានប្រវត្តិរូប</p>
           </div>
         ) : (
           profiles.map((profile) => (
@@ -106,7 +106,7 @@ export default function RelatedProfilesPanel({
       </div>
 
       {!loading && (
-        <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 text-lg font-normal text-gray-500">
+        <div className="flex items-center justify-between border-t border-gray-100 px-5 py-4 text-lg font-normal text-gray-500">
           <span>
             ទំព័រ {page + 1} / {totalPages}
           </span>

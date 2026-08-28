@@ -174,18 +174,18 @@ export default function StoreMenuItemsSection({
           <button
             type="button"
             onClick={onAddMenuItem}
-            className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-2xl bg-primary-800 px-5 text-lg font-semibold text-white shadow-xs transition hover:bg-primary-900 active:scale-95"
+            className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-full bg-primary-800 px-6 text-lg font-normal text-white shadow-xs transition hover:bg-primary-900 active:scale-95"
           >
             <Plus size={19} />
-            បង្កើតម៉ឺនុយ
+            <span>បង្កើតម៉ឺនុយ</span>
           </button>
         ) : (
           <Link
             href={`/menu-items?storeUuid=${storeUuid}&tab=WEBSITE`}
-            className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-2xl bg-primary-800 px-5 text-lg font-semibold text-white shadow-xs transition hover:bg-primary-900 active:scale-95"
+            className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-full bg-primary-800 px-6 text-lg font-normal text-white shadow-xs transition hover:bg-primary-900 active:scale-95"
           >
             <Plus size={19} />
-            គ្រប់គ្រងម៉ឺនុយ
+            <span>គ្រប់គ្រងម៉ឺនុយ</span>
           </Link>
         )
       }
@@ -204,7 +204,7 @@ export default function StoreMenuItemsSection({
             items-center
             justify-center
             gap-3
-            rounded-2xl
+            rounded-3xl
             border
             border-gray-100
             bg-gray-50/70
@@ -220,7 +220,7 @@ export default function StoreMenuItemsSection({
             "
           />
 
-          <p className="text-lg font-medium text-gray-500">
+          <p className="text-lg font-normal text-gray-500">
             កំពុងទាញយកមុខម្ហូប...
           </p>
         </div>
@@ -236,7 +236,7 @@ export default function StoreMenuItemsSection({
             flex-col
             items-center
             justify-center
-            rounded-2xl
+            rounded-3xl
             border
             border-dashed
             border-gray-200
@@ -253,7 +253,7 @@ export default function StoreMenuItemsSection({
               w-16
               items-center
               justify-center
-              rounded-2xl
+              rounded-full
               bg-primary-50
               text-primary-700
             "
@@ -261,7 +261,7 @@ export default function StoreMenuItemsSection({
             <UtensilsCrossed size={29} />
           </div>
 
-          <p className="mt-4 text-xl font-semibold text-primary-800">
+          <p className="mt-4 text-2xl font-medium text-primary-800">
             មិនទាន់មានម៉ឺនុយទេ
           </p>
 
@@ -270,6 +270,7 @@ export default function StoreMenuItemsSection({
               mt-2
               max-w-xl
               text-lg
+              font-normal
               leading-8
               text-gray-500
             "
@@ -293,14 +294,14 @@ export default function StoreMenuItemsSection({
                 bg-[#137A3D]
                 px-6
                 text-lg
-                font-semibold
+                font-normal
                 text-white
                 transition
                 hover:bg-[#0f6833]
               "
             >
               <Plus size={18} />
-              បង្កើតម៉ឺនុយដំបូង
+              <span>បង្កើតម៉ឺនុយដំបូង</span>
             </button>
           ) : (
             <Link
@@ -316,14 +317,14 @@ export default function StoreMenuItemsSection({
                 bg-[#137A3D]
                 px-6
                 text-lg
-                font-semibold
+                font-normal
                 text-white
                 transition
                 hover:bg-[#0f6833]
               "
             >
               <Plus size={18} />
-              បង្កើតម៉ឺនុយដំបូង
+              <span>បង្កើតម៉ឺនុយដំបូង</span>
             </Link>
           )}
         </div>
@@ -344,10 +345,10 @@ export default function StoreMenuItemsSection({
                 <div
                   key={item.uuid}
                   onClick={() => onViewItem?.(item)}
-                  className="group relative flex flex-col min-w-0 cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white p-3.5 shadow-2xs transition-all duration-200 hover:border-emerald-200 hover:shadow-md"
+                  className="group relative flex flex-col min-w-0 cursor-pointer overflow-hidden rounded-3xl border border-gray-100 bg-white p-4 shadow-xs transition-all duration-200 hover:border-emerald-200 hover:shadow-md"
                 >
                   {/* IMAGE TOP */}
-                  <div className="relative h-44 w-full shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                  <div className="relative h-48 w-full shrink-0 overflow-hidden rounded-2xl bg-gray-100">
                     {image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -358,23 +359,23 @@ export default function StoreMenuItemsSection({
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-emerald-50 text-[#137A3D]">
-                        <UtensilsCrossed size={32} />
+                        <UtensilsCrossed size={36} />
                       </div>
                     )}
 
-                    {/* Action buttons over image top-right (hidden by default, shown on hover) */}
-                    <div className="absolute right-2 top-2 flex items-center gap-1 rounded-xl bg-white/90 p-1 shadow-xs backdrop-blur-xs opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    {/* Action buttons over image top-right */}
+                    <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-white/95 p-1 shadow-xs backdrop-blur-xs opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                       <button
                         type="button"
                         onClick={(event) => {
                           event.stopPropagation();
                           onViewItem?.(item);
                         }}
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-gray-600 transition hover:bg-gray-100 hover:text-primary-800"
+                        className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100 hover:text-primary-800"
                         aria-label="មើលព័ត៌មានលម្អិត"
                         title="មើលព័ត៌មានលម្អិត"
                       >
-                        <Eye size={16} />
+                        <Eye size={18} />
                       </button>
 
                       <button
@@ -383,11 +384,11 @@ export default function StoreMenuItemsSection({
                           event.stopPropagation();
                           onEditItem?.(item);
                         }}
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-emerald-50 text-primary-800 transition hover:bg-emerald-100 hover:text-primary-900"
+                        className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-emerald-50 text-primary-800 transition hover:bg-emerald-100 hover:text-primary-900"
                         aria-label="កែប្រែម៉ឺនុយ"
                         title="កែប្រែម៉ឺនុយ"
                       >
-                        <Pencil size={16} />
+                        <Pencil size={18} />
                       </button>
 
                       <button
@@ -396,21 +397,21 @@ export default function StoreMenuItemsSection({
                           event.stopPropagation();
                           onDeleteItem?.(item);
                         }}
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-rose-50 text-rose-600 transition hover:bg-rose-100 hover:text-rose-700"
+                        className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-rose-50 text-rose-600 transition hover:bg-rose-100 hover:text-rose-700"
                         aria-label="លុបម៉ឺនុយ"
                         title="លុបម៉ឺនុយ"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </div>
 
                   {/* CONTENT UNDER IMAGE */}
-                  <div className="mt-3 flex flex-1 flex-col justify-between space-y-2.5">
+                  <div className="mt-4 flex flex-1 flex-col justify-between space-y-3">
                     <div>
                       {/* Name */}
                       <p
-                        className="text-lg font-bold text-gray-900 transition group-hover:text-primary-800 line-clamp-1"
+                        className="text-xl font-medium text-gray-800 transition group-hover:text-primary-800 line-clamp-1"
                         title={item.name}
                       >
                         {item.name}
@@ -419,7 +420,7 @@ export default function StoreMenuItemsSection({
                       {/* Canonical Name */}
                       {item.food?.canonicalName && item.food.canonicalName !== item.name && (
                         <p
-                          className="mt-0.5 text-base text-gray-500 line-clamp-1"
+                          className="mt-1 text-lg font-normal text-gray-500 line-clamp-1"
                           title={item.food.canonicalName}
                         >
                           {item.food.canonicalName}
@@ -428,28 +429,28 @@ export default function StoreMenuItemsSection({
                     </div>
 
                     {/* Price, Prep Time, and Availability status UNDER Image */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-100">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-xl font-bold text-primary-800">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-gray-100">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-2xl font-medium text-primary-800">
                           ${Number(item.price ?? 0).toFixed(2)}
                         </span>
-                        <span className="text-sm font-semibold text-gray-400">
+                        <span className="text-lg font-normal text-gray-400">
                           {item.currencyCode || "USD"}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         {/* PREPARATION TIME */}
                         {item.preparationTimeMinutes != null && (
-                          <div className="inline-flex items-center gap-1 rounded-md border border-amber-100 bg-amber-50 px-2 py-0.5 text-sm font-semibold text-amber-800">
-                            <Clock size={14} className="text-amber-600" />
+                          <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-100 bg-amber-50 px-3 py-1 text-lg font-normal text-amber-800">
+                            <Clock size={16} className="text-amber-600" />
                             <span>{item.preparationTimeMinutes} min</span>
                           </div>
                         )}
 
                         {/* AVAILABILITY STATUS */}
                         <div
-                          className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-base font-semibold ${
+                          className={`inline-flex items-center rounded-full px-3.5 py-1 text-lg font-normal ${
                             available
                               ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
                               : "bg-gray-100 text-gray-600 border border-gray-200"

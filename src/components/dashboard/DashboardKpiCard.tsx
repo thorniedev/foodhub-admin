@@ -49,16 +49,16 @@ export default function DashboardKpiCard({
 
   return (
     <article className={cn(
-      "group relative flex flex-col justify-between overflow-hidden rounded-[24px] border border-gray-200 bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-[0_8px_24px_rgba(16,24,40,0.06)]",
+      "group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-gray-100 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-gray-200 hover:shadow-md",
       styles.border,
     )}>
       <div className={cn("absolute inset-x-0 top-0 h-1.5", styles.surface)} />
 
-      <div className="flex min-w-0 items-start gap-3">
+      <div className="flex min-w-0 items-start gap-3.5">
         <span
           aria-hidden="true"
           className={cn(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border",
+            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border",
             styles.surface,
             styles.border,
             styles.icon,
@@ -69,34 +69,34 @@ export default function DashboardKpiCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <p className="truncate text-sm font-semibold text-gray-600">{label}</p>
+            <p className="truncate text-lg font-normal text-gray-600">{label}</p>
             {hint && <InfoTooltip label={hint} />}
           </div>
 
-          <p className={cn("mt-2 text-3xl font-bold tabular-nums", styles.text)}>
+          <p className={cn("mt-1.5 text-3xl font-medium tabular-nums", styles.text)}>
             {value}
           </p>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2.5">
         {change ? (
           <span
             className={cn(
-              "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-semibold tabular-nums",
+              "inline-flex items-center gap-1 rounded-full px-3 py-1 text-lg font-normal tabular-nums",
               changeClassName,
             )}
           >
-            <ChangeIcon size={14} aria-hidden="true" />
+            <ChangeIcon size={16} aria-hidden="true" />
             {change}
           </span>
         ) : (
-          <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-sm font-medium text-gray-500">
+          <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-lg font-normal text-gray-500">
             គ្មានទិន្នន័យប្រៀបធៀប
           </span>
         )}
 
-        <span className="text-sm text-gray-500 tabular-nums">
+        <span className="text-lg font-normal text-gray-500 tabular-nums">
           ដំណាក់កាលមុន: {previousValue ?? "—"}
         </span>
       </div>

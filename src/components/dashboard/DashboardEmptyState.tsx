@@ -26,8 +26,8 @@ export default function DashboardEmptyState({
         {icon ?? <Inbox size={22} aria-hidden="true" />}
       </span>
 
-      <p className="text-lg font-semibold text-gray-700">{title}</p>
-      <p className="max-w-md text-base text-gray-500">{description}</p>
+      <p className="text-2xl font-medium text-gray-800">{title}</p>
+      <p className="max-w-md text-lg font-normal text-gray-500">{description}</p>
 
       {action && <div className="mt-2">{action}</div>}
     </div>

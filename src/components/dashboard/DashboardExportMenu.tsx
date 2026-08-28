@@ -89,12 +89,12 @@ export default function DashboardExportMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((previous) => !previous)}
-        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-5 text-base font-bold text-primary-800 transition hover:bg-primary-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-6 text-lg font-normal text-primary-800 transition hover:bg-primary-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <Download size={18} aria-hidden="true" />
-        នាំចេញ
+        <Download size={20} aria-hidden="true" />
+        <span>នាំចេញ</span>
         <ChevronDown
-          size={16}
+          size={18}
           aria-hidden="true"
           className={cn("transition-transform", open && "rotate-180")}
         />
@@ -104,9 +104,9 @@ export default function DashboardExportMenu({
         <div
           role="menu"
           aria-label="ជម្រើសនាំចេញរបាយការណ៍"
-          className="absolute right-0 top-full z-50 mt-2 w-72 rounded-2xl border border-gray-200 bg-white p-3 shadow-xl"
+          className="absolute right-0 top-full z-50 mt-2 w-80 rounded-3xl border border-gray-100 bg-white p-4 shadow-xl"
         >
-          <p className="px-1 pb-2 text-sm font-semibold text-gray-500">
+          <p className="px-1 pb-2 text-lg font-medium text-gray-700">
             របាយការណ៍
           </p>
 
@@ -122,20 +122,20 @@ export default function DashboardExportMenu({
                   aria-checked={selected}
                   onClick={() => setReport(option.value)}
                   className={cn(
-                    "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-base transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                    "flex w-full cursor-pointer items-center justify-between rounded-full px-4 py-2.5 text-left text-lg font-normal transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
                     selected
-                      ? "bg-primary-50 font-semibold text-primary-800"
+                      ? "bg-primary-50 text-primary-800"
                       : "text-gray-700 hover:bg-gray-50",
                   )}
                 >
-                  {option.label}
-                  {selected && <Check size={16} aria-hidden="true" />}
+                  <span>{option.label}</span>
+                  {selected && <Check size={18} aria-hidden="true" />}
                 </button>
               );
             })}
           </div>
 
-          <p className="px-1 pb-2 pt-3 text-sm font-semibold text-gray-500">
+          <p className="px-1 pb-2 pt-3 text-lg font-medium text-gray-700">
             ទម្រង់ឯកសារ
           </p>
 
@@ -147,19 +147,19 @@ export default function DashboardExportMenu({
                 role="menuitem"
                 disabled={busyFormat !== null}
                 onClick={() => void handleDownload(option.value)}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 px-3 text-base font-semibold text-gray-800 transition hover:border-primary-300 hover:bg-primary-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full border border-gray-200 px-4 text-lg font-normal text-gray-700 transition hover:border-primary-300 hover:bg-primary-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {busyFormat === option.value ? (
-                  <Loader2 size={16} aria-hidden="true" className="animate-spin" />
+                  <Loader2 size={18} aria-hidden="true" className="animate-spin" />
                 ) : (
                   option.icon
                 )}
-                {option.label}
+                <span>{option.label}</span>
               </button>
             ))}
           </div>
 
-          <p className="mt-3 px-1 text-sm leading-relaxed text-gray-500">
+          <p className="mt-3 px-1 text-lg leading-relaxed text-gray-500">
             របាយការណ៍ប្រើតម្រងដូចនឹងផ្ទាំងនេះ។
           </p>
         </div>
@@ -170,7 +170,7 @@ export default function DashboardExportMenu({
       </p>
 
       {errorMessage && (
-        <p role="alert" className="absolute right-0 top-full mt-1 w-72 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+        <p role="alert" className="absolute right-0 top-full mt-1 w-80 rounded-2xl bg-red-50 px-4 py-2.5 text-lg font-normal text-red-700">
           {errorMessage}
         </p>
       )}

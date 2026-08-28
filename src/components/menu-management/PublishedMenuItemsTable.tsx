@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
-import { Eye, MinusCircle, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { Eye, MinusCircle, Pencil, Trash2 } from "lucide-react";
 import MenuItemAvatar from "./MenuItemAvatar";
 import Pagination from "@/src/components/ui/Pagination";
 
@@ -71,8 +71,6 @@ function renderCategoryCell(
 function MenuItemRowActions({
   item,
   disabled,
-  rowIndex = 0,
-  totalRows = 1,
   onView,
   onEdit,
   onSoftDelete,
@@ -87,29 +85,13 @@ function MenuItemRowActions({
   onSoftDelete?: (item: MenuItemRecord) => void;
   onHardDelete: (item: MenuItemRecord) => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  const openUpward = totalRows > 2 && rowIndex >= totalRows - 2;
-
-  useEffect(() => {
-    if (!open) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open]);
-
   return (
     <div className="relative flex items-center justify-center gap-2">
       {/* 1. View Detail (Green Eye) */}
       <button
         type="button"
         onClick={() => onView(item)}
-        className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
         title="មើលព័ត៌មានលម្អិត"
       >
         <Eye size={20} />
@@ -120,61 +102,35 @@ function MenuItemRowActions({
         type="button"
         disabled={disabled}
         onClick={() => onEdit(item)}
-        className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
         title="កែប្រែ"
       >
         <Pencil size={20} />
       </button>
 
-      {/* 3. More (3-dots) for extra actions */}
-      <div className="relative" ref={menuRef}>
+      {/* 3. Soft Delete / Pause Sale (Amber Circle with minus) */}
+      {onSoftDelete && (
         <button
           type="button"
           disabled={disabled}
-          onClick={() => setOpen((prev) => !prev)}
-          className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition hover:bg-gray-100 hover:text-gray-800 focus:outline-none ${open ? "bg-gray-200 text-gray-900 ring-2 ring-gray-300/60" : ""
-            }`}
-          title="ផ្សេងទៀត"
-          aria-label="More actions"
+          onClick={() => onSoftDelete(item)}
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
+          title="ផ្អាកលក់"
         >
-          <MoreVertical size={20} />
+          <MinusCircle size={20} />
         </button>
+      )}
 
-        {open && (
-          <div
-            className={`absolute right-0 z-[100] min-w-[195px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150 ${openUpward ? "bottom-full mb-2" : "top-full mt-2"
-              }`}
-          >
-            {/* Soft Delete / Disable */}
-            {onSoftDelete && (
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  onSoftDelete(item);
-                }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-normal text-amber-700 transition hover:bg-amber-50"
-              >
-                <MinusCircle size={18} />
-                <span>ផ្អាកលក់</span>
-              </button>
-            )}
-
-            {/* Hard Delete */}
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onHardDelete(item);
-              }}
-              className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-normal text-red-600 transition hover:bg-red-50"
-            >
-              <Trash2 size={18} />
-              <span>លុបចេញពីប្រព័ន្ធ</span>
-            </button>
-          </div>
-        )}
-      </div>
+      {/* 4. Hard Delete (Red Dustbin Trash) */}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onHardDelete(item)}
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+        title="លុបចេញពីប្រព័ន្ធ"
+      >
+        <Trash2 size={20} />
+      </button>
     </div>
   );
 }
@@ -256,7 +212,7 @@ export default function PublishedMenuItemsTable({
                 ស្ថានភាព
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3.5 text-center font-normal min-w-[110px]">
+              <th className="whitespace-nowrap px-4 py-3.5 text-center font-normal min-w-[180px]">
                 សកម្មភាព
               </th>
             </tr>

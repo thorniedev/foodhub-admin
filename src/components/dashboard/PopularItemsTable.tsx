@@ -48,18 +48,18 @@ export default function PopularItemsTable({
         header: "មុខម្ហូប",
         cell: ({ row }) => (
           <div className="min-w-0">
-            <p className="flex items-center gap-1.5 truncate font-semibold text-gray-900">
+            <p className="flex items-center gap-1.5 truncate text-lg font-normal text-gray-800">
               {row.original.itemName}
               {row.original.missingContentCount > 0 && (
                 <AlertCircle
-                  size={14}
+                  size={16}
                   className="shrink-0 text-amber-600"
                   aria-label="ខ្វះព័ត៌មានមុខម្ហូប"
                 />
               )}
             </p>
             {row.original.foodName && (
-              <p className="truncate text-sm text-gray-500">
+              <p className="truncate text-lg font-normal text-gray-400">
                 {row.original.foodName}
               </p>
             )}

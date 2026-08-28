@@ -33,13 +33,13 @@ export default function DashboardUnavailableState({
       </span>
 
       <div>
-        <p className="text-lg font-semibold text-amber-900">
+        <p className="text-2xl font-medium text-amber-900">
           {reportName
             ? `របាយការណ៍ “${reportName}” មិនទាន់មាននៅលើម៉ាស៊ីនមេទេ`
             : "របាយការណ៍នេះមិនទាន់មាននៅលើម៉ាស៊ីនមេទេ"}
         </p>
 
-        <p className="mt-1 max-w-xl text-base text-amber-800/90">
+        <p className="mt-1 max-w-xl text-lg font-normal text-amber-800/90">
           ម៉ាស៊ីនមេបានឆ្លើយតប 404 សម្រាប់ endpoint នេះ។ នេះមិនមែនមានន័យថាគ្មានទិន្នន័យទេ —
           backend ដែលកំពុងភ្ជាប់មិនទាន់មានរបាយការណ៍វិភាគនេះ។ សូមដាក់ពង្រាយ backend
           ជំនាន់ថ្មី រួចព្យាយាមម្ដងទៀត។
@@ -50,10 +50,10 @@ export default function DashboardUnavailableState({
         <button
           type="button"
           onClick={onRetry}
-          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-amber-300 bg-white px-5 text-base font-semibold text-amber-900 transition hover:bg-amber-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-200"
+          className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full border border-amber-300 bg-white px-6 text-lg font-normal text-amber-900 transition hover:bg-amber-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-200"
         >
           <RotateCcw size={18} aria-hidden="true" />
-          ព្យាយាមម្ដងទៀត
+          <span>ព្យាយាមម្ដងទៀត</span>
         </button>
       )}
     </div>

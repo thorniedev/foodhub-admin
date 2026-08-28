@@ -1,18 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 
 import {
   Calendar,
   CheckCircle,
   Eye,
   Mail,
-  MoreVertical,
+  MinusCircle,
   Pencil,
   RotateCcw,
   Shield,
-  AlertTriangle,
   Trash2,
   XCircle,
 } from "lucide-react";
@@ -55,6 +53,9 @@ export default function UsersTable({
             <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[280px]">
               គណនីអ្នកប្រើប្រាស់
             </th>
+            <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[240px]">
+              អ៊ីមែល
+            </th>
             <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[170px]">
               កាលបរិច្ឆេទបង្កើត
             </th>
@@ -64,7 +65,7 @@ export default function UsersTable({
             <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[140px]">
               ស្ថានភាព
             </th>
-            <th className="whitespace-nowrap px-6 py-4 text-end font-normal min-w-[160px] pr-6">
+            <th className="whitespace-nowrap px-6 py-4 text-end font-normal min-w-[180px] pr-6">
               សកម្មភាព
             </th>
           </tr>
@@ -109,14 +110,11 @@ export default function UsersTable({
               (user as any).profile?.profileImageUrl ||
               (user as any).profile?.imageUrl;
 
-            const isActive = user.status === "ACTIVE";
-            const isSuspended = user.status === "SUSPENDED";
             const role = getAdminUserPrimaryRole(user);
             const canManage = canManageAdminUser(currentAdminRole, user);
             const actionDisabled = disabled || !canManage;
 
-            // Only show one clean subtext (Email or Username) without repetition
-            const subtext = user.primaryEmail || (user.username ? `@${user.username}` : "");
+            const usernameSubtext = user.username ? `@${user.username}` : "";
 
             return (
               <tr
@@ -153,16 +151,22 @@ export default function UsersTable({
                       <p className="max-w-[280px] truncate text-lg font-normal text-gray-800 transition group-hover:text-primary-800">
                         {name}
                       </p>
-                      {subtext && (
-                        <p className="max-w-[280px] truncate text-base font-normal text-gray-400">
-                          {subtext}
-                        </p>
-                      )}
+                      
                       <span className="mt-1 inline-flex rounded-full border border-primary-100 bg-primary-50 px-2.5 py-0.5 text-sm font-normal uppercase tracking-wide text-primary-700">
                         {role}
                       </span>
                     </div>
                   </Link>
+                </td>
+
+                {/* Email / Gmail column */}
+                <td className="whitespace-nowrap px-6 py-3.5">
+                  <div className="flex items-center gap-2 text-lg font-normal text-gray-600">
+                    <Mail size={18} className="text-primary-700 shrink-0" />
+                    <span className="max-w-[240px] truncate">
+                      {user.primaryEmail || "—"}
+                    </span>
+                  </div>
                 </td>
 
                 {/* Created Date */}
@@ -213,7 +217,7 @@ export default function UsersTable({
 
           {users.length === 0 && (
             <tr>
-              <td colSpan={5} className="py-12 text-center text-gray-400">
+              <td colSpan={6} className="py-12 text-center text-gray-400">
                 <div className="flex flex-col items-center justify-center gap-3">
                   <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gray-50 text-gray-400">
                     <Shield size={28} />
@@ -235,8 +239,6 @@ function UserRowActions({
   user,
   detailHref,
   disabled,
-  rowIndex = 0,
-  totalRows = 1,
   onProfileEdit,
   onSuspend,
   onRestore,
@@ -252,27 +254,10 @@ function UserRowActions({
   onRestore?: (user: AdminUser) => void;
   onHardDelete?: (user: AdminUser) => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  const openUpward = totalRows > 2 && rowIndex >= totalRows - 2;
-
-  useEffect(() => {
-    if (!open) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open]);
-
-  const isActive = user.status?.toUpperCase() === "ACTIVE";
   const isSuspended = user.status?.toUpperCase() === "SUSPENDED";
 
   return (
-    <div className="relative flex items-center justify-end gap-2 pr-1">
+    <div className="flex items-center justify-end gap-2 pr-1">
       {/* 1. View Detail (Green Eye) */}
       <Link
         href={detailHref}
@@ -293,72 +278,44 @@ function UserRowActions({
         <Pencil size={18} />
       </button>
 
-      {/* 3. More (3-dots) for extra actions */}
-      {(onSuspend || onRestore || onHardDelete) && (
-        <div className="relative" ref={menuRef}>
+      {/* 3. Status Action: Suspend (Amber Warning) or Restore (Emerald Circular reload) */}
+      {isSuspended ? (
+        onRestore && (
           <button
             type="button"
             disabled={disabled}
-            onClick={() => setOpen((prev) => !prev)}
-            className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition hover:bg-gray-100 hover:text-gray-800 focus:outline-none ${
-              open ? "bg-gray-200 text-gray-900 ring-2 ring-gray-300/60" : ""
-            }`}
-            title="ផ្សេងទៀត"
-            aria-label="More actions"
+            onClick={() => onRestore(user)}
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
+            title="ស្តារឡើងវិញ"
           >
-            <MoreVertical size={18} />
+            <RotateCcw size={18} />
           </button>
+        )
+      ) : (
+        onSuspend && (
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => onSuspend(user)}
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
+            title="ផ្អាកដំណើរការ"
+          >
+            <MinusCircle size={18} />
+          </button>
+        )
+      )}
 
-          {open && (
-            <div
-              className={`absolute right-0 z-[100] min-w-max whitespace-nowrap overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150 text-left ${
-                openUpward ? "bottom-full mb-2" : "top-full mt-2"
-              }`}
-            >
-              {isActive && onSuspend && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    onSuspend(user);
-                  }}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-amber-700 transition hover:bg-amber-50 whitespace-nowrap"
-                >
-                  <AlertTriangle size={18} className="shrink-0" />
-                  <span>ផ្អាកដំណើរការ</span>
-                </button>
-              )}
-
-              {isSuspended && onRestore && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    onRestore(user);
-                  }}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-emerald-700 transition hover:bg-emerald-50 whitespace-nowrap"
-                >
-                  <RotateCcw size={18} className="shrink-0" />
-                  <span>ស្តារឡើងវិញ</span>
-                </button>
-              )}
-
-              {onHardDelete && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    onHardDelete(user);
-                  }}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-red-600 transition hover:bg-red-50 whitespace-nowrap"
-                >
-                  <Trash2 size={18} className="shrink-0" />
-                  <span>លុបចេញពីប្រព័ន្ធ</span>
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+      {/* 4. Delete / Dustbin (Red Trash) */}
+      {onHardDelete && (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onHardDelete(user)}
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+          title="លុបចេញពីប្រព័ន្ធ"
+        >
+          <Trash2 size={18} />
+        </button>
       )}
     </div>
   );

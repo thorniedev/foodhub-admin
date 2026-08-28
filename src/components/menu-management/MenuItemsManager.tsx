@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   useCreateManagedFoodMutation,
@@ -86,6 +87,7 @@ export default function MenuItemsManager({
   catalogType?: "FOOD" | "DRINK" | "ALL";
 }) {
   const isCatalogMode = catalogType === "FOOD" || catalogType === "DRINK";
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [selectedStoreUuid, setSelectedStoreUuid] = useState("");
   const [selectedCategoryUuid, setSelectedCategoryUuid] = useState("");
@@ -1680,7 +1682,7 @@ export default function MenuItemsManager({
             stores={allCombinedStores}
             busy={busy}
             itemsPerPage={itemsPerPage}
-            onView={(item) => setDetailUuid(item.uuid)}
+            onView={(item) => router.push(`/menu-items/${item.uuid}`)}
             onEdit={(item) => {
               setEditingMenu(item);
               setMenuModalOpen(true);

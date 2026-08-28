@@ -44,7 +44,7 @@ export default function ShopBasicInfoSection({
   errors?: BasicInfoErrors;
 }) {
   return (
-    <section className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
+    <section className="rounded-3xl border border-gray-100 bg-white p-6 sm:p-8">
       {/* =================================================
           SECTION HEADER
       ================================================== */}
@@ -53,20 +53,20 @@ export default function ShopBasicInfoSection({
         <div
           className="
             flex
-            h-11
-            w-11
+            h-12
+            w-12
             shrink-0
             items-center
             justify-center
-            rounded-xl
+            rounded-full
             bg-primary-50
             text-primary-800
           "
         >
-          <Store size={22} />
+          <Store size={24} />
         </div>
 
-        <p className="text-2xl font-bold text-[#0F5A2C]">
+        <p className="text-2xl font-medium text-[#0F5A2C]">
           ព័ត៌មានហាង
         </p>
       </div>
@@ -122,7 +122,7 @@ export default function ShopBasicInfoSection({
             ariaLabel="Operating status"
           />
           {errors?.operatingStatus && (
-            <p className="mt-1 text-lg text-red-600">{errors.operatingStatus.message}</p>
+            <p className="mt-1 text-lg font-normal text-red-600">{errors.operatingStatus.message}</p>
           )}
         </label>
 
@@ -141,7 +141,7 @@ export default function ShopBasicInfoSection({
             ariaLabel="Price level"
           />
           {errors?.priceLevel && (
-            <p className="mt-1 text-lg text-red-600">{errors.priceLevel.message}</p>
+            <p className="mt-1 text-lg font-normal text-red-600">{errors.priceLevel.message}</p>
           )}
         </label>
 
@@ -168,18 +168,18 @@ export default function ShopBasicInfoSection({
             onChange={(event) => onChange("description", event.target.value)}
             placeholder="សរសេរការពិពណ៌នាអំពីហាង..."
             className={`
-              w-full resize-none rounded-xl border bg-gray-50
-              px-4 py-3.5 text-lg leading-8 text-gray-800
+              w-full resize-none rounded-3xl border bg-gray-50
+              px-5 py-4 text-lg font-normal leading-8 text-gray-800
               outline-none transition placeholder:text-gray-400
               hover:border-gray-300
-              focus:bg-white focus:ring-4
+              focus:bg-white focus:ring-2 focus:ring-primary-100
               ${errors?.description
-                ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"}
+                ? "border-red-400 focus:border-red-500"
+                : "border-gray-200 focus:border-primary-600"}
             `}
           />
           {errors?.description && (
-            <p className="mt-1 text-lg text-red-600">{errors.description.message}</p>
+            <p className="mt-1 text-lg font-normal text-red-600">{errors.description.message}</p>
           )}
         </label>
       </div>
@@ -204,8 +204,8 @@ function FieldLabel({
         mb-2
         block
         text-lg
-        font-medium
-        text-primary-800
+        font-normal
+        text-gray-700
       "
     >
       {children}
@@ -249,16 +249,16 @@ function Field({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         className={`
-          h-[52px] w-full rounded-xl border bg-gray-50
-          px-4 text-lg text-gray-800 outline-none transition
+          h-12 w-full rounded-full border bg-gray-50
+          px-5 text-lg font-normal text-gray-800 outline-none transition
           placeholder:text-gray-400 hover:border-gray-300
-          focus:bg-white focus:ring-4
+          focus:bg-white focus:ring-2 focus:ring-primary-100
           ${error
-            ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-            : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"}
+            ? "border-red-400 focus:border-red-500"
+            : "border-gray-200 focus:border-primary-600"}
         `}
       />
-      {error && <p className="mt-1 text-lg text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-lg font-normal text-red-600">{error}</p>}
     </label>
   );
 }
