@@ -167,36 +167,52 @@ async function callBackend(
   });
 }
 
-function copyResponse(
+/**
+ * Analytics exports come back as CSV or PDF. Reading those through
+ * response.text() corrupts the bytes, so anything that is not JSON is copied
+ * through verbatim as an ArrayBuffer.
+ */
+function isJsonContentType(contentType: string | null): boolean {
+  return contentType === null || contentType.toLowerCase().includes("json");
+}
+
+async function copyResponse(
   backendResponse: Response,
   refreshedTokens?: KeycloakTokenResponse | null,
 ): Promise<NextResponse> {
-  return (async () => {
-    if (backendResponse.status === 204) {
-      const response = new NextResponse(null, {
-        status: 204,
-      });
-
-      applyRefreshedCookies(response, refreshedTokens);
-      return response;
-    }
-
-    const responseText = await backendResponse.text();
-    const headers = new Headers();
-
-    const contentType = backendResponse.headers.get("content-type");
-    if (contentType) {
-      headers.set("Content-Type", contentType);
-    }
-
-    const response = new NextResponse(responseText || null, {
-      status: backendResponse.status,
-      headers,
+  if (backendResponse.status === 204) {
+    const response = new NextResponse(null, {
+      status: 204,
     });
 
     applyRefreshedCookies(response, refreshedTokens);
     return response;
-  })();
+  }
+
+  const contentType = backendResponse.headers.get("content-type");
+  const headers = new Headers();
+
+  if (contentType) {
+    headers.set("Content-Type", contentType);
+  }
+
+  // The browser download helper reads the filename from this header.
+  const contentDisposition = backendResponse.headers.get("content-disposition");
+  if (contentDisposition) {
+    headers.set("Content-Disposition", contentDisposition);
+  }
+
+  const body: BodyInit | null = isJsonContentType(contentType)
+    ? (await backendResponse.text()) || null
+    : await backendResponse.arrayBuffer();
+
+  const response = new NextResponse(body, {
+    status: backendResponse.status,
+    headers,
+  });
+
+  applyRefreshedCookies(response, refreshedTokens);
+  return response;
 }
 
 function applyRefreshedCookies(

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import Image from "next/image";
 import {
   Sparkles,
   Search,
@@ -115,7 +116,7 @@ export default function AdminRecommendationsPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   // Inspector Modal / Slide-over State
-  const [selectedSessionUuid, setSelectedSessionUuid] = useState<string | null>(null);
+  const [selectedSession, setSelectedSession] = useState<AdminSessionSummary | null>(null);
   const [sessionDetail, setSessionDetail] = useState<AdminSessionDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -169,13 +170,13 @@ export default function AdminRecommendationsPage() {
   }, [sessions, totalElements]);
 
   // 2. Open Session Inspector
-  const handleInspect = async (uuid: string) => {
-    setSelectedSessionUuid(uuid);
+  const handleInspect = async (session: AdminSessionSummary) => {
+    setSelectedSession(session);
     setDetailLoading(true);
     setDetailError(null);
 
     try {
-      const detail = await fetchAdminSessionDetail(uuid);
+      const detail = await fetchAdminSessionDetail(session.uuid, undefined, session);
       setSessionDetail(detail);
     } catch (err: any) {
       console.warn("Backend detail fetch failed:", err?.message);
@@ -200,8 +201,15 @@ export default function AdminRecommendationsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-zinc-200/80 dark:border-zinc-800">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-zinc-100">
-            <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 shadow-2xs">
-              <Sparkles className="w-6 h-6" />
+            <div className="p-2 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 shadow-2xs flex items-center justify-center">
+              <Image
+                src="/Image/ai-recommendation.png"
+                alt="AI Recommendation & Safety Audit"
+                width={26}
+                height={26}
+                className="w-6.5 h-6.5 object-contain dark:invert"
+                priority
+              />
             </div>
             AI Recommendation & Safety Audit
           </h1>
@@ -512,7 +520,7 @@ export default function AdminRecommendationsPage() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleInspect(session.uuid);
+                          handleInspect(session);
                         }}
                         className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-lg font-normal text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 transition shadow-2xs cursor-pointer group-hover:border-amber-400"
                       >
@@ -600,16 +608,16 @@ export default function AdminRecommendationsPage() {
 
       {/* Slide-over Inspector Drawer */}
       <SessionInspectorDrawer
-        sessionUuid={selectedSessionUuid}
+        sessionUuid={selectedSession?.uuid ?? null}
         sessionDetail={sessionDetail}
         loading={detailLoading}
         error={detailError}
         onClose={() => {
-          setSelectedSessionUuid(null);
+          setSelectedSession(null);
           setSessionDetail(null);
           setDetailError(null);
         }}
-        onRefresh={() => selectedSessionUuid && handleInspect(selectedSessionUuid)}
+        onRefresh={() => selectedSession && handleInspect(selectedSession)}
       />
     </div>
   );

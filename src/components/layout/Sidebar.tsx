@@ -14,6 +14,8 @@ import { markLogoutPending } from "../../lib/redirectToAdminLogin";
 import { dashboardNav, type NavItem } from "../../config/dashboardNav";
 
 import { useSidebar } from "../../context/SidebarContext";
+import { useCurrentAdmin } from "@/src/hooks/useCurrentAdmin";
+import { getAdminRole } from "@/src/lib/currentAdminDisplay";
 
 // =========================================================
 // ACTIVE ROUTE
@@ -64,6 +66,8 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const { isOpen, close } = useSidebar();
+  const { admin } = useCurrentAdmin();
+  const currentRole = getAdminRole(admin);
 
   const [openMenus, setOpenMenus] = useState<string[]>([]);
 
@@ -98,6 +102,15 @@ export default function Sidebar() {
   // =======================================================
 
   const renderItem = (item: NavItem, level = 0): ReactNode => {
+    // Hide SUPER_ADMIN protected items from non-super-admins
+    if (
+      item.requiredRole &&
+      item.requiredRole === "SUPER_ADMIN" &&
+      currentRole !== "SUPER_ADMIN"
+    ) {
+      return null;
+    }
+
     const Icon = item.icon;
 
     const hasChildren = Boolean(item.children && item.children.length > 0);

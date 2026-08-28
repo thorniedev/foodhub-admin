@@ -184,5 +184,64 @@ describe("adminRecommendationService with Standardized Backend Envelopes", () =>
       expect(detail.items[0].menuItemName).toBe("Amok");
       expect(detail.safetyChecks[0].result).toBe("SAFE");
     });
+
+    it("falls back to the session row when metadata is missing", async () => {
+      const fallbackSession: AdminSessionSummary = {
+        uuid: "sess-404",
+        requestedByUserId: 10,
+        mode: "GROUP",
+        status: "READY",
+        requestSource: "MOBILE_APP",
+        candidateCount: 12,
+        eligibleCount: 10,
+        startedAt: "2026-08-24T08:00:00Z",
+        createdAt: "2026-08-24T08:00:00Z",
+      };
+
+      const mockItems = {
+        status: 200,
+        message: "OK",
+        data: {
+          items: [{ uuid: "item-2", menuItemId: 7, menuItemName: "Lok Lak", rankPosition: 1, finalScore: 0.88 }],
+        },
+      };
+
+      const mockSafety = {
+        status: 200,
+        message: "OK",
+        data: {
+          items: [{ uuid: "check-2", profileId: 10, menuItemId: 7, result: "BLOCKED", ruleVersion: "v1" }],
+        },
+      };
+
+      global.fetch = vi.fn().mockImplementation((url: string) => {
+        if (url.includes("/items")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => mockItems,
+          });
+        }
+        if (url.includes("/safety-checks")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => mockSafety,
+          });
+        }
+        return Promise.resolve({
+          ok: false,
+          status: 404,
+          statusText: "Not Found",
+          json: async () => ({ message: "Not Found" }),
+        });
+      });
+
+      const detail = await fetchAdminSessionDetail("sess-404", undefined, fallbackSession);
+
+      expect(detail.uuid).toBe("sess-404");
+      expect(detail.mode).toBe("GROUP");
+      expect(detail.status).toBe("READY");
+      expect(detail.items).toHaveLength(1);
+      expect(detail.safetyChecks).toHaveLength(1);
+    });
   });
 });

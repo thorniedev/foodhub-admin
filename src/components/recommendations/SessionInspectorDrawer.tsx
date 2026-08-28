@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import {
   Sparkles,
   ShieldCheck,
@@ -59,7 +60,13 @@ export default function SessionInspectorDrawer({
           <div className="space-y-1 min-w-0 pr-4">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-bold text-lg text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-amber-500" />
+                <Image
+                  src="/Image/ai-recommendation.png"
+                  alt="AI"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5 object-contain dark:invert"
+                />
                 Session Audit Inspector
               </h3>
               {sessionDetail?.mode && (

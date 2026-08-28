@@ -1,3 +1,5 @@
+import React from "react";
+import Image from "next/image";
 import {
   LayoutGrid,
   Store,
@@ -10,11 +12,26 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+export const AiRecommendationIcon: React.FC<{
+  size?: number | string;
+  className?: string;
+}> = ({ size = 20, className = "" }) => {
+  const s = Number(size) || 20;
+  return React.createElement(Image, {
+    src: "/Image/ai-recommendation.png",
+    alt: "AI",
+    width: s,
+    height: s,
+    className: `object-contain shrink-0 ${className}`,
+  });
+};
+
 export interface NavItem {
   label: string;
   href?: string;
-  icon?: LucideIcon;
+  icon?: LucideIcon | React.ComponentType<{ size?: number | string; className?: string }>;
   children?: NavItem[];
+  requiredRole?: string;
 }
 
 export const dashboardNav: NavItem[] = [
@@ -27,6 +44,12 @@ export const dashboardNav: NavItem[] = [
     label: "អនុសាសន៍ & សវនកម្ម AI",
     icon: Bot,
     href: "/admin/recommendations",
+  },
+  {
+    label: "កំណត់ត្រាសវនកម្ម",
+    icon: ClipboardList,
+    href: "/audit-logs",
+    requiredRole: "SUPER_ADMIN",
   },
 
   {
