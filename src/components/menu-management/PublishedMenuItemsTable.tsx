@@ -141,8 +141,9 @@ function MenuItemRowActions({
 
         {open && (
           <div
-            className={`absolute right-0 z-[100] min-w-[195px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150 ${openUpward ? "bottom-full mb-2" : "top-full mt-2"
-              }`}
+            className={`absolute right-0 z-[100] min-w-max whitespace-nowrap overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150 ${
+              openUpward ? "bottom-full mb-2" : "top-full mt-2"
+            }`}
           >
             {/* Soft Delete / Disable */}
             {onSoftDelete && (
@@ -152,9 +153,9 @@ function MenuItemRowActions({
                   setOpen(false);
                   onSoftDelete(item);
                 }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-amber-700 transition hover:bg-amber-50"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-amber-700 transition hover:bg-amber-50 whitespace-nowrap"
               >
-                <MinusCircle size={18} />
+                <MinusCircle size={18} className="shrink-0" />
                 <span>ផ្អាកលក់</span>
               </button>
             )}
@@ -166,9 +167,9 @@ function MenuItemRowActions({
                 setOpen(false);
                 onHardDelete(item);
               }}
-              className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-red-600 transition hover:bg-red-50"
+              className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-red-600 transition hover:bg-red-50 whitespace-nowrap"
             >
-              <Trash2 size={18} />
+              <Trash2 size={18} className="shrink-0" />
               <span>លុបចេញពីប្រព័ន្ធ</span>
             </button>
           </div>

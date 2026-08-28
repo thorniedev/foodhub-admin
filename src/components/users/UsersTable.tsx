@@ -311,7 +311,7 @@ function UserRowActions({
 
           {open && (
             <div
-              className={`absolute right-0 z-[100] min-w-[175px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 text-left ${
+              className={`absolute right-0 z-[100] min-w-max whitespace-nowrap overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150 text-left ${
                 openUpward ? "bottom-full mb-2" : "top-full mt-2"
               }`}
             >
@@ -322,9 +322,9 @@ function UserRowActions({
                     setOpen(false);
                     onSuspend(user);
                   }}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-50"
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-amber-700 transition hover:bg-amber-50 whitespace-nowrap"
                 >
-                  <AlertTriangle size={16} />
+                  <AlertTriangle size={18} className="shrink-0" />
                   <span>ផ្អាកដំណើរការ</span>
                 </button>
               )}
@@ -336,9 +336,9 @@ function UserRowActions({
                     setOpen(false);
                     onRestore(user);
                   }}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-emerald-700 transition hover:bg-emerald-50 whitespace-nowrap"
                 >
-                  <RotateCcw size={16} />
+                  <RotateCcw size={18} className="shrink-0" />
                   <span>ស្តារឡើងវិញ</span>
                 </button>
               )}
@@ -350,9 +350,9 @@ function UserRowActions({
                     setOpen(false);
                     onHardDelete(user);
                   }}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-red-600 transition hover:bg-red-50 whitespace-nowrap"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={18} className="shrink-0" />
                   <span>លុបចេញពីប្រព័ន្ធ</span>
                 </button>
               )}

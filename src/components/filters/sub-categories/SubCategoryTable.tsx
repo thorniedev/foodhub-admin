@@ -162,7 +162,7 @@ function MoreMenu({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-1.5 min-w-[170px] overflow-hidden rounded-2xl border border-gray-100 bg-white py-1.5 shadow-xl shadow-gray-200/70">
+        <div className="absolute right-0 top-full z-50 mt-1.5 min-w-max whitespace-nowrap overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl shadow-gray-200/70 animate-in fade-in zoom-in-95 duration-150">
           {/* Toggle Active */}
           <button
             type="button"
@@ -171,16 +171,16 @@ function MoreMenu({
               onToggleActive(item);
               setOpen(false);
             }}
-            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+            className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 whitespace-nowrap disabled:opacity-50"
           >
             <MinusCircle
               size={15}
-              className={active ? "text-amber-500" : "text-emerald-500"}
+              className={`shrink-0 ${active ? "text-amber-500" : "text-emerald-500"}`}
             />
-            {active ? "បិទដំណើរការ" : "បើកដំណើរការ"}
+            <span>{active ? "បិទដំណើរការ" : "បើកដំណើរការ"}</span>
           </button>
 
-          <div className="mx-3 my-1 border-t border-gray-100" />
+          <div className="mx-2 my-1 border-t border-gray-100" />
 
           {/* Delete */}
           <button
@@ -189,10 +189,10 @@ function MoreMenu({
               onDelete(item);
               setOpen(false);
             }}
-            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+            className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 whitespace-nowrap"
           >
-            <Trash2 size={15} />
-            លុប
+            <Trash2 size={15} className="shrink-0" />
+            <span>លុប</span>
           </button>
         </div>
       )}
