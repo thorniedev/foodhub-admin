@@ -58,7 +58,7 @@ export default function StoreSelect({
         disabled={disabled}
         onClick={() => setOpen((current) => !current)}
         aria-label={ariaLabel}
-        className={`flex h-12 w-full items-center justify-between gap-3 rounded-xl border bg-gray-50 px-4 text-left text-lg text-gray-800 outline-none transition disabled:cursor-not-allowed disabled:opacity-50 ${
+        className={`flex h-12 w-full items-center justify-between gap-3 rounded-full border bg-gray-50 px-5 text-left text-lg font-normal text-gray-800 outline-none transition disabled:cursor-not-allowed disabled:opacity-50 ${
           open
             ? "border-[#136C34] bg-white ring-2 ring-[#136C34]/10"
             : "border-gray-200 hover:border-[#136C34]/50"
@@ -88,10 +88,10 @@ export default function StoreSelect({
                   onChange(option.value);
                   setOpen(false);
                 }}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${
+                className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
                   isSelected
                     ? "bg-emerald-50 text-[#137A3D]"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-[#137A3D]"
+                    : "text-gray-700 hover:bg-gray-50 hover:text-[#137A3D]"
                 }`}
               >
                 <span>{option.label}</span>

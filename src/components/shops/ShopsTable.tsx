@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Eye, MapPin, MoreVertical, Pencil, Settings2, Store as StoreIcon, Trash2 } from "lucide-react";
+import { Eye, MapPin, MinusCircle, Pencil, Store as StoreIcon, Trash2 } from "lucide-react";
 import type { Store, StoreStatusAction } from "@/src/types/shop";
 import {
   displayStoreLocation,
@@ -181,8 +180,6 @@ function ShopRowActions({
   store,
   detailHref,
   disabled,
-  rowIndex = 0,
-  totalRows = 1,
   onEdit,
   onStatus,
   onDelete,
@@ -196,93 +193,51 @@ function ShopRowActions({
   onStatus: (store: Store, action: StoreStatusAction) => void;
   onDelete?: (store: Store) => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  const openUpward = totalRows > 2 && rowIndex >= totalRows - 2;
-
-  useEffect(() => {
-    if (!open) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open]);
-
   return (
-    <div className="relative flex items-center justify-center gap-2">
+    <div className="flex items-center justify-center gap-2">
       {/* 1. View Detail (Green Eye) */}
       <Link
         href={detailHref}
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-200"
         title="មើលលម្អិត"
       >
-        <Eye size={18} />
+        <Eye size={20} />
       </Link>
 
-      {/* 2. Primary Action: Edit (Blue Pencil) */}
+      {/* 2. Edit (Blue Pencil) */}
       <button
         type="button"
         disabled={disabled}
         onClick={() => onEdit(store)}
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-40"
         title="កែប្រែ"
       >
-        <Pencil size={18} />
+        <Pencil size={20} />
       </button>
 
-      {/* 3. More (3-dots) for extra actions */}
-      <div className="relative" ref={menuRef}>
+      {/* 3. Manage Status / Suspend (Amber Circle Minus) */}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onStatus(store, "ACCOUNT")}
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-amber-50 text-amber-600 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-200 disabled:cursor-not-allowed disabled:opacity-40"
+        title="គ្រប់គ្រងស្ថានភាព"
+      >
+        <MinusCircle size={20} />
+      </button>
+
+      {/* 4. Delete (Red Dustbin) */}
+      {onDelete && (
         <button
           type="button"
           disabled={disabled}
-          onClick={() => setOpen((prev) => !prev)}
-          className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition hover:bg-gray-100 hover:text-gray-800 focus:outline-none ${
-            open ? "bg-gray-200 text-gray-900 ring-2 ring-gray-300/60" : ""
-          }`}
-          title="ផ្សេងទៀត"
-          aria-label="More actions"
+          onClick={() => onDelete(store)}
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-rose-50 text-rose-600 transition hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-200 disabled:cursor-not-allowed disabled:opacity-40"
+          title="លុបចេញពីប្រព័ន្ធ"
         >
-          <MoreVertical size={18} />
+          <Trash2 size={20} />
         </button>
-
-        {open && (
-          <div
-            className={`absolute right-0 z-[100] min-w-max whitespace-nowrap overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150 ${
-              openUpward ? "bottom-full mb-2" : "top-full mt-2"
-            }`}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onStatus(store, "ACCOUNT");
-              }}
-              className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-amber-700 transition hover:bg-amber-50 whitespace-nowrap"
-            >
-              <Settings2 size={18} className="shrink-0" />
-              <span>គ្រប់គ្រងស្ថានភាព</span>
-            </button>
-
-            {onDelete && (
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  onDelete(store);
-                }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-lg font-semibold text-red-600 transition hover:bg-red-50 whitespace-nowrap"
-              >
-                <Trash2 size={18} className="shrink-0" />
-                <span>លុបចេញពីប្រព័ន្ធ</span>
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }

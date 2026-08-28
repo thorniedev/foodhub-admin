@@ -14,7 +14,7 @@ export default function ShopImageUploadGrid({
   onChange: (key: "logoMediaUuid" | "coverMediaUuid", value: string) => void;
 }) {
   return (
-    <section className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
+    <section className="rounded-3xl border border-gray-100 bg-white p-6 sm:p-8">
       {/* =================================================
           SECTION HEADER
       ================================================== */}
@@ -24,25 +24,25 @@ export default function ShopImageUploadGrid({
           <div
             className="
               flex
-              h-11
-              w-11
+              h-12
+              w-12
               shrink-0
               items-center
               justify-center
-              rounded-xl
+              rounded-full
               bg-primary-50
               text-primary-800
             "
           >
-            <ImageIcon size={22} />
+            <ImageIcon size={24} />
           </div>
 
           <div className="min-w-0">
-            <p className="text-2xl font-bold text-[#0F5A2C]">
+            <p className="text-2xl font-medium text-[#0F5A2C]">
               រូបភាពហាង
             </p>
 
-            <p className="mt-2 max-w-2xl text-lg leading-8 text-gray-500">
+            <p className="mt-2 max-w-2xl text-lg font-normal leading-8 text-gray-500">
               បន្ថែមរូបសញ្ញា (Logo) និងរូបគម្រប (Cover) របស់ហាង ដោយផ្ទុកឡើងរូបភាពពីឧបករណ៍ ឬប្រើប្រាស់ Image URL។
             </p>
           </div>
@@ -56,14 +56,14 @@ export default function ShopImageUploadGrid({
           <div
             className="
               inline-flex
-              min-h-10
+              min-h-11
               items-center
               gap-2
               rounded-full
               bg-primary-50
-              px-4
+              px-5
               text-lg
-              font-medium
+              font-normal
               text-primary-800
             "
           >
@@ -74,16 +74,16 @@ export default function ShopImageUploadGrid({
           <div
             className="
               inline-flex
-              min-h-10
+              min-h-11
               items-center
               gap-2
               rounded-full
               border
               border-gray-200
               bg-white
-              px-4
+              px-5
               text-lg
-              font-medium
+              font-normal
               text-gray-600
             "
           >

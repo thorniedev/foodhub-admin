@@ -191,19 +191,19 @@ export default function DashboardFilterBar({
       onSubmit={submit}
       noValidate
       aria-label="តម្រងទិន្នន័យវិភាគ"
-      className="rounded-[24px] border border-gray-200/90 bg-white p-5 shadow-xs transition-all dark:border-slate-800 dark:bg-slate-900"
+      className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all dark:border-slate-800 dark:bg-slate-900"
     >
       {/* Top Header: Filter Title & Date Presets */}
-      <div className="flex flex-col gap-4 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-50 text-primary-800 dark:bg-emerald-950/60 dark:text-emerald-400">
-            <SlidersHorizontal size={18} aria-hidden="true" />
+      <div className="flex flex-col gap-4 border-b border-gray-100 pb-5 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-50 text-primary-800 dark:bg-emerald-950/60 dark:text-emerald-400">
+            <SlidersHorizontal size={22} aria-hidden="true" />
           </span>
           <div>
-            <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <span>តម្រងទិន្នន័យ (Filters)</span>
+            <h3 className="text-xl font-medium text-gray-800 dark:text-white flex items-center gap-2.5">
+              <span>កម្រងទិន្នន័យ (Filters)</span>
               {activeFiltersCount > 0 && (
-                <span className="inline-flex items-center rounded-full bg-primary-100 px-2 py-0.5 text-xs font-bold text-primary-800 dark:bg-emerald-950 dark:text-emerald-300">
+                <span className="inline-flex items-center rounded-full bg-primary-100 px-3 py-0.5 text-lg font-normal text-primary-800 dark:bg-emerald-950 dark:text-emerald-300">
                   {activeFiltersCount} សកម្ម
                 </span>
               )}
@@ -215,7 +215,7 @@ export default function DashboardFilterBar({
         <div
           role="group"
           aria-label="ចន្លោះកាលបរិច្ឆេទ"
-          className="flex flex-wrap items-center gap-1 rounded-full bg-gray-100/90 p-1 dark:bg-slate-800/90"
+          className="flex flex-wrap items-center gap-1.5 rounded-full bg-gray-100/90 p-1.5 dark:bg-slate-800/90"
         >
           {PRESETS.map((option) => {
             const active = preset === option.value;
@@ -227,10 +227,10 @@ export default function DashboardFilterBar({
                 aria-pressed={active}
                 onClick={() => selectPreset(option.value)}
                 className={cn(
-                  "min-h-9 rounded-full px-3.5 text-xs sm:text-sm font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 cursor-pointer",
+                  "min-h-10 rounded-full px-4 text-lg font-normal transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 cursor-pointer",
                   active
-                    ? "bg-white text-primary-800 shadow-xs dark:bg-slate-950 dark:text-emerald-400"
-                    : "text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white",
+                    ? "bg-white text-primary-800 shadow-sm dark:bg-slate-950 dark:text-emerald-400"
+                    : "text-gray-600 hover:text-gray-800 dark:text-slate-400 dark:hover:text-white",
                 )}
               >
                 {option.label}
@@ -242,10 +242,10 @@ export default function DashboardFilterBar({
 
       {/* Custom Date Range Inputs (Only revealed when "ជ្រើសកាលបរិច្ឆេទ" is active) */}
       {isCustom && (
-        <div className="mt-4 grid grid-cols-1 gap-3 rounded-2xl border border-primary-100 bg-primary-50/40 p-4 sm:grid-cols-2 dark:border-slate-800 dark:bg-slate-950/40 animate-in fade-in duration-200">
-          <label className="block space-y-1.5">
-              <span className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300">
-                <CalendarDays size={14} className="text-primary-700 dark:text-emerald-400" />
+        <div className="mt-5 grid grid-cols-1 gap-4 rounded-3xl border border-primary-100 bg-primary-50/40 p-5 sm:grid-cols-2 dark:border-slate-800 dark:bg-slate-950/40 animate-in fade-in duration-200">
+          <label className="block space-y-2">
+            <span className="flex items-center gap-2 text-lg font-normal text-gray-700 dark:text-slate-300">
+              <CalendarDays size={18} className="text-primary-700 dark:text-emerald-400" />
               <span>កាលបរិច្ឆេទចាប់ផ្ដើម</span>
             </span>
             <input
@@ -255,13 +255,13 @@ export default function DashboardFilterBar({
               className={inputClassName(Boolean(errors.from))}
             />
             {errors.from?.message && (
-              <span className="block text-xs font-semibold text-red-600">{errors.from.message}</span>
+              <span className="block text-lg font-normal text-red-600">{errors.from.message}</span>
             )}
           </label>
 
-          <label className="block space-y-1.5">
-              <span className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300">
-                <CalendarDays size={14} className="text-primary-700 dark:text-emerald-400" />
+          <label className="block space-y-2">
+            <span className="flex items-center gap-2 text-lg font-normal text-gray-700 dark:text-slate-300">
+              <CalendarDays size={18} className="text-primary-700 dark:text-emerald-400" />
               <span>កាលបរិច្ឆេទបញ្ចប់</span>
             </span>
             <input
@@ -271,18 +271,18 @@ export default function DashboardFilterBar({
               className={inputClassName(Boolean(errors.to))}
             />
             {errors.to?.message && (
-              <span className="block text-xs font-semibold text-red-600">{errors.to.message}</span>
+              <span className="block text-lg font-normal text-red-600">{errors.to.message}</span>
             )}
           </label>
         </div>
       )}
 
       {/* Main Standard Filter Row: Province/Region + Food Category */}
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {/* Province / Region Dropdown */}
-        <div className="space-y-1.5">
-          <label className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300">
-            <MapPin size={15} className="text-primary-700 dark:text-emerald-400" />
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-lg font-normal text-gray-700 dark:text-slate-300">
+            <MapPin size={18} className="text-primary-700 dark:text-emerald-400" />
             <span>រាជធានី / ខេត្ត</span>
           </label>
           <Controller
@@ -296,19 +296,19 @@ export default function DashboardFilterBar({
                 }}
                 options={provinceSelectOptions}
                 placeholder="រាជធានី / ខេត្តទាំងអស់"
-                className="[&>button]:h-11 [&>button]:rounded-xl"
+                className="[&>button]:h-12 [&>button]:rounded-full [&>button]:text-lg [&>button]:font-normal"
               />
             )}
           />
           {errors.province?.message && (
-            <p className="text-xs font-semibold text-red-600">{errors.province.message}</p>
+            <p className="text-lg font-normal text-red-600">{errors.province.message}</p>
           )}
         </div>
 
         {/* Food Category Dropdown */}
-        <div className="space-y-1.5">
-          <label className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300">
-            <Utensils size={15} className="text-primary-700 dark:text-emerald-400" />
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-lg font-normal text-gray-700 dark:text-slate-300">
+            <Utensils size={18} className="text-primary-700 dark:text-emerald-400" />
             <span>ប្រភេទម្ហូប</span>
           </label>
           <Controller
@@ -320,19 +320,19 @@ export default function DashboardFilterBar({
                 onChange={field.onChange}
                 options={categorySelectOptions}
                 placeholder="ប្រភេទទាំងអស់"
-                className="[&>button]:h-11 [&>button]:rounded-xl"
+                className="[&>button]:h-12 [&>button]:rounded-full [&>button]:text-lg [&>button]:font-normal"
               />
             )}
           />
           {errors.categoryCode?.message && (
-            <p className="text-xs font-semibold text-red-600">{errors.categoryCode.message}</p>
+            <p className="text-lg font-normal text-red-600">{errors.categoryCode.message}</p>
           )}
         </div>
 
         {/* City / District Filter (Optional quick search) */}
-        <label className="block space-y-1.5">
-          <span className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300">
-            <Compass size={15} className="text-primary-700 dark:text-emerald-400" />
+        <label className="block space-y-2">
+          <span className="flex items-center gap-2 text-lg font-normal text-gray-700 dark:text-slate-300">
+            <Compass size={18} className="text-primary-700 dark:text-emerald-400" />
             <span>ក្រុង / ខណ្ឌ</span>
           </span>
           <input
@@ -343,25 +343,25 @@ export default function DashboardFilterBar({
             className={inputClassName(Boolean(errors.city))}
           />
           {errors.city?.message && (
-            <span className="block text-xs font-semibold text-red-600">{errors.city.message}</span>
+            <span className="block text-lg font-normal text-red-600">{errors.city.message}</span>
           )}
         </label>
       </div>
 
       {/* Advanced Geo-Radius Accordion Toggle */}
-      <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
+      <div className="mt-5 pt-4 border-t border-gray-100 dark:border-slate-800">
         <button
           type="button"
           onClick={() => setShowAdvancedGeo((prev) => !prev)}
-          className="flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-primary-800 dark:text-slate-400 dark:hover:text-emerald-400 transition cursor-pointer"
+          className="flex items-center gap-2.5 text-lg font-normal text-gray-600 hover:text-primary-800 dark:text-slate-400 dark:hover:text-emerald-400 transition cursor-pointer"
         >
-          <Compass size={14} className="text-primary-700 dark:text-emerald-400" />
+          <Compass size={18} className="text-primary-700 dark:text-emerald-400" />
           <span>
             {showAdvancedGeo ? "លាក់តម្រងកាំភូមិសាស្ត្រ" : "បង្ហាញតម្រងកាំភូមិសាស្ត្រកម្រិតខ្ពស់ (Geo Radius)"}
           </span>
-          {showAdvancedGeo ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          {showAdvancedGeo ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           {latitude && longitude && (
-            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+            <span className="rounded-full bg-emerald-100 px-3 py-0.5 text-lg font-normal text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
               📍 ទីតាំងជាក់លាក់
             </span>
           )}
@@ -369,24 +369,24 @@ export default function DashboardFilterBar({
 
         {/* Collapsible Advanced Geo-Radius Section */}
         {showAdvancedGeo && (
-          <div className="mt-3 rounded-2xl border border-gray-100 bg-gray-50/80 p-4 dark:border-slate-800 dark:bg-slate-950/60 animate-in fade-in duration-150 space-y-3.5">
+          <div className="mt-4 rounded-3xl border border-gray-100 bg-gray-50/80 p-5 dark:border-slate-800 dark:bg-slate-950/60 animate-in fade-in duration-150 space-y-4">
             {/* Quick Popular Hubs Presets */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-gray-700 dark:text-slate-300">
+                <span className="text-lg font-normal text-gray-700 dark:text-slate-300">
                   ទីតាំងពេញនិយម
                 </span>
                 {latitude && longitude && (
                   <button
                     type="button"
                     onClick={clearGeoCoordinates}
-                    className="text-[11px] font-bold text-rose-600 hover:underline cursor-pointer"
+                    className="text-lg font-normal text-rose-600 hover:underline cursor-pointer"
                   >
                     សម្អាតកូអរដោនេ
                   </button>
                 )}
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {POPULAR_GEO_HUBS.map((hub) => {
                   const isSelected =
                     latitude === String(hub.lat) && longitude === String(hub.lng);
@@ -397,9 +397,9 @@ export default function DashboardFilterBar({
                       type="button"
                       onClick={() => applyGeoHub(hub)}
                       className={cn(
-                        "rounded-xl px-2.5 py-1.5 text-xs font-semibold transition cursor-pointer shadow-2xs",
+                        "rounded-full px-4 py-2 text-lg font-normal transition cursor-pointer shadow-sm",
                         isSelected
-                          ? "bg-primary-800 text-white font-bold dark:bg-emerald-600"
+                          ? "bg-primary-800 text-white dark:bg-emerald-600"
                           : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300",
                       )}
                     >
@@ -411,9 +411,9 @@ export default function DashboardFilterBar({
             </div>
 
             {/* Custom Coordinates & Radius Slider */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 pt-2 border-t border-gray-200/60 dark:border-slate-800">
-              <label className="block space-y-1">
-                <span className="block text-[11px] font-bold text-gray-600 dark:text-slate-400">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 pt-3 border-t border-gray-200/60 dark:border-slate-800">
+              <label className="block space-y-1.5">
+                <span className="block text-lg font-normal text-gray-600 dark:text-slate-400">
                   រយៈទទឹង
                 </span>
                 <input
@@ -425,14 +425,14 @@ export default function DashboardFilterBar({
                   className={inputClassName(Boolean(errors.latitude))}
                 />
                 {errors.latitude?.message && (
-                  <span className="block text-[11px] font-semibold text-red-600">
+                  <span className="block text-lg font-normal text-red-600">
                     {errors.latitude.message}
                   </span>
                 )}
               </label>
 
-              <label className="block space-y-1">
-                <span className="block text-[11px] font-bold text-gray-600 dark:text-slate-400">
+              <label className="block space-y-1.5">
+                <span className="block text-lg font-normal text-gray-600 dark:text-slate-400">
                   រយៈបណ្ដោយ
                 </span>
                 <input
@@ -444,20 +444,20 @@ export default function DashboardFilterBar({
                   className={inputClassName(Boolean(errors.longitude))}
                 />
                 {errors.longitude?.message && (
-                  <span className="block text-[11px] font-semibold text-red-600">
+                  <span className="block text-lg font-normal text-red-600">
                     {errors.longitude.message}
                   </span>
                 )}
               </label>
 
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-[11px] font-bold text-gray-600 dark:text-slate-400">
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-lg font-normal text-gray-600 dark:text-slate-400">
                   <span>កាំស្វែងរក</span>
-                  <span className="font-bold text-primary-800 dark:text-emerald-400">
+                  <span className="font-medium text-primary-800 dark:text-emerald-400">
                     {radiusKm ? `${radiusKm} km` : "5 km"}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <input
                     type="range"
                     min={1}
@@ -465,7 +465,7 @@ export default function DashboardFilterBar({
                     step={1}
                     value={radiusKm ? Number(radiusKm) : 5}
                     onChange={(e) => setValue("radiusKm", e.target.value, { shouldDirty: true })}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-800 dark:bg-slate-700"
+                    className="w-full h-2.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-800 dark:bg-slate-700"
                   />
                   <input
                     type="number"
@@ -474,11 +474,11 @@ export default function DashboardFilterBar({
                     placeholder="5"
                     aria-label="កាំស្វែងរក (គ.ម)"
                     {...register("radiusKm")}
-                    className="w-16 h-9 rounded-xl border border-gray-200 text-center text-xs font-bold text-gray-800 dark:bg-slate-900 dark:border-slate-800 dark:text-white"
+                    className="w-20 h-12 rounded-full border border-gray-200 text-center text-lg font-medium text-gray-800 dark:bg-slate-900 dark:border-slate-800 dark:text-white"
                   />
                 </div>
                 {errors.radiusKm?.message && (
-                  <p className="text-[11px] font-semibold text-red-600">
+                  <p className="text-lg font-normal text-red-600">
                     {errors.radiusKm.message}
                   </p>
                 )}
@@ -489,64 +489,64 @@ export default function DashboardFilterBar({
       </div>
 
       {/* Action Buttons Toolbar & Active Badges */}
-      <div className="mt-4 flex flex-col gap-3 pt-4 border-t border-gray-100 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
+      <div className="mt-5 flex flex-col gap-4 pt-5 border-t border-gray-100 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
         {/* Active Filter Chips */}
-        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
           {selectedProvince && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2.5 py-1 text-xs font-bold text-primary-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-4 py-1.5 text-lg font-normal text-primary-800 dark:bg-emerald-950/60 dark:text-emerald-300">
               📍 {selectedProvince}
               <button
                 type="button"
                 onClick={() => setValue("province", "", { shouldDirty: true })}
                 className="hover:text-red-500 cursor-pointer"
               >
-                <X size={12} />
+                <X size={16} />
               </button>
             </span>
           )}
 
           {selectedCategory && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-secondary-50 px-2.5 py-1 text-xs font-bold text-secondary-800 dark:bg-secondary-950/60 dark:text-secondary-300">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-50 px-4 py-1.5 text-lg font-normal text-secondary-800 dark:bg-secondary-950/60 dark:text-secondary-300">
               🍲 {selectedCategory}
               <button
                 type="button"
                 onClick={() => setValue("categoryCode", "", { shouldDirty: true })}
                 className="hover:text-red-500 cursor-pointer"
               >
-                <X size={12} />
+                <X size={16} />
               </button>
             </span>
           )}
 
           {selectedCity && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-4 py-1.5 text-lg font-normal text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
               🧭 {selectedCity}
               <button
                 type="button"
                 onClick={() => setValue("city", "", { shouldDirty: true })}
                 className="hover:text-red-500 cursor-pointer"
               >
-                <X size={12} />
+                <X size={16} />
               </button>
             </span>
           )}
 
           {latitude && longitude && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-4 py-1.5 text-lg font-normal text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
               🎯 {radiusKm || 5} km ជុំវិញទីតាំង
               <button
                 type="button"
                 onClick={clearGeoCoordinates}
                 className="hover:text-red-500 cursor-pointer"
               >
-                <X size={12} />
+                <X size={16} />
               </button>
             </span>
           )}
         </div>
 
         {/* Actions: Reset, Apply, Export */}
-        <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
+        <div className="flex flex-wrap items-center justify-end gap-3 shrink-0">
           <button
             type="button"
             onClick={() => {
@@ -554,18 +554,18 @@ export default function DashboardFilterBar({
               setShowAdvancedGeo(false);
               onReset();
             }}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-xs sm:text-sm font-bold text-gray-700 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer"
+            className="inline-flex min-h-12 items-center gap-2 rounded-full border border-gray-200 bg-white px-6 text-lg font-normal text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer"
           >
-            <RotateCcw size={16} aria-hidden="true" />
+            <RotateCcw size={18} aria-hidden="true" />
             <span>កំណត់ឡើងវិញ</span>
           </button>
 
           <button
             type="submit"
             disabled={isFetching}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary-800 px-5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-primary-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-emerald-600 dark:hover:bg-emerald-700 cursor-pointer"
+            className="inline-flex min-h-12 items-center gap-2 rounded-full bg-primary-800 px-7 text-lg font-normal text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-emerald-600 dark:hover:bg-emerald-700 cursor-pointer"
           >
-            <Search size={16} aria-hidden="true" />
+            <Search size={18} aria-hidden="true" />
             <span>អនុវត្តតម្រង</span>
           </button>
 
@@ -578,7 +578,7 @@ export default function DashboardFilterBar({
 
 function inputClassName(hasError: boolean): string {
   return cn(
-    "h-11 w-full rounded-xl border bg-white px-3 text-xs sm:text-sm text-gray-900 transition outline-none placeholder:text-gray-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white",
+    "h-12 w-full rounded-full border bg-white px-5 text-lg text-gray-800 transition outline-none placeholder:text-gray-400 dark:border-slate-800 dark:bg-slate-950 dark:text-white",
     hasError
       ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
       : "border-gray-200 hover:border-gray-300 focus:border-primary-600 focus:ring-2 focus:ring-primary-100 dark:focus:border-emerald-500",

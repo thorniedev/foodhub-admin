@@ -5,6 +5,7 @@ import {
   Clock3,
   Mail,
   MapPin,
+  MinusCircle,
   Pencil,
   Phone,
   Settings2,
@@ -48,7 +49,7 @@ export default function StoreProfileHeader({
   const accountStatus = getStoreAccountStatus(store.accountStatus);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+    <section className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
       {/* =================================================
           TOP COVER BANNER
       ================================================== */}
@@ -72,10 +73,10 @@ export default function StoreProfileHeader({
         {/* Top Control: Back Button */}
         <Link
           href="/shops"
-          className="absolute left-5 top-5 z-20 inline-flex items-center gap-2 rounded-xl bg-black/35 px-4 py-2 text-lg font-semibold text-white backdrop-blur-md transition hover:bg-black/50"
+          className="absolute left-5 top-5 z-20 inline-flex items-center gap-2 rounded-full bg-black/40 px-5 py-2.5 text-lg font-normal text-white backdrop-blur-md transition hover:bg-black/60"
         >
           <ArrowLeft size={20} />
-          ហាង
+          <span>ហាង</span>
         </Link>
 
         {/* Store Logo & Title in Cover */}
@@ -103,11 +104,11 @@ export default function StoreProfileHeader({
 
             {/* Name + Address */}
             <div className="min-w-0 flex-1 pb-1 text-white">
-              <h1 className="truncate text-2xl font-extrabold sm:text-3xl lg:text-4xl drop-shadow-xs">
+              <h1 className="truncate text-3xl font-medium sm:text-4xl drop-shadow-xs">
                 {store.storeName}
               </h1>
-              <div className="mt-1.5 flex items-start gap-1.5 text-lg text-white/90">
-                <MapPin size={19} className="mt-0.5 shrink-0 text-emerald-300" />
+              <div className="mt-1.5 flex items-start gap-2 text-lg font-normal text-white/90">
+                <MapPin size={20} className="mt-0.5 shrink-0 text-emerald-300" />
                 <span className="line-clamp-1">
                   {displayStoreLocation(store) || "មិនមានអាសយដ្ឋាន"}
                 </span>
@@ -118,9 +119,9 @@ export default function StoreProfileHeader({
       </div>
 
       {/* =================================================
-          BOTTOM SECTION (Green Gradient Theme Matching UsersHeader)
+          BOTTOM SECTION (Green Gradient Theme)
       ================================================== */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#0f6b32] via-[#14833E] to-[#1aad54] p-5 sm:p-6 text-white shadow-xl shadow-primary-900/20">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#0f6b32] via-[#14833E] to-[#1aad54] p-6 sm:p-7 text-white shadow-xl shadow-primary-900/20">
         {/* Decorative background blur blobs */}
         <div className="pointer-events-none absolute -right-16 -top-20 h-72 w-72 rounded-full bg-white/5 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 right-24 h-72 w-72 rounded-full bg-white/5 blur-3xl" />
@@ -128,19 +129,19 @@ export default function StoreProfileHeader({
         {/* Top Row: Quick Contacts (Left) & Actions Bar (Right) */}
         <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           {/* Quick Contact Links */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-3">
             {store.phoneNumber ? (
               <a
                 href={`tel:${store.phoneNumber}`}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/15 px-4 py-2.5 text-lg font-semibold text-white shadow-xs backdrop-blur-sm transition hover:border-white/40 hover:bg-white/25"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-5 py-2.5 text-lg font-normal text-white shadow-xs backdrop-blur-sm transition hover:border-white/40 hover:bg-white/25"
                 title="ចុចដើម្បីហៅ"
               >
-                <Phone size={18} className="text-emerald-200" />
+                <Phone size={19} className="text-emerald-200" />
                 <span>{store.phoneNumber}</span>
               </a>
             ) : (
-              <div className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-lg font-medium text-white/50">
-                <Phone size={18} className="text-white/30" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-5 py-2.5 text-lg font-normal text-white/60">
+                <Phone size={19} className="text-white/40" />
                 <span>មិនមានលេខទូរស័ព្ទ</span>
               </div>
             )}
@@ -148,30 +149,30 @@ export default function StoreProfileHeader({
             {store.email ? (
               <a
                 href={`mailto:${store.email}`}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/15 px-4 py-2.5 text-lg font-semibold text-white shadow-xs backdrop-blur-sm transition hover:border-white/40 hover:bg-white/25"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-5 py-2.5 text-lg font-normal text-white shadow-xs backdrop-blur-sm transition hover:border-white/40 hover:bg-white/25"
                 title="ចុចដើម្បីផ្ញើអ៊ីមែល"
               >
-                <Mail size={18} className="text-emerald-200" />
-                <span className="max-w-[220px] truncate">{store.email}</span>
+                <Mail size={19} className="text-emerald-200" />
+                <span className="max-w-[240px] truncate">{store.email}</span>
               </a>
             ) : (
-              <div className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-lg font-medium text-white/50">
-                <Mail size={18} className="text-white/30" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-5 py-2.5 text-lg font-normal text-white/60">
+                <Mail size={19} className="text-white/40" />
                 <span>មិនមានអ៊ីមែល</span>
               </div>
             )}
           </div>
 
           {/* Actions Bar Capsule */}
-          <div className="flex items-center gap-1.5 rounded-2xl border border-white/20 bg-white/10 p-1.5 backdrop-blur-md shadow-lg shadow-black/5 shrink-0">
+          <div className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 p-1.5 backdrop-blur-md shadow-lg shadow-black/5 shrink-0">
             <button
               type="button"
               disabled={busy}
               onClick={onEdit}
               title="កែប្រែ"
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/25 active:scale-95 disabled:opacity-50"
+              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/25 active:scale-95 disabled:opacity-50"
             >
-              <Pencil size={19} />
+              <Pencil size={20} />
             </button>
 
             <button
@@ -179,9 +180,9 @@ export default function StoreProfileHeader({
               disabled={busy}
               onClick={() => onStatus("REVIEW")}
               title="គ្រប់គ្រងស្ថានភាព"
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-amber-200 transition hover:bg-amber-400/30 hover:text-amber-100 active:scale-95 disabled:opacity-50"
+              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/10 text-amber-200 transition hover:bg-amber-400/30 hover:text-amber-100 active:scale-95 disabled:opacity-50"
             >
-              <Settings2 size={19} />
+              <MinusCircle size={20} />
             </button>
 
             <button
@@ -189,9 +190,9 @@ export default function StoreProfileHeader({
               disabled={busy}
               onClick={onHours}
               title="កំណត់ម៉ោងដំណើរការ"
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-emerald-200 transition hover:bg-emerald-400/30 hover:text-emerald-100 active:scale-95 disabled:opacity-50"
+              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/10 text-emerald-200 transition hover:bg-emerald-400/30 hover:text-emerald-100 active:scale-95 disabled:opacity-50"
             >
-              <Clock3 size={19} />
+              <Clock3 size={20} />
             </button>
 
             {onDelete && (
@@ -200,19 +201,19 @@ export default function StoreProfileHeader({
                 disabled={busy}
                 onClick={onDelete}
                 title="លុបហាង"
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-rose-200 transition hover:bg-rose-500/30 hover:text-rose-100 active:scale-95 disabled:opacity-50"
+                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/10 text-rose-200 transition hover:bg-rose-500/30 hover:text-rose-100 active:scale-95 disabled:opacity-50"
               >
-                <Trash2 size={19} />
+                <Trash2 size={20} />
               </button>
             )}
           </div>
         </div>
 
-        {/* 3 Status Cards with Glassmorphism matching UsersHeader */}
-        <div className="relative z-10 mt-5 grid gap-3 sm:grid-cols-3">
+        {/* 3 Status Cards */}
+        <div className="relative z-10 mt-6 grid gap-4 sm:grid-cols-3">
           {/* 1. Review Status */}
           <StatusKpiCard
-            icon={<ShieldCheck size={22} />}
+            icon={<ShieldCheck size={24} />}
             label="ស្ថានភាពពិនិត្យ (Review)"
             value={reviewStatus.label}
             note={reviewStatus.note}
@@ -227,7 +228,7 @@ export default function StoreProfileHeader({
 
           {/* 2. Operating Status */}
           <StatusKpiCard
-            icon={<Clock3 size={22} />}
+            icon={<Clock3 size={24} />}
             label="ស្ថានភាពដំណើរការ (Operating)"
             value={liveStatus.label}
             note={liveStatus.note}
@@ -242,7 +243,7 @@ export default function StoreProfileHeader({
 
           {/* 3. Account Status */}
           <StatusKpiCard
-            icon={<UserCheck size={22} />}
+            icon={<UserCheck size={24} />}
             label="ស្ថានភាពគណនី (Account)"
             value={accountStatus.label}
             note={accountStatus.note}
@@ -275,19 +276,19 @@ function StatusKpiCard({
 }) {
   const toneStyles = {
     positive: {
-      text: "text-emerald-200 font-black",
+      text: "text-emerald-200 font-medium",
       iconBox: "bg-emerald-400/20 text-emerald-200 ring-emerald-300/30",
       dot: "bg-emerald-300 shadow-[0_0_8px_rgba(110,231,183,0.8)]",
       ring: "ring-emerald-400/20 hover:ring-emerald-400/40 bg-emerald-950/10",
     },
     warning: {
-      text: "text-amber-200 font-black",
+      text: "text-amber-200 font-medium",
       iconBox: "bg-amber-400/20 text-amber-200 ring-amber-300/30",
       dot: "bg-amber-300 shadow-[0_0_8px_rgba(252,211,77,0.8)]",
       ring: "ring-amber-400/20 hover:ring-amber-400/40 bg-amber-950/10",
     },
     danger: {
-      text: "text-rose-200 font-black",
+      text: "text-rose-200 font-medium",
       iconBox: "bg-rose-400/20 text-rose-200 ring-rose-300/30",
       dot: "bg-rose-300 shadow-[0_0_8px_rgba(253,164,175,0.8)]",
       ring: "ring-rose-400/20 hover:ring-rose-400/40 bg-rose-950/10",
@@ -295,24 +296,24 @@ function StatusKpiCard({
   }[tone];
 
   return (
-    <div className={`group relative overflow-hidden rounded-2xl p-4 backdrop-blur-sm ring-1 transition-all duration-200 hover:bg-white/15 ${toneStyles.ring}`}>
+    <div className={`group relative overflow-hidden rounded-3xl p-5 backdrop-blur-sm ring-1 transition-all duration-200 hover:bg-white/15 ${toneStyles.ring}`}>
       {/* Subtle inner glow */}
-      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-white/5 to-transparent" />
 
-      <div className="relative flex items-center gap-3">
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl backdrop-blur-sm ring-1 shadow-xs ${toneStyles.iconBox}`}>
+      <div className="relative flex items-center gap-3.5">
+        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full backdrop-blur-sm ring-1 shadow-xs ${toneStyles.iconBox}`}>
           {icon}
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between">
-            <p className="text-base font-semibold text-white/85">{label}</p>
+            <p className="text-lg font-normal text-white/90">{label}</p>
             <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${toneStyles.dot} animate-pulse`} />
           </div>
-          <p className={`mt-0.5 truncate text-xl font-bold drop-shadow-xs ${toneStyles.text}`} title={value}>
+          <p className={`mt-0.5 truncate text-2xl drop-shadow-xs ${toneStyles.text}`} title={value}>
             {value}
           </p>
-          <p className="mt-0.5 text-base text-white/75 truncate" title={note}>
+          <p className="mt-0.5 text-lg font-normal text-white/80 truncate" title={note}>
             {note}
           </p>
         </div>

@@ -14,7 +14,7 @@ export default function StoreMediaSection({
 }) {
   return (
     <Section title="រូបភាព & ឡូហ្គោ" icon={<ImageIcon size={22} />}>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <MediaCard
           title="ឡូហ្គោ"
           mediaUuid={store.logoMediaUuid}
@@ -49,7 +49,7 @@ function MediaCard({
 }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/60 transition hover:border-gray-200 hover:bg-gray-50">
-      <div className="relative h-40 bg-white flex items-center justify-center border-b border-gray-100">
+      <div className="relative h-44 bg-white flex items-center justify-center border-b border-gray-100">
         {mediaUuid ? (
           <StoreMediaImage
             mediaUuid={mediaUuid}
@@ -62,18 +62,18 @@ function MediaCard({
           />
         ) : (
           <div className="flex flex-col items-center justify-center p-4 text-center text-gray-400">
-            <ImageIcon size={36} className="text-gray-300" />
-            <p className="mt-1 text-lg font-medium text-gray-500">
+            <ImageIcon size={40} className="text-gray-300" />
+            <p className="mt-2 text-lg font-normal text-gray-500">
               មិនទាន់មាន {type === "logo" ? "ឡូហ្គោ" : "រូបភាពផ្ទៃខាងក្រោយ"} ឡើយ
             </p>
           </div>
         )}
       </div>
 
-      <div className="p-4 flex items-center justify-between">
+      <div className="p-5 flex items-center justify-between">
         <div>
-          <p className="text-lg font-semibold text-gray-800">{title}</p>
-          <p className="text-base text-gray-500 font-mono mt-0.5">
+          <p className="text-lg font-medium text-gray-800">{title}</p>
+          <p className="text-lg text-gray-500 font-mono mt-0.5 font-normal">
             {mediaUuid ? "បានភ្ជាប់រួចរាល់" : "មិនមានរូបភាព"}
           </p>
         </div>
@@ -82,10 +82,10 @@ function MediaCard({
           <button
             type="button"
             onClick={onEdit}
-            className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-base font-bold text-gray-700 shadow-2xs transition hover:bg-gray-100"
+            className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 shadow-2xs transition hover:bg-gray-100"
           >
-            <Pencil size={15} />
-            កែប្រែ
+            <Pencil size={18} />
+            <span>កែប្រែ</span>
           </button>
         )}
       </div>

@@ -45,18 +45,18 @@ export default function StoreSystemInfoSection({ store }: { store: Store }) {
 
   return (
     <Section title="ព័ត៌មានប្រព័ន្ធ" icon={<Fingerprint size={22} />}>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         {/* Copyable Store UUID */}
-        <div className="col-span-full rounded-2xl border border-gray-100 bg-gray-50/60 px-4 py-4 transition hover:border-gray-200 hover:bg-gray-50">
+        <div className="col-span-full rounded-2xl border border-gray-100 bg-gray-50/60 px-5 py-4 transition hover:border-gray-200 hover:bg-gray-50">
           <div className="flex items-center justify-between">
-            <p className="text-lg font-medium text-gray-500">
+            <p className="text-lg font-normal text-gray-500">
               លេខសម្គាល់ហាង
             </p>
 
             <button
               type="button"
               onClick={handleCopyUuid}
-              className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-lg font-bold text-gray-700 shadow-2xs transition hover:bg-gray-100"
+              className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 shadow-2xs transition hover:bg-gray-100"
             >
               {copiedUuid ? (
                 <>
@@ -71,7 +71,7 @@ export default function StoreSystemInfoSection({ store }: { store: Store }) {
               )}
             </button>
           </div>
-          <p className="mt-1 break-all font-mono text-lg font-semibold text-gray-800">
+          <p className="mt-1 break-all font-mono text-lg font-medium text-gray-800">
             {store.uuid || "—"}
           </p>
         </div>
@@ -93,8 +93,6 @@ export default function StoreSystemInfoSection({ store }: { store: Store }) {
           value={formatStatusKhmer(store.operatingStatus)}
           icon={<CheckCircle2 size={19} />}
         />
-
-  
 
         <Item
           label="កែប្រែចុងក្រោយ"

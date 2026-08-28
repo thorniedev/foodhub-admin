@@ -49,7 +49,7 @@ export default function ShopSocialSection({
   };
 
   return (
-    <section className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
+    <section className="rounded-3xl border border-gray-100 bg-white p-6 sm:p-8">
       {/* =================================================
           SECTION HEADER
       ================================================== */}
@@ -59,25 +59,25 @@ export default function ShopSocialSection({
           <div
             className="
               flex
-              h-11
-              w-11
+              h-12
+              w-12
               shrink-0
               items-center
               justify-center
-              rounded-xl
+              rounded-full
               bg-primary-50
               text-primary-800
             "
           >
-            <Share2 size={22} />
+            <Share2 size={24} />
           </div>
 
           <div className="min-w-0">
-            <p className="text-2xl font-bold text-[#0F5A2C]">
+            <p className="text-2xl font-medium text-[#0F5A2C]">
               បណ្ដាញសង្គម
             </p>
 
-            <p className="mt-1 text-lg leading-7 text-gray-500">
+            <p className="mt-1 text-lg font-normal leading-7 text-gray-500">
               បន្ថែមបណ្ដាញសង្គមរបស់ហាងសម្រាប់បង្ហាញទៅកាន់គណនីអ្នកប្រើប្រាស់ (អតិបរមា {MAX_STORE_SOCIAL_LINKS} links · មួយ platform មួយ link)។
             </p>
           </div>
@@ -100,7 +100,7 @@ export default function ShopSocialSection({
           }
           className="
             inline-flex
-            min-h-[48px]
+            min-h-12
             w-full
             shrink-0
             items-center
@@ -108,14 +108,14 @@ export default function ShopSocialSection({
             gap-2
             rounded-full
             bg-primary-800
-            px-5
+            px-6
             text-lg
-            font-medium
+            font-normal
             text-white
             transition
             hover:bg-primary-900
             focus:outline-none
-            focus:ring-4
+            focus:ring-2
             focus:ring-primary-100
             disabled:cursor-not-allowed
             disabled:opacity-50
@@ -144,7 +144,7 @@ export default function ShopSocialSection({
               flex-col
               items-center
               justify-center
-              rounded-2xl
+              rounded-3xl
               border
               border-dashed
               border-gray-200
@@ -160,7 +160,7 @@ export default function ShopSocialSection({
                 w-12
                 items-center
                 justify-center
-                rounded-xl
+                rounded-full
                 bg-primary-50
                 text-primary-700
               "
@@ -168,11 +168,11 @@ export default function ShopSocialSection({
               <Share2 size={23} />
             </div>
 
-            <p className="mt-3 text-lg font-medium text-gray-600">
+            <p className="mt-3 text-lg font-normal text-gray-600">
               មិនទាន់មានបណ្ដាញសង្គម
             </p>
 
-            <p className="mt-1 text-lg leading-7 text-gray-400">
+            <p className="mt-1 text-lg font-normal leading-7 text-gray-400">
               ចុចប៊ូតុង "បន្ថែម" ដើម្បីបញ្ចូលបណ្ដាញសង្គមថ្មី។
             </p>
           </div>
@@ -187,12 +187,12 @@ export default function ShopSocialSection({
               <div
                 key={`${link.platform}-${index}`}
                 className="
-                    rounded-2xl
+                    rounded-3xl
                     border
                     border-gray-100
                     bg-gray-50/70
-                    p-4
-                    sm:p-5
+                    p-5
+                    sm:p-6
                   "
               >
                 <div
@@ -214,8 +214,8 @@ export default function ShopSocialSection({
                           mb-2
                           block
                           text-lg
-                          font-medium
-                          text-primary-800
+                          font-normal
+                          text-gray-700
                         "
                     >
                       Platform
@@ -227,20 +227,21 @@ export default function ShopSocialSection({
                         update(index, "platform", event.target.value)
                       }
                       className="
-                          h-[52px]
+                          h-12
                           w-full
-                          rounded-xl
+                          rounded-full
                           border
                           border-gray-200
                           bg-white
-                          px-4
+                          px-5
                           text-lg
+                          font-normal
                           text-gray-800
                           outline-none
                           transition
                           hover:border-gray-300
                           focus:border-primary-600
-                          focus:ring-4
+                          focus:ring-2
                           focus:ring-primary-100
                         "
                     >
@@ -273,8 +274,8 @@ export default function ShopSocialSection({
                           mb-2
                           block
                           text-lg
-                          font-medium
-                          text-primary-800
+                          font-normal
+                          text-gray-700
                         "
                     >
                       Profile URL
@@ -287,21 +288,22 @@ export default function ShopSocialSection({
                       }
                       placeholder={placeholder}
                       className="
-                          h-[52px]
+                          h-12
                           w-full
-                          rounded-xl
+                          rounded-full
                           border
                           border-gray-200
                           bg-white
-                          px-4
+                          px-5
                           text-lg
+                          font-normal
                           text-gray-800
                           outline-none
                           transition
                           placeholder:text-gray-400
                           hover:border-gray-300
                           focus:border-primary-600
-                          focus:ring-4
+                          focus:ring-2
                           focus:ring-primary-100
                         "
                     />
@@ -317,8 +319,8 @@ export default function ShopSocialSection({
                           mb-2
                           block
                           text-lg
-                          font-medium
-                          text-primary-800
+                          font-normal
+                          text-gray-700
                         "
                     >
                       Display order
@@ -333,21 +335,22 @@ export default function ShopSocialSection({
                       }
                       placeholder="1"
                       className="
-                          h-[52px]
+                          h-12
                           w-full
-                          rounded-xl
+                          rounded-full
                           border
                           border-gray-200
                           bg-white
-                          px-4
+                          px-5
                           text-lg
+                          font-normal
                           text-gray-800
                           outline-none
                           transition
                           placeholder:text-gray-400
                           hover:border-gray-300
                           focus:border-primary-600
-                          focus:ring-4
+                          focus:ring-2
                           focus:ring-primary-100
                         "
                     />
@@ -368,11 +371,12 @@ export default function ShopSocialSection({
                     title="លុប Social link"
                     className="
                         flex
-                        h-[52px]
-                        w-full
+                        h-12
+                        w-12
+                        shrink-0
                         items-center
                         justify-center
-                        rounded-xl
+                        rounded-full
                         border
                         border-red-100
                         bg-white
@@ -381,17 +385,18 @@ export default function ShopSocialSection({
                         hover:bg-red-50
                         hover:text-red-600
                         focus:outline-none
-                        focus:ring-4
+                        focus:ring-2
                         focus:ring-red-100
-                        lg:w-[52px]
                       "
                   >
-                    <Trash2 size={21} />
+                    <Trash2 size={20} />
                   </button>
                 </div>
 
-                {link.profileUrl.trim() && error && (
-                  <p className="mt-2 text-lg text-red-600">{error}</p>
+                {error && (
+                  <p className="mt-3 text-lg font-normal text-red-600">
+                    {error}
+                  </p>
                 )}
               </div>
             );

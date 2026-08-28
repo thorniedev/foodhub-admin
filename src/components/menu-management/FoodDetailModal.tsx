@@ -1,27 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import {
   Activity,
   Calendar,
   Clock,
   CloudSun,
-  DollarSign,
-  ExternalLink,
   Flame,
   Globe2,
   Heart,
   Layers,
   Loader2,
+  MapPin,
   Pencil,
   Sparkles,
-  Store,
   UsersRound,
+  Utensils,
   X,
 } from "lucide-react";
 
 import {
   useGetManagedFoodQuery,
-  useGetPublishedMenuItemsQuery,
   useGetManagedFoodCategoriesQuery,
   useGetManagedCuisinesQuery,
 } from "@/src/app/store/menuManagementApi";
@@ -29,69 +28,31 @@ import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
 import { readFoodRelationsStorage } from "@/src/lib/filterCatalogStorage";
 
-const SPICE_LABELS: Record<number, string> = {
-  0: "0 - មិនហឹរ (No Spicy)",
-  1: "1 - ហឹរតិច (Mild)",
-  2: "2 - ហឹរមធ្យម (Medium)",
-  3: "3 - ហឹរខ្លាំង (Hot)",
-  4: "4 - ហឹរខ្លាំងណាស់ (Extra Hot)",
-  5: "5 - ហឹរបំផុត (Extreme)",
+const SPICE_SHORT_LABELS: Record<number, string> = {
+  0: "មិនហឹរ",
+  1: "ហឹរតិច",
+  2: "ហឹរមធ្យម",
+  3: "ហឹរខ្លាំង",
+  4: "ហឹរខ្លាំងណាស់",
+  5: "ហឹរបំផុត",
 };
-
-// ─── Shared card ─────────────────────────────────────────────────────────────
-
-function InfoCard({
-  accentClass,
-  label,
-  icon,
-  children,
-}: {
-  accentClass: string;
-  label: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:shadow-sm">
-      <div className={`absolute left-0 top-0 h-full w-1 rounded-l-2xl ${accentClass}`} />
-      <div className="flex items-center gap-2 pl-2 text-sm font-semibold text-gray-400 mb-2">
-        {icon}
-        <span>{label}</span>
-      </div>
-      <div className="pl-2">{children}</div>
-    </div>
-  );
-}
-
-function TagRow({ items, color }: { items: any[]; color: string }) {
-  if (!items.length) return <span className="text-sm text-gray-400">—</span>;
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {items.map((it: any, i: number) => (
-        <span key={i} className={`inline-flex rounded-xl px-3 py-1 text-xs font-bold ${color}`}>
-          {it.localName || it.name || it.code || "—"}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-// ─── Main modal ──────────────────────────────────────────────────────────────
 
 export default function FoodDetailModal({
   uuid,
   onClose,
   onEdit,
-  onEditMenuItem,
 }: {
   uuid: string | null;
   onClose: () => void;
   onEdit?: (item: any) => void;
   onEditMenuItem?: (item: any) => void;
 }) {
-  const { data: rawData, isLoading, isError } = useGetManagedFoodQuery(uuid ?? "", {
-    skip: !uuid,
-  });
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  const { data: rawData, isLoading, isError } = useGetManagedFoodQuery(
+    uuid ?? "",
+    { skip: !uuid },
+  );
 
   const categoriesQuery = useGetManagedFoodCategoriesQuery();
   const cuisinesQuery = useGetManagedCuisinesQuery();
@@ -100,14 +61,13 @@ export default function FoodDetailModal({
 
   const stored = uuid ? readFoodRelationsStorage(uuid) : null;
 
-  // If server returned all-null nutrition, prefer stored values.
-  const srvNut = rawData ? (rawData.nutritionData ?? (rawData as any).nutrition) : null;
+  const srvNut = rawData
+    ? rawData.nutritionData ?? (rawData as any).nutrition
+    : null;
   const storedNut = stored?.nutritionData ?? stored?.nutrition;
-  // Only trust server nutrition when at least one field has a real non-zero value.
   const srvHasNutrition = !!(
     srvNut &&
-    (
-      (srvNut as any).calories ||
+    ((srvNut as any).calories ||
       (srvNut as any).proteinGrams ||
       (srvNut as any).protein ||
       (srvNut as any).carbohydrateGrams ||
@@ -115,8 +75,7 @@ export default function FoodDetailModal({
       (srvNut as any).fatGrams ||
       (srvNut as any).fat ||
       (srvNut as any).fiberGrams ||
-      (srvNut as any).fiber
-    )
+      (srvNut as any).fiber)
   );
   const mergedNutrition = srvHasNutrition ? srvNut : (storedNut ?? srvNut);
 
@@ -124,13 +83,19 @@ export default function FoodDetailModal({
     rawData?.categoryName ||
     rawData?.category?.name ||
     (rawData?.category as any)?.localName ||
-    categoriesQuery.data?.find((c) => c.uuid === (rawData?.categoryUuid || (rawData?.category as any)?.uuid))?.name;
+    categoriesQuery.data?.find(
+      (c) =>
+        c.uuid === (rawData?.categoryUuid || (rawData?.category as any)?.uuid),
+    )?.name;
 
   const cuisineName =
     rawData?.cuisineName ||
     rawData?.cuisine?.name ||
     (rawData?.cuisine as any)?.localName ||
-    cuisinesQuery.data?.find((c) => c.uuid === (rawData?.cuisineUuid || (rawData?.cuisine as any)?.uuid))?.name;
+    cuisinesQuery.data?.find(
+      (c) =>
+        c.uuid === (rawData?.cuisineUuid || (rawData?.cuisine as any)?.uuid),
+    )?.name;
 
   const data = rawData
     ? {
@@ -138,18 +103,41 @@ export default function FoodDetailModal({
         categoryName,
         cuisineName,
         nutritionData: mergedNutrition,
-        mealTypes: (stored?.mealTypes !== undefined ? stored.mealTypes : (rawData as any)?.mealTypes) ?? [],
-        seasons: (stored?.seasons !== undefined ? stored.seasons : rawData.seasons) ?? [],
-        events: (stored?.events !== undefined ? stored.events : rawData.events) ?? [],
-        suitableWeather: (stored?.suitableWeather !== undefined ? stored.suitableWeather : (stored?.weatherConditions ?? rawData.suitableWeather)) ?? [],
-        ageRules: (stored?.ageRules !== undefined ? stored.ageRules : (stored?.ageGroups ?? rawData.ageRules)) ?? [],
-        dietaryTypes: (stored?.dietaryTypes !== undefined ? stored.dietaryTypes : rawData.dietaryTypes) ?? [],
-        allergens: (stored?.allergens !== undefined ? stored.allergens : rawData.allergens) ?? [],
-        preparationTimes: (stored?.preparationTimes !== undefined ? stored.preparationTimes : (rawData as any)?.preparationTimes) ?? [],
-        distances: (stored?.distances !== undefined ? stored.distances : (rawData as any)?.distances) ?? [],
+        mealTypes:
+          (stored?.mealTypes !== undefined
+            ? stored.mealTypes
+            : (rawData as any)?.mealTypes) ?? [],
+        seasons:
+          (stored?.seasons !== undefined ? stored.seasons : rawData.seasons) ??
+          [],
+        events:
+          (stored?.events !== undefined ? stored.events : rawData.events) ?? [],
+        suitableWeather:
+          (stored?.suitableWeather !== undefined
+            ? stored.suitableWeather
+            : (stored?.weatherConditions ?? rawData.suitableWeather)) ?? [],
+        ageRules:
+          (stored?.ageRules !== undefined
+            ? stored.ageRules
+            : (stored?.ageGroups ?? rawData.ageRules)) ?? [],
+        dietaryTypes:
+          (stored?.dietaryTypes !== undefined
+            ? stored.dietaryTypes
+            : rawData.dietaryTypes) ?? [],
+        allergens:
+          (stored?.allergens !== undefined
+            ? stored.allergens
+            : rawData.allergens) ?? [],
+        preparationTimes:
+          (stored?.preparationTimes !== undefined
+            ? stored.preparationTimes
+            : (rawData as any)?.preparationTimes) ?? [],
+        distances:
+          (stored?.distances !== undefined
+            ? stored.distances
+            : (rawData as any)?.distances) ?? [],
       }
     : (stored as any);
-
 
   const images = (
     data?.images?.length
@@ -161,244 +149,378 @@ export default function FoodDetailModal({
           : [data?.thumbnail || data?.imageUrl].filter(Boolean)
   ) as string[];
 
+  const activeImage = images[selectedImageIndex] || images[0];
   const spice = data?.defaultSpiceLevel ?? (data as any)?.spiceLevel ?? 0;
 
+  const prepTime =
+    (data as any)?.preparationTimeMinutes ||
+    (data?.preparationTimes?.[0] as any)?.name ||
+    (data?.preparationTimes?.[0] as any)?.localName ||
+    "15 នាទី";
+
+  const distanceText =
+    (data?.distances?.[0] as any)?.name ||
+    (data?.distances?.[0] as any)?.localName ||
+    data?.cuisineName ||
+    "N/A";
+
+  const calories = data?.nutritionData?.calories ?? 0;
+
   return (
-    <div className="fixed inset-0 z-[150] overflow-y-auto bg-black/60 p-4 backdrop-blur-[4px] animate-in fade-in duration-200">
-      <div className="mx-auto my-6 w-full max-w-4xl overflow-hidden rounded-[32px] bg-white shadow-[0_32px_80px_rgba(0,0,0,0.25)] animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-[4px] animate-in fade-in duration-200">
+      <div className="relative my-6 max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[32px] bg-white p-6 shadow-[0_32px_80px_rgba(0,0,0,0.25)] sm:p-8 animate-in zoom-in-95 duration-200">
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute right-6 top-6 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-gray-200 focus:outline-none"
+        >
+          <X size={22} />
+        </button>
 
-        {/* ─── HERO BANNER ─── */}
-        <div className="relative bg-gradient-to-br from-[#14833E] via-[#1a9e4d] to-[#0f6b32] px-7 pb-8 pt-7">
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
-          >
-            <X size={18} />
-          </button>
-
-          <div className="flex items-center gap-4">
-            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-white/20 shadow-lg shadow-black/10">
-              {images[0] ? (
-                <img
-                  src={resolveFoodHubCatalogImageUrl(images[0]) || images[0]}
-                  alt={data?.localName || data?.canonicalName || ""}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-4xl">🍽️</div>
-              )}
-            </div>
-            <div className="min-w-0 flex-1 pr-10">
-              <p className="truncate text-3xl font-black text-amber-300">
-                {data?.localName || data?.canonicalName || "ព័ត៌មានមុខម្ហូប"}
-              </p>
-              {data?.canonicalName && data?.localName && (
-                <p className="mt-0.5 text-base text-white/70">{data.canonicalName}</p>
-              )}
-              <p className="mt-1 text-sm text-white/60">ព័ត៌មានលម្អិតពេញលេញអំពីមុខម្ហូប</p>
-            </div>
+        {isLoading ? (
+          <div className="flex min-h-[380px] flex-col items-center justify-center gap-4 py-16">
+            <Loader2 size={42} className="animate-spin text-[#14833E]" />
+            <p className="text-xl font-normal text-gray-500">
+              កំពុងទាញយកព័ត៌មានលម្អិត...
+            </p>
           </div>
-
-          {/* Badges row */}
-          {data && (
-            <div className="mt-5 flex flex-wrap items-center gap-2.5">
-              <span className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-bold ${
-                data.isActive === false
-                  ? "border-white/20 bg-black/20 text-white/70"
-                  : "border-white/30 bg-white/20 text-white"
-              }`}>
-                <span className={`h-2 w-2 rounded-full ${data.isActive === false ? "bg-gray-400" : "bg-emerald-300"}`} />
-                {data.isActive === false ? "អសកម្ម" : "សកម្ម"}
-              </span>
-              {data.categoryName && (
-                <span className="rounded-full bg-white/15 px-3.5 py-1.5 text-sm font-bold text-white border border-white/20">
-                  {extractKhmerOnlyName(data.categoryName)}
-                </span>
-              )}
-              {data.cuisineName && (
-                <span className="rounded-full bg-white/15 px-3.5 py-1.5 text-sm font-bold text-white border border-white/20">
-                  {data.cuisineName}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* ─── BODY ─── */}
-        <div className="p-7">
-          {isLoading ? (
-            <div className="flex min-h-64 flex-col items-center justify-center gap-4">
-              <Loader2 size={40} className="animate-spin text-[#137A3D]" />
-              <p className="text-base font-semibold text-gray-500">
-                កំពុងទាញយកព័ត៌មានលម្អិតមុខម្ហូប...
-              </p>
-            </div>
-          ) : isError ? (
-            <div className="my-6 rounded-2xl bg-red-50 p-5 text-center text-base font-semibold text-red-600">
-              មិនអាចទាញយកព័ត៌មានលម្អិតមុខម្ហូបនេះបានទេ។
-            </div>
-          ) : data ? (
-            <div className="mt-4 space-y-5">
-
-              {/* Description */}
-              {data.description && (
-                <p className="text-base leading-relaxed text-gray-600">{data.description}</p>
-              )}
-
-              {/* Spice */}
-              <div className="flex items-center gap-3">
-                <Flame size={18} className={spice > 0 ? "text-orange-500" : "text-gray-300"} />
-                <span className="text-sm font-bold text-gray-600">កម្រិតហឹរ:</span>
-                <div className="flex gap-1">
-                  {[0,1,2,3,4,5].map(lvl => (
-                    <span key={lvl} className={`h-3.5 w-3.5 rounded-full border ${
-                      lvl <= spice ? "bg-orange-400 border-orange-300" : "bg-gray-100 border-gray-200"
-                    }`} />
-                  ))}
+        ) : isError ? (
+          <div className="my-8 rounded-2xl bg-red-50 p-6 text-center text-xl font-normal text-red-600">
+            មិនអាចទាញយកព័ត៌មានលម្អិតមុខម្ហូបនេះបានទេ។
+          </div>
+        ) : data ? (
+          <div className="space-y-6">
+            {/* Top Grid: Images (Left) + Details (Right) */}
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-stretch">
+              {/* Left Column: Image Showcase */}
+              <div className="flex flex-col gap-3.5 lg:col-span-5 h-full">
+                {/* Main Large Image - Big and Fills Height */}
+                <div className="relative flex-1 min-h-[360px] sm:min-h-[420px] w-full overflow-hidden rounded-3xl border border-gray-100 bg-gray-50 shadow-sm">
+                  {activeImage ? (
+                    <img
+                      src={
+                        resolveFoodHubCatalogImageUrl(activeImage) ||
+                        activeImage
+                      }
+                      alt={data?.localName || data?.canonicalName || ""}
+                      className="absolute inset-0 h-full w-full object-cover transition duration-300"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-5xl text-gray-300">
+                      <Utensils size={64} className="text-gray-300" />
+                    </div>
+                  )}
                 </div>
-                <span className="text-sm font-bold text-orange-600">
-                  {SPICE_LABELS[spice] || `${spice} / 5`}
-                </span>
-              </div>
 
-              {/* Category & Cuisine */}
-              <div className="grid gap-3 sm:grid-cols-2">
-                <InfoCard accentClass="bg-blue-300" label="ប្រភេទមុខម្ហូប" icon={<Layers size={15} />}>
-                  <p className="text-base font-bold text-gray-900">
-                    {data.categoryName ? extractKhmerOnlyName(data.categoryName) : "—"}
-                  </p>
-                </InfoCard>
-                <InfoCard accentClass="bg-amber-300" label="ម្ហូបតាមប្រទេស (Cuisine)" icon={<Globe2 size={15} />}>
-                  <p className="text-base font-bold text-gray-900">{data.cuisineName || "—"}</p>
-                </InfoCard>
-              </div>
-
-              {/* Nutrition */}
-              {data.nutritionData && (
-                <InfoCard accentClass="bg-emerald-400" label="សារធាតុចិញ្ចឹម (Nutrition)" icon={<Activity size={15} className="text-[#14833E]" />}>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                    {[
-                      { label: "កាឡូរី", val: data.nutritionData.calories, unit: "kcal", cls: "bg-emerald-50 text-emerald-800" },
-                      { label: "ខ្លាញ់", val: data.nutritionData.fatGrams, unit: "g", cls: "bg-orange-50 text-orange-800" },
-                      { label: "សរសៃ", val: data.nutritionData.fiberGrams, unit: "g", cls: "bg-violet-50 text-violet-800" },
-                      { label: "ប្រូតេអ៊ីន", val: data.nutritionData.proteinGrams, unit: "g", cls: "bg-blue-50 text-blue-800" },
-                      { label: "កាបូអ៊ីដ្រាត", val: data.nutritionData.carbohydrateGrams ?? (data.nutritionData as any).carbsGrams, unit: "g", cls: "bg-amber-50 text-amber-800" },
-                    ].map(n => (
-                      <div key={n.label} className={`rounded-2xl ${n.cls} p-3 text-center`}>
-                        <p className="text-xs font-bold text-gray-500">{n.label}</p>
-                        <p className="mt-0.5 text-base font-black">{n.val ?? 0} <span className="text-xs font-medium">{n.unit}</span></p>
-                      </div>
+                {/* Thumbnails Row */}
+                {images.length > 1 && (
+                  <div
+                    className={`grid w-full gap-2.5 shrink-0 ${
+                      images.length === 2
+                        ? "grid-cols-2"
+                        : images.length === 3
+                          ? "grid-cols-3"
+                          : "grid-cols-4"
+                    }`}
+                  >
+                    {images.map((img, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setSelectedImageIndex(idx)}
+                        className={`relative aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-2xl border-2 transition ${
+                          selectedImageIndex === idx
+                            ? "border-[#14833E] ring-2 ring-[#14833E]/20 shadow-xs"
+                            : "border-gray-200 hover:border-gray-400"
+                        }`}
+                      >
+                        <img
+                          src={resolveFoodHubCatalogImageUrl(img) || img}
+                          alt={`Thumbnail ${idx + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                      </button>
                     ))}
                   </div>
-                </InfoCard>
-              )}
+                )}
+              </div>
 
-              {/* Filter Tags Grid */}
-              <div className="grid gap-3 sm:grid-cols-2">
-                {/* Meal Types */}
-                <InfoCard accentClass="bg-emerald-400" label="ពេលទទួលទាន" icon={<Clock size={15} />}>
-                  <TagRow
-                    items={Array.isArray(data.mealTypes) ? data.mealTypes as any[] : []}
-                    color="bg-emerald-100 text-emerald-800"
-                  />
-                </InfoCard>
+              {/* Right Column: Title, Badges, Description, Stat Cards */}
+              <div className="flex flex-col justify-between lg:col-span-7">
+                <div className="space-y-4">
+                  {/* Title & Subtitle */}
+                  <div>
+                    <h2 className="text-3xl font-medium text-gray-800">
+                      {data?.localName ||
+                        data?.canonicalName ||
+                        "ព័ត៌មានមុខម្ហូប"}
+                    </h2>
+                    {data?.canonicalName &&
+                      data?.localName &&
+                      data.canonicalName !== data.localName && (
+                        <p className="mt-1 text-lg font-normal text-gray-400">
+                          {data.canonicalName}
+                        </p>
+                      )}
+                  </div>
 
-                {/* Age Groups */}
-                <InfoCard accentClass="bg-blue-300" label="ក្រុមអាយុ" icon={<UsersRound size={15} />}>
-                  <TagRow
-                    items={
-                      Array.isArray(data.ageRules) && (data.ageRules as any[]).length > 0
-                        ? data.ageRules as any[]
-                        : Array.isArray((data as any).ageGroups)
-                        ? (data as any).ageGroups
-                        : []
-                    }
-                    color="bg-blue-100 text-blue-800"
-                  />
-                </InfoCard>
+                  {/* Badges */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-lg font-normal ${
+                        data.isActive === false
+                          ? "border-gray-200 bg-gray-100 text-gray-600"
+                          : "border-emerald-100 bg-emerald-50 text-emerald-700"
+                      }`}
+                    >
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${
+                          data.isActive === false
+                            ? "bg-gray-400"
+                            : "bg-emerald-500"
+                        }`}
+                      />
+                      {data.isActive === false ? "អសកម្ម" : "មានលក់"}
+                    </span>
 
-                {/* Dietary Types */}
-                <InfoCard accentClass="bg-rose-300" label="របបអាហារ" icon={<Heart size={15} />}>
-                  <TagRow
-                    items={Array.isArray(data.dietaryTypes) ? data.dietaryTypes as any[] : []}
-                    color="bg-rose-100 text-rose-800"
-                  />
-                </InfoCard>
+                    {data.categoryName && (
+                      <span className="rounded-full border border-emerald-100 bg-emerald-50 px-3.5 py-1 text-lg font-normal text-emerald-700">
+                        {extractKhmerOnlyName(data.categoryName)}
+                      </span>
+                    )}
 
-                {/* Seasons + Weather */}
-                <InfoCard accentClass="bg-amber-300" label="រដូវកាល & អាកាសធាតុ" icon={<CloudSun size={15} />}>
-                  <div className="flex flex-wrap gap-1.5">
-                    {Array.isArray(data.seasons) && (data.seasons as any[]).map((s: any, idx: number) => (
-                      <span key={`s-${idx}`} className="rounded-xl bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
+                    {data.cuisineName && (
+                      <span className="rounded-full border border-emerald-100 bg-emerald-50 px-3.5 py-1 text-lg font-normal text-emerald-700">
+                        {data.cuisineName}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  {data.description ? (
+                    <p className="text-lg font-normal leading-relaxed text-gray-600">
+                      {data.description}
+                    </p>
+                  ) : (
+                    <p className="text-lg font-normal text-gray-400">
+                      មិនមានការពិពណ៌នាអំពីមុខម្ហូបនេះទេ។
+                    </p>
+                  )}
+
+                  {/* 4 Stat Cards */}
+                  <div className="grid grid-cols-2 gap-3 pt-2 sm:grid-cols-4">
+                    {/* Stat 1: Time */}
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-gray-50/70 p-3.5 text-center">
+                      <Clock size={22} className="text-[#14833E]" />
+                      <p className="mt-1 text-lg font-medium text-gray-800">
+                        {prepTime}
+                      </p>
+                      <p className="text-lg font-normal text-gray-400">
+                        ពេលរៀបចំ
+                      </p>
+                    </div>
+
+                    {/* Stat 2: Distance / Cuisine */}
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-gray-50/70 p-3.5 text-center">
+                      <MapPin size={22} className="text-[#14833E]" />
+                      <p className="mt-1 max-w-full truncate text-lg font-medium text-gray-800">
+                        {distanceText}
+                      </p>
+                      <p className="text-lg font-normal text-gray-400">
+                        ចម្ងាយ
+                      </p>
+                    </div>
+
+                    {/* Stat 3: Spice */}
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-gray-50/70 p-3.5 text-center">
+                      <Flame
+                        size={22}
+                        className={
+                          spice > 0 ? "text-amber-500" : "text-[#14833E]"
+                        }
+                      />
+                      <p className="mt-1 text-lg font-medium text-gray-800">
+                        {SPICE_SHORT_LABELS[spice] || `${spice} កម្រិត`}
+                      </p>
+                      <p className="text-lg font-normal text-gray-400">
+                        កម្រិតហឹរ
+                      </p>
+                    </div>
+
+                    {/* Stat 4: Calories */}
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-gray-50/70 p-3.5 text-center">
+                      <Activity size={22} className="text-[#14833E]" />
+                      <p className="mt-1 text-lg font-medium text-gray-800">
+                        {calories} kcal
+                      </p>
+                      <p className="text-lg font-normal text-gray-400">
+                        កាឡូរី
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Dietary Types / របបអាហារ */}
+                  <div className="pt-2">
+                    <p className="text-lg font-normal text-gray-400">
+                      របបអាហារ
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap gap-2">
+                      {Array.isArray(data.dietaryTypes) &&
+                      data.dietaryTypes.length > 0 ? (
+                        (data.dietaryTypes as any[]).map(
+                          (dt: any, idx: number) => (
+                            <span
+                              key={idx}
+                              className="rounded-full border border-emerald-100 bg-emerald-50 px-3.5 py-1 text-lg font-normal text-emerald-700"
+                            >
+                              {dt.localName || dt.name || dt.code || "—"}
+                            </span>
+                          ),
+                        )
+                      ) : (
+                        <p className="text-lg font-normal text-gray-400">
+                          មិនមានទិន្នន័យរបបអាហារ។
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Classification Sections */}
+            <div className="grid grid-cols-1 gap-4 pt-2 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Meal Time */}
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <Clock size={18} className="text-[#14833E]" />
+                  <span className="text-lg font-normal">ពេលទទួលទាន</span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {Array.isArray(data.mealTypes) &&
+                  data.mealTypes.length > 0 ? (
+                    (data.mealTypes as any[]).map((m: any, idx: number) => (
+                      <span
+                        key={idx}
+                        className="rounded-xl bg-white px-2.5 py-1 text-lg font-normal text-gray-700 border border-gray-100"
+                      >
+                        {m.localName || m.name || m.code}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-lg font-normal text-gray-400">—</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Age Groups */}
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <UsersRound size={18} className="text-[#14833E]" />
+                  <span className="text-lg font-normal">ក្រុមអាយុ</span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {Array.isArray(data.ageRules) &&
+                  data.ageRules.length > 0 ? (
+                    (data.ageRules as any[]).map((a: any, idx: number) => (
+                      <span
+                        key={idx}
+                        className="rounded-xl bg-white px-2.5 py-1 text-lg font-normal text-gray-700 border border-gray-100"
+                      >
+                        {a.localName || a.name || a.code}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-lg font-normal text-gray-400">—</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Seasons & Weather */}
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <CloudSun size={18} className="text-[#14833E]" />
+                  <span className="text-lg font-normal">រដូវកាល & អាកាសធាតុ</span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {Array.isArray(data.seasons) &&
+                    (data.seasons as any[]).map((s: any, idx: number) => (
+                      <span
+                        key={`s-${idx}`}
+                        className="rounded-xl bg-white px-2.5 py-1 text-lg font-normal text-gray-700 border border-gray-100"
+                      >
                         {s.localName || s.name || s.code}
                       </span>
                     ))}
-                    {Array.isArray(data.suitableWeather) && (data.suitableWeather as any[]).map((w: any, idx: number) => (
-                      <span key={`w-${idx}`} className="rounded-xl bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800">
+                  {Array.isArray(data.suitableWeather) &&
+                    (data.suitableWeather as any[]).map((w: any, idx: number) => (
+                      <span
+                        key={`w-${idx}`}
+                        className="rounded-xl bg-white px-2.5 py-1 text-lg font-normal text-gray-700 border border-gray-100"
+                      >
                         {w.localName || w.name || w.code}
                       </span>
                     ))}
-                    {(!data.seasons || (data.seasons as any[]).length === 0) &&
-                     (!data.suitableWeather || (data.suitableWeather as any[]).length === 0) && (
-                      <span className="text-sm text-gray-400">គ្រប់រដូវកាល</span>
+                  {(!data.seasons || data.seasons.length === 0) &&
+                    (!data.suitableWeather || data.suitableWeather.length === 0) && (
+                      <span className="text-lg font-normal text-gray-400">គ្រប់រដូវកាល</span>
                     )}
-                  </div>
-                </InfoCard>
+                </div>
               </div>
 
               {/* Events */}
-              {Array.isArray(data.events) && (data.events as any[]).length > 0 && (
-                <InfoCard accentClass="bg-violet-300" label="ព្រឹត្តិការណ៍" icon={<Sparkles size={15} />}>
-                  <TagRow items={data.events as any[]} color="bg-violet-100 text-violet-800" />
-                </InfoCard>
-              )}
-
-              {/* Gallery Images */}
-              {images.length > 1 && (
-                <InfoCard accentClass="bg-gray-300" label={`រូបភាពទាំងអស់ (${images.length})`} icon={<span className="text-base">🖼</span>}>
-                  <div className="flex flex-wrap gap-2.5">
-                    {images.map((img, idx) => (
-                      <img
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <Sparkles size={18} className="text-[#14833E]" />
+                  <span className="text-lg font-normal">ព្រឹត្តិការណ៍</span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {Array.isArray(data.events) && data.events.length > 0 ? (
+                    (data.events as any[]).map((e: any, idx: number) => (
+                      <span
                         key={idx}
-                        src={resolveFoodHubCatalogImageUrl(img) || img}
-                        alt={`Food ${idx + 1}`}
-                        className="h-20 w-20 rounded-2xl object-cover border border-gray-200 shadow-sm"
-                      />
-                    ))}
-                  </div>
-                </InfoCard>
-              )}
-
-
-
+                        className="rounded-xl bg-white px-2.5 py-1 text-lg font-normal text-gray-700 border border-gray-100"
+                      >
+                        {e.localName || e.name || e.code}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-lg font-normal text-gray-400">—</span>
+                  )}
+                </div>
+              </div>
             </div>
-          ) : null}
 
-          {/* ─── FOOTER ─── */}
-          <div className="mt-6 flex items-center justify-between">
-            <div>
-              {data && onEdit && (
+            {/* Footer Action Buttons */}
+            <div className="flex items-center justify-between pt-4">
+              {data && onEdit ? (
                 <button
                   type="button"
-                  onClick={() => { onClose(); onEdit(data); }}
+                  onClick={() => {
+                    onClose();
+                    onEdit(data);
+                  }}
                   className="inline-flex items-center gap-2 rounded-full border border-[#14833E] px-7 py-3 text-lg font-normal text-[#14833E] transition hover:bg-emerald-50"
                 >
                   <Pencil size={18} />
-                  កែប្រែ Food
+                  <span>កែប្រែព័ត៌មាន</span>
                 </button>
+              ) : (
+                <div />
               )}
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex h-12 items-center rounded-full bg-[#14833E] px-8 text-lg font-normal text-white shadow-lg shadow-[#14833E]/20 transition hover:bg-[#0f6b32] focus:outline-none"
+              >
+                បិទ
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex h-12 items-center rounded-full bg-[#14833E] px-8 text-lg font-normal text-white shadow-lg shadow-[#14833E]/25 transition hover:bg-[#0f6b32] focus:outline-none focus:ring-4 focus:ring-[#14833E]/30"
-            >
-              បិទ
-            </button>
           </div>
-        </div>
+        ) : null}
       </div>
     </div>
   );

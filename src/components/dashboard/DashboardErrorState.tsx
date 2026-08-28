@@ -31,18 +31,18 @@ export default function DashboardErrorState({
       </span>
 
       <div>
-        <p className="text-lg font-semibold text-red-800">{title}</p>
-        <p className="mt-1 max-w-xl text-base text-red-700/90">{message}</p>
+        <p className="text-2xl font-medium text-red-800">{title}</p>
+        <p className="mt-1 max-w-xl text-lg font-normal text-red-700/90">{message}</p>
       </div>
 
       {onRetry && (
         <button
           type="button"
           onClick={onRetry}
-          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-red-600 px-5 text-base font-semibold text-white transition hover:bg-red-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-red-200"
+          className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-red-600 px-6 text-lg font-normal text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-red-200"
         >
           <RotateCcw size={18} aria-hidden="true" />
-          ព្យាយាមម្ដងទៀត
+          <span>ព្យាយាមម្ដងទៀត</span>
         </button>
       )}
     </div>

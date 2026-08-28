@@ -72,7 +72,7 @@ export default function UserDetailHeader({
     user.status === "DISABLED" || user.status === "DELETED";
 
   return (
-    <section className="relative overflow-hidden rounded-[30px] bg-gradient-to-br from-[#0f6b32] via-[#14833E] to-[#1aad54] px-6 py-7 text-white shadow-xl shadow-primary-900/20 sm:px-8 sm:py-8">
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f6b32] via-[#14833E] to-[#1aad54] px-6 py-7 text-white shadow-xl shadow-primary-900/20 sm:px-8 sm:py-8">
       {/* Decorative luminous glow */}
       <div className="pointer-events-none absolute -right-16 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 right-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
@@ -81,10 +81,10 @@ export default function UserDetailHeader({
       <div className="relative">
         <Link
           href="/users"
-          className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm ring-1 ring-white/20 transition hover:bg-white/25 active:scale-95"
+          className="inline-flex items-center gap-2 rounded-full bg-white/15 px-5 py-2.5 text-lg font-normal text-white backdrop-blur-sm ring-1 ring-white/20 transition hover:bg-white/25 active:scale-95"
         >
-          <ArrowLeft size={16} />
-          ត្រឡប់ទៅបញ្ជីគណនីអ្នកប្រើប្រាស់
+          <ArrowLeft size={18} />
+          <span>ត្រឡប់ទៅបញ្ជីគណនីអ្នកប្រើប្រាស់</span>
         </Link>
 
         <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -94,42 +94,42 @@ export default function UserDetailHeader({
               userUuid={user.uuid}
               avatarMediaUuid={avatarMediaUuid}
               imageUrl={imageUrl}
-              containerClassName="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[24px] bg-white text-2xl font-bold text-primary-800 shadow-md ring-2 ring-white/30"
+              containerClassName="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white text-2xl font-medium text-primary-800 shadow-md ring-2 ring-white/30"
             />
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                <p className="truncate text-[28px] leading-tight font-extrabold text-accent-400 drop-shadow-xs">
+                <p className="truncate text-3xl sm:text-4xl font-medium text-accent-400 drop-shadow-xs">
                   {name}
                 </p>
 
                 <StatusBadge status={user.status} />
               </div>
 
-              <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-2 text-[18px] text-white/90">
+              <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-2 text-lg font-normal text-white/90">
                 <span className="inline-flex items-center gap-2">
-                  <Mail size={16} />
-                  {user.primaryEmail ?? "គ្មានអ៊ីមែល"}
+                  <Mail size={18} />
+                  <span>{user.primaryEmail ?? "គ្មានអ៊ីមែល"}</span>
                 </span>
 
                 <span className="inline-flex items-center gap-2">
-                  <User size={16} />
-                  ចូលប្រើចុងក្រោយ: {formatDateTime(user.lastLoginAt)}
+                  <User size={18} />
+                  <span>ចូលប្រើចុងក្រោយ: {formatDateTime(user.lastLoginAt)}</span>
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2.5">
+          <div className="flex flex-wrap gap-3">
             {onCreateProfile && !isDisabledOrDeleted && (
               <button
                 type="button"
                 disabled={busy}
                 onClick={onCreateProfile}
-                className="inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-5 text-base font-bold text-primary-800 shadow-md shadow-black/10 transition-all hover:bg-accent-50 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-white px-6 text-lg font-normal text-primary-800 shadow-md shadow-black/10 transition-all hover:bg-accent-50 active:scale-95 disabled:opacity-50"
               >
-                <Plus size={18} />
-                បង្កើតប្រវត្តិរូបថ្មី
+                <Plus size={20} />
+                <span>បង្កើតប្រវត្តិរូបថ្មី</span>
               </button>
             )}
 
@@ -140,11 +140,11 @@ export default function UserDetailHeader({
                     type="button"
                     disabled={busy}
                     onClick={onRestore}
-                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-500 px-5 text-base font-bold text-white shadow-md shadow-emerald-950/20 transition-all hover:bg-emerald-600 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                    className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-emerald-500 px-6 text-lg font-normal text-white shadow-md shadow-emerald-950/20 transition-all hover:bg-emerald-600 active:scale-95 disabled:opacity-50"
                     title="ស្តារ user"
                   >
-                    <RotateCcw size={18} />
-                    ស្តារឡើងវិញ
+                    <RotateCcw size={19} />
+                    <span>ស្តារឡើងវិញ</span>
                   </button>
                 )}
 
@@ -153,11 +153,11 @@ export default function UserDetailHeader({
                     type="button"
                     disabled={busy}
                     onClick={onHardDelete}
-                    className="inline-flex min-h-12 items-center gap-2 rounded-full border border-red-400 bg-red-600 px-5 text-base font-bold text-white shadow-md shadow-red-950/20 transition-all hover:bg-red-500 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                    className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full border border-red-400 bg-red-600 px-6 text-lg font-normal text-white shadow-md shadow-red-950/20 transition-all hover:bg-red-500 active:scale-95 disabled:opacity-50"
                     title="លុប user ចេញពីប្រព័ន្ធ"
                   >
-                    <Trash2 size={18} />
-                    លុបចេញពីប្រព័ន្ធ
+                    <Trash2 size={19} />
+                    <span>លុបចេញពីប្រព័ន្ធ</span>
                   </button>
                 )}
               </>
@@ -165,7 +165,7 @@ export default function UserDetailHeader({
           </div>
         </div>
 
-        <div className="mt-7 grid gap-3 sm:grid-cols-3">
+        <div className="mt-7 grid gap-3.5 sm:grid-cols-3">
           <Info
             label="ផ្ទៀងផ្ទាត់អ៊ីមែល"
             value={user.emailVerified ? "បានផ្ទៀងផ្ទាត់" : "មិនបានផ្ទៀងផ្ទាត់"}
@@ -194,9 +194,9 @@ function Info({
   value: string;
 }) {
   return (
-    <div className="rounded-3xl bg-white/20 px-5 py-4">
-      <p className="text-[18px] text-white/80">{label}</p>
-      <p className="mt-1 truncate text-[18px] font-semibold text-white">
+    <div className="rounded-3xl bg-white/20 px-6 py-4.5">
+      <p className="text-lg font-normal text-white/80">{label}</p>
+      <p className="mt-1 truncate text-2xl font-medium text-white">
         {value}
       </p>
     </div>

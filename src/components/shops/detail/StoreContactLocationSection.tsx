@@ -51,13 +51,13 @@ export default function StoreContactLocationSection({
 
   return (
     <Section title="ទីតាំង & ទំនាក់ទំនង" icon={<MapPin size={22} />}>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         {/* Full Address Banner */}
-        <div className="col-span-full rounded-2xl border border-gray-100 bg-gray-50/60 px-4 py-4 transition hover:border-gray-200 hover:bg-gray-50">
-          <p className="text-lg font-medium text-gray-500">អាសយដ្ឋានពេញលេញ</p>
-          <p className="mt-1 flex items-center gap-2 text-lg font-semibold text-gray-800">
+        <div className="col-span-full rounded-2xl border border-gray-100 bg-gray-50/60 px-5 py-4 transition hover:border-gray-200 hover:bg-gray-50">
+          <p className="text-lg font-normal text-gray-500">អាសយដ្ឋានពេញលេញ</p>
+          <p className="mt-1 flex items-center gap-2 text-lg font-medium text-gray-800">
             <span className="text-primary-700">
-              <MapPin size={19} />
+              <MapPin size={20} />
             </span>
             {store.addressLine || "មិនមានអាសយដ្ឋានឡើយ"}
           </p>
@@ -65,37 +65,37 @@ export default function StoreContactLocationSection({
 
         {/* Embedded Interactive Map Preview */}
         {hasCoords && mapEmbedUrl && (
-          <div className="col-span-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xs">
+          <div className="col-span-full overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-xs">
             <div className="relative">
               <iframe
                 title="Store Map"
                 src={mapEmbedUrl}
-                className="h-56 w-full border-0 sm:h-64"
+                className="h-60 w-full border-0 sm:h-72"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 bg-gray-50/90 px-4 py-3.5 backdrop-blur-sm">
-                <div className="flex items-center gap-2 text-lg font-semibold text-gray-700">
-                  <Compass size={18} className="text-primary-700" />
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 bg-gray-50/90 px-5 py-4 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-lg font-medium text-gray-700">
+                  <Compass size={20} className="text-primary-700" />
                   <span>
                     {lat.toFixed(6)}, {lng.toFixed(6)}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={handleCopyCoordinates}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-2 text-base font-bold text-gray-700 shadow-2xs transition hover:bg-gray-50"
+                    className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 shadow-2xs transition hover:bg-gray-50"
                   >
                     {copiedCoords ? (
                       <>
-                        <Check size={16} className="text-emerald-600" />
+                        <Check size={18} className="text-emerald-600" />
                         <span className="text-emerald-700">បានចម្លង</span>
                       </>
                     ) : (
                       <>
-                        <Copy size={16} />
+                        <Copy size={18} />
                         <span>ចម្លងកូអរដោនេ</span>
                       </>
                     )}
@@ -105,9 +105,9 @@ export default function StoreContactLocationSection({
                     href={`https://www.google.com/maps/search/${encodeURIComponent(store.storeName)}/@${lat},${lng},17z`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full bg-[#136C34] px-4 py-2 text-base font-bold text-white shadow-xs transition hover:bg-[#0F5F2E]"
+                    className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-[#136C34] px-5 text-lg font-normal text-white shadow-xs transition hover:bg-[#0F5F2E]"
                   >
-                    <ExternalLink size={16} />
+                    <ExternalLink size={18} />
                     <span>បើកក្នុង Google Maps</span>
                   </a>
                 </div>

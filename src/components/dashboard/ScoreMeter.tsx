@@ -12,7 +12,7 @@ export default function ScoreMeter({ value }: { value: number }) {
 
   return (
     <span className="flex items-center justify-end gap-2">
-      <span className="font-semibold text-gray-900 tabular-nums">
+      <span className="text-lg font-normal text-gray-800 tabular-nums">
         {formatDecimal(safe)}
       </span>
 

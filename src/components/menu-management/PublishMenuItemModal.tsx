@@ -497,26 +497,50 @@ export default function PublishMenuItemModal({
     setFieldErrors({});
   }, [activeItem, item, open, stores, foods, ingredients, dietaryTypes, allergens, storeFixedId]);
 
+  const safeFoods = useMemo(
+    () =>
+      Array.isArray(foods)
+        ? foods
+        : (foods as any)?.content ?? (foods as any)?.contents ?? [],
+    [foods],
+  );
+
+  const safeIngredients = useMemo(
+    () =>
+      Array.isArray(ingredients)
+        ? ingredients
+        : (ingredients as any)?.contents ?? [],
+    [ingredients],
+  );
+
+  const safeDietaryTypes = useMemo(
+    () =>
+      Array.isArray(dietaryTypes)
+        ? dietaryTypes
+        : (dietaryTypes as any)?.contents ?? [],
+    [dietaryTypes],
+  );
+
   const activeFoods = useMemo(
     () =>
-      foods.filter(
+      safeFoods.filter(
         (food) =>
           food.isActive !== false ||
           food.uuid === item?.foodUuid ||
           food.uuid === (item as any)?.food?.uuid ||
           food.uuid === values.foodUuid,
       ),
-    [foods, item, values.foodUuid],
+    [safeFoods, item, values.foodUuid],
   );
 
   const activeIngredients = useMemo(
-    () => ingredients.filter((ingredient) => ingredient.isActive !== false),
-    [ingredients],
+    () => safeIngredients.filter((ingredient) => ingredient.isActive !== false),
+    [safeIngredients],
   );
 
   const activeDietaryTypes = useMemo(
-    () => dietaryTypes.filter((dt) => dt.active !== false),
-    [dietaryTypes],
+    () => safeDietaryTypes.filter((dt) => dt.active !== false),
+    [safeDietaryTypes],
   );
 
   const storeOptions: SearchableOption[] = useMemo(() => {

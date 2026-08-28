@@ -28,18 +28,18 @@ export default function UserEditModal({
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[3px]">
-      <div className="w-full max-w-lg overflow-hidden rounded-[28px] border border-gray-100 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="w-full max-w-lg overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 bg-gradient-to-r from-emerald-50/70 via-white to-emerald-50/40 px-6 py-5 sm:px-8">
           <div className="flex items-center gap-3.5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-800 text-white shadow-md shadow-primary-900/20 ring-1 ring-primary-700/20">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-800 text-white shadow-md shadow-primary-900/20 ring-1 ring-primary-700/20">
               <UserCog size={22} />
             </div>
             <div>
-              <p className="text-2xl font-bold tracking-tight text-gray-900">
+              <p className="text-2xl sm:text-3xl font-medium tracking-tight text-gray-800">
                 ស្ថានភាពគណនី
               </p>
-              <p className="mt-0.5 text-sm text-gray-400">@{user.username}</p>
+              <p className="mt-0.5 text-lg font-normal text-gray-400">@{user.username}</p>
             </div>
           </div>
 
@@ -48,16 +48,16 @@ export default function UserEditModal({
             disabled={saving}
             onClick={onClose}
             aria-label="Close"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-gray-200 disabled:opacity-50"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
         {/* Content */}
         <div className="space-y-5 p-6 sm:p-8">
           <div>
-            <p className="text-sm font-semibold text-gray-700 mb-3">
+            <p className="text-lg font-normal text-gray-700 mb-3">
               ជ្រើសរើសស្ថានភាពគណនី
             </p>
 
@@ -71,7 +71,7 @@ export default function UserEditModal({
                     key={option}
                     type="button"
                     onClick={() => setStatus(option)}
-                    className={`flex min-h-16 items-center justify-between rounded-2xl border-2 px-4 py-3 text-base font-bold transition active:scale-95 ${
+                    className={`flex min-h-16 cursor-pointer items-center justify-between rounded-full border-2 px-5 py-3 text-lg font-normal transition active:scale-95 ${
                       selected
                         ? isSuspend
                           ? "border-amber-400 bg-amber-50/80 text-amber-900 shadow-sm"
@@ -81,7 +81,7 @@ export default function UserEditModal({
                   >
                     <div className="flex items-center gap-2.5">
                       <div
-                        className={`flex h-8 w-8 items-center justify-center rounded-xl ${
+                        className={`flex h-8 w-8 items-center justify-center rounded-full ${
                           isSuspend
                             ? "bg-amber-100 text-amber-700"
                             : "bg-emerald-100 text-emerald-700"
@@ -115,16 +115,16 @@ export default function UserEditModal({
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="rounded-2xl border border-gray-200 bg-white px-5 py-2.5 text-base font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              className="rounded-full border border-gray-200 bg-white px-6 py-3 text-lg font-normal text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
             >
               បោះបង់
             </button>
 
             <button
-              type="button"
+              type="submit"
               disabled={saving || status === user.status}
               onClick={() => void onSubmit(status)}
-              className="inline-flex items-center gap-2 rounded-2xl bg-primary-800 px-6 py-2.5 text-base font-bold text-white shadow-md shadow-primary-900/20 transition-all hover:bg-primary-900 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-primary-800 px-7 py-3 text-lg font-normal text-white shadow-md shadow-primary-900/20 transition-all hover:bg-primary-900 active:scale-95 disabled:opacity-50"
             >
               {saving ? (
                 <>

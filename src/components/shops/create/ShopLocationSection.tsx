@@ -44,7 +44,7 @@ export default function ShopLocationSection({
   ];
 
   return (
-    <section className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
+    <section className="rounded-3xl border border-gray-100 bg-white p-6 sm:p-8">
       {/* =================================================
           SECTION HEADER
       ================================================== */}
@@ -52,15 +52,15 @@ export default function ShopLocationSection({
       <div className="mb-6 flex items-center gap-3">
         <div
           className="
-            flex h-11 w-11 shrink-0
+            flex h-12 w-12 shrink-0
             items-center justify-center
-            rounded-xl bg-primary-50 text-primary-800
+            rounded-full bg-primary-50 text-primary-800
           "
         >
-          <MapPinned size={22} />
+          <MapPinned size={24} />
         </div>
 
-        <p className="text-2xl font-bold text-[#0F5A2C]">ទីតាំងហាង</p>
+        <p className="text-2xl font-medium text-[#0F5A2C]">ទីតាំងហាង</p>
       </div>
 
       {/* =================================================
@@ -73,7 +73,7 @@ export default function ShopLocationSection({
 
           return (
             <label key={key} className="block">
-              <span className="mb-2 block text-lg font-medium text-primary-800">
+              <span className="mb-2 block text-lg font-normal text-gray-700">
                 {label}
                 {required && <span className="text-red-500"> *</span>}
               </span>
@@ -85,17 +85,17 @@ export default function ShopLocationSection({
                 onChange={(event) => onChange(key, event.target.value)}
                 placeholder={placeholder}
                 className={`
-                  h-[52px] w-full rounded-xl border bg-gray-50
-                  px-4 text-lg text-gray-800 outline-none transition
+                  h-12 w-full rounded-full border bg-gray-50
+                  px-5 text-lg font-normal text-gray-800 outline-none transition
                   placeholder:text-gray-400 hover:border-gray-300
-                  focus:bg-white focus:ring-4
+                  focus:bg-white focus:ring-2 focus:ring-primary-100
                   ${fieldError
-                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                    : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"}
+                    ? "border-red-400 focus:border-red-500"
+                    : "border-gray-200 focus:border-primary-600"}
                 `}
               />
               {fieldError && (
-                <p className="mt-1 text-lg text-red-600">{fieldError}</p>
+                <p className="mt-1 text-lg font-normal text-red-600">{fieldError}</p>
               )}
             </label>
           );

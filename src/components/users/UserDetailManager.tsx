@@ -422,7 +422,7 @@ export default function UserDetailManager({
   if (userLoading) {
     return (
       <div className="flex min-h-[65vh] items-center justify-center">
-        <Loader2 size={34} className="animate-spin text-primary-700" />
+        <Loader2 size={38} className="animate-spin text-primary-700" />
       </div>
     );
   }
@@ -430,14 +430,14 @@ export default function UserDetailManager({
   if (userError || !user) {
     return (
       <div className="w-full min-w-0 max-w-full">
-        <div className="flex min-h-[420px] flex-col items-center justify-center rounded-[28px] border border-red-100 bg-white px-6 text-center">
+        <div className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-red-100 bg-white px-6 text-center">
           <AlertTriangle size={42} className="text-red-400" />
 
-          <p className="mt-4 text-xl font-bold text-gray-800">
+          <p className="mt-4 text-2xl font-medium text-gray-800">
             មិនអាចទាញយក User detail
           </p>
 
-          <p className="mt-2 max-w-lg text-base leading-7 text-gray-500">
+          <p className="mt-2 max-w-lg text-lg font-normal leading-relaxed text-gray-500">
             {getAdminApiErrorMessage(userError)}
           </p>
         </div>
@@ -465,47 +465,47 @@ export default function UserDetailManager({
       />
 
       {/* =================================================
-          FLOATING TOAST NOTIFICATION (SHADCN STYLE)
+          FLOATING TOAST NOTIFICATION
       ================================================== */}
       {notice && (
         <div className="fixed top-6 right-6 z-[9999] pointer-events-none flex max-w-md animate-in fade-in slide-in-from-top-5 duration-300">
           <div
-            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-3.5 shadow-2xl backdrop-blur-md transition-all ${notice.type === "success"
+            className={`pointer-events-auto flex items-center gap-3.5 rounded-3xl border px-5 py-4 shadow-2xl backdrop-blur-md transition-all ${notice.type === "success"
               ? "border-emerald-200 bg-white/95 text-emerald-950 shadow-emerald-500/10"
               : "border-red-200 bg-white/95 text-red-950 shadow-red-500/10"
               }`}
           >
             <div
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${notice.type === "success"
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${notice.type === "success"
                 ? "bg-emerald-50 text-emerald-600"
                 : "bg-red-50 text-red-600"
                 }`}
             >
               {notice.type === "success" ? (
-                <CheckCircle2 size={20} />
+                <CheckCircle2 size={24} />
               ) : (
-                <AlertCircle size={20} />
+                <AlertCircle size={24} />
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold leading-relaxed">
+              <p className="text-lg font-medium leading-relaxed">
                 {notice.text}
               </p>
             </div>
             <button
               type="button"
               onClick={() => setNotice(null)}
-              className="ml-2 flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+              className="cursor-pointer ml-2 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
               aria-label="Close"
             >
-              <X size={15} />
+              <X size={18} />
             </button>
           </div>
         </div>
       )}
 
       {profilesError && (
-        <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-base text-red-600">
+        <div className="rounded-3xl border border-red-100 bg-red-50 px-5 py-4 text-lg font-normal text-red-600">
           {getAdminApiErrorMessage(profilesError)}
         </div>
       )}
