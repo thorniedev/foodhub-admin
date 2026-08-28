@@ -106,7 +106,7 @@ export default function RelatedProfilesPanel({
       </div>
 
       {!loading && (
-        <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 text-lg text-gray-500">
+        <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 text-lg font-normal text-gray-500">
           <span>
             ទំព័រ {page + 1} / {totalPages}
           </span>
@@ -116,20 +116,20 @@ export default function RelatedProfilesPanel({
               type="button"
               disabled={fetching || page <= 0}
               onClick={() => onPageChange(page - 1)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 transition hover:border-primary-300 hover:bg-primary-50 hover:text-primary-800 disabled:opacity-40"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="Previous profile page"
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={20} />
             </button>
 
             <button
               type="button"
               disabled={fetching || page >= totalPages - 1}
               onClick={() => onPageChange(page + 1)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 transition hover:border-primary-300 hover:bg-primary-50 hover:text-primary-800 disabled:opacity-40"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="Next profile page"
             >
-              <ChevronRight size={18} />
+              <ChevronRight size={20} />
             </button>
           </div>
         </div>

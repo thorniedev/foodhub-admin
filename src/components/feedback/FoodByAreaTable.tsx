@@ -31,13 +31,13 @@ export default function FoodByAreaTable({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px] border-collapse text-left">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/50">
-              <th className="px-5 py-4 text-xl font-bold text-[#136C34]">រូបភាព</th>
-              <th className="px-5 py-4 text-xl font-bold text-[#136C34]">ទីតាំង</th>
-              <th className="px-5 py-4 text-xl font-bold text-[#136C34]">ចំណងជើង</th>
-              <th className="px-5 py-4 text-xl font-bold text-[#136C34]">ការពិពណ៌នា</th>
-              <th className="px-5 py-4 text-center text-xl font-bold text-[#136C34]">បង្ហាញ</th>
-              <th className="px-5 py-4 text-right text-xl font-bold text-[#136C34]">សកម្មភាព</th>
+            <tr className="border-b border-gray-100 bg-gray-50/50 text-left text-lg font-normal text-primary-800">
+              <th className="px-5 py-4 font-normal">រូបភាព</th>
+              <th className="px-5 py-4 font-normal">ទីតាំង</th>
+              <th className="px-5 py-4 font-normal">ចំណងជើង</th>
+              <th className="px-5 py-4 font-normal">ការពិពណ៌នា</th>
+              <th className="px-5 py-4 text-center font-normal">បង្ហាញ</th>
+              <th className="px-5 py-4 text-right font-normal">សកម្មភាព</th>
           </tr>
         </thead>
         <tbody>
@@ -47,7 +47,7 @@ export default function FoodByAreaTable({
               className="border-b border-gray-100 last:border-0 hover:bg-gray-50/60"
             >
               <td className="px-5 py-4">
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
+                <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-gray-100">
                   <Image
                     src={getValidImageUrl(item.image_url)}
                     alt={item.name}
@@ -57,14 +57,14 @@ export default function FoodByAreaTable({
                   />
                 </div>
               </td>
-              <td className="px-5 py-4 text-base text-gray-500">
+              <td className="px-5 py-4 text-lg font-normal text-gray-500">
                 {item.location}
               </td>
               <td className="px-5 py-4">
-                <p className="text-lg text-gray-800">{item.name}</p>
-                <p className="mt-1 text-sm text-gray-400">{item.id}</p>
+                <p className="text-lg font-normal text-gray-800">{item.name}</p>
+                <p className="mt-1 text-sm font-normal text-gray-400">{item.id}</p>
               </td>
-              <td className="px-5 py-4 text-base text-gray-500 max-w-[220px] truncate">
+              <td className="px-5 py-4 text-lg font-normal text-gray-500 max-w-[220px] truncate">
                 {item.description || "-"}
               </td>
               <td className="px-5 py-4 text-center">

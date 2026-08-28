@@ -45,31 +45,28 @@ export default function DietaryTypesTabs({
   };
 
   return (
-    <div className="flex w-full min-w-0 gap-2 overflow-x-auto pb-1 xl:w-auto">
+    <div className="flex flex-wrap items-center gap-2">
       {tabs.map((tab) => {
-        const selected =
-          value === tab.value;
+        const active = value === tab.value;
 
         return (
           <button
             key={tab.value}
             type="button"
-            onClick={() =>
-              onChange(tab.value)
-            }
-            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-medium transition ${
-              selected
-                ? "bg-primary-800 text-white"
-                : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
+            onClick={() => onChange(tab.value)}
+            className={`group relative inline-flex h-12 cursor-pointer items-center gap-2.5 rounded-full px-5 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
+              active
+                ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
+                : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
             }`}
           >
-            {tab.label}
+            <span>{tab.label}</span>
 
             <span
-              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-medium ${
-                selected
-                  ? "bg-white/20 text-white"
-                  : "bg-white text-gray-500"
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2.5 text-lg font-normal transition-colors duration-200 ${
+                active
+                  ? "bg-white/20 text-white backdrop-blur-xs"
+                  : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
               }`}
             >
               {counts[tab.value]}

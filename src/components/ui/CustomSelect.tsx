@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Check, ChevronDown, Search, X } from "lucide-react";
 
 export interface CustomSelectOption {
   value: string;
@@ -18,6 +18,8 @@ interface CustomSelectProps {
   error?: boolean;
   className?: string;
   align?: "left" | "right" | string;
+  searchable?: boolean;
+  pill?: boolean;
 }
 
 export default function CustomSelect({
@@ -29,11 +31,27 @@ export default function CustomSelect({
   error = false,
   className = "",
   align = "left",
+  searchable,
+  pill = false,
 }: CustomSelectProps) {
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const isSearchable = searchable ?? options.length > 7;
 
   const selectedOption = options.find((opt) => opt.value === value);
+
+  const filteredOptions = useMemo(() => {
+    if (!searchQuery.trim()) return options;
+    const q = searchQuery.toLowerCase().trim();
+    return options.filter(
+      (opt) =>
+        opt.label.toLowerCase().includes(q) ||
+        opt.description?.toLowerCase().includes(q),
+    );
+  }, [options, searchQuery]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -53,6 +71,17 @@ export default function CustomSelect({
     };
   }, [open]);
 
+  useEffect(() => {
+    if (open && isSearchable) {
+      setSearchQuery("");
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 50);
+    }
+  }, [open, isSearchable]);
+
+  const isPill = pill || className.includes("rounded-full");
+
   return (
     <div ref={containerRef} className={`relative w-full ${className}`}>
       {/* Trigger */}
@@ -60,17 +89,21 @@ export default function CustomSelect({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}
-        className={`flex h-12 w-full items-center justify-between rounded-2xl border bg-white px-4 text-left text-base transition outline-none disabled:cursor-not-allowed disabled:bg-gray-50 ${
+        className={`flex h-12 w-full items-center justify-between border bg-white px-4 text-left text-lg font-normal transition outline-none disabled:cursor-not-allowed disabled:bg-gray-50 ${
+          isPill ? "rounded-full px-5" : "rounded-2xl"
+        } ${
           error
             ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
             : open
               ? "border-primary-600 ring-2 ring-primary-100 shadow-sm"
-              : "border-gray-200 hover:border-gray-300 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              : selectedOption && isPill
+                ? "border-primary-300 bg-primary-50/40 text-primary-900 hover:border-primary-400"
+                : "border-gray-200 hover:border-gray-300 focus:border-primary-600 focus:ring-2 focus:ring-primary-100 text-gray-700"
         }`}
       >
         <span
-          className={`truncate font-medium ${
-            selectedOption ? "text-gray-900" : "text-gray-400"
+          className={`truncate font-normal ${
+            selectedOption ? "text-gray-800" : "text-gray-400"
           }`}
         >
           {selectedOption ? selectedOption.label : placeholder}
@@ -86,41 +119,79 @@ export default function CustomSelect({
 
       {/* Dropdown Menu */}
       {open && (
-        <div className={`absolute top-full z-[130] mt-1.5 max-h-60 w-full overflow-y-auto rounded-2xl border border-gray-150 bg-white p-1.5 shadow-xl shadow-gray-900/10 animate-in fade-in zoom-in-95 duration-150 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${align === "right" ? "right-0" : "left-0"}`}>
-          {options.map((opt) => {
-            const isSelected = opt.value === value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => {
-                  onChange(opt.value);
-                  setOpen(false);
-                }}
-                className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-base transition ${
-                  isSelected
-                    ? "bg-primary-50/80 font-semibold text-primary-800"
-                    : "text-gray-700 hover:bg-emerald-50/60 hover:text-primary-800"
-                }`}
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="truncate">{opt.label}</p>
-                  {opt.description && (
-                    <p className="mt-0.5 truncate text-xs text-gray-400 font-normal">
-                      {opt.description}
-                    </p>
-                  )}
-                </div>
+        <div
+          className={`absolute top-[52px] z-[130] flex max-h-80 w-full min-w-[190px] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl shadow-gray-900/10 animate-in fade-in zoom-in-95 duration-150 ${align === "right" ? "right-0" : "left-0"}`}
+        >
+          {/* Optional Search Input */}
+          {isSearchable && (
+            <div className="relative mb-1.5 p-1">
+              <Search
+                size={16}
+                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="ស្វែងរក..."
+                className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50 pl-9 pr-7 text-base font-normal text-gray-800 outline-none transition focus:border-primary-600 focus:bg-white focus:ring-2 focus:ring-primary-100"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          )}
 
-                {isSelected && (
-                  <Check
-                    size={16}
-                    className="ml-2 shrink-0 text-primary-800"
-                  />
-                )}
-              </button>
-            );
-          })}
+          {/* Options List */}
+          <div className="overflow-y-auto max-h-64 space-y-0.5 pr-0.5">
+            {filteredOptions.length === 0 ? (
+              <div className="px-3.5 py-4 text-center text-base font-normal text-gray-400">
+                មិនរកឃើញទិន្នន័យ
+              </div>
+            ) : (
+              filteredOptions.map((opt) => {
+                const isSelected = opt.value === value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(opt.value);
+                      setOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                      isSelected
+                        ? "bg-primary-50 font-normal text-primary-800"
+                        : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate">{opt.label}</p>
+                      {opt.description && (
+                        <p className="mt-0.5 truncate text-base font-normal text-gray-400">
+                          {opt.description}
+                        </p>
+                      )}
+                    </div>
+
+                    {isSelected && (
+                      <Check
+                        size={18}
+                        className="ml-2 shrink-0 text-primary-800"
+                      />
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
         </div>
       )}
     </div>

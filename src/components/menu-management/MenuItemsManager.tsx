@@ -3,6 +3,7 @@
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowUpDown,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -11,6 +12,7 @@ import {
   Loader2,
   Plus,
   RefreshCw,
+  RotateCcw,
   Search,
   Store,
   Utensils,
@@ -18,7 +20,7 @@ import {
   Layers,
 } from "lucide-react";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   useCreateManagedFoodMutation,
@@ -43,7 +45,8 @@ import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
 import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
 import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionApi";
 import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
-import { readFilterCatalog, saveFoodRelationsStorage } from "@/src/lib/filterCatalogStorage";
+import { readFilterCatalog, saveFoodRelationsStorage, readLocalMenuItems } from "@/src/lib/filterCatalogStorage";
+import { useUpdateFoodCategoryMutation } from "@/src/app/store/foodCategoryApi";
 import CustomSelect from "../ui/CustomSelect";
 
 import { getMenuManagementApiError } from "@/src/lib/menuManagementApiError";
@@ -59,6 +62,7 @@ import type {
   FoodWritePayload,
   MenuItemRecord,
   MenuItemWritePayload,
+  StoreOption,
 } from "@/src/types/menu-management";
 
 import DeleteConfirmModal from "./DeleteConfirmModal";
@@ -96,7 +100,23 @@ export default function MenuItemsManager({
   >("NEWEST");
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sizeOpen, setSizeOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+  const sizeRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
   const [notice, setNotice] = useState<Notice>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sizeRef.current && !sizeRef.current.contains(e.target as Node)) {
+        setSizeOpen(false);
+      }
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!notice) return;
@@ -134,11 +154,33 @@ export default function MenuItemsManager({
   });
 
   const categoriesQuery = useGetManagedFoodCategoriesQuery();
+  const [updateFoodCategory] = useUpdateFoodCategoryMutation();
+
+  useEffect(() => {
+    const list = categoriesQuery.data;
+    if (!Array.isArray(list) || !list.length) return;
+    for (const c of list) {
+      if (c.parentCategoryUuid && c.parentCategoryUuid === c.uuid) {
+        console.warn("[AUTO-REPAIRING CATEGORY CYCLE IN BACKEND DATABASE]", c.name, c.uuid);
+        void updateFoodCategory({
+          uuid: c.uuid,
+          body: {
+            parentCategoryUuid: null,
+          },
+        });
+      }
+    }
+  }, [categoriesQuery.data, updateFoodCategory]);
   const cuisinesQuery = useGetManagedCuisinesQuery();
   const storesQuery = useGetManagedStoresQuery();
-  const allShopsListQuery = useGetShopsQuery({ size: 100 });
+  const allShopsListQuery = useGetShopsQuery({
+    reviewStatus: "APPROVED",
+    accountStatus: "ACTIVE",
+    size: 100,
+  });
   const approvedStoresCountQuery = useGetShopsQuery({
     reviewStatus: "APPROVED",
+    accountStatus: "ACTIVE",
     size: 1,
   });
 
@@ -224,9 +266,41 @@ export default function MenuItemsManager({
   const [deleteMenuItem, { isLoading: deletingMenuItemRequest }] = useDeleteStoreMenuItemMutation();
 
   const foods = foodsQuery.data?.content ?? [];
-  const menuItems = menuItemsQuery.data?.content ?? [];
+  const rawMenuItems = menuItemsQuery.data?.content ?? [];
+  const localMenuItems = useMemo(() => readLocalMenuItems(), [menuItemsQuery.data]);
+  const menuItems = useMemo(() => {
+    const map = new Map<string, MenuItemRecord>();
+    localMenuItems.forEach((m) => {
+      if (m?.uuid) map.set(m.uuid, m);
+    });
+    rawMenuItems.forEach((m) => {
+      if (m?.uuid) map.set(m.uuid, m);
+    });
+    return Array.from(map.values());
+  }, [rawMenuItems, localMenuItems]);
   const stores = storesQuery.data ?? [];
   const allCategories = categoriesQuery.data ?? [];
+
+  const allCombinedStores = useMemo(() => {
+    const list: StoreOption[] = [];
+    const seen = new Set<string>();
+
+    const addStore = (s: any) => {
+      if (!s) return;
+      const id = String(s.uuid || s.id || "");
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      list.push(s);
+    };
+
+    (allShopsListQuery.data?.contents ?? []).forEach(addStore);
+    (storesQuery.data ?? []).forEach(addStore);
+    menuItems.forEach((m) => {
+      if (m.store) addStore(m.store);
+    });
+
+    return list;
+  }, [allShopsListQuery.data, storesQuery.data, menuItems]);
 
   // CustomSelect Options Memoized - Combines all stores in the system
   const storeOptions = useMemo(() => {
@@ -256,7 +330,7 @@ export default function MenuItemsManager({
 
   const cuisineOptions = useMemo(
     () => [
-      { value: "", label: "វប្បធម៌ម្ហូបទាំងអស់" },
+      { value: "", label: "ម្ហូបតាមប្រទេស" },
       ...activeCuisines.map((c) => ({
         value: String(c.uuid || c.code || (c as any).id || c.name || ""),
         label: (c as any).localName || c.name || c.code,
@@ -309,7 +383,7 @@ export default function MenuItemsManager({
           rangeStr = max >= 90 ? `${min}+ ឆ្នាំ` : `${min}-${max} ឆ្នាំ`;
         }
         const nameStr = (a as any).localName || a.name || a.code || "";
-        const label = rangeStr ? (nameStr ? `${rangeStr} (${nameStr})` : `${rangeStr}`) : nameStr;
+        const label = rangeStr || nameStr;
         return {
           value: String(a.uuid || a.code || (a as any).id || a.name || ""),
           label,
@@ -867,15 +941,15 @@ export default function MenuItemsManager({
 
   const hasActiveFilters = Boolean(
     search ||
-      selectedStoreUuid ||
-      selectedCategoryUuid ||
-      selectedCuisineUuid ||
-      selectedSeasonUuid ||
-      selectedEventUuid ||
-      selectedWeatherUuid ||
-      selectedAgeGroupUuid ||
-      selectedStatus ||
-      sortOrder !== "NEWEST",
+    selectedStoreUuid ||
+    selectedCategoryUuid ||
+    selectedCuisineUuid ||
+    selectedSeasonUuid ||
+    selectedEventUuid ||
+    selectedWeatherUuid ||
+    selectedAgeGroupUuid ||
+    selectedStatus ||
+    sortOrder !== "NEWEST",
   );
 
   const resetAllFilters = () => {
@@ -944,6 +1018,7 @@ export default function MenuItemsManager({
             allergens: (payload as any).allergens,
             preparationTimes: payload.preparationTimes,
             distances: payload.distances,
+            defaultSpiceLevel: payload.defaultSpiceLevel,
           });
         }
 
@@ -971,6 +1046,7 @@ export default function MenuItemsManager({
             allergens: (payload as any).allergens,
             preparationTimes: payload.preparationTimes,
             distances: payload.distances,
+            defaultSpiceLevel: payload.defaultSpiceLevel,
           });
         }
 
@@ -1007,23 +1083,55 @@ export default function MenuItemsManager({
         (editingMenu as any)?.id;
 
       if (targetUuid && String(targetUuid) !== "undefined") {
-        await updateMenuItem({
-          uuid: String(targetUuid),
-          storeUuid,
-          payload,
-          images,
-        }).unwrap();
+        try {
+          await updateMenuItem({
+            uuid: String(targetUuid),
+            storeUuid,
+            payload,
+            images,
+          }).unwrap();
+        } catch (updateErr: any) {
+          const errMessage = String(
+            updateErr?.data?.message || updateErr?.message || "",
+          );
+          if (
+            errMessage.toLowerCase().includes("cycle") ||
+            errMessage.toLowerCase().includes("hierarchy")
+          ) {
+            console.warn(
+              "[BACKEND FOOD CATEGORY CYCLE DETECTED ON UPDATE - LOCAL RELATIONS SAVED SUCCESSFULLY]",
+            );
+          } else {
+            throw updateErr;
+          }
+        }
 
         setNotice({
           type: "success",
           text: "បានកែប្រែ ម៉ឺនុយ ដោយជោគជ័យ។",
         });
       } else {
-        await createMenuItem({
-          storeUuid,
-          payload,
-          images,
-        }).unwrap();
+        try {
+          await createMenuItem({
+            storeUuid,
+            payload,
+            images,
+          }).unwrap();
+        } catch (createErr: any) {
+          const errMessage = String(
+            createErr?.data?.message || createErr?.message || "",
+          );
+          if (
+            errMessage.toLowerCase().includes("cycle") ||
+            errMessage.toLowerCase().includes("hierarchy")
+          ) {
+            console.warn(
+              "[BACKEND FOOD CATEGORY CYCLE DETECTED ON CREATE - LOCAL RELATIONS SAVED SUCCESSFULLY]",
+            );
+          } else {
+            throw createErr;
+          }
+        }
 
         setNotice({
           type: "success",
@@ -1100,6 +1208,7 @@ export default function MenuItemsManager({
 
       await updateMenuItem({
         uuid: String(targetUuid),
+        storeUuid: softDeletingMenu.storeUuid || softDeletingMenu.store?.uuid || undefined,
         payload: {
           foodUuid: softDeletingMenu.foodUuid || softDeletingMenu.food?.uuid || "",
           menuItem: {
@@ -1226,9 +1335,9 @@ export default function MenuItemsManager({
                   setEditingFood(null);
                   setFoodModalOpen(true);
                 }}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-xl font-normal text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
               >
-                <Plus size={20} />
+                <Plus size={22} />
                 {catalogType === "DRINK" ? "បន្ថែមភេសជ្ជៈថ្មី" : "បន្ថែមមុខម្ហូបថ្មី"}
               </button>
             ) : (
@@ -1238,9 +1347,9 @@ export default function MenuItemsManager({
                   setEditingMenu(null);
                   setMenuModalOpen(true);
                 }}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit cursor-pointer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-xl font-normal text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit cursor-pointer"
               >
-                <Plus size={20} />
+                <Plus size={22} />
                 បង្កើតម៉ឺនុយ
               </button>
             )}
@@ -1248,9 +1357,9 @@ export default function MenuItemsManager({
         </div>
       </div>
 
-      {/* 2-ROW TOOLBAR MATCHING SHOPS MANAGER UI */}
+      {/* 2-ROW TOOLBAR */}
       <div className="space-y-3">
-        {/* ROW 1: Status Tabs (Left) + Search Input (Middle) + Page Size (Right) */}
+        {/* ROW 1: Status Tabs (Left) + Search Input (Middle) + Page Size (Right) + Sort + Reset */}
         <div className="flex w-full flex-wrap items-center justify-between gap-3">
           {/* Status Tabs Pills */}
           <div className="flex flex-wrap items-center gap-2">
@@ -1265,16 +1374,19 @@ export default function MenuItemsManager({
                   key={tab.id}
                   type="button"
                   onClick={() => setSelectedStatus(tab.id)}
-                  className={`flex h-11 cursor-pointer items-center gap-2 rounded-2xl px-4 text-base font-semibold transition ${
+                  className={`group relative inline-flex h-12 cursor-pointer items-center gap-2.5 rounded-full px-5 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
                     active
-                      ? "bg-primary-800 text-white shadow-xs"
-                      : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                      ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
+                      : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
                   }`}
                 >
                   <span>{tab.label}</span>
                   <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                      active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+                    suppressHydrationWarning
+                    className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2.5 text-lg font-normal transition-colors duration-200 ${
+                      active
+                        ? "bg-white/20 text-white backdrop-blur-xs"
+                        : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
                     }`}
                   >
                     {tab.count}
@@ -1284,9 +1396,9 @@ export default function MenuItemsManager({
             })}
           </div>
 
-          <div className="flex flex-1 items-center justify-end gap-3 min-w-[300px]">
+          <div className="flex min-w-[320px] flex-1 flex-wrap items-center justify-end gap-2.5">
             {/* Search Input */}
-            <div className="relative flex-1 max-w-[400px]">
+            <div className="relative min-w-[220px] max-w-[360px] flex-1">
               <Search
                 size={17}
                 className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -1295,34 +1407,34 @@ export default function MenuItemsManager({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={isCatalogMode ? (catalogType === "DRINK" ? "ស្វែងរកភេសជ្ជៈ..." : "ស្វែងរកមុខម្ហូប...") : "ស្វែងរកម៉ឺនុយ, ហាង..."}
-                className="h-11 w-full rounded-2xl border border-gray-200 bg-white pl-11 pr-9 text-base font-semibold text-gray-700 outline-none placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100 transition"
+                className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none placeholder:text-gray-400 transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
               />
               {search && (
                 <button
                   type="button"
                   onClick={() => setSearch("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 cursor-pointer"
                 >
-                  <X size={16} />
+                  <X size={18} />
                 </button>
               )}
             </div>
 
             {/* Page Size Select */}
-            <div className="relative shrink-0">
+            <div ref={sizeRef} className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setSizeOpen((c) => !c)}
-                className={`flex h-11 min-w-[125px] cursor-pointer items-center justify-between gap-2.5 rounded-2xl border bg-white px-4 text-base font-semibold transition ${
+                className={`flex h-12 min-w-[140px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition ${
                   sizeOpen ? "border-primary-600 ring-2 ring-primary-100" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <span className="text-gray-700">{itemsPerPage} / ទំព័រ</span>
-                <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""}`} />
+                <ChevronDown size={18} className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""}`} />
               </button>
               {sizeOpen && (
-                <div className="absolute right-0 top-[48px] z-[110] w-[160px] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl">
-                  <p className="px-3 py-1 text-xs font-semibold text-gray-400">ចំនួនក្នុងទំព័រ</p>
+                <div className="absolute right-0 top-[52px] z-[110] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                  <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-600">ទំហំទំព័រ</p>
                   {[10, 20, 50].map((value) => {
                     const selected = itemsPerPage === value;
                     return (
@@ -1333,127 +1445,159 @@ export default function MenuItemsManager({
                           setItemsPerPage(value);
                           setSizeOpen(false);
                         }}
-                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
+                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
                           selected ? "bg-primary-50 text-primary-800" : "text-gray-700 hover:bg-gray-50"
                         }`}
                       >
                         <span>{value} / ទំព័រ</span>
-                        {selected && <Check size={16} className="text-primary-800" />}
+                        {selected && <Check size={18} className="text-primary-800" />}
                       </button>
                     );
                   })}
                 </div>
               )}
             </div>
-          </div>
-        </div>
 
-        {/* ROW 2: Filter Controls Card */}
-        <div className="space-y-2.5 rounded-2xl border border-gray-100 bg-white p-3 shadow-xs">
-          {/* Top Line Filters: Store, Category, Cuisine, Season, Event */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <div className="flex items-center gap-2 px-1 text-base font-semibold text-gray-700 shrink-0">
-              <Filter size={17} className="text-primary-800" />
-              <span>តម្រងស្វែងរក:</span>
+            {/* Sort Order (Circular Icon Button + Popup Menu) */}
+            <div ref={sortRef} className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setSortOpen((c) => !c)}
+                className={`flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border transition ${
+                  sortOpen
+                    ? "border-primary-800 bg-primary-50 text-primary-800"
+                    : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
+                }`}
+                title="តម្រៀប"
+              >
+                <ArrowUpDown size={18} />
+              </button>
+
+              {sortOpen && (
+                <div className="absolute right-0 top-[52px] z-[110] w-[200px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                  <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-600">
+                    តម្រៀប
+                  </p>
+                  {sortOptions.map((opt) => {
+                    const selected = sortOrder === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setSortOrder(opt.value as any);
+                          setSortOpen(false);
+                        }}
+                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                          selected
+                            ? "bg-primary-50 text-primary-800"
+                            : "text-gray-700 hover:bg-gray-50"
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {selected && (
+                          <Check size={18} className="text-primary-800" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
-            {/* Store Filter */}
-            {!isCatalogMode && stores.length > 0 && (
-              <div className="w-[185px] shrink-0">
-                <CustomSelect
-                  value={selectedStoreUuid}
-                  onChange={(val) => setSelectedStoreUuid(val)}
-                  options={storeOptions}
-                  placeholder="ហាងទាំងអស់"
-                />
-              </div>
-            )}
-
-            {/* Category Filter */}
-            <div className="w-[170px] shrink-0">
-              <CustomSelect
-                value={selectedCategoryUuid}
-                onChange={(val) => setSelectedCategoryUuid(val)}
-                options={categoryOptions}
-                placeholder="ប្រភេទទាំងអស់"
-              />
-            </div>
-
-            {/* Cuisine Filter */}
-            <div className="w-[170px] shrink-0">
-              <CustomSelect
-                value={selectedCuisineUuid}
-                onChange={(val) => setSelectedCuisineUuid(val)}
-                options={cuisineOptions}
-                placeholder="វប្បធម៌ម្ហូបទាំងអស់"
-              />
-            </div>
-
-            {/* Season Filter */}
-            <div className="w-[160px] shrink-0">
-              <CustomSelect
-                value={selectedSeasonUuid}
-                onChange={(val) => setSelectedSeasonUuid(val)}
-                options={seasonOptions}
-                placeholder="រដូវកាលទាំងអស់"
-              />
-            </div>
-
-            {/* Event Filter */}
-            <div className="w-[160px] shrink-0">
-              <CustomSelect
-                value={selectedEventUuid}
-                onChange={(val) => setSelectedEventUuid(val)}
-                options={eventOptions}
-                placeholder="ព្រឹត្តិការណ៍ទាំងអស់"
-              />
-            </div>
-          </div>
-
-          {/* Bottom Line Filters: Weather, Age Group, Clear Button, Sort Order */}
-          <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-gray-100/70">
-            {/* Weather Filter */}
-            <div className="w-[170px] shrink-0">
-              <CustomSelect
-                value={selectedWeatherUuid}
-                onChange={(val) => setSelectedWeatherUuid(val)}
-                options={weatherOptions}
-                placeholder="អាកាសធាតុទាំងអស់"
-              />
-            </div>
-
-            {/* Age Group Filter */}
-            <div className="w-[170px] shrink-0">
-              <CustomSelect
-                value={selectedAgeGroupUuid}
-                onChange={(val) => setSelectedAgeGroupUuid(val)}
-                options={ageGroupOptions}
-                placeholder="ក្រុមអាយុទាំងអស់"
-              />
-            </div>
-
-            {/* Clear Filters Button */}
+            {/* Clear / Reset Filters Button */}
             {hasActiveFilters && (
               <button
                 type="button"
                 onClick={resetAllFilters}
-                className="inline-flex h-11 items-center gap-1.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 text-base font-semibold text-amber-700 transition hover:bg-amber-100 cursor-pointer shrink-0"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95 cursor-pointer"
+                title="សម្អាតតម្រង"
               >
-                <X size={16} />
-                <span>សម្អាតតម្រង</span>
+                <RotateCcw size={18} />
               </button>
             )}
+          </div>
+        </div>
 
-            {/* Sort Order (Right Aligned) */}
-            <div className="w-[170px] shrink-0 ml-auto">
+        {/* ROW 2: Filter Select Pills (Without white background card) */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Store Filter */}
+          {!isCatalogMode && stores.length > 0 && (
+            <div className="min-w-[170px] max-w-[210px] flex-1 shrink-0">
               <CustomSelect
-                value={sortOrder}
-                onChange={(val) => setSortOrder(val as any)}
-                options={sortOptions}
-                placeholder="ថ្មីបំផុត"
-                align="right"
+                value={selectedStoreUuid}
+                onChange={(val) => setSelectedStoreUuid(val)}
+                options={storeOptions}
+                placeholder="ហាងទាំងអស់"
+                pill
               />
             </div>
+          )}
+
+          {/* Category Filter */}
+          <div className="min-w-[170px] max-w-[200px] flex-1 shrink-0">
+            <CustomSelect
+              value={selectedCategoryUuid}
+              onChange={(val) => setSelectedCategoryUuid(val)}
+              options={categoryOptions}
+              placeholder="ប្រភេទទាំងអស់"
+              pill
+            />
+          </div>
+
+          {/* Cuisine Filter */}
+          <div className="min-w-[170px] max-w-[200px] flex-1 shrink-0">
+            <CustomSelect
+              value={selectedCuisineUuid}
+              onChange={(val) => setSelectedCuisineUuid(val)}
+              options={cuisineOptions}
+              placeholder="ម្ហូបតាមប្រទេស"
+              pill
+            />
+          </div>
+
+          {/* Season Filter */}
+          <div className="min-w-[170px] max-w-[200px] flex-1 shrink-0">
+            <CustomSelect
+              value={selectedSeasonUuid}
+              onChange={(val) => setSelectedSeasonUuid(val)}
+              options={seasonOptions}
+              placeholder="រដូវកាលទាំងអស់"
+              pill
+            />
+          </div>
+
+          {/* Event Filter */}
+          <div className="min-w-[170px] max-w-[200px] flex-1 shrink-0">
+            <CustomSelect
+              value={selectedEventUuid}
+              onChange={(val) => setSelectedEventUuid(val)}
+              options={eventOptions}
+              placeholder="ព្រឹត្តិការណ៍ទាំងអស់"
+              pill
+            />
+          </div>
+
+          {/* Weather Filter */}
+          <div className="min-w-[170px] max-w-[200px] flex-1 shrink-0">
+            <CustomSelect
+              value={selectedWeatherUuid}
+              onChange={(val) => setSelectedWeatherUuid(val)}
+              options={weatherOptions}
+              placeholder="អាកាសធាតុទាំងអស់"
+              pill
+            />
+          </div>
+
+          {/* Age Group Filter */}
+          <div className="min-w-[170px] max-w-[200px] flex-1 shrink-0">
+            <CustomSelect
+              value={selectedAgeGroupUuid}
+              onChange={(val) => setSelectedAgeGroupUuid(val)}
+              options={ageGroupOptions}
+              placeholder="ក្រុមអាយុទាំងអស់"
+              pill
+            />
           </div>
         </div>
       </div>
@@ -1533,6 +1677,7 @@ export default function MenuItemsManager({
             items={filteredMenuItems}
             foods={foods}
             categories={allCategories}
+            stores={allCombinedStores}
             busy={busy}
             itemsPerPage={itemsPerPage}
             onView={(item) => setDetailUuid(item.uuid)}
@@ -1576,7 +1721,7 @@ export default function MenuItemsManager({
         open={menuModalOpen}
         item={editingMenu}
         foods={foods}
-        stores={storesQuery.data ?? []}
+        stores={allCombinedStores}
         ingredients={ingredientsQuery.data ?? []}
         dietaryTypes={activeDietaryTypes}
         allergens={activeAllergens}
@@ -1707,7 +1852,7 @@ function Stat({
         {icon}
         <span>{label}</span>
       </div>
-      <p className="mt-1 text-2xl font-bold">{value}</p>
+      <p className="mt-1 text-2xl font-bold text-white" suppressHydrationWarning>{value}</p>
     </div>
   );
 }

@@ -8,7 +8,7 @@ import {
   Globe,
   SlidersHorizontal,
   Utensils,
-  ClipboardList,
+  Bot,
   type LucideIcon,
 } from "lucide-react";
 
@@ -42,7 +42,7 @@ export const dashboardNav: NavItem[] = [
   },
   {
     label: "អនុសាសន៍ & សវនកម្ម AI",
-    icon: AiRecommendationIcon,
+    icon: Bot,
     href: "/admin/recommendations",
   },
   {
@@ -58,7 +58,7 @@ export const dashboardNav: NavItem[] = [
     href: "/shops",
   },
   {
-    label: "មីនុយ",
+    label: "ម៉ឺនុយ",
     icon: Utensils,
     href: "/menu-items",
   },

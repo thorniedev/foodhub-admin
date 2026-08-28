@@ -27,17 +27,17 @@ export default function CanonicalFoodsTable({
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-[1050px] w-full">
-        <thead className="bg-gray-50 text-left text-xs font-black uppercase tracking-wide text-gray-500">
-          <tr>
-            <th className="px-5 py-4">Food</th>
-            <th className="px-5 py-4">Category</th>
-            <th className="px-5 py-4">Cuisine</th>
-            <th className="px-5 py-4">Spice</th>
-            <th className="px-5 py-4">Nutrition</th>
-            <th className="px-5 py-4">Status</th>
-            <th className="px-5 py-4 text-right">Store action</th>
+    <div className="overflow-x-auto rounded-3xl border border-gray-100 bg-white">
+      <table className="min-w-[1050px] w-full text-lg font-normal">
+        <thead className="bg-gray-50/70 text-left text-lg font-normal text-primary-800">
+          <tr className="border-b border-gray-100">
+            <th className="px-5 py-4 font-normal">Food</th>
+            <th className="px-5 py-4 font-normal">Category</th>
+            <th className="px-5 py-4 font-normal">Cuisine</th>
+            <th className="px-5 py-4 font-normal">Spice</th>
+            <th className="px-5 py-4 font-normal">Nutrition</th>
+            <th className="px-5 py-4 font-normal">Status</th>
+            <th className="px-5 py-4 text-right font-normal">Store action</th>
           </tr>
         </thead>
 
@@ -50,7 +50,7 @@ export default function CanonicalFoodsTable({
             const nutrition = food.nutritionData ?? food.nutrition;
 
             return (
-              <tr key={food.uuid} className="transition hover:bg-emerald-50/20">
+              <tr key={food.uuid} className="transition hover:bg-gray-50/70">
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 text-gray-300">
@@ -61,36 +61,36 @@ export default function CanonicalFoodsTable({
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-black text-gray-900">
+                      <p className="text-lg font-normal text-gray-900">
                         {food.localName || food.canonicalName}
                       </p>
                       {food.localName && (
-                        <p className="mt-0.5 text-sm text-gray-500">{food.canonicalName}</p>
+                        <p className="mt-0.5 text-base font-normal text-gray-500">{food.canonicalName}</p>
                       )}
-                      <p className="mt-1 max-w-[280px] truncate text-xs text-gray-400">
+                      <p className="mt-1 max-w-[280px] truncate text-sm font-normal text-gray-400">
                         {food.description || food.uuid}
                       </p>
                     </div>
                   </div>
                 </td>
-                <td className="px-5 py-4 text-sm font-semibold text-gray-600">
+                <td className="px-5 py-4 text-lg font-normal text-gray-600">
                   {food.category?.name ?? "—"}
                 </td>
-                <td className="px-5 py-4 text-sm font-semibold text-gray-600">
+                <td className="px-5 py-4 text-lg font-normal text-gray-600">
                   {food.cuisine?.name ?? "—"}
                 </td>
-                <td className="px-5 py-4 text-sm font-bold text-gray-600">
+                <td className="px-5 py-4 text-lg font-normal text-gray-600">
                   {food.spiceLevel ?? food.defaultSpiceLevel ?? 0}/5
                 </td>
-                <td className="px-5 py-4 text-xs leading-5 text-gray-500">
+                <td className="px-5 py-4 text-sm leading-5 text-gray-500">
                   <div>{nutrition?.calories ?? 0} kcal</div>
                   <div>P {nutrition?.proteinGrams ?? 0}g · C {nutrition?.carbsGrams ?? 0}g</div>
                 </td>
                 <td className="px-5 py-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-black ${active
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-gray-100 text-gray-500"
+                    className={`inline-flex rounded-full px-3.5 py-1 text-lg font-normal border ${active
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                        : "bg-gray-100 text-gray-500 border-gray-200"
                       }`}
                   >
                     {active ? "ACTIVE" : "INACTIVE"}
@@ -99,12 +99,11 @@ export default function CanonicalFoodsTable({
                 <td className="px-5 py-4 text-right">
                   <button
                     type="button"
-                    disabled={!active}
                     onClick={() => onPublish(food)}
-                    className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#137A3D] px-4 text-sm font-black text-white transition hover:bg-[#0f6333] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex h-10 items-center gap-1.5 rounded-full border border-primary-800 bg-white px-4 text-lg font-normal text-primary-800 transition hover:bg-primary-50 active:scale-95"
                   >
-                    <Globe2 size={15} />
-                    Publish for Store
+                    <Globe2 size={16} />
+                    <span>Publish</span>
                   </button>
                 </td>
               </tr>

@@ -327,11 +327,11 @@ export const shopApi = adminBaseApi.injectEndpoints({
           reviewStatus:
             store.reviewStatus && store.reviewStatus !== "UNKNOWN"
               ? store.reviewStatus
-              : requestedReview || "APPROVED",
+              : requestedReview || store.reviewStatus || "PENDING",
           accountStatus:
             store.accountStatus && store.accountStatus !== "UNKNOWN"
               ? store.accountStatus
-              : requestedAccount || "ACTIVE",
+              : requestedAccount || store.accountStatus || "ACTIVE",
           operatingStatus:
             store.operatingStatus && store.operatingStatus !== "UNKNOWN"
               ? store.operatingStatus

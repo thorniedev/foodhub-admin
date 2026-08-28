@@ -4,9 +4,13 @@ export interface Cuisine {
   code: string;
   name: string;
   description: string | null;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  isActive?: boolean;
+  active?: boolean;
+  is_active?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CuisinePayload {
@@ -14,4 +18,6 @@ export interface CuisinePayload {
   name?: string;
   description?: string | null;
   isActive?: boolean;
+  active?: boolean;
+  is_active?: boolean;
 }

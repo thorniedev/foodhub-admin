@@ -185,9 +185,15 @@ export interface ReplaceStoreHoursPayload {
 export interface CreateStoreFromGooglePayload {
   placeId: string;
   overrides: {
-    timezone: string;
+    timezone:       string;
     logoMediaUuid?: string | null;
     coverMediaUuid?: string | null;
+    /* Address fields resolved from Google Places addressComponents */
+    commune?:    string | null;
+    district?:   string | null;
+    city?:       string | null;
+    province?:   string | null;
+    postalCode?: string | null;
   };
 }
 

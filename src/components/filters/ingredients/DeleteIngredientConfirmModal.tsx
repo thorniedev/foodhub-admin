@@ -63,19 +63,19 @@ export default function DeleteIngredientConfirmModal({
           </button>
         </div>
 
-        <p className="mt-5 text-3xl font-semibold text-primary-800">
+        <p className="mt-5 text-2xl font-normal text-primary-800">
           បិទគ្រឿងផ្សំ?
         </p>
 
-        <p className="mt-3 text-lg leading-8 text-gray-500">
+        <p className="mt-3 text-lg leading-8 font-normal text-gray-500">
           តើអ្នកចង់បិទ{" "}
-          <span className="font-semibold text-gray-800">
+          <span className="font-normal text-gray-800">
             {item.name}
           </span>{" "}
           មែនទេ?
         </p>
 
-        <p className="mt-2 text-lg leading-8 text-gray-400">
+        <p className="mt-2 text-lg leading-8 font-normal text-gray-400">
           ទិន្នន័យមិនត្រូវបានលុបចេញពី Database ទេ។ វានឹងត្រូវបានកំណត់ជាអសកម្ម ហើយអាចស្ដារឡើងវិញបាន។
         </p>
 
@@ -84,7 +84,7 @@ export default function DeleteIngredientConfirmModal({
             type="button"
             disabled={deleting}
             onClick={onClose}
-            className="min-h-12 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-12 rounded-full border border-gray-200 bg-white px-4 text-lg font-normal text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             បោះបង់
           </button>
@@ -93,7 +93,7 @@ export default function DeleteIngredientConfirmModal({
             type="button"
             disabled={deleting}
             onClick={onConfirm}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-500 px-4 text-lg font-medium text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-500 px-4 text-lg font-normal text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {deleting && (
               <Loader2

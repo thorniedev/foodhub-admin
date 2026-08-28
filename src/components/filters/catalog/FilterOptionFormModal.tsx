@@ -14,6 +14,8 @@ import {
   X,
 } from "lucide-react";
 
+import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
+
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
@@ -25,6 +27,7 @@ import type {
 ========================================================= */
 
 const EMPTY_FORM: FilterCatalogOptionFormValues = {
+  code: "",
   localName: "",
   name: "",
   description: "",
@@ -60,6 +63,8 @@ export default function FilterOptionFormModal({
       EMPTY_FORM,
     );
 
+  const [isCodeCustom, setIsCodeCustom] = useState(false);
+
   const [
     validationError,
     setValidationError,
@@ -74,34 +79,37 @@ export default function FilterOptionFormModal({
       return;
     }
 
-    setForm(
-      item
-        ? {
-            localName:
-              item.localName || item.name,
-            name:
-              item.localName || item.name,
-            description:
-              item.description ?? "",
-            parentUuid:
-              item.parentUuid ?? "",
-            numericValue:
-              item.numericValue === null
-                ? ""
-                : String(
-                    item.numericValue,
-                  ),
-            unit:
-              item.unit ?? "",
-            startTime:
-              item.startTime ?? "",
-            endTime:
-              item.endTime ?? "",
-            active:
-              item.active,
-          }
-        : EMPTY_FORM,
-    );
+    if (item) {
+      setForm({
+        code: item.code ?? "",
+        localName:
+          item.localName || item.name,
+        name:
+          item.localName || item.name,
+        description:
+          item.description ?? "",
+        parentUuid:
+          item.parentUuid ?? "",
+        numericValue:
+          item.numericValue === null || item.numericValue === undefined
+            ? ""
+            : String(
+                item.numericValue,
+              ),
+        unit:
+          item.unit ?? "",
+        startTime:
+          item.startTime ?? "",
+        endTime:
+          item.endTime ?? "",
+        active:
+          item.active,
+      });
+      setIsCodeCustom(true);
+    } else {
+      setForm(EMPTY_FORM);
+      setIsCodeCustom(false);
+    }
 
     setValidationError("");
   }, [open, item]);
@@ -142,16 +150,17 @@ export default function FilterOptionFormModal({
     ) => {
       event.preventDefault();
 
-      if (
-        !form.localName.trim() &&
-        !form.name.trim()
-      ) {
+      const label = form.localName.trim() || form.name.trim();
+
+      if (!label) {
         setValidationError(
           "សូមបំពេញឈ្មោះស្លាកត្រង។",
         );
 
         return;
       }
+
+      const code = form.code?.trim().toUpperCase() || createCodeFromLabel(label);
 
       if (
         form.numericValue.trim() &&
@@ -195,10 +204,33 @@ export default function FilterOptionFormModal({
 
       setValidationError("");
 
-      await onSubmit(form);
+      try {
+        await onSubmit({
+          ...form,
+          code,
+          name: label,
+          localName: label,
+        });
+      } catch (err: any) {
+        const errorMsg =
+          err?.data?.message ||
+          err?.message ||
+          (typeof err === "string" ? err : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។");
+        setValidationError(errorMsg);
+      }
     };
 
   const isMealType = group.source === "MEAL_TYPE_API";
+  const hasValueFields = ["PREPARATION_TIME", "DISTANCE", "SPICE_LEVEL"].includes(group.code);
+
+  const handleNameChange = (val: string) => {
+    setForm((prev) => ({
+      ...prev,
+      name: val,
+      localName: val,
+      code: !isCodeCustom && !item ? createCodeFromLabel(val) : prev.code,
+    }));
+  };
 
   return (
     <div
@@ -331,22 +363,67 @@ export default function FilterOptionFormModal({
             sm:p-7
           "
         >
-          {/* Names */}
-          {/* Name */}
-          <div>
+          {/* Name & Code */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field
               label={`ឈ្មោះ ${group.labelKm}`}
               value={form.localName || form.name}
-              onChange={(value) =>
-                setForm((previous) => ({
-                  ...previous,
-                  name: value,
-                  localName: value,
-                }))
-              }
+              onChange={handleNameChange}
               placeholder={`ឧ. បញ្ចូលឈ្មោះ ${group.labelKm}`}
+              required
+            />
+
+            <Field
+              label="កូដ (Code)"
+              value={form.code || ""}
+              onChange={(value) => {
+                setIsCodeCustom(true);
+                setForm((prev) => ({
+                  ...prev,
+                  code: value.toUpperCase(),
+                }));
+              }}
+              placeholder="ឧ. CODE_NAME"
             />
           </div>
+
+          {/* Numeric Value & Unit for specific groups */}
+          {hasValueFields && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field
+                label="តម្លៃលេខ (Value)"
+                type="number"
+                value={form.numericValue}
+                onChange={(value) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    numericValue: value,
+                  }))
+                }
+                placeholder="ឧ. 10"
+              />
+
+              <Field
+                label="ឯកតា (Unit)"
+                value={form.unit}
+                onChange={(value) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    unit: value,
+                  }))
+                }
+                placeholder={
+                  group.code === "PREPARATION_TIME"
+                    ? "MINUTE"
+                    : group.code === "DISTANCE"
+                      ? "KM"
+                      : group.code === "SPICE_LEVEL"
+                        ? "LEVEL"
+                        : "ឧ. នាទី / km"
+                }
+              />
+            </div>
+          )}
 
           {/* Parent category */}
           {group.source ===
@@ -432,54 +509,56 @@ export default function FilterOptionFormModal({
           )}
 
           {/* Description */}
-          <div>
-            <FieldLabel>
-              ការពិពណ៌នា
-            </FieldLabel>
+          {!isMealType && (
+            <div>
+              <FieldLabel>
+                ការពិពណ៌នា
+              </FieldLabel>
 
-            <textarea
-              rows={3}
-              value={
-                form.description
-              }
-              onChange={(
-                event,
-              ) =>
-                setForm(
-                  (
-                    previous,
-                  ) => ({
-                    ...previous,
-                    description:
-                      event.target
-                        .value,
-                  }),
-                )
-              }
-              placeholder="បញ្ចូលការពិពណ៌នា..."
-              className="
-                w-full
-                resize-none
-                rounded-xl
-                border
-                border-gray-200
-                bg-gray-50
-                px-4
-                py-3
-                text-lg
-                leading-8
-                text-gray-800
-                outline-none
-                transition
-                placeholder:text-gray-400
-                hover:border-gray-300
-                focus:border-primary-600
-                focus:bg-white
-                focus:ring-4
-                focus:ring-primary-100
-              "
-            />
-          </div>
+              <textarea
+                rows={3}
+                value={
+                  form.description
+                }
+                onChange={(
+                  event,
+                ) =>
+                  setForm(
+                    (
+                      previous,
+                    ) => ({
+                      ...previous,
+                      description:
+                        event.target
+                          .value,
+                    }),
+                  )
+                }
+                placeholder="បញ្ចូលការពិពណ៌នា..."
+                className="
+                  w-full
+                  resize-none
+                  rounded-xl
+                  border
+                  border-gray-200
+                  bg-gray-50
+                  px-4
+                  py-3
+                  text-lg
+                  leading-8
+                  text-gray-800
+                  outline-none
+                  transition
+                  placeholder:text-gray-400
+                  hover:border-gray-300
+                  focus:border-primary-600
+                  focus:bg-white
+                  focus:ring-4
+                  focus:ring-primary-100
+                "
+              />
+            </div>
+          )}
 
           {/* Meal start/end time */}
           {isMealType && (
@@ -691,7 +770,7 @@ export default function FilterOptionFormModal({
                 bg-white
                 px-7
                 text-lg
-                font-medium
+                font-normal
                 text-gray-600
                 transition
                 hover:border-primary-200
@@ -720,7 +799,7 @@ export default function FilterOptionFormModal({
                 bg-primary-800
                 px-7
                 text-lg
-                font-medium
+                font-normal
                 text-white
                 transition
                 hover:bg-primary-900

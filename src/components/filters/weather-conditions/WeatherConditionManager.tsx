@@ -248,25 +248,6 @@ export default function WeatherConditionManager() {
 
   const inactiveCount = totalCount - activeCount;
 
-  const normalizedSearch = search.trim().toLowerCase();
-
-  const suggestions = useMemo(() => {
-    if (!normalizedSearch) {
-      return [];
-    }
-
-    return items
-      .filter((item) =>
-        [item.localName, item.name, item.code, item.description].some(
-          (value) =>
-            String(value ?? "")
-              .toLowerCase()
-              .includes(normalizedSearch),
-        ),
-      )
-      .slice(0, 8);
-  }, [items, normalizedSearch]);
-
   const filteredItems = useMemo(() => {
     const query = searchText(search);
 
@@ -510,17 +491,12 @@ export default function WeatherConditionManager() {
         totalCount={totalCount}
         activeCount={activeCount}
         inactiveCount={inactiveCount}
-        suggestions={suggestions}
         onSearchChange={(value) => {
           setSearch(value);
           setPage(0);
         }}
         onClearSearch={() => {
           setSearch("");
-          setPage(0);
-        }}
-        onSuggestionSelect={(item) => {
-          setSearch(item.localName || item.name);
           setPage(0);
         }}
         onStatusChange={(value) => {

@@ -49,12 +49,12 @@ export default function HardDeleteUserConfirmModal({
 
         {/* Header Content */}
         <div className="mt-5 text-center">
-          <h3 className="text-xl font-bold tracking-tight text-gray-900 whitespace-nowrap">
+          <h3 className="text-2xl font-normal tracking-tight text-gray-900 whitespace-nowrap">
             លុបគណនីនេះជាអចិន្ត្រៃយ៍?
           </h3>
-          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+          <p className="mt-2 text-lg leading-relaxed text-gray-500 font-normal">
             គណនី{" "}
-            <span className="font-bold text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200/80">
+            <span className="font-normal text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200/80">
               {name}
             </span>{" "}
             នឹងត្រូវបានលុបចេញពីប្រព័ន្ធទាំងស្រុង។
@@ -63,8 +63,8 @@ export default function HardDeleteUserConfirmModal({
 
         {/* Callout Notice */}
         <div className="mt-5 flex items-start gap-3 rounded-2xl border border-red-200/90 bg-red-50/40 p-4 text-left">
-          <AlertTriangle size={17} className="mt-0.5 shrink-0 text-red-600" />
-          <p className="text-xs font-medium leading-relaxed text-red-800">
+          <AlertTriangle size={20} className="mt-0.5 shrink-0 text-red-600" />
+          <p className="text-lg font-normal leading-relaxed text-red-800">
             សកម្មភាពនេះមិនអាចស្តារឡើងវិញបានឡើយ។ ទិន្នន័យពាក់ព័ន្ធទាំងអស់នឹងត្រូវលុបជាអចិន្ត្រៃយ៍។
           </p>
         </div>
@@ -75,7 +75,7 @@ export default function HardDeleteUserConfirmModal({
             type="button"
             disabled={deleting}
             onClick={onClose}
-            className="flex h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-base font-bold text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50"
+            className="flex h-12 items-center justify-center rounded-full border border-gray-200 bg-white text-lg font-normal text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50"
           >
             បោះបង់
           </button>
@@ -84,11 +84,11 @@ export default function HardDeleteUserConfirmModal({
             type="button"
             disabled={deleting}
             onClick={() => void onConfirm()}
-            className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#990000] px-4 text-base font-bold text-white shadow-md shadow-red-950/20 transition hover:bg-[#800000] active:scale-[0.98] disabled:opacity-60"
+            className="flex h-12 items-center justify-center gap-2 rounded-full bg-[#990000] px-4 text-lg font-normal text-white shadow-md shadow-red-950/20 transition hover:bg-[#800000] active:scale-[0.98] disabled:opacity-60"
           >
             {deleting ? (
               <>
-                <Loader2 size={18} className="animate-spin" />
+                <Loader2 size={20} className="animate-spin" />
                 កំពុងលុប...
               </>
             ) : (

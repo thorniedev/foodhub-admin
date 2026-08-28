@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CircleOff, Coffee, Plus, RotateCcw, ShieldCheck, Utensils } from "lucide-react";
+import { CircleOff, CupSoda, Plus, ShieldCheck, UtensilsCrossed } from "lucide-react";
 
 type Props = {
   mode: "FOOD" | "DRINK";
@@ -7,7 +7,6 @@ type Props = {
   activeCount: number;
   inactiveCount: number;
   onAdd: () => void;
-  onRestoreAll?: () => void;
 };
 
 export default function SubCategoryHeader({
@@ -16,13 +15,12 @@ export default function SubCategoryHeader({
   activeCount,
   inactiveCount,
   onAdd,
-  onRestoreAll,
 }: Props) {
   const isDrink = mode === "DRINK";
   const title = isDrink ? "គ្រប់គ្រងអនុប្រភេទភេសជ្ជៈ" : "គ្រប់គ្រងអនុប្រភេទម្ហូប";
   const description = isDrink
-    ? "គ្រប់គ្រង បន្ថែម កែប្រែ និងលុបអនុប្រភេទភេសជ្ជៈក្រោមប្រភេទមេ ភេសជ្ជៈ (DRINK) សម្រាប់ជ្រើសពេលបង្កើតភេសជ្ជៈ។"
-    : "គ្រប់គ្រង បន្ថែម កែប្រែ និងលុបអនុប្រភេទម្ហូបក្រោមប្រភេទមេ ម្ហូបអាហារ (FOOD) សម្រាប់ជ្រើសពេលបង្កើតមុខម្ហូប។";
+    ? "គ្រប់គ្រង បន្ថែម កែប្រែ និងលុបអនុប្រភេទភេសជ្ជៈក្រោមប្រភេទមេ ភេសជ្ជៈ សម្រាប់ជ្រើសពេលបង្កើតភេសជ្ជៈ។"
+    : "គ្រប់គ្រង បន្ថែម កែប្រែ និងលុបអនុប្រភេទម្ហូបក្រោមប្រភេទមេ ម្ហូបអាហារ សម្រាប់ជ្រើសពេលបង្កើតមុខម្ហូប។";
   const buttonText = isDrink ? "បន្ថែមអនុប្រភេទភេសជ្ជៈ" : "បន្ថែមអនុប្រភេទម្ហូប";
 
   return (
@@ -36,12 +34,12 @@ export default function SubCategoryHeader({
         <div className="min-w-0">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
-              {isDrink ? <Coffee size={25} /> : <Utensils size={25} />}
+              {isDrink ? <CupSoda size={25} /> : <UtensilsCrossed size={25} />}
             </div>
 
             <div className="min-w-0">
-              <p className="text-3xl font-bold text-accent-400">{title}</p>
-              <p className="mt-2 max-w-2xl text-xl leading-7 text-white/85">
+              <p className="text-5xl font-bold text-accent-400">{title}</p>
+              <p className="mt-6 max-w-2xl text-xl leading-8 text-white/85">
                 {description}
               </p>
             </div>
@@ -50,7 +48,7 @@ export default function SubCategoryHeader({
           {/* Statistics */}
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Stat
-              icon={isDrink ? <Coffee size={20} /> : <Utensils size={20} />}
+              icon={isDrink ? <CupSoda size={20} /> : <UtensilsCrossed size={20} />}
               label="សរុប"
               value={total}
             />
@@ -71,23 +69,12 @@ export default function SubCategoryHeader({
 
         {/* Primary actions */}
         <div className="flex flex-wrap items-center gap-3">
-          {inactiveCount > 0 && onRestoreAll && (
-            <button
-              type="button"
-              onClick={onRestoreAll}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-400 px-5 py-3 text-lg font-bold text-gray-900 shadow-sm transition hover:bg-amber-300 sm:w-fit"
-            >
-              <RotateCcw size={20} />
-              ស្ដារទាំងអស់ ({inactiveCount})
-            </button>
-          )}
-
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-primary-800 shadow-sm transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-fit"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-xl font-normal text-primary-800 shadow-sm transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-fit"
           >
-            <Plus size={20} />
+            <Plus size={22} />
             {buttonText}
           </button>
         </div>
