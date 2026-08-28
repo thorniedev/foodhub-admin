@@ -947,7 +947,7 @@ export default function PublishMenuItemModal({
                   ariaLabel="ជ្រើសរើសហាង"
                 />
                 {(Boolean(item) || Boolean(storeFixedId)) && (
-                  <p className="mt-2 flex items-center gap-2 text-base font-normal text-emerald-700">
+                  <p className="mt-2 flex items-center gap-2 text-lg font-normal text-emerald-700">
                     <BadgeCheck size={18} className="shrink-0" />
                     ហាងត្រូវបានកំណត់រួចហើយ មិនអាចផ្លាស់ប្តូរបានទេ។
                   </p>
@@ -1087,80 +1087,82 @@ export default function PublishMenuItemModal({
             />
 
             {ingredientRows.length > 0 ? (
-              <div className="mt-4 space-y-2.5">
+              <div className="mt-4 space-y-3">
                 {ingredientRows.map((row, index) => (
                   <div
                     key={index}
                     style={{ zIndex: ingredientRows.length - index + 20 }}
-                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-emerald-100 hover:shadow"
+                    className="rounded-3xl border border-emerald-100 bg-white p-3.5 shadow-sm transition hover:border-emerald-200 hover:shadow"
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-base font-normal text-emerald-800">
-                      {index + 1}
-                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-lg font-normal text-emerald-800">
+                        {index + 1}
+                      </div>
 
-                    <div className="flex-1 min-w-[200px]">
-                      <MenuItemSearchableSelect
-                        value={row.ingredientUuid}
-                        options={ingredientOptions}
-                        onChange={(next) =>
-                          updateIngredientRow(index, { ingredientUuid: next })
+                      <div className="flex-1 min-w-[220px]">
+                        <MenuItemSearchableSelect
+                          value={row.ingredientUuid}
+                          options={ingredientOptions}
+                          onChange={(next) =>
+                            updateIngredientRow(index, { ingredientUuid: next })
+                          }
+                          placeholder="ជ្រើសរើសគ្រឿងផ្សំ..."
+                          ariaLabel="ជ្រើសរើសគ្រឿងផ្សំ"
+                        />
+                      </div>
+
+                      <div className="w-32 min-w-[120px]">
+                        <input
+                          type="number"
+                          min="0"
+                          step="any"
+                          placeholder="បរិមាណ"
+                          value={row.quantity}
+                          onKeyDown={(e) => {
+                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                          }}
+                          onChange={(event) => {
+                            const val = event.target.value;
+                            if (Number(val) < 0) return;
+                            updateIngredientRow(index, { quantity: val });
+                          }}
+                          className={inputClass}
+                        />
+                      </div>
+
+                      <div className="w-32 min-w-[120px]">
+                        <input
+                          placeholder="ខ្នាត (g, ml)"
+                          value={row.unit}
+                          onChange={(event) =>
+                            updateIngredientRow(index, { unit: event.target.value })
+                          }
+                          className={inputClass}
+                        />
+                      </div>
+
+                      <label className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 transition hover:border-emerald-200 hover:bg-emerald-50/40">
+                        <input
+                          type="checkbox"
+                          checked={row.isOptional}
+                          onChange={(event) =>
+                            updateIngredientRow(index, {
+                              isOptional: event.target.checked,
+                            })
+                          }
+                          className="h-5 w-5 rounded accent-[#137A3D]"
+                        />
+                        <span className="whitespace-nowrap">ជាជម្រើស</span>
+                      </label>
+
+                      <RemoveRowButton
+                        onClick={() =>
+                          setIngredientRows((current) =>
+                            current.filter((_, rowIndex) => rowIndex !== index),
+                          )
                         }
-                        placeholder="ជ្រើសរើសគ្រឿងផ្សំ..."
-                        ariaLabel="ជ្រើសរើសគ្រឿងផ្សំ"
                       />
                     </div>
-
-                    <div className="w-28">
-                      <input
-                        type="number"
-                        min="0"
-                        step="any"
-                        placeholder="បរិមាណ"
-                        value={row.quantity}
-                        onKeyDown={(e) => {
-                          if (e.key === "-" || e.key === "e") e.preventDefault();
-                        }}
-                        onChange={(event) => {
-                          const val = event.target.value;
-                          if (Number(val) < 0) return;
-                          updateIngredientRow(index, { quantity: val });
-                        }}
-                        className={inputClass}
-                      />
-                    </div>
-
-                    <div className="w-28">
-                      <input
-                        placeholder="ខ្នាត (g, ml)"
-                        value={row.unit}
-                        onChange={(event) =>
-                          updateIngredientRow(index, { unit: event.target.value })
-                        }
-                        className={inputClass}
-                      />
-                    </div>
-
-                    <label className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-base font-normal text-gray-700 transition hover:border-emerald-200 hover:bg-emerald-50/40">
-                      <input
-                        type="checkbox"
-                        checked={row.isOptional}
-                        onChange={(event) =>
-                          updateIngredientRow(index, {
-                            isOptional: event.target.checked,
-                          })
-                        }
-                        className="h-4 w-4 rounded accent-[#137A3D]"
-                      />
-                      <span className="whitespace-nowrap">ជាជម្រើស</span>
-                    </label>
-
-                    <RemoveRowButton
-                      onClick={() =>
-                        setIngredientRows((current) =>
-                          current.filter((_, rowIndex) => rowIndex !== index),
-                        )
-                      }
-                    />
                   </div>
                 ))}
               </div>
@@ -1191,44 +1193,54 @@ export default function PublishMenuItemModal({
             />
 
             {dietaryTypeRows.length > 0 ? (
-              <div className="mt-4 space-y-2.5">
+              <div className="mt-4 space-y-3">
                 {dietaryTypeRows.map((row, index) => (
                   <div
                     key={index}
                     style={{ zIndex: dietaryTypeRows.length - index + 20 }}
-                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-emerald-100 hover:shadow"
+                    className="rounded-3xl border border-emerald-100 bg-white p-3.5 shadow-sm transition hover:border-emerald-200 hover:shadow"
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-base font-normal text-emerald-800">
-                      {index + 1}
-                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-lg font-normal text-emerald-800">
+                        {index + 1}
+                      </div>
 
-                    <div className="flex-1 min-w-[200px]">
-                      <MenuItemSearchableSelect
-                        value={row.dietaryTypeUuid}
-                        options={dietaryTypeOptions}
-                        onChange={(next) =>
-                          updateDietaryTypeRow(index, { dietaryTypeUuid: next })
+                      <div className="flex-1 min-w-[220px]">
+                        <MenuItemSearchableSelect
+                          value={row.dietaryTypeUuid}
+                          options={dietaryTypeOptions}
+                          onChange={(next) =>
+                            updateDietaryTypeRow(index, { dietaryTypeUuid: next })
+                          }
+                          placeholder="ជ្រើស Dietary Type..."
+                          ariaLabel="ជ្រើស Dietary Type"
+                        />
+                      </div>
+
+                      <div className="w-52 min-w-[170px]">
+                        <MenuItemSearchableSelect
+                          value={row.verificationStatus}
+                          options={verificationStatusOptions}
+                          onChange={(next) =>
+                            updateDietaryTypeRow(index, {
+                              verificationStatus: next,
+                            })
+                          }
+                          placeholder="ជ្រើសរើសស្ថានភាព..."
+                          ariaLabel="ជ្រើសរើសស្ថានភាព"
+                        />
+                      </div>
+
+                      <RemoveRowButton
+                        onClick={() =>
+                          setDietaryTypeRows((current) =>
+                            current.filter((_, rowIndex) => rowIndex !== index),
+                          )
                         }
-                        placeholder="ជ្រើស Dietary Type..."
-                        ariaLabel="ជ្រើស Dietary Type"
                       />
                     </div>
 
-                    <div className="w-44">
-                      <MenuItemSearchableSelect
-                        value={row.verificationStatus}
-                        options={verificationStatusOptions}
-                        onChange={(next) =>
-                          updateDietaryTypeRow(index, {
-                            verificationStatus: next,
-                          })
-                        }
-                        placeholder="ជ្រើសរើសស្ថានភាព..."
-                        ariaLabel="ជ្រើសរើសស្ថានភាព"
-                      />
-                    </div>
-
-                    <div className="flex-1 min-w-[180px]">
+                    <div className="mt-2.5 sm:pl-14">
                       <input
                         placeholder="កំណត់ចំណាំ (Notes)..."
                         value={row.notes}
@@ -1238,14 +1250,6 @@ export default function PublishMenuItemModal({
                         className={inputClass}
                       />
                     </div>
-
-                    <RemoveRowButton
-                      onClick={() =>
-                        setDietaryTypeRows((current) =>
-                          current.filter((_, rowIndex) => rowIndex !== index),
-                        )
-                      }
-                    />
                   </div>
                 ))}
               </div>
@@ -1278,67 +1282,77 @@ export default function PublishMenuItemModal({
             />
 
             {allergenRows.length > 0 ? (
-              <div className="mt-4 space-y-2.5">
+              <div className="mt-4 space-y-3">
                 {allergenRows.map((row, index) => (
                   <div
                     key={index}
                     style={{ zIndex: allergenRows.length - index + 20 }}
-                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-rose-100 hover:shadow"
+                    className="rounded-3xl border border-rose-100 bg-white p-3.5 shadow-sm transition hover:border-rose-200 hover:shadow"
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-base font-normal text-rose-700">
-                      {index + 1}
-                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-100 text-lg font-normal text-rose-700">
+                        {index + 1}
+                      </div>
 
-                    <div className="flex-1 min-w-[200px]">
-                      <MenuItemSearchableSelect
-                        value={row.allergenUuid}
-                        options={(allergens as any[]).map((a: any) => ({
-                          value: a.uuid || a.id || "",
-                          label: (a as any).localName || a.name || a.code || "",
-                          sublabel: a.code,
-                        }))}
-                        onChange={(next) =>
+                      <div className="flex-1 min-w-[220px]">
+                        <MenuItemSearchableSelect
+                          value={row.allergenUuid}
+                          options={(allergens as any[]).map((a: any) => ({
+                            value: a.uuid || a.id || "",
+                            label: (a as any).localName || a.name || a.code || "",
+                            sublabel: a.code,
+                          }))}
+                          onChange={(next) =>
+                            setAllergenRows((current) =>
+                              current.map((r, i) => i === index ? { ...r, allergenUuid: next } : r)
+                            )
+                          }
+                          placeholder="ជ្រើសអាឡែហ្ស៊ី..."
+                          ariaLabel="ជ្រើសអាឡែហ្ស៊ី"
+                        />
+                      </div>
+
+                      <div className="w-44 min-w-[150px]">
+                        <MenuItemSearchableSelect
+                          value={row.declarationType}
+                          options={[
+                            { value: "CONTAINS", label: "មាន" },
+                            { value: "MAY_CONTAIN", label: "អាចមាន" },
+                          ]}
+                          onChange={(next) =>
+                            setAllergenRows((current) =>
+                              current.map((r, i) => i === index ? { ...r, declarationType: next } : r)
+                            )
+                          }
+                          placeholder="ប្រភេទ..."
+                          ariaLabel="ជ្រើសប្រភេទ"
+                        />
+                      </div>
+
+                      <div className="w-48 min-w-[160px]">
+                        <MenuItemSearchableSelect
+                          value={row.verificationStatus}
+                          options={verificationStatusOptions}
+                          onChange={(next) =>
+                            setAllergenRows((current) =>
+                              current.map((r, i) => i === index ? { ...r, verificationStatus: next } : r)
+                            )
+                          }
+                          placeholder="ស្ថានភាព..."
+                          ariaLabel="ជ្រើសស្ថានភាពផ្ទៀងផ្ទាត់"
+                        />
+                      </div>
+
+                      <RemoveRowButton
+                        onClick={() =>
                           setAllergenRows((current) =>
-                            current.map((r, i) => i === index ? { ...r, allergenUuid: next } : r)
+                            current.filter((_, rowIndex) => rowIndex !== index)
                           )
                         }
-                        placeholder="ជ្រើសអាឡែហ្ស៊ី..."
-                        ariaLabel="ជ្រើសអាឡែហ្ស៊ី"
                       />
                     </div>
 
-                    <div className="w-36">
-                      <MenuItemSearchableSelect
-                        value={row.declarationType}
-                        options={[
-                          { value: "CONTAINS", label: "មាន" },
-                          { value: "MAY_CONTAIN", label: "អាចមាន" },
-                        ]}
-                        onChange={(next) =>
-                          setAllergenRows((current) =>
-                            current.map((r, i) => i === index ? { ...r, declarationType: next } : r)
-                          )
-                        }
-                        placeholder="ប្រភេទ..."
-                        ariaLabel="ជ្រើសប្រភេទ"
-                      />
-                    </div>
-
-                    <div className="w-36">
-                      <MenuItemSearchableSelect
-                        value={row.verificationStatus}
-                        options={verificationStatusOptions}
-                        onChange={(next) =>
-                          setAllergenRows((current) =>
-                            current.map((r, i) => i === index ? { ...r, verificationStatus: next } : r)
-                          )
-                        }
-                        placeholder="ស្ថានភាព..."
-                        ariaLabel="ជ្រើសស្ថានភាពផ្ទៀងផ្ទាត់"
-                      />
-                    </div>
-
-                    <div className="flex-1 min-w-[160px]">
+                    <div className="mt-2.5 sm:pl-14">
                       <input
                         placeholder="កំណត់ចំណាំ (Notes)..."
                         value={row.notes}
@@ -1350,14 +1364,6 @@ export default function PublishMenuItemModal({
                         className={inputClass}
                       />
                     </div>
-
-                    <RemoveRowButton
-                      onClick={() =>
-                        setAllergenRows((current) =>
-                          current.filter((_, rowIndex) => rowIndex !== index)
-                        )
-                      }
-                    />
                   </div>
                 ))}
               </div>
@@ -1388,35 +1394,36 @@ export default function PublishMenuItemModal({
             />
 
             {medicalConditionRows.length > 0 ? (
-              <div className="mt-4 space-y-2.5">
+              <div className="mt-4 space-y-3">
                 {medicalConditionRows.map((row, index) => (
                   <div
                     key={index}
                     style={{ zIndex: medicalConditionRows.length - index + 20 }}
-                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-violet-100 hover:shadow"
+                    className="rounded-3xl border border-violet-100 bg-white p-3.5 shadow-sm transition hover:border-violet-200 hover:shadow"
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-100 text-base font-normal text-violet-800">
-                      {index + 1}
-                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-violet-100 text-lg font-normal text-violet-800">
+                        {index + 1}
+                      </div>
 
-                    <div className="flex-1 min-w-[200px]">
-                      <MenuItemSearchableSelect
-                        value={row.medicalConditionUuid}
-                        options={medicalConditionOptions}
-                        onChange={(next) =>
-                          setMedicalConditionRows((current) =>
-                            current.map((r, i) =>
-                              i === index ? { ...r, medicalConditionUuid: next } : r,
-                            ),
-                          )
-                        }
-                        placeholder="ជ្រើសស្ថានភាពសុខភាព..."
-                        ariaLabel="ជ្រើសស្ថានភាពសុខភាព"
-                      />
-                    </div>
+                      <div className="flex-1 min-w-[220px]">
+                        <MenuItemSearchableSelect
+                          value={row.medicalConditionUuid}
+                          options={medicalConditionOptions}
+                          onChange={(next) =>
+                            setMedicalConditionRows((current) =>
+                              current.map((r, i) =>
+                                i === index ? { ...r, medicalConditionUuid: next } : r,
+                              ),
+                            )
+                          }
+                          placeholder="ជ្រើសស្ថានភាពសុខភាព..."
+                          ariaLabel="ជ្រើសស្ថានភាពសុខភាព"
+                        />
+                      </div>
 
-                    <div className="w-48">
-                      <MenuItemSearchableSelect
+                      <div className="w-52 min-w-[170px]">
+                        <MenuItemSearchableSelect
                         value={row.suitabilityStatus}
                         options={suitabilityStatusOptions}
                         onChange={(next) =>
@@ -1433,21 +1440,6 @@ export default function PublishMenuItemModal({
                       />
                     </div>
 
-                    <div className="flex-1 min-w-[180px]">
-                      <input
-                        placeholder="កំណត់ចំណាំ (Notes)..."
-                        value={row.notes}
-                        onChange={(event) =>
-                          setMedicalConditionRows((current) =>
-                            current.map((r, i) =>
-                              i === index ? { ...r, notes: event.target.value } : r,
-                            ),
-                          )
-                        }
-                        className={inputClass}
-                      />
-                    </div>
-
                     <RemoveRowButton
                       onClick={() =>
                         setMedicalConditionRows((current) =>
@@ -1456,6 +1448,22 @@ export default function PublishMenuItemModal({
                       }
                     />
                   </div>
+
+                  <div className="mt-2.5 sm:pl-14">
+                    <input
+                      placeholder="កំណត់ចំណាំ (Notes)..."
+                      value={row.notes}
+                      onChange={(event) =>
+                        setMedicalConditionRows((current) =>
+                          current.map((r, i) =>
+                            i === index ? { ...r, notes: event.target.value } : r,
+                          ),
+                        )
+                      }
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
                 ))}
               </div>
             ) : (
@@ -1577,8 +1585,8 @@ function MiniLabel({ children }: { children: React.ReactNode }) {
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <p className="mt-1.5 flex items-center gap-1.5 text-base font-normal text-red-600">
-      <AlertCircle size={16} className="shrink-0" />
+    <p className="mt-1.5 flex items-center gap-1.5 text-lg font-normal text-red-600">
+      <AlertCircle size={18} className="shrink-0" />
       <span>{message}</span>
     </p>
   );
@@ -1697,7 +1705,7 @@ function InfoBadge({
   children: React.ReactNode;
 }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-1.5 text-base font-normal text-gray-600">
+    <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-1.5 text-lg font-normal text-gray-600">
       {icon}
       {children}
     </span>

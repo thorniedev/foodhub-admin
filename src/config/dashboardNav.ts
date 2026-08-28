@@ -150,18 +150,7 @@ export const dashboardNav: NavItem[] = [
         label: "ស្ថានភាពសុខភាព",
         href: "/filter/medical-conditions",
       },
-      {
-        label: "ពេលចម្អិន",
-        href: "/filter/preparation-times",
-      },
-      {
-        label: "ចម្ងាយ",
-        href: "/filter/distances",
-      },
-      {
-        label: "តំបន់",
-        href: "/filter/regions",
-      },
+
       {
         label: "គ្រឿងផ្សំ",
         href: "/filter/ingredients",

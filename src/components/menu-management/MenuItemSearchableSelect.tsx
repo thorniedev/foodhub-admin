@@ -98,7 +98,7 @@ export default function MenuItemSearchableSelect({
             <>
               {selected.label}
               {selected.sublabel && (
-                <span className="ml-2 text-base text-gray-400 font-normal">
+                <span className="ml-2 text-lg text-gray-400 font-normal">
                   ({selected.sublabel})
                 </span>
               )}
@@ -187,7 +187,7 @@ export default function MenuItemSearchableSelect({
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{option.label}</span>
                     {option.sublabel && (
-                      <span className="block truncate text-base font-normal text-gray-400">
+                      <span className="block truncate text-lg font-normal text-gray-400">
                         {option.sublabel}
                       </span>
                     )}
