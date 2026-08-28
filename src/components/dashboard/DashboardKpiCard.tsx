@@ -91,12 +91,12 @@ export default function DashboardKpiCard({
             {change}
           </span>
         ) : (
-          <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-lg font-normal text-gray-500">
+          <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">
             គ្មានទិន្នន័យប្រៀបធៀប
           </span>
         )}
 
-        <span className="text-lg font-normal text-gray-500 tabular-nums">
+        <span className="text-xs text-gray-500 tabular-nums">
           ដំណាក់កាលមុន: {previousValue ?? "—"}
         </span>
       </div>
