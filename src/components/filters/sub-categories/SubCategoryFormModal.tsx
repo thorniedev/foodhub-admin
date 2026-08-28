@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import {
   AlertTriangle,
-  Coffee,
-  Hash,
-  Layers,
+  CupSoda,
   Loader2,
-  Utensils,
+  UtensilsCrossed,
   X,
 } from "lucide-react";
 import type { FoodCategory, FoodCategoryPayload } from "@/src/types/foodCategory";
@@ -79,7 +77,6 @@ export default function SubCategoryFormModal({
     }
   }, [open, item]);
 
-  // Handle name change and auto code generation
   const handleNameChange = (val: string) => {
     setName(val);
     if (!item && !isCodeCustom) {
@@ -116,37 +113,30 @@ export default function SubCategoryFormModal({
 
   if (!open) return null;
 
-  const modalTitle = item
-    ? isDrink
-      ? "កែប្រែអនុប្រភេទភេសជ្ជៈ"
-      : "កែប្រែអនុប្រភេទម្ហូប"
-    : isDrink
-      ? "បន្ថែមអនុប្រភេទភេសជ្ជៈថ្មី"
-      : "បន្ថែមអនុប្រភេទម្ហូបថ្មី";
-
-  const modalSubtitle = isDrink
-    ? "អនុប្រភេទនេះនឹងស្ថិតនៅក្រោមប្រភេទមេ ភេសជ្ជៈ (DRINK) និងបង្ហាញក្នុងទម្រង់បង្កើតភេសជ្ជៈ។"
-    : "អនុប្រភេទនេះនឹងស្ថិតនៅក្រោមប្រភេទមេ ម្ហូបអាហារ (FOOD) និងបង្ហាញក្នុងទម្រង់បង្កើតមុខម្ហូប។";
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-      />
-
-      {/* Modal Card */}
-      <div className="relative w-full max-w-xl rounded-3xl bg-white shadow-2xl transition-all">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-50 text-primary-700">
-              {isDrink ? <Coffee size={22} /> : <Utensils size={22} />}
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
+      <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl">
+        {/* HEADER */}
+        <div className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-5 sm:px-8">
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
+              {isDrink ? <CupSoda size={24} /> : <UtensilsCrossed size={24} />}
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">{modalTitle}</h2>
-              <p className="text-xs text-gray-400">{modalSubtitle}</p>
+
+            <div className="min-w-0">
+              <p className="text-2xl font-semibold text-primary-800">
+                {item
+                  ? isDrink
+                    ? "កែប្រែអនុប្រភេទភេសជ្ជៈ"
+                    : "កែប្រែអនុប្រភេទម្ហូប"
+                  : isDrink
+                    ? "បន្ថែម អនុប្រភេទភេសជ្ជៈ"
+                    : "បន្ថែម អនុប្រភេទម្ហូប"}
+              </p>
+
+              <p className="mt-0.5 truncate text-lg text-gray-500">
+                {isDrink ? "Drink Sub-Categories" : "Food Sub-Categories"}
+              </p>
             </div>
           </div>
 
@@ -154,122 +144,96 @@ export default function SubCategoryFormModal({
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+            aria-label="Close"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5 p-6">
-          {error && (
-            <div className="flex items-center gap-2.5 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
-              <AlertTriangle size={18} className="shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Parent Category Informational Banner */}
-          <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-800">
-              <Layers size={16} />
-              <span>ប្រភេទមេ (Parent Root Category)</span>
-            </div>
-            <div className="mt-1.5 flex items-center justify-between">
-              <p className="font-bold text-emerald-950">
-                {parentRootName || (isDrink ? "ភេសជ្ជៈ" : "ម្ហូបអាហារ")} ({parentRootCode || prefix})
-              </p>
-              <span className="rounded-lg bg-emerald-200/60 px-2 py-0.5 font-mono text-[11px] font-bold text-emerald-900">
-                ROOT
-              </span>
-            </div>
-          </div>
-
-          {/* Name Field */}
-          <div className="space-y-1.5">
-            <label className="block text-sm font-bold text-gray-700">
-              ឈ្មោះអនុប្រភេទ <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="space-y-4 p-6 sm:p-7">
+          {/* Name & Code */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field
+              label={isDrink ? "ឈ្មោះ អនុប្រភេទភេសជ្ជៈ" : "ឈ្មោះ អនុប្រភេទម្ហូប"}
               value={name}
-              onChange={(e) => handleNameChange(e.target.value)}
+              onChange={handleNameChange}
               placeholder={
                 isDrink ? "ឧ. កាហ្វេបុរាណ, តែទឹកដោះគោ" : "ឧ. សម្ល និងស៊ុប, ម្ហូបឆា"
               }
-              className="h-[48px] w-full rounded-2xl border border-gray-200 bg-gray-50/50 px-4 text-base text-gray-800 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
+              required
+            />
+
+            <Field
+              label="កូដ (Code)"
+              value={code}
+              onChange={(value) => {
+                setCode(value.toUpperCase());
+                setIsCodeCustom(true);
+              }}
+              placeholder={isDrink ? "ឧ. DRINK_MILK_TEA" : "ឧ. FOOD_SOUP"}
+              required
             />
           </div>
 
-          {/* Code Field */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="block text-sm font-bold text-gray-700">
-                កូដ (Code) <span className="text-red-500">*</span>
-              </label>
-              {!item && (
-                <span className="text-xs text-gray-400">
-                  (បង្កើតស្វ័យប្រវត្តិតាមឈ្មោះ)
-                </span>
-              )}
-            </div>
-            <div className="relative">
-              <Hash
-                size={18}
-                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                type="text"
-                required
-                value={code}
-                onChange={(e) => {
-                  setCode(e.target.value.toUpperCase());
-                  setIsCodeCustom(true);
-                }}
-                placeholder={isDrink ? "DRINK_MILK_TEA" : "FOOD_SOUP"}
-                className="h-[48px] w-full rounded-2xl border border-gray-200 bg-gray-50/50 pl-10 pr-4 font-mono text-sm uppercase text-gray-800 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
-              />
-            </div>
-          </div>
+          {/* Description */}
+          <div>
+            <FieldLabel>ការពិពណ៌នា</FieldLabel>
 
-          {/* Description Field */}
-          <div className="space-y-1.5">
-            <label className="block text-sm font-bold text-gray-700">
-              ការពិពណ៌នា
-            </label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="ព័ត៌មានបន្ថែមអំពីអនុប្រភេទនេះ..."
-              className="w-full rounded-2xl border border-gray-200 bg-gray-50/50 p-4 text-base text-gray-800 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
+              placeholder="បញ្ចូលការពិពណ៌នាអំពីអនុប្រភេទ..."
+              className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-lg leading-8 text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
             />
           </div>
 
-          {/* Active Status Checkbox */}
-          <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50/60 p-4 transition hover:bg-gray-100/60">
-            <input
-              type="checkbox"
-              checked={isActive}
-              onChange={(e) => setIsActive(e.target.checked)}
-              className="h-5 w-5 rounded-lg border-gray-300 text-primary-600 focus:ring-primary-500"
-            />
-            <div>
-              <p className="text-sm font-bold text-gray-800">ដាក់ឱ្យដំណើរការ (Active)</p>
-              <p className="text-xs text-gray-400">
-                អនុញ្ញាតឱ្យជ្រើសរើសអនុប្រភេទនេះក្នុងទម្រង់បង្កើតមុខម្ហូប/ភេសជ្ជៈ
+          {/* Status */}
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-3.5">
+            <div className="min-w-0">
+              <p className="text-lg font-medium text-primary-800">
+                ស្ថានភាព
+              </p>
+
+              <p className="text-base text-gray-500">
+                បើក ដើម្បីឱ្យអនុប្រភេទនេះសកម្មក្នុងប្រព័ន្ធ។
               </p>
             </div>
-          </label>
 
-          {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-4">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isActive}
+              onClick={() => setIsActive((prev) => !prev)}
+              className={`relative h-7 w-12 shrink-0 rounded-full transition focus:outline-none focus:ring-4 focus:ring-primary-100 ${
+                isActive ? "bg-primary-700" : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-all ${
+                  isActive ? "left-6" : "left-1"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Validation error */}
+          {error && (
+            <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-lg leading-7 text-red-600">
+              <AlertTriangle size={18} className="mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-end">
             <button
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="rounded-full border border-gray-200 px-6 py-2.5 text-sm font-bold text-gray-600 transition hover:bg-gray-50 focus:outline-none"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-white px-7 text-lg font-normal text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               បោះបង់
             </button>
@@ -277,14 +241,63 @@ export default function SubCategoryFormModal({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-full bg-primary-800 px-7 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-500/20 disabled:opacity-60"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary-800 px-7 text-lg font-normal text-white transition hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {saving && <Loader2 size={16} className="animate-spin" />}
-              {item ? "រក្សាទុកការកែប្រែ" : "បង្កើតអនុប្រភេទ"}
+              {saving && <Loader2 size={20} className="animate-spin" />}
+              {saving
+                ? "កំពុងរក្សាទុក..."
+                : item
+                  ? "រក្សាទុកការកែប្រែ"
+                  : isDrink
+                    ? "បន្ថែម អនុប្រភេទភេសជ្ជៈ"
+                    : "បន្ថែម អនុប្រភេទម្ហូប"}
             </button>
           </div>
         </form>
       </div>
     </div>
+  );
+}
+
+function FieldLabel({
+  children,
+  required = false,
+}: {
+  children: ReactNode;
+  required?: boolean;
+}) {
+  return (
+    <span className="mb-2 block text-lg font-medium text-primary-800">
+      {children}
+      {required && <span className="text-red-500"> *</span>}
+    </span>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  required = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  required?: boolean;
+}) {
+  return (
+    <label className="block">
+      <FieldLabel required={required}>{label}</FieldLabel>
+
+      <input
+        value={value}
+        required={required}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="h-[52px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+      />
+    </label>
   );
 }

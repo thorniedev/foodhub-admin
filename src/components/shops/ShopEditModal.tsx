@@ -109,7 +109,7 @@ function toValidUuidOrNull(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const v = value.trim();
   const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return uuidRegex.test(v) ? v : null;
 }
 
@@ -187,8 +187,8 @@ export default function ShopEditModal({
       longitude: String(store.longitude ?? ""),
       phoneNumber: store.phoneNumber ?? "",
       email: store.email ?? "",
-      logoMediaUuid: "",
-      coverMediaUuid: "",
+      logoMediaUuid: store.logoMediaUuid ?? "",
+      coverMediaUuid: store.coverMediaUuid ?? "",
       priceLevel: store.priceLevel == null ? "" : String(store.priceLevel),
       hygieneRating: store.hygieneRating == null ? "" : String(store.hygieneRating),
       operatingStatus:
@@ -288,7 +288,7 @@ export default function ShopEditModal({
             </div>
             <div className="min-w-0">
               <p className="text-2xl font-bold text-[#0F5A2C]">កែប្រែព័ត៌មានហាង</p>
-              <p className="mt-0.5 truncate text-base text-gray-400">{store.storeName}</p>
+              <p className="mt-0.5 truncate text-lg text-gray-500">{store.storeName}</p>
             </div>
           </div>
 
@@ -554,7 +554,7 @@ export default function ShopEditModal({
               type="button"
               disabled={saving}
               onClick={onClose}
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white px-7 text-base font-semibold text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+              className="inline-flex min-h-[52px] items-center justify-center rounded-2xl border border-gray-200 bg-white px-7 text-lg font-semibold text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 disabled:opacity-50"
             >
               បោះបង់
             </button>
@@ -562,9 +562,9 @@ export default function ShopEditModal({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#137A3D] px-8 text-base font-semibold text-white shadow-sm transition hover:bg-[#0f6833] disabled:opacity-60"
+              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#137A3D] px-8 text-lg font-semibold text-white shadow-sm transition hover:bg-[#0f6833] disabled:opacity-60"
             >
-              {saving && <Loader2 size={18} className="animate-spin" />}
+              {saving && <Loader2 size={20} className="animate-spin" />}
               {saving ? "កំពុងរក្សាទុក..." : "រក្សាទុក"}
             </button>
           </div>
@@ -580,10 +580,10 @@ export default function ShopEditModal({
 
 function inputCls(hasError: boolean) {
   return [
-    "h-12 w-full rounded-xl border bg-gray-50 px-4 text-base text-gray-800 outline-none transition",
-    "placeholder:text-gray-400",
+    "h-[52px] w-full rounded-xl border bg-gray-50 px-4 text-lg text-gray-800 outline-none transition",
+    "placeholder:text-gray-400 placeholder:text-lg",
     "hover:border-gray-300",
-    "focus:border-[#137A3D] focus:bg-white focus:ring-2 focus:ring-[#137A3D]/15",
+    "focus:border-[#137A3D] focus:bg-white focus:ring-4 focus:ring-[#137A3D]/15",
     hasError
       ? "border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-100"
       : "border-gray-200",
@@ -683,31 +683,31 @@ function SingleStoreImagePicker({
       {/* Top bar */}
       <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
         <div>
-          <p className="text-base font-semibold text-gray-900">{label}</p>
-          <p className="text-xs text-gray-400">ចុចលើរូបភាពដើម្បីប្តូរ</p>
+          <p className="text-lg font-semibold text-gray-900">{label}</p>
+          <p className="text-sm text-gray-400">ចុចលើរូបភាពដើម្បីប្តូរ</p>
         </div>
 
         {hasNewUpload ? (
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-              <CheckCircle2 size={13} />
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+              <CheckCircle2 size={15} />
               រូបភាពថ្មី
             </span>
             <button
               type="button"
               onClick={handleReset}
               title="កំណត់ដើមវិញ"
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-red-600"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-red-600"
             >
-              <RotateCcw size={14} />
+              <RotateCcw size={16} />
             </button>
           </div>
         ) : hasOriginal ? (
-          <span className="rounded-full bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-500">
+          <span className="rounded-full bg-gray-50 px-3 py-1 text-sm font-medium text-gray-500">
             រូបភាពបច្ចុប្បន្ន
           </span>
         ) : (
-          <span className="text-xs text-gray-400">មិនទាន់មាន</span>
+          <span className="text-sm text-gray-400">មិនទាន់មាន</span>
         )}
       </div>
 
@@ -775,16 +775,16 @@ function SingleStoreImagePicker({
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-[#137A3D] transition group-hover:scale-105">
                 <Camera size={24} />
               </div>
-              <p className="mt-2 text-sm font-semibold text-gray-700">ចុចដើម្បី Upload</p>
-              <p className="mt-0.5 text-xs text-gray-400">PNG, JPG, WebP ក្រោម 10MB</p>
+              <p className="mt-2 text-base font-semibold text-gray-700">ចុចដើម្បី Upload</p>
+              <p className="mt-0.5 text-sm text-gray-400">PNG, JPG, WebP ក្រោម 10MB</p>
             </div>
           )}
 
           {/* Hover Overlay indicating click to replace */}
           {(localPreview || hasOriginal) && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition duration-200 group-hover:bg-black/40 group-focus:bg-black/40">
-              <div className="flex scale-95 items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-[#137A3D] opacity-0 shadow-lg transition duration-200 group-hover:scale-100 group-hover:opacity-100 group-focus:scale-100 group-focus:opacity-100">
-                <Upload size={16} />
+              <div className="flex scale-95 items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-base font-semibold text-[#137A3D] opacity-0 shadow-lg transition duration-200 group-hover:scale-100 group-hover:opacity-100 group-focus:scale-100 group-focus:opacity-100">
+                <Upload size={18} />
                 <span>ចុចដើម្បីប្តូររូប</span>
               </div>
             </div>
@@ -794,7 +794,7 @@ function SingleStoreImagePicker({
           {loading && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm">
               <Loader2 size={28} className="animate-spin text-[#137A3D]" />
-              <p className="mt-2 text-xs font-semibold text-gray-700">កំពុង Upload...</p>
+              <p className="mt-2 text-sm font-semibold text-gray-700">កំពុង Upload...</p>
             </div>
           )}
         </button>
@@ -802,7 +802,7 @@ function SingleStoreImagePicker({
 
       {/* Error message */}
       {error && (
-        <div className="border-t border-red-100 bg-red-50 px-4 py-2.5 text-xs font-medium text-red-600">
+        <div className="border-t border-red-100 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600">
           {error}
         </div>
       )}
@@ -826,13 +826,13 @@ function FormSection({
   return (
     <section className="rounded-2xl border border-gray-100 bg-white">
       <div className="flex items-center gap-3 rounded-t-2xl border-b border-gray-100 bg-gray-50/50 px-5 py-4">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[#137A3D]">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[#137A3D]">
           {icon}
         </div>
-        <p className="text-xl font-bold text-[#0F5A2C]">{title}</p>
+        <p className="text-2xl font-bold text-[#0F5A2C]">{title}</p>
       </div>
 
-      <div className="p-5">{children}</div>
+      <div className="p-5 sm:p-6">{children}</div>
     </section>
   );
 }
@@ -854,15 +854,15 @@ function Field({
   const cleanLabel = label.replace(/\s*\*+/g, "").trim();
 
   return (
-    <div className={`flex flex-col gap-1.5 ${className}`}>
-      <label className="block text-sm font-semibold text-gray-700">
+    <div className={`flex flex-col gap-2 ${className}`}>
+      <label className="block text-lg font-semibold text-gray-700">
         {cleanLabel}
         {isRequired && <span className="ml-1 text-red-500 font-bold">*</span>}
       </label>
       {children}
       {error && (
-        <p className="flex items-center gap-1.5 text-sm font-medium text-red-600">
-          <AlertTriangle size={13} className="shrink-0" />
+        <p className="flex items-center gap-1.5 text-base font-medium text-red-600">
+          <AlertTriangle size={16} className="shrink-0" />
           {error}
         </p>
       )}
@@ -876,8 +876,8 @@ function Field({
 
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
-      <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+    <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-base font-semibold text-red-600">
+      <AlertTriangle size={18} className="mt-0.5 shrink-0" />
       <span>{message}</span>
     </div>
   );

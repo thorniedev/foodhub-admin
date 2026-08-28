@@ -29,7 +29,9 @@ const emptyForm: SeasonalFoodFormValues = {
   isdisplay: true,
 };
 
-function getInitialForm(initialData?: SeasonalFoodImage | null): SeasonalFoodFormValues {
+function getInitialForm(
+  initialData?: SeasonalFoodImage | null,
+): SeasonalFoodFormValues {
   if (!initialData) {
     return emptyForm;
   }
@@ -84,7 +86,7 @@ function SeasonalFoodFormContent({
             <p className="text-3xl font-bold text-[#136C34]">
               {initialData ? "កែសម្រួលរូបភាព" : "បន្ថែមរូបភាពថ្មី"}
             </p>
-          </div>
+          </div>  
           <button
             type="button"
             disabled={saving}
@@ -97,7 +99,9 @@ function SeasonalFoodFormContent({
 
         <form onSubmit={handleSubmit} className="space-y-5 p-6">
           <div>
-            <label className="mb-2 block text-xl font-semibold text-[#F97316]">ចំណងជើង</label>
+            <label className="mb-2 block text-xl font-semibold text-[#F97316]">
+              ចំណងជើង
+            </label>
             <input
               type="text"
               required
@@ -108,7 +112,9 @@ function SeasonalFoodFormContent({
           </div>
 
           <div>
-            <label className="mb-2 block text-xl font-semibold text-[#F97316]">ផ្លូវរូបភាព</label>
+            <label className="mb-2 block text-xl font-semibold text-[#F97316]">
+              ផ្លូវរូបភាព
+            </label>
             <input
               type="text"
               required
@@ -125,7 +131,9 @@ function SeasonalFoodFormContent({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="mb-2 block text-xl font-semibold text-[#F97316]">រដូវកាល</label>
+              <label className="mb-2 block text-xl font-semibold text-[#F97316]">
+                រដូវកាល
+              </label>
               <input
                 type="text"
                 required
@@ -137,7 +145,9 @@ function SeasonalFoodFormContent({
               />
             </div>
             <div>
-              <label className="mb-2 block text-xl font-semibold text-[#F97316]">លំដាប់</label>
+              <label className="mb-2 block text-xl font-semibold text-[#F97316]">
+                លំដាប់
+              </label>
               <input
                 type="number"
                 min={1}
@@ -161,17 +171,23 @@ function SeasonalFoodFormContent({
           <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-4">
             <div>
               <p className="text-xl font-semibold text-[#F97316]">បង្ហាញ</p>
-              <p className="text-sm text-gray-500">កំណត់ឲ្យរូបភាពនេះបង្ហាញនៅលើកម្មវិធី</p>
+              <p className="text-sm text-gray-500">
+                កំណត់ឲ្យរូបភាពនេះបង្ហាញនៅលើកម្មវិធី
+              </p>
             </div>
             <button
               type="button"
-              onClick={() => setForm((prev) => ({ ...prev, isdisplay: !prev.isdisplay }))}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isdisplay ? "bg-[#136C34]" : "bg-gray-300"
-                }`}
+              onClick={() =>
+                setForm((prev) => ({ ...prev, isdisplay: !prev.isdisplay }))
+              }
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                form.isdisplay ? "bg-[#136C34]" : "bg-gray-300"
+              }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.isdisplay ? "translate-x-6" : "translate-x-1"
-                  }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  form.isdisplay ? "translate-x-6" : "translate-x-1"
+                }`}
               />
             </button>
           </div>

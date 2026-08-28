@@ -62,18 +62,18 @@ function MediaCard({
           />
         ) : (
           <div className="flex flex-col items-center justify-center p-4 text-center text-gray-400">
-            <ImageIcon size={32} className="text-gray-300" />
-            <p className="mt-1 text-sm font-medium text-gray-400">
+            <ImageIcon size={36} className="text-gray-300" />
+            <p className="mt-1 text-lg font-medium text-gray-500">
               មិនទាន់មាន {type === "logo" ? "ឡូហ្គោ" : "រូបភាពផ្ទៃខាងក្រោយ"} ឡើយ
             </p>
           </div>
         )}
       </div>
 
-      <div className="p-3.5 flex items-center justify-between">
+      <div className="p-4 flex items-center justify-between">
         <div>
-          <p className="text-base font-semibold text-gray-800">{title}</p>
-          <p className="text-xs text-gray-500 font-mono mt-0.5">
+          <p className="text-lg font-semibold text-gray-800">{title}</p>
+          <p className="text-base text-gray-500 font-mono mt-0.5">
             {mediaUuid ? "បានភ្ជាប់រួចរាល់" : "មិនមានរូបភាព"}
           </p>
         </div>
@@ -82,9 +82,9 @@ function MediaCard({
           <button
             type="button"
             onClick={onEdit}
-            className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-bold text-gray-700 transition hover:bg-gray-100"
+            className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-base font-bold text-gray-700 shadow-2xs transition hover:bg-gray-100"
           >
-            <Pencil size={12} />
+            <Pencil size={15} />
             កែប្រែ
           </button>
         )}

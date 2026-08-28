@@ -15,6 +15,15 @@ import type {
 import type { MealType } from "@/src/types/mealType";
 
 function toCatalogOption(item: MealType): FilterCatalogOption {
+  const activeValue =
+    item.is_active !== undefined
+      ? item.is_active
+      : item.isActive !== undefined
+        ? item.isActive
+        : item.active !== undefined
+          ? item.active
+          : true;
+
   return {
     uuid: item.uuid,
     groupCode: "MEAL_TIME",
@@ -22,11 +31,11 @@ function toCatalogOption(item: MealType): FilterCatalogOption {
     name: item.name,
     localName: item.name,
     description: null,
-    numericValue: item.displayOrder,
+    numericValue: item.displayOrder ?? item.display_order ?? null,
     unit: null,
-    startTime: item.defaultStartTime,
-    endTime: item.defaultEndTime,
-    active: item.isActive,
+    startTime: item.defaultStartTime || item.default_start_time || "",
+    endTime: item.defaultEndTime || item.default_end_time || "",
+    active: Boolean(activeValue),
     createdAt: new Date().toISOString(), // Fallback
     updatedAt: new Date().toISOString(), // Fallback
   };
@@ -66,16 +75,26 @@ export function useMealTypeCatalog() {
       const label =
         values.name.trim() ||
         values.localName.trim();
+      const code =
+        values.code?.trim().toUpperCase() ||
+        createCodeFromLabel(label);
+
+      const startTime = values.startTime || "00:00:00";
+      const endTime = values.endTime || "23:59:00";
+      const order = Number(values.numericValue) || 1;
 
       await createMealType({
-        code: createCodeFromLabel(
-          label,
-        ),
+        code,
         name: label,
-        defaultStartTime: values.startTime || "00:00:00",
-        defaultEndTime: values.endTime || "23:59:00",
-        displayOrder: Number(values.numericValue) || 1,
+        defaultStartTime: startTime,
+        default_start_time: startTime,
+        defaultEndTime: endTime,
+        default_end_time: endTime,
+        displayOrder: order,
+        display_order: order,
         isActive: values.active,
+        is_active: values.active,
+        active: values.active,
       }).unwrap();
 
       await refetch();
@@ -92,15 +111,30 @@ export function useMealTypeCatalog() {
         values.name.trim() ||
         values.localName.trim();
 
+      const startTime = values.startTime || "00:00:00";
+      const endTime = values.endTime || "23:59:00";
+      const order = Number(values.numericValue) || 1;
+
+      const body: any = {
+        name: label,
+        defaultStartTime: startTime,
+        default_start_time: startTime,
+        defaultEndTime: endTime,
+        default_end_time: endTime,
+        displayOrder: order,
+        display_order: order,
+        isActive: values.active,
+        is_active: values.active,
+        active: values.active,
+      };
+
+      if (values.code?.trim()) {
+        body.code = values.code.trim().toUpperCase();
+      }
+
       await updateMealType({
         uuid,
-        body: {
-          name: label,
-          defaultStartTime: values.startTime || "00:00:00",
-          defaultEndTime: values.endTime || "23:59:00",
-          displayOrder: Number(values.numericValue) || 1,
-          isActive: values.active,
-        },
+        body,
       }).unwrap();
 
       await refetch();
@@ -117,6 +151,8 @@ export function useMealTypeCatalog() {
         uuid,
         body: {
           isActive: active,
+          is_active: active,
+          active: active,
         },
       }).unwrap();
 

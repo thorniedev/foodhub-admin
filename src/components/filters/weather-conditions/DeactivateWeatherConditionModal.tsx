@@ -3,7 +3,7 @@
 import type { WeatherCondition } from "@/src/types/weather-condition";
 import {
   Loader2,
-  Trash2,
+  MinusCircle,
   X,
 } from "lucide-react";
 
@@ -26,9 +26,9 @@ export default function DeactivateWeatherConditionModal({
     <div className="fixed inset-0 z-[170] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px]">
       <div className="w-full max-w-md rounded-[30px] bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-500">
-            <Trash2
-              size={24}
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 text-amber-600">
+            <MinusCircle
+              size={26}
             />
           </div>
 
@@ -42,12 +42,12 @@ export default function DeactivateWeatherConditionModal({
           </button>
         </div>
 
-        <p className="mt-5 text-3xl font-black text-gray-900">
+        <p className="mt-5 text-2xl font-normal text-gray-800">
           បិទ Weather Condition?
         </p>
 
-        <p className="mt-3 text-lg leading-7 text-gray-500">
-          <span className="font-black text-gray-800">
+        <p className="mt-3 text-lg leading-7 font-normal text-gray-500">
+          <span className="font-normal text-gray-800">
             {item.name}
           </span>{" "}
           នឹងត្រូវ Deactivate តាម DELETE endpoint។
@@ -58,7 +58,7 @@ export default function DeactivateWeatherConditionModal({
             type="button"
             disabled={deleting}
             onClick={onClose}
-            className="rounded-full border border-gray-200 px-5 py-3 text-lg font-bold text-gray-600"
+            className="rounded-full border border-gray-200 px-6 py-3 text-lg font-normal text-gray-600 hover:bg-gray-50"
           >
             បោះបង់
           </button>
@@ -67,11 +67,11 @@ export default function DeactivateWeatherConditionModal({
             type="button"
             disabled={deleting}
             onClick={onConfirm}
-            className="inline-flex items-center gap-2 rounded-full bg-red-500 px-5 py-3 text-lg font-black text-white disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-full bg-red-500 px-6 py-3 text-lg font-normal text-white disabled:opacity-60 hover:bg-red-600"
           >
             {deleting && (
               <Loader2
-                size={18}
+                size={20}
                 className="animate-spin"
               />
             )}

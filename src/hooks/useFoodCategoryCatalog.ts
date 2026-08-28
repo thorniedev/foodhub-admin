@@ -19,9 +19,20 @@ function toCatalogOption(item: {
   name: string;
   description: string | null;
   parentCategoryUuid: string | null;
-  isActive: boolean;
+  isActive?: boolean;
+  active?: boolean;
+  is_active?: boolean;
   createdAt: string;
 }): FilterCatalogOption {
+  const activeValue =
+    item.is_active !== undefined
+      ? item.is_active
+      : item.isActive !== undefined
+        ? item.isActive
+        : item.active !== undefined
+          ? item.active
+          : true;
+
   return {
     uuid: item.uuid,
     groupCode: "FOOD_CATEGORY",
@@ -32,9 +43,9 @@ function toCatalogOption(item: {
     parentUuid: item.parentCategoryUuid,
     numericValue: null,
     unit: null,
-    active: item.isActive,
+    active: Boolean(activeValue),
     createdAt: item.createdAt,
-    updatedAt: item.createdAt, // Fallback since updatedAt isn't clearly always there
+    updatedAt: item.createdAt,
   };
 }
 
@@ -72,14 +83,13 @@ export function useFoodCategoryCatalog() {
       const label =
         values.name.trim() ||
         values.localName.trim();
+      const code =
+        values.code?.trim().toUpperCase() ||
+        createCodeFromLabel(label);
 
       await createFoodCategory({
-        code: createCodeFromLabel(
-          label,
-        ),
-        name:
-          values.name.trim() ||
-          values.localName.trim(),
+        code,
+        name: label,
         description:
           values.description.trim() ||
           null,
@@ -88,6 +98,7 @@ export function useFoodCategoryCatalog() {
         parentCategoryUuid:
           values.parentUuid || null,
       }).unwrap();
+
 
       await refetch();
     },
@@ -102,6 +113,11 @@ export function useFoodCategoryCatalog() {
       uuid: string,
       values: FilterCatalogOptionFormValues,
     ) => {
+      const parentUuid =
+        values.parentUuid && values.parentUuid !== uuid
+          ? values.parentUuid
+          : null;
+
       await updateFoodCategory({
         uuid,
         body: {
@@ -114,7 +130,7 @@ export function useFoodCategoryCatalog() {
           isActive:
             values.active,
           parentCategoryUuid:
-            values.parentUuid || null,
+            parentUuid,
         },
       }).unwrap();
 

@@ -18,33 +18,33 @@ export default function DeleteConfirmModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
-      <div className="bg-white rounded-2xl w-full max-w-sm p-5 sm:p-6">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-3xl w-full max-w-md p-6">
         <div className="flex items-center gap-3 mb-3">
-          <div className="bg-red-50 rounded-full p-2">
-            <AlertTriangle size={20} className="text-red-500" />
+          <div className="bg-red-50 rounded-2xl p-2.5">
+            <AlertTriangle size={24} className="text-red-500" />
           </div>
-          <h2 className="text-base sm:text-lg font-bold text-gray-800">
+          <h2 className="text-xl font-normal text-gray-800">
             លុបចំណីអាហារ
           </h2>
         </div>
 
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-lg font-normal text-gray-500 mb-6">
           តើអ្នកប្រាកដទេថាចង់លុប{" "}
-          <span className="font-medium text-gray-700">{itemName}</span>? សកម្មភាពនេះមិន
+          <span className="font-normal text-gray-700">{itemName}</span>? សកម្មភាពនេះមិន
           អាចត្រឡប់វិញបានទេ។
         </p>
 
         <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"
+            className="px-6 py-2.5 text-lg font-normal text-gray-600 hover:bg-gray-100 rounded-full border border-gray-200"
           >
             បោះបង់
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg"
+            className="px-6 py-2.5 text-lg font-normal text-white bg-red-500 hover:bg-red-600 rounded-full"
           >
             លុប
           </button>

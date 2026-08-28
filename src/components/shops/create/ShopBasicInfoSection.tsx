@@ -4,17 +4,30 @@ import { Store } from "lucide-react";
 
 import StoreSelect from "../StoreSelect";
 
+type ErrorLike = { message?: string } | undefined;
+
+type BasicInfoErrors = {
+  storeName?:       ErrorLike;
+  description?:     ErrorLike;
+  countryCode?:     ErrorLike;
+  timezone?:        ErrorLike;
+  priceLevel?:      ErrorLike;
+  hygieneRating?:   ErrorLike;
+  operatingStatus?: ErrorLike;
+};
+
 export default function ShopBasicInfoSection({
   values,
   onChange,
+  errors,
 }: {
   values: {
-    storeName: string;
-    description: string;
-    countryCode: string;
-    timezone: string;
-    priceLevel: string;
-    hygieneRating: string;
+    storeName:       string;
+    description:     string;
+    countryCode:     string;
+    timezone:        string;
+    priceLevel:      string;
+    hygieneRating:   string;
     operatingStatus: StoreOperatingStatus;
   };
   onChange: (
@@ -28,6 +41,7 @@ export default function ShopBasicInfoSection({
       | "operatingStatus",
     value: string,
   ) => void;
+  errors?: BasicInfoErrors;
 }) {
   return (
     <section className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
@@ -68,6 +82,7 @@ export default function ShopBasicInfoSection({
           onChange={(value) => onChange("storeName", value)}
           placeholder="ឧ. Sovann Kitchen"
           required
+          error={errors?.storeName?.message}
         />
 
         <Field
@@ -76,6 +91,7 @@ export default function ShopBasicInfoSection({
           onChange={(value) => onChange("countryCode", value)}
           placeholder="ឧ. KH"
           required
+          error={errors?.countryCode?.message}
         />
 
         <Field
@@ -84,6 +100,7 @@ export default function ShopBasicInfoSection({
           onChange={(value) => onChange("timezone", value)}
           placeholder="ឧ. Asia/Phnom_Penh"
           required
+          error={errors?.timezone?.message}
         />
 
         {/* ===============================================
@@ -97,25 +114,16 @@ export default function ShopBasicInfoSection({
             value={values.operatingStatus}
             onChange={(value) => onChange("operatingStatus", value)}
             options={[
-              {
-                value: "OPEN",
-                label: "បើកដំណើរការ",
-              },
-              {
-                value: "CLOSED",
-                label: "បិទដំណើរការ",
-              },
-              {
-                value: "TEMPORARILY_CLOSED",
-                label: "ផ្អាកដំណើរការបណ្ដោះអាសន្ន",
-              },
-              {
-                value: "UNKNOWN",
-                label: "មិនបានកំណត់",
-              },
+              { value: "OPEN",               label: "បើកដំណើរការ" },
+              { value: "CLOSED",             label: "បិទដំណើរការ" },
+              { value: "TEMPORARILY_CLOSED", label: "ផ្អាកដំណើរការបណ្ដោះអាសន្ន" },
+              { value: "UNKNOWN",            label: "មិនបានកំណត់" },
             ]}
             ariaLabel="Operating status"
           />
+          {errors?.operatingStatus && (
+            <p className="mt-1 text-lg text-red-600">{errors.operatingStatus.message}</p>
+          )}
         </label>
 
         <label className="block">
@@ -124,7 +132,7 @@ export default function ShopBasicInfoSection({
             value={values.priceLevel}
             onChange={(value) => onChange("priceLevel", value)}
             options={[
-              { value: "", label: "— មិនបានកំណត់" },
+              { value: "",  label: "— មិនបានកំណត់" },
               { value: "1", label: "កម្រិតទាប (ថោក)" },
               { value: "2", label: "កម្រិតមធ្យម (សមរម្យ)" },
               { value: "3", label: "កម្រិតខ្ពស់ (ថ្លៃ)" },
@@ -132,6 +140,9 @@ export default function ShopBasicInfoSection({
             ]}
             ariaLabel="Price level"
           />
+          {errors?.priceLevel && (
+            <p className="mt-1 text-lg text-red-600">{errors.priceLevel.message}</p>
+          )}
         </label>
 
         <Field
@@ -141,6 +152,7 @@ export default function ShopBasicInfoSection({
           value={values.hygieneRating}
           onChange={(value) => onChange("hygieneRating", value)}
           placeholder="ឧ. 4.5"
+          error={errors?.hygieneRating?.message}
         />
 
         {/* ===============================================
@@ -155,28 +167,20 @@ export default function ShopBasicInfoSection({
             value={values.description}
             onChange={(event) => onChange("description", event.target.value)}
             placeholder="សរសេរការពិពណ៌នាអំពីហាង..."
-            className="
-              w-full
-              resize-none
-              rounded-xl
-              border
-              border-gray-200
-              bg-gray-50
-              px-4
-              py-3.5
-              text-lg
-              leading-8
-              text-gray-800
-              outline-none
-              transition
-              placeholder:text-gray-400
+            className={`
+              w-full resize-none rounded-xl border bg-gray-50
+              px-4 py-3.5 text-lg leading-8 text-gray-800
+              outline-none transition placeholder:text-gray-400
               hover:border-gray-300
-              focus:border-primary-600
-              focus:bg-white
-              focus:ring-4
-              focus:ring-primary-100
-            "
+              focus:bg-white focus:ring-4
+              ${errors?.description
+                ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"}
+            `}
           />
+          {errors?.description && (
+            <p className="mt-1 text-lg text-red-600">{errors.description.message}</p>
+          )}
         </label>
       </div>
     </section>
@@ -223,14 +227,16 @@ function Field({
   required = false,
   step,
   placeholder,
+  error,
 }: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  type?: string;
-  required?: boolean;
-  step?: string;
+  label:        string;
+  value:        string;
+  onChange:     (value: string) => void;
+  type?:        string;
+  required?:    boolean;
+  step?:        string;
   placeholder?: string;
+  error?:       string;
 }) {
   return (
     <label className="block">
@@ -239,30 +245,20 @@ function Field({
       <input
         type={type}
         step={step}
-        required={required}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="
-          h-[52px]
-          w-full
-          rounded-xl
-          border
-          border-gray-200
-          bg-gray-50
-          px-4
-          text-lg
-          text-gray-800
-          outline-none
-          transition
-          placeholder:text-gray-400
-          hover:border-gray-300
-          focus:border-primary-600
-          focus:bg-white
-          focus:ring-4
-          focus:ring-primary-100
-        "
+        className={`
+          h-[52px] w-full rounded-xl border bg-gray-50
+          px-4 text-lg text-gray-800 outline-none transition
+          placeholder:text-gray-400 hover:border-gray-300
+          focus:bg-white focus:ring-4
+          ${error
+            ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+            : "border-gray-200 focus:border-primary-600 focus:ring-primary-100"}
+        `}
       />
+      {error && <p className="mt-1 text-lg text-red-600">{error}</p>}
     </label>
   );
 }

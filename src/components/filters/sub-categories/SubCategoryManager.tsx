@@ -148,7 +148,6 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
 
   // States
   const [search, setSearch] = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [statusFilter, setStatusFilter] =
     useState<SubCategoryStatusFilter>("ALL");
   const [sortMode, setSortMode] = useState<SubCategorySortMode>("NEWEST");
@@ -173,18 +172,7 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
   ).length;
   const inactiveCount = subCategories.length - activeCount;
 
-  // Search suggestions
   const normalizedSearch = search.trim().toLowerCase();
-  const suggestions = useMemo(() => {
-    if (!normalizedSearch) return [];
-    return subCategories
-      .filter((item) =>
-        [item.name, item.code, item.description ?? ""].some((val) =>
-          String(val).toLowerCase().includes(normalizedSearch),
-        ),
-      )
-      .slice(0, 6);
-  }, [subCategories, normalizedSearch]);
 
   // Filtered & Sorted items
   const filtered = useMemo(() => {
@@ -241,12 +229,21 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
 
   const handleSave = async (payload: FoodCategoryPayload) => {
     try {
+      const targetParentUuid =
+        editing && editing.uuid === rootCategory.uuid
+          ? null
+          : payload.parentCategoryUuid || rootCategory.uuid;
+
+      if (editing && targetParentUuid === editing.uuid) {
+        throw new Error("អនុប្រភេទមិនអាចកំណត់ជាប្រភេទមេរបស់ខ្លួនឯងបានទេ។");
+      }
+
       if (editing) {
         await updateFoodCategory({
           uuid: editing.uuid,
           body: {
             ...payload,
-            parentCategoryUuid: rootCategory.uuid,
+            parentCategoryUuid: targetParentUuid,
           },
         }).unwrap();
         setNotice({
@@ -256,7 +253,7 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
       } else {
         await createFoodCategory({
           ...payload,
-          parentCategoryUuid: rootCategory.uuid,
+          parentCategoryUuid: targetParentUuid,
         }).unwrap();
         setNotice({
           type: "success",
@@ -284,7 +281,6 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
         uuid: item.uuid,
         body: {
           isActive: newStatus,
-          parentCategoryUuid: rootCategory.uuid,
         },
       }).unwrap();
       setNotice({
@@ -326,7 +322,6 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
     setSortMode("NEWEST");
     setSize(20);
     setPage(0);
-    setShowSuggestions(false);
     refetch();
   };
 
@@ -354,7 +349,7 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
   };
 
   return (
-    <div className="w-full min-w-0 max-w-full space-y-6">
+    <div className="w-full min-w-0 max-w-full space-y-5">
       {/* Header Banner */}
       <SubCategoryHeader
         mode={mode}
@@ -362,7 +357,6 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
         activeCount={activeCount}
         inactiveCount={inactiveCount}
         onAdd={handleOpenCreate}
-        onRestoreAll={inactiveCount > 0 ? handleRestoreAll : undefined}
       />
 
       {/* Notice Message */}
@@ -412,27 +406,15 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
         size={size}
         sortOpen={sortOpen}
         sizeOpen={sizeOpen}
-        showSuggestions={showSuggestions}
-        suggestions={suggestions}
         totalCount={subCategories.length}
         activeCount={activeCount}
         inactiveCount={inactiveCount}
         onSearchChange={(val) => {
           setSearch(val);
-          setShowSuggestions(val.trim().length > 0);
           setPage(0);
-        }}
-        onSearchFocus={() => {
-          if (search.trim()) setShowSuggestions(true);
         }}
         onClearSearch={() => {
           setSearch("");
-          setShowSuggestions(false);
-          setPage(0);
-        }}
-        onSuggestionSelect={(item) => {
-          setSearch(item.name);
-          setShowSuggestions(false);
           setPage(0);
         }}
         onStatusFilterChange={(st) => {
@@ -458,7 +440,6 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
         onCloseDropdowns={() => {
           setSortOpen(false);
           setSizeOpen(false);
-          setShowSuggestions(false);
         }}
         onReset={handleReset}
       />

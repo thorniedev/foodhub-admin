@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-
 import {
   LoaderCircle,
-  Trash2,
+  MinusCircle,
   X,
 } from "lucide-react";
-
 import type { DietaryType } from "@/src/types/dietaryType";
 
 type Props = {
@@ -26,15 +24,11 @@ export default function DeleteDietaryTypeConfirmModal({
   useEffect(() => {
     if (!item) return;
 
-    const previousOverflow =
-      document.body.style.overflow;
-
-    document.body.style.overflow =
-      "hidden";
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.overflow =
-        previousOverflow;
+      document.body.style.overflow = previousOverflow;
     };
   }, [item]);
 
@@ -46,8 +40,8 @@ export default function DeleteDietaryTypeConfirmModal({
     <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
       <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
-            <Trash2 size={24} />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 text-amber-600">
+            <MinusCircle size={28} />
           </div>
 
           <button
@@ -61,16 +55,16 @@ export default function DeleteDietaryTypeConfirmModal({
           </button>
         </div>
 
-        <p className="mt-5 text-3xl font-semibold text-primary-800">
-          បិទរបបអាហារនេះ?
+        <p className="mt-5 text-2xl font-normal text-primary-800">
+          បិទដំណើរការ {item.name}?
         </p>
 
-        <p className="mt-3 text-lg leading-8 text-gray-500">
+        <p className="mt-3 text-lg leading-8 font-normal text-gray-500">
           របបអាហារ{" "}
-          <span className="font-semibold text-gray-800">
+          <span className="font-normal text-gray-800">
             {item.name}
           </span>{" "}
-          នឹងត្រូវបិទ ហើយអាចស្ដារឡើងវិញនៅពេលក្រោយ។
+          នឹងត្រូវបិទទៅជាអសកម្ម (Inactive) ហើយអាចស្ដារឡើងវិញបានគ្រប់ពេល។
         </p>
 
         <div className="mt-6 grid grid-cols-2 gap-3">
@@ -78,18 +72,16 @@ export default function DeleteDietaryTypeConfirmModal({
             type="button"
             onClick={onClose}
             disabled={deleting}
-            className="min-h-12 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-12 rounded-full border border-gray-200 bg-white px-4 text-lg font-normal text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             បោះបង់
           </button>
 
           <button
             type="button"
-            onClick={() =>
-              void onConfirm()
-            }
+            onClick={() => void onConfirm()}
             disabled={deleting}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-500 px-4 text-lg font-medium text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-amber-600 px-4 text-lg font-normal text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {deleting && (
               <LoaderCircle
@@ -97,8 +89,7 @@ export default function DeleteDietaryTypeConfirmModal({
                 className="animate-spin"
               />
             )}
-
-            បិទ
+            បិទដំណើរការ
           </button>
         </div>
       </div>

@@ -28,6 +28,7 @@ export interface DietaryTypeFormValues {
 
 export const DIETARY_TYPE_CATEGORIES = [
   "LIFESTYLE",
+  "RELIGIOUS",
   "NUTRITIONAL",
   "MEDICAL",
 ] as const;

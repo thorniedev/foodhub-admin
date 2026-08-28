@@ -213,12 +213,13 @@ async function forwardRequest(
    *
    * ?page=0&size=100
    */
-  targetUrl.search = incomingUrl.search;
-
-  // Ensure size does not exceed 100 for discovery search
-  if (normalizedPath[0] === "discovery" && incomingUrl.searchParams.has("size")) {
+  if (normalizedPath[0] === "discovery") {
+    const page = incomingUrl.searchParams.get("page") || "0";
     const rawSize = parseInt(incomingUrl.searchParams.get("size") || "100", 10);
-    targetUrl.searchParams.set("size", String(Math.min(Math.max(1, rawSize), 100)));
+    const size = String(Math.min(Math.max(1, rawSize), 100));
+    targetUrl.search = `?page=${encodeURIComponent(page)}&size=${encodeURIComponent(size)}`;
+  } else {
+    targetUrl.search = incomingUrl.search;
   }
 
   const requestHeaders = new Headers();

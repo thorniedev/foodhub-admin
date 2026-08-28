@@ -6,6 +6,7 @@ import {
   ArrowUpDown,
   Check,
   ChevronDown,
+  RotateCcw,
   Search,
   ShieldAlert,
   X,
@@ -54,13 +55,7 @@ export default function AllergenManager() {
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(20);
 
-  /* =======================================================
-     SEARCH
-  ======================================================= */
-
   const [search, setSearch] = useState("");
-
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
   /* =======================================================
      FILTER
@@ -141,39 +136,7 @@ export default function AllergenManager() {
   const inactiveCount = items.length - activeCount;
 
   /* =======================================================
-     SEARCH SUGGESTIONS
-
-     Search only:
-     - code = displayed as Allergen
-     - description
-
-     Do NOT search item.name.
-  ======================================================= */
-
-  const suggestions = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    if (!query) {
-      return [];
-    }
-
-    return suggestionItems
-      .filter((item) => {
-        const code = item.code?.toLowerCase() ?? "";
-
-        const description = item.description?.toLowerCase() ?? "";
-
-        return code.includes(query) || description.includes(query);
-      })
-      .slice(0, 8);
-  }, [suggestionItems, search]);
-
-  /* =======================================================
      FILTER
-
-     Search only:
-     - item.code
-     - item.description
   ======================================================= */
 
   const filteredItems = useMemo(() => {
@@ -199,11 +162,11 @@ export default function AllergenManager() {
 
       /* SEARCH */
 
+      const name = item.name?.toLowerCase() ?? "";
       const code = item.code?.toLowerCase() ?? "";
-
       const description = item.description?.toLowerCase() ?? "";
 
-      return code.includes(query) || description.includes(query);
+      return name.includes(query) || code.includes(query) || description.includes(query);
     });
   }, [items, search, statusFilter]);
 
@@ -457,9 +420,7 @@ export default function AllergenManager() {
         inactiveCount={inactiveCount}
         onAdd={() => {
           setEditing(null);
-
           setMessage(null);
-
           setFormOpen(true);
         }}
       />
@@ -468,219 +429,78 @@ export default function AllergenManager() {
           TABS + TOOLBAR
       ================================================== */}
 
-      <div className="flex w-full flex-nowrap items-center justify-between gap-4">
-        {/* ===============================================
-            LEFT
-        ================================================ */}
+      <div className="flex w-full flex-wrap items-center justify-between gap-3">
+        {/* LEFT: Status Tabs */}
+        <AllergensTabs
+          value={statusFilter}
+          allCount={items.length}
+          activeCount={activeCount}
+          inactiveCount={inactiveCount}
+          onChange={(value) => {
+            setStatusFilter(value);
+            setPage(0);
+          }}
+        />
 
-        <div className="shrink-0">
-          <AllergensTabs
-            value={statusFilter}
-            allCount={items.length}
-            activeCount={activeCount}
-            inactiveCount={inactiveCount}
-            onChange={(value) => {
-              setStatusFilter(value);
-
-              setPage(0);
-            }}
-          />
-        </div>
-
-        {/* ===============================================
-            RIGHT
-        ================================================ */}
-
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          {/* =============================================
-              SEARCH
-          ============================================== */}
-
-          <div className="relative">
+        {/* RIGHT: Search + Size + Sort + Reset */}
+        <div className="flex min-w-[320px] flex-1 flex-wrap items-center justify-end gap-2.5">
+          {/* SEARCH */}
+          <div className="relative min-w-[220px] max-w-[360px] flex-1">
             <Search
               size={17}
               className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
             />
-
             <input
               value={search}
               onChange={(event) => {
-                const value = event.target.value;
-
-                setSearch(value);
-
+                setSearch(event.target.value);
                 setPage(0);
-
-                setShowSuggestions(value.trim().length > 0);
               }}
-              onFocus={() => {
-                if (search.trim().length > 0) {
-                  setShowSuggestions(true);
-                }
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Escape") {
-                  setShowSuggestions(false);
-                }
-
-                if (event.key === "Enter") {
-                  setShowSuggestions(false);
-                }
-              }}
-              placeholder="ស្វែងរកតាមអាឡែស៊ី ឬការពិពណ៌នា..."
-              className="h-[52px] w-[500px] rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              placeholder="ស្វែងរកអាឡែស៊ី..."
+              className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
             />
-
-            {/* =========================================
-                CLEAR SEARCH
-            ========================================== */}
-
             {search && (
               <button
                 type="button"
                 onClick={() => {
                   setSearch("");
-
-                  setShowSuggestions(false);
-
                   setPage(0);
                 }}
                 className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
                 aria-label="Clear search"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
-            )}
-
-            {/* =========================================
-                SUGGESTIONS
-            ========================================== */}
-
-            {showSuggestions && search.trim().length > 0 && (
-              <div className="absolute left-0 top-[52px] z-[100] w-[400px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
-                {/* ===================================
-                      NO RESULT
-                  ==================================== */}
-
-                {suggestions.length === 0 ? (
-                  <div className="px-5 py-6 text-center ">
-                    <ShieldAlert size={32} className="mx-auto text-secondary-600" />
-
-                    <p className="mt-2 text-lg text-secondary-600">
-                      មិនមានអាឡែស៊ីដែលត្រូវគ្នា
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    {/* =================================
-                          SUGGESTION HEADER
-                      ================================== */}
-
-                    <div className="border-b border-gray-100 px-5 py-3">
-                      <p className="text-lg uppercase tracking-wide text-secondary-600">
-                        លទ្ធផលស្វែងរក
-                      </p>
-                    </div>
-
-                    {/* =================================
-                          RESULT LIST
-                      ================================== */}
-
-                    <div className="max-h-[320px] overflow-y-auto p-2">
-                      {suggestions.map((item) => (
-                        <button
-                          key={item.uuid}
-                          type="button"
-                          onMouseDown={(event) => {
-                            event.preventDefault();
-                          }}
-                          onClick={() => {
-                            /*
-                             * Allergen shown to
-                             * Admin = code
-                             */
-                            setSearch(item.code);
-
-                            setShowSuggestions(false);
-
-                            setPage(0);
-                          }}
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
-                        >
-                          {/* ICON */}
-
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
-                            <ShieldAlert size={24} />
-                          </div>
-
-                          {/* INFORMATION */}
-
-                          <div className="min-w-0 flex-1">
-                            {/* ALLERGEN */}
-
-                            <p className="truncate text-lg font-black text-gray-800">
-                              {item.code}
-                            </p>
-
-                            {/* DESCRIPTION */}
-
-                            {item.description && (
-                              <p className="mt-1 truncate text-lg text-gray-400">
-                                {item.description}
-                              </p>
-                            )}
-                          </div>
-
-                          {/* STATUS */}
-
-                          <span
-                            className={`shrink-0 rounded-full px-2 py-1 text-lg font-bold ${item.active
-                                ? "bg-primary-50 text-primary-700"
-                                : "bg-gray-100 text-gray-500"
-                              }`}
-                          >
-                            {item.active ? "សកម្ម" : "អសកម្ម"}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
             )}
           </div>
 
-          {/* =============================================
-              PAGE SIZE
-          ============================================== */}
-
-          <div className="relative">
+          {/* PAGE SIZE */}
+          <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => setSizeOpen((current) => !current)}
-              className={`flex h-11 min-w-[125px] items-center justify-between gap-3 rounded-2xl border bg-white px-4 text-lg font-semibold transition ${sizeOpen
-                  ? "border-primary-800 ring-2 ring-primary-100"
-                  : "border-gray-200 hover:border-primary-800/50"
-                }`}
+              className={`flex h-12 min-w-[140px] items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition ${
+                sizeOpen
+                  ? "border-primary-600 ring-2 ring-primary-100"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
             >
               <span className="text-gray-700">{size} / ទំព័រ</span>
-
               <ChevronDown
-                size={17}
-                className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
-                  }`}
+                size={18}
+                className={`text-gray-400 transition-transform duration-200 ${
+                  sizeOpen ? "rotate-180" : ""
+                }`}
               />
             </button>
 
             {sizeOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[150px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg  text-secondary-600">
-                  ចំនួនក្នុងទំព័រ
+              <div className="absolute right-0 top-[52px] z-[110] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-600">
+                  ទំហំទំព័រ
                 </p>
-
-                {[10, 20, 50].map((value) => {
+                {[10, 20, 50, 100].map((value) => {
                   const selected = size === value;
-
                   return (
                     <button
                       key={value}
@@ -690,15 +510,15 @@ export default function AllergenManager() {
                         setPage(0);
                         setSizeOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                        selected
                           ? "bg-primary-50 text-primary-800"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
-                        }`}
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
                     >
                       <span>{value} / ទំព័រ</span>
-
                       {selected && (
-                        <Check size={16} className="text-primary-800" />
+                        <Check size={18} className="text-primary-800" />
                       )}
                     </button>
                   );
@@ -707,55 +527,47 @@ export default function AllergenManager() {
             )}
           </div>
 
-          {/* =============================================
-              SORT
-          ============================================== */}
-
-          <div className="relative">
+          {/* SORT */}
+          <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => setSortOpen((current) => !current)}
-              className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition ${sortOpen
+              className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${
+                sortOpen
                   ? "border-primary-800 bg-primary-50 text-primary-800"
                   : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
-                }`}
+              }`}
               aria-label="Sort allergens"
-              title="Sort allergens"
+              title="តម្រៀប"
             >
               <ArrowUpDown size={18} />
             </button>
 
-            {/* =========================================
-                SORT MENU
-            ========================================== */}
-
             {sortOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg uppercase tracking-wide text-secondary-600">
+              <div className="absolute right-0 top-[52px] z-[110] w-[200px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-600">
                   តម្រៀប
                 </p>
-
                 {sortOptions.map((option) => {
                   const selected = sortBy === option.value;
-
                   return (
                     <button
                       key={option.value}
                       type="button"
                       onClick={() => {
                         setSortBy(option.value);
-
                         setSortOpen(false);
+                        setPage(0);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg font-semibold transition ${selected
+                      className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                        selected
                           ? "bg-primary-50 text-primary-800"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-800"
-                        }`}
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
                     >
                       <span>{option.label}</span>
-
                       {selected && (
-                        <Check size={16} className="text-primary-800" />
+                        <Check size={18} className="text-primary-800" />
                       )}
                     </button>
                   );
@@ -763,6 +575,26 @@ export default function AllergenManager() {
               </div>
             )}
           </div>
+
+          {/* RESET BUTTON */}
+          {(search.trim() || statusFilter !== "ALL" || sortBy !== "A_Z" || size !== 20) && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setStatusFilter("ALL");
+                setSortBy("A_Z");
+                setSize(20);
+                setSortOpen(false);
+                setSizeOpen(false);
+                setPage(0);
+              }}
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95"
+              title="កំណត់ឡើងវិញ"
+            >
+              <RotateCcw size={18} />
+            </button>
+          )}
         </div>
       </div>
 

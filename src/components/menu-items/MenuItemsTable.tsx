@@ -26,18 +26,18 @@ export default function MenuItemsTable({ items }: { items: CatalogMenuItem[] }) 
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-[1150px] w-full">
-        <thead className="bg-gray-50 text-left text-xs font-black uppercase tracking-wide text-gray-500">
-          <tr>
-            <th className="px-5 py-4">Menu Item</th>
-            <th className="px-5 py-4">Store</th>
-            <th className="px-5 py-4">Food master</th>
-            <th className="px-5 py-4">Price</th>
-            <th className="px-5 py-4">Availability</th>
-            <th className="px-5 py-4">Prep time</th>
-            <th className="px-5 py-4">Source</th>
-            <th className="px-5 py-4">Published</th>
+    <div className="overflow-x-auto rounded-3xl border border-gray-100 bg-white">
+      <table className="min-w-[1150px] w-full text-lg font-normal">
+        <thead className="bg-gray-50/70 text-left text-lg font-normal text-primary-800">
+          <tr className="border-b border-gray-100">
+            <th className="px-5 py-4 font-normal">Menu Item</th>
+            <th className="px-5 py-4 font-normal">Store</th>
+            <th className="px-5 py-4 font-normal">Food master</th>
+            <th className="px-5 py-4 font-normal">Price</th>
+            <th className="px-5 py-4 font-normal">Availability</th>
+            <th className="px-5 py-4 font-normal">Prep time</th>
+            <th className="px-5 py-4 font-normal">Source</th>
+            <th className="px-5 py-4 font-normal">Published</th>
           </tr>
         </thead>
 
@@ -47,7 +47,7 @@ export default function MenuItemsTable({ items }: { items: CatalogMenuItem[] }) 
             const available = item.availabilityStatus === "AVAILABLE";
 
             return (
-              <tr key={item.uuid} className="transition hover:bg-emerald-50/20">
+              <tr key={item.uuid} className="transition hover:bg-gray-50/70">
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 text-gray-300">
@@ -59,44 +59,44 @@ export default function MenuItemsTable({ items }: { items: CatalogMenuItem[] }) 
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="font-black text-gray-900">{item.localName || item.name}</p>
-                        {item.isFeatured && <Star size={14} className="fill-amber-400 text-amber-400" />}
+                        <p className="text-lg font-normal text-gray-800">{item.localName || item.name}</p>
+                        {item.isFeatured && <Star size={16} className="fill-amber-400 text-amber-400" />}
                       </div>
                       {item.localName && (
-                        <p className="mt-0.5 text-sm text-gray-500">{item.name}</p>
+                        <p className="mt-0.5 text-base font-normal text-gray-500">{item.name}</p>
                       )}
-                      <p className="mt-1 max-w-[260px] truncate text-xs text-gray-400">
+                      <p className="mt-1 max-w-[260px] truncate text-sm font-normal text-gray-400">
                         {item.description || item.uuid}
                       </p>
                     </div>
                   </div>
                 </td>
                 <td className="px-5 py-4">
-                  <p className="text-sm font-black text-gray-700">
+                  <p className="text-lg font-normal text-gray-700">
                     {item.store?.storeName || item.store?.name || "—"}
                   </p>
-                  <p className="mt-1 text-xs text-gray-400">{item.store?.city || ""}</p>
+                  <p className="mt-1 text-sm font-normal text-gray-400">{item.store?.city || ""}</p>
                 </td>
-                <td className="px-5 py-4 text-sm font-semibold text-gray-600">
+                <td className="px-5 py-4 text-lg font-normal text-gray-600">
                   {item.food?.localName || item.food?.canonicalName || "—"}
                 </td>
-                <td className="px-5 py-4 text-sm font-black text-[#137A3D]">
+                <td className="px-5 py-4 text-lg font-normal text-emerald-800">
                   {money(item.price, item.currencyCode)}
                 </td>
                 <td className="px-5 py-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-black ${available
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-orange-50 text-orange-600"
+                    className={`inline-flex rounded-full px-3.5 py-1 text-lg font-normal border ${available
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                        : "bg-amber-50 text-amber-700 border-amber-100"
                       }`}
                   >
                     {item.availabilityStatus || "UNKNOWN"}
                   </span>
                 </td>
-                <td className="px-5 py-4 text-sm font-semibold text-gray-600">
+                <td className="px-5 py-4 text-lg font-normal text-gray-600">
                   {item.preparationTimeMinutes ?? "—"} min
                 </td>
-                <td className="px-5 py-4 text-sm font-semibold text-gray-500">
+                <td className="px-5 py-4 text-lg font-normal text-gray-500">
                   {item.source || "—"}
                 </td>
                 <td className="px-5 py-4">

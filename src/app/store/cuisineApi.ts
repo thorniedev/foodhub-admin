@@ -116,14 +116,13 @@ export const cuisineApi = baseApi.injectEndpoints({
         const includeInactive = queryParams.includeInactive ?? false;
 
         return {
-          url: includeInactive
-            ? "/api/catalog/cuisines/all"
-            : "/api/catalog/cuisines",
+          url: "/api/catalog/cuisines",
           method: "GET",
           params: {
             page,
             size,
             sort: "name,asc",
+            ...(includeInactive ? { includeInactive: true } : {}),
           },
         };
       },

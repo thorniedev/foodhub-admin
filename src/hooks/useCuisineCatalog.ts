@@ -18,10 +18,23 @@ function toCatalogOption(item: {
   code: string;
   name: string;
   description: string | null;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  isActive?: boolean;
+  active?: boolean;
+  is_active?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 }): FilterCatalogOption {
+  const activeValue =
+    item.is_active !== undefined
+      ? item.is_active
+      : item.isActive !== undefined
+        ? item.isActive
+        : item.active !== undefined
+          ? item.active
+          : true;
+
   return {
     uuid: item.uuid,
     groupCode: "CUISINE",
@@ -31,9 +44,9 @@ function toCatalogOption(item: {
     description: item.description,
     numericValue: null,
     unit: null,
-    active: item.isActive,
-    createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
+    active: Boolean(activeValue),
+    createdAt: item.createdAt || item.created_at || "",
+    updatedAt: item.updatedAt || item.updated_at || "",
   };
 }
 
@@ -71,19 +84,19 @@ export function useCuisineCatalog() {
       const label =
         values.name.trim() ||
         values.localName.trim();
+      const code =
+        values.code?.trim().toUpperCase() ||
+        createCodeFromLabel(label);
 
       await createCuisine({
-        code: createCodeFromLabel(
-          label,
-        ),
-        name:
-          values.name.trim() ||
-          values.localName.trim(),
+        code,
+        name: label,
         description:
           values.description.trim() ||
           null,
-        isActive:
-          values.active,
+        isActive: values.active,
+        is_active: values.active,
+        active: values.active,
       }).unwrap();
 
       await refetch();
@@ -99,18 +112,27 @@ export function useCuisineCatalog() {
       uuid: string,
       values: FilterCatalogOptionFormValues,
     ) => {
+      const label =
+        values.name.trim() ||
+        values.localName.trim();
+
+      const body: any = {
+        name: label,
+        description:
+          values.description.trim() ||
+          null,
+        isActive: values.active,
+        is_active: values.active,
+        active: values.active,
+      };
+
+      if (values.code?.trim()) {
+        body.code = values.code.trim().toUpperCase();
+      }
+
       await updateCuisine({
         uuid,
-        body: {
-          name:
-            values.name.trim() ||
-            values.localName.trim(),
-          description:
-            values.description.trim() ||
-            null,
-          isActive:
-            values.active,
-        },
+        body,
       }).unwrap();
 
       await refetch();
@@ -130,6 +152,8 @@ export function useCuisineCatalog() {
         uuid,
         body: {
           isActive: active,
+          is_active: active,
+          active: active,
         },
       }).unwrap();
 

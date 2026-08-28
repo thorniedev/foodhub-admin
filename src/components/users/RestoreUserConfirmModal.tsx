@@ -49,22 +49,22 @@ export default function RestoreUserConfirmModal({
 
         {/* Header Content */}
         <div className="mt-5 text-center">
-          <h3 className="text-xl font-bold tracking-tight text-gray-900 whitespace-nowrap">
+          <h3 className="text-2xl font-normal tracking-tight text-gray-900 whitespace-nowrap">
             បើកដំណើរការគណនីនេះឡើងវិញ?
           </h3>
-          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+          <p className="mt-2 text-lg leading-relaxed text-gray-500 font-normal">
             គណនី{" "}
-            <span className="font-bold text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200/80">
+            <span className="font-normal text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-lg border border-gray-200/80">
               {name}
             </span>{" "}
-            នឹងត្រូវបានស្តារឱ្យមានស្ថានភាព <strong>"សកម្ម"</strong> ឡើងវិញ។
+            នឹងត្រូវបានស្តារឱ្យមានស្ថានភាព "សកម្ម" ឡើងវិញ។
           </p>
         </div>
 
         {/* Callout Notice */}
         <div className="mt-5 flex items-start gap-3 rounded-2xl border border-emerald-200/90 bg-emerald-50/40 p-4 text-left">
-          <CheckCircle2 size={17} className="mt-0.5 shrink-0 text-emerald-600" />
-          <p className="text-xs font-medium leading-relaxed text-emerald-900">
+          <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-emerald-600" />
+          <p className="text-lg font-normal leading-relaxed text-emerald-900">
             បន្ទាប់ពីបើកដំណើរការឡើងវិញ អ្នកប្រើប្រាស់អាច Login ចូលប្រើប្រាស់ និងបញ្ជាទិញអាហារបានជាធម្មតា។
           </p>
         </div>
@@ -75,7 +75,7 @@ export default function RestoreUserConfirmModal({
             type="button"
             disabled={restoring}
             onClick={onClose}
-            className="flex h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-base font-bold text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50"
+            className="flex h-12 items-center justify-center rounded-full border border-gray-200 bg-white text-lg font-normal text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50"
           >
             បោះបង់
           </button>
@@ -84,11 +84,11 @@ export default function RestoreUserConfirmModal({
             type="button"
             disabled={restoring}
             onClick={() => void onConfirm()}
-            className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#0F5A2C] px-4 text-base font-bold text-white shadow-md shadow-emerald-950/20 transition hover:bg-[#0C4723] active:scale-[0.98] disabled:opacity-60"
+            className="flex h-12 items-center justify-center gap-2 rounded-full bg-[#0F5A2C] px-4 text-lg font-normal text-white shadow-md shadow-emerald-950/20 transition hover:bg-[#0C4723] active:scale-[0.98] disabled:opacity-60"
           >
             {restoring ? (
               <>
-                <Loader2 size={18} className="animate-spin" />
+                <Loader2 size={20} className="animate-spin" />
                 កំពុងស្តារ...
               </>
             ) : (
