@@ -154,7 +154,7 @@ export default function ActivityTrendChart({
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={data}
-                margin={{ top: 10, right: 10, bottom: 0, left: -12 }}
+                margin={{ top: 12, right: 12, bottom: 4, left: 0 }}
               >
                 <defs>
                   <linearGradient id={activeUsersFillId} x1="0" x2="0" y1="0" y2="1">
@@ -172,7 +172,7 @@ export default function ActivityTrendChart({
                 <XAxis
                   dataKey="date"
                   tickFormatter={formatShortDate}
-                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 18 }}
+                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 13 }}
                   tickLine={false}
                   axisLine={{ stroke: CHART_GRID }}
                   minTickGap={24}
@@ -185,7 +185,7 @@ export default function ActivityTrendChart({
                 <YAxis
                   yAxisId="people"
                   tickFormatter={formatCompact}
-                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 18 }}
+                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 13 }}
                   tickLine={false}
                   axisLine={false}
                   width={68}

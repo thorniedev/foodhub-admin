@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGrid, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 import { cn } from "@/src/lib/utils";
 import type { DashboardPeriod } from "@/src/types/adminDashboard";
@@ -29,19 +29,15 @@ export default function DashboardHeader({
   const activeTo = period?.to || fallbackRange?.to;
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+    <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border/70 bg-background px-1 pb-5 pt-1">
       <div className="flex min-w-0 items-center gap-3.5">
-        <span
-          aria-hidden="true"
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-600 text-white"
-        >
-          <LayoutGrid size={24} />
-        </span>
-
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-semibold text-gray-800">
-            ទិន្នន័យវិភាគ
-          </h1>
+          <div>
+            <h1 className="truncate text-2xl font-semibold tracking-tight text-gray-900">
+              ផ្ទាំងគ្រប់គ្រង
+            </h1>
+            <p className="mt-0.5 text-sm text-gray-500">មើលស្ថានភាពអាជីវកម្ម FoodHub របស់អ្នក</p>
+          </div>
 
           <p className="mt-1 truncate text-sm leading-6 text-gray-500 tabular-nums">
             {activeFrom && activeTo ? (

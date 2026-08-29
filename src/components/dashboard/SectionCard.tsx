@@ -36,13 +36,11 @@ export default function SectionCard({
   return (
     <section
       className={cn(
-        "relative flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm",
+        "relative flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-none",
         className,
       )}
     >
-      <div className={cn("h-1.5 w-full", styles.surface)} />
-
-      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-gray-100/90 bg-gray-50/60 p-4 sm:p-5">
+      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-border/70 bg-transparent p-4 sm:p-5">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3.5">
             {icon && (
@@ -60,12 +58,12 @@ export default function SectionCard({
 
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-lg font-semibold text-gray-800">{title}</p>
+                <p className="text-base font-semibold tracking-tight text-foreground">{title}</p>
                 {hint && <InfoTooltip label={hint} />}
               </div>
 
               {description && (
-                <p className="mt-1 text-sm leading-6 text-gray-500">{description}</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>
               )}
             </div>
           </div>
@@ -74,7 +72,7 @@ export default function SectionCard({
         {actions && <div className="flex items-center gap-2">{actions}</div>}
       </header>
 
-      <div className={cn("flex-1 p-5", bodyClassName)}>{children}</div>
+      <div className={cn("flex-1 p-4 sm:p-5", bodyClassName)}>{children}</div>
     </section>
   );
 }
