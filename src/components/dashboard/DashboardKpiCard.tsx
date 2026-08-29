@@ -69,11 +69,11 @@ export default function DashboardKpiCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <p className="truncate text-sm font-medium text-gray-600">{label}</p>
+            <p className="truncate text-sm font-medium text-muted-foreground">{label}</p>
             {hint && <InfoTooltip label={hint} />}
           </div>
 
-          <p className={cn("mt-1.5 text-2xl font-semibold tabular-nums", styles.text)}>
+          <p className={cn("mt-2 text-3xl font-semibold tracking-tight tabular-nums", styles.text)}>
             {value}
           </p>
         </div>

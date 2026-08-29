@@ -262,7 +262,7 @@ export default function AdminDashboardPage() {
   );
 
   return (
-    <div className="flex flex-col gap-5 bg-muted/30 pb-10">
+    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 bg-muted/30 pb-12">
       <div className="order-1">
         <DashboardHeader
           period={overview.data?.period ?? null}

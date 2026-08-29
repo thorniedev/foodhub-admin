@@ -58,12 +58,12 @@ export default function SectionCard({
 
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-lg font-semibold text-gray-800">{title}</p>
+                <p className="text-base font-semibold tracking-tight text-foreground">{title}</p>
                 {hint && <InfoTooltip label={hint} />}
               </div>
 
               {description && (
-                <p className="mt-1 text-sm leading-6 text-gray-500">{description}</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>
               )}
             </div>
           </div>
