@@ -58,26 +58,26 @@ export default function DashboardHeader({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2.5">
         <span
           className={cn(
-            "inline-flex min-h-9 items-center gap-2 rounded-full border px-3 text-sm font-medium",
+            "inline-flex h-8 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium",
             isFetching
-              ? "border-blue-200 bg-blue-50 text-blue-800"
-              : "border-primary-200 bg-primary-50 text-primary-800",
+              ? "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300"
+              : "border-primary-200 bg-primary-50 text-primary-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300",
           )}
         >
           <span
             aria-hidden="true"
             className={cn(
-              "h-2.5 w-2.5 rounded-full",
-              isFetching ? "animate-pulse bg-blue-600" : "bg-primary-600",
+              "h-2 w-2 rounded-full",
+              isFetching ? "animate-pulse bg-blue-600" : "bg-primary-600 dark:bg-emerald-400",
             )}
           />
           {isFetching ? "កំពុងធ្វើបច្ចុប្បន្នភាព…" : "ទិន្នន័យផ្ទាល់"}
         </span>
 
-        <span className="text-sm text-gray-500 tabular-nums">
+        <span className="text-xs text-muted-foreground tabular-nums">
           {lastUpdatedLabel ? `ធ្វើបច្ចុប្បន្នភាព ${lastUpdatedLabel}` : "ទើបផ្ទុកថ្មី"}
         </span>
 
@@ -86,10 +86,10 @@ export default function DashboardHeader({
           onClick={onRefresh}
           title="ផ្ទុកទិន្នន័យឡើងវិញ"
           aria-label="ផ្ទុកទិន្នន័យឡើងវិញ"
-          className="inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-full border border-gray-200 bg-white px-3.5 text-sm font-medium text-gray-700 shadow-sm transition hover:border-primary-300 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-border/80 bg-background px-3 text-xs font-medium text-foreground shadow-xs transition hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
           <RefreshCw
-            size={18}
+            size={14}
             aria-hidden="true"
             className={cn(isFetching && "animate-spin")}
           />

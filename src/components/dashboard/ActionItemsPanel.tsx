@@ -51,7 +51,8 @@ export default function ActionItemsPanel({
       description="បញ្ហាទិន្នន័យដែលកំពុងរារាំងគុណភាពនៃការណែនាំ"
       icon={<ClipboardCheck size={18} aria-hidden="true" />}
       hint="បញ្ជីនេះមិនអាស្រ័យលើចន្លោះកាលបរិច្ឆេទទេ — វាបង្ហាញស្ថានភាពទិន្នន័យបច្ចុប្បន្ន។"
-      bodyClassName="px-5 py-4"
+      tone="amber"
+      bodyClassName="px-5 py-3"
     >
       {isLoading ? (
         <TableSkeleton rows={4} />
@@ -63,7 +64,7 @@ export default function ActionItemsPanel({
           description="មុខម្ហូបទាំងអស់មានព័ត៌មានពេញលេញ ហើយគ្មានហាងរង់ចាំអនុម័តទេ។"
         />
       ) : (
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-border/50">
           {items.map((item) => {
             const href = actionHref(item);
             const recommendation =
@@ -72,30 +73,30 @@ export default function ActionItemsPanel({
             return (
               <li
                 key={`${item.issueType}-${item.entityUuid}`}
-                className="flex flex-wrap items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-1 last:pb-1"
               >
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
                     <StatusBadge tone={severityTone(item.severity)}>
                       {labelFor(SEVERITY_LABELS, item.severity)}
                     </StatusBadge>
 
-                    <span className="text-lg font-normal text-gray-500">
+                    <span className="text-xs font-medium text-muted-foreground">
                       {labelFor(ISSUE_TYPE_LABELS, item.issueType)}
                     </span>
                   </div>
 
-                  <p className="mt-1.5 truncate text-xl font-medium text-gray-800">
+                  <p className="mt-1 truncate text-sm font-semibold text-foreground">
                     {item.entityName}
                   </p>
 
                   {item.relatedName && (
-                    <p className="truncate text-lg font-normal text-gray-400">
+                    <p className="truncate text-xs text-muted-foreground">
                       {item.relatedName}
                     </p>
                   )}
 
-                  <p className="mt-1 text-lg font-normal leading-relaxed text-gray-600">
+                  <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                     {recommendation}
                   </p>
                 </div>
@@ -103,10 +104,10 @@ export default function ActionItemsPanel({
                 {href && (
                   <Link
                     href={href}
-                    className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 shadow-sm transition hover:border-primary-300 hover:bg-primary-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                    className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border border-border/80 bg-background px-3 text-xs font-medium text-foreground shadow-xs transition hover:border-primary/50 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
                   >
                     <span>ដោះស្រាយ</span>
-                    <ArrowUpRight size={18} aria-hidden="true" />
+                    <ArrowUpRight size={14} aria-hidden="true" />
                   </Link>
                 )}
               </li>

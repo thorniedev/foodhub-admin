@@ -53,12 +53,12 @@ export default function TopStoresTable({
           <div className="min-w-0">
             <Link
               href={`/shops/${row.original.storeUuid}`}
-              className="truncate text-lg font-normal text-primary-800 underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="truncate text-sm font-medium text-primary-700 underline-offset-2 hover:underline hover:text-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             >
               {row.original.storeName}
             </Link>
             {row.original.address && (
-              <p className="truncate text-lg font-normal text-gray-400">
+              <p className="truncate text-xs text-muted-foreground">
                 {row.original.address}
               </p>
             )}

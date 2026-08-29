@@ -262,18 +262,18 @@ export default function AdminDashboardPage() {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 bg-muted/30 pb-12">
-      <div className="order-1">
-        <DashboardHeader
-          period={overview.data?.period ?? null}
+    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 pb-12">
+      {/* 1. Page Header */}
+      <DashboardHeader
+        period={overview.data?.period ?? null}
         fallbackRange={fallbackRange}
         lastUpdatedLabel={lastUpdatedLabel}
         isFetching={isFetchingAny}
-          onRefresh={refreshAll}
-        />
-      </div>
+        onRefresh={refreshAll}
+      />
 
-      <div className="order-2">
+      {/* 2. Key Performance Indicators (Totals & Rates) */}
+      <div>
         {overview.isError ? (
           <DashboardErrorState
             error={overview.error}
@@ -286,14 +286,30 @@ export default function AdminDashboardPage() {
         )}
       </div>
 
-      <div className="order-4">
+      {/* 3. Interactive Filter & Export Toolbar */}
+      <div>
+        <DashboardFilterBar
+          filters={filters}
+          onApply={writeFilters}
+          onReset={() => writeFilters(DEFAULT_DASHBOARD_FILTERS)}
+          categoryOptions={categoryOptions}
+          cityOptions={cityOptions}
+          provinceOptions={provinceOptions}
+          isFetching={isFetchingAny}
+          actions={exportMenu}
+        />
+      </div>
+
+      {/* 4. Primary Visual Analytics: Activity & Usage Trends */}
+      <div>
         <ActivityTrendChart
-        data={overview.data?.activityTrend ?? []}
+          data={overview.data?.activityTrend ?? []}
           isLoading={overview.isLoading}
         />
       </div>
 
-      <div className="order-3 grid grid-cols-1 gap-5 xl:grid-cols-2">
+      {/* 5. Geographic & Category Performance Charts */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         {locationUnavailable ? (
           <SectionCard
             title="សមិទ្ធកម្មតាមទីតាំង"
@@ -349,24 +365,13 @@ export default function AdminDashboardPage() {
         )}
       </div>
 
-      <div className="order-5 rounded-xl border border-border/70 bg-card p-1 shadow-none">
-        <DashboardFilterBar
-          filters={filters}
-          onApply={writeFilters}
-          onReset={() => writeFilters(DEFAULT_DASHBOARD_FILTERS)}
-          categoryOptions={categoryOptions}
-          cityOptions={cityOptions}
-          provinceOptions={provinceOptions}
-          isFetching={isFetchingAny}
-          actions={exportMenu}
-        />
-      </div>
-
+      {/* 6. Action Items / Needs Immediate Attention */}
       <ActionItemsPanel
         items={overview.data?.actionItems ?? []}
         isLoading={overview.isLoading}
       />
 
+      {/* 7. Store Performance Table */}
       <TopStoresTable
         page={stores.data}
         pageIndex={storePage}
@@ -379,6 +384,7 @@ export default function AdminDashboardPage() {
         onRetry={() => void stores.refetch()}
       />
 
+      {/* 8. Popular Menu Items Table */}
       <PopularItemsTable
         page={items.data}
         pageIndex={itemPage}

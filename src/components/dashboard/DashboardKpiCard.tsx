@@ -48,17 +48,28 @@ export default function DashboardKpiCard({
   const ChangeIcon = flat ? Minus : rising ? ArrowUpRight : ArrowDownRight;
 
   return (
-    <article className={cn(
-      "group relative flex min-h-36 flex-col justify-between overflow-hidden rounded-xl border border-border/70 bg-card p-5 shadow-none transition duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm",
-      styles.border,
-    )}>
+    <article
+      className={cn(
+        "group relative flex flex-col justify-between overflow-hidden rounded-xl border border-border/70 bg-card p-4 sm:p-5 shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm",
+        styles.border,
+      )}
+    >
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <p className="truncate text-xs font-medium text-muted-foreground">{label}</p>
+            {hint && <InfoTooltip label={hint} />}
+          </div>
 
+          <p className="mt-2 text-2xl font-bold tracking-tight text-foreground tabular-nums sm:text-3xl">
+            {value}
+          </p>
+        </div>
 
-      <div className="flex min-w-0 items-start gap-3.5">
         <span
           aria-hidden="true"
           className={cn(
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border",
             styles.surface,
             styles.border,
             styles.icon,
@@ -66,37 +77,26 @@ export default function DashboardKpiCard({
         >
           {icon}
         </span>
-
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <p className="truncate text-sm font-medium text-muted-foreground">{label}</p>
-            {hint && <InfoTooltip label={hint} />}
-          </div>
-
-          <p className={cn("mt-2 text-3xl font-semibold tracking-tight tabular-nums", styles.text)}>
-            {value}
-          </p>
-        </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2.5">
+      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/40 pt-3">
         {change ? (
           <span
             className={cn(
-              "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium tabular-nums",
+              "inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums",
               changeClassName,
             )}
           >
-            <ChangeIcon size={16} aria-hidden="true" />
+            <ChangeIcon size={13} aria-hidden="true" />
             {change}
           </span>
         ) : (
-          <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">
+          <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
             គ្មានទិន្នន័យប្រៀបធៀប
           </span>
         )}
 
-        <span className="text-xs text-gray-500 tabular-nums">
+        <span className="text-xs text-muted-foreground tabular-nums">
           ដំណាក់កាលមុន: {previousValue ?? "—"}
         </span>
       </div>
