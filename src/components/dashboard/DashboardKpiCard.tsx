@@ -49,10 +49,10 @@ export default function DashboardKpiCard({
 
   return (
     <article className={cn(
-      "group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-gray-200 hover:shadow-md",
+      "group relative flex min-h-36 flex-col justify-between overflow-hidden rounded-xl border border-border/70 bg-card p-5 shadow-none transition duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm",
       styles.border,
     )}>
-      <div className={cn("absolute inset-x-0 top-0 h-1.5", styles.surface)} />
+
 
       <div className="flex min-w-0 items-start gap-3.5">
         <span
