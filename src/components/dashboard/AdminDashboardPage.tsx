@@ -262,43 +262,38 @@ export default function AdminDashboardPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6 pb-10">
-      <DashboardHeader
-        period={overview.data?.period ?? null}
+    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 bg-muted/30 pb-12">
+      <div className="order-1">
+        <DashboardHeader
+          period={overview.data?.period ?? null}
         fallbackRange={fallbackRange}
         lastUpdatedLabel={lastUpdatedLabel}
         isFetching={isFetchingAny}
-        onRefresh={refreshAll}
-      />
-
-      <DashboardFilterBar
-        filters={filters}
-        onApply={writeFilters}
-        onReset={() => writeFilters(DEFAULT_DASHBOARD_FILTERS)}
-        categoryOptions={categoryOptions}
-        cityOptions={cityOptions}
-        provinceOptions={provinceOptions}
-        isFetching={isFetchingAny}
-        actions={exportMenu}
-      />
-
-      {overview.isError ? (
-        <DashboardErrorState
-          error={overview.error}
-          onRetry={() => void overview.refetch()}
+          onRefresh={refreshAll}
         />
-      ) : overview.isLoading ? (
-        <KpiGridSkeleton />
-      ) : (
-        <DashboardKpiGrid kpis={overview.data?.kpis ?? {}} />
-      )}
+      </div>
 
-      <ActivityTrendChart
+      <div className="order-2">
+        {overview.isError ? (
+          <DashboardErrorState
+            error={overview.error}
+            onRetry={() => void overview.refetch()}
+          />
+        ) : overview.isLoading ? (
+          <KpiGridSkeleton />
+        ) : (
+          <DashboardKpiGrid kpis={overview.data?.kpis ?? {}} />
+        )}
+      </div>
+
+      <div className="order-4">
+        <ActivityTrendChart
         data={overview.data?.activityTrend ?? []}
-        isLoading={overview.isLoading}
-      />
+          isLoading={overview.isLoading}
+        />
+      </div>
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+      <div className="order-3 grid grid-cols-1 gap-5 xl:grid-cols-2">
         {locationUnavailable ? (
           <SectionCard
             title="សមិទ្ធកម្មតាមទីតាំង"
@@ -352,6 +347,19 @@ export default function AdminDashboardPage() {
             isLoading={categories.isLoading && overview.isLoading}
           />
         )}
+      </div>
+
+      <div className="order-5 rounded-xl border border-border/70 bg-card p-1 shadow-none">
+        <DashboardFilterBar
+          filters={filters}
+          onApply={writeFilters}
+          onReset={() => writeFilters(DEFAULT_DASHBOARD_FILTERS)}
+          categoryOptions={categoryOptions}
+          cityOptions={cityOptions}
+          provinceOptions={provinceOptions}
+          isFetching={isFetchingAny}
+          actions={exportMenu}
+        />
       </div>
 
       <ActionItemsPanel
