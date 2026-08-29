@@ -39,9 +39,12 @@ export default function DashboardHeader({
         </span>
 
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-semibold text-gray-800">
-            ទិន្នន័យវិភាគ
-          </h1>
+          <div>
+            <h1 className="truncate text-2xl font-semibold tracking-tight text-gray-900">
+              ផ្ទាំងគ្រប់គ្រង
+            </h1>
+            <p className="mt-0.5 text-sm text-gray-500">មើលស្ថានភាពអាជីវកម្ម FoodHub របស់អ្នក</p>
+          </div>
 
           <p className="mt-1 truncate text-sm leading-6 text-gray-500 tabular-nums">
             {activeFrom && activeTo ? (

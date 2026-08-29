@@ -74,7 +74,7 @@ export default function SectionCard({
         {actions && <div className="flex items-center gap-2">{actions}</div>}
       </header>
 
-      <div className={cn("flex-1 p-5", bodyClassName)}>{children}</div>
+      <div className={cn("flex-1 p-4 sm:p-5", bodyClassName)}>{children}</div>
     </section>
   );
 }
