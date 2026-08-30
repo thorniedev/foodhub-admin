@@ -238,14 +238,14 @@ function applyRefreshedCookies(
   if (tokens.refresh_token) {
     response.cookies.set("foodhub_refresh_token", tokens.refresh_token, {
       ...options,
-      maxAge: tokens.refresh_expires_in ?? 30 * 60,
+      maxAge: tokens.refresh_expires_in ?? 30 * 24 * 60 * 60, // 30 days
     });
   }
 
   if (tokens.id_token) {
     response.cookies.set("foodhub_id_token", tokens.id_token, {
       ...options,
-      maxAge: tokens.expires_in,
+      maxAge: tokens.refresh_expires_in ?? 30 * 24 * 60 * 60, // 30 days
     });
   }
 }

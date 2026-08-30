@@ -29,22 +29,26 @@ export default function DashboardHeader({
   const activeTo = period?.to || fallbackRange?.to;
 
   return (
-    <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border/70 bg-background px-1 pb-5 pt-1">
+    <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border/60 bg-transparent px-1 pb-4 pt-1">
       <div className="flex min-w-0 items-center gap-3.5">
         <div className="min-w-0">
           <div>
-            <h1 className="truncate text-2xl font-semibold tracking-tight text-gray-900">
-              ផ្ទាំងគ្រប់គ្រង
+            <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+              ទិដ្ឋភាពទូទៅនៃប្រព័ន្ធ
             </h1>
-            <p className="mt-0.5 text-sm text-gray-500">មើលស្ថានភាពអាជីវកម្ម FoodHub របស់អ្នក</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              មើលស្ថានភាពទិន្នន័យ ការលក់ និងដំណើរការអាជីវកម្ម FoodHub របស់អ្នក
+            </p>
           </div>
 
-          <p className="mt-1 truncate text-sm leading-6 text-gray-500 tabular-nums">
+          <p className="mt-1 truncate text-xs leading-5 text-muted-foreground tabular-nums">
             {activeFrom && activeTo ? (
               <>
-                {formatLongDate(activeFrom)} – {formatLongDate(activeTo)}
+                <span className="font-medium text-foreground">
+                  {formatLongDate(activeFrom)} – {formatLongDate(activeTo)}
+                </span>
                 {period?.previousFrom && period?.previousTo && (
-                  <span className="text-gray-400">
+                  <span className="text-muted-foreground/80">
                     {" · ធៀបនឹង "}
                     {formatLongDate(period.previousFrom)} –{" "}
                     {formatLongDate(period.previousTo)}

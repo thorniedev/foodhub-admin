@@ -272,21 +272,7 @@ export default function AdminDashboardPage() {
         onRefresh={refreshAll}
       />
 
-      {/* 2. Key Performance Indicators (Totals & Rates) */}
-      <div>
-        {overview.isError ? (
-          <DashboardErrorState
-            error={overview.error}
-            onRetry={() => void overview.refetch()}
-          />
-        ) : overview.isLoading ? (
-          <KpiGridSkeleton />
-        ) : (
-          <DashboardKpiGrid kpis={overview.data?.kpis ?? {}} />
-        )}
-      </div>
-
-      {/* 3. Interactive Filter & Export Toolbar */}
+      {/* 2. Interactive Filter & Export Toolbar */}
       <div>
         <DashboardFilterBar
           filters={filters}
@@ -298,6 +284,20 @@ export default function AdminDashboardPage() {
           isFetching={isFetchingAny}
           actions={exportMenu}
         />
+      </div>
+
+      {/* 3. Key Performance Indicators (Totals & Rates) */}
+      <div>
+        {overview.isError ? (
+          <DashboardErrorState
+            error={overview.error}
+            onRetry={() => void overview.refetch()}
+          />
+        ) : overview.isLoading ? (
+          <KpiGridSkeleton />
+        ) : (
+          <DashboardKpiGrid kpis={overview.data?.kpis ?? {}} />
+        )}
       </div>
 
       {/* 4. Primary Visual Analytics: Activity & Usage Trends */}

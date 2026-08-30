@@ -98,6 +98,11 @@ export async function GET(request: NextRequest) {
   authorizationUrl.searchParams.set("code_challenge", codeChallenge);
   authorizationUrl.searchParams.set("code_challenge_method", "S256");
 
+  const kcIdpHint = request.nextUrl.searchParams.get("kc_idp_hint");
+  if (kcIdpHint) {
+    authorizationUrl.searchParams.set("kc_idp_hint", kcIdpHint);
+  }
+
   if (request.nextUrl.searchParams.get("prompt") === "login") {
     authorizationUrl.searchParams.set("prompt", "login");
   }
@@ -117,7 +122,7 @@ export async function GET(request: NextRequest) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
     path: "/",
-    maxAge: 10 * 60,
+    maxAge: 30 * 60,
   };
 
   response.cookies.set("foodhub_oauth_state", state, temporaryCookieOptions);
