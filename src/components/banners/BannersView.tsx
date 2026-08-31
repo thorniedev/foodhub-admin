@@ -2,15 +2,12 @@
 
 import {
   AlertCircle,
-  Calendar,
+  ArrowUpDown,
   Check,
   CheckCircle2,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Eye,
   EyeOff,
-  Filter,
   ImageIcon,
   Info,
   Loader2,
@@ -19,12 +16,14 @@ import {
   Pencil,
   Plus,
   RefreshCw,
+  RotateCcw,
   Search,
   Sparkles,
   Trash2,
   X,
 } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Pagination from "@/src/components/ui/Pagination";
 import type {
   AdminBannerResponse,
   BannerCategory,
@@ -34,13 +33,13 @@ import type {
 } from "../../types/banner";
 import {
   BANNER_CATEGORIES,
-  BANNER_CATEGORY_COLORS,
   BANNER_CATEGORY_LABELS,
 } from "../../types/banner";
 import { adminBannerApi, resolveImageUrl } from "../../services/adminBannerApi";
 import BannerFormModal from "./BannerFormModal";
 import BannerDeleteDialog from "./BannerDeleteDialog";
 import BannerMediaImage from "./BannerMediaImage";
+import BannersTableSkeleton from "./BannersTableSkeleton";
 
 interface ToastItem {
   id: string;
@@ -53,18 +52,26 @@ export default function BannersView() {
   const [banners, setBanners] = useState<AdminBannerResponse[]>([]);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [publishedCount, setPublishedCount] = useState(0);
+  const [draftCount, setDraftCount] = useState(0);
+
   const [isLoading, setIsLoading] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters & Pagination state
+  // Filters & Sorting state
   const [selectedCategory, setSelectedCategory] = useState<BannerCategory | "ALL">("ALL");
   const [categoryOpen, setCategoryOpen] = useState(false);
   const categoryContainerRef = useRef<HTMLDivElement>(null);
+
   const [publishedFilter, setPublishedFilter] = useState<"ALL" | "PUBLISHED" | "DRAFT">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
+  const [pageSizeOpen, setPageSizeOpen] = useState(false);
 
   // Modals state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -91,7 +98,7 @@ export default function BannersView() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Close category dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -110,7 +117,7 @@ export default function BannersView() {
     };
   }, [categoryOpen]);
 
-  // Fetch banners from API
+  // Fetch banners from API with backend pagination & accurate global counts
   const fetchBanners = useCallback(async (isBackground = false) => {
     if (isBackground) {
       setIsFetching(true);
@@ -130,19 +137,21 @@ export default function BannersView() {
     };
 
     try {
-      const response = await adminBannerApi.getBanners(params);
-      const pageData =
-        (response as any)?.payload || (response as any)?.data || response;
-      const contents: AdminBannerResponse[] =
-        pageData?.contents ||
-        pageData?.content ||
-        (Array.isArray(pageData) ? pageData : []);
+      const [pageRes, allRes, pubRes, draftRes] = await Promise.all([
+        adminBannerApi.getBanners(params),
+        adminBannerApi.getBanners({ page: 0, size: 1 }),
+        adminBannerApi.getBanners({ page: 0, size: 1, isPublished: true }),
+        adminBannerApi.getBanners({ page: 0, size: 1, isPublished: false }),
+      ]);
 
+      const contents: AdminBannerResponse[] = pageRes?.contents || [];
       setBanners(contents);
-      setTotalElements(
-        pageData?.totalElements ?? pageData?.total ?? contents.length,
-      );
-      setTotalPages(pageData?.totalPages ?? 1);
+      setTotalElements(pageRes?.totalElements ?? contents.length);
+      setTotalPages(pageRes?.totalPages ?? 1);
+
+      setTotalCount(allRes?.totalElements ?? contents.length);
+      setPublishedCount(pubRes?.totalElements ?? 0);
+      setDraftCount(draftRes?.totalElements ?? 0);
     } catch (err: any) {
       setError(
         err?.message || "មិនអាចទាញយកទិន្នន័យផ្ទាំងបែនណឺបានទេ សូមព្យាយាមម្តងទៀត។",
@@ -157,8 +166,8 @@ export default function BannersView() {
     void fetchBanners();
   }, [fetchBanners]);
 
-  // Client-side search filter
-  const filteredBanners = useMemo(() => {
+  // Client-side search on current page items
+  const displayedBanners = useMemo(() => {
     if (!searchQuery.trim()) return banners;
     const q = searchQuery.toLowerCase().trim();
     return banners.filter(
@@ -169,9 +178,21 @@ export default function BannersView() {
     );
   }, [banners, searchQuery]);
 
-  // Published / Draft Counts
-  const publishedCount = useMemo(() => banners.filter((b) => b.isPublished).length, [banners]);
-  const draftCount = useMemo(() => banners.filter((b) => !b.isPublished).length, [banners]);
+  const hasActiveFilters =
+    publishedFilter !== "ALL" ||
+    selectedCategory !== "ALL" ||
+    searchQuery.trim() !== "" ||
+    pageSize !== 20;
+
+  const handleResetFilters = () => {
+    setPublishedFilter("ALL");
+    setSelectedCategory("ALL");
+    setSearchQuery("");
+    setPageSize(20);
+    setCurrentPage(0);
+    setCategoryOpen(false);
+    setPageSizeOpen(false);
+  };
 
   // Handle Create / Edit save
   const handleFormSave = async (
@@ -209,6 +230,8 @@ export default function BannersView() {
           b.id === banner.id ? { ...b, isPublished: nextStatus } : b,
         ),
       );
+      setPublishedCount((prev) => (nextStatus ? prev + 1 : Math.max(0, prev - 1)));
+      setDraftCount((prev) => (nextStatus ? Math.max(0, prev - 1) : prev + 1));
       addToast(
         "success",
         `បានប្តូរស្ថានភាពបែនណឺទៅជា "${nextStatus ? "បានផ្សាយ" : "ព្រាង"}"!`,
@@ -239,20 +262,6 @@ export default function BannersView() {
       addToast("error", err?.message || "បរាជ័យក្នុងការលុបបែនណឺ!");
     } finally {
       setIsDeleting(false);
-    }
-  };
-
-  // Format date helper
-  const formatDate = (isoDate: string) => {
-    try {
-      const d = new Date(isoDate);
-      return d.toLocaleDateString("km-KH", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    } catch {
-      return isoDate;
     }
   };
 
@@ -322,7 +331,11 @@ export default function BannersView() {
                   <ImageIcon size={20} className="shrink-0" />
                   <span className="truncate">បែនណឺសរុប</span>
                 </div>
-                <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold tabular-nums">{totalElements}</p>
+                {isLoading ? (
+                  <div className="mt-1 h-8 w-14 rounded-lg bg-white/30 animate-pulse" />
+                ) : (
+                  <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold tabular-nums">{totalCount}</p>
+                )}
               </div>
 
               <div className="rounded-2xl sm:rounded-3xl bg-white/20 px-3 py-2.5 sm:px-5 sm:py-4">
@@ -330,7 +343,11 @@ export default function BannersView() {
                   <CheckCircle2 size={20} className="shrink-0" />
                   <span className="truncate">បានផ្សាយ</span>
                 </div>
-                <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold tabular-nums">{publishedCount}</p>
+                {isLoading ? (
+                  <div className="mt-1 h-8 w-14 rounded-lg bg-white/30 animate-pulse" />
+                ) : (
+                  <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold tabular-nums">{publishedCount}</p>
+                )}
               </div>
 
               <div className="rounded-2xl sm:rounded-3xl bg-white/20 px-3 py-2.5 sm:px-5 sm:py-4">
@@ -338,7 +355,11 @@ export default function BannersView() {
                   <EyeOff size={20} className="shrink-0" />
                   <span className="truncate">ព្រាង</span>
                 </div>
-                <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold tabular-nums">{draftCount}</p>
+                {isLoading ? (
+                  <div className="mt-1 h-8 w-14 rounded-lg bg-white/30 animate-pulse" />
+                ) : (
+                  <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold tabular-nums">{draftCount}</p>
+                )}
               </div>
             </div>
           </div>
@@ -358,16 +379,16 @@ export default function BannersView() {
       </section>
 
       {/* ============================================================
-          2. TABS + TOOLBAR (MATCHING STANDARD 2x2 MOBILE GRID)
+          2. TABS + TOOLBAR (CATALOG & SHOPS STANDARD STYLE)
       ============================================================ */}
       <div className="space-y-3">
         <div className="flex w-full flex-wrap items-center justify-between gap-3">
           {/* Mobile Status Tabs + Category + Refresh */}
           <div className="space-y-2 sm:hidden w-full">
-            {/* Row 1: Tab 1 & Tab 2 (Equal 2 columns) */}
+            {/* Row 1: Tab 1 & Tab 2 */}
             <div className="grid grid-cols-2 gap-2 w-full">
               {[
-                { id: "ALL", label: "ទាំងអស់", count: totalElements },
+                { id: "ALL", label: "ទាំងអស់", count: totalCount },
                 { id: "PUBLISHED", label: "បានផ្សាយ", count: publishedCount },
               ].map((tab) => {
                 const active = publishedFilter === tab.id;
@@ -521,7 +542,7 @@ export default function BannersView() {
           {/* Desktop Status Tabs (sm: and up) */}
           <div className="hidden sm:flex sm:flex-wrap sm:items-center sm:gap-2">
             {[
-              { id: "ALL", label: "ទាំងអស់", count: totalElements },
+              { id: "ALL", label: "ទាំងអស់", count: totalCount },
               { id: "PUBLISHED", label: "បានផ្សាយ", count: publishedCount },
               { id: "DRAFT", label: "ព្រាង", count: draftCount },
             ].map((tab) => {
@@ -555,10 +576,10 @@ export default function BannersView() {
             })}
           </div>
 
-          {/* Desktop Search + Category + Refresh */}
+          {/* Desktop Controls (Right): Search + Category + Page Size + Reset + Refresh */}
           <div className="hidden sm:flex sm:min-w-[320px] sm:flex-1 sm:items-center sm:justify-end sm:gap-2.5">
             {/* Search Input */}
-            <div className="relative min-w-[220px] max-w-xl flex-1">
+            <div className="relative min-w-[200px] max-w-[320px] flex-1">
               <Search
                 size={18}
                 className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
@@ -584,8 +605,11 @@ export default function BannersView() {
             <div className="relative shrink-0">
               <button
                 type="button"
-                onClick={() => setCategoryOpen((prev) => !prev)}
-                className={`flex h-12 min-w-[160px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-5 text-lg font-normal transition outline-none ${
+                onClick={() => {
+                  setCategoryOpen((prev) => !prev);
+                  setPageSizeOpen(false);
+                }}
+                className={`flex h-12 min-w-[150px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition outline-none ${
                   categoryOpen
                     ? "border-primary-600 ring-2 ring-primary-100"
                     : "border-gray-200 hover:border-gray-300"
@@ -655,6 +679,71 @@ export default function BannersView() {
               )}
             </div>
 
+            {/* Page Size Select */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setPageSizeOpen((prev) => !prev);
+                  setCategoryOpen(false);
+                }}
+                className={`flex h-12 min-w-[130px] items-center justify-between gap-2 rounded-full border bg-white px-4 text-lg font-normal transition ${
+                  pageSizeOpen
+                    ? "border-primary-600 ring-2 ring-primary-100"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <span className="text-gray-700">{pageSize} / ទំព័រ</span>
+                <ChevronDown
+                  size={18}
+                  className={`text-gray-400 transition-transform duration-200 ${
+                    pageSizeOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {pageSizeOpen && (
+                <div className="absolute right-0 top-[52px] z-[110] w-[170px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+                  <p className="px-3 pb-2 pt-1 text-base text-secondary-600">
+                    ទំហំទំព័រ
+                  </p>
+                  {[10, 20, 50, 100].map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => {
+                        setPageSize(size);
+                        setCurrentPage(0);
+                        setPageSizeOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                        pageSize === size
+                          ? "bg-primary-50 text-primary-800"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>{size} / ទំព័រ</span>
+                      {pageSize === size && (
+                        <Check size={18} className="text-primary-800" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Reset Filters Button */}
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95 cursor-pointer"
+                title="កំណត់ឡើងវិញ"
+              >
+                <RotateCcw size={18} />
+              </button>
+            )}
+
             {/* Refresh Button */}
             <button
               type="button"
@@ -713,237 +802,213 @@ export default function BannersView() {
       )}
 
       {/* ============================================================
-          3. TABLE (MATCHING SHOPS TABLE STYLES)
+          3. TABLE & PAGINATION CONTAINER (MATCHING CATALOG PAGE)
       ============================================================ */}
-      <div className="w-full min-w-0 max-w-full overflow-x-auto rounded-3xl border border-gray-100 bg-white shadow-sm [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <table className="w-full table-auto border-collapse text-left">
-          {/* ================= HEAD ================= */}
-          <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-normal text-primary-800">
-              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[240px]">
-                ផ្ទាំងរូបភាព & ចំណងជើង
-              </th>
-              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[200px]">
-                ការពិពណ៌នា
-              </th>
-              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[140px]">
-                ប្រភេទ
-              </th>
-              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[130px]">
-                ទីតាំង
-              </th>
-         
-              <th className="whitespace-nowrap px-4 py-3.5 text-center font-normal min-w-[130px]">
-                ស្ថានភាពផ្សាយ
-              </th>
-              <th className="whitespace-nowrap px-4 py-3.5 text-center font-normal min-w-[120px]">
-                សកម្មភាព
-              </th>
-            </tr>
-          </thead>
-
-          {/* ================= BODY ================= */}
-          <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-20 text-center">
-                  <div className="flex flex-col items-center justify-center gap-3">
-                    <Loader2 size={32} className="animate-spin text-emerald-600" />
-                    <p className="text-lg font-normal text-gray-500">
-                      កំពុងទាញយកទិន្នន័យបែនណឺ...
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            ) : filteredBanners.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-16 text-center">
-                  <p className="text-lg font-normal text-gray-500">
-                    មិនមានទិន្នន័យផ្ទាំងបែនណឺ
-                  </p>
-                  <p className="mt-1 text-lg font-normal text-gray-400">
-                    ទិន្នន័យផ្ទាំងរូបភាពផ្សព្វផ្សាយនឹងបង្ហាញនៅទីនេះ
-                  </p>
-                </td>
-              </tr>
-            ) : (
-              filteredBanners.map((banner) => {
-                const fullImageUrl = resolveImageUrl(
-                  banner.imageUrl || banner.imageMediaUuid,
-                );
-                const isToggling = Boolean(togglingIds[banner.id]);
-
-                return (
-                  <tr
-                    key={banner.id}
-                    className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
-                  >
-                    {/* 1. Thumbnail + Title */}
-                    <td className="px-4 py-3">
-                      <div className="group flex items-center gap-3">
-                        <div
-                          onClick={() => fullImageUrl && setPreviewImage({ url: fullImageUrl, title: banner.title })}
-                          className="relative flex h-11 w-20 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100"
-                          title="ចុចដើម្បីមើលរូបភាពពេញ"
-                        >
-                          <BannerMediaImage
-                            mediaUrlOrUuid={banner.imageUrl || banner.imageMediaUuid}
-                            alt={banner.title}
-                            className="h-full w-full object-cover"
-                            fallbackIcon={<ImageIcon size={22} className="text-primary-800 shrink-0" />}
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition group-hover:opacity-100">
-                            <Maximize2 size={14} className="text-white" />
-                          </div>
-                        </div>
-
-                        <div className="min-w-0">
-                          <p className="max-w-[240px] truncate text-lg font-normal text-gray-800 transition group-hover:text-primary-800">
-                            {banner.title}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* 2. Description in its own column */}
-                    <td className="px-4 py-3">
-                      {banner.description ? (
-                        <p className="max-w-[280px] truncate text-lg font-normal text-gray-600" title={banner.description}>
-                          {banner.description}
-                        </p>
-                      ) : (
-                        <span className="text-lg italic font-normal text-gray-400">
-                          គ្មានការពិពណ៌នា
-                        </span>
-                      )}
-                    </td>
-
-                    {/* 3. Category Badge */}
-                    <td className="whitespace-nowrap px-4 py-3">
-                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-100 bg-emerald-50 px-3.5 py-1 text-lg font-normal text-emerald-700">
-                        <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500" />
-                        {BANNER_CATEGORY_LABELS[banner.category] || banner.category}
-                      </span>
-                    </td>
-
-                    {/* 4. Location */}
-                    <td className="whitespace-nowrap px-4 py-3">
-                      <div className="flex items-center gap-1.5 text-lg font-normal text-gray-500">
-                        <MapPin size={18} className="text-primary-700 shrink-0" />
-                        <span>{banner.location || "—"}</span>
-                      </div>
-                    </td>
-
-                    {/* 5. Published Status Toggle Switch & Badge */}
-                    <td className="whitespace-nowrap px-4 py-3 text-center">
-                      <div className="inline-flex items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          disabled={isToggling}
-                          onClick={() => void handleToggleStatus(banner)}
-                          className={`group/toggle relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50 ${
-                            banner.isPublished ? "bg-[#137A3D]" : "bg-gray-300 hover:bg-gray-400"
-                          }`}
-                          title={banner.isPublished ? "ចុចដើម្បីបិទមិនបង្ហាញ (Hide / Draft)" : "ចុចដើម្បីបង្ហាញផ្សាយ (Show / Publish)"}
-                          aria-label="Toggle banner status"
-                        >
-                          <span
-                            className={`inline-flex h-4 w-4 transform items-center justify-center rounded-full bg-white shadow-md transition-transform duration-200 ${
-                              banner.isPublished ? "translate-x-6" : "translate-x-1"
-                            }`}
-                          >
-                            {isToggling && (
-                              <Loader2 size={10} className="animate-spin text-gray-600" />
-                            )}
-                          </span>
-                        </button>
-                        <span
-                          className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${
-                            banner.isPublished
-                              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                              : "border-gray-200 bg-gray-50 text-gray-600"
-                          }`}
-                        >
-                          <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${banner.isPublished ? "bg-emerald-500" : "bg-gray-400"}`} />
-                          {banner.isPublished ? "បានផ្សាយ" : "ព្រាង"}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* 6. Actions */}
-                    <td className="whitespace-nowrap px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        {fullImageUrl && (
-                          <button
-                            type="button"
-                            onClick={() => setPreviewImage({ url: fullImageUrl, title: banner.title })}
-                            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-                            title="មើលរូបភាពពេញ"
-                          >
-                            <Eye size={18} />
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingBanner(banner);
-                            setIsFormModalOpen(true);
-                          }}
-                          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                          title="កែប្រែ"
-                        >
-                          <Pencil size={18} />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setDeletingBanner(banner)}
-                          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100"
-                          title="លុប"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
+      <section className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
+        {isLoading ? (
+          <BannersTableSkeleton rows={pageSize === 10 ? 5 : 7} />
+        ) : (
+          <>
+            <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <table className="w-full table-auto border-collapse text-left">
+                {/* ================= TABLE HEAD ================= */}
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50/80 text-left text-xl font-medium text-primary-900">
+                    <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[240px]">
+                      ផ្ទាំងរូបភាព & ចំណងជើង
+                    </th>
+                    <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[200px]">
+                      ការពិពណ៌នា
+                    </th>
+                    <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[140px]">
+                      ប្រភេទ
+                    </th>
+                    <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[130px]">
+                      ទីតាំង
+                    </th>
+                    <th className="whitespace-nowrap px-4 py-4 text-center font-medium min-w-[130px]">
+                      ស្ថានភាពផ្សាយ
+                    </th>
+                    <th className="whitespace-nowrap px-4 py-4 text-center font-medium min-w-[120px]">
+                      សកម្មភាព
+                    </th>
                   </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                </thead>
 
-        {/* ================= PAGINATION (EXACT SHOPS PAGINATION STYLE) ================= */}
-        <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-base text-gray-500">
-            សរុប <span className="font-semibold text-gray-700">{totalElements}</span> ផ្ទាំងបែនណឺ
-          </p>
+                {/* ================= TABLE BODY ================= */}
+                <tbody>
+                  {displayedBanners.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-16 text-center">
+                        <p className="text-xl font-medium text-gray-500">
+                          មិនមានទិន្នន័យផ្ទាំងបែនណឺ
+                        </p>
+                        <p className="mt-1 text-lg text-gray-400">
+                          សូមសាកល្បងស្វែងរក ឬជ្រើស filter ផ្សេងទៀត។
+                        </p>
+                      </td>
+                    </tr>
+                  ) : (
+                    displayedBanners.map((banner) => {
+                      const fullImageUrl = resolveImageUrl(
+                        banner.imageUrl || banner.imageMediaUuid,
+                      );
+                      const isToggling = Boolean(togglingIds[banner.id]);
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={currentPage === 0 || isLoading}
-              onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <ChevronLeft size={18} />
-            </button>
+                      return (
+                        <tr
+                          key={banner.id}
+                          className="border-b border-gray-100 bg-white transition-colors duration-150 last:border-b-0 hover:bg-gray-50/70"
+                        >
+                          {/* 1. Thumbnail + Title */}
+                          <td className="px-4 py-3">
+                            <div className="group flex items-center gap-3">
+                              <div
+                                onClick={() => fullImageUrl && setPreviewImage({ url: fullImageUrl, title: banner.title })}
+                                className="relative flex h-11 w-20 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-primary-50 text-primary-800 transition group-hover:border-primary-200 group-hover:bg-primary-100"
+                                title="ចុចដើម្បីមើលរូបភាពពេញ"
+                              >
+                                <BannerMediaImage
+                                  mediaUrlOrUuid={banner.imageUrl || banner.imageMediaUuid}
+                                  alt={banner.title}
+                                  className="h-full w-full object-cover"
+                                  fallbackIcon={<ImageIcon size={22} className="text-primary-800 shrink-0" />}
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition group-hover:opacity-100">
+                                  <Maximize2 size={14} className="text-white" />
+                                </div>
+                              </div>
 
-            <span className="flex h-9 min-w-9 items-center justify-center rounded-lg bg-[#136C34] px-3 text-base font-semibold text-white">
-              {currentPage + 1} / {Math.max(totalPages, 1)}
-            </span>
+                              <div className="min-w-0">
+                                <p className="max-w-[240px] truncate text-lg font-normal text-gray-800 transition group-hover:text-primary-800">
+                                  {banner.title}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
 
-            <button
-              type="button"
-              disabled={currentPage >= totalPages - 1 || isLoading}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#136C34] hover:bg-emerald-50 hover:text-[#136C34] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        </div>
-      </div>
+                          {/* 2. Description */}
+                          <td className="px-4 py-3">
+                            {banner.description ? (
+                              <p className="max-w-[280px] truncate text-lg font-normal text-gray-600" title={banner.description}>
+                                {banner.description}
+                              </p>
+                            ) : (
+                              <span className="text-lg italic font-normal text-gray-400">
+                                គ្មានការពិពណ៌នា
+                              </span>
+                            )}
+                          </td>
+
+                          {/* 3. Category Badge */}
+                          <td className="whitespace-nowrap px-4 py-3">
+                            <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-100 bg-emerald-50 px-3.5 py-1 text-lg font-normal text-emerald-700">
+                              <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500" />
+                              {BANNER_CATEGORY_LABELS[banner.category] || banner.category}
+                            </span>
+                          </td>
+
+                          {/* 4. Location */}
+                          <td className="whitespace-nowrap px-4 py-3">
+                            <div className="flex items-center gap-1.5 text-lg font-normal text-gray-500">
+                              <MapPin size={18} className="text-primary-700 shrink-0" />
+                              <span>{banner.location || "—"}</span>
+                            </div>
+                          </td>
+
+                          {/* 5. Published Status Toggle Switch & Badge */}
+                          <td className="whitespace-nowrap px-4 py-3 text-center">
+                            <div className="inline-flex items-center justify-center gap-2">
+                              <button
+                                type="button"
+                                disabled={isToggling}
+                                onClick={() => void handleToggleStatus(banner)}
+                                className={`group/toggle relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50 ${
+                                  banner.isPublished ? "bg-[#137A3D]" : "bg-gray-300 hover:bg-gray-400"
+                                }`}
+                                title={banner.isPublished ? "ចុចដើម្បីបិទមិនបង្ហាញ (Hide / Draft)" : "ចុចដើម្បីបង្ហាញផ្សាយ (Show / Publish)"}
+                                aria-label="Toggle banner status"
+                              >
+                                <span
+                                  className={`inline-flex h-4 w-4 transform items-center justify-center rounded-full bg-white shadow-md transition-transform duration-200 ${
+                                    banner.isPublished ? "translate-x-6" : "translate-x-1"
+                                  }`}
+                                >
+                                  {isToggling && (
+                                    <Loader2 size={10} className="animate-spin text-gray-600" />
+                                  )}
+                                </span>
+                              </button>
+                              <span
+                                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${
+                                  banner.isPublished
+                                    ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+                                    : "border-gray-200 bg-gray-50 text-gray-600"
+                                }`}
+                              >
+                                <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${banner.isPublished ? "bg-emerald-500" : "bg-gray-400"}`} />
+                                {banner.isPublished ? "បានផ្សាយ" : "ព្រាង"}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* 6. Actions */}
+                          <td className="whitespace-nowrap px-4 py-3 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              {fullImageUrl && (
+                                <button
+                                  type="button"
+                                  onClick={() => setPreviewImage({ url: fullImageUrl, title: banner.title })}
+                                  className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                                  title="មើលរូបភាពពេញ"
+                                >
+                                  <Eye size={18} />
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingBanner(banner);
+                                  setIsFormModalOpen(true);
+                                }}
+                                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                title="កែប្រែ"
+                              >
+                                <Pencil size={18} />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setDeletingBanner(banner)}
+                                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100"
+                                title="លុប"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* ================= FOOTER PAGINATION (EXACT MATCH TO REFERENCE PAGE) ================= */}
+            <Pagination
+              page={currentPage}
+              totalPages={totalPages}
+              totalElements={totalElements}
+              unit="ទិន្នន័យ"
+              zeroIndexed={true}
+              onPageChange={(p) => setCurrentPage(p)}
+              className="border-t border-gray-100"
+            />
+          </>
+        )}
+      </section>
 
       {/* Form Modal (Create / Edit) */}
       {isFormModalOpen && (

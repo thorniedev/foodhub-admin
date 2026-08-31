@@ -49,6 +49,7 @@ import {
   readFoodRelationsStorage,
   readMenuItemRelationsStorage,
 } from "@/src/lib/filterCatalogStorage";
+import MenuItemDetailSkeleton from "./MenuItemDetailSkeleton";
 import PublishMenuItemModal from "./PublishMenuItemModal";
 import type { MenuItemWritePayload } from "@/src/types/menu-management";
 
@@ -286,12 +287,7 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
       </div>
 
       {isLoading ? (
-        <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 rounded-3xl border border-gray-100 bg-white py-20 shadow-sm">
-          <Loader2 size={44} className="animate-spin text-[#14833E]" />
-          <p className="text-xl font-normal text-gray-500">
-            កំពុងទាញយកព័ត៌មានលម្អិតម៉ឺនុយ...
-          </p>
-        </div>
+        <MenuItemDetailSkeleton />
       ) : isError || !data ? (
         <div className="rounded-3xl border border-red-100 bg-red-50 p-8 text-center text-xl font-normal text-red-600 shadow-sm">
           មិនអាចទាញយកព័ត៌មានលម្អិតរបស់ម៉ឺនុយនេះបានទេ។

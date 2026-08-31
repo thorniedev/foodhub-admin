@@ -37,19 +37,17 @@ export default function FoodByAreaTabs({
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
-            className={`flex items-center gap-2 px-4 h-12 rounded-full text-lg font-normal transition-all ${
-              activeTab === tab.key
-                ? "bg-[#136C34] text-white shadow-md shadow-primary-900/15"
-                : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-            }`}
+            className={`flex items-center gap-2 px-4 h-12 rounded-full text-lg font-normal transition-all ${activeTab === tab.key
+              ? "bg-[#136C34] text-white shadow-md shadow-primary-900/15"
+              : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+              }`}
           >
             <span>{tab.label}</span>
             <span
-              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-base font-normal ${
-                activeTab === tab.key
-                  ? "bg-white/20 text-white"
-                  : "bg-gray-100 text-gray-600"
-              }`}
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-base font-normal ${activeTab === tab.key
+                ? "bg-white/20 text-white"
+                : "bg-gray-100 text-gray-600"
+                }`}
             >
               {countFor(tab.key)}
             </span>

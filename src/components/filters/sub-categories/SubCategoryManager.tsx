@@ -27,6 +27,7 @@ import SubCategoryFormModal from "./SubCategoryFormModal";
 import SubCategoryHeader from "./SubCategoryHeader";
 import SubCategoryPagination from "./SubCategoryPagination";
 import SubCategoryTable from "./SubCategoryTable";
+import CatalogTableSkeleton from "../catalog/CatalogTableSkeleton";
 import SubCategoryToolbar, {
   type SubCategorySortMode,
   type SubCategoryStatusFilter,
@@ -445,14 +446,14 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
       />
 
       {/* Table & Pagination Container */}
-      <section className="overflow-visible rounded-3xl border border-gray-100 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
         {isLoading ? (
-          <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
-            <Loader2 size={32} className="animate-spin text-primary-600" />
-            <p className="mt-3 text-base font-semibold text-gray-500">
-              កំពុងទាញយកទិន្នន័យ...
-            </p>
-          </div>
+          <CatalogTableSkeleton
+            rows={size === 10 ? 5 : 7}
+            groupLabel={mode === "DRINK" ? "អនុប្រភេទភេសជ្ជៈ" : "អនុប្រភេទម្ហូប"}
+            hasValueColumn={false}
+            hasDescriptionColumn={true}
+          />
         ) : (
           <>
             {/* Table */}

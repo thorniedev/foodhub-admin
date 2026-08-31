@@ -42,6 +42,7 @@ import IngredientFormModal from "./IngredientFormModal";
 import IngredientsHeader from "./IngredientsHeader";
 import IngredientsPagination from "./IngredientsPagination";
 import IngredientsTable from "./IngredientsTable";
+import CatalogTableSkeleton from "../catalog/CatalogTableSkeleton";
 import IngredientsTabs from "./IngredientsTabs";
 
 type SortMode =
@@ -1021,16 +1022,14 @@ export default function IngredientManager() {
 
       {/* TABLE */}
 
-      <section className="overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
         {isLoading ? (
-          <div className="flex min-h-[340px] items-center justify-center">
-            <LoaderCircle
-              size={
-                32
-              }
-              className="animate-spin text-primary-800"
-            />
-          </div>
+          <CatalogTableSkeleton
+            rows={size === 10 ? 5 : 7}
+            groupLabel="គ្រឿងផ្សំ"
+            hasValueColumn={false}
+            hasDescriptionColumn={true}
+          />
         ) : error ? (
           <div className="flex min-h-[340px] flex-col items-center justify-center px-6 text-center">
             <AlertTriangle

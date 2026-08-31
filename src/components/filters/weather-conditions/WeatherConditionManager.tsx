@@ -29,6 +29,7 @@ import WeatherConditionFormModal from "./WeatherConditionFormModal";
 import WeatherConditionHeader from "./WeatherConditionHeader";
 import WeatherConditionPagination from "./WeatherConditionPagination";
 import WeatherConditionTable from "./WeatherConditionTable";
+import CatalogTableSkeleton from "../catalog/CatalogTableSkeleton";
 import WeatherConditionToolbar, {
   type SortMode,
   type StatusFilter,
@@ -527,16 +528,12 @@ export default function WeatherConditionManager() {
 
       <section className="overflow-hidden rounded-[26px] border border-gray-100 bg-white shadow-sm">
         {isLoading ? (
-          <div className="flex min-h-[360px] flex-col items-center justify-center">
-            <Loader2
-              size={32}
-              className="animate-spin text-primary-800"
-            />
-
-            <p className="mt-3 text-lg font-semibold text-gray-400">
-              កំពុងទាញយក Weather Conditions...
-            </p>
-          </div>
+          <CatalogTableSkeleton
+            rows={size === 10 ? 5 : 7}
+            groupLabel="ស្ថានភាពអាកាសធាតុ"
+            hasValueColumn={false}
+            hasDescriptionColumn={true}
+          />
         ) : error ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center px-5 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500">

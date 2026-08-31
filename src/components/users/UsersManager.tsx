@@ -49,6 +49,7 @@ import UserProfileEditModal from "./UserProfileEditModal";
 import UsersHeader from "./UsersHeader";
 import UsersPagination from "./UsersPagination";
 import UsersTable from "./UsersTable";
+import UsersTableSkeleton from "./UsersTableSkeleton";
 import UsersTabs from "./UsersTabs";
 
 export type UserRoleFilter = "ALL" | "ADMIN" | "USER";
@@ -627,6 +628,7 @@ export default function UsersManager() {
         total={Math.max(data?.totalElements ?? 0, users.length)}
         activeCount={counts.active}
         suspendedCount={counts.suspended}
+        isLoading={isLoading}
         onCreate={() => {
           setNotice(null);
           setCreateOpen(true);
@@ -1185,11 +1187,9 @@ export default function UsersManager() {
           TABLE
       ================================================== */}
 
-      <section className="w-full min-w-0 max-w-full overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
+      <section className="w-full min-w-0 max-w-full overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
         {isLoading ? (
-          <div className="flex min-h-[360px] items-center justify-center">
-            <Loader2 size={30} className="animate-spin text-primary-800" />
-          </div>
+          <UsersTableSkeleton rows={size === 10 ? 5 : 7} />
         ) : error ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
             <AlertTriangle size={38} className="text-red-400" />

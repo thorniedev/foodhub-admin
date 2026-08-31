@@ -41,6 +41,7 @@ import MedicalConditionFormModal from "./MedicalConditionFormModal";
 import MedicalConditionsHeader from "./MedicalConditionsHeader";
 import MedicalConditionsPagination from "./MedicalConditionsPagination";
 import MedicalConditionsTable from "./MedicalConditionsTable";
+import CatalogTableSkeleton from "../catalog/CatalogTableSkeleton";
 import MedicalConditionsTabs from "./MedicalConditionsTabs";
 
 /* =========================================================
@@ -922,14 +923,14 @@ export default function MedicalConditionManager() {
           TABLE
       ================================================== */}
 
-      <section className="overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
         {isLoading ? (
-          <div className="flex min-h-[320px] items-center justify-center">
-            <LoaderCircle
-              size={30}
-              className="animate-spin text-primary-800"
-            />
-          </div>
+          <CatalogTableSkeleton
+            rows={size === 10 ? 5 : 7}
+            groupLabel="ស្ថានភាពសុខភាព"
+            hasValueColumn={false}
+            hasDescriptionColumn={true}
+          />
         ) : error ? (
           <div className="flex min-h-[320px] flex-col items-center justify-center px-6 text-center">
             <AlertTriangle

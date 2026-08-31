@@ -5,6 +5,7 @@ interface UsersHeaderProps {
   total: number;
   activeCount: number;
   suspendedCount: number;
+  isLoading?: boolean;
   onCreate: () => void;
 }
 
@@ -12,6 +13,7 @@ export default function UsersHeader({
   total,
   activeCount,
   suspendedCount,
+  isLoading = false,
   onCreate,
 }: UsersHeaderProps) {
   return (
@@ -40,16 +42,19 @@ export default function UsersHeader({
               icon={<Users size={20} />}
               label="គណនីសរុប"
               value={total}
+              isLoading={isLoading}
             />
             <Stat
               icon={<UserCheck size={20} />}
               label="សកម្ម"
               value={activeCount}
+              isLoading={isLoading}
             />
             <Stat
               icon={<UserRoundX size={20} />}
               label="ផ្អាកដំណើរការ"
               value={suspendedCount}
+              isLoading={isLoading}
             />
           </div>
         </div>
@@ -58,7 +63,7 @@ export default function UsersHeader({
           id="create-user-btn"
           type="button"
           onClick={onCreate}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-normal text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit shrink-0"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-normal text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit shrink-0 cursor-pointer"
         >
           <Plus size={20} />
           បង្កើតគណនីថ្មី
@@ -72,10 +77,12 @@ function Stat({
   icon,
   label,
   value,
+  isLoading,
 }: {
   icon: ReactNode;
   label: string;
   value: number;
+  isLoading?: boolean;
 }) {
   return (
     <div className="rounded-2xl sm:rounded-3xl bg-white/20 px-3.5 py-3 sm:px-5 sm:py-4">
@@ -83,7 +90,11 @@ function Stat({
         <span className="shrink-0">{icon}</span>
         <span className="truncate">{label}</span>
       </div>
-      <p className="mt-1 text-2xl font-bold text-white tabular-nums">{value}</p>
+      {isLoading ? (
+        <div className="mt-1 h-8 w-16 rounded-lg bg-white/30 animate-pulse" />
+      ) : (
+        <p className="mt-1 text-2xl font-bold text-white tabular-nums">{value}</p>
+      )}
     </div>
   );
 }

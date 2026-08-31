@@ -40,6 +40,7 @@ import ShopsHeader from "./ShopsHeader";
 import ShopsPagination from "./ShopsPagination";
 import ShopStatusModal from "./ShopStatusModal";
 import ShopsTable from "./ShopsTable";
+import ShopsTableSkeleton from "./ShopsTableSkeleton";
 import ShopsTabs from "./ShopsTabs";
 
 type StoreSort = "NAME_ASC" | "NAME_DESC" | "NEWEST" | "OLDEST";
@@ -724,9 +725,7 @@ export default function ShopsManager() {
         )}
 
         {isLoading ? (
-          <div className="flex min-h-[360px] items-center justify-center">
-            <Loader2 size={30} className="animate-spin text-[#137A3D]" />
-          </div>
+          <ShopsTableSkeleton rows={size === 10 ? 5 : 7} />
         ) : error ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
             <AlertTriangle size={38} className="text-red-400" />

@@ -68,6 +68,7 @@ import type {
 
 import DeleteConfirmModal from "./DeleteConfirmModal";
 import FoodCatalogTable from "./FoodCatalogTable";
+import FoodCatalogTableSkeleton from "./FoodCatalogTableSkeleton";
 import FoodDetailModal from "./FoodDetailModal";
 import FoodFormModal from "./FoodFormModal";
 import MenuItemDetailModal from "./MenuItemDetailModal";
@@ -1833,11 +1834,9 @@ export default function MenuItemsManager({
       )}
 
       {/* Data Table Section */}
-      <section className="overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
         {currentLoading ? (
-          <div className="flex min-h-[380px] items-center justify-center">
-            <Loader2 size={36} className="animate-spin text-[#137A3D]" />
-          </div>
+          <FoodCatalogTableSkeleton rows={itemsPerPage === 10 ? 5 : 7} catalogType={catalogType} />
         ) : currentError ? (
           <div className="flex min-h-[380px] flex-col items-center justify-center px-6 text-center">
             <AlertTriangle size={44} className="text-red-400" />

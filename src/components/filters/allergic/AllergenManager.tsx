@@ -38,6 +38,7 @@ import AllergenFormModal from "./AllergenFormModal";
 import AllergensHeader from "./AllergensHeader";
 import AllergensPagination from "./AllergensPagination";
 import AllergensTable from "./AllergensTable";
+import CatalogTableSkeleton from "../catalog/CatalogTableSkeleton";
 import AllergensTabs from "./AllergensTabs";
 import DeleteAllergenConfirmModal from "./DeleteAllergenConfirmModal";
 
@@ -788,28 +789,39 @@ export default function AllergenManager() {
           TABLE
       ================================================== */}
 
-      <section className="overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
-        <AllergensTable
-          allergens={sortedItems}
-          disabled={busy}
-          onView={(item) => setViewing(item)}
-          onEdit={(item) => {
-            setEditing(item);
-
-            setFormOpen(true);
-          }}
-          onDelete={setDeleting}
-          onRestore={(item) => void handleRestore(item)}
-        />
-
-        {!isLoading && !error && (
-          <AllergensPagination
-            page={data?.pageNumber ?? page}
-            totalPages={data?.totalPages ?? 1}
-            totalElements={data?.totalElements ?? 0}
-            disabled={isFetching}
-            onPageChange={setPage}
+      <section className="overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
+        {isLoading ? (
+          <CatalogTableSkeleton
+            rows={size === 10 ? 5 : 7}
+            groupLabel="អាឡែហ្ស៊ី"
+            hasValueColumn={false}
+            hasDescriptionColumn={true}
           />
+        ) : (
+          <>
+            <AllergensTable
+              allergens={sortedItems}
+              disabled={busy}
+              onView={(item) => setViewing(item)}
+              onEdit={(item) => {
+                setEditing(item);
+
+                setFormOpen(true);
+              }}
+              onDelete={setDeleting}
+              onRestore={(item) => void handleRestore(item)}
+            />
+
+            {!error && (
+              <AllergensPagination
+                page={data?.pageNumber ?? page}
+                totalPages={data?.totalPages ?? 1}
+                totalElements={data?.totalElements ?? 0}
+                disabled={isFetching}
+                onPageChange={setPage}
+              />
+            )}
+          </>
         )}
       </section>
 

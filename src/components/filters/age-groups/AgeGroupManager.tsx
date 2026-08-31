@@ -42,6 +42,7 @@ import AgeGroupsHeader from "./AgeGroupsHeader";
 import AgeGroupsPagination from "./AgeGroupsPagination";
 
 import AgeGroupsTable from "./AgeGroupsTable";
+import CatalogTableSkeleton from "../catalog/CatalogTableSkeleton";
 
 import AgeGroupsTabs from "./AgeGroupsTabs";
 
@@ -959,16 +960,14 @@ export default function AgeGroupManager() {
       )}
 
       {/* TABLE */}
-      <section className="overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
         {isLoading ? (
-          <div className="flex min-h-[340px] items-center justify-center">
-            <LoaderCircle
-              size={
-                30
-              }
-              className="animate-spin text-primary-800"
-            />
-          </div>
+          <CatalogTableSkeleton
+            rows={size === 10 ? 5 : 7}
+            groupLabel="ក្រុមអាយុ"
+            hasValueColumn={false}
+            hasDescriptionColumn={true}
+          />
         ) : error ? (
           <div className="flex min-h-[340px] flex-col items-center justify-center px-6 text-center">
             <AlertTriangle

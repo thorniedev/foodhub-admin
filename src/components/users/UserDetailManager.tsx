@@ -52,6 +52,7 @@ import ProfileDetailPanel from "./ProfileDetailPanel";
 import ProfileEditModal from "./ProfileEditModal";
 import RelatedProfilesPanel from "./RelatedProfilesPanel";
 import UserDetailHeader from "./UserDetailHeader";
+import UserDetailSkeleton from "./UserDetailSkeleton";
 import UserEditModal from "./UserEditModal";
 import {
   removeDisabledUserCache,
@@ -420,11 +421,7 @@ export default function UserDetailManager({
   };
 
   if (userLoading) {
-    return (
-      <div className="flex min-h-[65vh] items-center justify-center">
-        <Loader2 size={38} className="animate-spin text-primary-700" />
-      </div>
-    );
+    return <UserDetailSkeleton />;
   }
 
   if (userError || !user) {

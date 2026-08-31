@@ -50,19 +50,17 @@ export default function FeedbackTabs({
               key={tab.key}
               type="button"
               onClick={() => onTabChange(tab.key)}
-              className={`flex items-center justify-between sm:justify-start gap-2 h-12 px-4 rounded-full text-lg font-normal transition-all active:scale-95 ${
-                activeTab === tab.key
+              className={`flex items-center justify-between sm:justify-start gap-2 h-12 px-4 rounded-full text-lg font-normal transition-all active:scale-95 ${activeTab === tab.key
                   ? "bg-primary-800 text-white shadow-md shadow-primary-900/15"
                   : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
-              }`}
+                }`}
             >
               <span className="truncate">{tab.label}</span>
               <span
-                className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2 text-base font-normal ${
-                  activeTab === tab.key
+                className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2 text-base font-normal ${activeTab === tab.key
                     ? "bg-white/20 text-white"
                     : "bg-gray-100 text-gray-600"
-                }`}
+                  }`}
               >
                 {countFor(tab.key)}
               </span>

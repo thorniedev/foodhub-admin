@@ -48,6 +48,7 @@ import type {
 
 import FilterOptionFormModal from "./FilterOptionFormModal";
 import FilterCatalogDetailModal from "./FilterCatalogDetailModal";
+import CatalogTableSkeleton from "./CatalogTableSkeleton";
 
 /* =========================================================
    TYPES
@@ -132,7 +133,7 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
   const eventCatalog = useEventCatalog();
   const weatherConditionCatalog = useWeatherConditionCatalog();
 
-  const { groupOptions, createOption, updateOption, setActive } =
+  const activeCatalog =
     group.source === "CUISINE_API"
       ? cuisineCatalog
       : group.source === "FOOD_CATEGORY_API"
@@ -145,7 +146,12 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
               ? eventCatalog
               : group.source === "WEATHER_CONDITION_API"
                 ? weatherConditionCatalog
-                : localCatalog;
+                : null;
+
+  const { groupOptions, createOption, updateOption, setActive } =
+    activeCatalog || localCatalog;
+
+  const isLoading = Boolean(activeCatalog?.isLoading && groupOptions.length === 0);
 
   const [search, setSearch] = useState("");
 
@@ -352,23 +358,34 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
       {errorMessage && <ErrorNotice message={errorMessage} />}
 
       {/* COMPONENT: CatalogTable & Pagination */}
-      <section className="overflow-visible rounded-3xl border border-gray-100 bg-white shadow-sm">
-        <CatalogTable
-          groupCode={group.code}
-          groupLabel={group.labelKm}
-          items={pageItems}
-          onView={(item) => setViewing(item)}
-          onEdit={openEditModal}
-          onDelete={setDeleting}
-          onRestore={(item) => setActive(item.uuid, true)}
-        />
+      <section className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
+        {isLoading ? (
+          <CatalogTableSkeleton
+            rows={size === 10 ? 5 : 7}
+            groupLabel={group.labelKm}
+            hasValueColumn={["PREPARATION_TIME", "DISTANCE", "SPICE_LEVEL"].includes(group.code)}
+            hasDescriptionColumn={group.code !== "MEAL_TIME"}
+          />
+        ) : (
+          <>
+            <CatalogTable
+              groupCode={group.code}
+              groupLabel={group.labelKm}
+              items={pageItems}
+              onView={(item) => setViewing(item)}
+              onEdit={openEditModal}
+              onDelete={setDeleting}
+              onRestore={(item) => setActive(item.uuid, true)}
+            />
 
-        <CatalogPagination
-          page={safePage}
-          totalPages={totalPages}
-          totalElements={sorted.length}
-          onPageChange={setPage}
-        />
+            <CatalogPagination
+              page={safePage}
+              totalPages={totalPages}
+              totalElements={sorted.length}
+              onPageChange={setPage}
+            />
+          </>
+        )}
       </section>
 
       {/* EXISTING COMPONENT: FilterOptionFormModal */}

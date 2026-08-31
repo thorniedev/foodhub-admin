@@ -41,6 +41,7 @@ import DietaryTypeFormModal from "./DietaryTypeFormModal";
 import DietaryTypesHeader from "./DietaryTypesHeader";
 import DietaryTypesPagination from "./DietaryTypesPagination";
 import DietaryTypesTable from "./DietaryTypesTable";
+import CatalogTableSkeleton from "../catalog/CatalogTableSkeleton";
 import DietaryTypesTabs from "./DietaryTypesTabs";
 
 /* =========================================================
@@ -746,20 +747,14 @@ export default function DietaryTypeManager() {
       {/* =================================================
           TABLE AREA
       ================================================== */}
-      <section className="w-full min-w-0 max-w-full overflow-visible rounded-[24px] border border-gray-100 bg-white shadow-sm">
+      <section className="w-full min-w-0 max-w-full overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
         {isLoading ? (
-          <div className="flex min-h-[320px] items-center justify-center">
-            <div className="text-center">
-              <LoaderCircle
-                size={32}
-                className="mx-auto animate-spin text-primary-800"
-              />
-
-              <p className="mt-3 text-lg font-medium text-gray-500">
-                កំពុងទាញទិន្នន័យ...
-              </p>
-            </div>
-          </div>
+          <CatalogTableSkeleton
+            rows={size === 10 ? 5 : 7}
+            groupLabel="របបអាហារ"
+            hasValueColumn={false}
+            hasDescriptionColumn={true}
+          />
         ) : error ? (
           <div className="flex min-h-[320px] flex-col items-center justify-center px-6 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">

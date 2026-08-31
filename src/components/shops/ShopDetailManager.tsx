@@ -32,6 +32,7 @@ import StoreSocialLinksSection from "./detail/StoreSocialLinksSection";
 import MenuItemDetailModal from "../menu-management/MenuItemDetailModal";
 import PublishMenuItemModal from "../menu-management/PublishMenuItemModal";
 import DeleteConfirmModal from "../menu-management/DeleteConfirmModal";
+import ShopDetailSkeleton from "./ShopDetailSkeleton";
 
 import {
   useCreateStoreMenuItemMutation,
@@ -344,15 +345,7 @@ export default function ShopDetailManager({
      STORE LOADING
   ======================================================= */
   if (storeLoading) {
-    return (
-      <div className="flex min-h-[65vh] flex-col items-center justify-center">
-        <Loader2 size={40} className="animate-spin text-[#137A3D]" />
-
-        <p className="mt-3 text-xl font-medium text-gray-500">
-          Loading Store...
-        </p>
-      </div>
-    );
+    return <ShopDetailSkeleton />;
   }
 
   /* =======================================================
