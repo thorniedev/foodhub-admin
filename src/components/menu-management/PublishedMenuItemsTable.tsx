@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { Eye, MinusCircle, Pencil, Trash2 } from "lucide-react";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { Eye, MinusCircle, MoreVertical, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import MenuItemAvatar from "./MenuItemAvatar";
 import Pagination from "@/src/components/ui/Pagination";
 
@@ -71,9 +71,12 @@ function renderCategoryCell(
 function MenuItemRowActions({
   item,
   disabled,
+  rowIndex = 0,
+  totalRows = 1,
   onView,
   onEdit,
   onSoftDelete,
+  onRestore,
   onHardDelete,
 }: {
   item: MenuItemRecord;
@@ -83,8 +86,36 @@ function MenuItemRowActions({
   onView: (item: MenuItemRecord) => void;
   onEdit: (item: MenuItemRecord) => void;
   onSoftDelete?: (item: MenuItemRecord) => void;
+  onRestore?: (item: MenuItemRecord) => void;
   onHardDelete: (item: MenuItemRecord) => void;
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const isAvailable = item.availabilityStatus === "AVAILABLE";
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    }
+
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen]);
+
   return (
     <div className="relative flex items-center justify-center gap-2">
       {/* 1. View Detail (Green Eye) */}
@@ -108,29 +139,80 @@ function MenuItemRowActions({
         <Pencil size={20} />
       </button>
 
-      {/* 3. Soft Delete / Pause Sale (Amber Circle with minus) */}
-      {onSoftDelete && (
+      {/* 3. Three-Dots Menu (MoreVertical) containing Pause/Restore & Hard Delete */}
+      <div className="relative" ref={menuRef}>
         <button
           type="button"
           disabled={disabled}
-          onClick={() => onSoftDelete(item)}
-          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
-          title="ផ្អាកលក់"
+          onClick={() => setMenuOpen((prev) => !prev)}
+          title="ជម្រើសបន្ថែម"
+          className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl transition focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:cursor-not-allowed disabled:opacity-40 ${
+            menuOpen
+              ? "bg-gray-200 text-gray-900 shadow-xs"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
+          }`}
         >
-          <MinusCircle size={20} />
+          <MoreVertical size={20} />
         </button>
-      )}
 
-      {/* 4. Hard Delete (Red Dustbin Trash) */}
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => onHardDelete(item)}
-        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
-        title="លុបចេញពីប្រព័ន្ធ"
-      >
-        <Trash2 size={20} />
-      </button>
+        {/* Dropdown Menu Popup */}
+        {menuOpen && (
+          <div
+            className={`absolute right-0 z-[120] min-w-[200px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-150 ${
+              totalRows > 3 && rowIndex >= totalRows - 2 ? "bottom-12 origin-bottom-right" : "top-12 origin-top-right"
+            }`}
+          >
+            {/* Option 1: Pause Sale / Restore */}
+            {isAvailable ? (
+              onSoftDelete && (
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onSoftDelete(item);
+                  }}
+                  className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left text-lg font-normal text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <MinusCircle size={18} className="text-amber-600 shrink-0" />
+                  <span>ផ្អាកលក់ (អស់/បិទ)</span>
+                </button>
+              )
+            ) : (
+              onRestore && (
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onRestore(item);
+                  }}
+                  className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left text-lg font-normal text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <RotateCcw size={18} className="text-emerald-600 shrink-0" />
+                  <span>បើកលក់ឡើងវិញ</span>
+                </button>
+              )
+            )}
+
+            <div className="my-1 border-t border-gray-100" />
+
+            {/* Option 2: Hard Delete */}
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => {
+                setMenuOpen(false);
+                onHardDelete(item);
+              }}
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left text-lg font-normal text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Trash2 size={18} className="text-red-500 shrink-0" />
+              <span>លុបចេញពីប្រព័ន្ធ</span>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -145,6 +227,7 @@ export default function PublishedMenuItemsTable({
   onView,
   onEdit,
   onSoftDelete,
+  onRestore,
   onDelete,
 }: {
   items: MenuItemRecord[];
@@ -156,14 +239,15 @@ export default function PublishedMenuItemsTable({
   onView: (item: MenuItemRecord) => void;
   onEdit: (item: MenuItemRecord) => void;
   onSoftDelete?: (item: MenuItemRecord) => void;
+  onRestore?: (item: MenuItemRecord) => void;
   onDelete: (item: MenuItemRecord) => void;
 }) {
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Reset to page 1 if items length changes or filter changes
+  // Reset to page 1 if items or itemsPerPage changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [items.length]);
+  }, [items, itemsPerPage]);
 
   const totalPages = Math.ceil(items.length / itemsPerPage) || 1;
 
@@ -191,28 +275,28 @@ export default function PublishedMenuItemsTable({
         <table className="w-full table-auto border-collapse text-left">
           {/* ================= HEADER ================= */}
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-normal text-primary-800">
-              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[140px]">
+            <tr className="border-b border-gray-100 bg-gray-50/80 text-left text-xl font-medium text-primary-900">
+              <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[140px]">
                 ម៉ឺនុយ
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[130px]">
+              <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[130px]">
                 ហាង
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[130px]">
+              <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[130px]">
                 ប្រភេទ
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[90px]">
+              <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[90px]">
                 តម្លៃ
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3.5 text-center font-normal min-w-[95px]">
+              <th className="whitespace-nowrap px-4 py-4 text-center font-medium min-w-[95px]">
                 ស្ថានភាព
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3.5 text-center font-normal min-w-[180px]">
+              <th className="whitespace-nowrap px-4 py-4 text-center font-medium min-w-[180px]">
                 សកម្មភាព
               </th>
             </tr>
@@ -298,6 +382,7 @@ export default function PublishedMenuItemsTable({
                       onView={onView}
                       onEdit={onEdit}
                       onSoftDelete={onSoftDelete}
+                      onRestore={onRestore}
                       onHardDelete={onDelete}
                     />
                   </td>

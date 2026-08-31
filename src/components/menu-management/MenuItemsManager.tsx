@@ -46,7 +46,7 @@ import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
 import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
 import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionApi";
 import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
-import { readFilterCatalog, saveFoodRelationsStorage, readLocalMenuItems } from "@/src/lib/filterCatalogStorage";
+import { readFilterCatalog, saveFoodRelationsStorage, readFoodRelationsStorage, readLocalMenuItems, deleteLocalMenuItem, updateLocalMenuItemStatus } from "@/src/lib/filterCatalogStorage";
 import { useUpdateFoodCategoryMutation } from "@/src/app/store/foodCategoryApi";
 import CustomSelect from "../ui/CustomSelect";
 
@@ -423,15 +423,15 @@ export default function MenuItemsManager({
   const relevantCategories = useMemo(() => {
     if (catalogType === "DRINK") {
       return allCategories.filter(
-        (c) => c.isActive !== false && isDrinkCategory(c, allCategories) && Boolean(c.parentCategoryUuid),
+        (c) => c.isActive !== false && isDrinkCategory(c, allCategories),
       );
     }
     if (catalogType === "FOOD") {
       return allCategories.filter(
-        (c) => c.isActive !== false && isFoodCategory(c, allCategories) && Boolean(c.parentCategoryUuid),
+        (c) => c.isActive !== false && isFoodCategory(c, allCategories),
       );
     }
-    return allCategories.filter((c) => c.isActive !== false && Boolean(c.parentCategoryUuid));
+    return allCategories.filter((c) => c.isActive !== false);
   }, [allCategories, catalogType]);
 
   const categoryOptions = useMemo(
@@ -551,7 +551,8 @@ export default function MenuItemsManager({
       const selCode = (selectedSeason?.code || "").toLowerCase();
 
       result = result.filter((item) => {
-        const list = Array.isArray(item.seasons) ? item.seasons : [];
+        const localRel = item.uuid ? readFoodRelationsStorage(item.uuid) : null;
+        const list = Array.isArray(item.seasons) && item.seasons.length > 0 ? item.seasons : (localRel?.seasons ?? []);
         if (list.length === 0) return false;
         return list.some((s: any) => {
           const sUuid = typeof s === "string" ? s : s?.uuid || s?.seasonUuid;
@@ -573,7 +574,8 @@ export default function MenuItemsManager({
       const selCode = (selectedEvent?.code || "").toLowerCase();
 
       result = result.filter((item) => {
-        const list = Array.isArray(item.events) ? item.events : [];
+        const localRel = item.uuid ? readFoodRelationsStorage(item.uuid) : null;
+        const list = Array.isArray(item.events) && item.events.length > 0 ? item.events : (localRel?.events ?? []);
         if (list.length === 0) return false;
         return list.some((e: any) => {
           const eUuid = typeof e === "string" ? e : e?.uuid || e?.eventUuid;
@@ -595,7 +597,8 @@ export default function MenuItemsManager({
       const selCode = (selectedWeather?.code || "").toLowerCase();
 
       result = result.filter((item) => {
-        const list = Array.isArray(item.suitableWeather) ? item.suitableWeather : [];
+        const localRel = item.uuid ? readFoodRelationsStorage(item.uuid) : null;
+        const list = Array.isArray(item.suitableWeather) && item.suitableWeather.length > 0 ? item.suitableWeather : (localRel?.suitableWeather ?? localRel?.weatherConditions ?? []);
         if (list.length === 0) return false;
         return list.some((w: any) => {
           const wUuid = typeof w === "string" ? w : w?.uuid || w?.weatherUuid || w?.weatherConditionUuid;
@@ -617,7 +620,12 @@ export default function MenuItemsManager({
       const selCode = (selectedAge?.code || "").toLowerCase();
 
       result = result.filter((item) => {
-        const list = Array.isArray(item.ageRules) ? item.ageRules : (Array.isArray((item as any).ageGroups) ? (item as any).ageGroups : []);
+        const localRel = item.uuid ? readFoodRelationsStorage(item.uuid) : null;
+        const list = Array.isArray(item.ageRules) && item.ageRules.length > 0
+          ? item.ageRules
+          : (Array.isArray((item as any).ageGroups) && (item as any).ageGroups.length > 0
+            ? (item as any).ageGroups
+            : (localRel?.ageRules ?? localRel?.ageGroups ?? []));
         if (list.length === 0) return false;
         return list.some((a: any) => {
           const aUuid = typeof a === "string" ? a : a?.uuid || a?.ageGroupUuid;
@@ -694,6 +702,7 @@ export default function MenuItemsManager({
     const getResolvedFood = (item: MenuItemRecord) => {
       const foodUuid = item.foodUuid || item.food?.uuid;
       const matchedCatalogFood = foodUuid ? foods.find((f) => f.uuid === foodUuid) : undefined;
+      const localRel = foodUuid ? readFoodRelationsStorage(foodUuid) : null;
       return {
         ...matchedCatalogFood,
         ...item.food,
@@ -701,10 +710,10 @@ export default function MenuItemsManager({
         categoryUuid: matchedCatalogFood?.categoryUuid || item.food?.categoryUuid,
         cuisine: matchedCatalogFood?.cuisine || item.food?.cuisine,
         cuisineUuid: matchedCatalogFood?.cuisineUuid || item.food?.cuisineUuid,
-        seasons: matchedCatalogFood?.seasons ?? item.food?.seasons ?? [],
-        events: matchedCatalogFood?.events ?? item.food?.events ?? [],
-        suitableWeather: matchedCatalogFood?.suitableWeather ?? item.food?.suitableWeather ?? [],
-        ageRules: matchedCatalogFood?.ageRules ?? item.food?.ageRules ?? [],
+        seasons: (matchedCatalogFood?.seasons && matchedCatalogFood.seasons.length > 0 ? matchedCatalogFood.seasons : undefined) ?? localRel?.seasons ?? item.food?.seasons ?? [],
+        events: (matchedCatalogFood?.events && matchedCatalogFood.events.length > 0 ? matchedCatalogFood.events : undefined) ?? localRel?.events ?? item.food?.events ?? [],
+        suitableWeather: (matchedCatalogFood?.suitableWeather && matchedCatalogFood.suitableWeather.length > 0 ? matchedCatalogFood.suitableWeather : undefined) ?? localRel?.suitableWeather ?? localRel?.weatherConditions ?? item.food?.suitableWeather ?? [],
+        ageRules: (matchedCatalogFood?.ageRules && matchedCatalogFood.ageRules.length > 0 ? matchedCatalogFood.ageRules : undefined) ?? localRel?.ageRules ?? localRel?.ageGroups ?? item.food?.ageRules ?? [],
       };
     };
 
@@ -857,7 +866,13 @@ export default function MenuItemsManager({
     }
 
     if (selectedStatus) {
-      result = result.filter((item) => item.availabilityStatus === selectedStatus);
+      if (selectedStatus === "AVAILABLE") {
+        result = result.filter((item) => item.availabilityStatus === "AVAILABLE");
+      } else if (selectedStatus === "HIDDEN" || selectedStatus === "UNAVAILABLE") {
+        result = result.filter((item) => item.availabilityStatus !== "AVAILABLE");
+      } else {
+        result = result.filter((item) => item.availabilityStatus === selectedStatus);
+      }
     }
 
     if (sortOrder === "NEWEST") {
@@ -936,8 +951,8 @@ export default function MenuItemsManager({
 
     const all = menuItems.length;
     const available = menuItems.filter((i) => i.availabilityStatus === "AVAILABLE").length;
-    const outOfStock = menuItems.filter((i) => i.availabilityStatus === "OUT_OF_STOCK" || i.availabilityStatus === "UNAVAILABLE").length;
-    const hidden = menuItems.filter((i) => i.availabilityStatus === "HIDDEN" || i.availabilityStatus === "ARCHIVED").length;
+    const outOfStock = menuItems.filter((i) => i.availabilityStatus === "OUT_OF_STOCK").length;
+    const hidden = menuItems.filter((i) => i.availabilityStatus !== "AVAILABLE").length;
     return { all, available, outOfStock, hidden };
   }, [menuItems, isCatalogMode, displayFoods]);
 
@@ -1208,33 +1223,88 @@ export default function MenuItemsManager({
         (softDeletingMenu as any).menuItemUuid ||
         (softDeletingMenu as any).id;
 
-      await updateMenuItem({
-        uuid: String(targetUuid),
-        storeUuid: softDeletingMenu.storeUuid || softDeletingMenu.store?.uuid || undefined,
-        payload: {
-          foodUuid: softDeletingMenu.foodUuid || softDeletingMenu.food?.uuid || "",
-          menuItem: {
-            name: softDeletingMenu.name,
-            description: softDeletingMenu.description || undefined,
-            price: Number(softDeletingMenu.price) || 0,
-            currencyCode: softDeletingMenu.currencyCode || "USD",
-            availabilityStatus: "UNAVAILABLE",
-            ingredientDataStatus: "VERIFIED",
-            isFeatured: Boolean(softDeletingMenu.isFeatured),
-            source: "MANUAL",
+      try {
+        await updateMenuItem({
+          uuid: String(targetUuid),
+          storeUuid: softDeletingMenu.storeUuid || softDeletingMenu.store?.uuid || undefined,
+          payload: {
+            foodUuid: softDeletingMenu.foodUuid || softDeletingMenu.food?.uuid || "",
+            menuItem: {
+              name: softDeletingMenu.name,
+              description: softDeletingMenu.description || undefined,
+              price: Number(softDeletingMenu.price) || 0,
+              currencyCode: softDeletingMenu.currencyCode || "USD",
+              availabilityStatus: "UNAVAILABLE",
+              ingredientDataStatus: "VERIFIED",
+              isFeatured: Boolean(softDeletingMenu.isFeatured),
+              source: "MANUAL",
+            },
+            ingredients: [],
+            dietaryTypes: [],
+            allergenDeclarations: [],
           },
-          ingredients: [],
-          dietaryTypes: [],
-          allergenDeclarations: [],
-        },
-        images: [],
-      }).unwrap();
+          images: [],
+        }).unwrap();
+      } catch (updateErr) {
+        console.warn("[SERVER UPDATE FAILED, UPDATING LOCAL]", updateErr);
+      }
+
+      updateLocalMenuItemStatus(String(targetUuid), "UNAVAILABLE");
 
       setNotice({
         type: "success",
         text: `បានផ្អាកលក់ ម៉ឺនុយ "${softDeletingMenu.name}" ដោយជោគជ័យ។`,
       });
       setSoftDeletingMenu(null);
+      await refreshAll();
+    } catch (error) {
+      setNotice({
+        type: "error",
+        text: getMenuManagementApiError(error),
+      });
+    }
+  };
+
+  const handleRestoreMenu = async (menu: MenuItemRecord) => {
+    try {
+      setNotice(null);
+      const targetUuid =
+        menu.uuid ||
+        (menu as any).menuItemUuid ||
+        (menu as any).id;
+
+      try {
+        await updateMenuItem({
+          uuid: String(targetUuid),
+          storeUuid: menu.storeUuid || menu.store?.uuid || undefined,
+          payload: {
+            foodUuid: menu.foodUuid || menu.food?.uuid || "",
+            menuItem: {
+              name: menu.name,
+              description: menu.description || undefined,
+              price: Number(menu.price) || 0,
+              currencyCode: menu.currencyCode || "USD",
+              availabilityStatus: "AVAILABLE",
+              ingredientDataStatus: "VERIFIED",
+              isFeatured: Boolean(menu.isFeatured),
+              source: "MANUAL",
+            },
+            ingredients: [],
+            dietaryTypes: [],
+            allergenDeclarations: [],
+          },
+          images: [],
+        }).unwrap();
+      } catch (updateErr) {
+        console.warn("[SERVER UPDATE FAILED, UPDATING LOCAL]", updateErr);
+      }
+
+      updateLocalMenuItemStatus(String(targetUuid), "AVAILABLE");
+
+      setNotice({
+        type: "success",
+        text: `បានបើកលក់ ម៉ឺនុយ "${menu.name}" ឡើងវិញដោយជោគជ័យ។`,
+      });
       await refreshAll();
     } catch (error) {
       setNotice({
@@ -1253,7 +1323,14 @@ export default function MenuItemsManager({
         (hardDeletingMenu as any).menuItemUuid ||
         (hardDeletingMenu as any).id;
 
-      await deleteMenuItem(String(targetUuid)).unwrap();
+      try {
+        await deleteMenuItem(String(targetUuid)).unwrap();
+      } catch (err) {
+        // If it's a local/mock item that server doesn't know, we still remove it locally
+        console.warn("[SERVER DELETE MENU ITEM FAILED, REMOVING LOCAL ITEM]", err);
+      }
+      deleteLocalMenuItem(String(targetUuid));
+
       setNotice({
         type: "success",
         text: `បានលុប ម៉ឺនុយ "${hardDeletingMenu.name}" ចេញពីប្រព័ន្ធដោយជោគជ័យ។`,
@@ -1271,29 +1348,29 @@ export default function MenuItemsManager({
   return (
     <div className="space-y-6">
       {/* Top Banner Header */}
-      <div className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
+      <div className="relative overflow-hidden rounded-3xl bg-[#14833E] px-4 py-5 text-white shadow-sm sm:px-8 sm:py-8">
         <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full bg-white/5" />
         <div className="pointer-events-none absolute -bottom-24 right-20 h-64 w-64 rounded-full bg-white/5" />
 
-        <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
+        <div className="relative flex flex-col gap-5 sm:gap-7 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
-                {isCatalogMode ? <Layers size={25} /> : <Utensils size={25} />}
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-white/15">
+                {isCatalogMode ? <Layers className="h-5 w-5 sm:h-6 sm:w-6" /> : <Utensils className="h-5 w-5 sm:h-6 sm:w-6" />}
               </div>
 
-              <div>
-                <p className="text-5xl font-bold text-accent-400">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-accent-400">
                   {pageTitle}
-                </p>
-                <p className="mt-6 max-w-2xl text-xl text-white/85">
+                </h1>
+                <p className="mt-2 sm:mt-4 max-w-2xl text-lg sm:text-xl text-white/85 leading-relaxed">
                   {pageSubtitle}
                 </p>
               </div>
             </div>
 
             {/* Quick Stats Grid */}
-            <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="mt-5 sm:mt-7 grid grid-cols-3 gap-2 sm:gap-3">
               {isCatalogMode ? (
                 <>
                   <Stat
@@ -1316,12 +1393,12 @@ export default function MenuItemsManager({
                   />
                   <Stat
                     icon={<Store size={20} />}
-                    label="ហាងបានអនុម័តសរុប"
+                    label="ហាងបានអនុម័ត"
                     value={approvedStoresCountQuery.data?.totalElements ?? stores.length}
                   />
                   <Stat
                     icon={<Layers size={20} />}
-                    label="បញ្ជីមុខម្ហូបសម្រាប់ហាង"
+                    label="បញ្ជីមុខម្ហូប"
                     value={foodsQuery.data?.totalElements ?? foods.length}
                   />
                 </>
@@ -1329,7 +1406,7 @@ export default function MenuItemsManager({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             {isCatalogMode ? (
               <button
                 type="button"
@@ -1337,9 +1414,9 @@ export default function MenuItemsManager({
                   setEditingFood(null);
                   setFoodModalOpen(true);
                 }}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-xl font-normal text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-normal text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit"
               >
-                <Plus size={22} />
+                <Plus size={20} />
                 {catalogType === "DRINK" ? "បន្ថែមភេសជ្ជៈថ្មី" : "បន្ថែមមុខម្ហូបថ្មី"}
               </button>
             ) : (
@@ -1349,9 +1426,9 @@ export default function MenuItemsManager({
                   setEditingMenu(null);
                   setMenuModalOpen(true);
                 }}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-xl font-normal text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit cursor-pointer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-normal text-primary-800 shadow-sm transition hover:bg-primary-50 sm:w-fit cursor-pointer"
               >
-                <Plus size={22} />
+                <Plus size={20} />
                 បង្កើតម៉ឺនុយ
               </button>
             )}
@@ -1359,12 +1436,12 @@ export default function MenuItemsManager({
         </div>
       </div>
 
-      {/* 2-ROW TOOLBAR */}
+      {/* TOOLBAR */}
       <div className="space-y-3">
-        {/* ROW 1: Status Tabs (Left) + Search Input (Middle) + Page Size (Right) + Sort + Reset */}
+        {/* ROW 1: Status Tabs + Search + Page Size + Sort (Matching Sample 1 & 2) */}
         <div className="flex w-full flex-wrap items-center justify-between gap-3">
-          {/* Status Tabs Pills */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Status Tabs (Left: 2x2 grid on mobile + Page Size/Sort in Slot 4) */}
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2 w-full sm:w-auto">
             {[
               { id: "", label: "ទាំងអស់", count: menuCounts.all },
               { id: "AVAILABLE", label: "មានលក់", count: menuCounts.available },
@@ -1376,16 +1453,16 @@ export default function MenuItemsManager({
                   key={tab.id}
                   type="button"
                   onClick={() => setSelectedStatus(tab.id)}
-                  className={`group relative inline-flex h-12 cursor-pointer items-center gap-2.5 rounded-full px-5 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
+                  className={`group relative flex w-full sm:w-auto h-12 cursor-pointer items-center justify-between sm:justify-start gap-2 sm:gap-2.5 rounded-full px-4 sm:px-5 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
                     active
                       ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
                       : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
                   }`}
                 >
-                  <span>{tab.label}</span>
+                  <span className="truncate text-lg">{tab.label}</span>
                   <span
                     suppressHydrationWarning
-                    className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2.5 text-lg font-normal transition-colors duration-200 ${
+                    className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2 text-base sm:text-lg font-normal transition-colors duration-200 ${
                       active
                         ? "bg-white/20 text-white backdrop-blur-xs"
                         : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
@@ -1396,14 +1473,103 @@ export default function MenuItemsManager({
                 </button>
               );
             })}
+
+            {/* Mobile Slot 4: Page Size + Sort */}
+            <div className="flex sm:hidden items-center gap-1.5 w-full">
+              {/* Page Size Mobile */}
+              <div ref={sizeRef} className="relative flex-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setSizeOpen((c) => !c)}
+                  className={`flex h-12 w-full cursor-pointer items-center justify-between gap-1.5 rounded-full border bg-white px-3 text-lg font-normal transition ${
+                    sizeOpen ? "border-primary-600 ring-2 ring-primary-100" : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <span className="text-gray-700 truncate">{itemsPerPage} / ទំព័រ</span>
+                  <ChevronDown size={18} className={`shrink-0 text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""}`} />
+                </button>
+                {sizeOpen && (
+                  <div className="absolute right-0 top-[52px] z-[110] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                    <p className="px-3 pb-2 pt-1 text-base font-normal text-secondary-600">ទំហំទំព័រ</p>
+                    {[10, 20, 50, 100].map((value) => {
+                      const selected = itemsPerPage === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => {
+                            setItemsPerPage(value);
+                            setSizeOpen(false);
+                          }}
+                          className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                            selected ? "bg-primary-50 text-primary-800" : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          <span>{value} / ទំព័រ</span>
+                          {selected && <Check size={18} className="text-primary-800" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Sort Order Mobile */}
+              <div ref={sortRef} className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setSortOpen((c) => !c)}
+                  className={`flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border transition ${
+                    sortOpen
+                      ? "border-primary-800 bg-primary-50 text-primary-800"
+                      : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
+                  }`}
+                  title="តម្រៀប"
+                >
+                  <ArrowUpDown size={18} />
+                </button>
+
+                {sortOpen && (
+                  <div className="absolute right-0 top-[52px] z-[110] w-[200px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                    <p className="px-3 pb-2 pt-1 text-base font-normal text-secondary-600">
+                      តម្រៀប
+                    </p>
+                    {sortOptions.map((opt) => {
+                      const selected = sortOrder === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => {
+                            setSortOrder(opt.value as any);
+                            setSortOpen(false);
+                          }}
+                          className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                            selected
+                              ? "bg-primary-50 text-primary-800"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          <span>{opt.label}</span>
+                          {selected && (
+                            <Check size={18} className="text-primary-800" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="flex min-w-[320px] flex-1 flex-wrap items-center justify-end gap-2.5">
-            {/* Search Input */}
-            <div className="relative min-w-[220px] max-w-[360px] flex-1">
+          {/* Desktop Controls (Right): Search + Page Size + Sort (Matching Sample 1 & 2) */}
+          <div className="hidden sm:flex sm:min-w-[320px] sm:flex-1 sm:items-center sm:justify-end sm:gap-2.5">
+            {/* Search Input Desktop */}
+            <div className="relative min-w-[220px] max-w-xl flex-1">
               <Search
-                size={17}
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                size={18}
+                className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
               />
               <input
                 value={search}
@@ -1415,29 +1581,29 @@ export default function MenuItemsManager({
                 <button
                   type="button"
                   onClick={() => setSearch("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 cursor-pointer"
+                  className="absolute right-3.5 top-1/2 z-10 -translate-y-1/2 text-gray-400 hover:text-gray-700 cursor-pointer"
                 >
                   <X size={18} />
                 </button>
               )}
             </div>
 
-            {/* Page Size Select */}
-            <div ref={sizeRef} className="relative shrink-0">
+            {/* Page Size Desktop */}
+            <div className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setSizeOpen((c) => !c)}
-                className={`flex h-12 min-w-[140px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition ${
+                className={`flex h-12 cursor-pointer items-center justify-between gap-2 rounded-full border bg-white px-4 text-lg font-normal transition ${
                   sizeOpen ? "border-primary-600 ring-2 ring-primary-100" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <span className="text-gray-700">{itemsPerPage} / ទំព័រ</span>
-                <ChevronDown size={18} className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""}`} />
+                <span className="text-gray-700 truncate">{itemsPerPage} / ទំព័រ</span>
+                <ChevronDown size={18} className={`shrink-0 text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""}`} />
               </button>
               {sizeOpen && (
                 <div className="absolute right-0 top-[52px] z-[110] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                  <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-600">ទំហំទំព័រ</p>
-                  {[10, 20, 50].map((value) => {
+                  <p className="px-3 pb-2 pt-1 text-base font-normal text-secondary-600">ទំហំទំព័រ</p>
+                  {[10, 20, 50, 100].map((value) => {
                     const selected = itemsPerPage === value;
                     return (
                       <button
@@ -1460,8 +1626,8 @@ export default function MenuItemsManager({
               )}
             </div>
 
-            {/* Sort Order (Circular Icon Button + Popup Menu) */}
-            <div ref={sortRef} className="relative shrink-0">
+            {/* Sort Order Desktop */}
+            <div className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setSortOpen((c) => !c)}
@@ -1477,7 +1643,7 @@ export default function MenuItemsManager({
 
               {sortOpen && (
                 <div className="absolute right-0 top-[52px] z-[110] w-[200px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                  <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-600">
+                  <p className="px-3 pb-2 pt-1 text-base font-normal text-secondary-600">
                     តម្រៀប
                   </p>
                   {sortOptions.map((opt) => {
@@ -1506,26 +1672,37 @@ export default function MenuItemsManager({
                 </div>
               )}
             </div>
-
-            {/* Clear / Reset Filters Button */}
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={resetAllFilters}
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95 cursor-pointer"
-                title="សម្អាតតម្រង"
-              >
-                <RotateCcw size={18} />
-              </button>
-            )}
           </div>
         </div>
 
-        {/* ROW 2: Filter Select Pills (Without white background card) */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        {/* Mobile Full-Width Search Bar */}
+        <div className="relative sm:hidden w-full">
+          <Search
+            size={18}
+            className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
+          />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={isCatalogMode ? (catalogType === "DRINK" ? "ស្វែងរកភេសជ្ជៈ..." : "ស្វែងរកមុខម្ហូប...") : "ស្វែងរកម៉ឺនុយ, ហាង..."}
+            className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none placeholder:text-gray-400 transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="absolute right-3.5 top-1/2 z-10 -translate-y-1/2 text-gray-400 hover:text-gray-700 cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
+
+        {/* ROW 2: Filter Select Pills (Clean Responsive Row without Overflow Clipping) */}
+        <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
           {/* Store Filter */}
           {!isCatalogMode && stores.length > 0 && (
-            <div className="min-w-[170px] max-w-[210px] flex-1 shrink-0">
+            <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[145px] lg:min-w-[165px]">
               <CustomSelect
                 value={selectedStoreUuid}
                 onChange={(val) => setSelectedStoreUuid(val)}
@@ -1537,7 +1714,7 @@ export default function MenuItemsManager({
           )}
 
           {/* Category Filter */}
-          <div className="min-w-[170px] max-w-[200px] flex-1 shrink-0">
+          <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[135px] lg:min-w-[155px]">
             <CustomSelect
               value={selectedCategoryUuid}
               onChange={(val) => setSelectedCategoryUuid(val)}
@@ -1548,7 +1725,7 @@ export default function MenuItemsManager({
           </div>
 
           {/* Cuisine Filter */}
-          <div className="min-w-[170px] max-w-[200px] flex-1 shrink-0">
+          <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[135px] lg:min-w-[155px]">
             <CustomSelect
               value={selectedCuisineUuid}
               onChange={(val) => setSelectedCuisineUuid(val)}
@@ -1559,7 +1736,7 @@ export default function MenuItemsManager({
           </div>
 
           {/* Season Filter */}
-          <div className="min-w-[170px] max-w-[200px] flex-1 shrink-0">
+          <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[135px] lg:min-w-[155px]">
             <CustomSelect
               value={selectedSeasonUuid}
               onChange={(val) => setSelectedSeasonUuid(val)}
@@ -1570,7 +1747,7 @@ export default function MenuItemsManager({
           </div>
 
           {/* Event Filter */}
-          <div className="min-w-[170px] max-w-[200px] flex-1 shrink-0">
+          <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[135px] lg:min-w-[155px]">
             <CustomSelect
               value={selectedEventUuid}
               onChange={(val) => setSelectedEventUuid(val)}
@@ -1581,7 +1758,7 @@ export default function MenuItemsManager({
           </div>
 
           {/* Weather Filter */}
-          <div className="min-w-[170px] max-w-[200px] flex-1 shrink-0">
+          <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[135px] lg:min-w-[155px]">
             <CustomSelect
               value={selectedWeatherUuid}
               onChange={(val) => setSelectedWeatherUuid(val)}
@@ -1592,7 +1769,7 @@ export default function MenuItemsManager({
           </div>
 
           {/* Age Group Filter */}
-          <div className="min-w-[170px] max-w-[200px] flex-1 shrink-0">
+          <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[135px] lg:min-w-[155px]">
             <CustomSelect
               value={selectedAgeGroupUuid}
               onChange={(val) => setSelectedAgeGroupUuid(val)}
@@ -1601,6 +1778,19 @@ export default function MenuItemsManager({
               pill
             />
           </div>
+
+          {/* Clear / Reset Filters Button */}
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={resetAllFilters}
+              className="col-span-2 flex h-12 w-full sm:w-auto shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full border border-red-200 bg-white px-5 text-lg font-normal text-red-600 transition hover:bg-red-50 active:scale-95 whitespace-nowrap"
+              title="សម្អាតតម្រង"
+            >
+              <RotateCcw size={18} />
+              <span>សម្អាតតម្រង</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -1688,6 +1878,7 @@ export default function MenuItemsManager({
               setMenuModalOpen(true);
             }}
             onSoftDelete={setSoftDeletingMenu}
+            onRestore={handleRestoreMenu}
             onDelete={setHardDeletingMenu}
           />
         )}
@@ -1849,12 +2040,12 @@ function Stat({
   value: number;
 }) {
   return (
-    <div className="rounded-3xl bg-white/20 px-5 py-4">
-      <div className="flex items-center gap-2 text-xl text-white/80">
-        {icon}
-        <span>{label}</span>
+    <div className="rounded-2xl sm:rounded-3xl bg-white/20 px-3.5 py-3 sm:px-5 sm:py-4">
+      <div className="flex items-center gap-1.5 sm:gap-2 text-lg sm:text-xl text-white/80">
+        <span className="shrink-0">{icon}</span>
+        <span className="truncate">{label}</span>
       </div>
-      <p className="mt-1 text-2xl font-bold text-white" suppressHydrationWarning>{value}</p>
+      <p className="mt-1 text-2xl font-bold text-white tabular-nums" suppressHydrationWarning>{value}</p>
     </div>
   );
 }

@@ -87,14 +87,14 @@ export default function BannersTable({
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] border-collapse text-left">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50 text-left text-lg font-normal text-primary-800">
-                <th className="px-5 py-4 font-normal">រូបភាព</th>
-                <th className="px-5 py-4 font-normal">ចំណងជើង</th>
-                <th className="px-5 py-4 font-normal">ប្រភេទ</th>
-                <th className="px-5 py-4 font-normal">ទីតាំង</th>
-                <th className="px-5 py-4 text-center font-normal">បង្ហាញ</th>
-                <th className="px-5 py-4 font-normal">បង្កើតនៅ</th>
-                <th className="px-5 py-4 text-right font-normal">សកម្មភាព</th>
+              <tr className="border-b border-gray-100 bg-gray-50/80 text-left text-xl font-medium text-primary-900">
+                <th className="px-5 py-4 font-medium">រូបភាព</th>
+                <th className="px-5 py-4 font-medium">ចំណងជើង</th>
+                <th className="px-5 py-4 font-medium">ប្រភេទ</th>
+                <th className="px-5 py-4 font-medium">ទីតាំង</th>
+                <th className="px-5 py-4 text-center font-medium">បង្ហាញ</th>
+                <th className="px-5 py-4 font-medium">បង្កើតនៅ</th>
+                <th className="px-5 py-4 text-right font-medium">សកម្មភាព</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -117,10 +117,9 @@ export default function BannersTable({
                   <td className="px-5 py-4 text-lg font-normal text-gray-800">{banner.title}</td>
                   <td className="px-5 py-4">
                     <span
-                      className={`inline-flex rounded-full border border-gray-100 px-3.5 py-1 text-lg font-normal ${
-                        CATEGORY_BADGE_STYLES[banner.category] ??
+                      className={`inline-flex rounded-full border border-gray-100 px-3.5 py-1 text-lg font-normal ${CATEGORY_BADGE_STYLES[banner.category] ??
                         "bg-gray-100 text-gray-600"
-                      }`}
+                        }`}
                     >
                       {BANNER_CATEGORY_LABELS[banner.category]}
                     </span>
@@ -147,14 +146,12 @@ export default function BannersTable({
                       }
                       disabled={pendingId === banner.id}
                       onClick={() => handleToggleStatus(banner)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${
-                        banner.isPublished ? "bg-[#136C34]" : "bg-gray-300"
-                      }`}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${banner.isPublished ? "bg-[#136C34]" : "bg-gray-300"
+                        }`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          banner.isPublished ? "translate-x-6" : "translate-x-1"
-                        }`}
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${banner.isPublished ? "translate-x-6" : "translate-x-1"
+                          }`}
                       />
                     </button>
                   </td>

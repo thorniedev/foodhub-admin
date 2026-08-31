@@ -99,44 +99,44 @@ export default function FoodDetailModal({
 
   const data = rawData
     ? {
-        ...rawData,
-        categoryName,
-        cuisineName,
-        nutritionData: mergedNutrition,
-        mealTypes:
-          (stored?.mealTypes !== undefined
-            ? stored.mealTypes
-            : (rawData as any)?.mealTypes) ?? [],
-        seasons:
-          (stored?.seasons !== undefined ? stored.seasons : rawData.seasons) ??
-          [],
-        events:
-          (stored?.events !== undefined ? stored.events : rawData.events) ?? [],
-        suitableWeather:
-          (stored?.suitableWeather !== undefined
-            ? stored.suitableWeather
-            : (stored?.weatherConditions ?? rawData.suitableWeather)) ?? [],
-        ageRules:
-          (stored?.ageRules !== undefined
-            ? stored.ageRules
-            : (stored?.ageGroups ?? rawData.ageRules)) ?? [],
-        dietaryTypes:
-          (stored?.dietaryTypes !== undefined
-            ? stored.dietaryTypes
-            : rawData.dietaryTypes) ?? [],
-        allergens:
-          (stored?.allergens !== undefined
-            ? stored.allergens
-            : rawData.allergens) ?? [],
-        preparationTimes:
-          (stored?.preparationTimes !== undefined
-            ? stored.preparationTimes
-            : (rawData as any)?.preparationTimes) ?? [],
-        distances:
-          (stored?.distances !== undefined
-            ? stored.distances
-            : (rawData as any)?.distances) ?? [],
-      }
+      ...rawData,
+      categoryName,
+      cuisineName,
+      nutritionData: mergedNutrition,
+      mealTypes:
+        (stored?.mealTypes !== undefined
+          ? stored.mealTypes
+          : (rawData as any)?.mealTypes) ?? [],
+      seasons:
+        (stored?.seasons !== undefined ? stored.seasons : rawData.seasons) ??
+        [],
+      events:
+        (stored?.events !== undefined ? stored.events : rawData.events) ?? [],
+      suitableWeather:
+        (stored?.suitableWeather !== undefined
+          ? stored.suitableWeather
+          : (stored?.weatherConditions ?? rawData.suitableWeather)) ?? [],
+      ageRules:
+        (stored?.ageRules !== undefined
+          ? stored.ageRules
+          : (stored?.ageGroups ?? rawData.ageRules)) ?? [],
+      dietaryTypes:
+        (stored?.dietaryTypes !== undefined
+          ? stored.dietaryTypes
+          : rawData.dietaryTypes) ?? [],
+      allergens:
+        (stored?.allergens !== undefined
+          ? stored.allergens
+          : rawData.allergens) ?? [],
+      preparationTimes:
+        (stored?.preparationTimes !== undefined
+          ? stored.preparationTimes
+          : (rawData as any)?.preparationTimes) ?? [],
+      distances:
+        (stored?.distances !== undefined
+          ? stored.distances
+          : (rawData as any)?.distances) ?? [],
+    }
     : (stored as any);
 
   const images = (
@@ -217,24 +217,22 @@ export default function FoodDetailModal({
                 {/* Thumbnails Row */}
                 {images.length > 1 && (
                   <div
-                    className={`grid w-full gap-2.5 shrink-0 ${
-                      images.length === 2
+                    className={`grid w-full gap-2.5 shrink-0 ${images.length === 2
                         ? "grid-cols-2"
                         : images.length === 3
                           ? "grid-cols-3"
                           : "grid-cols-4"
-                    }`}
+                      }`}
                   >
                     {images.map((img, idx) => (
                       <button
                         key={idx}
                         type="button"
                         onClick={() => setSelectedImageIndex(idx)}
-                        className={`relative aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-2xl border-2 transition ${
-                          selectedImageIndex === idx
+                        className={`relative aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-2xl border-2 transition ${selectedImageIndex === idx
                             ? "border-[#14833E] ring-2 ring-[#14833E]/20 shadow-xs"
                             : "border-gray-200 hover:border-gray-400"
-                        }`}
+                          }`}
                       >
                         <img
                           src={resolveFoodHubCatalogImageUrl(img) || img}
@@ -269,18 +267,16 @@ export default function FoodDetailModal({
                   {/* Badges */}
                   <div className="flex flex-wrap items-center gap-2">
                     <span
-                      className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-lg font-normal ${
-                        data.isActive === false
+                      className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-lg font-normal ${data.isActive === false
                           ? "border-gray-200 bg-gray-100 text-gray-600"
                           : "border-emerald-100 bg-emerald-50 text-emerald-700"
-                      }`}
+                        }`}
                     >
                       <span
-                        className={`h-2.5 w-2.5 rounded-full ${
-                          data.isActive === false
+                        className={`h-2.5 w-2.5 rounded-full ${data.isActive === false
                             ? "bg-gray-400"
                             : "bg-emerald-500"
-                        }`}
+                          }`}
                       />
                       {data.isActive === false ? "អសកម្ម" : "មានលក់"}
                     </span>
@@ -368,7 +364,7 @@ export default function FoodDetailModal({
                     </p>
                     <div className="mt-1.5 flex flex-wrap gap-2">
                       {Array.isArray(data.dietaryTypes) &&
-                      data.dietaryTypes.length > 0 ? (
+                        data.dietaryTypes.length > 0 ? (
                         (data.dietaryTypes as any[]).map(
                           (dt: any, idx: number) => (
                             <span
@@ -400,7 +396,7 @@ export default function FoodDetailModal({
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {Array.isArray(data.mealTypes) &&
-                  data.mealTypes.length > 0 ? (
+                    data.mealTypes.length > 0 ? (
                     (data.mealTypes as any[]).map((m: any, idx: number) => (
                       <span
                         key={idx}
@@ -423,7 +419,7 @@ export default function FoodDetailModal({
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {Array.isArray(data.ageRules) &&
-                  data.ageRules.length > 0 ? (
+                    data.ageRules.length > 0 ? (
                     (data.ageRules as any[]).map((a: any, idx: number) => (
                       <span
                         key={idx}

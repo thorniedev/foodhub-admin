@@ -34,18 +34,18 @@ export default function FoodTypesTable({
     <div className="bg-white border border-gray-100 rounded-3xl overflow-x-auto">
       <table className="w-full text-lg font-normal min-w-[1000px]">
         <thead>
-          <tr className="border-b border-gray-100 text-left text-lg font-normal text-primary-800 bg-gray-50/70">
-            <th className="py-3.5 px-4 font-normal">
+          <tr className="border-b border-gray-100 text-left text-xl font-medium text-primary-900 bg-gray-50/80">
+            <th className="py-4 px-4 font-medium">
               លេខសម្គាល់និងឈ្មោះចំណីអាហារ
             </th>
-            <th className="py-3.5 px-4 font-normal">ឈ្មោះហាង</th>
-            <th className="py-3.5 px-4 font-normal">ការវាយតម្លៃ</th>
-            <th className="py-3.5 px-4 font-normal">របបអាហារ</th>
-            <th className="py-3.5 px-4 font-normal">ពេលវេលា</th>
-            <th className="py-3.5 px-4 font-normal">ចម្ងាយ</th>
-            <th className="py-3.5 px-4 font-normal">ទំហំ</th>
-            <th className="py-3.5 px-4 font-normal">ការពិពណ៌នា</th>
-            <th className="py-3.5 px-4 font-normal text-right">
+            <th className="py-4 px-4 font-medium">ឈ្មោះហាង</th>
+            <th className="py-4 px-4 font-medium">ការវាយតម្លៃ</th>
+            <th className="py-4 px-4 font-medium">របបអាហារ</th>
+            <th className="py-4 px-4 font-medium">ពេលវេលា</th>
+            <th className="py-4 px-4 font-medium">ចម្ងាយ</th>
+            <th className="py-4 px-4 font-medium">ទំហំ</th>
+            <th className="py-4 px-4 font-medium">ការពិពណ៌នា</th>
+            <th className="py-4 px-4 font-medium text-right">
               សកម្មភាព
             </th>
           </tr>

@@ -30,28 +30,28 @@ export default function ShopsTable({
       <table className="w-full table-auto border-collapse text-left">
         {/* ================= HEADER ================= */}
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-normal text-primary-800">
-            <th className="whitespace-nowrap px-3 py-3.5 font-normal min-w-[140px]">
+          <tr className="border-b border-gray-100 bg-gray-50/80 text-left text-xl font-medium text-primary-900">
+            <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[140px]">
               ហាង
             </th>
 
-            <th className="whitespace-nowrap px-3 py-3.5 font-normal min-w-[130px]">
+            <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[130px]">
               ទីតាំង
             </th>
 
-            <th className="whitespace-nowrap px-2 py-3.5 text-center font-normal min-w-[95px]">
+            <th className="whitespace-nowrap px-2 py-4 text-center font-medium min-w-[95px]">
               ការពិនិត្យ
             </th>
 
-            <th className="whitespace-nowrap px-2 py-3.5 text-center font-normal min-w-[85px]">
+            <th className="whitespace-nowrap px-2 py-4 text-center font-medium min-w-[85px]">
               គណនី
             </th>
 
-            <th className="whitespace-nowrap px-2 py-3.5 text-center font-normal min-w-[80px]">
+            <th className="whitespace-nowrap px-2 py-4 text-center font-medium min-w-[80px]">
               បើកឥឡូវ
             </th>
 
-            <th className="whitespace-nowrap px-3 py-3.5 text-center font-normal min-w-[110px]">
+            <th className="whitespace-nowrap px-3 py-4 text-center font-medium min-w-[110px]">
               សកម្មភាព
             </th>
           </tr>

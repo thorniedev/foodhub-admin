@@ -637,255 +637,506 @@ export default function UsersManager() {
           TABS + TOOLBAR
       ================================================== */}
 
-      <div className="flex w-full flex-wrap items-center justify-between gap-3">
-        <UsersTabs
-          value={statusFilter}
-          counts={counts}
-          onChange={(value) => {
-            setStatusFilter(value);
-            setPage(0);
-          }}
-        />
-
-        <div className="ml-auto flex min-w-[320px] flex-1 flex-wrap items-center justify-end gap-2.5">
-          {/* SEARCH */}
-          <div className="relative min-w-[240px] max-w-[420px] flex-1">
-            <Search
-              size={18}
-              className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
-            />
-
-            <input
-              value={search}
-              onChange={(event) => {
-                const value = event.target.value;
-                setSearch(value);
+      <div className="space-y-3">
+        <div className="flex w-full flex-wrap items-center justify-between gap-3">
+          {/* LEFT: Status Tabs (3 tabs on mobile grid + 4th slot for controls) */}
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2 w-full sm:w-auto">
+            <UsersTabs
+              value={statusFilter}
+              counts={counts}
+              onChange={(value) => {
+                setStatusFilter(value);
                 setPage(0);
-                setShowSuggestions(value.trim().length > 0);
               }}
-              onFocus={() => {
-                if (search.trim().length > 0) {
-                  setShowSuggestions(true);
-                }
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Escape") {
-                  setShowSuggestions(false);
-                }
-                if (event.key === "Enter") {
-                  setShowSuggestions(false);
-                }
-              }}
-              placeholder="ស្វែងរកឈ្មោះ, គណនី ឬ អ៊ីមែល..."
-              className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
             />
 
-            {search && (
+            {/* Mobile Controls (Slot 4): Page Size + Sort */}
+            <div className="flex sm:hidden items-center gap-1.5 w-full">
+              {/* PAGE SIZE */}
+              <div className="relative flex-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSizeOpen((current) => !current);
+                    setSortOpen(false);
+                    setShowSuggestions(false);
+                  }}
+                  className={`flex h-12 w-full cursor-pointer items-center justify-between gap-1.5 rounded-full border bg-white px-3 text-lg font-normal transition ${sizeOpen
+                    ? "border-primary-600 ring-2 ring-primary-100"
+                    : "border-gray-200 hover:border-primary-600/50"
+                    }`}
+                >
+                  <span className="text-gray-700 truncate">{size} / ទំព័រ</span>
+
+                  <ChevronDown
+                    size={18}
+                    className={`shrink-0 text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
+                      }`}
+                  />
+                </button>
+
+                {sizeOpen && (
+                  <div className="absolute right-0 top-[52px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+                    <p className="px-3 pb-2 pt-1 text-base font-normal text-secondary-500">
+                      ចំនួនក្នុងទំព័រ
+                    </p>
+
+                    {[10, 20, 50].map((value) => {
+                      const selected = size === value;
+
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => {
+                            setSize(value);
+                            setPage(0);
+                            setSizeOpen(false);
+                          }}
+                          className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected
+                            ? "bg-primary-50 text-primary-700"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
+                            }`}
+                        >
+                          <span>{value} / ទំព័រ</span>
+
+                          {selected && (
+                            <Check size={18} className="text-primary-700" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* SORT */}
+              <div className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSortOpen((current) => !current);
+                    setSizeOpen(false);
+                    setShowSuggestions(false);
+                  }}
+                  className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${sortOpen
+                    ? "border-primary-800 ring-2 ring-primary-100 text-primary-800"
+                    : "border-gray-200 text-gray-700 hover:border-gray-300"
+                    }`}
+                  aria-label="Sort users"
+                  title="តម្រៀប"
+                >
+                  <ArrowUpDown size={18} className="shrink-0" />
+                </button>
+
+                {sortOpen && (
+                  <div className="absolute right-0 top-[52px] z-[100] w-[200px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+                    <p className="px-3 pb-2 pt-1 text-base font-normal text-secondary-500">
+                      តម្រៀប
+                    </p>
+
+                    {sortOptions.map((option) => {
+                      const selected = sortBy === option.value;
+
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            setSortBy(option.value);
+                            setSortOpen(false);
+                          }}
+                          className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected
+                            ? "bg-primary-50 text-primary-700"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
+                            }`}
+                        >
+                          <span>{option.label}</span>
+
+                          {selected && (
+                            <Check size={18} className="text-primary-700" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* DESKTOP CONTROLS: Search + Page Size + Sort */}
+          <div className="hidden sm:flex sm:min-w-[320px] sm:flex-1 sm:items-center sm:justify-end sm:gap-2.5">
+            {/* SEARCH */}
+            <div className="relative min-w-[220px] max-w-xl flex-1">
+              <Search
+                size={18}
+                className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
+              />
+
+              <input
+                value={search}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setSearch(value);
+                  setPage(0);
+                  setShowSuggestions(value.trim().length > 0);
+                }}
+                onFocus={() => {
+                  if (search.trim().length > 0) {
+                    setShowSuggestions(true);
+                  }
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    setShowSuggestions(false);
+                  }
+                  if (event.key === "Enter") {
+                    setShowSuggestions(false);
+                  }
+                }}
+                placeholder="ស្វែងរកឈ្មោះ, គណនី ឬ អ៊ីមែល..."
+                className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              />
+
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setShowSuggestions(false);
+                    setPage(0);
+                  }}
+                  className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700 cursor-pointer"
+                  aria-label="Clear search"
+                >
+                  <X size={18} />
+                </button>
+              )}
+
+              {showSuggestions && normalizedSearch && (
+                <div className="absolute left-0 top-[52px] z-[100] w-full max-w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
+                  {suggestions.length === 0 ? (
+                    <div className="px-5 py-6 text-center">
+                      <Users size={32} className="mx-auto text-secondary-500" />
+                      <p className="mt-2 text-lg font-normal text-secondary-500">
+                        មិនមានអ្នកប្រើដែលត្រូវគ្នា
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="border-b border-gray-100 px-5 py-3">
+                        <p className="text-lg font-normal text-secondary-500">
+                          លទ្ធផលស្វែងរក
+                        </p>
+                      </div>
+
+                      <div className="max-h-[340px] overflow-y-auto p-2">
+                        {suggestions.map((user) => {
+                          const name = displayName(
+                            user.firstName,
+                            user.lastName,
+                            user.username,
+                          );
+
+                          return (
+                            <button
+                              key={user.uuid}
+                              type="button"
+                              onMouseDown={(event) => {
+                                event.preventDefault();
+                              }}
+                              onClick={() => {
+                                setSearch(name);
+                                setShowSuggestions(false);
+                                setPage(0);
+                              }}
+                              className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
+                            >
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
+                                <UserRound size={20} />
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-base font-normal text-gray-800">
+                                  {name}
+                                </p>
+
+                                <p className="mt-0.5 truncate text-sm font-normal text-gray-400">
+                                  @{user.username}
+                                </p>
+
+                                {user.primaryEmail && (
+                                  <p className="mt-0.5 truncate text-sm font-normal text-gray-400">
+                                    {user.primaryEmail}
+                                  </p>
+                                )}
+                              </div>
+
+                              <span
+                                className={`shrink-0 rounded-full px-2.5 py-1 text-sm font-normal ${user.status === "ACTIVE"
+                                  ? "bg-primary-50 text-primary-700"
+                                  : user.status === "SUSPENDED"
+                                    ? "bg-secondary-50 text-secondary-600"
+                                    : user.status === "DELETED"
+                                      ? "bg-red-50 text-red-700"
+                                      : "bg-gray-100 text-gray-500"
+                                  }`}
+                              >
+                                {user.status}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* PAGE SIZE */}
+            <div className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => {
-                  setSearch("");
+                  setSizeOpen((current) => !current);
+                  setSortOpen(false);
                   setShowSuggestions(false);
-                  setPage(0);
                 }}
-                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700 cursor-pointer"
-                aria-label="Clear search"
+                className={`flex h-12 min-w-[140px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition ${sizeOpen
+                  ? "border-primary-600 ring-2 ring-primary-100"
+                  : "border-gray-200 hover:border-primary-600/50"
+                  }`}
               >
-                <X size={18} />
-              </button>
-            )}
+                <span className="text-gray-700">{size} / ទំព័រ</span>
 
-            {showSuggestions && normalizedSearch && (
-              <div className="absolute left-0 top-[52px] z-[100] w-[430px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
-                {suggestions.length === 0 ? (
-                  <div className="px-5 py-6 text-center">
-                    <Users size={32} className="mx-auto text-secondary-500" />
-                    <p className="mt-2 text-lg font-normal text-secondary-500">
-                      មិនមានអ្នកប្រើដែលត្រូវគ្នា
+                <ChevronDown
+                  size={18}
+                  className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
+                    }`}
+                />
+              </button>
+
+              {sizeOpen && (
+                <div className="absolute right-0 top-[52px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+                  <p className="px-3 pb-2 pt-1 text-base font-normal text-secondary-500">
+                    ចំនួនក្នុងទំព័រ
+                  </p>
+
+                  {[10, 20, 50].map((value) => {
+                    const selected = size === value;
+
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => {
+                          setSize(value);
+                          setPage(0);
+                          setSizeOpen(false);
+                        }}
+                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected
+                          ? "bg-primary-50 text-primary-700"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
+                          }`}
+                      >
+                        <span>{value} / ទំព័រ</span>
+
+                        {selected && (
+                          <Check size={18} className="text-primary-700" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* SORT */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setSortOpen((current) => !current);
+                  setSizeOpen(false);
+                  setShowSuggestions(false);
+                }}
+                className={`flex h-12 min-w-[140px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition ${sortOpen
+                  ? "border-primary-800 ring-2 ring-primary-100 text-primary-800"
+                  : "border-gray-200 text-gray-700 hover:border-gray-300"
+                  }`}
+                aria-label="Sort users"
+                title="តម្រៀប"
+              >
+                <span className="truncate">
+                  {sortOptions.find((opt) => opt.value === sortBy)?.label || "តម្រៀប"}
+                </span>
+                <ArrowUpDown size={18} className="shrink-0 text-gray-400" />
+              </button>
+
+              {sortOpen && (
+                <div className="absolute right-0 top-[52px] z-[100] w-[200px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
+                  <p className="px-3 pb-2 pt-1 text-base font-normal text-secondary-500">
+                    តម្រៀប
+                  </p>
+
+                  {sortOptions.map((option) => {
+                    const selected = sortBy === option.value;
+
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => {
+                          setSortBy(option.value);
+                          setSortOpen(false);
+                        }}
+                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected
+                          ? "bg-primary-50 text-primary-700"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
+                          }`}
+                      >
+                        <span>{option.label}</span>
+
+                        {selected && (
+                          <Check size={18} className="text-primary-700" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Search Bar (Full Width Row) */}
+        <div className="relative sm:hidden w-full">
+          <Search
+            size={18}
+            className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
+          />
+
+          <input
+            value={search}
+            onChange={(event) => {
+              const value = event.target.value;
+              setSearch(value);
+              setPage(0);
+              setShowSuggestions(value.trim().length > 0);
+            }}
+            onFocus={() => {
+              if (search.trim().length > 0) {
+                setShowSuggestions(true);
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                setShowSuggestions(false);
+              }
+              if (event.key === "Enter") {
+                setShowSuggestions(false);
+              }
+            }}
+            placeholder="ស្វែងរកឈ្មោះ, គណនី ឬ អ៊ីមែល..."
+            className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+          />
+
+          {search && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setShowSuggestions(false);
+                setPage(0);
+              }}
+              className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700 cursor-pointer"
+              aria-label="Clear search"
+            >
+              <X size={18} />
+            </button>
+          )}
+
+          {showSuggestions && normalizedSearch && (
+            <div className="absolute left-0 top-[52px] z-[100] w-full max-w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.13)]">
+              {suggestions.length === 0 ? (
+                <div className="px-5 py-6 text-center">
+                  <Users size={32} className="mx-auto text-secondary-500" />
+                  <p className="mt-2 text-lg font-normal text-secondary-500">
+                    មិនមានអ្នកប្រើដែលត្រូវគ្នា
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="border-b border-gray-100 px-5 py-3">
+                    <p className="text-lg font-normal text-secondary-500">
+                      លទ្ធផលស្វែងរក
                     </p>
                   </div>
-                ) : (
-                  <>
-                    <div className="border-b border-gray-100 px-5 py-3">
-                      <p className="text-lg font-normal text-secondary-500">
-                        លទ្ធផលស្វែងរក
-                      </p>
-                    </div>
 
-                    <div className="max-h-[340px] overflow-y-auto p-2">
-                      {suggestions.map((user) => {
-                        const name = displayName(
-                          user.firstName,
-                          user.lastName,
-                          user.username,
-                        );
+                  <div className="max-h-[340px] overflow-y-auto p-2">
+                    {suggestions.map((user) => {
+                      const name = displayName(
+                        user.firstName,
+                        user.lastName,
+                        user.username,
+                      );
 
-                        return (
-                          <button
-                            key={user.uuid}
-                            type="button"
-                            onMouseDown={(event) => {
-                              event.preventDefault();
-                            }}
-                            onClick={() => {
-                              setSearch(name);
-                              setShowSuggestions(false);
-                              setPage(0);
-                            }}
-                            className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
-                          >
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
-                              <UserRound size={20} />
-                            </div>
+                      return (
+                        <button
+                          key={user.uuid}
+                          type="button"
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                          }}
+                          onClick={() => {
+                            setSearch(name);
+                            setShowSuggestions(false);
+                            setPage(0);
+                          }}
+                          className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-primary-50"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
+                            <UserRound size={20} />
+                          </div>
 
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-base font-normal text-gray-800">
-                                {name}
-                              </p>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-base font-normal text-gray-800">
+                              {name}
+                            </p>
 
+                            <p className="mt-0.5 truncate text-sm font-normal text-gray-400">
+                              @{user.username}
+                            </p>
+
+                            {user.primaryEmail && (
                               <p className="mt-0.5 truncate text-sm font-normal text-gray-400">
-                                @{user.username}
+                                {user.primaryEmail}
                               </p>
+                            )}
+                          </div>
 
-                              {user.primaryEmail && (
-                                <p className="mt-0.5 truncate text-sm font-normal text-gray-400">
-                                  {user.primaryEmail}
-                                </p>
-                              )}
-                            </div>
-
-                            <span
-                              className={`shrink-0 rounded-full px-2.5 py-1 text-sm font-normal ${user.status === "ACTIVE"
-                                ? "bg-primary-50 text-primary-700"
-                                : user.status === "SUSPENDED"
-                                  ? "bg-secondary-50 text-secondary-600"
-                                  : user.status === "DELETED"
-                                    ? "bg-red-50 text-red-700"
-                                    : "bg-gray-100 text-gray-500"
-                                }`}
-                            >
-                              {user.status}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* PAGE SIZE */}
-          <div className="relative shrink-0">
-            <button
-              type="button"
-              onClick={() => {
-                setSizeOpen((current) => !current);
-                setSortOpen(false);
-                setShowSuggestions(false);
-              }}
-              className={`flex h-12 min-w-[140px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition ${sizeOpen
-                ? "border-primary-600 ring-2 ring-primary-100"
-                : "border-gray-200 hover:border-primary-600/50"
-                }`}
-            >
-              <span className="text-gray-700">{size} / ទំព័រ</span>
-
-              <ChevronDown
-                size={18}
-                className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""
-                  }`}
-              />
-            </button>
-
-            {sizeOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-500">
-                  ចំនួនក្នុងទំព័រ
-                </p>
-
-                {[10, 20, 50].map((value) => {
-                  const selected = size === value;
-
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => {
-                        setSize(value);
-                        setPage(0);
-                        setSizeOpen(false);
-                      }}
-                      className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected
-                        ? "bg-primary-50 text-primary-700"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
-                        }`}
-                    >
-                      <span>{value} / ទំព័រ</span>
-
-                      {selected && (
-                        <Check size={18} className="text-primary-700" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* SORT */}
-          <div className="relative shrink-0">
-            <button
-              type="button"
-              onClick={() => {
-                setSortOpen((current) => !current);
-                setSizeOpen(false);
-                setShowSuggestions(false);
-              }}
-              className={`flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border transition ${sortOpen
-                ? "border-primary-800 bg-primary-50 text-primary-800"
-                : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
-                }`}
-              aria-label="Sort users"
-              title="តម្រៀប"
-            >
-              <ArrowUpDown size={18} />
-            </button>
-
-            {sortOpen && (
-              <div className="absolute right-0 top-[52px] z-[100] w-[200px] rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_15px_45px_rgba(0,0,0,0.12)]">
-                <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-500">
-                  តម្រៀប
-                </p>
-
-                {sortOptions.map((option) => {
-                  const selected = sortBy === option.value;
-
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => {
-                        setSortBy(option.value);
-                        setSortOpen(false);
-                      }}
-                      className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected
-                        ? "bg-primary-50 text-primary-700"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-primary-700"
-                        }`}
-                    >
-                      <span>{option.label}</span>
-
-                      {selected && (
-                        <Check size={18} className="text-primary-700" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                          <span
+                            className={`shrink-0 rounded-full px-2.5 py-1 text-sm font-normal ${user.status === "ACTIVE"
+                              ? "bg-primary-50 text-primary-700"
+                              : user.status === "SUSPENDED"
+                                ? "bg-secondary-50 text-secondary-600"
+                                : user.status === "DELETED"
+                                  ? "bg-red-50 text-red-700"
+                                  : "bg-gray-100 text-gray-500"
+                              }`}
+                          >
+                            {user.status}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

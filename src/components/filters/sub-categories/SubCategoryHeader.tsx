@@ -24,29 +24,29 @@ export default function SubCategoryHeader({
   const buttonText = isDrink ? "បន្ថែមអនុប្រភេទភេសជ្ជៈ" : "បន្ថែមអនុប្រភេទម្ហូប";
 
   return (
-    <section className="relative overflow-hidden rounded-[30px] bg-[#14833E] px-6 py-7 text-white shadow-sm sm:px-8 sm:py-8">
+    <section className="relative overflow-hidden rounded-3xl bg-[#14833E] px-4 py-5 text-white shadow-sm sm:px-8 sm:py-8">
       {/* Decorative background circles */}
       <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full bg-white/5" />
       <div className="pointer-events-none absolute -bottom-24 right-20 h-64 w-64 rounded-full bg-white/5" />
 
-      <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
+      <div className="relative flex flex-col gap-5 sm:gap-7 lg:flex-row lg:items-start lg:justify-between">
         {/* Left content */}
         <div className="min-w-0">
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
-              {isDrink ? <CupSoda size={25} /> : <UtensilsCrossed size={25} />}
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-white/15">
+              {isDrink ? <CupSoda className="h-5 w-5 sm:h-6 sm:w-6" /> : <UtensilsCrossed className="h-5 w-5 sm:h-6 sm:w-6" />}
             </div>
 
-            <div className="min-w-0">
-              <p className="text-5xl font-bold text-accent-400">{title}</p>
-              <p className="mt-6 max-w-2xl text-xl leading-8 text-white/85">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-accent-400">{title}</h1>
+              <p className="mt-2 sm:mt-4 max-w-2xl text-lg sm:text-xl leading-relaxed text-white/85">
                 {description}
               </p>
             </div>
           </div>
 
           {/* Statistics */}
-          <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="mt-5 sm:mt-7 grid grid-cols-3 gap-2 sm:gap-3">
             <Stat
               icon={isDrink ? <CupSoda size={20} /> : <UtensilsCrossed size={20} />}
               label="សរុប"
@@ -68,16 +68,14 @@ export default function SubCategoryHeader({
         </div>
 
         {/* Primary actions */}
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={onAdd}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-xl font-normal text-primary-800 shadow-sm transition hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-fit"
-          >
-            <Plus size={22} />
-            {buttonText}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-normal text-[#136C34] shadow-sm transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-white/20 sm:w-fit shrink-0"
+        >
+          <Plus size={20} />
+          {buttonText}
+        </button>
       </div>
     </section>
   );
@@ -93,13 +91,13 @@ function Stat({
   value: number;
 }) {
   return (
-    <div className="rounded-3xl bg-white/20 px-5 py-4">
-      <div className="flex items-center gap-2 text-xl text-white/80">
-        {icon}
-        <span>{label}</span>
+    <div className="rounded-2xl sm:rounded-3xl bg-white/20 px-3.5 py-3 sm:px-5 sm:py-4">
+      <div className="flex items-center gap-1.5 sm:gap-2 text-lg sm:text-xl text-white/80">
+        <span className="shrink-0">{icon}</span>
+        <span className="truncate">{label}</span>
       </div>
 
-      <p className="mt-1 text-2xl font-bold text-white">{value}</p>
+      <p className="mt-1 text-2xl font-bold text-white tabular-nums">{value}</p>
     </div>
   );
 }

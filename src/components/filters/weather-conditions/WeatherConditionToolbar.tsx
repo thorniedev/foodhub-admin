@@ -110,10 +110,10 @@ export default function WeatherConditionToolbar({
   ];
 
   return (
-    <section>
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        {/* Status tabs */}
-        <div className="flex w-full min-w-0 gap-2 overflow-x-auto pb-1 xl:w-auto">
+    <section className="space-y-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Mobile 2x2 Grid: 3 Tabs + Controls in Slot 4 */}
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2 w-full sm:w-auto">
           {statusTabs.map((tab) => {
             const active = statusFilter === tab.value;
 
@@ -122,17 +122,19 @@ export default function WeatherConditionToolbar({
                 key={tab.value}
                 type="button"
                 onClick={() => onStatusChange(tab.value)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-lg font-normal transition ${
+                className={`flex w-full sm:w-auto h-12 cursor-pointer items-center justify-between sm:justify-start gap-2 sm:gap-2.5 rounded-full px-4 sm:px-5 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
                   active
-                    ? "bg-primary-800 text-white"
-                    : "bg-white text-gray-500 hover:bg-emerald-50 hover:text-[#136C34]"
+                    ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
+                    : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
                 }`}
               >
-                {tab.label}
+                <span className="truncate">{tab.label}</span>
 
                 <span
-                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-lg font-normal ${
-                    active ? "bg-white/20 text-white" : "bg-white text-gray-500"
+                  className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2 text-base sm:text-lg font-normal transition-colors duration-200 ${
+                    active
+                      ? "bg-white/20 text-white backdrop-blur-xs"
+                      : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
                   }`}
                 >
                   {tab.count}
@@ -140,17 +142,110 @@ export default function WeatherConditionToolbar({
               </button>
             );
           })}
+
+          {/* Slot 4 on Mobile: Page Size + Sort */}
+          <div className="flex sm:hidden items-center gap-1.5 w-full">
+            {/* Page Size */}
+            <div ref={sizeContainerRef} className="relative flex-1 min-w-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setSizeOpen((prev) => !prev);
+                  setSortOpen(false);
+                }}
+                className="flex h-12 w-full items-center justify-between gap-1.5 rounded-full border border-gray-200 bg-white px-3 text-lg font-normal text-gray-700 transition hover:border-primary-200 hover:bg-primary-50"
+              >
+                <span className="truncate">{size} / ទំព័រ</span>
+                <ChevronDown size={18} className="shrink-0" />
+              </button>
+
+              {sizeOpen && (
+                <div className="absolute right-0 top-[52px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                  <p className="px-3 pb-2 pt-1 text-base text-secondary-600">
+                    ទំហំទំព័រ
+                  </p>
+                  {[10, 20, 50].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => {
+                        onSizeChange(value);
+                        setSizeOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-lg transition ${
+                        size === value
+                          ? "bg-primary-50 font-normal text-primary-800"
+                          : "text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>{value} / ទំព័រ</span>
+                      {size === value && <Check size={18} />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Sort */}
+            <div ref={sortContainerRef} className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setSortOpen((prev) => !prev);
+                  setSizeOpen(false);
+                }}
+                aria-label="Sort"
+                title="តម្រៀប"
+                className={`flex h-12 w-12 items-center justify-center rounded-full border transition ${
+                  sortOpen
+                    ? "border-primary-800 bg-primary-50 text-primary-800"
+                    : "border-gray-200 bg-white text-gray-600 hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800"
+                }`}
+              >
+                <ArrowUpDown size={18} />
+              </button>
+
+              {sortOpen && (
+                <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                  <p className="px-3 pb-2 pt-1 text-base text-secondary-600">
+                    តម្រៀប
+                  </p>
+
+                  {sortOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        onSortChange(option.value);
+                        setSortOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg transition ${
+                        sortMode === option.value
+                          ? "bg-primary-50 text-primary-800"
+                          : "text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>{option.label}</span>
+                      {sortMode === option.value && (
+                        <Check size={16} className="text-primary-800" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Search + controls */}
-        <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center xl:w-auto">
+        {/* Desktop Search + controls */}
+        <div className="hidden sm:flex sm:min-w-[320px] sm:flex-1 sm:items-center sm:justify-end sm:gap-2.5">
           {/* Search input */}
           <div
             ref={searchContainerRef}
-            className="relative min-w-0 flex-1 sm:min-w-[340px]"
+            className="relative min-w-[220px] max-w-[360px] flex-1"
           >
             <Search
-              size={20}
+              size={18}
               className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
             />
 
@@ -161,7 +256,7 @@ export default function WeatherConditionToolbar({
                 onSearchChange(value);
               }}
               placeholder="ស្វែងរក ស្ថានភាពអាកាសធាតុ..."
-              className="h-[52px] w-full rounded-full border border-gray-200 bg-gray-50 pl-12 pr-11 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+              className="h-12 w-full rounded-full border border-gray-200 bg-white pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
             />
 
             {search && (
@@ -171,7 +266,7 @@ export default function WeatherConditionToolbar({
                   onClearSearch();
                 }}
                 aria-label="Clear search"
-                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -179,22 +274,22 @@ export default function WeatherConditionToolbar({
           </div>
 
           {/* Page size */}
-          <div ref={sizeContainerRef} className="relative shrink-0">
+          <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => {
                 setSizeOpen((prev) => !prev);
                 setSortOpen(false);
               }}
-              className="flex h-[52px] min-w-[150px] items-center justify-between gap-3 rounded-full border border-gray-200 bg-white px-4 text-lg font-medium text-gray-700 transition hover:border-primary-200 hover:bg-primary-50"
+              className="flex h-12 min-w-[140px] items-center justify-between gap-2.5 rounded-full border border-gray-200 bg-white px-4 text-lg font-normal text-gray-700 transition hover:border-gray-300"
             >
-              {size} / ទំព័រ
+              <span>{size} / ទំព័រ</span>
               <ChevronDown size={18} />
             </button>
 
             {sizeOpen && (
-              <div className="absolute right-0 top-[60px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+              <div className="absolute right-0 top-[52px] z-[100] w-[180px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <p className="px-3 pb-2 pt-1 text-base text-secondary-600">
                   ទំហំទំព័រ
                 </p>
                 {[10, 20, 50].map((value) => (
@@ -205,13 +300,13 @@ export default function WeatherConditionToolbar({
                       onSizeChange(value);
                       setSizeOpen(false);
                     }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-lg transition ${
+                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-lg font-normal transition ${
                       size === value
-                        ? "bg-primary-50 font-medium text-primary-800"
-                        : "text-gray-600 hover:bg-gray-50"
+                        ? "bg-primary-50 text-primary-800"
+                        : "text-gray-700 hover:bg-gray-50"
                     }`}
                   >
-                    {value} / ទំព័រ
+                    <span>{value} / ទំព័រ</span>
                     {size === value && <Check size={18} />}
                   </button>
                 ))}
@@ -220,7 +315,7 @@ export default function WeatherConditionToolbar({
           </div>
 
           {/* Sort */}
-          <div ref={sortContainerRef} className="relative shrink-0">
+          <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => {
@@ -239,8 +334,8 @@ export default function WeatherConditionToolbar({
             </button>
 
             {sortOpen && (
-              <div className="absolute right-0 top-[56px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
-                <p className="px-3 pb-2 pt-1 text-lg text-secondary-600">
+              <div className="absolute right-0 top-[52px] z-[100] w-[190px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                <p className="px-3 pb-2 pt-1 text-base text-secondary-600">
                   តម្រៀប
                 </p>
 
@@ -252,15 +347,15 @@ export default function WeatherConditionToolbar({
                       onSortChange(option.value);
                       setSortOpen(false);
                     }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-lg transition ${
+                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
                       sortMode === option.value
                         ? "bg-primary-50 text-primary-800"
-                        : "text-gray-600 hover:bg-gray-50"
+                        : "text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     <span>{option.label}</span>
                     {sortMode === option.value && (
-                      <Check size={16} className="text-primary-800" />
+                      <Check size={18} className="text-primary-800" />
                     )}
                   </button>
                 ))}
@@ -268,6 +363,37 @@ export default function WeatherConditionToolbar({
             )}
           </div>
         </div>
+      </div>
+
+      {/* Mobile Search Bar (Full Width Row) */}
+      <div className="relative sm:hidden w-full">
+        <Search
+          size={18}
+          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+        />
+
+        <input
+          value={search}
+          onChange={(event) => {
+            const value = event.target.value;
+            onSearchChange(value);
+          }}
+          placeholder="ស្វែងរក ស្ថានភាពអាកាសធាតុ..."
+          className="h-12 w-full rounded-full border border-gray-200 bg-white pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+        />
+
+        {search && (
+          <button
+            type="button"
+            onClick={() => {
+              onClearSearch();
+            }}
+            aria-label="Clear search"
+            className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
     </section>
   );

@@ -37,9 +37,9 @@ export default function BannersFilters({
       <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 -mx-1 px-1">
         <button
           onClick={() => onCategoryChange("ALL")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${category === "ALL"
-              ? "bg-[#136C34] text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          className={`flex items-center gap-2 px-4 h-12 rounded-full text-lg font-normal transition-all whitespace-nowrap shrink-0 ${category === "ALL"
+              ? "bg-[#136C34] text-white shadow-md shadow-primary-900/15"
+              : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
             }`}
         >
           ទាំងអស់
@@ -48,9 +48,9 @@ export default function BannersFilters({
           <button
             key={c}
             onClick={() => onCategoryChange(c)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${category === c
-                ? "bg-[#136C34] text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            className={`flex items-center gap-2 px-4 h-12 rounded-full text-lg font-normal transition-all whitespace-nowrap shrink-0 ${category === c
+                ? "bg-[#136C34] text-white shadow-md shadow-primary-900/15"
+                : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
               }`}
           >
             {BANNER_CATEGORY_LABELS[c]}
@@ -62,7 +62,7 @@ export default function BannersFilters({
         <select
           value={published}
           onChange={(e) => onPublishedChange(e.target.value as PublishedFilter)}
-          className="h-10 rounded-full border border-gray-200 bg-white px-4 text-sm text-gray-600 outline-none focus:border-[#136C34] focus:ring-2 focus:ring-[#136C34]/10"
+          className="h-12 rounded-full border border-gray-200 bg-white px-4 text-lg font-normal text-gray-700 outline-none focus:border-[#136C34] focus:ring-2 focus:ring-[#136C34]/10"
         >
           {(Object.keys(PUBLISHED_LABELS) as PublishedFilter[]).map((key) => (
             <option key={key} value={key}>
@@ -71,14 +71,14 @@ export default function BannersFilters({
           ))}
         </select>
 
-        <div className="relative w-full sm:w-64 shrink-0">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="relative w-full sm:w-72 shrink-0">
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="ស្វែងរកតាមចំណងជើង..."
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full h-12 pl-11 pr-4 text-lg border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-600"
           />
         </div>
       </div>

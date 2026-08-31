@@ -21,7 +21,11 @@ import type { AdminEntityType, AdminSearchResultItem } from "@/src/types/adminSe
 import { useMemo } from "react";
 import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
 import { useGetAdminUsersQuery } from "@/src/app/store/userProfileApi";
-import { useGetManagedFoodsQuery } from "@/src/app/store/menuManagementApi";
+import {
+  useGetManagedFoodsQuery,
+  useGetPublishedMenuItemsQuery,
+} from "@/src/app/store/menuManagementApi";
+import { readLocalMenuItems } from "@/src/lib/filterCatalogStorage";
 
 export default function GlobalAdminSearch() {
   const [inputQuery, setInputQuery] = useState("");
@@ -71,7 +75,12 @@ export default function GlobalAdminSearch() {
 
   const { data: fallbackFoods, isFetching: fallbackFoodsLoading } = useGetManagedFoodsQuery(
     { query: debouncedQuery, page: 0, size: 100 },
-    { skip: shouldSkipFallback || (selectedType !== "ALL" && selectedType !== "FOOD" && selectedType !== "MENU_ITEM") },
+    { skip: shouldSkipFallback || (selectedType !== "ALL" && selectedType !== "FOOD") },
+  );
+
+  const { data: fallbackMenuItemsData, isFetching: fallbackMenuItemsLoading } = useGetPublishedMenuItemsQuery(
+    { query: debouncedQuery, page: 0, size: 100 },
+    { skip: shouldSkipFallback || (selectedType !== "ALL" && selectedType !== "MENU_ITEM") },
   );
 
   const primaryResults = data?.results ?? [];
@@ -157,14 +166,65 @@ export default function GlobalAdminSearch() {
             type: "FOOD",
             title: displayTitle,
             subtitle: subtitle || undefined,
-            targetUrl: `/menu-items`,
+            targetUrl: `/menu-items?search=${encodeURIComponent(displayTitle)}`,
           });
         }
       });
     }
 
+    // Published Store Menu Items (Server + LocalStorage)
+    const combinedMenuItems = [
+      ...(fallbackMenuItemsData?.content ?? []),
+      ...readLocalMenuItems(),
+    ];
+    const seenMenuUuids = new Set<string>();
+
+    combinedMenuItems.forEach((menuItem) => {
+      const itemUuid = String(menuItem.uuid || (menuItem as any).id || "");
+      if (!itemUuid || seenMenuUuids.has(itemUuid)) return;
+      seenMenuUuids.add(itemUuid);
+
+      const name = String(menuItem.name || "");
+      const desc = String(menuItem.description || "");
+      const storeName = String(
+        menuItem.store?.storeName ||
+          menuItem.store?.name ||
+          (menuItem as any).storeName ||
+          "",
+      );
+      const foodCanonical = String(menuItem.food?.canonicalName || "");
+      const foodLocal = String(menuItem.food?.localName || "");
+
+      const combinedText = `${name} ${desc} ${storeName} ${foodCanonical} ${foodLocal}`.toLowerCase();
+
+      if (combinedText.includes(q)) {
+        const subtitle = storeName
+          ? `ហាង: ${storeName} • $${Number(menuItem.price ?? 0).toFixed(2)}`
+          : `$${Number(menuItem.price ?? 0).toFixed(2)}`;
+
+        const targetStoreUuid = menuItem.storeUuid || menuItem.store?.uuid;
+
+        list.push({
+          uuid: itemUuid,
+          type: "MENU_ITEM",
+          title: name || foodLocal || foodCanonical || "Menu Item",
+          subtitle,
+          status: menuItem.availabilityStatus,
+          targetUrl: targetStoreUuid
+            ? `/shops/${targetStoreUuid}`
+            : `/menu-items?search=${encodeURIComponent(name)}`,
+        });
+      }
+    });
+
     return list;
-  }, [debouncedQuery, fallbackShops, fallbackUsers, fallbackFoods]);
+  }, [
+    debouncedQuery,
+    fallbackShops,
+    fallbackUsers,
+    fallbackFoods,
+    fallbackMenuItemsData,
+  ]);
 
   const rawResults = primaryResults.length > 0 ? primaryResults : fallbackResults;
   const filteredResults = (
@@ -176,7 +236,10 @@ export default function GlobalAdminSearch() {
   const isSearchLoading =
     isFetching ||
     (primaryResults.length === 0 &&
-      (fallbackShopsLoading || fallbackUsersLoading || fallbackFoodsLoading));
+      (fallbackShopsLoading ||
+        fallbackUsersLoading ||
+        fallbackFoodsLoading ||
+        fallbackMenuItemsLoading));
 
 
 
@@ -213,23 +276,22 @@ export default function GlobalAdminSearch() {
 
   return (
     <div ref={containerRef} className="relative w-full max-w-3xl">
-      {/* SEARCH BAR INPUT & REINDEX BUTTON */}
       <div className="relative">
         <Search
           size={18}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+          className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
         />
 
         <input
           type="text"
-          placeholder="ស្វែងរកប្រព័ន្ធ (Stores, Foods, Users, Menu Items)..."
+          placeholder="ស្វែងរកប្រព័ន្ធ (Stores, Foods, Users)..."
           value={inputQuery}
           onFocus={() => setIsOpen(true)}
           onChange={(e) => {
             setInputQuery(e.target.value);
             setIsOpen(true);
           }}
-          className="w-full rounded-full border border-gray-200 py-2.5 pl-11 pr-10 text-base outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
+          className="h-11 sm:h-12 w-full rounded-full border border-gray-200 bg-gray-50/50 sm:bg-white py-2 pl-10 sm:pl-11 pr-9 sm:pr-10 text-base sm:text-lg outline-none transition focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
         />
 
         {inputQuery && (

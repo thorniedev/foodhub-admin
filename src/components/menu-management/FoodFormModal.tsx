@@ -304,22 +304,22 @@ export default function FoodFormModal({
             typeof s === "string"
               ? s
               : s.seasonUuid ||
-                s.uuid ||
-                s.id ||
-                s.season?.uuid ||
-                s.season?.id ||
-                s.code ||
-                s.seasonCode ||
-                s.season?.code ||
-                "";
+              s.uuid ||
+              s.id ||
+              s.season?.uuid ||
+              s.season?.id ||
+              s.code ||
+              s.seasonCode ||
+              s.season?.code ||
+              "";
           const sName =
             typeof s === "string"
               ? s
               : s.name ||
-                s.season?.name ||
-                s.localName ||
-                s.season?.localName ||
-                "";
+              s.season?.name ||
+              s.localName ||
+              s.season?.localName ||
+              "";
           const found = seasons.find(
             (opt) =>
               (sId && (opt.uuid === sId || opt.code === sId || (opt as any).id === sId)) ||
@@ -350,22 +350,22 @@ export default function FoodFormModal({
             typeof e === "string"
               ? e
               : e.eventUuid ||
-                e.uuid ||
-                e.id ||
-                e.event?.uuid ||
-                e.event?.id ||
-                e.code ||
-                e.eventCode ||
-                e.event?.code ||
-                "";
+              e.uuid ||
+              e.id ||
+              e.event?.uuid ||
+              e.event?.id ||
+              e.code ||
+              e.eventCode ||
+              e.event?.code ||
+              "";
           const eName =
             typeof e === "string"
               ? e
               : e.name ||
-                e.event?.name ||
-                e.localName ||
-                e.event?.localName ||
-                "";
+              e.event?.name ||
+              e.localName ||
+              e.event?.localName ||
+              "";
           const found = events.find(
             (opt) =>
               (eId && (opt.uuid === eId || opt.code === eId || (opt as any).id === eId)) ||
@@ -402,24 +402,24 @@ export default function FoodFormModal({
             typeof w === "string"
               ? w
               : w.weatherConditionUuid ||
-                w.weatherUuid ||
-                w.conditionUuid ||
-                w.uuid ||
-                w.id ||
-                w.weatherCondition?.uuid ||
-                w.weatherCondition?.id ||
-                w.code ||
-                w.weatherCode ||
-                w.weatherCondition?.code ||
-                "";
+              w.weatherUuid ||
+              w.conditionUuid ||
+              w.uuid ||
+              w.id ||
+              w.weatherCondition?.uuid ||
+              w.weatherCondition?.id ||
+              w.code ||
+              w.weatherCode ||
+              w.weatherCondition?.code ||
+              "";
           const wName =
             typeof w === "string"
               ? w
               : w.name ||
-                w.weatherCondition?.name ||
-                w.localName ||
-                w.weatherCondition?.localName ||
-                "";
+              w.weatherCondition?.name ||
+              w.localName ||
+              w.weatherCondition?.localName ||
+              "";
           const found = weatherConditions.find(
             (opt) =>
               (wId && (opt.uuid === wId || opt.code === wId || (opt as any).id === wId)) ||
@@ -450,22 +450,22 @@ export default function FoodFormModal({
             typeof m === "string"
               ? m
               : m.mealTypeUuid ||
-                m.uuid ||
-                m.id ||
-                m.mealType?.uuid ||
-                m.mealType?.id ||
-                m.code ||
-                m.mealTypeCode ||
-                m.mealType?.code ||
-                "";
+              m.uuid ||
+              m.id ||
+              m.mealType?.uuid ||
+              m.mealType?.id ||
+              m.code ||
+              m.mealTypeCode ||
+              m.mealType?.code ||
+              "";
           const mName =
             typeof m === "string"
               ? m
               : m.name ||
-                m.mealType?.name ||
-                m.localName ||
-                m.mealType?.localName ||
-                "";
+              m.mealType?.name ||
+              m.localName ||
+              m.mealType?.localName ||
+              "";
           const found = mealTypes.find(
             (opt) =>
               (mId && (opt.uuid === mId || opt.code === mId || (opt as any).id === mId)) ||
@@ -497,22 +497,22 @@ export default function FoodFormModal({
             typeof a === "string"
               ? a
               : a.ageGroupUuid ||
-                a.uuid ||
-                a.id ||
-                a.ageGroup?.uuid ||
-                a.ageGroup?.id ||
-                a.code ||
-                a.ageGroupCode ||
-                a.ageGroup?.code ||
-                "";
+              a.uuid ||
+              a.id ||
+              a.ageGroup?.uuid ||
+              a.ageGroup?.id ||
+              a.code ||
+              a.ageGroupCode ||
+              a.ageGroup?.code ||
+              "";
           const aName =
             typeof a === "string"
               ? a
               : a.name ||
-                a.ageGroup?.name ||
-                a.localName ||
-                a.ageGroup?.localName ||
-                "";
+              a.ageGroup?.name ||
+              a.localName ||
+              a.ageGroup?.localName ||
+              "";
           const found = ageGroups.find(
             (opt) =>
               (aId && (opt.uuid === aId || opt.code === aId || (opt as any).id === aId)) ||
@@ -1188,24 +1188,21 @@ export default function FoodFormModal({
                     isActive: !current.isActive,
                   }))
                 }
-                className={`flex h-12 w-full items-center justify-between rounded-full border px-5 transition cursor-pointer ${
-                  values.isActive
+                className={`flex h-12 w-full items-center justify-between rounded-full border px-5 transition cursor-pointer ${values.isActive
                     ? "border-emerald-200 bg-emerald-50/60 text-emerald-800"
                     : "border-gray-200 bg-gray-50 text-gray-500"
-                }`}
+                  }`}
               >
                 <span className="text-lg font-normal">
                   {values.isActive ? "សកម្ម (Active)" : "អសកម្ម (Inactive)"}
                 </span>
                 <div
-                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-                    values.isActive ? "bg-[#137A3D]" : "bg-gray-300"
-                  }`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${values.isActive ? "bg-[#137A3D]" : "bg-gray-300"
+                    }`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
-                      values.isActive ? "translate-x-6" : "translate-x-1"
-                    }`}
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${values.isActive ? "translate-x-6" : "translate-x-1"
+                      }`}
                   />
                 </div>
               </button>

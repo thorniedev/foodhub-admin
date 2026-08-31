@@ -334,9 +334,9 @@ export default function StoreMenuItemsSection({
         ================================================== */
         <>
           {/* =================================================
-              MENU ITEM GRID
+              MENU ITEM GRID (HORIZONTAL RECTANGLE CARDS)
           ================================================== */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4">
             {paginatedItems.map((item) => {
               const image = getMenuItemImage(item);
               const available = item.availabilityStatus === "AVAILABLE";
@@ -345,10 +345,10 @@ export default function StoreMenuItemsSection({
                 <div
                   key={item.uuid}
                   onClick={() => onViewItem?.(item)}
-                  className="group relative flex flex-col min-w-0 cursor-pointer overflow-hidden rounded-3xl border border-gray-100 bg-white p-4 shadow-xs transition-all duration-200 hover:border-emerald-200 hover:shadow-md"
+                  className="group relative flex flex-col sm:flex-row items-stretch sm:items-center min-w-0 cursor-pointer overflow-hidden rounded-3xl border border-gray-100 bg-white p-4 shadow-xs transition-all duration-200 hover:border-emerald-200 hover:shadow-md gap-4 sm:gap-5"
                 >
-                  {/* IMAGE TOP */}
-                  <div className="relative h-48 w-full shrink-0 overflow-hidden rounded-2xl bg-gray-100">
+                  {/* IMAGE LEFT */}
+                  <div className="relative h-44 sm:h-32 sm:w-44 w-full shrink-0 overflow-hidden rounded-2xl bg-gray-100">
                     {image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -362,74 +362,77 @@ export default function StoreMenuItemsSection({
                         <UtensilsCrossed size={36} />
                       </div>
                     )}
-
-                    {/* Action buttons over image top-right */}
-                    <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-white/95 p-1 shadow-xs backdrop-blur-xs opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onViewItem?.(item);
-                        }}
-                        className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100 hover:text-primary-800"
-                        aria-label="មើលព័ត៌មានលម្អិត"
-                        title="មើលព័ត៌មានលម្អិត"
-                      >
-                        <Eye size={18} />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onEditItem?.(item);
-                        }}
-                        className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-emerald-50 text-primary-800 transition hover:bg-emerald-100 hover:text-primary-900"
-                        aria-label="កែប្រែម៉ឺនុយ"
-                        title="កែប្រែម៉ឺនុយ"
-                      >
-                        <Pencil size={18} />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onDeleteItem?.(item);
-                        }}
-                        className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-rose-50 text-rose-600 transition hover:bg-rose-100 hover:text-rose-700"
-                        aria-label="លុបម៉ឺនុយ"
-                        title="លុបម៉ឺនុយ"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
                   </div>
 
-                  {/* CONTENT UNDER IMAGE */}
-                  <div className="mt-4 flex flex-1 flex-col justify-between space-y-3">
-                    <div>
-                      {/* Name */}
-                      <p
-                        className="text-xl font-medium text-gray-800 transition group-hover:text-primary-800 line-clamp-1"
-                        title={item.name}
-                      >
-                        {item.name}
-                      </p>
-
-                      {/* Canonical Name */}
-                      {item.food?.canonicalName && item.food.canonicalName !== item.name && (
+                  {/* CONTENT RIGHT */}
+                  <div className="flex flex-1 flex-col justify-between min-w-0 h-full py-0.5 space-y-3 sm:space-y-2">
+                    {/* Header Row: Title & Actions */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        {/* Name */}
                         <p
-                          className="mt-1 text-lg font-normal text-gray-500 line-clamp-1"
-                          title={item.food.canonicalName}
+                          className="text-xl font-medium text-gray-800 transition group-hover:text-primary-800 line-clamp-1"
+                          title={item.name}
                         >
-                          {item.food.canonicalName}
+                          {item.name}
                         </p>
-                      )}
+
+                        {/* Canonical Name */}
+                        {item.food?.canonicalName && item.food.canonicalName !== item.name && (
+                          <p
+                            className="mt-0.5 text-lg font-normal text-gray-500 line-clamp-1"
+                            title={item.food.canonicalName}
+                          >
+                            {item.food.canonicalName}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onViewItem?.(item);
+                          }}
+                          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100 hover:text-primary-800"
+                          aria-label="មើលព័ត៌មានលម្អិត"
+                          title="មើលព័ត៌មានលម្អិត"
+                        >
+                          <Eye size={18} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onEditItem?.(item);
+                          }}
+                          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-emerald-50 text-primary-800 transition hover:bg-emerald-100 hover:text-primary-900"
+                          aria-label="កែប្រែម៉ឺនុយ"
+                          title="កែប្រែម៉ឺនុយ"
+                        >
+                          <Pencil size={18} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onDeleteItem?.(item);
+                          }}
+                          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-rose-50 text-rose-600 transition hover:bg-rose-100 hover:text-rose-700"
+                          aria-label="លុបម៉ឺនុយ"
+                          title="លុបម៉ឺនុយ"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </div>
 
-                    {/* Price, Prep Time, and Availability status UNDER Image */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-gray-100">
+                    {/* Bottom Row: Price, Prep Time, and Availability status */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
                       <div className="flex items-baseline gap-1.5">
                         <span className="text-2xl font-medium text-primary-800">
                           ${Number(item.price ?? 0).toFixed(2)}

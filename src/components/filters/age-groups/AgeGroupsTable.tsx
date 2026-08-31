@@ -1,12 +1,13 @@
 "use client";
 
-import { MinusCircle, Pencil, UsersRound } from "lucide-react";
+import { Eye, MinusCircle, Pencil, UsersRound } from "lucide-react";
 import type { AgeGroup } from "@/src/types/ageGroup";
 import { formatAdminDate } from "@/src/types/safetyResource";
 
 type Props = {
   items: AgeGroup[];
   disabled?: boolean;
+  onView: (item: AgeGroup) => void;
   onEdit: (item: AgeGroup) => void;
   onDelete: (item: AgeGroup) => void;
 };
@@ -14,6 +15,7 @@ type Props = {
 export default function AgeGroupsTable({
   items,
   disabled = false,
+  onView,
   onEdit,
   onDelete,
 }: Props) {
@@ -21,14 +23,14 @@ export default function AgeGroupsTable({
     <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full min-w-[700px] table-auto border-collapse text-left">
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-normal text-primary-800">
-            <th className="py-4 pl-6 pr-4 font-normal">ក្រុមអាយុ</th>
-            <th className="px-4 py-4 font-normal">កូដ</th>
-            <th className="px-4 py-4 font-normal">ចន្លោះអាយុ</th>
-            <th className="px-4 py-4 font-normal">ការពិពណ៌នា</th>
-            <th className="px-4 py-4 text-center font-normal">ស្ថានភាព</th>
+          <tr className="border-b border-gray-100 bg-gray-50/80 text-left text-xl font-medium text-primary-900">
+            <th className="py-4 pl-6 pr-4 font-medium">ក្រុមអាយុ</th>
+            <th className="px-4 py-4 font-medium">កូដ</th>
+            <th className="px-4 py-4 font-medium">ចន្លោះអាយុ</th>
+            <th className="px-4 py-4 font-medium">ការពិពណ៌នា</th>
+            <th className="px-4 py-4 text-center font-medium">ស្ថានភាព</th>
 
-            <th className="min-w-[110px] py-4 pl-4 pr-6 text-center font-normal">សកម្មភាព</th>
+            <th className="min-w-[130px] py-4 pl-4 pr-6 text-center font-medium">សកម្មភាព</th>
           </tr>
         </thead>
 
@@ -73,6 +75,15 @@ export default function AgeGroupsTable({
               {/* Actions */}
               <td className="py-3.5 pl-4 pr-6 text-center">
                 <div className="flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => onView(item)}
+                    title="មើលព័ត៌មានលម្អិត"
+                    className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <Eye size={18} />
+                  </button>
                   <button
                     type="button"
                     disabled={disabled}

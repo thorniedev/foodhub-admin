@@ -89,8 +89,8 @@ export default function CustomSelect({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}
-        className={`flex h-12 w-full items-center justify-between border bg-white px-4 text-left text-lg font-normal transition outline-none disabled:cursor-not-allowed disabled:bg-gray-50 ${
-          isPill ? "rounded-full px-5" : "rounded-2xl"
+        className={`flex h-12 w-full items-center justify-between border bg-white px-3.5 sm:px-4 text-left text-lg font-normal transition outline-none disabled:cursor-not-allowed disabled:bg-gray-50 ${
+          isPill ? "rounded-full px-3.5 sm:px-5" : "rounded-2xl"
         } ${
           error
             ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
@@ -102,7 +102,7 @@ export default function CustomSelect({
         }`}
       >
         <span
-          className={`truncate font-normal ${
+          className={`truncate font-normal min-w-0 text-lg ${
             selectedOption ? "text-gray-800" : "text-gray-400"
           }`}
         >
@@ -111,7 +111,7 @@ export default function CustomSelect({
 
         <ChevronDown
           size={18}
-          className={`shrink-0 text-gray-400 transition-transform duration-200 ${
+          className={`shrink-0 ml-1 text-gray-400 transition-transform duration-200 ${
             open ? "rotate-180 text-primary-700" : ""
           }`}
         />

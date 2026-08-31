@@ -305,7 +305,18 @@ export function deleteLocalMenuItem(uuid: string) {
   if (typeof window === "undefined" || !uuid) return;
   try {
     const existing = readLocalMenuItems();
-    const updated = existing.filter((x: any) => x.uuid !== uuid);
+    const updated = existing.filter((x: any) => x.uuid !== uuid && String(x.id) !== uuid);
+    window.localStorage.setItem(CREATED_MENU_ITEMS_STORAGE_KEY, JSON.stringify(updated));
+  } catch {}
+}
+
+export function updateLocalMenuItemStatus(uuid: string, availabilityStatus: string) {
+  if (typeof window === "undefined" || !uuid) return;
+  try {
+    const existing = readLocalMenuItems();
+    const updated = existing.map((x: any) =>
+      x.uuid === uuid || String(x.id) === uuid ? { ...x, availabilityStatus } : x
+    );
     window.localStorage.setItem(CREATED_MENU_ITEMS_STORAGE_KEY, JSON.stringify(updated));
   } catch {}
 }

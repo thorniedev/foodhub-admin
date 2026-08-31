@@ -323,10 +323,10 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
               {images.length > 1 && (
                 <div
                   className={`grid w-full gap-3 ${images.length === 2
-                      ? "grid-cols-2"
-                      : images.length === 3
-                        ? "grid-cols-3"
-                        : "grid-cols-4"
+                    ? "grid-cols-2"
+                    : images.length === 3
+                      ? "grid-cols-3"
+                      : "grid-cols-4"
                     }`}
                 >
                   {images.map((img, idx) => (
@@ -335,8 +335,8 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
                       type="button"
                       onClick={() => setSelectedImageIndex(idx)}
                       className={`relative aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-2xl border-2 transition ${selectedImageIndex === idx
-                          ? "border-[#14833E] ring-2 ring-[#14833E]/20 shadow-xs"
-                          : "border-gray-200 hover:border-gray-400"
+                        ? "border-[#14833E] ring-2 ring-[#14833E]/20 shadow-xs"
+                        : "border-gray-200 hover:border-gray-400"
                         }`}
                     >
                       <img
@@ -376,8 +376,8 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
                 <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={`inline-flex items-center gap-2 rounded-full border px-4 py-1 text-lg font-normal ${!isAvailable
-                        ? "border-gray-200 bg-gray-100 text-gray-600"
-                        : "border-emerald-100 bg-emerald-50 text-emerald-700"
+                      ? "border-gray-200 bg-gray-100 text-gray-600"
+                      : "border-emerald-100 bg-emerald-50 text-emerald-700"
                       }`}
                   >
                     <span

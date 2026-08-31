@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 import {
@@ -8,6 +9,7 @@ import {
   Eye,
   Mail,
   MinusCircle,
+  MoreVertical,
   Pencil,
   RotateCcw,
   Shield,
@@ -49,23 +51,23 @@ export default function UsersTable({
       <table className="w-full border-collapse text-left">
         {/* ================= HEAD ================= */}
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/60 text-left text-lg font-normal text-primary-800">
-            <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[280px]">
+          <tr className="border-b border-gray-100 bg-gray-50/80 text-left text-xl font-medium text-primary-900">
+            <th className="whitespace-nowrap px-6 py-4 font-medium min-w-[280px]">
               គណនីអ្នកប្រើប្រាស់
             </th>
-            <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[240px]">
+            <th className="whitespace-nowrap px-6 py-4 font-medium min-w-[240px]">
               អ៊ីមែល
             </th>
-            <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[170px]">
+            <th className="whitespace-nowrap px-6 py-4 font-medium min-w-[170px]">
               កាលបរិច្ឆេទបង្កើត
             </th>
-            <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[140px]">
+            <th className="whitespace-nowrap px-6 py-4 font-medium min-w-[140px]">
               ផ្ទៀងផ្ទាត់
             </th>
-            <th className="whitespace-nowrap px-6 py-4 font-normal min-w-[140px]">
+            <th className="whitespace-nowrap px-6 py-4 font-medium min-w-[140px]">
               ស្ថានភាព
             </th>
-            <th className="whitespace-nowrap px-6 py-4 text-end font-normal min-w-[180px] pr-6">
+            <th className="whitespace-nowrap px-6 py-4 text-end font-medium min-w-[180px] pr-6">
               សកម្មភាព
             </th>
           </tr>
@@ -254,15 +256,40 @@ function UserRowActions({
   onRestore?: (user: AdminUser) => void;
   onHardDelete?: (user: AdminUser) => void;
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const isSuspended = user.status?.toUpperCase() === "SUSPENDED";
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    }
+
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen]);
 
   return (
     <div className="flex items-center justify-end gap-2 pr-1">
       {/* 1. View Detail (Green Eye) */}
       <Link
         href={detailHref}
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-        title="មើលលម្អិត"
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+        title="មើលព័ត៌មានលម្អិត"
       >
         <Eye size={18} />
       </Link>
@@ -272,50 +299,85 @@ function UserRowActions({
         type="button"
         disabled={disabled}
         onClick={() => onProfileEdit(user)}
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
         title="កែប្រែ"
       >
         <Pencil size={18} />
       </button>
 
-      {/* 3. Status Action: Suspend (Amber Warning) or Restore (Emerald Circular reload) */}
-      {isSuspended ? (
-        onRestore && (
+      {/* 3. Three-Dots Menu for More Actions (Suspend/Restore + Delete) */}
+      {(onSuspend || onRestore || onHardDelete) && (
+        <div className="relative" ref={menuRef}>
           <button
             type="button"
             disabled={disabled}
-            onClick={() => onRestore(user)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
-            title="ស្តារឡើងវិញ"
+            onClick={() => setMenuOpen((prev) => !prev)}
+            title="ជម្រើសបន្ថែម"
+            className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:cursor-not-allowed disabled:opacity-40 ${
+              menuOpen
+                ? "bg-gray-200 text-gray-900 shadow-xs"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
+            }`}
           >
-            <RotateCcw size={18} />
+            <MoreVertical size={18} />
           </button>
-        )
-      ) : (
-        onSuspend && (
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => onSuspend(user)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
-            title="ផ្អាកដំណើរការ"
-          >
-            <MinusCircle size={18} />
-          </button>
-        )
-      )}
 
-      {/* 4. Delete / Dustbin (Red Trash) */}
-      {onHardDelete && (
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => onHardDelete(user)}
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-40"
-          title="លុបចេញពីប្រព័ន្ធ"
-        >
-          <Trash2 size={18} />
-        </button>
+          {/* Dropdown Menu Popup */}
+          {menuOpen && (
+            <div className="absolute right-0 top-12 z-50 min-w-[200px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+              {/* Option 1: Suspend / Restore */}
+              {isSuspended ? (
+                onRestore && (
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onRestore(user);
+                    }}
+                    className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left text-lg font-normal text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <RotateCcw size={18} className="text-emerald-600 shrink-0" />
+                    <span>ស្តារឡើងវិញ</span>
+                  </button>
+                )
+              ) : (
+                onSuspend && (
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onSuspend(user);
+                    }}
+                    className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left text-lg font-normal text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <MinusCircle size={18} className="text-amber-600 shrink-0" />
+                    <span>ផ្អាកដំណើរការ</span>
+                  </button>
+                )
+              )}
+
+              {onHardDelete && <div className="my-1 border-t border-gray-100" />}
+
+              {/* Option 2: Hard Delete */}
+              {onHardDelete && (
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onHardDelete(user);
+                  }}
+                  className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left text-lg font-normal text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Trash2 size={18} className="text-red-500 shrink-0" />
+                  <span>លុបចេញពីប្រព័ន្ធ</span>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

@@ -108,9 +108,8 @@ export default function FeedbackTable({
               </td>
               <td className="py-3.5 px-4">
                 <span
-                  className={`text-lg font-normal px-3.5 py-1 rounded-full border border-gray-100 ${
-                    STATUS_BADGE[item.status]
-                  }`}
+                  className={`text-lg font-normal px-3.5 py-1 rounded-full border border-gray-100 ${STATUS_BADGE[item.status]
+                    }`}
                 >
                   {STATUS_LABEL[item.status]}
                 </span>

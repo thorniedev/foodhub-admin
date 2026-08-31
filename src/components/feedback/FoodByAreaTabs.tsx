@@ -31,24 +31,24 @@ export default function FoodByAreaTabs({
     key === "all" ? data.length : data.filter((d) => d.location === key).length;
 
   return (
-    <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
       <div className="flex items-center gap-2 flex-wrap">
         {AREA_TAB_LABELS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-base font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 h-12 rounded-full text-lg font-normal transition-all ${
               activeTab === tab.key
-                ? "bg-[#136C34] text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-[#136C34] text-white shadow-md shadow-primary-900/15"
+                : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
             }`}
           >
-            {tab.label}
+            <span>{tab.label}</span>
             <span
-              className={`text-base rounded-full px-1.5 py-0.5 ${
+              className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-base font-normal ${
                 activeTab === tab.key
                   ? "bg-white/20 text-white"
-                  : "bg-white text-gray-500"
+                  : "bg-gray-100 text-gray-600"
               }`}
             >
               {countFor(tab.key)}
@@ -56,17 +56,17 @@ export default function FoodByAreaTabs({
           </button>
         ))}
       </div>
-      <div className="relative">
+      <div className="relative w-full sm:w-72 shrink-0">
         <Search
-          size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          size={18}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
         />
         <input
           type="text"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="ស្វែងរករូបភាពអាហារ..."
-          className="pl-9 pr-3 py-2 text-base border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 w-64"
+          className="w-full h-12 pl-11 pr-4 text-lg border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-600"
         />
       </div>
     </div>

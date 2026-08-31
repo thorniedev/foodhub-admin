@@ -307,7 +307,7 @@ export default function BannersView() {
               </div>
 
               <div>
-                <p className="text-5xl font-bold text-accent-400">គ្រប់គ្រងរូបបេណឺ</p>
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-accent-400">គ្រប់គ្រងរូបបេណឺ</p>
                 <p className="mt-6 max-w-2xl text-xl text-white/85">
                   គ្រប់គ្រង ផ្ទាំងរូបភាពផ្សព្វផ្សាយពាណិជ្ជកម្ម ព័ត៌មានប្រូម៉ូសិន{" "}
                   <br className="md:block max-md:hidden" />
@@ -316,29 +316,29 @@ export default function BannersView() {
               </div>
             </div>
 
-            <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-3xl bg-white/20 px-5 py-4">
-                <div className="flex items-center gap-2 text-xl text-white/80">
-                  <ImageIcon size={20} />
-                  <span>បែនណឺសរុប</span>
+            <div className="mt-5 sm:mt-7 grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="rounded-2xl sm:rounded-3xl bg-white/20 px-3 py-2.5 sm:px-5 sm:py-4">
+                <div className="flex items-center gap-1.5 sm:gap-2 text-lg sm:text-xl text-white/80">
+                  <ImageIcon size={20} className="shrink-0" />
+                  <span className="truncate">បែនណឺសរុប</span>
                 </div>
-                <p className="mt-1 text-2xl font-bold">{totalElements}</p>
+                <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold tabular-nums">{totalElements}</p>
               </div>
 
-              <div className="rounded-3xl bg-white/20 px-5 py-4">
-                <div className="flex items-center gap-2 text-xl text-white/80">
-                  <CheckCircle2 size={20} />
-                  <span>បានផ្សាយ</span>
+              <div className="rounded-2xl sm:rounded-3xl bg-white/20 px-3 py-2.5 sm:px-5 sm:py-4">
+                <div className="flex items-center gap-1.5 sm:gap-2 text-lg sm:text-xl text-white/80">
+                  <CheckCircle2 size={20} className="shrink-0" />
+                  <span className="truncate">បានផ្សាយ</span>
                 </div>
-                <p className="mt-1 text-2xl font-bold">{publishedCount}</p>
+                <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold tabular-nums">{publishedCount}</p>
               </div>
 
-              <div className="rounded-3xl bg-white/20 px-5 py-4">
-                <div className="flex items-center gap-2 text-xl text-white/80">
-                  <EyeOff size={20} />
-                  <span>ព្រាង (Drafts)</span>
+              <div className="rounded-2xl sm:rounded-3xl bg-white/20 px-3 py-2.5 sm:px-5 sm:py-4">
+                <div className="flex items-center gap-1.5 sm:gap-2 text-lg sm:text-xl text-white/80">
+                  <EyeOff size={20} className="shrink-0" />
+                  <span className="truncate">ព្រាង</span>
                 </div>
-                <p className="mt-1 text-2xl font-bold">{draftCount}</p>
+                <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold tabular-nums">{draftCount}</p>
               </div>
             </div>
           </div>
@@ -349,7 +349,7 @@ export default function BannersView() {
               setEditingBanner(null);
               setIsFormModalOpen(true);
             }}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-normal text-[#136C34] shadow-sm transition hover:bg-emerald-50 sm:w-fit"
           >
             <Plus size={20} />
             បង្កើតបែនណឺថ្មី
@@ -358,159 +358,340 @@ export default function BannersView() {
       </section>
 
       {/* ============================================================
-          2. TABS + TOOLBAR (MATCHING MENU ITEMS FORMAT)
+          2. TABS + TOOLBAR (MATCHING STANDARD 2x2 MOBILE GRID)
       ============================================================ */}
-      <div className="flex w-full flex-wrap items-center justify-between gap-3">
-        {/* Left Status Tabs */}
-        <div className="flex flex-wrap items-center gap-2">
-          {[
-            { id: "ALL", label: "ទាំងអស់", count: totalElements },
-            { id: "PUBLISHED", label: "បានផ្សាយ", count: publishedCount },
-            { id: "DRAFT", label: "ព្រាង", count: draftCount },
-          ].map((tab) => {
-            const active = publishedFilter === tab.id;
-            return (
+      <div className="space-y-3">
+        <div className="flex w-full flex-wrap items-center justify-between gap-3">
+          {/* Mobile Status Tabs + Category + Refresh */}
+          <div className="space-y-2 sm:hidden w-full">
+            {/* Row 1: Tab 1 & Tab 2 (Equal 2 columns) */}
+            <div className="grid grid-cols-2 gap-2 w-full">
+              {[
+                { id: "ALL", label: "ទាំងអស់", count: totalElements },
+                { id: "PUBLISHED", label: "បានផ្សាយ", count: publishedCount },
+              ].map((tab) => {
+                const active = publishedFilter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => {
+                      setPublishedFilter(tab.id as any);
+                      setCurrentPage(0);
+                    }}
+                    className={`group relative flex w-full h-12 cursor-pointer items-center justify-between gap-2 rounded-full px-4 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
+                      active
+                        ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
+                        : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
+                    }`}
+                  >
+                    <span className="truncate">{tab.label}</span>
+                    <span
+                      className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2 text-base font-normal transition-colors duration-200 ${
+                        active
+                          ? "bg-white/20 text-white backdrop-blur-xs"
+                          : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Row 2: Tab 3 (Compact) + Category Dropdown (Wide Flex) + Refresh */}
+            <div className="flex items-center gap-1.5 w-full">
+              {/* Tab 3: ព្រាង */}
               <button
-                key={tab.id}
                 type="button"
                 onClick={() => {
-                  setPublishedFilter(tab.id as any);
+                  setPublishedFilter("DRAFT");
                   setCurrentPage(0);
                 }}
-                className={`group relative inline-flex h-12 shrink-0 cursor-pointer items-center gap-2.5 rounded-full px-5 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
-                  active
+                className={`group relative flex h-12 shrink-0 cursor-pointer items-center justify-between gap-2 rounded-full px-4 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
+                  publishedFilter === "DRAFT"
                     ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
                     : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
                 }`}
               >
-                <span>{tab.label}</span>
+                <span>ព្រាង</span>
                 <span
-                  className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2.5 text-lg font-normal transition-colors duration-200 ${
-                    active
+                  className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2 text-base font-normal transition-colors duration-200 ${
+                    publishedFilter === "DRAFT"
                       ? "bg-white/20 text-white backdrop-blur-xs"
                       : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
                   }`}
                 >
-                  {tab.count}
+                  {draftCount}
                 </span>
               </button>
-            );
-          })}
-        </div>
 
-        {/* Right Search + Category + Refresh */}
-        <div className="ml-auto flex min-w-[320px] flex-1 flex-wrap items-center justify-end gap-2.5">
-          {/* Search Input */}
-          <div className="relative min-w-[240px] max-w-[380px] flex-1">
-            <Search
-              size={18}
-              className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
-            />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="ស្វែងរកតាមចំណងជើង ឬការពិពណ៌នា..."
-              className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700 cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
-
-          {/* Category Dropdown */}
-          <div ref={categoryContainerRef} className="relative shrink-0">
-            <button
-              type="button"
-              onClick={() => setCategoryOpen((prev) => !prev)}
-              className={`flex h-12 min-w-[160px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-5 text-lg font-normal transition outline-none ${
-                categoryOpen
-                  ? "border-primary-600 ring-2 ring-primary-100"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              <span className="truncate text-gray-700">
-                {selectedCategory === "ALL"
-                  ? "ប្រភេទទាំងអស់"
-                  : BANNER_CATEGORY_LABELS[selectedCategory] || selectedCategory}
-              </span>
-              <ChevronDown
-                size={18}
-                className={`shrink-0 text-gray-400 transition-transform duration-200 ${
-                  categoryOpen ? "rotate-180 text-primary-700" : ""
-                }`}
-              />
-            </button>
-
-            {categoryOpen && (
-              <div className="absolute right-0 top-[52px] z-[110] w-[210px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl animate-in fade-in zoom-in-95 duration-150">
-                <p className="px-3 pb-2 pt-1 text-lg font-normal text-secondary-600">
-                  ប្រភេទ
-                </p>
+              {/* Category Dropdown (Flex-1) */}
+              <div ref={categoryContainerRef} className="relative flex-1 min-w-0">
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedCategory("ALL");
-                    setCurrentPage(0);
-                    setCategoryOpen(false);
-                  }}
-                  className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
-                    selectedCategory === "ALL"
-                      ? "bg-primary-50 text-primary-800"
-                      : "text-gray-700 hover:bg-gray-50"
+                  onClick={() => setCategoryOpen((prev) => !prev)}
+                  className={`flex h-12 w-full cursor-pointer items-center justify-between gap-1.5 rounded-full border bg-white px-3.5 text-lg font-normal transition outline-none ${
+                    categoryOpen
+                      ? "border-primary-600 ring-2 ring-primary-100"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
-                  <span>ប្រភេទទាំងអស់</span>
-                  {selectedCategory === "ALL" && (
-                    <Check size={18} className="text-primary-800" />
-                  )}
+                  <span className="truncate text-gray-700">
+                    {selectedCategory === "ALL"
+                      ? "ប្រភេទទាំងអស់"
+                      : BANNER_CATEGORY_LABELS[selectedCategory] || selectedCategory}
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className={`shrink-0 text-gray-400 transition-transform duration-200 ${
+                      categoryOpen ? "rotate-180 text-primary-700" : ""
+                    }`}
+                  />
                 </button>
-                {BANNER_CATEGORIES.map((cat) => {
-                  const selected = selectedCategory === cat;
-                  return (
+
+                {categoryOpen && (
+                  <div className="absolute right-0 top-[52px] z-[110] w-[210px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+                    <p className="px-3 pb-2 pt-1 text-base font-normal text-secondary-600">
+                      ប្រភេទ
+                    </p>
                     <button
-                      key={cat}
                       type="button"
                       onClick={() => {
-                        setSelectedCategory(cat);
+                        setSelectedCategory("ALL");
                         setCurrentPage(0);
                         setCategoryOpen(false);
                       }}
                       className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
-                        selected
+                        selectedCategory === "ALL"
                           ? "bg-primary-50 text-primary-800"
                           : "text-gray-700 hover:bg-gray-50"
                       }`}
                     >
-                      <span>{BANNER_CATEGORY_LABELS[cat] || cat}</span>
-                      {selected && (
+                      <span>ប្រភេទទាំងអស់</span>
+                      {selectedCategory === "ALL" && (
                         <Check size={18} className="text-primary-800" />
                       )}
                     </button>
-                  );
-                })}
+                    {BANNER_CATEGORIES.map((cat) => {
+                      const selected = selectedCategory === cat;
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => {
+                            setSelectedCategory(cat);
+                            setCurrentPage(0);
+                            setCategoryOpen(false);
+                          }}
+                          className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                            selected
+                              ? "bg-primary-50 text-primary-800"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          <span>{BANNER_CATEGORY_LABELS[cat] || cat}</span>
+                          {selected && (
+                            <Check size={18} className="text-primary-800" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Refresh Button */}
+              <button
+                type="button"
+                onClick={() => void fetchBanners(true)}
+                disabled={isLoading || isFetching}
+                title="ទាញយកឡើងវិញ"
+                className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800 disabled:opacity-50"
+              >
+                <RefreshCw
+                  size={18}
+                  className={isFetching ? "animate-spin text-emerald-600" : ""}
+                />
+              </button>
+            </div>
           </div>
 
-          {/* Refresh Button */}
-          <button
-            type="button"
-            onClick={() => void fetchBanners(true)}
-            disabled={isLoading || isFetching}
-            title="ទាញយកឡើងវិញ"
-            className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800 disabled:opacity-50"
-          >
-            <RefreshCw
-              size={18}
-              className={isFetching ? "animate-spin text-emerald-600" : ""}
-            />
-          </button>
+          {/* Desktop Status Tabs (sm: and up) */}
+          <div className="hidden sm:flex sm:flex-wrap sm:items-center sm:gap-2">
+            {[
+              { id: "ALL", label: "ទាំងអស់", count: totalElements },
+              { id: "PUBLISHED", label: "បានផ្សាយ", count: publishedCount },
+              { id: "DRAFT", label: "ព្រាង", count: draftCount },
+            ].map((tab) => {
+              const active = publishedFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => {
+                    setPublishedFilter(tab.id as any);
+                    setCurrentPage(0);
+                  }}
+                  className={`group relative flex h-12 cursor-pointer items-center gap-2.5 rounded-full px-5 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
+                    active
+                      ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
+                      : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2.5 text-lg font-normal transition-colors duration-200 ${
+                      active
+                        ? "bg-white/20 text-white backdrop-blur-xs"
+                        : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Desktop Search + Category + Refresh */}
+          <div className="hidden sm:flex sm:min-w-[320px] sm:flex-1 sm:items-center sm:justify-end sm:gap-2.5">
+            {/* Search Input */}
+            <div className="relative min-w-[220px] max-w-xl flex-1">
+              <Search
+                size={18}
+                className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="ស្វែងរកតាមចំណងជើង ឬការពិពណ៌នា..."
+                className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700 cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+
+            {/* Category Dropdown */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setCategoryOpen((prev) => !prev)}
+                className={`flex h-12 min-w-[160px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-5 text-lg font-normal transition outline-none ${
+                  categoryOpen
+                    ? "border-primary-600 ring-2 ring-primary-100"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <span className="truncate text-gray-700">
+                  {selectedCategory === "ALL"
+                    ? "ប្រភេទទាំងអស់"
+                    : BANNER_CATEGORY_LABELS[selectedCategory] || selectedCategory}
+                </span>
+                <ChevronDown
+                  size={18}
+                  className={`shrink-0 text-gray-400 transition-transform duration-200 ${
+                    categoryOpen ? "rotate-180 text-primary-700" : ""
+                  }`}
+                />
+              </button>
+
+              {categoryOpen && (
+                <div className="absolute right-0 top-[52px] z-[110] w-[210px] rounded-2xl border border-gray-100 bg-white p-2 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+                  <p className="px-3 pb-2 pt-1 text-base font-normal text-secondary-600">
+                    ប្រភេទ
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory("ALL");
+                      setCurrentPage(0);
+                      setCategoryOpen(false);
+                    }}
+                    className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                      selectedCategory === "ALL"
+                        ? "bg-primary-50 text-primary-800"
+                        : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span>ប្រភេទទាំងអស់</span>
+                    {selectedCategory === "ALL" && (
+                      <Check size={18} className="text-primary-800" />
+                    )}
+                  </button>
+                  {BANNER_CATEGORIES.map((cat) => {
+                    const selected = selectedCategory === cat;
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          setSelectedCategory(cat);
+                          setCurrentPage(0);
+                          setCategoryOpen(false);
+                        }}
+                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
+                          selected
+                            ? "bg-primary-50 text-primary-800"
+                            : "text-gray-700 hover:bg-gray-50"
+                        }`}
+                      >
+                        <span>{BANNER_CATEGORY_LABELS[cat] || cat}</span>
+                        {selected && (
+                          <Check size={18} className="text-primary-800" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Refresh Button */}
+            <button
+              type="button"
+              onClick={() => void fetchBanners(true)}
+              disabled={isLoading || isFetching}
+              title="ទាញយកឡើងវិញ"
+              className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-primary-800 hover:bg-primary-50 hover:text-primary-800 disabled:opacity-50"
+            >
+              <RefreshCw
+                size={18}
+                className={isFetching ? "animate-spin text-emerald-600" : ""}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Full Width Search Input (Row 3) */}
+        <div className="relative sm:hidden w-full">
+          <Search
+            size={18}
+            className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
+          />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="ស្វែងរកតាមចំណងជើង ឬការពិពណ៌នា..."
+            className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700 cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+          )}
         </div>
       </div>
 
