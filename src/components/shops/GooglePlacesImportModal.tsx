@@ -408,7 +408,14 @@ export default function GooglePlacesImportModal({
        * Parse addressComponents immediately so the preview card and the
        * onImport payload both have structured address data.
        */
-      setResolvedAddress(readAddressFromPreview(response));
+      const resolved = readAddressFromPreview(response);
+      
+      // Debug logging to see what data we're getting
+      console.log('[GooglePlacesImport] Preview response:', response);
+      console.log('[GooglePlacesImport] Address components:', (response as Record<string, unknown>)['addressComponents']);
+      console.log('[GooglePlacesImport] Resolved address:', resolved);
+      
+      setResolvedAddress(resolved);
     } catch (requestError) {
       setPreview(null);
       setResolvedAddress(null);
@@ -1033,7 +1040,7 @@ export default function GooglePlacesImportModal({
                   </p>
                 </div>
               ) : preview ? (
-                <GooglePlacePreviewCard preview={preview} />
+                <GooglePlacePreviewCard preview={preview} resolvedAddress={resolvedAddress} />
               ) : (
                 <div className="flex min-h-[250px] flex-col items-center justify-center px-5 text-center">
                   <div
@@ -1265,7 +1272,13 @@ export default function GooglePlacesImportModal({
    GOOGLE PLACE PREVIEW CARD
 ========================================================= */
 
-function GooglePlacePreviewCard({ preview }: { preview: GooglePlacePreview }) {
+function GooglePlacePreviewCard({ 
+  preview,
+  resolvedAddress
+}: { 
+  preview: GooglePlacePreview;
+  resolvedAddress: ReturnType<typeof readAddressFromPreview> | null;
+}) {
   const displayName =
     getPreviewString(preview, "displayName", "name") ?? "Google Place";
 
@@ -1408,6 +1421,86 @@ function GooglePlacePreviewCard({ preview }: { preview: GooglePlacePreview }) {
             label="លេខទូរស័ព្ទ"
             value={phone}
           />
+        )}
+
+        {/* Cambodian Administrative Divisions */}
+        {resolvedAddress && (
+          <>
+            {resolvedAddress.commune && (
+              <PreviewInfoRow
+                icon={<MapPin size={20} />}
+                label="សង្កាត់/ឃុំ"
+                value={resolvedAddress.commune}
+              />
+            )}
+
+            {resolvedAddress.district && (
+              <PreviewInfoRow
+                icon={<MapPin size={20} />}
+                label="ខណ្ឌ/ស្រុក"
+                value={resolvedAddress.district}
+              />
+            )}
+
+            {resolvedAddress.city && (
+              <PreviewInfoRow
+                icon={<MapPin size={20} />}
+                label="ក្រុង/ទីក្រុង"
+                value={resolvedAddress.city}
+              />
+            )}
+
+            {resolvedAddress.province && (
+              <PreviewInfoRow
+                icon={<MapPin size={20} />}
+                label="រាជធានី/ខេត្ត"
+                value={resolvedAddress.province}
+              />
+            )}
+
+            {resolvedAddress.postalCode && (
+              <PreviewInfoRow
+                icon={<MapPin size={20} />}
+                label="លេខកូដប្រៃសណីយ៍"
+                value={resolvedAddress.postalCode}
+              />
+            )}
+
+            {/* Show message if no address components found */}
+            {!resolvedAddress.commune && 
+             !resolvedAddress.district && 
+             !resolvedAddress.city && 
+             !resolvedAddress.province && 
+             !resolvedAddress.postalCode && (
+              <div className="rounded-2xl bg-amber-50 px-4 py-4">
+                <div className="flex items-start gap-3">
+                  <div
+                    className="
+                      flex
+                      h-10
+                      w-10
+                      shrink-0
+                      items-center
+                      justify-center
+                      rounded-xl
+                      bg-amber-100
+                      text-amber-700
+                    "
+                  >
+                    <MapPin size={20} />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-lg font-medium text-amber-800">ព័ត៌មានអាសយដ្ឋានមិនពេញលេញ</p>
+
+                    <p className="mt-1 text-lg leading-7 text-amber-700">
+                      Google Maps មិនបានផ្តល់ព័ត៌មានអំពីសង្កាត់/ឃុំ, ខណ្ឌ/ស្រុក, ក្រុង, ខេត្ត ឬលេខកូដប្រៃសណីយ៍។ អ្នកនឹងត្រូវបញ្ចូលព័ត៌មានទាំងនេះដោយដៃក្រោយពេលបង្កើតហាង។
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {website && (
