@@ -8,6 +8,9 @@ import {
   useUpdateStoreOperatingStatusMutation,
   useUpdateStoreReviewStatusMutation,
 } from "@/src/app/store/shop/shopApi";
+import { useGetPublishedMenuItemsQuery } from "@/src/app/store/menuManagementApi";
+import { readLocalMenuItems } from "@/src/lib/filterCatalogStorage";
+import { useMemo } from "react";
 import type { Store } from "@/src/types/shop";
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
 
@@ -147,6 +150,30 @@ export default function ShopStatusModal({
   const [account, setAccount] = useState<AccountValue>("ACTIVE");
   const [error, setError] = useState<string | null>(null);
 
+  const { data: menuItemsData, isLoading: itemsLoading } = useGetPublishedMenuItemsQuery(
+    {
+      storeUuid: store?.uuid ?? "",
+      size: 50,
+    },
+    {
+      skip: !store?.uuid,
+    },
+  );
+
+  const localItems = useMemo(() => {
+    if (typeof window === "undefined" || !store?.uuid) return [];
+    return readLocalMenuItems().filter(
+      (m) => String(m.storeUuid || m.store?.uuid || "") === String(store.uuid),
+    );
+  }, [store?.uuid]);
+
+  const totalItemCount = useMemo(() => {
+    const serverCount = menuItemsData?.totalElements ?? menuItemsData?.content?.length ?? 0;
+    return Math.max(serverCount, localItems.length);
+  }, [menuItemsData, localItems]);
+
+  const hasMenuItems = totalItemCount > 0;
+
   const [updateReview, { isLoading: reviewLoading }] = useUpdateStoreReviewStatusMutation();
   const [updateOperating, { isLoading: operatingLoading }] = useUpdateStoreOperatingStatusMutation();
   const [updateAccount, { isLoading: accountLoading }] = useUpdateStoreAccountStatusMutation();
@@ -207,12 +234,36 @@ export default function ShopStatusModal({
   };
 
   const goNext = () => {
+    if (!hasMenuItems) {
+      if (step === 1 && review === "APPROVED") {
+        setError("ច្បាប់តឹងរ៉ឹង៖ ហាងគ្មានមុខម្ហូប (០ មុខ) មិនអាចអនុម័តបានទេ។");
+        return;
+      }
+      if (step === 2 && operating === "OPEN") {
+        setError("ច្បាប់តឹងរ៉ឹង៖ ហាងគ្មានមុខម្ហូប (០ មុខ) មិនអាចបើកដំណើរការ (OPEN) បានទេ។");
+        return;
+      }
+    }
+    setError(null);
     setStep((s) => (s < 3 ? (s + 1) as Step : s));
   };
 
   const save = async () => {
     try {
       setError(null);
+
+      // Strict validation: Store must have at least 1 menu item to be APPROVED or OPEN
+      if (!hasMenuItems) {
+        if (review === "APPROVED") {
+          setError("ច្បាប់តឹងរ៉ឹង៖ ហាងមិនទាន់មានមុខម្ហូបនៅឡើយទេ (០ មុខ)។ ត្រូវមានមុខម្ហូបយ៉ាងហោចណាស់ ១ ដើម្បីអនុម័ត (APPROVED)។");
+          return;
+        }
+        if (operating === "OPEN") {
+          setError("ច្បាប់តឹងរ៉ឹង៖ ហាងមិនទាន់មានមុខម្ហូបនៅឡើយទេ (០ មុខ)។ ត្រូវមានមុខម្ហូបយ៉ាងហោចណាស់ ១ ដើម្បីបើកដំណើរការ (OPEN)។");
+          return;
+        }
+      }
+
       if (review) {
         await updateReview({
           storeUuid: store.uuid,
@@ -289,6 +340,19 @@ export default function ShopStatusModal({
         {/* ── Body ── */}
         <div className="space-y-2 p-5 pt-4">
 
+          {/* Strict Rule Notice if Store has 0 menu items */}
+          {!itemsLoading && !hasMenuItems && (
+            <div className="flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-amber-900">
+              <AlertTriangle size={20} className="mt-0.5 shrink-0 text-amber-600" />
+              <div className="text-sm">
+                <p className="font-bold text-amber-800">ច្បាប់តឹងរ៉ឹង៖ ហាងគ្មានមុខម្ហូប (០ មុខ)</p>
+                <p className="mt-0.5 text-amber-700">
+                  ហាងត្រូវមានមុខម្ហូបយ៉ាងហោចណាស់ ១ ដើម្បីអនុញ្ញាតឱ្យបើកដំណើរការ (OPEN) ឬអនុម័ត (APPROVED)។
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* ─ Step 1: Review ─ */}
           {step === 1 && (
             <div className="space-y-2">
@@ -298,15 +362,19 @@ export default function ShopStatusModal({
                   <p className="text-lg font-semibold text-amber-700">ស្ថានភាពបច្ចុប្បន្ន: កំពុងរង់ចាំពិនិត្យ</p>
                 </div>
               )}
-              {REVIEW_OPTIONS.map((opt) => (
-                <OptionCard
-                  key={opt.value}
-                  opt={opt}
-                  isActive={review === opt.value}
-                  disabled={isLoading}
-                  onClick={() => setReview(opt.value as ReviewValue)}
-                />
-              ))}
+              {REVIEW_OPTIONS.map((opt) => {
+                const isBlocked = opt.value === "APPROVED" && !hasMenuItems;
+                return (
+                  <OptionCard
+                    key={opt.value}
+                    opt={opt}
+                    isActive={review === opt.value}
+                    disabled={isLoading || isBlocked}
+                    disabledReason={isBlocked ? "តម្រូវឱ្យមានមុខម្ហូបយ៉ាងហោច ១" : undefined}
+                    onClick={() => setReview(opt.value as ReviewValue)}
+                  />
+                );
+              })}
               {review === "REJECTED" && (
                 <div className="pt-1">
                   <p className="mb-1.5 text-lg font-normal text-gray-700">មូលហេតុបដិសេធ</p>
@@ -328,15 +396,19 @@ export default function ShopStatusModal({
           {/* ─ Step 2: Operating ─ */}
           {step === 2 && (
             <div className="space-y-2">
-              {OPERATING_OPTIONS.map((opt) => (
-                <OptionCard
-                  key={opt.value}
-                  opt={opt}
-                  isActive={operating === opt.value}
-                  disabled={isLoading}
-                  onClick={() => setOperating(opt.value)}
-                />
-              ))}
+              {OPERATING_OPTIONS.map((opt) => {
+                const isBlocked = opt.value === "OPEN" && !hasMenuItems;
+                return (
+                  <OptionCard
+                    key={opt.value}
+                    opt={opt}
+                    isActive={operating === opt.value}
+                    disabled={isLoading || isBlocked}
+                    disabledReason={isBlocked ? "តម្រូវឱ្យមានមុខម្ហូបយ៉ាងហោច ១" : undefined}
+                    onClick={() => setOperating(opt.value)}
+                  />
+                );
+              })}
             </div>
           )}
 
@@ -423,6 +495,7 @@ function OptionCard({
   opt,
   isActive,
   disabled,
+  disabledReason,
   onClick,
 }: {
   opt: {
@@ -436,6 +509,7 @@ function OptionCard({
   };
   isActive: boolean;
   disabled: boolean;
+  disabledReason?: string;
   onClick: () => void;
 }) {
   return (
@@ -444,23 +518,54 @@ function OptionCard({
       disabled={disabled}
       onClick={onClick}
       className={`flex w-full items-center gap-3.5 rounded-2xl border-2 p-3.5 text-left transition ${
-        isActive
-          ? `${opt.bg} ${opt.border}`
-          : "border-gray-100 bg-gray-50/60 hover:border-gray-200 hover:bg-gray-50"
+        disabled
+          ? "cursor-not-allowed border-gray-100 bg-gray-100/70 opacity-60"
+          : isActive
+            ? `${opt.bg} ${opt.border}`
+            : "border-gray-100 bg-gray-50/60 hover:border-gray-200 hover:bg-gray-50"
       }`}
     >
       <span
         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
-          isActive ? `${opt.ring} ring-4` : "ring-2 ring-gray-200"
+          disabled
+            ? "ring-2 ring-gray-300"
+            : isActive
+              ? `${opt.ring} ring-4`
+              : "ring-2 ring-gray-200"
         }`}
       >
-        <span className={`h-3 w-3 rounded-full transition ${isActive ? opt.dot : "bg-gray-300"}`} />
+        <span
+          className={`h-3 w-3 rounded-full transition ${
+            disabled ? "bg-gray-400" : isActive ? opt.dot : "bg-gray-300"
+          }`}
+        />
       </span>
-      <div className="flex-1">
-        <p className={`text-lg font-bold ${isActive ? opt.text : "text-gray-700"}`}>{opt.label}</p>
-        <p className={`text-base ${isActive ? opt.text : "text-gray-400"}`}>{opt.desc}</p>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p
+            className={`text-lg font-bold ${
+              disabled ? "text-gray-500" : isActive ? opt.text : "text-gray-700"
+            }`}
+          >
+            {opt.label}
+          </p>
+          {disabledReason && (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
+              {disabledReason}
+            </span>
+          )}
+        </div>
+        <p
+          className={`text-base ${
+            disabled ? "text-gray-400" : isActive ? opt.text : "text-gray-400"
+          }`}
+        >
+          {opt.desc}
+        </p>
       </div>
-      {isActive && <span className={`text-lg font-bold ${opt.text}`}>✓</span>}
+      {isActive && !disabled && (
+        <span className={`text-lg font-bold ${opt.text}`}>✓</span>
+      )}
     </button>
   );
 }
