@@ -18,13 +18,9 @@ export default async function LoginPage({
   const params = await searchParams;
   const errorMessage = params.error_description ?? params.error;
   const returnTo = getSafeAuthReturnPath(params.returnTo);
-  const loggedOut = params.loggedOut === "true";
 
-  // Only auto-redirect to Keycloak when there is no error and the user
-  // was NOT just logged out.  After logout we show a confirmation message
-  // with a manual "Sign in" button so that we never race with the
-  // Keycloak post-logout redirect chain.
-  if (!errorMessage && !loggedOut) {
+  // Auto-redirect directly to Keycloak login form when there are no errors
+  if (!errorMessage) {
     const loginParams = new URLSearchParams({
       returnTo,
       prompt: "login",
@@ -48,12 +44,6 @@ export default async function LoginPage({
           </p>
         </div>
 
-        {loggedOut && !errorMessage && (
-          <p className="mt-6 rounded-lg bg-green-50 px-4 py-3 text-center text-sm text-green-700">
-            You have been signed out successfully.
-          </p>
-        )}
-
         {errorMessage && (
           <p className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-center text-sm text-red-600">
             {errorMessage}
@@ -62,14 +52,12 @@ export default async function LoginPage({
 
         <form action="/api/auth/login" method="get" className="mt-8">
           <input type="hidden" name="returnTo" value={returnTo} />
-          {(errorMessage || loggedOut) && (
-            <input type="hidden" name="prompt" value="login" />
-          )}
+          <input type="hidden" name="prompt" value="login" />
           <button
             type="submit"
             className="w-full rounded-xl bg-[#136C34] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#0f592b]"
           >
-            {errorMessage ? "Try another account" : "Sign in"}
+            Try another account
           </button>
         </form>
 

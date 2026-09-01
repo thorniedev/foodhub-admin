@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   const idToken = request.cookies.get("foodhub_id_token")?.value;
 
   const normalizedAppUrl = normalizeBaseUrl(appUrl);
-  const postLogoutRedirectUri = `${normalizedAppUrl}/login?loggedOut=true`;
+  const postLogoutRedirectUri = `${normalizedAppUrl}/login`;
 
   let redirectUrl = new URL(postLogoutRedirectUri);
 
