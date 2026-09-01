@@ -9,7 +9,6 @@ import {
   useUpdateStoreReviewStatusMutation,
 } from "@/src/app/store/shop/shopApi";
 import { useGetPublishedMenuItemsQuery } from "@/src/app/store/menuManagementApi";
-import { readLocalMenuItems } from "@/src/lib/filterCatalogStorage";
 import { useMemo } from "react";
 import type { Store } from "@/src/types/shop";
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
@@ -160,17 +159,9 @@ export default function ShopStatusModal({
     },
   );
 
-  const localItems = useMemo(() => {
-    if (typeof window === "undefined" || !store?.uuid) return [];
-    return readLocalMenuItems().filter(
-      (m) => String(m.storeUuid || m.store?.uuid || "") === String(store.uuid),
-    );
-  }, [store?.uuid]);
-
   const totalItemCount = useMemo(() => {
-    const serverCount = menuItemsData?.totalElements ?? menuItemsData?.content?.length ?? 0;
-    return Math.max(serverCount, localItems.length);
-  }, [menuItemsData, localItems]);
+    return menuItemsData?.totalElements ?? menuItemsData?.content?.length ?? 0;
+  }, [menuItemsData]);
 
   const hasMenuItems = totalItemCount > 0;
 

@@ -22,8 +22,6 @@ import { useGetPublishedMenuItemsQuery } from "@/src/app/store/menuManagementApi
 
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
 
-import { readLocalMenuItems } from "@/src/lib/filterCatalogStorage";
-
 import type { MenuItemRecord } from "@/src/types/menu-management";
 
 import { Section } from "./StoreOverviewSection";
@@ -86,26 +84,9 @@ export default function StoreMenuItemsSection({
     },
   );
 
-  const localItems = useMemo(() => readLocalMenuItems(), [data]);
-
   // Sort items by numeric ID descending, timestamp descending, or array reverse to guarantee NEWEST items FIRST!
   const sortedItems = useMemo(() => {
-    const serverList = data?.content ?? [];
-    const map = new Map<string, MenuItemRecord>();
-
-    localItems.forEach((m) => {
-      if (m?.uuid && String(m.storeUuid || m.store?.uuid || "") === String(storeUuid)) {
-        map.set(m.uuid, m);
-      }
-    });
-
-    serverList.forEach((m) => {
-      if (m?.uuid) {
-        map.set(m.uuid, m);
-      }
-    });
-
-    const raw = Array.from(map.values());
+    const raw = data?.content ?? [];
     return [...raw].sort((a, b) => {
       // 1. Sort by numeric ID descending if available
       const idA =
@@ -154,7 +135,7 @@ export default function StoreMenuItemsSection({
       // 3. Fallback: Reverse array order so newest appended items appear first
       return raw.indexOf(b) - raw.indexOf(a);
     });
-  }, [data?.content, localItems, storeUuid]);
+  }, [data?.content]);
 
   const totalPages = Math.ceil(sortedItems.length / ITEMS_PER_PAGE) || 1;
 

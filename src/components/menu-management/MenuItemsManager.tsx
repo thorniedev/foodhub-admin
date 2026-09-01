@@ -46,7 +46,7 @@ import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
 import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
 import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionApi";
 import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
-import { readFilterCatalog, saveFoodRelationsStorage, readLocalMenuItems } from "@/src/lib/filterCatalogStorage";
+import { readFilterCatalog, saveFoodRelationsStorage } from "@/src/lib/filterCatalogStorage";
 import { useUpdateFoodCategoryMutation } from "@/src/app/store/foodCategoryApi";
 import CustomSelect from "../ui/CustomSelect";
 
@@ -269,17 +269,7 @@ export default function MenuItemsManager({
 
   const foods = foodsQuery.data?.content ?? [];
   const rawMenuItems = menuItemsQuery.data?.content ?? [];
-  const localMenuItems = useMemo(() => readLocalMenuItems(), [menuItemsQuery.data]);
-  const menuItems = useMemo(() => {
-    const map = new Map<string, MenuItemRecord>();
-    localMenuItems.forEach((m) => {
-      if (m?.uuid) map.set(m.uuid, m);
-    });
-    rawMenuItems.forEach((m) => {
-      if (m?.uuid) map.set(m.uuid, m);
-    });
-    return Array.from(map.values());
-  }, [rawMenuItems, localMenuItems]);
+  const menuItems = rawMenuItems;
   const stores = storesQuery.data ?? [];
   const allCategories = categoriesQuery.data ?? [];
 

@@ -771,11 +771,7 @@ function normalizePage<T>(
 }
 
 import {
-  saveLocalMenuItem,
-  readLocalMenuItems,
-  deleteLocalMenuItem,
   saveMenuItemRelationsStorage,
-  createClientUuid,
 } from "@/src/lib/filterCatalogStorage";
 
 function toError(
@@ -2014,12 +2010,6 @@ export const menuManagementApi =
           async queryFn(arg) {
             const uuid = typeof arg === "string" ? arg : arg.uuid;
 
-            const localItems = readLocalMenuItems();
-            const foundLocal = localItems.find((m) => m?.uuid === uuid);
-            if (foundLocal) {
-              return { data: foundLocal };
-            }
-
             const params: Record<string, string | number | boolean | undefined> = {};
             if (typeof arg === "object") {
               if (arg.latitude != null) params.latitude = arg.latitude;
@@ -2103,8 +2093,6 @@ export const menuManagementApi =
                 ? "VERIFIED"
                 : payload.menuItem?.ingredientDataStatus || "VERIFIED";
 
-            const mediaUuids = primaryMediaUuid ? [primaryMediaUuid] : (payload.primaryMediaUuids ?? []);
-
             // CreateMenuItemRequest (backend) is a nested DTO:
             // { foodUuid, menuItem: { name, price, ... }, primaryMediaUuids,
             //   thumbnailMediaUuid, galleryMediaUuids, ingredients, dietaryTypes,
@@ -2172,8 +2160,11 @@ export const menuManagementApi =
               },
             );
 
-            const hasServerError = "error" in result;
-            const rawCreated = !hasServerError ? ((result.data ?? {}) as any) : {};
+            if ("error" in result) {
+              return result;
+            }
+
+            const rawCreated = (result.data ?? {}) as any;
             const createdItem = unwrap<MenuItemRecord>(rawCreated);
             const realServerUuid =
               createdItem?.uuid ||
@@ -2183,37 +2174,23 @@ export const menuManagementApi =
               rawCreated?.menuItemUuid ||
               rawCreated?.id;
 
-            const createdUuid = realServerUuid || createClientUuid();
+            if (!realServerUuid) {
+              return {
+                error: toError(500, {
+                  message:
+                    "Menu item creation did not return a valid id from the server.",
+                }),
+              };
+            }
 
-            const fallbackRecord: MenuItemRecord = {
-              uuid: createdUuid,
-              storeUuid,
-              foodUuid: payload.foodUuid,
-              name: payload.menuItem?.name || "ម៉ឺនុយថ្មី",
-              description: payload.menuItem?.description,
-              price: Number(payload.menuItem?.price) || 0,
-              currencyCode: payload.menuItem?.currencyCode || "USD",
-              preparationTimeMinutes: Number(payload.menuItem?.preparationTimeMinutes) || 15,
-              availabilityStatus: (payload.menuItem?.availabilityStatus as any) || "AVAILABLE",
-              ingredientDataStatus: (normalizedIngredientDataStatus as any) || "VERIFIED",
-              isFeatured: Boolean(payload.menuItem?.isFeatured),
-              thumbnail: primaryMediaUuid ? `/api/v1/media/files/${primaryMediaUuid}/download` : undefined,
-              imageUrl: primaryMediaUuid ? `/api/v1/media/files/${primaryMediaUuid}/download` : undefined,
-              primaryMediaUuids: primaryMediaUuid ? [primaryMediaUuid] : [],
-              galleryMediaUuids: galleryMediaUuids,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            };
-
-            saveLocalMenuItem(fallbackRecord);
-            saveMenuItemRelationsStorage(createdUuid, {
+            saveMenuItemRelationsStorage(realServerUuid, {
               ingredients: payload.ingredients,
               dietaryTypes: payload.dietaryTypes,
               medicalConditions: (payload as any).medicalConditions,
             });
 
-            // 3. Attach Ingredients to server ONLY if server creation succeeded
-            if (!hasServerError && realServerUuid && Array.isArray(payload.ingredients) && payload.ingredients.length > 0) {
+            // 3. Attach Ingredients to server
+            if (Array.isArray(payload.ingredients) && payload.ingredients.length > 0) {
               try {
                 await browserRequest<unknown>(
                   `/api/admin/menu-items/${encodeURIComponent(realServerUuid)}/ingredients`,
@@ -2236,8 +2213,8 @@ export const menuManagementApi =
               }
             }
 
-            // 4. Attach Dietary Types to server ONLY if server creation succeeded
-            if (!hasServerError && realServerUuid && Array.isArray(payload.dietaryTypes) && payload.dietaryTypes.length > 0) {
+            // 4. Attach Dietary Types to server
+            if (Array.isArray(payload.dietaryTypes) && payload.dietaryTypes.length > 0) {
               const validDietary = payload.dietaryTypes.filter(
                 (d) =>
                   d.dietaryTypeUuid &&
@@ -2267,8 +2244,8 @@ export const menuManagementApi =
               }
             }
 
-            // 5. Attach Allergen Declarations to server ONLY if server creation succeeded
-            if (!hasServerError && realServerUuid && Array.isArray(payload.allergenDeclarations) && payload.allergenDeclarations.length > 0) {
+            // 5. Attach Allergen Declarations to server
+            if (Array.isArray(payload.allergenDeclarations) && payload.allergenDeclarations.length > 0) {
               try {
                 await browserRequest<unknown>(
                   `/api/admin/menu-items/${encodeURIComponent(realServerUuid)}/allergen-declarations`,
@@ -2292,7 +2269,7 @@ export const menuManagementApi =
             }
 
             return {
-              data: realServerUuid && createdItem?.uuid ? createdItem : fallbackRecord,
+              data: createdItem,
             };
           },
         }),
@@ -2432,10 +2409,6 @@ export const menuManagementApi =
             if ("error" in coreResult) {
               const errStr = JSON.stringify(coreResult.error || "").toLowerCase();
               const isCategoryCycle = errStr.includes("cycle") || errStr.includes("hierarchy");
-              const isNotFound =
-                errStr.includes("404") ||
-                errStr.includes("not found") ||
-                errStr.includes("notfound");
 
               if (isCategoryCycle) {
                 // Category cycle bypass — treat as success so relations save
@@ -2448,42 +2421,6 @@ export const menuManagementApi =
                     price: payload.menuItem?.price,
                   },
                 };
-              } else if (isNotFound) {
-                // Item exists only in localStorage (not yet on server) — update local record
-                console.warn("[MENU ITEM UPDATE 404 - ITEM IS LOCAL-ONLY, UPDATING LOCALSTORAGE]", targetUuid);
-                const existingLocals = readLocalMenuItems();
-                const updatedLocals = existingLocals.map((m: any) => {
-                  if (m?.uuid !== targetUuid) return m;
-                  return {
-                    ...m,
-                    foodUuid: payload.foodUuid ?? m.foodUuid,
-                    name: payload.menuItem?.name ?? m.name,
-                    description: payload.menuItem?.description ?? m.description,
-                    price: payload.menuItem?.price ?? m.price,
-                    currencyCode: payload.menuItem?.currencyCode ?? m.currencyCode,
-                    preparationTimeMinutes:
-                      payload.menuItem?.preparationTimeMinutes ?? m.preparationTimeMinutes,
-                    availabilityStatus:
-                      payload.menuItem?.availabilityStatus ?? m.availabilityStatus,
-                    ingredientDataStatus:
-                      payload.menuItem?.ingredientDataStatus ?? m.ingredientDataStatus,
-                    isFeatured:
-                      payload.menuItem?.isFeatured ?? m.isFeatured,
-                    thumbnailMediaUuid:
-                      payload.thumbnailMediaUuid ?? m.thumbnailMediaUuid,
-                    updatedAt: new Date().toISOString(),
-                  };
-                });
-                try {
-                  window.localStorage.setItem(
-                    "foodhub-created-menu-items-v1",
-                    JSON.stringify(updatedLocals),
-                  );
-                } catch {
-                  /* storage quota exceeded — ignore */
-                }
-                const localRecord = updatedLocals.find((m: any) => m?.uuid === targetUuid);
-                return { data: localRecord ?? ({ uuid: targetUuid } as MenuItemRecord) };
               } else {
                 return coreResult;
               }
@@ -2654,7 +2591,9 @@ export const menuManagementApi =
               );
             }
 
-            deleteLocalMenuItem(uuid);
+            if ("error" in result) {
+              return result;
+            }
 
             return {
               data: (null as unknown as void),
