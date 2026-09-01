@@ -19,6 +19,7 @@ import {
 import {
   shopApi,
   useDeleteShopMutation,
+  useGetAllShopsQuery,
   useGetShopByUuidQuery,
   useGetShopsQuery,
   useUpdateShopMutation,
@@ -31,7 +32,11 @@ import type {
 } from "@/src/types/shop";
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
 import { getStoreLiveStatus, storeLogoCandidate } from "@/src/lib/shopFormat";
-import CustomSelect from "../ui/CustomSelect";
+import {
+  CAMBODIA_PROVINCES,
+  isStoreInProvinceOrCity,
+} from "@/src/lib/cambodia-provinces";
+import CustomSelect, { type CustomSelectOption } from "../ui/CustomSelect";
 
 import StoreMediaImage from "./detail/StoreMediaImage";
 import dynamic from "next/dynamic";
@@ -49,33 +54,13 @@ import ShopsTabs from "./ShopsTabs";
 
 type StoreSort = "NAME_ASC" | "NAME_DESC" | "NEWEST" | "OLDEST";
 
-const CITY_OPTIONS = [
-  { value: "ALL", label: "រាជធានី-ខេត្តទាំងអស់" },
-  { value: "Phnom Penh", label: "ភ្នំពេញ" },
-  { value: "Banteay Meanchey", label: "បន្ទាយមានជ័យ" },
-  { value: "Battambang", label: "បាត់ដំបង" },
-  { value: "Kampong Cham", label: "កំពង់ចាម" },
-  { value: "Kampong Chhnang", label: "កំពង់ឆ្នាំង" },
-  { value: "Kampong Speu", label: "កំពង់ស្ពឺ" },
-  { value: "Kampong Thom", label: "កំពង់ធំ" },
-  { value: "Kampot", label: "កំពត" },
-  { value: "Kandal", label: "កណ្ដាល" },
-  { value: "Kep", label: "កែប" },
-  { value: "Koh Kong", label: "កោះកុង" },
-  { value: "Kratie", label: "ក្រចេះ" },
-  { value: "Mondulkiri", label: "មណ្ឌលគិរី" },
-  { value: "Oddar Meanchey", label: "ឧត្តរមានជ័យ" },
-  { value: "Pailin", label: "ប៉ៃលិន" },
-  { value: "Preah Sihanouk", label: "ព្រះសីហនុ" },
-  { value: "Preah Vihear", label: "ព្រះវិហារ" },
-  { value: "Prey Veng", label: "ព្រៃវែង" },
-  { value: "Pursat", label: "ពោធិ៍សាត់" },
-  { value: "Ratanakiri", label: "រតនគិរី" },
-  { value: "Siem Reap", label: "សៀមរាប" },
-  { value: "Stung Treng", label: "ស្ទឹងត្រែង" },
-  { value: "Svay Rieng", label: "ស្វាយរៀង" },
-  { value: "Takeo", label: "តាកែវ" },
-  { value: "Tboung Khmum", label: "ត្បូងឃ្មុំ" },
+const CITY_OPTIONS: CustomSelectOption[] = [
+  { value: "ALL", label: "រាជធានី-ខេត្តទាំងអស់", description: "All Capital & Provinces" },
+  ...CAMBODIA_PROVINCES.map((p) => ({
+    value: p.nameEn,
+    label: p.nameKh,
+    description: p.nameEn,
+  })),
 ];
 
 const OPEN_OPTIONS = [
@@ -130,16 +115,46 @@ export default function ShopsManager() {
     return () => clearTimeout(timer);
   }, [notice]);
 
-  /* Main paginated list filtered by the active tab */
-  const { data, error, isLoading, isFetching, refetch } = useGetShopsQuery({
+  const hasActiveFilters = cityFilter !== "ALL" || openFilter !== "ALL";
+
+  const effectiveQuery = useMemo(() => {
+    const parts: string[] = [];
+    if (serverQuery.trim()) {
+      parts.push(serverQuery.trim());
+    } else if (cityFilter !== "ALL") {
+      parts.push(cityFilter);
+    }
+    return parts.join(" ");
+  }, [serverQuery, cityFilter]);
+
+  const apiSort = useMemo(() => {
+    switch (sortBy) {
+      case "OLDEST":
+        return "createdAt,asc";
+      case "NAME_ASC":
+        return "storeName,asc";
+      case "NAME_DESC":
+        return "storeName,desc";
+      case "NEWEST":
+      default:
+        return "createdAt,desc";
+    }
+  }, [sortBy]);
+
+  /* Fetch all stores for the active tab across all pages */
+  const {
+    data: allStoresData,
+    error,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useGetAllShopsQuery({
     query: serverQuery || undefined,
     reviewStatus:
       filter === "APPROVED" || filter === "PENDING" || filter === "REJECTED"
         ? filter
         : undefined,
     accountStatus: filter === "APPROVED" ? "ACTIVE" : undefined,
-    page,
-    size,
   });
 
   const isSearching = Boolean(serverQuery);
@@ -300,7 +315,7 @@ export default function ShopsManager() {
     return set;
   }, [archivedData]);
 
-  const rawStores = data?.contents ?? [];
+  const rawStores = allStoresData ?? [];
   const stores = useMemo(() => {
     return rawStores.map((store) => {
       let reviewStatus = store.reviewStatus;
@@ -335,17 +350,16 @@ export default function ShopsManager() {
 
   /* Dynamic counts: Uses main query total for active tab and skips duplicate requests */
   const counts = {
-    all: filter === "ALL" ? (data?.totalElements ?? 0) : (allData?.totalElements ?? 0),
-    approved: filter === "APPROVED" ? (data?.totalElements ?? 0) : (approvedData?.totalElements ?? 0),
-    pending: filter === "PENDING" ? (data?.totalElements ?? 0) : (pendingData?.totalElements ?? 0),
-    rejected: filter === "REJECTED" ? (data?.totalElements ?? 0) : (rejectedData?.totalElements ?? 0),
+    all: filter === "ALL" ? (allStoresData?.length ?? 0) : (allData?.totalElements ?? 0),
+    approved: filter === "APPROVED" ? (allStoresData?.length ?? 0) : (approvedData?.totalElements ?? 0),
+    pending: filter === "PENDING" ? (allStoresData?.length ?? 0) : (pendingData?.totalElements ?? 0),
+    rejected: filter === "REJECTED" ? (allStoresData?.length ?? 0) : (rejectedData?.totalElements ?? 0),
   };
 
   const filteredStores = stores.filter((store) => {
-    // City filter
+    // City / Province filter (matching province, city, district, commune, and addressLine across Khmer and English)
     if (cityFilter !== "ALL") {
-      const locationText = [store.city, store.province, store.addressLine].filter(Boolean).join(" ").toLowerCase();
-      if (!locationText.includes(cityFilter.toLowerCase())) {
+      if (!isStoreInProvinceOrCity(store, cityFilter)) {
         return false;
       }
     }
@@ -376,54 +390,83 @@ export default function ShopsManager() {
   const sortedStores = useMemo(() => {
     const list = [...filteredStores];
 
+    const compareStoreId = (a: StoreType, b: StoreType): number => {
+      const idA = a.id !== undefined && a.id !== null ? a.id : "";
+      const idB = b.id !== undefined && b.id !== null ? b.id : "";
+
+      const numA = typeof idA === "number" ? idA : Number(idA);
+      const numB = typeof idB === "number" ? idB : Number(idB);
+
+      if (!isNaN(numA) && !isNaN(numB) && idA !== "" && idB !== "") {
+        return numA - numB;
+      }
+
+      const strA = String(idA || a.uuid || "");
+      const strB = String(idB || b.uuid || "");
+      return strA.localeCompare(strB, undefined, { numeric: true, sensitivity: "base" });
+    };
+
     switch (sortBy) {
       case "NAME_ASC":
-        return list.sort((a, b) =>
-          (a.storeName ?? "").localeCompare(b.storeName ?? "", undefined, {
+        return list.sort((a, b) => {
+          const cmp = (a.storeName ?? "").localeCompare(b.storeName ?? "", undefined, {
             sensitivity: "base",
             numeric: true,
-          }),
-        );
-      case "NAME_DESC":
-        return list.sort((a, b) =>
-          (b.storeName ?? "").localeCompare(a.storeName ?? "", undefined, {
-            sensitivity: "base",
-            numeric: true,
-          }),
-        );
-      case "OLDEST": {
-        const hasTimestamps = list.some((item) => Boolean(item.createdAt));
-        if (hasTimestamps) {
-          return list.sort((a, b) => {
-            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-            return timeA - timeB;
           });
-        }
-        return list.reverse();
+          if (cmp !== 0) return cmp;
+          return compareStoreId(a, b);
+        });
+
+      case "NAME_DESC":
+        return list.sort((a, b) => {
+          const cmp = (b.storeName ?? "").localeCompare(a.storeName ?? "", undefined, {
+            sensitivity: "base",
+            numeric: true,
+          });
+          if (cmp !== 0) return cmp;
+          return compareStoreId(b, a);
+        });
+
+      case "OLDEST": {
+        return list.sort((a, b) => {
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          if (timeA && timeB && timeA !== timeB) {
+            return timeA - timeB;
+          }
+          return compareStoreId(a, b);
+        });
       }
+
       case "NEWEST":
       default: {
-        const hasTimestamps = list.some((item) => Boolean(item.createdAt));
-        if (hasTimestamps) {
-          return list.sort((a, b) => {
-            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return list.sort((a, b) => {
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          if (timeA && timeB && timeA !== timeB) {
             return timeB - timeA;
-          });
-        }
-        // Backend API returns sort: "createdAt,desc" by default, keep exact API order
-        return list;
+          }
+          return compareStoreId(b, a);
+        });
       }
     }
   }, [filteredStores, sortBy]);
 
-  const hasActiveFilters = cityFilter !== "ALL" || openFilter !== "ALL";
+  const displayedStores = useMemo(() => {
+    const start = page * size;
+    return sortedStores.slice(start, start + size);
+  }, [sortedStores, page, size]);
+
+  const paginationTotalElements = filteredStores.length;
+  const paginationTotalPages =
+    Math.ceil(filteredStores.length / size) || (filteredStores.length > 0 ? 1 : 0);
+  const paginationPage = page;
 
   const handleResetFilters = () => {
     setCityFilter("ALL");
     setOpenFilter("ALL");
     setSortBy("NEWEST");
+    setPage(0);
   };
 
   const handleSearch = () => {
@@ -477,7 +520,7 @@ export default function ShopsManager() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="w-full space-y-6">
       <ShopsHeader
         total={counts.all}
         approved={counts.approved}
@@ -485,9 +528,7 @@ export default function ShopsManager() {
         rejected={counts.rejected}
       />
 
-      {/* TOOLBAR */}
-      <div className="space-y-3">
-        {/* ROW 1: Status Tabs on Left, Search Bar on Right (Inline on Desktop, Stacked on Mobile) */}
+      <div className="space-y-4 rounded-3xl border border-gray-100 bg-white p-5 shadow-xs">
         <div className="flex w-full flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="w-full sm:w-auto min-w-0">
             <ShopsTabs
@@ -498,7 +539,6 @@ export default function ShopsManager() {
             />
           </div>
 
-          {/* Search Bar (Inline & Fully Extended on Desktop, Full Width on Mobile) */}
           <div className="relative w-full sm:flex-1 sm:min-w-[280px]">
             <Search
               size={18}
@@ -594,20 +634,17 @@ export default function ShopsManager() {
           </div>
         </div>
 
-        {/* ROW 3 & 4 on Mobile: 4 Filter Controls (2 rows, 2 cols each on mobile -> grid grid-cols-2) */}
         <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2.5">
-          {/* 1. City Filter (Row 3, Col 1 on Mobile) */}
-          <div className="w-full sm:w-[180px] lg:w-[210px]">
+          <div className="w-full sm:w-[190px] lg:w-[220px]">
             <CustomSelect
               value={cityFilter}
               onChange={(val) => { setCityFilter(val); setPage(0); }}
               options={CITY_OPTIONS}
-              placeholder="ក្រុង/ខេត្ត"
+              placeholder="រាជធានី-ខេត្ត"
               pill
             />
           </div>
 
-          {/* 2. Open/Close Filter (Row 3, Col 2 on Mobile) */}
           <div className="w-full sm:w-[180px] lg:w-[210px]">
             <CustomSelect
               value={openFilter}
@@ -618,11 +655,13 @@ export default function ShopsManager() {
             />
           </div>
 
-          {/* 3. Sort By Filter (Row 4, Col 1 on Mobile) */}
           <div className="w-full sm:w-[160px] lg:w-[190px]">
             <CustomSelect
               value={sortBy}
-              onChange={(val) => setSortBy(val as StoreSort)}
+              onChange={(val) => {
+                setSortBy(val as StoreSort);
+                setPage(0);
+              }}
               options={SORT_OPTIONS}
               placeholder="តម្រៀបតាម"
               pill
@@ -743,7 +782,7 @@ export default function ShopsManager() {
               សាកល្បងម្តងទៀត
             </button>
           </div>
-        ) : sortedStores.length === 0 ? (
+        ) : displayedStores.length === 0 ? (
           <div className="flex min-h-[340px] flex-col items-center justify-center">
             <Store size={60} className="text-[#F97316]" />
             <p className="mt-3 text-2xl text-[#F97316]">មិនមាន Store</p>
@@ -751,7 +790,7 @@ export default function ShopsManager() {
         ) : (
           <div className={`transition-opacity duration-200 ${isPending || isFetching ? "opacity-75" : "opacity-100"}`}>
             <ShopsTable
-              stores={sortedStores}
+              stores={displayedStores}
               disabled={updating || deleting || isFetching}
               onEdit={(store) => setEditingUuid(store.uuid)}
               onStatus={(store, action) => { setStatusStore(store); setStatusAction(action); }}
@@ -762,9 +801,9 @@ export default function ShopsManager() {
 
         {!isLoading && !error && (
           <ShopsPagination
-            page={data?.pageNumber ?? page}
-            totalPages={data?.totalPages ?? 0}
-            totalElements={data?.totalElements ?? 0}
+            page={paginationPage}
+            totalPages={paginationTotalPages}
+            totalElements={paginationTotalElements}
             disabled={isFetching || isPending}
             onPageChange={setPage}
           />

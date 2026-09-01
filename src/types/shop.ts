@@ -65,6 +65,7 @@ export interface StoreHour {
 }
 
 export interface Store {
+  id?: number | string | null;
   uuid: string;
   storeName: string;
   description: string | null;
@@ -116,6 +117,7 @@ export interface GetAdminStoresParams {
   accountStatus?: StoreAccountStatus;
   page?: number;
   size?: number;
+  sort?: string;
 }
 
 export interface CreateStorePayload {

@@ -152,6 +152,7 @@ export function normalizeStore(raw: unknown): Store {
   if (!isObject(raw)) return {} as Store;
   const r = raw as Record<string, any>;
   return {
+    id: r.id !== undefined && r.id !== null ? r.id : undefined,
     uuid: String(r.uuid || r.id || ""),
     storeName: String(r.storeName || r.store_name || r.name || ""),
     description: r.description !== undefined ? r.description : null,
@@ -309,7 +310,7 @@ export const shopApi = adminBaseApi.injectEndpoints({
             accountStatus: p.accountStatus || undefined,
             page: p.page ?? 0,
             size: Math.min(Math.max(1, p.size ?? 20), 100),
-            sort: "createdAt,desc",
+            sort: p.sort || "createdAt,desc",
           },
         };
       },
@@ -339,6 +340,98 @@ export const shopApi = adminBaseApi.injectEndpoints({
         }));
 
         return page;
+      },
+      providesTags: ["Store", "Shop"],
+      keepUnusedDataFor: 300,
+    }),
+    getAllShops: builder.query<
+      Store[],
+      { reviewStatus?: StoreReviewStatus | "ALL"; accountStatus?: StoreAccountStatus; query?: string } | void
+    >({
+      queryFn: async (arg, _api, _extraOptions, baseQuery) => {
+        try {
+          const pageSize = 100;
+          const p = (arg ?? {}) as {
+            reviewStatus?: StoreReviewStatus | "ALL";
+            accountStatus?: StoreAccountStatus;
+            query?: string;
+          };
+          const requestedReview =
+            p.reviewStatus && p.reviewStatus !== "ALL" ? p.reviewStatus : undefined;
+          const requestedAccount =
+            p.accountStatus || (requestedReview === "APPROVED" ? "ACTIVE" : undefined);
+          const requestedQuery = p.query?.trim() || undefined;
+
+          const firstRes = await baseQuery({
+            url: "/stores",
+            method: "GET",
+            params: {
+              query: requestedQuery,
+              reviewStatus: requestedReview,
+              accountStatus: requestedAccount,
+              page: 0,
+              size: pageSize,
+              sort: "createdAt,desc",
+            },
+          });
+
+          if (firstRes.error) {
+            return { error: firstRes.error };
+          }
+
+          const firstPageData = normalizeStorePage(firstRes.data);
+          let allStores: Store[] = [...firstPageData.contents];
+          const totalPages = Math.min(firstPageData.totalPages || 1, 50);
+
+          if (totalPages > 1) {
+            const pagePromises = [];
+            for (let p = 1; p < totalPages; p++) {
+              pagePromises.push(
+                baseQuery({
+                  url: "/stores",
+                  method: "GET",
+                  params: {
+                    query: requestedQuery,
+                    reviewStatus: requestedReview,
+                    accountStatus: requestedAccount,
+                    page: p,
+                    size: pageSize,
+                    sort: "createdAt,desc",
+                  },
+                }),
+              );
+            }
+
+            const results = await Promise.all(pagePromises);
+            for (const res of results) {
+              if (res.data) {
+                const pageData = normalizeStorePage(res.data);
+                allStores.push(...pageData.contents);
+              }
+            }
+          }
+
+          allStores = allStores.map((store) => ({
+            ...store,
+            reviewStatus:
+              store.reviewStatus && store.reviewStatus !== "UNKNOWN"
+                ? store.reviewStatus
+                : requestedReview || store.reviewStatus || "PENDING",
+            accountStatus:
+              store.accountStatus && store.accountStatus !== "UNKNOWN"
+                ? store.accountStatus
+                : requestedAccount || store.accountStatus || "ACTIVE",
+          }));
+
+          return { data: allStores };
+        } catch (err: any) {
+          return {
+            error: {
+              status: "CUSTOM_ERROR" as const,
+              error: err?.message || "Failed to fetch stores",
+            },
+          };
+        }
       },
       providesTags: ["Store", "Shop"],
       keepUnusedDataFor: 300,
@@ -480,6 +573,8 @@ export const shopApi = adminBaseApi.injectEndpoints({
 export const {
   useGetShopsQuery,
   useLazyGetShopsQuery,
+  useGetAllShopsQuery,
+  useLazyGetAllShopsQuery,
   useGetShopByUuidQuery,
   useLazyGetShopByUuidQuery,
   useCreateShopMutation,

@@ -49,7 +49,8 @@ export default function CustomSelect({
     return options.filter(
       (opt) =>
         opt.label.toLowerCase().includes(q) ||
-        opt.description?.toLowerCase().includes(q),
+        opt.description?.toLowerCase().includes(q) ||
+        opt.value.toLowerCase().includes(q),
     );
   }, [options, searchQuery]);
 
