@@ -40,12 +40,16 @@ import { getAdminUserPrimaryRole } from "@/src/lib/adminUserRoles";
 import { displayName } from "@/src/lib/userProfileFormat";
 import { getAdminApiErrorMessage } from "@/src/lib/adminApiError";
 
-import HardDeleteUserConfirmModal from "./HardDeleteUserConfirmModal";
-import RestoreUserConfirmModal from "./RestoreUserConfirmModal";
-import SuspendUserConfirmModal from "./SuspendUserConfirmModal";
-import UserCreateModal from "./UserCreateModal";
-import UserEditModal from "./UserEditModal";
-import UserProfileEditModal from "./UserProfileEditModal";
+import dynamic from "next/dynamic";
+
+// Lazy load modals for better performance
+const HardDeleteUserConfirmModal = dynamic(() => import("./HardDeleteUserConfirmModal"));
+const RestoreUserConfirmModal = dynamic(() => import("./RestoreUserConfirmModal"));
+const SuspendUserConfirmModal = dynamic(() => import("./SuspendUserConfirmModal"));
+const UserCreateModal = dynamic(() => import("./UserCreateModal"));
+const UserEditModal = dynamic(() => import("./UserEditModal"));
+const UserProfileEditModal = dynamic(() => import("./UserProfileEditModal"));
+
 import UsersHeader from "./UsersHeader";
 import UsersPagination from "./UsersPagination";
 import UsersTable from "./UsersTable";
@@ -1187,7 +1191,7 @@ export default function UsersManager() {
           TABLE
       ================================================== */}
 
-      <section className="w-full min-w-0 max-w-full overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
+      <section className="w-full rounded-3xl border border-gray-100 bg-white shadow-sm">
         {isLoading ? (
           <UsersTableSkeleton rows={size === 10 ? 5 : 7} />
         ) : error ? (

@@ -66,13 +66,17 @@ import type {
   StoreOption,
 } from "@/src/types/menu-management";
 
-import DeleteConfirmModal from "./DeleteConfirmModal";
+import dynamic from "next/dynamic";
+
+// Lazy load heavy modals for better performance
+const DeleteConfirmModal = dynamic(() => import("./DeleteConfirmModal"));
+const FoodDetailModal = dynamic(() => import("./FoodDetailModal"));
+const FoodFormModal = dynamic(() => import("./FoodFormModal"));
+const MenuItemDetailModal = dynamic(() => import("./MenuItemDetailModal"));
+const PublishMenuItemModal = dynamic(() => import("./PublishMenuItemModal"));
+
 import FoodCatalogTable from "./FoodCatalogTable";
 import FoodCatalogTableSkeleton from "./FoodCatalogTableSkeleton";
-import FoodDetailModal from "./FoodDetailModal";
-import FoodFormModal from "./FoodFormModal";
-import MenuItemDetailModal from "./MenuItemDetailModal";
-import PublishMenuItemModal from "./PublishMenuItemModal";
 import PublishedMenuItemsTable from "./PublishedMenuItemsTable";
 
 type Notice = {

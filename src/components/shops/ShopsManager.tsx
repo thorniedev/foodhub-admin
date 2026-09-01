@@ -34,11 +34,15 @@ import { getStoreLiveStatus, storeLogoCandidate } from "@/src/lib/shopFormat";
 import CustomSelect from "../ui/CustomSelect";
 
 import StoreMediaImage from "./detail/StoreMediaImage";
-import DeleteShopConfirmModal from "./DeleteShopConfirmModal";
-import ShopEditModal from "./ShopEditModal";
+import dynamic from "next/dynamic";
+
+// Lazy load modals for better performance
+const DeleteShopConfirmModal = dynamic(() => import("./DeleteShopConfirmModal"));
+const ShopEditModal = dynamic(() => import("./ShopEditModal"));
+const ShopStatusModal = dynamic(() => import("./ShopStatusModal"));
+
 import ShopsHeader from "./ShopsHeader";
 import ShopsPagination from "./ShopsPagination";
-import ShopStatusModal from "./ShopStatusModal";
 import ShopsTable from "./ShopsTable";
 import ShopsTableSkeleton from "./ShopsTableSkeleton";
 import ShopsTabs from "./ShopsTabs";

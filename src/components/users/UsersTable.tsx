@@ -47,27 +47,27 @@ export default function UsersTable({
   onRestore,
 }: UsersTableProps) {
   return (
-    <div className="w-full overflow-x-auto rounded-3xl border border-gray-100 bg-white shadow-sm">
-      <table className="w-full border-collapse text-left">
+    <div className="w-full">
+      <table className="w-full table-auto border-collapse text-left">
         {/* ================= HEAD ================= */}
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/80 text-left text-xl font-medium text-primary-900">
-            <th className="whitespace-nowrap px-6 py-4 font-medium min-w-[280px]">
+            <th className="whitespace-nowrap px-6 py-4 font-medium">
               គណនីអ្នកប្រើប្រាស់
             </th>
-            <th className="whitespace-nowrap px-6 py-4 font-medium min-w-[240px]">
+            <th className="whitespace-nowrap px-6 py-4 font-medium">
               អ៊ីមែល
             </th>
-            <th className="whitespace-nowrap px-6 py-4 font-medium min-w-[170px]">
+            <th className="whitespace-nowrap px-6 py-4 font-medium">
               កាលបរិច្ឆេទបង្កើត
             </th>
-            <th className="whitespace-nowrap px-6 py-4 font-medium min-w-[140px]">
+            <th className="whitespace-nowrap px-6 py-4 font-medium">
               ផ្ទៀងផ្ទាត់
             </th>
-            <th className="whitespace-nowrap px-6 py-4 font-medium min-w-[140px]">
+            <th className="whitespace-nowrap px-6 py-4 font-medium">
               ស្ថានភាព
             </th>
-            <th className="whitespace-nowrap px-6 py-4 text-end font-medium min-w-[180px] pr-6">
+            <th className="whitespace-nowrap px-6 py-4 text-end font-medium pr-6">
               សកម្មភាព
             </th>
           </tr>
@@ -165,7 +165,7 @@ export default function UsersTable({
                 <td className="whitespace-nowrap px-6 py-3.5">
                   <div className="flex items-center gap-2 text-lg font-normal text-gray-600">
                     <Mail size={18} className="text-primary-700 shrink-0" />
-                    <span className="max-w-[240px] truncate">
+                    <span className="max-w-[160px] truncate" title={user.primaryEmail || "—"}>
                       {user.primaryEmail || "—"}
                     </span>
                   </div>
