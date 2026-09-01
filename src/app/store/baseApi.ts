@@ -13,7 +13,9 @@ import {
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: "",
+  credentials: "include",
   prepareHeaders: (headers) => {
+    headers.set("Accept", "application/json");
     const token = getAuthAccessToken();
 
     if (token) {
