@@ -181,8 +181,6 @@ export default function MenuItemsManager({
   const cuisinesQuery = useGetManagedCuisinesQuery();
   const storesQuery = useGetManagedStoresQuery();
   const allShopsListQuery = useGetShopsQuery({
-    reviewStatus: "APPROVED",
-    accountStatus: "ACTIVE",
     size: 100,
   });
   const approvedStoresCountQuery = useGetShopsQuery({
@@ -2019,7 +2017,6 @@ export default function MenuItemsManager({
         mealTypes={activeMealTypes}
         ageGroups={activeAgeGroups}
         dietaryTypes={activeDietaryTypes}
-        allergens={activeAllergens}
         preparationTimes={preparationTimeOptions}
         distances={distanceOptions}
         saving={creatingFood || updatingFood}

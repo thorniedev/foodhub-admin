@@ -47,7 +47,6 @@ import type {
 import type { MealType } from "@/src/types/mealType";
 import type { AgeGroup } from "@/src/types/ageGroup";
 import type { DietaryType } from "@/src/types/dietaryType";
-import type { Allergen } from "@/src/types/allergen";
 import type { FilterCatalogOption } from "@/src/types/filterCatalog";
 import { useGetManagedFoodQuery } from "@/src/app/store/menuManagementApi";
 
@@ -99,7 +98,6 @@ export default function FoodFormModal({
   mealTypes = [],
   ageGroups = [],
   dietaryTypes = [],
-  allergens = [],
   preparationTimes = [],
   distances = [],
   saving,
@@ -117,7 +115,6 @@ export default function FoodFormModal({
   mealTypes?: MealType[];
   ageGroups?: AgeGroup[];
   dietaryTypes?: DietaryType[];
-  allergens?: Allergen[];
   preparationTimes?: FilterCatalogOption[];
   distances?: FilterCatalogOption[];
   regions?: FilterCatalogOption[];
@@ -140,7 +137,6 @@ export default function FoodFormModal({
   const [mealTypeRows, setMealTypeRows] = useState<FoodMealTypeRelation[]>([]);
   const [ageRuleRows, setAgeRuleRows] = useState<FoodAgeRuleRelation[]>([]);
   const [dietaryTypeRows, setDietaryTypeRows] = useState<FoodDietaryTypeRelation[]>([]);
-  const [allergenRows, setAllergenRows] = useState<Array<{ allergenUuid: string; riskLevel?: string; notes?: string }>>([]);
   const [preparationTimeRows, setPreparationTimeRows] = useState<Array<{ optionUuid: string; notes?: string }>>([]);
   const [distanceRows, setDistanceRows] = useState<Array<{ optionUuid: string; notes?: string }>>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -162,7 +158,6 @@ export default function FoodFormModal({
       setMealTypeRows([]);
       setAgeRuleRows([]);
       setDietaryTypeRows([]);
-      setAllergenRows([]);
       setPreparationTimeRows([]);
       setDistanceRows([]);
       setError(null);
@@ -508,37 +503,6 @@ export default function FoodFormModal({
         .filter((d) => Boolean(d.code)),
     );
 
-    const rawAllergens =
-      Array.isArray(activeItem.allergens) && activeItem.allergens.length > 0
-          ? activeItem.allergens
-          : Array.isArray((activeItem as any).allergenDeclarations) && (activeItem as any).allergenDeclarations.length > 0
-            ? (activeItem as any).allergenDeclarations
-            : [];
-    setAllergenRows(
-      rawAllergens
-        .map((a: any) => {
-          const aId =
-            typeof a === "string"
-              ? a
-              : a.allergenUuid || a.uuid || a.id || a.code || "";
-          const aName =
-            typeof a === "string"
-              ? a
-              : a.name || a.localName || a.allergenName || "";
-          const found = allergens.find(
-            (opt) =>
-              (aId && (opt.uuid === aId || opt.code === aId || (opt as any).id === aId)) ||
-              (aName && (opt.name === aName || (opt as any).localName === aName)),
-          );
-          return {
-            allergenUuid: found?.uuid || found?.code || aId || "",
-            riskLevel: a.riskLevel || "MEDIUM",
-            notes: a.notes ?? "",
-          };
-        })
-        .filter((a) => Boolean(a.allergenUuid)),
-    );
-
     const rawPrepTimes =
       Array.isArray((activeItem as any)?.preparationTimes)
           ? (activeItem as any).preparationTimes
@@ -611,11 +575,6 @@ export default function FoodFormModal({
   const activeDietaryTypes = useMemo(
     () => dietaryTypes.filter((d) => d.active !== false),
     [dietaryTypes],
-  );
-
-  const activeAllergens = useMemo(
-    () => (allergens ?? []).filter((a) => a.active !== false),
-    [allergens],
   );
 
   const activeMealTypes = useMemo(
@@ -704,27 +663,6 @@ export default function FoodFormModal({
       })),
     ],
     [activeDietaryTypes],
-  );
-
-  const allergenSelectOptions = useMemo(
-    () => [
-      { value: "", label: "ជ្រើសសារធាតុបង្កអាឡែស៊ី..." },
-      ...activeAllergens.map((a) => ({
-        value: a.uuid,
-        label: (a as any).localName || a.name || a.code,
-        description: a.code,
-      })),
-    ],
-    [activeAllergens],
-  );
-
-  const allergenRiskSelectOptions = useMemo(
-    () => [
-      { value: "LOW", label: "LOW (ទាប)" },
-      { value: "MEDIUM", label: "MEDIUM (មធ្យម)" },
-      { value: "HIGH", label: "HIGH (ខ្ពស់)" },
-    ],
-    [],
   );
 
   const mealTypeSelectOptions = useMemo(
@@ -960,22 +898,6 @@ export default function FoodFormModal({
               localName: (found as any)?.localName || undefined,
               ruleResult: r.ruleResult || "ALLOWED",
               reasonText: r.reasonText?.trim() || "Suitable as a normal serving.",
-            };
-          }),
-        allergens: allergenRows
-          .filter((r) => Boolean(r.allergenUuid))
-          .map((r) => {
-            const found = allergens.find(
-              (a) => a.uuid === r.allergenUuid || a.code === r.allergenUuid,
-            );
-            return {
-              allergenUuid: found?.uuid || r.allergenUuid,
-              allergenCode: found?.code || undefined,
-              code: found?.code || undefined,
-              name: found?.name || undefined,
-              localName: (found as any)?.localName || undefined,
-              riskLevel: r.riskLevel || "MEDIUM",
-              notes: r.notes?.trim() || null,
             };
           }),
         preparationTimes: preparationTimeRows
@@ -1248,76 +1170,6 @@ export default function FoodFormModal({
                     <button
                       type="button"
                       onClick={() => setDietaryTypeRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Allergens Metadata Section */}
-          <div className="rounded-3xl border border-rose-100 bg-gradient-to-br from-rose-50/40 to-white p-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
-                  <ShieldAlert size={20} />
-                </div>
-                <div>
-                  <p className="text-2xl font-normal text-gray-800">សារធាតុបង្កអាឡែស៊ី <span className="text-lg font-normal text-gray-400">(Allergens)</span></p>
-                  <p className="mt-0.5 text-lg font-normal text-gray-500">Peanuts, Seafood, Dairy, etc.</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setAllergenRows((current) => [...current, { allergenUuid: "", riskLevel: "MEDIUM", notes: "" }])}
-                className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-rose-700 active:scale-95 cursor-pointer"
-              >
-                <Plus size={18} />
-                បន្ថែមអាឡែស៊ី
-              </button>
-            </div>
-
-            {allergenRows.length === 0 ? (
-              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-rose-200 bg-white/70 px-5 py-4">
-                <ShieldAlert size={18} className="shrink-0 text-rose-400" />
-                <p className="text-lg font-normal text-gray-400">មិនទាន់បានជ្រើសសារធាតុបង្កអាឡែស៊ី</p>
-              </div>
-            ) : (
-              <div className="mt-4 space-y-2.5">
-                {allergenRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-rose-100 hover:shadow">
-                    <div className="flex-1 min-w-[200px]">
-                      <CustomSelect
-                        value={row.allergenUuid}
-                        onChange={(val) => {
-                          setAllergenRows((prev) =>
-                            prev.map((r, i) => (i === idx ? { ...r, allergenUuid: val } : r)),
-                          );
-                        }}
-                        options={allergenSelectOptions}
-                        placeholder="ជ្រើសសារធាតុបង្កអាឡែស៊ី..."
-                        searchable
-                        pill
-                      />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="កំណត់ចំណាំ (Notes)..."
-                      value={row.notes ?? ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setAllergenRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
-                        );
-                      }}
-                      className="h-12 flex-1 min-w-[180px] rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 outline-none placeholder:font-normal placeholder:text-gray-400 focus:border-rose-400 focus:ring-2 focus:ring-rose-100"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setAllergenRows((prev) => prev.filter((_, i) => i !== idx))}
                       className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
                     >
                       <Trash2 size={18} />

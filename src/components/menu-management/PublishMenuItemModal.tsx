@@ -171,7 +171,12 @@ function numberOrNull(value: string): number | null {
 }
 
 function storeLabel(store: StoreOption): string {
-  return store.storeName || store.name || store.localName || store.uuid;
+  const name = store.storeName || store.name || store.localName || store.uuid;
+  const status = (store as any).reviewStatus || (store as any).accountStatus || (store as any).operatingStatus;
+  if (status && status !== "APPROVED" && status !== "ACTIVE") {
+    return `${name} (${status})`;
+  }
+  return name;
 }
 
 function foodLabel(food: FoodRecord): string {
@@ -340,8 +345,6 @@ export default function PublishMenuItemModal({
   const { data: searchedShops } = useGetShopsQuery(
     {
       query: storeSearchInput.trim() || undefined,
-      reviewStatus: "APPROVED",
-      accountStatus: "ACTIVE",
       size: 50,
     },
     { skip: !open || storeSearchInput.trim().length < 2 },
