@@ -89,12 +89,12 @@ export default function DashboardExportMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((previous) => !previous)}
-        className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-6 text-lg font-normal text-primary-800 transition hover:bg-primary-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-200 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-3.5 text-xs font-medium text-primary-800 transition hover:bg-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
       >
-        <Download size={20} aria-hidden="true" />
+        <Download size={15} aria-hidden="true" />
         <span>នាំចេញ</span>
         <ChevronDown
-          size={18}
+          size={14}
           aria-hidden="true"
           className={cn("transition-transform", open && "rotate-180")}
         />
@@ -104,13 +104,13 @@ export default function DashboardExportMenu({
         <div
           role="menu"
           aria-label="ជម្រើសនាំចេញរបាយការណ៍"
-          className="absolute right-0 top-full z-50 mt-2 w-80 rounded-3xl border border-gray-100 bg-white p-4 shadow-xl"
+          className="absolute right-0 top-full z-50 mt-1.5 w-72 rounded-xl border border-border/80 bg-card p-3 shadow-lg"
         >
-          <p className="px-1 pb-2 text-lg font-medium text-gray-700">
+          <p className="px-1 pb-1.5 text-xs font-semibold text-foreground">
             របាយការណ៍
           </p>
 
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {REPORTS.map((option) => {
               const selected = report === option.value;
 
@@ -122,24 +122,24 @@ export default function DashboardExportMenu({
                   aria-checked={selected}
                   onClick={() => setReport(option.value)}
                   className={cn(
-                    "flex w-full cursor-pointer items-center justify-between rounded-full px-4 py-2.5 text-left text-lg font-normal transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                    "flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
                     selected
-                      ? "bg-primary-50 text-primary-800"
-                      : "text-gray-700 hover:bg-gray-50",
+                      ? "bg-primary-50 text-primary-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                      : "text-foreground hover:bg-muted",
                   )}
                 >
                   <span>{option.label}</span>
-                  {selected && <Check size={18} aria-hidden="true" />}
+                  {selected && <Check size={14} aria-hidden="true" />}
                 </button>
               );
             })}
           </div>
 
-          <p className="px-1 pb-2 pt-3 text-lg font-medium text-gray-700">
+          <p className="px-1 pb-1.5 pt-2.5 text-xs font-semibold text-foreground">
             ទម្រង់ឯកសារ
           </p>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-1.5">
             {FORMATS.map((option) => (
               <button
                 key={option.value}
@@ -147,10 +147,10 @@ export default function DashboardExportMenu({
                 role="menuitem"
                 disabled={busyFormat !== null}
                 onClick={() => void handleDownload(option.value)}
-                className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full border border-gray-200 px-4 text-lg font-normal text-gray-700 transition hover:border-primary-300 hover:bg-primary-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border/80 px-2.5 text-xs font-medium text-foreground transition hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {busyFormat === option.value ? (
-                  <Loader2 size={18} aria-hidden="true" className="animate-spin" />
+                  <Loader2 size={14} aria-hidden="true" className="animate-spin" />
                 ) : (
                   option.icon
                 )}
@@ -159,7 +159,7 @@ export default function DashboardExportMenu({
             ))}
           </div>
 
-          <p className="mt-3 px-1 text-lg leading-relaxed text-gray-500">
+          <p className="mt-2.5 px-1 text-2xs leading-relaxed text-muted-foreground">
             របាយការណ៍ប្រើតម្រងដូចនឹងផ្ទាំងនេះ។
           </p>
         </div>
@@ -170,7 +170,7 @@ export default function DashboardExportMenu({
       </p>
 
       {errorMessage && (
-        <p role="alert" className="absolute right-0 top-full mt-1 w-80 rounded-2xl bg-red-50 px-4 py-2.5 text-lg font-normal text-red-700">
+        <p role="alert" className="absolute right-0 top-full mt-1 w-72 rounded-lg bg-red-50 p-2 text-xs font-normal text-red-700 dark:bg-red-950 dark:text-red-300">
           {errorMessage}
         </p>
       )}

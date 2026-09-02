@@ -33,7 +33,7 @@ function getConfig() {
   const backendApiUrl =
     process.env.BACKEND_API_URL ??
     process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "http://localhost:7070/api/v1";
+    "https://api.mhoubahar.store";
 
   const keycloakUrl =
     process.env.KEYCLOAK_URL ??
@@ -48,7 +48,7 @@ function getConfig() {
   const clientId =
     process.env.KEYCLOAK_CLIENT_ID ??
     process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ??
-    "foodhub-web";
+    "mhoubahar-admin";
 
   const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET;
 
@@ -191,7 +191,7 @@ function applyRefreshedCookies(
   if (tokens.refresh_token) {
     response.cookies.set("foodhub_refresh_token", tokens.refresh_token, {
       ...options,
-      maxAge: tokens.refresh_expires_in ?? 30 * 60,
+      maxAge: tokens.refresh_expires_in ?? 30 * 24 * 60 * 60,
     });
   }
 

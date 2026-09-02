@@ -80,7 +80,7 @@ export default function ActivityTrendChart({
         <div
           role="group"
           aria-label="ជ្រើសរើសរង្វាស់សម្រាប់សសរ"
-          className="flex items-center gap-1.5 rounded-full bg-gray-100 p-1"
+          className="flex items-center gap-1 rounded-full bg-muted/60 p-1"
         >
           {BAR_METRICS.map((metric) => {
             const active = metric.value === barMetric;
@@ -92,10 +92,10 @@ export default function ActivityTrendChart({
                 aria-pressed={active}
                 onClick={() => setBarMetric(metric.value)}
                 className={cn(
-                  "min-h-10 cursor-pointer rounded-full px-4 text-lg font-normal transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                  "h-7 cursor-pointer rounded-full px-3 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
                   active
-                    ? "bg-white text-gray-800 shadow-sm"
-                    : "text-gray-600 hover:text-gray-800",
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {metric.label}
@@ -113,20 +113,20 @@ export default function ActivityTrendChart({
           description="មិនមានការមើល ការចុច ឬវគ្គណែនាំណាមួយត្រូវបានកត់ត្រាទេ។"
         />
       ) : (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2.5 text-lg font-normal">
-            <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 text-emerald-700">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
+            <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
               <span
-                className="h-2.5 w-2.5 rounded-full"
+                className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: CHART_SERIES.activeUsers }}
                 aria-hidden="true"
               />
               អ្នកប្រើប្រាស់សកម្ម
             </span>
 
-            <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3.5 text-blue-700">
+            <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300">
               <span
-                className="h-2.5 w-2.5 rounded-full"
+                className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: CHART_SERIES.newUsers }}
                 aria-hidden="true"
               />
@@ -134,7 +134,7 @@ export default function ActivityTrendChart({
             </span>
 
             <span
-              className="inline-flex min-h-9 items-center gap-2 rounded-full border px-3.5"
+              className="inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5"
               style={{
                 borderColor: `${activeBar.color}33`,
                 backgroundColor: `${activeBar.color}14`,
@@ -142,7 +142,7 @@ export default function ActivityTrendChart({
               }}
             >
               <span
-                className="h-2.5 w-2.5 rounded-full"
+                className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: activeBar.color }}
                 aria-hidden="true"
               />
@@ -150,11 +150,11 @@ export default function ActivityTrendChart({
             </span>
           </div>
 
-          <div className="h-[300px] w-full">
+          <div className="h-[280px] w-full sm:h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={data}
-                margin={{ top: 10, right: 10, bottom: 0, left: -12 }}
+                margin={{ top: 12, right: 12, bottom: 4, left: 0 }}
               >
                 <defs>
                   <linearGradient id={activeUsersFillId} x1="0" x2="0" y1="0" y2="1">
@@ -172,7 +172,7 @@ export default function ActivityTrendChart({
                 <XAxis
                   dataKey="date"
                   tickFormatter={formatShortDate}
-                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 18 }}
+                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
                   tickLine={false}
                   axisLine={{ stroke: CHART_GRID }}
                   minTickGap={24}
@@ -185,10 +185,10 @@ export default function ActivityTrendChart({
                 <YAxis
                   yAxisId="people"
                   tickFormatter={formatCompact}
-                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 18 }}
+                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
-                  width={68}
+                  width={48}
                   allowDecimals={false}
                 />
 
@@ -196,10 +196,10 @@ export default function ActivityTrendChart({
                   yAxisId="volume"
                   orientation="right"
                   tickFormatter={formatCompact}
-                  tick={{ fill: activeBar.color, fontSize: 18 }}
+                  tick={{ fill: activeBar.color, fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
-                  width={68}
+                  width={48}
                   allowDecimals={false}
                 />
 

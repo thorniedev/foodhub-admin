@@ -35,10 +35,7 @@ import {
   extractKhmerOnlyName,
   isDrinkCategory,
 } from "@/src/lib/catalogCategoryHelper";
-import {
-  readFoodRelationsStorage,
-  readMenuItemRelationsStorage,
-} from "@/src/lib/filterCatalogStorage";
+import type { FoodRecord } from "@/src/types/menu-management";
 
 const SPICE_SHORT_LABELS: Record<number, string> = {
   0: "មិនហឹរ",
@@ -94,12 +91,16 @@ export default function MenuItemDetailModal({
 
   const activeImage = images[selectedImageIndex] || images[0];
   const isAvailable = data?.availabilityStatus !== "UNAVAILABLE";
+  const foodsList: FoodRecord[] = Array.isArray(foodsQuery.data)
+    ? foodsQuery.data
+    : foodsQuery.data?.content ?? (foodsQuery.data as any)?.contents ?? [];
+
   const rawFood = data?.food as any;
   const foodUuid =
     data?.foodUuid ||
     rawFood?.uuid ||
     rawFood?.id ||
-    foodsQuery.data?.content?.find(
+    foodsList.find(
       (f) =>
         (rawFood?.canonicalName && f.canonicalName === rawFood.canonicalName) ||
         (rawFood?.localName && f.localName === rawFood.localName) ||
@@ -108,11 +109,8 @@ export default function MenuItemDetailModal({
     )?.uuid;
 
   const catalogFood = foodUuid
-    ? foodsQuery.data?.content?.find((f) => f.uuid === foodUuid)
+    ? foodsList.find((f) => f.uuid === foodUuid)
     : null;
-  const storedFood = foodUuid ? readFoodRelationsStorage(foodUuid) : null;
-  const storedMenuItem = uuid ? readMenuItemRelationsStorage(uuid) : null;
-
   const categoryName =
     rawFood?.categoryName ||
     rawFood?.category?.name ||
@@ -151,70 +149,79 @@ export default function MenuItemDetailModal({
     matchedStore?.localName ||
     "—";
 
-  const srvNut =
-    catalogFood?.nutritionData ??
-    (catalogFood as any)?.nutrition ??
-    rawFood?.nutritionData ??
-    rawFood?.nutrition;
-  const storedNut = storedFood?.nutritionData ?? storedFood?.nutrition;
-  const srvHasNutrition = !!(
-    srvNut &&
-    (Number(srvNut.calories) > 0 ||
-      Number(srvNut.proteinGrams ?? srvNut.protein) > 0 ||
-      Number(srvNut.carbohydrateGrams ?? srvNut.carbs) > 0 ||
-      Number(srvNut.fatGrams ?? srvNut.fat) > 0 ||
-      Number(srvNut.fiberGrams ?? srvNut.fiber) > 0)
-  );
+  const foodEvents =
+    Array.isArray(rawFood?.events) && rawFood.events.length > 0
+      ? rawFood.events
+      : Array.isArray(catalogFood?.events) && catalogFood.events.length > 0
+        ? catalogFood.events
+        : [];
 
-  const baseFood = catalogFood || rawFood;
+  const foodSeasons =
+    Array.isArray(rawFood?.seasons) && rawFood.seasons.length > 0
+      ? rawFood.seasons
+      : Array.isArray(catalogFood?.seasons) && catalogFood.seasons.length > 0
+        ? catalogFood.seasons
+        : [];
+
+  const foodWeather =
+    Array.isArray(rawFood?.suitableWeather) && rawFood.suitableWeather.length > 0
+      ? rawFood.suitableWeather
+      : Array.isArray(rawFood?.weatherConditions) && rawFood.weatherConditions.length > 0
+        ? rawFood.weatherConditions
+        : Array.isArray(catalogFood?.suitableWeather) && catalogFood.suitableWeather.length > 0
+          ? catalogFood.suitableWeather
+          : Array.isArray((catalogFood as any)?.weatherConditions) && (catalogFood as any).weatherConditions.length > 0
+            ? (catalogFood as any).weatherConditions
+            : [];
+
+  const foodMealTypes =
+    Array.isArray(rawFood?.mealTypes) && rawFood.mealTypes.length > 0
+      ? rawFood.mealTypes
+      : Array.isArray(catalogFood?.mealTypes) && catalogFood.mealTypes.length > 0
+        ? catalogFood.mealTypes
+        : [];
+
+  const foodAgeRules =
+    Array.isArray(rawFood?.ageRules) && rawFood.ageRules.length > 0
+      ? rawFood.ageRules
+      : Array.isArray((rawFood as any)?.ageGroups) && (rawFood as any).ageGroups.length > 0
+        ? (rawFood as any).ageGroups
+        : Array.isArray(catalogFood?.ageRules) && catalogFood.ageRules.length > 0
+          ? catalogFood.ageRules
+          : Array.isArray((catalogFood as any)?.ageGroups) && (catalogFood as any).ageGroups.length > 0
+            ? (catalogFood as any).ageGroups
+            : [];
+
+  const foodDietaryTypes =
+    Array.isArray(rawFood?.dietaryTypes) && rawFood.dietaryTypes.length > 0
+      ? rawFood.dietaryTypes
+      : Array.isArray(catalogFood?.dietaryTypes) && catalogFood.dietaryTypes.length > 0
+        ? catalogFood.dietaryTypes
+        : [];
+
+  const baseFood = rawFood || catalogFood;
   const food = baseFood
     ? {
-      ...baseFood,
-      categoryName,
-      cuisineName,
-      nutritionData: srvHasNutrition ? srvNut : (storedNut ?? srvNut),
-      mealTypes:
-        storedFood?.mealTypes !== undefined
-          ? storedFood.mealTypes
-          : (baseFood.mealTypes ?? []),
-      ageRules:
-        storedFood?.ageRules !== undefined
-          ? storedFood.ageRules
-          : storedFood?.ageGroups !== undefined
-            ? storedFood.ageGroups
-            : (baseFood.ageRules ?? baseFood.ageGroups ?? []),
-      seasons:
-        storedFood?.seasons !== undefined
-          ? storedFood.seasons
-          : (baseFood.seasons ?? []),
-      suitableWeather:
-        storedFood?.suitableWeather !== undefined
-          ? storedFood.suitableWeather
-          : storedFood?.weatherConditions !== undefined
-            ? storedFood.weatherConditions
-            : (baseFood.suitableWeather ?? baseFood.weatherConditions ?? []),
-      events:
-        storedFood?.events !== undefined
-          ? storedFood.events
-          : (baseFood.events ?? []),
-      dietaryTypes:
-        storedMenuItem?.dietaryTypes !== undefined
-          ? storedMenuItem.dietaryTypes
-          : data?.dietaryTypes !== undefined &&
-            Array.isArray(data.dietaryTypes)
-            ? data.dietaryTypes
-            : storedFood?.dietaryTypes !== undefined
-              ? storedFood.dietaryTypes
-              : (baseFood.dietaryTypes ?? []),
-      allergens:
-        storedFood?.allergens !== undefined
-          ? storedFood.allergens
-          : (baseFood.allergens ?? []),
-    }
+        ...catalogFood,
+        ...baseFood,
+        categoryName,
+        cuisineName,
+        nutritionData:
+          (data as any)?.nutrition ??
+          baseFood?.nutritionData ??
+          (baseFood as any)?.nutrition ??
+          catalogFood?.nutritionData,
+        mealTypes: foodMealTypes,
+        ageRules: foodAgeRules,
+        seasons: foodSeasons,
+        suitableWeather: foodWeather,
+        events: foodEvents,
+        dietaryTypes: foodDietaryTypes,
+        allergens: (data as any)?.allergenDeclarations ?? baseFood?.allergens ?? catalogFood?.allergens ?? [],
+      }
     : null;
 
-  const spice =
-    food?.defaultSpiceLevel ?? (storedFood as any)?.defaultSpiceLevel ?? 0;
+  const spice = (baseFood as any)?.spiceLevel ?? baseFood?.defaultSpiceLevel ?? 0;
 
   const prepTime =
     data?.preparationTimeMinutes != null

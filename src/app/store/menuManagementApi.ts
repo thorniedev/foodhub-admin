@@ -771,11 +771,7 @@ function normalizePage<T>(
 }
 
 import {
-  saveLocalMenuItem,
-  readLocalMenuItems,
-  deleteLocalMenuItem,
   saveMenuItemRelationsStorage,
-  createClientUuid,
 } from "@/src/lib/filterCatalogStorage";
 
 function toError(
@@ -903,6 +899,181 @@ function makeMultipart(
   });
 
   return form;
+}
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function asUuid(value: unknown): string | null {
+  const text = typeof value === "string" ? value.trim() : "";
+  return UUID_PATTERN.test(text) ? text : null;
+}
+
+/**
+ * Builds the `food` JSON for POST/PATCH /api/v1/catalog/foods.
+ *
+ * That endpoint is the one that actually persists a Food's relations
+ * (food_seasons, food_events, food_weather_conditions, food_meal_types,
+ * food_age_rules) as well as nutrition. Its ObjectMapper rejects unknown
+ * properties, so this sends exactly the fields CreateFoodRequest and
+ * UpdateFoodRequest declare — no denormalized code/name extras.
+ *
+ * Relation entries without a resolvable UUID are dropped rather than sent,
+ * because the server requires a UUID for each and would reject the whole
+ * save.
+ */
+function buildCatalogFoodJson(
+  payload: Partial<FoodWritePayload>,
+  primaryMediaUuids: string[],
+): Record<string, unknown> {
+  const seasons = (payload.seasons ?? [])
+    .map((row: any) => {
+      const seasonUuid = asUuid(row.seasonUuid) ?? asUuid(row.uuid);
+      return seasonUuid
+        ? {
+            seasonUuid,
+            suitabilityScore: row.suitabilityScore ?? 0.95,
+            reasonText: row.reasonText?.trim() || null,
+          }
+        : null;
+    })
+    .filter(Boolean);
+
+  const events = (payload.events ?? [])
+    .map((row: any) => {
+      const eventUuid = asUuid(row.eventUuid) ?? asUuid(row.uuid);
+      return eventUuid
+        ? {
+            eventUuid,
+            relevanceScore: row.relevanceScore ?? 0.9,
+            reasonText: row.reasonText?.trim() || null,
+          }
+        : null;
+    })
+    .filter(Boolean);
+
+  const suitableWeather = (
+    payload.suitableWeather ??
+    (payload as any).weatherConditions ??
+    []
+  )
+    .map((row: any) => {
+      const weatherConditionUuid =
+        asUuid(row.weatherConditionUuid) ?? asUuid(row.uuid);
+      return weatherConditionUuid
+        ? {
+            weatherConditionUuid,
+            suitabilityScore: row.suitabilityScore ?? 0.95,
+            reasonText: row.reasonText?.trim() || null,
+          }
+        : null;
+    })
+    .filter(Boolean);
+
+  const mealTypes = (payload.mealTypes ?? [])
+    .map((row: any) => {
+      const mealTypeUuid = asUuid(row.mealTypeUuid) ?? asUuid(row.uuid);
+      return mealTypeUuid
+        ? {
+            mealTypeUuid,
+            suitabilityScore: row.suitabilityScore ?? 1.0,
+          }
+        : null;
+    })
+    .filter(Boolean);
+
+  const ageRules = (payload.ageRules ?? (payload as any).ageGroups ?? [])
+    .map((row: any) => {
+      const ageGroupUuid = asUuid(row.ageGroupUuid) ?? asUuid(row.uuid);
+      return ageGroupUuid
+        ? {
+            ageGroupUuid,
+            ruleResult: row.ruleResult || "ALLOWED",
+            reasonText:
+              row.reasonText?.trim() || "Suitable as a normal serving.",
+          }
+        : null;
+    })
+    .filter(Boolean);
+
+  // foods.dietary_types is a plain jsonb array of objects on the server.
+  const dietaryTypes = (payload.dietaryTypes ?? []).map((row: any) =>
+    typeof row === "string"
+      ? { code: row, name: row }
+      : {
+          code: row.code || row.dietaryTypeCode || "",
+          name: row.name || row.localName || row.code || "",
+        },
+  );
+
+  return {
+    canonicalName: payload.canonicalName,
+    localName: payload.localName ?? null,
+    description: payload.description ?? null,
+    categoryUuid: asUuid(payload.categoryUuid),
+    cuisineUuid: asUuid(payload.cuisineUuid),
+    primaryMediaUuids: primaryMediaUuids.filter((value) => asUuid(value)),
+    // The catalog contract caps spice at 5.
+    defaultSpiceLevel: Math.min(
+      5,
+      Math.max(0, Number(payload.defaultSpiceLevel ?? 0)),
+    ),
+    nutritionData: payload.nutritionData ?? {},
+    seasons,
+    dietaryTypes,
+    events,
+    suitableWeather,
+    mealTypes,
+    ageRules,
+    isActive: payload.isActive ?? true,
+  };
+}
+
+/**
+ * The item's own attribute copy, sent under MenuItemCreationInput.
+ *
+ * spiceLevel/nutritionData are included whenever set. The six list fields
+ * (seasons, events, suitableWeather, mealTypes, ageRules, dietaryTypes) are
+ * sent whenever the array itself was provided — including empty — because
+ * an empty array is the form's honest representation of "the admin cleared
+ * every row here," not "say nothing." MenuItemCreationInput distinguishes a
+ * missing field (seed from the selected food) from an explicit [] (store
+ * nothing), so collapsing "empty" into "omitted" here would silently
+ * discard that clear-all edit and leave the old rows in place.
+ */
+function menuItemAttributeFields(
+  menuItem: Partial<MenuItemWritePayload["menuItem"]> | undefined,
+): Record<string, unknown> {
+  if (!menuItem) return {};
+
+  const fields: Record<string, unknown> = {};
+
+  if (menuItem.spiceLevel != null) {
+    fields.spiceLevel = Number(menuItem.spiceLevel);
+  }
+  if (menuItem.nutritionData) {
+    fields.nutritionData = menuItem.nutritionData;
+  }
+  if (menuItem.seasons !== undefined) {
+    fields.seasons = menuItem.seasons;
+  }
+  if (menuItem.events !== undefined) {
+    fields.events = menuItem.events;
+  }
+  if (menuItem.suitableWeather !== undefined) {
+    fields.suitableWeather = menuItem.suitableWeather;
+  }
+  if (menuItem.mealTypes !== undefined) {
+    fields.mealTypes = menuItem.mealTypes;
+  }
+  if (menuItem.ageRules !== undefined) {
+    fields.ageRules = menuItem.ageRules;
+  }
+  if (menuItem.dietaryTypes !== undefined) {
+    fields.dietaryTypes = menuItem.dietaryTypes;
+  }
+
+  return fields;
 }
 
 export const menuManagementApi =
@@ -1370,35 +1541,29 @@ export const menuManagementApi =
               result.data as never,
             );
 
-            // Normalize nutritionData only if there is real non-zero data.
-            // If the server returned 0s or empty, leave it undefined so that
-            // FoodFormModal and FoodDetailModal will load stored nutrition.
-            const rawNut = (raw as any)?.nutritionData ?? (raw as any)?.nutrition;
-            const hasRawNut = rawNut && (
-              Number(rawNut.calories) > 0 ||
-              Number(rawNut.proteinGrams ?? rawNut.protein) > 0 ||
-              Number(rawNut.carbohydrateGrams ?? rawNut.carbsGrams ?? rawNut.carbs ?? rawNut.carbohydrate) > 0 ||
-              Number(rawNut.fatGrams ?? rawNut.fat) > 0 ||
-              Number(rawNut.fiberGrams ?? rawNut.fiber) > 0
-            );
+            // Normalize the server's nutrition field names only. The server
+            // is the single source of truth: an empty or zeroed nutrition
+            // object means no nutrition is recorded, and must be shown as
+            // such rather than being replaced by a cached client value.
+            const rawNut =
+              (raw as any)?.nutritionData ??
+              (raw as any)?.nutrition ??
+              (raw as any);
 
-            const nutritionData = hasRawNut
+            const nutritionData = rawNut
               ? {
                   calories: rawNut.calories ?? rawNut.calorie ?? null,
                   proteinGrams: rawNut.proteinGrams ?? rawNut.protein ?? null,
-                  carbohydrateGrams: rawNut.carbohydrateGrams ?? rawNut.carbsGrams ?? rawNut.carbs ?? rawNut.carbohydrate ?? null,
+                  carbohydrateGrams:
+                    rawNut.carbohydrateGrams ??
+                    rawNut.carbsGrams ??
+                    rawNut.carbs ??
+                    rawNut.carbohydrate ??
+                    null,
                   fatGrams: rawNut.fatGrams ?? rawNut.fat ?? null,
                   fiberGrams: rawNut.fiberGrams ?? rawNut.fiber ?? null,
                 }
-              : (raw as any)?.calories != null && Number((raw as any).calories) > 0
-                ? {
-                    calories: (raw as any).calories ?? null,
-                    proteinGrams: (raw as any).proteinGrams ?? (raw as any).protein ?? null,
-                    carbohydrateGrams: (raw as any).carbohydrateGrams ?? (raw as any).carbsGrams ?? (raw as any).carbs ?? null,
-                    fatGrams: (raw as any).fatGrams ?? (raw as any).fat ?? null,
-                    fiberGrams: (raw as any).fiberGrams ?? (raw as any).fiber ?? null,
-                  }
-                : undefined;
+              : undefined;
 
             return {
               data: {
@@ -1423,11 +1588,6 @@ export const menuManagementApi =
             payload,
             images,
           }) {
-            let primaryMediaUuid =
-              payload.primaryMediaUuid ||
-              (Array.isArray(payload.primaryMediaUuids)
-                ? payload.primaryMediaUuids[0]
-                : undefined);
             const primaryMediaUuids: string[] = [
               ...(payload.primaryMediaUuids ?? []),
             ];
@@ -1440,13 +1600,11 @@ export const menuManagementApi =
                     file,
                     "CATALOG_FOOD_PRIMARY",
                   );
-                  if (uploaded.uuid) {
-                    if (!primaryMediaUuid) {
-                      primaryMediaUuid = uploaded.uuid;
-                    }
-                    if (!primaryMediaUuids.includes(uploaded.uuid)) {
-                      primaryMediaUuids.push(uploaded.uuid);
-                    }
+                  if (
+                    uploaded.uuid &&
+                    !primaryMediaUuids.includes(uploaded.uuid)
+                  ) {
+                    primaryMediaUuids.push(uploaded.uuid);
                   }
                 }
               } catch (mediaError) {
@@ -1457,128 +1615,19 @@ export const menuManagementApi =
               }
             }
 
-            const categoryCode =
-              payload.categoryCode ||
-              payload.categoryUuid;
-            const cuisineCode =
-              payload.cuisineCode ||
-              payload.cuisineUuid;
+            // POST /api/v1/catalog/foods is the endpoint that persists a
+            // Food's relations and nutrition. The /api/admin/foods contract
+            // carries neither, which is why relation edits used to survive
+            // only in this browser's localStorage.
+            const foodJson = buildCatalogFoodJson(payload, primaryMediaUuids);
 
-            const seasonList = payload.seasons ?? [];
-            const eventList = payload.events ?? [];
-            const weatherList =
-              payload.suitableWeather ??
-              (payload as any).weatherConditions ??
-              [];
-            const mealTypeList = payload.mealTypes ?? [];
-            const ageRulesList =
-              payload.ageRules ?? (payload as any).ageGroups ?? [];
-            const dietaryList = payload.dietaryTypes ?? [];
-
-            const seasonUuids = seasonList.map((s: any) => s.seasonUuid || s.uuid).filter(Boolean);
-            const seasonCodes = seasonList.map((s: any) => s.seasonCode || s.code).filter(Boolean);
-
-            const eventUuids = eventList.map((e: any) => e.eventUuid || e.uuid).filter(Boolean);
-            const eventCodes = eventList.map((e: any) => e.eventCode || e.code).filter(Boolean);
-
-            const weatherConditionUuids = weatherList.map((w: any) => w.weatherConditionUuid || w.uuid).filter(Boolean);
-            const weatherConditionCodes = weatherList.map((w: any) => w.weatherConditionCode || w.code).filter(Boolean);
-
-            const mealTypeUuids = mealTypeList.map((m: any) => m.mealTypeUuid || m.uuid).filter(Boolean);
-            const mealTypeCodes = mealTypeList.map((m: any) => m.mealTypeCode || m.code).filter(Boolean);
-
-            const ageGroupUuids = ageRulesList.map((a: any) => a.ageGroupUuid || a.uuid).filter(Boolean);
-            const ageGroupCodes = ageRulesList.map((a: any) => a.ageGroupCode || a.code).filter(Boolean);
-
-            const dietaryTypeCodes = dietaryList.map((d: any) => d.code || d.dietaryTypeCode || (typeof d === "string" ? d : "")).filter(Boolean);
-            const dietaryTypeUuids = dietaryList.map((d: any) => d.uuid || d.dietaryTypeUuid).filter(Boolean);
-
-            const jsonPayload: Record<string, unknown> = {
-              ...payload,
-              categoryCode,
-              categoryUuid: payload.categoryUuid || categoryCode,
-              cuisineCode,
-              cuisineUuid: payload.cuisineUuid || cuisineCode,
-              active: payload.isActive ?? (payload as any).active ?? true,
-              primaryMediaUuid: primaryMediaUuid || undefined,
-              primaryMediaUuids:
-                primaryMediaUuids.length > 0 ? primaryMediaUuids : undefined,
-
-              seasons: seasonList,
-              seasonUuids,
-              seasonCodes,
-
-              events: eventList,
-              eventUuids,
-              eventCodes,
-
-              suitableWeather: weatherList,
-              weatherConditions: weatherList,
-              weatherConditionUuids,
-              weatherConditionCodes,
-
-              mealTypes: mealTypeList,
-              mealTypeUuids,
-              mealTypeCodes,
-
-              ageRules: ageRulesList,
-              ageGroups: ageRulesList,
-              ageGroupUuids,
-              ageGroupCodes,
-
-              dietaryTypes: dietaryList,
-              dietaryTypeCodes,
-              dietaryCodes: dietaryTypeCodes,
-              dietaryTypeUuids,
-
-              ...(payload.nutritionData
-                ? {
-                    nutritionData: payload.nutritionData,
-                    nutrition: payload.nutritionData,
-                    calories: payload.nutritionData.calories,
-                    proteinGrams: payload.nutritionData.proteinGrams,
-                    carbohydrateGrams: payload.nutritionData.carbohydrateGrams,
-                    fatGrams: payload.nutritionData.fatGrams,
-                    fiberGrams: payload.nutritionData.fiberGrams,
-                  }
-                : {}),
-            };
-
-            // 1. Try Admin API first (POST /api/admin/foods with JSON)
-            let result = await browserRequest<unknown>(
-              "/api/admin/foods",
+            const result = await browserRequest<unknown>(
+              "/api/catalog/foods",
               {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(jsonPayload),
+                body: makeMultipart("food", foodJson, []),
               },
             );
-
-            // 2. Fallback to Catalog API if admin endpoint is not found
-            if (
-              "error" in result &&
-              (result.error.status === 404 ||
-                result.error.status === 405 ||
-                result.error.status === 415)
-            ) {
-              const multipartForm = new FormData();
-              multipartForm.append(
-                "food",
-                new Blob([JSON.stringify(jsonPayload)], {
-                  type: "application/json",
-                }),
-              );
-
-              result = await browserRequest<unknown>(
-                "/api/catalog/foods",
-                {
-                  method: "POST",
-                  body: multipartForm,
-                },
-              );
-            }
 
             if ("error" in result) {
               return result;
@@ -1589,39 +1638,7 @@ export const menuManagementApi =
             );
 
             return {
-              data: {
-                ...jsonPayload,
-                ...savedCreated,
-                // Prefer the payload nutrition we just sent over whatever the server echoes back.
-                nutritionData: (() => {
-                  const sn = savedCreated.nutritionData;
-                  const hasServerNut = sn && (
-                    Number((sn as any).calories) > 0 ||
-                    Number((sn as any).proteinGrams ?? (sn as any).protein) > 0 ||
-                    Number((sn as any).carbohydrateGrams ?? (sn as any).carbs) > 0 ||
-                    Number((sn as any).fatGrams ?? (sn as any).fat) > 0 ||
-                    Number((sn as any).fiberGrams ?? (sn as any).fiber) > 0
-                  );
-                  return hasServerNut ? sn : (payload.nutritionData ?? sn);
-                })(),
-                nutrition: (() => {
-                  const sn = (savedCreated as any).nutrition ?? savedCreated.nutritionData;
-                  const hasServerNut = sn && (
-                    Number((sn as any).calories) > 0 ||
-                    Number((sn as any).proteinGrams ?? (sn as any).protein) > 0 ||
-                    Number((sn as any).carbohydrateGrams ?? (sn as any).carbs) > 0 ||
-                    Number((sn as any).fatGrams ?? (sn as any).fat) > 0 ||
-                    Number((sn as any).fiberGrams ?? (sn as any).fiber) > 0
-                  );
-                  return hasServerNut ? sn : (payload.nutritionData ?? sn);
-                })(),
-                seasons: savedCreated.seasons?.length ? savedCreated.seasons : seasonList,
-                events: savedCreated.events?.length ? savedCreated.events : eventList,
-                suitableWeather: savedCreated.suitableWeather?.length ? savedCreated.suitableWeather : weatherList,
-                mealTypes: savedCreated.mealTypes?.length ? savedCreated.mealTypes : mealTypeList,
-                ageRules: savedCreated.ageRules?.length ? savedCreated.ageRules : ageRulesList,
-                dietaryTypes: savedCreated.dietaryTypes?.length ? savedCreated.dietaryTypes : dietaryList,
-              } as FoodRecord,
+              data: savedCreated as FoodRecord,
             };
           },
         }),
@@ -1645,11 +1662,6 @@ export const menuManagementApi =
             payload,
             images,
           }) {
-            let primaryMediaUuid =
-              payload.primaryMediaUuid ||
-              (Array.isArray(payload.primaryMediaUuids)
-                ? payload.primaryMediaUuids[0]
-                : undefined);
             const primaryMediaUuids: string[] = [
               ...(payload.primaryMediaUuids ?? []),
             ];
@@ -1662,13 +1674,11 @@ export const menuManagementApi =
                     file,
                     "CATALOG_FOOD_PRIMARY",
                   );
-                  if (uploaded.uuid) {
-                    if (!primaryMediaUuid) {
-                      primaryMediaUuid = uploaded.uuid;
-                    }
-                    if (!primaryMediaUuids.includes(uploaded.uuid)) {
-                      primaryMediaUuids.push(uploaded.uuid);
-                    }
+                  if (
+                    uploaded.uuid &&
+                    !primaryMediaUuids.includes(uploaded.uuid)
+                  ) {
+                    primaryMediaUuids.push(uploaded.uuid);
                   }
                 }
               } catch (mediaError) {
@@ -1679,128 +1689,19 @@ export const menuManagementApi =
               }
             }
 
-            const categoryCode =
-              payload.categoryCode ||
-              payload.categoryUuid;
-            const cuisineCode =
-              payload.cuisineCode ||
-              payload.cuisineUuid;
+            // PATCH /api/v1/catalog/foods/{uuid} is the endpoint that
+            // persists a Food's relations and nutrition. The /api/admin/foods
+            // contract carries neither, which is why relation edits used to
+            // survive only in this browser's localStorage.
+            const foodJson = buildCatalogFoodJson(payload, primaryMediaUuids);
 
-            const seasonList = payload.seasons ?? [];
-            const eventList = payload.events ?? [];
-            const weatherList =
-              payload.suitableWeather ??
-              (payload as any).weatherConditions ??
-              [];
-            const mealTypeList = payload.mealTypes ?? [];
-            const ageRulesList =
-              payload.ageRules ?? (payload as any).ageGroups ?? [];
-            const dietaryList = payload.dietaryTypes ?? [];
-
-            const seasonUuids = seasonList.map((s: any) => s.seasonUuid || s.uuid).filter(Boolean);
-            const seasonCodes = seasonList.map((s: any) => s.seasonCode || s.code).filter(Boolean);
-
-            const eventUuids = eventList.map((e: any) => e.eventUuid || e.uuid).filter(Boolean);
-            const eventCodes = eventList.map((e: any) => e.eventCode || e.code).filter(Boolean);
-
-            const weatherConditionUuids = weatherList.map((w: any) => w.weatherConditionUuid || w.uuid).filter(Boolean);
-            const weatherConditionCodes = weatherList.map((w: any) => w.weatherConditionCode || w.code).filter(Boolean);
-
-            const mealTypeUuids = mealTypeList.map((m: any) => m.mealTypeUuid || m.uuid).filter(Boolean);
-            const mealTypeCodes = mealTypeList.map((m: any) => m.mealTypeCode || m.code).filter(Boolean);
-
-            const ageGroupUuids = ageRulesList.map((a: any) => a.ageGroupUuid || a.uuid).filter(Boolean);
-            const ageGroupCodes = ageRulesList.map((a: any) => a.ageGroupCode || a.code).filter(Boolean);
-
-            const dietaryTypeCodes = dietaryList.map((d: any) => d.code || d.dietaryTypeCode || (typeof d === "string" ? d : "")).filter(Boolean);
-            const dietaryTypeUuids = dietaryList.map((d: any) => d.uuid || d.dietaryTypeUuid).filter(Boolean);
-
-            const jsonPayload: Record<string, unknown> = {
-              ...payload,
-              categoryCode,
-              ...(payload.categoryUuid ? { categoryUuid: payload.categoryUuid } : {}),
-              cuisineCode,
-              ...(payload.cuisineUuid ? { cuisineUuid: payload.cuisineUuid } : {}),
-              active: payload.isActive ?? (payload as any).active ?? true,
-              primaryMediaUuid: primaryMediaUuid || undefined,
-              primaryMediaUuids:
-                primaryMediaUuids.length > 0 ? primaryMediaUuids : undefined,
-
-              seasons: seasonList,
-              seasonUuids,
-              seasonCodes,
-
-              events: eventList,
-              eventUuids,
-              eventCodes,
-
-              suitableWeather: weatherList,
-              weatherConditions: weatherList,
-              weatherConditionUuids,
-              weatherConditionCodes,
-
-              mealTypes: mealTypeList,
-              mealTypeUuids,
-              mealTypeCodes,
-
-              ageRules: ageRulesList,
-              ageGroups: ageRulesList,
-              ageGroupUuids,
-              ageGroupCodes,
-
-              dietaryTypes: dietaryList,
-              dietaryTypeCodes,
-              dietaryCodes: dietaryTypeCodes,
-              dietaryTypeUuids,
-
-              ...(payload.nutritionData
-                ? {
-                    nutritionData: payload.nutritionData,
-                    nutrition: payload.nutritionData,
-                    calories: payload.nutritionData.calories,
-                    proteinGrams: payload.nutritionData.proteinGrams,
-                    carbohydrateGrams: payload.nutritionData.carbohydrateGrams,
-                    fatGrams: payload.nutritionData.fatGrams,
-                    fiberGrams: payload.nutritionData.fiberGrams,
-                  }
-                : {}),
-            };
-
-            // 1. Try Admin API first (PATCH /api/admin/foods/{uuid} with JSON)
-            let result = await browserRequest<unknown>(
-              `/api/admin/foods/${encodeURIComponent(uuid)}`,
+            const result = await browserRequest<unknown>(
+              `/api/catalog/foods/${encodeURIComponent(uuid)}`,
               {
                 method: "PATCH",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(jsonPayload),
+                body: makeMultipart("food", foodJson, []),
               },
             );
-
-            // 2. Fallback to Catalog API if admin endpoint is not found
-            if (
-              "error" in result &&
-              (result.error.status === 404 ||
-                result.error.status === 405 ||
-                result.error.status === 415)
-            ) {
-              const multipartForm = new FormData();
-              multipartForm.append(
-                "food",
-                new Blob([JSON.stringify(jsonPayload)], {
-                  type: "application/json",
-                }),
-              );
-
-              result = await browserRequest<unknown>(
-                `/api/catalog/foods/${encodeURIComponent(uuid)}`,
-                {
-                  method: "PATCH",
-                  body: multipartForm,
-                },
-              );
-            }
 
             if ("error" in result) {
               return result;
@@ -1811,34 +1712,7 @@ export const menuManagementApi =
             );
 
             return {
-              data: {
-                ...jsonPayload,
-                ...savedUpdated,
-                // Prefer the payload nutrition we just sent over whatever the server echoes back.
-                // The server often returns 0s even when it saved the values, so we trust our payload.
-                nutritionData: (() => {
-                  const sn = savedUpdated.nutritionData;
-                  const hasServerNut = sn && (
-                    (sn as any).calories || (sn as any).proteinGrams || (sn as any).carbohydrateGrams ||
-                    (sn as any).fatGrams || (sn as any).fiberGrams
-                  );
-                  return hasServerNut ? sn : (payload.nutritionData ?? sn);
-                })(),
-                nutrition: (() => {
-                  const sn = (savedUpdated as any).nutrition ?? savedUpdated.nutritionData;
-                  const hasServerNut = sn && (
-                    (sn as any).calories || (sn as any).proteinGrams || (sn as any).carbohydrateGrams ||
-                    (sn as any).fatGrams || (sn as any).fiberGrams
-                  );
-                  return hasServerNut ? sn : (payload.nutritionData ?? sn);
-                })(),
-                seasons: savedUpdated.seasons?.length ? savedUpdated.seasons : seasonList,
-                events: savedUpdated.events?.length ? savedUpdated.events : eventList,
-                suitableWeather: savedUpdated.suitableWeather?.length ? savedUpdated.suitableWeather : weatherList,
-                mealTypes: savedUpdated.mealTypes?.length ? savedUpdated.mealTypes : mealTypeList,
-                ageRules: savedUpdated.ageRules?.length ? savedUpdated.ageRules : ageRulesList,
-                dietaryTypes: savedUpdated.dietaryTypes?.length ? savedUpdated.dietaryTypes : dietaryList,
-              } as FoodRecord,
+              data: savedUpdated as FoodRecord,
             };
           },
         }),
@@ -1917,37 +1791,37 @@ export const menuManagementApi =
               }
             }
 
-            // 2. Discovery Search API (POST /api/discovery/menu-items/search)
+            // 2. Fetch from Full Catalog Menu Items Endpoint first (contains real events, seasons, weather, age rules)
+            const query = makeQuery({
+              page: safePage,
+              size: safeSize,
+              sort: "createdAt,desc",
+              query: p.query,
+              storeUuid: p.storeUuid,
+            });
+
             let result = await browserRequest<unknown>(
-              `/api/discovery/menu-items/search?page=${safePage}&size=${safeSize}`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  ...(p.query ? { query: p.query } : {}),
-                  ...(p.storeUuid
-                    ? { storeUuid: p.storeUuid, storeUuids: [p.storeUuid] }
-                    : {}),
-                  ...(p.rootCategoryCode ? { categoryUuids: [p.rootCategoryCode] } : {}),
-                }),
-              },
+              `/api/catalog/menu-items${query}`,
             );
 
-            // 3. Fallbacks if discovery search with POST returned error:
+            // 3. Fallback to Discovery Search API if catalog returned an error
             if ("error" in result) {
-              const query = makeQuery({
-                page: safePage,
-                size: safeSize,
-                sort: "createdAt,desc",
-                query: p.query,
-                storeUuid: p.storeUuid,
-              });
-
-              const catalogRes = await browserRequest<unknown>(
-                `/api/catalog/menu-items${query}`,
+              const discoveryRes = await browserRequest<unknown>(
+                `/api/discovery/menu-items/search?page=${safePage}&size=${safeSize}`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    ...(p.query ? { query: p.query } : {}),
+                    ...(p.storeUuid
+                      ? { storeUuid: p.storeUuid, storeUuids: [p.storeUuid] }
+                      : {}),
+                    ...(p.rootCategoryCode ? { categoryUuids: [p.rootCategoryCode] } : {}),
+                  }),
+                },
               );
-              if (!("error" in catalogRes)) {
-                result = catalogRes;
+              if (!("error" in discoveryRes)) {
+                result = discoveryRes;
               }
             }
 
@@ -2006,6 +1880,33 @@ export const menuManagementApi =
           providesTags: (result, error, uuid) => [{ type: "MenuItem" as const, id: uuid }],
         }),
 
+      // GET /api/admin/menu-items/{uuid}: the admin-only detail endpoint
+      // (CatalogMenuItemServiceImpl.get -> AdminMenuItemDetailResponse).
+      // Unlike getPublishedMenuItemDetail below (the customer-facing
+      // /detail endpoint), this returns the menu item's own attribute
+      // snapshot with full fidelity — uuid + score/reasonText on every
+      // season/event/weather/meal-type/age-rule row, not just code/name —
+      // which the edit form needs to round-trip these fields correctly.
+      getManagedMenuItem:
+        builder.query<MenuItemRecord, string>({
+          async queryFn(uuid) {
+            const result = await browserRequest<unknown>(
+              `/api/admin/menu-items/${encodeURIComponent(uuid)}`,
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: unwrap<MenuItemRecord>(result.data as never),
+            };
+          },
+          providesTags: (result, error, uuid) => [
+            { type: "MenuItem" as const, id: uuid },
+          ],
+        }),
+
       getPublishedMenuItemDetail:
         builder.query<
           MenuItemRecord,
@@ -2013,12 +1914,6 @@ export const menuManagementApi =
         >({
           async queryFn(arg) {
             const uuid = typeof arg === "string" ? arg : arg.uuid;
-
-            const localItems = readLocalMenuItems();
-            const foundLocal = localItems.find((m) => m?.uuid === uuid);
-            if (foundLocal) {
-              return { data: foundLocal };
-            }
 
             const params: Record<string, string | number | boolean | undefined> = {};
             if (typeof arg === "object") {
@@ -2103,8 +1998,6 @@ export const menuManagementApi =
                 ? "VERIFIED"
                 : payload.menuItem?.ingredientDataStatus || "VERIFIED";
 
-            const mediaUuids = primaryMediaUuid ? [primaryMediaUuid] : (payload.primaryMediaUuids ?? []);
-
             // CreateMenuItemRequest (backend) is a nested DTO:
             // { foodUuid, menuItem: { name, price, ... }, primaryMediaUuids,
             //   thumbnailMediaUuid, galleryMediaUuids, ingredients, dietaryTypes,
@@ -2135,6 +2028,9 @@ export const menuManagementApi =
                 // BULK_IMPORT, API — there is no "ADMIN" value. Admin-created
                 // items are MANUAL (also MenuItemCreationInput's own default).
                 source: "MANUAL",
+                // The item's own attribute copy. Whatever is omitted here is
+                // seeded server-side from the selected food.
+                ...menuItemAttributeFields(payload.menuItem),
               },
               thumbnailMediaUuid: primaryMediaUuid || null,
               galleryMediaUuids: galleryMediaUuids,
@@ -2150,13 +2046,10 @@ export const menuManagementApi =
                 verificationStatus: d.verificationStatus || "VERIFIED",
                 notes: d.notes || null,
               })),
-              allergenDeclarations: (payload.allergenDeclarations ?? []).map((a) => ({
-                allergenUuid: a.allergenUuid,
-                declarationType: a.declarationType || "MAY_CONTAIN",
-                riskLevel: a.riskLevel || "MEDIUM",
-                verificationStatus: a.verificationStatus || "VERIFIED",
-                notes: a.notes || null,
-              })),
+              // Allergen declarations are not sent: the backend derives them
+              // from ingredients (CatalogMenuItemCommandRepository
+              // .replaceAllergenDeclarations is a documented no-op), so
+              // there is no server-side field for this form to fill.
             };
 
             const result = await browserRequest<unknown>(
@@ -2172,8 +2065,11 @@ export const menuManagementApi =
               },
             );
 
-            const hasServerError = "error" in result;
-            const rawCreated = !hasServerError ? ((result.data ?? {}) as any) : {};
+            if ("error" in result) {
+              return result;
+            }
+
+            const rawCreated = (result.data ?? {}) as any;
             const createdItem = unwrap<MenuItemRecord>(rawCreated);
             const realServerUuid =
               createdItem?.uuid ||
@@ -2183,37 +2079,25 @@ export const menuManagementApi =
               rawCreated?.menuItemUuid ||
               rawCreated?.id;
 
-            const createdUuid = realServerUuid || createClientUuid();
+            if (!realServerUuid) {
+              return {
+                error: toError(500, {
+                  message:
+                    "Menu item creation did not return a valid id from the server.",
+                }),
+              };
+            }
 
-            const fallbackRecord: MenuItemRecord = {
-              uuid: createdUuid,
-              storeUuid,
-              foodUuid: payload.foodUuid,
-              name: payload.menuItem?.name || "ម៉ឺនុយថ្មី",
-              description: payload.menuItem?.description,
-              price: Number(payload.menuItem?.price) || 0,
-              currencyCode: payload.menuItem?.currencyCode || "USD",
-              preparationTimeMinutes: Number(payload.menuItem?.preparationTimeMinutes) || 15,
-              availabilityStatus: (payload.menuItem?.availabilityStatus as any) || "AVAILABLE",
-              ingredientDataStatus: (normalizedIngredientDataStatus as any) || "VERIFIED",
-              isFeatured: Boolean(payload.menuItem?.isFeatured),
-              thumbnail: primaryMediaUuid ? `/api/v1/media/files/${primaryMediaUuid}/download` : undefined,
-              imageUrl: primaryMediaUuid ? `/api/v1/media/files/${primaryMediaUuid}/download` : undefined,
-              primaryMediaUuids: primaryMediaUuid ? [primaryMediaUuid] : [],
-              galleryMediaUuids: galleryMediaUuids,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            };
-
-            saveLocalMenuItem(fallbackRecord);
-            saveMenuItemRelationsStorage(createdUuid, {
-              ingredients: payload.ingredients,
+            // Ingredients are persisted by the server below and read back
+            // from it, so only the declarations the server still drops
+            // (MenuItemCatalogCommandRepository.replaceDietaryTypes and
+            // replaceAllergenDeclarations are no-ops) are cached here.
+            saveMenuItemRelationsStorage(realServerUuid, {
               dietaryTypes: payload.dietaryTypes,
-              medicalConditions: (payload as any).medicalConditions,
             });
 
-            // 3. Attach Ingredients to server ONLY if server creation succeeded
-            if (!hasServerError && realServerUuid && Array.isArray(payload.ingredients) && payload.ingredients.length > 0) {
+            // 3. Attach Ingredients to server
+            if (Array.isArray(payload.ingredients) && payload.ingredients.length > 0) {
               try {
                 await browserRequest<unknown>(
                   `/api/admin/menu-items/${encodeURIComponent(realServerUuid)}/ingredients`,
@@ -2236,8 +2120,8 @@ export const menuManagementApi =
               }
             }
 
-            // 4. Attach Dietary Types to server ONLY if server creation succeeded
-            if (!hasServerError && realServerUuid && Array.isArray(payload.dietaryTypes) && payload.dietaryTypes.length > 0) {
+            // 4. Attach Dietary Types to server
+            if (Array.isArray(payload.dietaryTypes) && payload.dietaryTypes.length > 0) {
               const validDietary = payload.dietaryTypes.filter(
                 (d) =>
                   d.dietaryTypeUuid &&
@@ -2267,32 +2151,14 @@ export const menuManagementApi =
               }
             }
 
-            // 5. Attach Allergen Declarations to server ONLY if server creation succeeded
-            if (!hasServerError && realServerUuid && Array.isArray(payload.allergenDeclarations) && payload.allergenDeclarations.length > 0) {
-              try {
-                await browserRequest<unknown>(
-                  `/api/admin/menu-items/${encodeURIComponent(realServerUuid)}/allergen-declarations`,
-                  {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      declarations: payload.allergenDeclarations.map((a) => ({
-                        allergenUuid: a.allergenUuid,
-                        declarationType: a.declarationType || "MAY_CONTAIN",
-                        riskLevel: a.riskLevel || "MEDIUM",
-                        verificationStatus: a.verificationStatus || "VERIFIED",
-                        notes: a.notes || undefined,
-                      })),
-                    }),
-                  },
-                );
-              } catch (e) {
-                console.warn("[ATTACH ALLERGENS WARNING]", e);
-              }
-            }
+            // Allergen declarations are not attached here: the backend's
+            // menu-item allergen-declarations endpoint is a documented
+            // no-op (CatalogMenuItemCommandRepository.replaceAllergenDeclarations
+            // — "derived directly from ingredients via ingredient_allergens"),
+            // so there is no server-side field for the admin form to fill.
 
             return {
-              data: realServerUuid && createdItem?.uuid ? createdItem : fallbackRecord,
+              data: createdItem,
             };
           },
         }),
@@ -2380,6 +2246,9 @@ export const menuManagementApi =
                 ingredientDataStatus: normalizedIngredientDataStatus,
                 isFeatured: Boolean(payload.menuItem?.isFeatured),
                 source: "MANUAL",
+                // The item's own attribute copy. Whatever is omitted here
+                // keeps the value already stored on the item.
+                ...menuItemAttributeFields(payload.menuItem),
               },
             };
 
@@ -2432,10 +2301,6 @@ export const menuManagementApi =
             if ("error" in coreResult) {
               const errStr = JSON.stringify(coreResult.error || "").toLowerCase();
               const isCategoryCycle = errStr.includes("cycle") || errStr.includes("hierarchy");
-              const isNotFound =
-                errStr.includes("404") ||
-                errStr.includes("not found") ||
-                errStr.includes("notfound");
 
               if (isCategoryCycle) {
                 // Category cycle bypass — treat as success so relations save
@@ -2448,42 +2313,6 @@ export const menuManagementApi =
                     price: payload.menuItem?.price,
                   },
                 };
-              } else if (isNotFound) {
-                // Item exists only in localStorage (not yet on server) — update local record
-                console.warn("[MENU ITEM UPDATE 404 - ITEM IS LOCAL-ONLY, UPDATING LOCALSTORAGE]", targetUuid);
-                const existingLocals = readLocalMenuItems();
-                const updatedLocals = existingLocals.map((m: any) => {
-                  if (m?.uuid !== targetUuid) return m;
-                  return {
-                    ...m,
-                    foodUuid: payload.foodUuid ?? m.foodUuid,
-                    name: payload.menuItem?.name ?? m.name,
-                    description: payload.menuItem?.description ?? m.description,
-                    price: payload.menuItem?.price ?? m.price,
-                    currencyCode: payload.menuItem?.currencyCode ?? m.currencyCode,
-                    preparationTimeMinutes:
-                      payload.menuItem?.preparationTimeMinutes ?? m.preparationTimeMinutes,
-                    availabilityStatus:
-                      payload.menuItem?.availabilityStatus ?? m.availabilityStatus,
-                    ingredientDataStatus:
-                      payload.menuItem?.ingredientDataStatus ?? m.ingredientDataStatus,
-                    isFeatured:
-                      payload.menuItem?.isFeatured ?? m.isFeatured,
-                    thumbnailMediaUuid:
-                      payload.thumbnailMediaUuid ?? m.thumbnailMediaUuid,
-                    updatedAt: new Date().toISOString(),
-                  };
-                });
-                try {
-                  window.localStorage.setItem(
-                    "foodhub-created-menu-items-v1",
-                    JSON.stringify(updatedLocals),
-                  );
-                } catch {
-                  /* storage quota exceeded — ignore */
-                }
-                const localRecord = updatedLocals.find((m: any) => m?.uuid === targetUuid);
-                return { data: localRecord ?? ({ uuid: targetUuid } as MenuItemRecord) };
               } else {
                 return coreResult;
               }
@@ -2550,35 +2379,13 @@ export const menuManagementApi =
               }
             }
 
-            // 5. Update Allergen Declarations if provided
-            if (payload.allergenDeclarations !== undefined && Array.isArray(payload.allergenDeclarations)) {
-              try {
-                await browserRequest<unknown>(
-                  `/api/admin/menu-items/${encodeURIComponent(
-                    targetUuid,
-                  )}/allergen-declarations`,
-                  {
-                    method: "PUT",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                      declarations: payload.allergenDeclarations.map((a) => ({
-                        allergenUuid: a.allergenUuid,
-                        declarationType: a.declarationType || "MAY_CONTAIN",
-                        riskLevel: a.riskLevel || "MEDIUM",
-                        verificationStatus: a.verificationStatus || "VERIFIED",
-                        notes: a.notes || undefined,
-                      })),
-                    }),
-                  },
-                );
-              } catch (algErr) {
-                console.warn("[UPDATE ALLERGENS WARNING]", algErr);
-              }
-            }
+            // Allergen declarations are not updated here: the backend's
+            // menu-item allergen-declarations endpoint is a documented
+            // no-op (CatalogMenuItemCommandRepository.replaceAllergenDeclarations
+            // — "derived directly from ingredients via ingredient_allergens"),
+            // so there is no server-side field for the admin form to fill.
 
-            // 6. Replace Images if new files provided
+            // 5. Replace Images if new files provided
             if (Array.isArray(images) && images.length > 0) {
               try {
                 const imgFormData = new FormData();
@@ -2654,7 +2461,9 @@ export const menuManagementApi =
               );
             }
 
-            deleteLocalMenuItem(uuid);
+            if ("error" in result) {
+              return result;
+            }
 
             return {
               data: (null as unknown as void),
@@ -2839,6 +2648,7 @@ export const {
 
   useGetPublishedMenuItemsQuery,
   useGetMenuItemQuery,
+  useGetManagedMenuItemQuery,
   useGetPublishedMenuItemDetailQuery,
   useCreateStoreMenuItemMutation,
   useUpdateStoreMenuItemMutation,

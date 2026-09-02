@@ -759,6 +759,21 @@ export interface MenuItemRecord {
 
   food?: FoodRecord | null;
 
+  /*
+   * The menu item's own copy of the attributes it was seeded with from its
+   * food when it was created. These are what the item actually serves, so a
+   * store's version of a dish can differ from the canonical food. Read these
+   * rather than reaching through `food`.
+   */
+  spiceLevel?: number | null;
+  nutritionData?: NutritionData | null;
+  seasons?: unknown[];
+  foodDietaryTypes?: unknown[];
+  events?: unknown[];
+  suitableWeather?: unknown[];
+  mealTypes?: unknown[];
+  ageRules?: unknown[];
+
   ingredients?: MenuItemIngredientRecord[];
   dietaryTypes?: MenuItemDietaryTypeRecord[] | unknown[];
   allergenDeclarations?: MenuItemAllergenDeclarationRecord[] | unknown[];
@@ -805,6 +820,19 @@ export interface MenuItemWritePayload {
     ingredientDataStatus: IngredientDataStatus | string;
     isFeatured: boolean;
     source: MenuItemSource;
+
+    /*
+     * The item's own attribute copy. Omitting one seeds it from the
+     * selected food; sending one stores it on the menu item.
+     */
+    spiceLevel?: number | null;
+    nutritionData?: NutritionData | null;
+    seasons?: unknown[];
+    dietaryTypes?: unknown[];
+    events?: unknown[];
+    suitableWeather?: unknown[];
+    mealTypes?: unknown[];
+    ageRules?: unknown[];
   };
 
   primaryMediaUuids?: string[];
@@ -812,7 +840,10 @@ export interface MenuItemWritePayload {
   galleryMediaUuids?: string[];
   ingredients: MenuItemIngredientPayload[];
   dietaryTypes: MenuItemDietaryTypePayload[];
-  allergenDeclarations: MenuItemAllergenDeclarationPayload[];
+  // Optional: the backend's allergen-declarations write is a documented
+  // no-op (derived from ingredients instead), so callers no longer collect
+  // or send this.
+  allergenDeclarations?: MenuItemAllergenDeclarationPayload[];
 }
 
 export interface ListParams {

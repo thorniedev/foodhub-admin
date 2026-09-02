@@ -44,7 +44,6 @@ import {
   useUpdateStoreMenuItemMutation,
 } from "@/src/app/store/menuManagementApi";
 import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
-import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
 import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionApi";
 import type { MenuItemWritePayload } from "@/src/types/menu-management";
 
@@ -176,10 +175,6 @@ export default function ShopDetailManager({
     skip: !isMenuModalOpen,
   });
   const dietaryTypesQuery = useGetDietaryTypesQuery(
-    { page: 0, size: 100 },
-    { skip: !isMenuModalOpen },
-  );
-  const allergensQuery = useGetAllergensQuery(
     { page: 0, size: 100 },
     { skip: !isMenuModalOpen },
   );
@@ -678,11 +673,6 @@ export default function ShopDetailManager({
           dietaryTypesQuery.data?.contents ??
           (dietaryTypesQuery.data as any)?.content ??
           (Array.isArray(dietaryTypesQuery.data) ? dietaryTypesQuery.data : [])
-        }
-        allergens={
-          allergensQuery.data?.contents ??
-          (allergensQuery.data as any)?.content ??
-          (Array.isArray(allergensQuery.data) ? allergensQuery.data : [])
         }
         medicalConditions={
           medicalConditionsQuery.data?.contents ??

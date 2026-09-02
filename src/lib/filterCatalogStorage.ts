@@ -260,67 +260,19 @@ export function updateCatalogCacheItem(
   writeCatalogCache(groupCode, updated);
 }
 
-export const FOOD_RELATIONS_STORAGE_PREFIX = "foodhub-food-relations-";
-
-export interface StoredFoodRelations {
-  seasons?: any[];
-  events?: any[];
-  suitableWeather?: any[];
-  weatherConditions?: any[];
-  mealTypes?: any[];
-  ageRules?: any[];
-  ageGroups?: any[];
-  dietaryTypes?: any[];
-  allergens?: any[];
-  nutritionData?: any;
-  nutrition?: any;
-  preparationTimes?: any[];
-  distances?: any[];
-  regions?: any[];
-  defaultSpiceLevel?: number | null;
-  updatedAt?: string;
-}
-
-export function saveFoodRelationsStorage(
-  foodUuid: string,
-  relations: StoredFoodRelations,
-) {
-  if (typeof window === "undefined" || !foodUuid) return;
-  try {
-    const key = `${FOOD_RELATIONS_STORAGE_PREFIX}${foodUuid}`;
-    window.localStorage.setItem(
-      key,
-      JSON.stringify({
-        ...relations,
-        updatedAt: new Date().toISOString(),
-      }),
-    );
-  } catch (err) {
-    console.warn("[FOOD RELATIONS STORAGE SAVE FAILED]", err);
-  }
-}
-
-export function readFoodRelationsStorage(
-  foodUuid: string,
-): StoredFoodRelations | null {
-  if (typeof window === "undefined" || !foodUuid) return null;
-  try {
-    const key = `${FOOD_RELATIONS_STORAGE_PREFIX}${foodUuid}`;
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return null;
-    return JSON.parse(raw) as StoredFoodRelations;
-  } catch {
-    return null;
-  }
-}
-
 export const MENU_ITEM_RELATIONS_STORAGE_PREFIX = "foodhub-menu-item-relations-";
 
+/**
+ * Only the menu item declarations the server still drops.
+ *
+ * MenuItemCatalogCommandRepository.replaceDietaryTypes and
+ * replaceAllergenDeclarations are no-ops, so these two would be lost on
+ * reload without a local copy. Everything else on a menu item — including
+ * ingredients and the food attribute snapshot — is read back from the API.
+ */
 export interface StoredMenuItemRelations {
   dietaryTypes?: any[];
   allergenDeclarations?: any[];
-  ingredients?: any[];
-  medicalConditions?: any[];
   updatedAt?: string;
 }
 
@@ -355,47 +307,4 @@ export function readMenuItemRelationsStorage(
   } catch {
     return null;
   }
-}
-
-export const CREATED_MENU_ITEMS_STORAGE_KEY = "foodhub-created-menu-items-v1";
-
-export function readLocalMenuItems(): any[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(CREATED_MENU_ITEMS_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-export function saveLocalMenuItem(item: any) {
-  if (typeof window === "undefined" || !item) return;
-  try {
-    const existing = readLocalMenuItems();
-    const updated = [item, ...existing.filter((x: any) => x.uuid !== item.uuid)];
-    window.localStorage.setItem(CREATED_MENU_ITEMS_STORAGE_KEY, JSON.stringify(updated));
-  } catch {}
-}
-
-export function deleteLocalMenuItem(uuid: string) {
-  if (typeof window === "undefined" || !uuid) return;
-  try {
-    const existing = readLocalMenuItems();
-    const updated = existing.filter((x: any) => x.uuid !== uuid && String(x.id) !== uuid);
-    window.localStorage.setItem(CREATED_MENU_ITEMS_STORAGE_KEY, JSON.stringify(updated));
-  } catch {}
-}
-
-export function updateLocalMenuItemStatus(uuid: string, availabilityStatus: string) {
-  if (typeof window === "undefined" || !uuid) return;
-  try {
-    const existing = readLocalMenuItems();
-    const updated = existing.map((x: any) =>
-      x.uuid === uuid || String(x.id) === uuid ? { ...x, availabilityStatus } : x
-    );
-    window.localStorage.setItem(CREATED_MENU_ITEMS_STORAGE_KEY, JSON.stringify(updated));
-  } catch {}
 }

@@ -13,7 +13,9 @@ import {
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: "",
+  credentials: "include",
   prepareHeaders: (headers) => {
+    headers.set("Accept", "application/json");
     const token = getAuthAccessToken();
 
     if (token) {
@@ -46,6 +48,11 @@ export const baseApi = createApi({
   reducerPath: "",
 
   baseQuery: baseQueryWithAuth,
+
+  // See adminBaseApi.ts: refetch on focus/reconnect so edits made by other
+  // admins in a different session become visible without a full reload.
+  refetchOnFocus: true,
+  refetchOnReconnect: true,
 
   tagTypes: [
     "Shop",

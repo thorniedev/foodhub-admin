@@ -48,18 +48,18 @@ export default function PopularItemsTable({
         header: "មុខម្ហូប",
         cell: ({ row }) => (
           <div className="min-w-0">
-            <p className="flex items-center gap-1.5 truncate text-lg font-normal text-gray-800">
+            <p className="flex items-center gap-1.5 truncate text-sm font-medium text-foreground">
               {row.original.itemName}
               {row.original.missingContentCount > 0 && (
                 <AlertCircle
-                  size={16}
+                  size={14}
                   className="shrink-0 text-amber-600"
                   aria-label="ខ្វះព័ត៌មានមុខម្ហូប"
                 />
               )}
             </p>
             {row.original.foodName && (
-              <p className="truncate text-lg font-normal text-gray-400">
+              <p className="truncate text-xs text-muted-foreground">
                 {row.original.foodName}
               </p>
             )}
@@ -70,7 +70,11 @@ export default function PopularItemsTable({
         id: "categoryName",
         header: "ប្រភេទ",
         meta: { hideOnMobile: true },
-        cell: ({ row }) => row.original.categoryName ?? "—",
+        cell: ({ row }) => (
+          <span className="text-xs text-muted-foreground">
+            {row.original.categoryName ?? "—"}
+          </span>
+        ),
       },
       {
         id: "store",
@@ -79,12 +83,14 @@ export default function PopularItemsTable({
           row.original.storeUuid ? (
             <Link
               href={`/shops/${row.original.storeUuid}`}
-              className="truncate text-primary-800 underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="truncate text-sm font-medium text-primary-700 underline-offset-2 hover:underline hover:text-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             >
               {row.original.storeName ?? "—"}
             </Link>
           ) : (
-            (row.original.storeName ?? "—")
+            <span className="text-sm text-foreground">
+              {row.original.storeName ?? "—"}
+            </span>
           ),
       },
       {

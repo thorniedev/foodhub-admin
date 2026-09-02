@@ -54,7 +54,6 @@ export function redirectToAdminLogin(): void {
   );
   const loginParams = new URLSearchParams({
     returnTo,
-    prompt: "login",
   });
 
   window.location.replace(`/api/auth/login?${loginParams.toString()}`);

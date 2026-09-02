@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGrid, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 import { cn } from "@/src/lib/utils";
 import type { DashboardPeriod } from "@/src/types/adminDashboard";
@@ -29,26 +29,26 @@ export default function DashboardHeader({
   const activeTo = period?.to || fallbackRange?.to;
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+    <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border/60 bg-transparent px-1 pb-4 pt-1">
       <div className="flex min-w-0 items-center gap-3.5">
-        <span
-          aria-hidden="true"
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-600 text-white"
-        >
-          <LayoutGrid size={24} />
-        </span>
-
         <div className="min-w-0">
-          <h1 className="truncate text-2xl font-medium text-gray-800">
-            ទិន្នន័យវិភាគ
-          </h1>
+          <div>
+            <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+              ទិដ្ឋភាពទូទៅនៃប្រព័ន្ធ
+            </h1>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              មើលស្ថានភាពទិន្នន័យ ការលក់ និងដំណើរការអាជីវកម្ម FoodHub របស់អ្នក
+            </p>
+          </div>
 
-          <p className="mt-0.5 truncate text-lg font-normal text-gray-500 tabular-nums">
+          <p className="mt-1 truncate text-xs leading-5 text-muted-foreground tabular-nums">
             {activeFrom && activeTo ? (
               <>
-                {formatLongDate(activeFrom)} – {formatLongDate(activeTo)}
+                <span className="font-medium text-foreground">
+                  {formatLongDate(activeFrom)} – {formatLongDate(activeTo)}
+                </span>
                 {period?.previousFrom && period?.previousTo && (
-                  <span className="text-gray-400">
+                  <span className="text-muted-foreground/80">
                     {" · ធៀបនឹង "}
                     {formatLongDate(period.previousFrom)} –{" "}
                     {formatLongDate(period.previousTo)}
@@ -62,26 +62,26 @@ export default function DashboardHeader({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2.5">
         <span
           className={cn(
-            "inline-flex min-h-11 items-center gap-2.5 rounded-full border px-4 text-lg font-normal",
+            "inline-flex h-8 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium",
             isFetching
-              ? "border-blue-200 bg-blue-50 text-blue-800"
-              : "border-primary-200 bg-primary-50 text-primary-800",
+              ? "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300"
+              : "border-primary-200 bg-primary-50 text-primary-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300",
           )}
         >
           <span
             aria-hidden="true"
             className={cn(
-              "h-2.5 w-2.5 rounded-full",
-              isFetching ? "animate-pulse bg-blue-600" : "bg-primary-600",
+              "h-2 w-2 rounded-full",
+              isFetching ? "animate-pulse bg-blue-600" : "bg-primary-600 dark:bg-emerald-400",
             )}
           />
           {isFetching ? "កំពុងធ្វើបច្ចុប្បន្នភាព…" : "ទិន្នន័យផ្ទាល់"}
         </span>
 
-        <span className="text-lg font-normal text-gray-500 tabular-nums">
+        <span className="text-xs text-muted-foreground tabular-nums">
           {lastUpdatedLabel ? `ធ្វើបច្ចុប្បន្នភាព ${lastUpdatedLabel}` : "ទើបផ្ទុកថ្មី"}
         </span>
 
@@ -90,10 +90,10 @@ export default function DashboardHeader({
           onClick={onRefresh}
           title="ផ្ទុកទិន្នន័យឡើងវិញ"
           aria-label="ផ្ទុកទិន្នន័យឡើងវិញ"
-          className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 shadow-sm transition hover:border-primary-300 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-border/80 bg-background px-3 text-xs font-medium text-foreground shadow-xs transition hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
           <RefreshCw
-            size={18}
+            size={14}
             aria-hidden="true"
             className={cn(isFetching && "animate-spin")}
           />

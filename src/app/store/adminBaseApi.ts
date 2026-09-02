@@ -41,6 +41,13 @@ const adminBaseQueryWithSessionRedirect: BaseQueryFn<
 export const adminBaseApi = createApi({
   reducerPath: "adminBaseApi",
   baseQuery: adminBaseQueryWithSessionRedirect,
+  // Different admins edit the same data from separate browser sessions, so
+  // this session's RTK Query cache can go stale the moment another admin
+  // saves a change elsewhere. refetchOnFocus/refetchOnReconnect (paired with
+  // setupListeners in Providers.tsx) refetch active queries when this tab
+  // regains focus or the network reconnects, instead of only on remount.
+  refetchOnFocus: true,
+  refetchOnReconnect: true,
   tagTypes: [
     "Allergen",
     "DietaryType",

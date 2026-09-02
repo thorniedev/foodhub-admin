@@ -71,7 +71,7 @@ export default function CategoryPerformanceChart({
         <div
           role="group"
           aria-label="ជ្រើសរើសរង្វាស់ប្រភេទ"
-          className="flex items-center gap-1.5 rounded-full bg-gray-100 p-1"
+          className="flex items-center gap-1 rounded-full bg-muted/60 p-1"
         >
           {METRICS.map((option) => {
             const active = option.value === metric;
@@ -83,10 +83,10 @@ export default function CategoryPerformanceChart({
                 aria-pressed={active}
                 onClick={() => setMetric(option.value)}
                 className={cn(
-                  "min-h-10 cursor-pointer rounded-full px-4 text-lg font-normal transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                  "h-7 cursor-pointer rounded-full px-3 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
                   active
-                    ? "bg-white text-gray-800 shadow-sm"
-                    : "text-gray-600 hover:text-gray-800",
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {option.label}
@@ -104,13 +104,13 @@ export default function CategoryPerformanceChart({
           description="មិនមានប្រភេទណាមួយមានសកម្មភាពក្នុងតម្រងនេះទេ។"
         />
       ) : (
-        <div className="h-[360px] w-full">
+        <div className="h-[340px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={rows}
               layout="vertical"
               margin={{ top: 4, right: 30, bottom: 0, left: 0 }}
-              barCategoryGap={8}
+              barCategoryGap={6}
             >
               <CartesianGrid
                 stroke={CHART_GRID}
@@ -121,7 +121,7 @@ export default function CategoryPerformanceChart({
               <XAxis
                 type="number"
                 tickFormatter={formatCompact}
-                tick={{ fill: CHART_AXIS_TEXT, fontSize: 18 }}
+                tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
                 tickLine={false}
                 axisLine={{ stroke: CHART_GRID }}
                 allowDecimals={false}
@@ -130,10 +130,10 @@ export default function CategoryPerformanceChart({
               <YAxis
                 type="category"
                 dataKey="categoryName"
-                tick={{ fill: CHART_AXIS_TEXT, fontSize: 18 }}
+                tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
                 tickLine={false}
                 axisLine={false}
-                width={200}
+                width={150}
               />
 
               <Tooltip
@@ -162,16 +162,16 @@ export default function CategoryPerformanceChart({
                 dataKey={metric}
                 name={activeMetric.label}
                 fill={activeMetric.color}
-                radius={[0, 10, 10, 0]}
-                maxBarSize={24}
-                background={{ fill: "#eef2f7" }}
+                radius={[0, 6, 6, 0]}
+                maxBarSize={20}
+                background={{ fill: "var(--muted, #f1f5f9)", opacity: 0.5 }}
               >
                 <LabelList
                   dataKey={metric}
                   position="right"
-                  offset={10}
+                  offset={8}
                   formatter={(value: number) => formatCompact(value)}
-                  style={{ fill: CHART_AXIS_TEXT, fontSize: 18, fontWeight: 400 }}
+                  style={{ fill: CHART_AXIS_TEXT, fontSize: 11, fontWeight: 500 }}
                 />
               </Bar>
             </BarChart>

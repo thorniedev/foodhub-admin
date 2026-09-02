@@ -47,8 +47,6 @@ const allowedRoutes: Record<string, ReadonlySet<string>> = {
 
   "users/me": new Set(["GET", "PATCH", "DELETE"]),
 
-  "users/me/sync": new Set(["PUT"]),
-
   users: new Set(["GET", "POST"]),
 
   /*
@@ -95,6 +93,119 @@ interface RouteContext {
   }>;
 }
 
+interface KeycloakTokenResponse {
+  access_token: string;
+  refresh_token?: string;
+  id_token?: string;
+  expires_in: number;
+  refresh_expires_in?: number;
+  token_type?: string;
+}
+
+function getKeycloakConfig() {
+  const keycloakUrl = (
+    process.env.KEYCLOAK_URL ??
+    process.env.NEXT_PUBLIC_KEYCLOAK_URL ??
+    "https://auth.mhoubahar.store"
+  ).replace(/\/+$/, "");
+
+  const realm =
+    process.env.KEYCLOAK_REALM ??
+    process.env.NEXT_PUBLIC_KEYCLOAK_REALM ??
+    "foodhub";
+
+  const clientId =
+    process.env.KEYCLOAK_CLIENT_ID ??
+    process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ??
+    "mhoubahar-admin";
+
+  const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET;
+
+  return { keycloakUrl, realm, clientId, clientSecret };
+}
+
+async function refreshAccessToken(
+  refreshToken: string,
+): Promise<KeycloakTokenResponse | null> {
+  const { keycloakUrl, realm, clientId, clientSecret } = getKeycloakConfig();
+
+  if (!clientId) {
+    return null;
+  }
+
+  const body = new URLSearchParams({
+    grant_type: "refresh_token",
+    client_id: clientId,
+    refresh_token: refreshToken,
+  });
+
+  if (clientSecret) {
+    body.set("client_secret", clientSecret);
+  }
+
+  const endpoint = `${keycloakUrl}/realms/${encodeURIComponent(realm)}/protocol/openid-connect/token`;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body,
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const tokens = (await response.json()) as KeycloakTokenResponse;
+    if (!tokens.access_token) {
+      return null;
+    }
+
+    return tokens;
+  } catch (error) {
+    console.error("[ADMIN PROXY] Token refresh connection error", error);
+    return null;
+  }
+}
+
+function applyRefreshedCookies(
+  response: NextResponse,
+  tokens?: KeycloakTokenResponse | null,
+) {
+  if (!tokens) return;
+
+  const secure = process.env.NODE_ENV === "production";
+  const options = {
+    httpOnly: true,
+    secure,
+    sameSite: "lax" as const,
+    path: "/",
+  };
+
+  response.cookies.set("foodhub_access_token", tokens.access_token, {
+    ...options,
+    maxAge: tokens.expires_in,
+  });
+
+  if (tokens.refresh_token) {
+    response.cookies.set("foodhub_refresh_token", tokens.refresh_token, {
+      ...options,
+      maxAge: tokens.refresh_expires_in ?? 30 * 24 * 60 * 60, // 30 days
+    });
+  }
+
+  if (tokens.id_token) {
+    response.cookies.set("foodhub_id_token", tokens.id_token, {
+      ...options,
+      maxAge: tokens.refresh_expires_in ?? 30 * 24 * 60 * 60, // 30 days
+    });
+  }
+}
+
 async function forwardRequest(
   request: NextRequest,
   context: RouteContext,
@@ -126,19 +237,6 @@ async function forwardRequest(
   }
 
   const backendPath = all.join("/");
-
-  /*
-   * First check exact route.
-   *
-   * Example:
-   * users/me/sync
-   *
-   * Then use first segment for child routes.
-   *
-   * Example:
-   * profiles/{uuid}/safety/allergies
-   * uses "profiles"
-   */
   const routeRule = allowedRoutes[backendPath] ?? allowedRoutes[all[0]];
 
   if (!routeRule) {
@@ -180,39 +278,16 @@ async function forwardRequest(
   let forwardedMethod = request.method;
   let customRequestBody: ArrayBuffer | undefined = undefined;
 
-  // Transparently route GET /api/menu-items or GET /api/catalog/menu-items to POST /discovery/menu-items/search
-  if (
-    request.method === "GET" &&
-    ((all[0] === "menu-items" && all.length === 1) ||
-      (all[0] === "catalog" && all[1] === "menu-items" && all.length === 2))
-  ) {
-    normalizedPath = ["discovery", "menu-items", "search"];
-    forwardedMethod = "POST";
-    const q = incomingUrl.searchParams.get("query") || undefined;
-    const storeUuid = incomingUrl.searchParams.get("storeUuid") || undefined;
-    const searchBody = JSON.stringify({
-      ...(q ? { query: q } : {}),
-      ...(storeUuid ? { storeUuid, storeUuids: [storeUuid] } : {}),
-    });
-    customRequestBody = new TextEncoder().encode(searchBody).buffer;
-  } else if (all[0] === "menu-items") {
+  if (all[0] === "menu-items") {
     normalizedPath = ["catalog", "menu-items", ...all.slice(1)];
   }
 
-  /*
-   * Encode every individual path segment.
-   */
   const safeBackendPath = normalizedPath
     .map((segment) => encodeURIComponent(segment))
     .join("/");
 
   const targetUrl = new URL(`${backendApiUrl}/${safeBackendPath}`);
 
-  /*
-   * Preserve:
-   *
-   * ?page=0&size=100
-   */
   if (normalizedPath[0] === "discovery") {
     const page = incomingUrl.searchParams.get("page") || "0";
     const rawSize = parseInt(incomingUrl.searchParams.get("size") || "100", 10);
@@ -237,14 +312,20 @@ async function forwardRequest(
     requestHeaders.set("Content-Type", "application/json");
   }
 
-  /*
-   * First accept Authorization directly.
-   *
-   * Otherwise use the token stored by FoodHub login.
-   */
   const incomingAuthorization = request.headers.get("authorization");
+  let accessToken = request.cookies.get("foodhub_access_token")?.value;
+  const refreshToken = request.cookies.get("foodhub_refresh_token")?.value;
+  let refreshedTokens: KeycloakTokenResponse | null = null;
 
-  const accessToken = request.cookies.get("foodhub_access_token")?.value;
+  // Silent refresh if access token missing but refresh token exists
+  if (!accessToken && refreshToken && !incomingAuthorization) {
+    console.log("[ADMIN PROXY] Access token missing. Attempting silent token refresh...");
+    refreshedTokens = await refreshAccessToken(refreshToken);
+    if (refreshedTokens?.access_token) {
+      accessToken = refreshedTokens.access_token;
+      console.log("[ADMIN PROXY] Silent token refresh succeeded!");
+    }
+  }
 
   if (incomingAuthorization) {
     requestHeaders.set("Authorization", incomingAuthorization);
@@ -253,11 +334,9 @@ async function forwardRequest(
   }
 
   const canHaveBody = forwardedMethod !== "GET" && forwardedMethod !== "HEAD";
-
   const requestBody = customRequestBody ?? (canHaveBody ? await request.arrayBuffer() : undefined);
 
   const controller = new AbortController();
-
   const timeoutId = setTimeout(() => {
     controller.abort();
   }, 15_000);
@@ -271,32 +350,41 @@ async function forwardRequest(
       hasAuthorization: requestHeaders.has("Authorization"),
     });
 
-    const backendResponse = await fetch(targetUrl, {
+    let backendResponse = await fetch(targetUrl, {
       method: forwardedMethod,
-
       headers: requestHeaders,
-
       body: requestBody && requestBody.byteLength > 0 ? requestBody : undefined,
-
       cache: "no-store",
-
       redirect: "manual",
-
       signal: controller.signal,
     });
 
-    const responseBody = await backendResponse.arrayBuffer();
+    // If 401 received and we have a refresh token, perform silent refresh & retry once
+    if (backendResponse.status === 401 && refreshToken && !refreshedTokens) {
+      console.log("[ADMIN PROXY] 401 returned from backend. Attempting token refresh & retry...");
+      refreshedTokens = await refreshAccessToken(refreshToken);
+      if (refreshedTokens?.access_token) {
+        accessToken = refreshedTokens.access_token;
+        requestHeaders.set("Authorization", `Bearer ${accessToken}`);
+        backendResponse = await fetch(targetUrl, {
+          method: forwardedMethod,
+          headers: requestHeaders,
+          body: requestBody && requestBody.byteLength > 0 ? requestBody : undefined,
+          cache: "no-store",
+          redirect: "manual",
+        });
+      }
+    }
 
+    const responseBody = await backendResponse.arrayBuffer();
     const responseHeaders = new Headers();
 
     const responseContentType = backendResponse.headers.get("content-type");
-
     if (responseContentType) {
       responseHeaders.set("Content-Type", responseContentType);
     }
 
     const location = backendResponse.headers.get("location");
-
     if (location) {
       responseHeaders.set("Location", location);
     }
@@ -307,13 +395,9 @@ async function forwardRequest(
       status: backendResponse.status,
     });
 
-    /*
-     * Helpful log when backend rejects the request.
-     */
     if (!backendResponse.ok) {
       try {
         const errorText = new TextDecoder().decode(responseBody);
-
         console.error("[FOODHUB BACKEND ERROR]", {
           status: backendResponse.status,
           backendUrl: targetUrl.toString(),
@@ -327,10 +411,16 @@ async function forwardRequest(
       }
     }
 
-    return new Response(responseBody.byteLength > 0 ? responseBody : null, {
+    const finalResponse = new NextResponse(responseBody.byteLength > 0 ? responseBody : null, {
       status: backendResponse.status,
       headers: responseHeaders,
     });
+
+    if (refreshedTokens) {
+      applyRefreshedCookies(finalResponse, refreshedTokens);
+    }
+
+    return finalResponse;
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
       console.error("[FOODHUB PROXY TIMEOUT]", targetUrl.toString());
