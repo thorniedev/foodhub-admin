@@ -145,41 +145,33 @@ export default function MenuItemDetailModal({
     "—";
 
   // A menu item carries its own copy of the attributes it was seeded with
-  // from its food, so a store's version of a dish can differ. Read the
-  // item's values first and only fall back to the canonical food for a
-  // record created before the item owned them.
-  const baseFood = catalogFood || rawFood;
-  const food = baseFood || data
+  // from its food (MenuItemDetailResponse.food.*, populated server-side
+  // from menu_items — not from the canonical food's current row), so a
+  // store's version of a dish can differ. rawFood is that item snapshot;
+  // catalogFood is the canonical food and is only a fallback for a record
+  // created before the item owned these fields.
+  const baseFood = rawFood || catalogFood;
+  const food = baseFood
     ? {
-        ...(baseFood ?? {}),
+        ...baseFood,
         categoryName,
         cuisineName,
         nutritionData:
-          data?.nutritionData ??
           (data as any)?.nutrition ??
           baseFood?.nutritionData ??
           (baseFood as any)?.nutrition,
-        mealTypes: data?.mealTypes ?? baseFood?.mealTypes ?? [],
-        ageRules:
-          data?.ageRules ?? baseFood?.ageRules ?? baseFood?.ageGroups ?? [],
-        seasons: data?.seasons ?? baseFood?.seasons ?? [],
+        mealTypes: baseFood?.mealTypes ?? [],
+        ageRules: baseFood?.ageRules ?? baseFood?.ageGroups ?? [],
+        seasons: baseFood?.seasons ?? [],
         suitableWeather:
-          data?.suitableWeather ??
-          baseFood?.suitableWeather ??
-          baseFood?.weatherConditions ??
-          [],
-        events: data?.events ?? baseFood?.events ?? [],
-        dietaryTypes:
-          (data as any)?.foodDietaryTypes ??
-          (Array.isArray(data?.dietaryTypes) ? data.dietaryTypes : undefined) ??
-          baseFood?.dietaryTypes ??
-          [],
-        allergens: data?.allergenDeclarations ?? baseFood?.allergens ?? [],
+          baseFood?.suitableWeather ?? baseFood?.weatherConditions ?? [],
+        events: baseFood?.events ?? [],
+        dietaryTypes: baseFood?.dietaryTypes ?? [],
+        allergens: (data as any)?.allergenDeclarations ?? baseFood?.allergens ?? [],
       }
     : null;
 
-  const spice =
-    (data as any)?.spiceLevel ?? baseFood?.defaultSpiceLevel ?? 0;
+  const spice = (baseFood as any)?.spiceLevel ?? baseFood?.defaultSpiceLevel ?? 0;
 
   const prepTime =
     data?.preparationTimeMinutes != null

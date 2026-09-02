@@ -840,7 +840,10 @@ export interface MenuItemWritePayload {
   galleryMediaUuids?: string[];
   ingredients: MenuItemIngredientPayload[];
   dietaryTypes: MenuItemDietaryTypePayload[];
-  allergenDeclarations: MenuItemAllergenDeclarationPayload[];
+  // Optional: the backend's allergen-declarations write is a documented
+  // no-op (derived from ingredients instead), so callers no longer collect
+  // or send this.
+  allergenDeclarations?: MenuItemAllergenDeclarationPayload[];
 }
 
 export interface ListParams {

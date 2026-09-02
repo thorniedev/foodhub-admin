@@ -1029,6 +1029,53 @@ function buildCatalogFoodJson(
   };
 }
 
+/**
+ * The item's own attribute copy, sent under MenuItemCreationInput.
+ *
+ * spiceLevel/nutritionData are included whenever set. The six list fields
+ * (seasons, events, suitableWeather, mealTypes, ageRules, dietaryTypes) are
+ * sent whenever the array itself was provided — including empty — because
+ * an empty array is the form's honest representation of "the admin cleared
+ * every row here," not "say nothing." MenuItemCreationInput distinguishes a
+ * missing field (seed from the selected food) from an explicit [] (store
+ * nothing), so collapsing "empty" into "omitted" here would silently
+ * discard that clear-all edit and leave the old rows in place.
+ */
+function menuItemAttributeFields(
+  menuItem: Partial<MenuItemWritePayload["menuItem"]> | undefined,
+): Record<string, unknown> {
+  if (!menuItem) return {};
+
+  const fields: Record<string, unknown> = {};
+
+  if (menuItem.spiceLevel != null) {
+    fields.spiceLevel = Number(menuItem.spiceLevel);
+  }
+  if (menuItem.nutritionData) {
+    fields.nutritionData = menuItem.nutritionData;
+  }
+  if (menuItem.seasons !== undefined) {
+    fields.seasons = menuItem.seasons;
+  }
+  if (menuItem.events !== undefined) {
+    fields.events = menuItem.events;
+  }
+  if (menuItem.suitableWeather !== undefined) {
+    fields.suitableWeather = menuItem.suitableWeather;
+  }
+  if (menuItem.mealTypes !== undefined) {
+    fields.mealTypes = menuItem.mealTypes;
+  }
+  if (menuItem.ageRules !== undefined) {
+    fields.ageRules = menuItem.ageRules;
+  }
+  if (menuItem.dietaryTypes !== undefined) {
+    fields.dietaryTypes = menuItem.dietaryTypes;
+  }
+
+  return fields;
+}
+
 export const menuManagementApi =
   adminBaseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -1833,6 +1880,33 @@ export const menuManagementApi =
           providesTags: (result, error, uuid) => [{ type: "MenuItem" as const, id: uuid }],
         }),
 
+      // GET /api/admin/menu-items/{uuid}: the admin-only detail endpoint
+      // (CatalogMenuItemServiceImpl.get -> AdminMenuItemDetailResponse).
+      // Unlike getPublishedMenuItemDetail below (the customer-facing
+      // /detail endpoint), this returns the menu item's own attribute
+      // snapshot with full fidelity — uuid + score/reasonText on every
+      // season/event/weather/meal-type/age-rule row, not just code/name —
+      // which the edit form needs to round-trip these fields correctly.
+      getManagedMenuItem:
+        builder.query<MenuItemRecord, string>({
+          async queryFn(uuid) {
+            const result = await browserRequest<unknown>(
+              `/api/admin/menu-items/${encodeURIComponent(uuid)}`,
+            );
+
+            if ("error" in result) {
+              return result;
+            }
+
+            return {
+              data: unwrap<MenuItemRecord>(result.data as never),
+            };
+          },
+          providesTags: (result, error, uuid) => [
+            { type: "MenuItem" as const, id: uuid },
+          ],
+        }),
+
       getPublishedMenuItemDetail:
         builder.query<
           MenuItemRecord,
@@ -1956,12 +2030,7 @@ export const menuManagementApi =
                 source: "MANUAL",
                 // The item's own attribute copy. Whatever is omitted here is
                 // seeded server-side from the selected food.
-                ...(payload.menuItem?.spiceLevel != null
-                  ? { spiceLevel: Number(payload.menuItem.spiceLevel) }
-                  : {}),
-                ...(payload.menuItem?.nutritionData
-                  ? { nutritionData: payload.menuItem.nutritionData }
-                  : {}),
+                ...menuItemAttributeFields(payload.menuItem),
               },
               thumbnailMediaUuid: primaryMediaUuid || null,
               galleryMediaUuids: galleryMediaUuids,
@@ -1977,13 +2046,10 @@ export const menuManagementApi =
                 verificationStatus: d.verificationStatus || "VERIFIED",
                 notes: d.notes || null,
               })),
-              allergenDeclarations: (payload.allergenDeclarations ?? []).map((a) => ({
-                allergenUuid: a.allergenUuid,
-                declarationType: a.declarationType || "MAY_CONTAIN",
-                riskLevel: a.riskLevel || "MEDIUM",
-                verificationStatus: a.verificationStatus || "VERIFIED",
-                notes: a.notes || null,
-              })),
+              // Allergen declarations are not sent: the backend derives them
+              // from ingredients (CatalogMenuItemCommandRepository
+              // .replaceAllergenDeclarations is a documented no-op), so
+              // there is no server-side field for this form to fill.
             };
 
             const result = await browserRequest<unknown>(
@@ -2085,29 +2151,11 @@ export const menuManagementApi =
               }
             }
 
-            // 5. Attach Allergen Declarations to server
-            if (Array.isArray(payload.allergenDeclarations) && payload.allergenDeclarations.length > 0) {
-              try {
-                await browserRequest<unknown>(
-                  `/api/admin/menu-items/${encodeURIComponent(realServerUuid)}/allergen-declarations`,
-                  {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      declarations: payload.allergenDeclarations.map((a) => ({
-                        allergenUuid: a.allergenUuid,
-                        declarationType: a.declarationType || "MAY_CONTAIN",
-                        riskLevel: a.riskLevel || "MEDIUM",
-                        verificationStatus: a.verificationStatus || "VERIFIED",
-                        notes: a.notes || undefined,
-                      })),
-                    }),
-                  },
-                );
-              } catch (e) {
-                console.warn("[ATTACH ALLERGENS WARNING]", e);
-              }
-            }
+            // Allergen declarations are not attached here: the backend's
+            // menu-item allergen-declarations endpoint is a documented
+            // no-op (CatalogMenuItemCommandRepository.replaceAllergenDeclarations
+            // — "derived directly from ingredients via ingredient_allergens"),
+            // so there is no server-side field for the admin form to fill.
 
             return {
               data: createdItem,
@@ -2200,12 +2248,7 @@ export const menuManagementApi =
                 source: "MANUAL",
                 // The item's own attribute copy. Whatever is omitted here
                 // keeps the value already stored on the item.
-                ...(payload.menuItem?.spiceLevel != null
-                  ? { spiceLevel: Number(payload.menuItem.spiceLevel) }
-                  : {}),
-                ...(payload.menuItem?.nutritionData
-                  ? { nutritionData: payload.menuItem.nutritionData }
-                  : {}),
+                ...menuItemAttributeFields(payload.menuItem),
               },
             };
 
@@ -2336,35 +2379,13 @@ export const menuManagementApi =
               }
             }
 
-            // 5. Update Allergen Declarations if provided
-            if (payload.allergenDeclarations !== undefined && Array.isArray(payload.allergenDeclarations)) {
-              try {
-                await browserRequest<unknown>(
-                  `/api/admin/menu-items/${encodeURIComponent(
-                    targetUuid,
-                  )}/allergen-declarations`,
-                  {
-                    method: "PUT",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                      declarations: payload.allergenDeclarations.map((a) => ({
-                        allergenUuid: a.allergenUuid,
-                        declarationType: a.declarationType || "MAY_CONTAIN",
-                        riskLevel: a.riskLevel || "MEDIUM",
-                        verificationStatus: a.verificationStatus || "VERIFIED",
-                        notes: a.notes || undefined,
-                      })),
-                    }),
-                  },
-                );
-              } catch (algErr) {
-                console.warn("[UPDATE ALLERGENS WARNING]", algErr);
-              }
-            }
+            // Allergen declarations are not updated here: the backend's
+            // menu-item allergen-declarations endpoint is a documented
+            // no-op (CatalogMenuItemCommandRepository.replaceAllergenDeclarations
+            // — "derived directly from ingredients via ingredient_allergens"),
+            // so there is no server-side field for the admin form to fill.
 
-            // 6. Replace Images if new files provided
+            // 5. Replace Images if new files provided
             if (Array.isArray(images) && images.length > 0) {
               try {
                 const imgFormData = new FormData();
@@ -2627,6 +2648,7 @@ export const {
 
   useGetPublishedMenuItemsQuery,
   useGetMenuItemQuery,
+  useGetManagedMenuItemQuery,
   useGetPublishedMenuItemDetailQuery,
   useCreateStoreMenuItemMutation,
   useUpdateStoreMenuItemMutation,

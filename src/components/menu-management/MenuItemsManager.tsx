@@ -1680,7 +1680,6 @@ export default function MenuItemsManager({
         stores={allCombinedStores}
         ingredients={ingredientsQuery.data ?? []}
         dietaryTypes={activeDietaryTypes}
-        allergens={activeAllergens}
         mealTypes={activeMealTypes}
         ageGroups={activeAgeGroups}
         seasons={activeSeasons}

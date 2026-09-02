@@ -11,10 +11,10 @@ import {
   Loader2,
   Plus,
   Save,
-  ShieldAlert,
   Sparkles,
   Store,
   Trash2,
+  UsersRound,
   UtensilsCrossed,
   X,
 } from "lucide-react";
@@ -29,6 +29,7 @@ import MenuItemSearchableSelect, {
 } from "./MenuItemSearchableSelect";
 import {
   useGetPublishedMenuItemDetailQuery,
+  useGetManagedMenuItemQuery,
 } from "@/src/app/store/menuManagementApi";
 import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
 
@@ -58,12 +59,48 @@ type DietaryTypeRow = {
   notes: string;
 };
 
-type AllergenRow = {
-  allergenUuid: string;
-  declarationType: "CONTAINS" | "MAY_CONTAIN" | string;
-  riskLevel: "LOW" | "MEDIUM" | "HIGH" | string;
-  verificationStatus: "VERIFIED" | "UNVERIFIED" | string;
-  notes: string;
+/*
+ * The item's own attribute copy, seeded from the selected food and editable
+ * from here — e.g. a food standard for breakfast can be sold at lunch or
+ * dinner by a specific store, so these rows exist per menu item, not just
+ * per food. Sent under payload.menuItem to
+ * MenuItemCreationInput.{seasons,events,suitableWeather,mealTypes,ageRules,
+ * dietaryTypes}.
+ */
+type SeasonRow = {
+  seasonUuid: string;
+  suitabilityScore: number;
+  reasonText: string;
+};
+
+type EventRow = {
+  eventUuid: string;
+  relevanceScore: number;
+  reasonText: string;
+};
+
+type WeatherRow = {
+  weatherConditionUuid: string;
+  suitabilityScore: number;
+  reasonText: string;
+};
+
+type MealTypeSuitabilityRow = {
+  mealTypeUuid: string;
+  suitabilityScore: number;
+};
+
+type AgeRuleRow = {
+  ageGroupUuid: string;
+  ruleResult: "ALLOWED" | "NOT_RECOMMENDED" | "RESTRICTED" | "BLOCKED" | string;
+  reasonText: string;
+};
+
+/** The food's classification tags (e.g. HALAL, VEGETARIAN), distinct from
+ *  the verified per-item declarations in dietaryTypeRows below. */
+type DietaryTagRow = {
+  code: string;
+  name: string;
 };
 
 type MedicalConditionRow = {
@@ -227,7 +264,6 @@ export default function PublishMenuItemModal({
   stores,
   ingredients,
   dietaryTypes = [],
-  allergens = [],
   mealTypes = [],
   ageGroups = [],
   seasons = [],
@@ -248,7 +284,6 @@ export default function PublishMenuItemModal({
   stores: StoreOption[];
   ingredients: IngredientOption[];
   dietaryTypes?: DietaryType[];
-  allergens?: unknown[];
   mealTypes?: any[];
   ageGroups?: any[];
   seasons?: any[];
@@ -273,14 +308,28 @@ export default function PublishMenuItemModal({
     itemUuid ? String(itemUuid) : "",
     { skip: !open || !itemUuid },
   );
+  // Admin-only detail: the item's own attribute snapshot with full fidelity
+  // (uuid + score/reasonText per row), needed to correctly round-trip the
+  // seasons/events/weather/meal-types/age-rules edit rows below.
+  const { data: managedItem } = useGetManagedMenuItemQuery(
+    itemUuid ? String(itemUuid) : "",
+    { skip: !open || !itemUuid },
+  );
 
   const activeItem = item ? (detailedItem || item) : null;
 
   const [values, setValues] = useState<FormState>(EMPTY);
   const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>([]);
   const [dietaryTypeRows, setDietaryTypeRows] = useState<DietaryTypeRow[]>([]);
-  const [allergenRows, setAllergenRows] = useState<AllergenRow[]>([]);
   const [medicalConditionRows, setMedicalConditionRows] = useState<MedicalConditionRow[]>([]);
+  const [seasonRows, setSeasonRows] = useState<SeasonRow[]>([]);
+  const [eventRows, setEventRows] = useState<EventRow[]>([]);
+  const [weatherRows, setWeatherRows] = useState<WeatherRow[]>([]);
+  const [mealTypeSuitabilityRows, setMealTypeSuitabilityRows] = useState<
+    MealTypeSuitabilityRow[]
+  >([]);
+  const [ageRuleRows, setAgeRuleRows] = useState<AgeRuleRow[]>([]);
+  const [dietaryTagRows, setDietaryTagRows] = useState<DietaryTagRow[]>([]);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [existingThumbnail, setExistingThumbnail] = useState<string | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
@@ -299,6 +348,71 @@ export default function PublishMenuItemModal({
   );
   const bodyRef = useRef<HTMLDivElement | null>(null);
 
+  const safeList = (value: unknown): any[] =>
+    Array.isArray(value)
+      ? value
+      : (value as any)?.content ?? (value as any)?.contents ?? [];
+
+  const seasonOptions: SearchableOption[] = useMemo(
+    () =>
+      safeList(seasons).map((s: any) => ({
+        value: s.uuid,
+        label: s.localName || s.name,
+        sublabel: s.code,
+      })),
+    [seasons],
+  );
+
+  const eventOptions: SearchableOption[] = useMemo(
+    () =>
+      safeList(events).map((e: any) => ({
+        value: e.uuid,
+        label: e.localName || e.name,
+        sublabel: e.code,
+      })),
+    [events],
+  );
+
+  const weatherOptions: SearchableOption[] = useMemo(
+    () =>
+      safeList(weatherConditions).map((w: any) => ({
+        value: w.uuid,
+        label: w.localName || w.name,
+        sublabel: w.code,
+      })),
+    [weatherConditions],
+  );
+
+  const mealTypeSuitabilityOptions: SearchableOption[] = useMemo(
+    () =>
+      safeList(mealTypes).map((m: any) => ({
+        value: m.uuid,
+        label: m.name,
+        sublabel: m.code,
+      })),
+    [mealTypes],
+  );
+
+  const ageGroupOptions: SearchableOption[] = useMemo(
+    () =>
+      safeList(ageGroups).map((a: any) => ({
+        value: a.uuid,
+        label: a.name,
+        sublabel: a.code,
+      })),
+    [ageGroups],
+  );
+
+  const ruleResultOptions: SearchableOption[] = useMemo(
+    () => [
+      { value: "ALLOWED", label: "អនុញ្ញាត" },
+      { value: "NOT_RECOMMENDED", label: "មិនណែនាំ" },
+      { value: "RESTRICTED", label: "ហាមឃាត់" },
+    ],
+    [],
+  );
+
+
   useEffect(() => {
     if (!open || !item || !activeItem) {
       setValues({
@@ -307,8 +421,13 @@ export default function PublishMenuItemModal({
       });
       setIngredientRows([]);
       setDietaryTypeRows([]);
-      setAllergenRows([]);
       setMedicalConditionRows([]);
+      setSeasonRows([]);
+      setEventRows([]);
+      setWeatherRows([]);
+      setMealTypeSuitabilityRows([]);
+      setAgeRuleRows([]);
+      setDietaryTagRows([]);
       setThumbnailFile(null);
       setExistingThumbnail(null);
       setGalleryFiles([]);
@@ -508,43 +627,144 @@ export default function PublishMenuItemModal({
         .filter((d) => Boolean(d.dietaryTypeUuid)),
     );
 
-    // ---- Allergen Declarations ----
-    const rawAllergens: any[] =
-      storedMenuItem?.allergenDeclarations !== undefined && Array.isArray(storedMenuItem.allergenDeclarations) && storedMenuItem.allergenDeclarations.length > 0
-        ? storedMenuItem.allergenDeclarations
-        : Array.isArray((activeItem as any).allergenDeclarations) && (activeItem as any).allergenDeclarations.length > 0
-        ? (activeItem as any).allergenDeclarations
-        : Array.isArray(activeItem.food?.allergens)
-        ? (activeItem.food as any).allergens
-        : [];
+    // ---- Food attribute snapshot (seasons/events/weather/meal types/age
+    // rules/dietary tags) ----
+    //
+    // managedItem (GET /api/admin/menu-items/{uuid}) has full fidelity —
+    // uuid + score/reasonText per row. activeItem (the public /detail
+    // response) carries the same item-owned values for seasons/events/
+    // weather with full fidelity too, but only code/name for meal types
+    // and age rules. targetFood (the canonical food) is the last resort,
+    // for a record created before the item owned these fields.
+    const snapshot = managedItem as any;
+    const itemFood = activeItem.food as any;
 
-    setAllergenRows(
-      rawAllergens
-        .map((raw: any) => {
-          const allergenUuid =
-            typeof raw === "string"
-              ? raw
-              : raw.allergenUuid || raw.uuid || raw.id || "";
-          const found = (allergens as any[]).find(
-            (a: any) =>
-              a.uuid === allergenUuid ||
-              a.code === allergenUuid ||
-              (typeof a === "object" && a.id === allergenUuid),
-          );
+    setSeasonRows(
+      safeList(snapshot?.seasons ?? itemFood?.seasons ?? targetFood?.seasons)
+        .map((s: any) => {
+          const seasonUuid =
+            s.seasonUuid ||
+            s.uuid ||
+            seasonOptions.find((opt) => opt.label === s.name)?.value ||
+            "";
           return {
-            allergenUuid: found?.uuid || allergenUuid,
-            declarationType: raw.declarationType || "MAY_CONTAIN",
-            riskLevel: raw.riskLevel || "MEDIUM",
-            verificationStatus: raw.verificationStatus || "VERIFIED",
-            notes: raw.notes || "",
+            seasonUuid,
+            suitabilityScore:
+              s.suitabilityScore != null ? Number(s.suitabilityScore) : 0.95,
+            reasonText: s.reasonText || "",
           };
         })
-        .filter((a) => Boolean(a.allergenUuid)),
+        .filter((r) => Boolean(r.seasonUuid)),
+    );
+
+    setEventRows(
+      safeList(snapshot?.events ?? itemFood?.events ?? targetFood?.events)
+        .map((e: any) => {
+          const eventUuid =
+            e.eventUuid ||
+            e.uuid ||
+            eventOptions.find((opt) => opt.label === e.name)?.value ||
+            "";
+          return {
+            eventUuid,
+            relevanceScore:
+              e.relevanceScore != null ? Number(e.relevanceScore) : 0.9,
+            reasonText: e.reasonText || "",
+          };
+        })
+        .filter((r) => Boolean(r.eventUuid)),
+    );
+
+    setWeatherRows(
+      safeList(
+        snapshot?.suitableWeather ??
+          itemFood?.suitableWeather ??
+          targetFood?.suitableWeather,
+      )
+        .map((w: any) => {
+          const weatherConditionUuid =
+            w.weatherConditionUuid ||
+            w.uuid ||
+            weatherOptions.find((opt) => opt.label === w.name)?.value ||
+            "";
+          return {
+            weatherConditionUuid,
+            suitabilityScore:
+              w.suitabilityScore != null ? Number(w.suitabilityScore) : 0.95,
+            reasonText: w.reasonText || "",
+          };
+        })
+        .filter((r) => Boolean(r.weatherConditionUuid)),
+    );
+
+    // mealTypes/ageRules: prefer the admin snapshot, since the public
+    // detail response only carries code/name for these two (no uuid or
+    // score), which would lose suitabilityScore/ruleResult on every edit.
+    setMealTypeSuitabilityRows(
+      safeList(snapshot?.mealTypes ?? itemFood?.mealTypes ?? targetFood?.mealTypes)
+        .map((m: any) => {
+          const mealTypeUuid =
+            m.mealTypeUuid ||
+            m.uuid ||
+            mealTypeSuitabilityOptions.find((opt) => opt.label === m.name)
+              ?.value ||
+            "";
+          return {
+            mealTypeUuid,
+            suitabilityScore:
+              m.suitabilityScore != null ? Number(m.suitabilityScore) : 1,
+          };
+        })
+        .filter((r) => Boolean(r.mealTypeUuid)),
+    );
+
+    setAgeRuleRows(
+      safeList(snapshot?.ageRules ?? itemFood?.ageRules ?? targetFood?.ageRules)
+        .map((a: any) => {
+          const ageGroupUuid =
+            a.ageGroupUuid ||
+            a.uuid ||
+            ageGroupOptions.find((opt) => opt.label === a.name)?.value ||
+            "";
+          return {
+            ageGroupUuid,
+            ruleResult: a.ruleResult || "ALLOWED",
+            reasonText: a.reasonText || "Suitable as a normal serving.",
+          };
+        })
+        .filter((r) => Boolean(r.ageGroupUuid)),
+    );
+
+    setDietaryTagRows(
+      safeList(
+        snapshot?.foodDietaryTypes ?? itemFood?.dietaryTypes ?? targetFood?.dietaryTypes,
+      )
+        .map((d: any) => ({
+          code: typeof d === "string" ? d : d.code || d.dietaryTypeCode || "",
+          name:
+            typeof d === "string" ? d : d.name || d.localName || d.code || "",
+        }))
+        .filter((r) => Boolean(r.code)),
     );
 
     setError(null);
     setFieldErrors({});
-  }, [activeItem, item, open, stores, foods, ingredients, dietaryTypes, allergens, storeFixedId]);
+  }, [
+    activeItem,
+    managedItem,
+    item,
+    open,
+    stores,
+    foods,
+    ingredients,
+    dietaryTypes,
+    storeFixedId,
+    seasonOptions,
+    eventOptions,
+    weatherOptions,
+    mealTypeSuitabilityOptions,
+    ageGroupOptions,
+  ]);
 
   const safeFoods = useMemo(
     () =>
@@ -636,6 +856,20 @@ export default function PublishMenuItemModal({
     () =>
       activeDietaryTypes.map((d) => ({
         value: d.uuid,
+        label: d.name,
+        sublabel: d.code,
+      })),
+    [activeDietaryTypes],
+  );
+
+  // Keyed by code, not uuid: dietaryTagRows stores the food's classification
+  // tags the same way foods.dietary_types does (code + name), not a uuid
+  // reference — distinct from dietaryTypeOptions above (used for the
+  // verified per-item declarations, which do key by uuid).
+  const dietaryTagOptions: SearchableOption[] = useMemo(
+    () =>
+      activeDietaryTypes.map((d) => ({
+        value: d.code,
         label: d.name,
         sublabel: d.code,
       })),
@@ -759,6 +993,108 @@ export default function PublishMenuItemModal({
           .filter((d) => Boolean(d.dietaryTypeUuid)),
       );
     }
+
+    // Seed the item's own attribute snapshot from the selected food. It is
+    // editable from here on — a food standard for breakfast can still be
+    // sold at lunch or dinner by this store.
+    setSeasonRows(
+      safeList(selectedFood?.seasons)
+        .map((s: any) => {
+          const seasonUuid =
+            s.seasonUuid ||
+            s.uuid ||
+            seasonOptions.find((opt) => opt.label === s.name)?.value ||
+            "";
+          return {
+            seasonUuid,
+            suitabilityScore:
+              s.suitabilityScore != null ? Number(s.suitabilityScore) : 0.95,
+            reasonText: s.reasonText || "",
+          };
+        })
+        .filter((r) => Boolean(r.seasonUuid)),
+    );
+
+    setEventRows(
+      safeList(selectedFood?.events)
+        .map((e: any) => {
+          const eventUuid =
+            e.eventUuid ||
+            e.uuid ||
+            eventOptions.find((opt) => opt.label === e.name)?.value ||
+            "";
+          return {
+            eventUuid,
+            relevanceScore:
+              e.relevanceScore != null ? Number(e.relevanceScore) : 0.9,
+            reasonText: e.reasonText || "",
+          };
+        })
+        .filter((r) => Boolean(r.eventUuid)),
+    );
+
+    setWeatherRows(
+      safeList(selectedFood?.suitableWeather)
+        .map((w: any) => {
+          const weatherConditionUuid =
+            w.weatherConditionUuid ||
+            w.uuid ||
+            weatherOptions.find((opt) => opt.label === w.name)?.value ||
+            "";
+          return {
+            weatherConditionUuid,
+            suitabilityScore:
+              w.suitabilityScore != null ? Number(w.suitabilityScore) : 0.95,
+            reasonText: w.reasonText || "",
+          };
+        })
+        .filter((r) => Boolean(r.weatherConditionUuid)),
+    );
+
+    setMealTypeSuitabilityRows(
+      safeList(selectedFood?.mealTypes)
+        .map((m: any) => {
+          const mealTypeUuid =
+            m.mealTypeUuid ||
+            m.uuid ||
+            mealTypeSuitabilityOptions.find((opt) => opt.label === m.name)
+              ?.value ||
+            "";
+          return {
+            mealTypeUuid,
+            suitabilityScore:
+              m.suitabilityScore != null ? Number(m.suitabilityScore) : 1,
+          };
+        })
+        .filter((r) => Boolean(r.mealTypeUuid)),
+    );
+
+    setAgeRuleRows(
+      safeList(selectedFood?.ageRules)
+        .map((a: any) => {
+          const ageGroupUuid =
+            a.ageGroupUuid ||
+            a.uuid ||
+            ageGroupOptions.find((opt) => opt.label === a.name)?.value ||
+            "";
+          return {
+            ageGroupUuid,
+            ruleResult: a.ruleResult || "ALLOWED",
+            reasonText: a.reasonText || "Suitable as a normal serving.",
+          };
+        })
+        .filter((r) => Boolean(r.ageGroupUuid)),
+    );
+
+    setDietaryTagRows(
+      safeList(selectedFood?.dietaryTypes).map((d: any) => ({
+        code: typeof d === "string" ? d : d.code || d.dietaryTypeCode || "",
+        name:
+          typeof d === "string"
+            ? d
+            : d.name || d.localName || d.code || "",
+      })).filter((r) => Boolean(r.code)),
+    );
   };
 
   const updateIngredientRow = (
@@ -777,6 +1113,60 @@ export default function PublishMenuItemModal({
     changes: Partial<DietaryTypeRow>,
   ) => {
     setDietaryTypeRows((current) =>
+      current.map((row, rowIndex) =>
+        rowIndex === index ? { ...row, ...changes } : row,
+      ),
+    );
+  };
+
+  const updateSeasonRow = (index: number, changes: Partial<SeasonRow>) => {
+    setSeasonRows((current) =>
+      current.map((row, rowIndex) =>
+        rowIndex === index ? { ...row, ...changes } : row,
+      ),
+    );
+  };
+
+  const updateEventRow = (index: number, changes: Partial<EventRow>) => {
+    setEventRows((current) =>
+      current.map((row, rowIndex) =>
+        rowIndex === index ? { ...row, ...changes } : row,
+      ),
+    );
+  };
+
+  const updateWeatherRow = (index: number, changes: Partial<WeatherRow>) => {
+    setWeatherRows((current) =>
+      current.map((row, rowIndex) =>
+        rowIndex === index ? { ...row, ...changes } : row,
+      ),
+    );
+  };
+
+  const updateMealTypeSuitabilityRow = (
+    index: number,
+    changes: Partial<MealTypeSuitabilityRow>,
+  ) => {
+    setMealTypeSuitabilityRows((current) =>
+      current.map((row, rowIndex) =>
+        rowIndex === index ? { ...row, ...changes } : row,
+      ),
+    );
+  };
+
+  const updateAgeRuleRow = (index: number, changes: Partial<AgeRuleRow>) => {
+    setAgeRuleRows((current) =>
+      current.map((row, rowIndex) =>
+        rowIndex === index ? { ...row, ...changes } : row,
+      ),
+    );
+  };
+
+  const updateDietaryTagRow = (
+    index: number,
+    changes: Partial<DietaryTagRow>,
+  ) => {
+    setDietaryTagRows((current) =>
       current.map((row, rowIndex) =>
         rowIndex === index ? { ...row, ...changes } : row,
       ),
@@ -893,8 +1283,10 @@ export default function PublishMenuItemModal({
           isFeatured: values.isFeatured,
           source: values.source || "MANUAL",
 
-          // Stored on the menu item itself. The server seeds anything left
-          // out from the selected food.
+          // Stored on the menu item itself, not the canonical food — a food
+          // standard for breakfast can still be sold at lunch or dinner by
+          // this store. The server seeds anything left out from the
+          // selected food.
           spiceLevel: numberOrNull(values.spiceLevel) ?? 0,
           nutritionData: {
             calories: numberOrNull(values.calories) ?? 0,
@@ -903,21 +1295,90 @@ export default function PublishMenuItemModal({
             fatGrams: numberOrNull(values.fat) ?? 0,
             fiberGrams: numberOrNull(values.fiber) ?? 0,
           },
+          seasons: seasonRows
+            .filter((r) => Boolean(r.seasonUuid))
+            .map((r) => {
+              const found = safeList(seasons).find(
+                (s: any) => s.uuid === r.seasonUuid,
+              );
+              return {
+                seasonUuid: r.seasonUuid,
+                code: found?.code,
+                name: found?.name,
+                localName: found?.localName,
+                suitabilityScore: r.suitabilityScore,
+                reasonText: r.reasonText.trim() || null,
+              };
+            }),
+          events: eventRows
+            .filter((r) => Boolean(r.eventUuid))
+            .map((r) => {
+              const found = safeList(events).find(
+                (e: any) => e.uuid === r.eventUuid,
+              );
+              return {
+                eventUuid: r.eventUuid,
+                code: found?.code,
+                name: found?.name,
+                localName: found?.localName,
+                relevanceScore: r.relevanceScore,
+                reasonText: r.reasonText.trim() || null,
+              };
+            }),
+          suitableWeather: weatherRows
+            .filter((r) => Boolean(r.weatherConditionUuid))
+            .map((r) => {
+              const found = safeList(weatherConditions).find(
+                (w: any) => w.uuid === r.weatherConditionUuid,
+              );
+              return {
+                weatherConditionUuid: r.weatherConditionUuid,
+                code: found?.code,
+                name: found?.name,
+                localName: found?.localName,
+                suitabilityScore: r.suitabilityScore,
+                reasonText: r.reasonText.trim() || null,
+              };
+            }),
+          mealTypes: mealTypeSuitabilityRows
+            .filter((r) => Boolean(r.mealTypeUuid))
+            .map((r) => {
+              const found = safeList(mealTypes).find(
+                (m: any) => m.uuid === r.mealTypeUuid,
+              );
+              return {
+                mealTypeUuid: r.mealTypeUuid,
+                code: found?.code,
+                name: found?.name,
+                suitabilityScore: r.suitabilityScore,
+              };
+            }),
+          ageRules: ageRuleRows
+            .filter((r) => Boolean(r.ageGroupUuid))
+            .map((r) => {
+              const found = safeList(ageGroups).find(
+                (a: any) => a.uuid === r.ageGroupUuid,
+              );
+              return {
+                ageGroupUuid: r.ageGroupUuid,
+                code: found?.code,
+                name: found?.name,
+                ruleResult: r.ruleResult,
+                reasonText: r.reasonText.trim() || "Suitable as a normal serving.",
+              };
+            }),
+          dietaryTypes: dietaryTagRows
+            .filter((r) => Boolean(r.code))
+            .map((r) => ({ code: r.code, name: r.name || r.code })),
         },
         primaryMediaUuids: [],
         thumbnailMediaUuid: thumbnailFile ? null : (existingThumbnail || null),
         galleryMediaUuids: existingGallery,
         ingredients: ingredientPayload,
         dietaryTypes: dietaryTypePayload,
-        allergenDeclarations: allergenRows
-          .filter((r) => Boolean(r.allergenUuid))
-          .map((r) => ({
-            allergenUuid: r.allergenUuid,
-            declarationType: r.declarationType || "MAY_CONTAIN",
-            riskLevel: r.riskLevel || "MEDIUM",
-            verificationStatus: r.verificationStatus || "VERIFIED",
-            notes: r.notes.trim() || null,
-          })),
+        // Allergen declarations are not sent: the backend derives them from
+        // ingredients and its allergen-declarations endpoint is a
+        // documented no-op, so there is no server-side field to fill.
       };
 
       const targetMenuItemUuid =
@@ -929,15 +1390,6 @@ export default function PublishMenuItemModal({
       if (targetMenuItemUuid) {
         saveMenuItemRelationsStorage(String(targetMenuItemUuid), {
           dietaryTypes: dietaryTypePayload,
-          allergenDeclarations: allergenRows
-            .filter((r) => Boolean(r.allergenUuid))
-            .map((r) => ({
-              allergenUuid: r.allergenUuid,
-              declarationType: r.declarationType || "MAY_CONTAIN",
-              riskLevel: r.riskLevel || "MEDIUM",
-              verificationStatus: r.verificationStatus || "VERIFIED",
-              notes: r.notes || null,
-            })),
         });
       }
 
@@ -1430,105 +1882,60 @@ export default function PublishMenuItemModal({
             )}
           </section>
 
-          {/* Allergen Declarations */}
-          <section className="rounded-3xl border border-rose-100 bg-gradient-to-br from-rose-50/40 to-white p-6">
+          {/*
+            The item's own attribute copy — seeded from the selected food,
+            editable per store. A food standard for breakfast can still be
+            sold at lunch or dinner here without changing the canonical food.
+          */}
+
+          {/* Seasons */}
+          <section className="rounded-3xl border border-sky-100 bg-gradient-to-br from-sky-50/40 to-white p-6">
             <TabIntro
-              icon={<ShieldAlert size={20} />}
-              title="សារធាតុអាឡែហ្ស៊ី (Allergens)"
-              description="សម្គាល់ប្រភេទអាឡែហ្ស៊ី ប្រភេទការប្រកាស និងកម្រិតហានិភ័យ។"
+              icon={<Sparkles size={20} />}
+              title="រដូវកាល"
+              description="តើម្ហូបនេះសមរម្យសម្រាប់រដូវកាលណា នៅហាងនេះ។"
               onAdd={() =>
-                setAllergenRows((current) => [
+                setSeasonRows((current) => [
                   ...current,
-                  {
-                    allergenUuid: "",
-                    declarationType: "MAY_CONTAIN",
-                    riskLevel: "MEDIUM",
-                    verificationStatus: "VERIFIED",
-                    notes: "",
-                  },
+                  { seasonUuid: "", suitabilityScore: 0.95, reasonText: "" },
                 ])
               }
-              addLabel="បន្ថែមអាឡែហ្ស៊ី"
+              addLabel="បន្ថែមរដូវកាល"
             />
-
-            {allergenRows.length > 0 ? (
+            {seasonRows.length > 0 ? (
               <div className="mt-4 space-y-2.5">
-                {allergenRows.map((row, index) => (
+                {seasonRows.map((row, index) => (
                   <div
                     key={index}
-                    style={{ zIndex: allergenRows.length - index + 20 }}
-                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-rose-100 hover:shadow"
+                    style={{ zIndex: seasonRows.length - index + 20 }}
+                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-sky-100 hover:shadow"
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-base font-normal text-rose-700">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-100 text-base font-normal text-sky-700">
                       {index + 1}
                     </div>
-
                     <div className="flex-1 min-w-[200px]">
                       <MenuItemSearchableSelect
-                        value={row.allergenUuid}
-                        options={(allergens as any[]).map((a: any) => ({
-                          value: a.uuid || a.id || "",
-                          label: (a as any).localName || a.name || a.code || "",
-                          sublabel: a.code,
-                        }))}
-                        onChange={(next) =>
-                          setAllergenRows((current) =>
-                            current.map((r, i) => i === index ? { ...r, allergenUuid: next } : r)
-                          )
-                        }
-                        placeholder="ជ្រើសអាឡែហ្ស៊ី..."
-                        ariaLabel="ជ្រើសអាឡែហ្ស៊ី"
+                        value={row.seasonUuid}
+                        options={seasonOptions}
+                        onChange={(next) => updateSeasonRow(index, { seasonUuid: next })}
+                        placeholder="ជ្រើសរដូវកាល..."
+                        ariaLabel="ជ្រើសរដូវកាល"
                       />
                     </div>
-
-                    <div className="w-36">
-                      <MenuItemSearchableSelect
-                        value={row.declarationType}
-                        options={[
-                          { value: "CONTAINS", label: "មាន" },
-                          { value: "MAY_CONTAIN", label: "អាចមាន" },
-                        ]}
-                        onChange={(next) =>
-                          setAllergenRows((current) =>
-                            current.map((r, i) => i === index ? { ...r, declarationType: next } : r)
-                          )
-                        }
-                        placeholder="ប្រភេទ..."
-                        ariaLabel="ជ្រើសប្រភេទ"
-                      />
-                    </div>
-
-                    <div className="w-36">
-                      <MenuItemSearchableSelect
-                        value={row.verificationStatus}
-                        options={verificationStatusOptions}
-                        onChange={(next) =>
-                          setAllergenRows((current) =>
-                            current.map((r, i) => i === index ? { ...r, verificationStatus: next } : r)
-                          )
-                        }
-                        placeholder="ស្ថានភាព..."
-                        ariaLabel="ជ្រើសស្ថានភាពផ្ទៀងផ្ទាត់"
-                      />
-                    </div>
-
-                    <div className="flex-1 min-w-[160px]">
+                    <div className="flex-1 min-w-[180px]">
                       <input
-                        placeholder="កំណត់ចំណាំ (Notes)..."
-                        value={row.notes}
+                        placeholder="មូលហេតុ (Reason)..."
+                        value={row.reasonText}
                         onChange={(event) =>
-                          setAllergenRows((current) =>
-                            current.map((r, i) => i === index ? { ...r, notes: event.target.value } : r)
-                          )
+                          updateSeasonRow(index, { reasonText: event.target.value })
                         }
                         className={inputClass}
                       />
                     </div>
-
                     <RemoveRowButton
                       onClick={() =>
-                        setAllergenRows((current) =>
-                          current.filter((_, rowIndex) => rowIndex !== index)
+                        setSeasonRows((current) =>
+                          current.filter((_, rowIndex) => rowIndex !== index),
                         )
                       }
                     />
@@ -1537,7 +1944,315 @@ export default function PublishMenuItemModal({
               </div>
             ) : (
               <div className="mt-4">
-                <EmptyRowsHint text="មិនទាន់បានកំណត់សារធាតុអាឡែហ្ស៊ីទេ។" />
+                <EmptyRowsHint text="មិនទាន់បានកំណត់រដូវកាលទេ។" />
+              </div>
+            )}
+          </section>
+
+          {/* Events */}
+          <section className="rounded-3xl border border-amber-100 bg-gradient-to-br from-amber-50/40 to-white p-6">
+            <TabIntro
+              icon={<Sparkles size={20} />}
+              title="ព្រឹត្តិការណ៍"
+              description="តើម្ហូបនេះសមរម្យសម្រាប់ព្រឹត្តិការណ៍អ្វី នៅហាងនេះ។"
+              onAdd={() =>
+                setEventRows((current) => [
+                  ...current,
+                  { eventUuid: "", relevanceScore: 0.9, reasonText: "" },
+                ])
+              }
+              addLabel="បន្ថែមព្រឹត្តិការណ៍"
+            />
+            {eventRows.length > 0 ? (
+              <div className="mt-4 space-y-2.5">
+                {eventRows.map((row, index) => (
+                  <div
+                    key={index}
+                    style={{ zIndex: eventRows.length - index + 20 }}
+                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-amber-100 hover:shadow"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-base font-normal text-amber-700">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 min-w-[200px]">
+                      <MenuItemSearchableSelect
+                        value={row.eventUuid}
+                        options={eventOptions}
+                        onChange={(next) => updateEventRow(index, { eventUuid: next })}
+                        placeholder="ជ្រើសព្រឹត្តិការណ៍..."
+                        ariaLabel="ជ្រើសព្រឹត្តិការណ៍"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-[180px]">
+                      <input
+                        placeholder="មូលហេតុ (Reason)..."
+                        value={row.reasonText}
+                        onChange={(event) =>
+                          updateEventRow(index, { reasonText: event.target.value })
+                        }
+                        className={inputClass}
+                      />
+                    </div>
+                    <RemoveRowButton
+                      onClick={() =>
+                        setEventRows((current) =>
+                          current.filter((_, rowIndex) => rowIndex !== index),
+                        )
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4">
+                <EmptyRowsHint text="មិនទាន់បានកំណត់ព្រឹត្តិការណ៍ទេ។" />
+              </div>
+            )}
+          </section>
+
+          {/* Suitable weather */}
+          <section className="rounded-3xl border border-cyan-100 bg-gradient-to-br from-cyan-50/40 to-white p-6">
+            <TabIntro
+              icon={<Sparkles size={20} />}
+              title="អាកាសធាតុសមរម្យ"
+              description="តើម្ហូបនេះសមរម្យសម្រាប់អាកាសធាតុបែបណា នៅហាងនេះ។"
+              onAdd={() =>
+                setWeatherRows((current) => [
+                  ...current,
+                  { weatherConditionUuid: "", suitabilityScore: 0.95, reasonText: "" },
+                ])
+              }
+              addLabel="បន្ថែមអាកាសធាតុ"
+            />
+            {weatherRows.length > 0 ? (
+              <div className="mt-4 space-y-2.5">
+                {weatherRows.map((row, index) => (
+                  <div
+                    key={index}
+                    style={{ zIndex: weatherRows.length - index + 20 }}
+                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-cyan-100 hover:shadow"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-base font-normal text-cyan-700">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 min-w-[200px]">
+                      <MenuItemSearchableSelect
+                        value={row.weatherConditionUuid}
+                        options={weatherOptions}
+                        onChange={(next) =>
+                          updateWeatherRow(index, { weatherConditionUuid: next })
+                        }
+                        placeholder="ជ្រើសអាកាសធាតុ..."
+                        ariaLabel="ជ្រើសអាកាសធាតុ"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-[180px]">
+                      <input
+                        placeholder="មូលហេតុ (Reason)..."
+                        value={row.reasonText}
+                        onChange={(event) =>
+                          updateWeatherRow(index, { reasonText: event.target.value })
+                        }
+                        className={inputClass}
+                      />
+                    </div>
+                    <RemoveRowButton
+                      onClick={() =>
+                        setWeatherRows((current) =>
+                          current.filter((_, rowIndex) => rowIndex !== index),
+                        )
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4">
+                <EmptyRowsHint text="មិនទាន់បានកំណត់អាកាសធាតុទេ។" />
+              </div>
+            )}
+          </section>
+
+          {/* Meal type suitability */}
+          <section className="rounded-3xl border border-lime-100 bg-gradient-to-br from-lime-50/40 to-white p-6">
+            <TabIntro
+              icon={<Clock3 size={20} />}
+              title="ពេលទទួលទាន"
+              description="តើហាងនេះលក់ម្ហូបនេះក្នុងពេលទទួលទានណាខ្លះ — អាចខុសពីលំនាំដើមរបស់ម្ហូប។"
+              onAdd={() =>
+                setMealTypeSuitabilityRows((current) => [
+                  ...current,
+                  { mealTypeUuid: "", suitabilityScore: 1 },
+                ])
+              }
+              addLabel="បន្ថែមពេលទទួលទាន"
+            />
+            {mealTypeSuitabilityRows.length > 0 ? (
+              <div className="mt-4 space-y-2.5">
+                {mealTypeSuitabilityRows.map((row, index) => (
+                  <div
+                    key={index}
+                    style={{ zIndex: mealTypeSuitabilityRows.length - index + 20 }}
+                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-lime-100 hover:shadow"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-lime-100 text-base font-normal text-lime-700">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 min-w-[200px]">
+                      <MenuItemSearchableSelect
+                        value={row.mealTypeUuid}
+                        options={mealTypeSuitabilityOptions}
+                        onChange={(next) =>
+                          updateMealTypeSuitabilityRow(index, { mealTypeUuid: next })
+                        }
+                        placeholder="ជ្រើសពេលទទួលទាន..."
+                        ariaLabel="ជ្រើសពេលទទួលទាន"
+                      />
+                    </div>
+                    <RemoveRowButton
+                      onClick={() =>
+                        setMealTypeSuitabilityRows((current) =>
+                          current.filter((_, rowIndex) => rowIndex !== index),
+                        )
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4">
+                <EmptyRowsHint text="មិនទាន់បានកំណត់ពេលទទួលទានទេ។" />
+              </div>
+            )}
+          </section>
+
+          {/* Age rules */}
+          <section className="rounded-3xl border border-orange-100 bg-gradient-to-br from-orange-50/40 to-white p-6">
+            <TabIntro
+              icon={<UsersRound size={20} />}
+              title="ក្រុមអាយុ"
+              description="ភាពសមរម្យសម្រាប់ក្រុមអាយុនីមួយៗ សម្រាប់ម្ហូបនេះនៅហាងនេះ។"
+              onAdd={() =>
+                setAgeRuleRows((current) => [
+                  ...current,
+                  {
+                    ageGroupUuid: "",
+                    ruleResult: "ALLOWED",
+                    reasonText: "Suitable as a normal serving.",
+                  },
+                ])
+              }
+              addLabel="បន្ថែមក្រុមអាយុ"
+            />
+            {ageRuleRows.length > 0 ? (
+              <div className="mt-4 space-y-2.5">
+                {ageRuleRows.map((row, index) => (
+                  <div
+                    key={index}
+                    style={{ zIndex: ageRuleRows.length - index + 20 }}
+                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-orange-100 hover:shadow"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-base font-normal text-orange-700">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 min-w-[180px]">
+                      <MenuItemSearchableSelect
+                        value={row.ageGroupUuid}
+                        options={ageGroupOptions}
+                        onChange={(next) => updateAgeRuleRow(index, { ageGroupUuid: next })}
+                        placeholder="ជ្រើសក្រុមអាយុ..."
+                        ariaLabel="ជ្រើសក្រុមអាយុ"
+                      />
+                    </div>
+                    <div className="w-40">
+                      <MenuItemSearchableSelect
+                        value={row.ruleResult}
+                        options={ruleResultOptions}
+                        onChange={(next) => updateAgeRuleRow(index, { ruleResult: next })}
+                        placeholder="លទ្ធផល..."
+                        ariaLabel="ជ្រើសលទ្ធផល"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-[180px]">
+                      <input
+                        placeholder="មូលហេតុ (Reason)..."
+                        value={row.reasonText}
+                        onChange={(event) =>
+                          updateAgeRuleRow(index, { reasonText: event.target.value })
+                        }
+                        className={inputClass}
+                      />
+                    </div>
+                    <RemoveRowButton
+                      onClick={() =>
+                        setAgeRuleRows((current) =>
+                          current.filter((_, rowIndex) => rowIndex !== index),
+                        )
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4">
+                <EmptyRowsHint text="មិនទាន់បានកំណត់ក្រុមអាយុទេ។" />
+              </div>
+            )}
+          </section>
+
+          {/* Food dietary classification tags (distinct from the verified
+              per-item declarations above, which target menu_item_dietary_types) */}
+          <section className="rounded-3xl border border-teal-100 bg-gradient-to-br from-teal-50/40 to-white p-6">
+            <TabIntro
+              icon={<Heart size={20} />}
+              title="ចំណាត់ថ្នាក់របបអាហារ"
+              description="ស្លាកចំណាត់ថ្នាក់ (ឧ. Halal, Vegetarian) សម្រាប់ម្ហូបនេះនៅហាងនេះ។"
+              onAdd={() =>
+                setDietaryTagRows((current) => [...current, { code: "", name: "" }])
+              }
+              addLabel="បន្ថែមចំណាត់ថ្នាក់"
+            />
+            {dietaryTagRows.length > 0 ? (
+              <div className="mt-4 space-y-2.5">
+                {dietaryTagRows.map((row, index) => (
+                  <div
+                    key={index}
+                    style={{ zIndex: dietaryTagRows.length - index + 20 }}
+                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-teal-100 hover:shadow"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-100 text-base font-normal text-teal-700">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 min-w-[220px]">
+                      <MenuItemSearchableSelect
+                        value={row.code}
+                        options={dietaryTagOptions}
+                        onChange={(next) => {
+                          const found = activeDietaryTypes.find(
+                            (d: any) => d.code === next,
+                          );
+                          updateDietaryTagRow(index, {
+                            code: found?.code || next,
+                            name: found?.name || next,
+                          });
+                        }}
+                        placeholder="ជ្រើសចំណាត់ថ្នាក់..."
+                        ariaLabel="ជ្រើសចំណាត់ថ្នាក់របបអាហារ"
+                      />
+                    </div>
+                    <RemoveRowButton
+                      onClick={() =>
+                        setDietaryTagRows((current) =>
+                          current.filter((_, rowIndex) => rowIndex !== index),
+                        )
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4">
+                <EmptyRowsHint text="មិនទាន់បានកំណត់ចំណាត់ថ្នាក់របបអាហារទេ។" />
               </div>
             )}
           </section>
