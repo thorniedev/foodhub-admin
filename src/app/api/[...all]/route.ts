@@ -278,22 +278,7 @@ async function forwardRequest(
   let forwardedMethod = request.method;
   let customRequestBody: ArrayBuffer | undefined = undefined;
 
-  // Transparently route GET /api/menu-items or GET /api/catalog/menu-items to POST /discovery/menu-items/search
-  if (
-    request.method === "GET" &&
-    ((all[0] === "menu-items" && all.length === 1) ||
-      (all[0] === "catalog" && all[1] === "menu-items" && all.length === 2))
-  ) {
-    normalizedPath = ["discovery", "menu-items", "search"];
-    forwardedMethod = "POST";
-    const q = incomingUrl.searchParams.get("query") || undefined;
-    const storeUuid = incomingUrl.searchParams.get("storeUuid") || undefined;
-    const searchBody = JSON.stringify({
-      ...(q ? { query: q } : {}),
-      ...(storeUuid ? { storeUuid, storeUuids: [storeUuid] } : {}),
-    });
-    customRequestBody = new TextEncoder().encode(searchBody).buffer;
-  } else if (all[0] === "menu-items") {
+  if (all[0] === "menu-items") {
     normalizedPath = ["catalog", "menu-items", ...all.slice(1)];
   }
 

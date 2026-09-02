@@ -837,29 +837,46 @@ export default function MenuItemsManager({
     }
 
     if (selectedCuisineUuid) {
-      const selectedCui = activeCuisines.find((c) => c.uuid === selectedCuisineUuid || (c as any).id === selectedCuisineUuid || c.code === selectedCuisineUuid);
-      const selName = (selectedCui?.name || (selectedCui as any)?.localName || "").toLowerCase();
-      const selCode = (selectedCui?.code || "").toLowerCase();
+      const selectedCui = activeCuisines.find(
+        (c) =>
+          c.uuid === selectedCuisineUuid ||
+          (c as any).id === selectedCuisineUuid ||
+          c.code === selectedCuisineUuid,
+      );
+      const selName = (selectedCui?.name || "").trim().toLowerCase();
+      const selLocalName = ((selectedCui as any)?.localName || "").trim().toLowerCase();
+      const selCode = (selectedCui?.code || "").trim().toUpperCase();
 
       result = result.filter((item) => {
         const resolvedFood = getResolvedFood(item);
-        const itemCuiUuid = resolvedFood.cuisine?.uuid || resolvedFood.cuisineUuid || (resolvedFood.cuisine as any)?.id;
-        const itemCuiName = (resolvedFood.cuisine?.name || resolvedFood.cuisineName || "").toLowerCase();
-        const itemCuiCode = (resolvedFood.cuisine?.code || "").toLowerCase();
-
-        if (!itemCuiUuid && !itemCuiCode && !itemCuiName) return true;
+        const itemCuiUuid =
+          resolvedFood.cuisine?.uuid ||
+          resolvedFood.cuisineUuid ||
+          (resolvedFood.cuisine as any)?.id;
+        const itemCuiName = (resolvedFood.cuisine?.name || resolvedFood.cuisineName || "").trim().toLowerCase();
+        const itemCuiLocalName = ((resolvedFood.cuisine as any)?.localName || "").trim().toLowerCase();
+        const itemCuiCode = (resolvedFood.cuisine?.code || "").trim().toUpperCase();
 
         if (itemCuiUuid && (itemCuiUuid === selectedCuisineUuid || (selectedCui && itemCuiUuid === selectedCui.uuid))) return true;
         if (selCode && itemCuiCode && itemCuiCode === selCode) return true;
-        if (selName && itemCuiName && (itemCuiName === selName || itemCuiName.includes(selName) || selName.includes(itemCuiName))) return true;
+        if (selName && itemCuiName && itemCuiName === selName) return true;
+        if (selLocalName && itemCuiLocalName && itemCuiLocalName === selLocalName) return true;
+        if (selLocalName && itemCuiName && itemCuiName === selLocalName) return true;
+        if (selName && itemCuiLocalName && itemCuiLocalName === selName) return true;
         return false;
       });
     }
 
     if (selectedSeasonUuid) {
-      const targetSeason = activeSeasons.find((s) => s.uuid === selectedSeasonUuid || (s as any).id === selectedSeasonUuid || s.code === selectedSeasonUuid);
-      const targetCode = targetSeason?.code;
-      const targetName = (targetSeason?.name || (targetSeason as any)?.localName || "").toLowerCase();
+      const targetSeason = activeSeasons.find(
+        (s) =>
+          s.uuid === selectedSeasonUuid ||
+          (s as any).id === selectedSeasonUuid ||
+          s.code === selectedSeasonUuid,
+      );
+      const targetCode = (targetSeason?.code || "").trim().toUpperCase();
+      const targetName = (targetSeason?.name || "").trim().toLowerCase();
+      const targetLocalName = ((targetSeason as any)?.localName || "").trim().toLowerCase();
 
       result = result.filter((item) => {
         const resolvedFood = getResolvedFood(item);
@@ -867,21 +884,35 @@ export default function MenuItemsManager({
         if (list.length === 0) return false;
         return list.some((s: any) => {
           const sUuid = typeof s === "string" ? s : s?.uuid || s?.seasonUuid;
-          const sCode = s?.code || s?.seasonCode;
-          const sName = (s?.name || s?.localName || "").toLowerCase();
-          return (
-            sUuid === selectedSeasonUuid ||
-            (targetCode && sCode === targetCode) ||
-            (targetName && sName && (sName.includes(targetName) || targetName.includes(sName)))
-          );
+          const sCode = (s?.code || s?.seasonCode || "").trim().toUpperCase();
+          const sName = (s?.name || "").trim().toLowerCase();
+          const sLocalName = (s?.localName || "").trim().toLowerCase();
+
+          if (sUuid && (sUuid === selectedSeasonUuid || (targetSeason?.uuid && sUuid === targetSeason.uuid))) {
+            return true;
+          }
+          if (targetCode && sCode && sCode === targetCode) {
+            return true;
+          }
+          if (targetName && sName && sName === targetName) return true;
+          if (targetLocalName && sLocalName && sLocalName === targetLocalName) return true;
+          if (targetLocalName && sName && sName === targetLocalName) return true;
+          if (targetName && sLocalName && sLocalName === targetName) return true;
+          return false;
         });
       });
     }
 
     if (selectedEventUuid) {
-      const targetEvent = activeEvents.find((e) => e.uuid === selectedEventUuid || (e as any).id === selectedEventUuid || e.code === selectedEventUuid);
-      const targetCode = targetEvent?.code;
-      const targetName = (targetEvent?.name || (targetEvent as any)?.localName || "").toLowerCase();
+      const targetEvent = activeEvents.find(
+        (e) =>
+          e.uuid === selectedEventUuid ||
+          (e as any).id === selectedEventUuid ||
+          e.code === selectedEventUuid,
+      );
+      const targetCode = (targetEvent?.code || "").trim().toUpperCase();
+      const targetName = (targetEvent?.name || "").trim().toLowerCase();
+      const targetLocalName = ((targetEvent as any)?.localName || "").trim().toLowerCase();
 
       result = result.filter((item) => {
         const resolvedFood = getResolvedFood(item);
@@ -889,21 +920,34 @@ export default function MenuItemsManager({
         if (list.length === 0) return false;
         return list.some((e: any) => {
           const eUuid = typeof e === "string" ? e : e?.uuid || e?.eventUuid;
-          const eCode = e?.code || e?.eventCode;
-          const eName = (e?.name || e?.localName || "").toLowerCase();
-          return (
-            eUuid === selectedEventUuid ||
-            (targetCode && eCode === targetCode) ||
-            (targetName && eName && (eName.includes(targetName) || targetName.includes(eName)))
-          );
+          const eCode = (e?.code || e?.eventCode || "").trim().toUpperCase();
+          const eName = (e?.name || "").trim().toLowerCase();
+          const eLocalName = (e?.localName || "").trim().toLowerCase();
+
+          if (eUuid && (eUuid === selectedEventUuid || (targetEvent?.uuid && eUuid === targetEvent.uuid))) {
+            return true;
+          }
+          if (targetCode && eCode && eCode === targetCode) {
+            return true;
+          }
+          if (targetName && eName && eName === targetName) return true;
+          if (targetLocalName && eLocalName && eLocalName === targetLocalName) return true;
+          if (targetLocalName && eName && eName === targetLocalName) return true;
+          if (targetName && eLocalName && eLocalName === targetName) return true;
+          return false;
         });
       });
     }
 
     if (selectedWeatherUuid) {
-      const targetWeather = activeWeatherConditions.find((w) => (w.uuid || w.code) === selectedWeatherUuid || (w as any).id === selectedWeatherUuid);
-      const targetCode = targetWeather?.code;
-      const targetName = (targetWeather?.name || (targetWeather as any)?.localName || "").toLowerCase();
+      const targetWeather = activeWeatherConditions.find(
+        (w) =>
+          (w.uuid || w.code) === selectedWeatherUuid ||
+          (w as any).id === selectedWeatherUuid,
+      );
+      const targetCode = (targetWeather?.code || "").trim().toUpperCase();
+      const targetName = (targetWeather?.name || "").trim().toLowerCase();
+      const targetLocalName = ((targetWeather as any)?.localName || "").trim().toLowerCase();
 
       result = result.filter((item) => {
         const resolvedFood = getResolvedFood(item);
@@ -911,35 +955,60 @@ export default function MenuItemsManager({
         if (list.length === 0) return false;
         return list.some((w: any) => {
           const wUuid = typeof w === "string" ? w : w?.uuid || w?.weatherUuid || w?.weatherConditionUuid;
-          const wCode = w?.code || w?.weatherCode;
-          const wName = (w?.name || w?.localName || "").toLowerCase();
-          return (
-            wUuid === selectedWeatherUuid ||
-            (targetCode && wCode === targetCode) ||
-            (targetName && wName && (wName.includes(targetName) || targetName.includes(wName)))
-          );
+          const wCode = (w?.code || w?.weatherCode || "").trim().toUpperCase();
+          const wName = (w?.name || "").trim().toLowerCase();
+          const wLocalName = (w?.localName || "").trim().toLowerCase();
+
+          if (wUuid && (wUuid === selectedWeatherUuid || (targetWeather?.uuid && wUuid === targetWeather.uuid))) {
+            return true;
+          }
+          if (targetCode && wCode && wCode === targetCode) {
+            return true;
+          }
+          if (targetName && wName && wName === targetName) return true;
+          if (targetLocalName && wLocalName && wLocalName === targetLocalName) return true;
+          if (targetLocalName && wName && wName === targetLocalName) return true;
+          if (targetName && wLocalName && wLocalName === targetName) return true;
+          return false;
         });
       });
     }
 
     if (selectedAgeGroupUuid) {
-      const targetAge = activeAgeGroups.find((a) => (a.uuid || a.code) === selectedAgeGroupUuid || (a as any).id === selectedAgeGroupUuid);
-      const targetCode = targetAge?.code;
-      const targetName = (targetAge?.name || (targetAge as any)?.localName || "").toLowerCase();
+      const targetAge = activeAgeGroups.find(
+        (a) =>
+          (a.uuid || a.code) === selectedAgeGroupUuid ||
+          (a as any).id === selectedAgeGroupUuid,
+      );
+      const targetCode = (targetAge?.code || "").trim().toUpperCase();
+      const targetName = (targetAge?.name || "").trim().toLowerCase();
+      const targetLocalName = ((targetAge as any)?.localName || "").trim().toLowerCase();
 
       result = result.filter((item) => {
         const resolvedFood = getResolvedFood(item);
-        const list = Array.isArray(resolvedFood.ageRules) ? resolvedFood.ageRules : (Array.isArray((resolvedFood as any).ageGroups) ? (resolvedFood as any).ageGroups : []);
+        const list = Array.isArray(resolvedFood.ageRules)
+          ? resolvedFood.ageRules
+          : Array.isArray((resolvedFood as any).ageGroups)
+            ? (resolvedFood as any).ageGroups
+            : [];
         if (list.length === 0) return false;
         return list.some((a: any) => {
           const aUuid = typeof a === "string" ? a : a?.uuid || a?.ageGroupUuid;
-          const aCode = a?.code || a?.ageGroupCode;
-          const aName = (a?.name || a?.localName || "").toLowerCase();
-          return (
-            aUuid === selectedAgeGroupUuid ||
-            (targetCode && aCode === targetCode) ||
-            (targetName && aName && (aName.includes(targetName) || targetName.includes(aName)))
-          );
+          const aCode = (a?.code || a?.ageGroupCode || "").trim().toUpperCase();
+          const aName = (a?.name || "").trim().toLowerCase();
+          const aLocalName = (a?.localName || "").trim().toLowerCase();
+
+          if (aUuid && (aUuid === selectedAgeGroupUuid || (targetAge?.uuid && aUuid === targetAge.uuid))) {
+            return true;
+          }
+          if (targetCode && aCode && aCode === targetCode) {
+            return true;
+          }
+          if (targetName && aName && aName === targetName) return true;
+          if (targetLocalName && aLocalName && aLocalName === targetLocalName) return true;
+          if (targetLocalName && aName && aName === targetLocalName) return true;
+          if (targetName && aLocalName && aLocalName === targetName) return true;
+          return false;
         });
       });
     }

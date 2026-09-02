@@ -1791,37 +1791,37 @@ export const menuManagementApi =
               }
             }
 
-            // 2. Discovery Search API (POST /api/discovery/menu-items/search)
+            // 2. Fetch from Full Catalog Menu Items Endpoint first (contains real events, seasons, weather, age rules)
+            const query = makeQuery({
+              page: safePage,
+              size: safeSize,
+              sort: "createdAt,desc",
+              query: p.query,
+              storeUuid: p.storeUuid,
+            });
+
             let result = await browserRequest<unknown>(
-              `/api/discovery/menu-items/search?page=${safePage}&size=${safeSize}`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  ...(p.query ? { query: p.query } : {}),
-                  ...(p.storeUuid
-                    ? { storeUuid: p.storeUuid, storeUuids: [p.storeUuid] }
-                    : {}),
-                  ...(p.rootCategoryCode ? { categoryUuids: [p.rootCategoryCode] } : {}),
-                }),
-              },
+              `/api/catalog/menu-items${query}`,
             );
 
-            // 3. Fallbacks if discovery search with POST returned error:
+            // 3. Fallback to Discovery Search API if catalog returned an error
             if ("error" in result) {
-              const query = makeQuery({
-                page: safePage,
-                size: safeSize,
-                sort: "createdAt,desc",
-                query: p.query,
-                storeUuid: p.storeUuid,
-              });
-
-              const catalogRes = await browserRequest<unknown>(
-                `/api/catalog/menu-items${query}`,
+              const discoveryRes = await browserRequest<unknown>(
+                `/api/discovery/menu-items/search?page=${safePage}&size=${safeSize}`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    ...(p.query ? { query: p.query } : {}),
+                    ...(p.storeUuid
+                      ? { storeUuid: p.storeUuid, storeUuids: [p.storeUuid] }
+                      : {}),
+                    ...(p.rootCategoryCode ? { categoryUuids: [p.rootCategoryCode] } : {}),
+                  }),
+                },
               );
-              if (!("error" in catalogRes)) {
-                result = catalogRes;
+              if (!("error" in discoveryRes)) {
+                result = discoveryRes;
               }
             }
 
