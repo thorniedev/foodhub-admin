@@ -22,7 +22,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import ThumbnailImagePicker from "./ThumbnailImagePicker";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
-import { readFoodRelationsStorage, readMenuItemRelationsStorage, saveMenuItemRelationsStorage } from "@/src/lib/filterCatalogStorage";
+import { readMenuItemRelationsStorage, saveMenuItemRelationsStorage } from "@/src/lib/filterCatalogStorage";
 import GalleryImagePicker from "./GalleryImagePicker";
 import MenuItemSearchableSelect, {
   type SearchableOption,
@@ -84,6 +84,17 @@ type FormState = {
   ingredientDataStatus: string;
   isFeatured: boolean;
   source: string;
+
+  /*
+   * Seeded from the selected food, then saved onto the menu item, so this
+   * store's version of the dish can differ from the canonical food.
+   */
+  spiceLevel: string;
+  calories: string;
+  protein: string;
+  carbohydrate: string;
+  fat: string;
+  fiber: string;
 };
 
 type FieldErrors = Partial<
@@ -103,7 +114,24 @@ const EMPTY: FormState = {
   ingredientDataStatus: "VERIFIED",
   isFeatured: false,
   source: "MANUAL",
+  spiceLevel: "0",
+  calories: "",
+  protein: "",
+  carbohydrate: "",
+  fat: "",
+  fiber: "",
 };
+
+function nutritionText(value: unknown): string {
+  return value == null ? "" : String(value);
+}
+
+function numberOrNull(value: string): number | null {
+  if (!value.trim()) return null;
+
+  const result = Number(value);
+  return Number.isFinite(result) ? result : null;
+}
 
 function storeLabel(store: StoreOption): string {
   return store.storeName || store.name || store.localName || store.uuid;
@@ -354,6 +382,13 @@ export default function PublishMenuItemModal({
           ? rawFoodUuid
           : (foods[0]?.uuid || ""));
 
+    // Prefer the item's own nutrition; fall back to the food only for a
+    // record created before menu items carried their own copy.
+    const itemNutrition = ((activeItem as any).nutritionData ??
+      (activeItem as any).nutrition ??
+      foundFood?.nutritionData ??
+      (foundFood as any)?.nutrition) as any;
+
     setValues({
       storeUuid: matchedStoreUuid,
       foodUuid: matchedFoodUuid,
@@ -374,6 +409,25 @@ export default function PublishMenuItemModal({
         activeItem.ingredientDataStatus || "VERIFIED",
       isFeatured: Boolean(activeItem.isFeatured),
       source: activeItem.source || "MANUAL",
+
+      // Editing shows the item's own attributes, which may already differ
+      // from the food it was created from.
+      spiceLevel: String(
+        (activeItem as any).spiceLevel ??
+          foundFood?.defaultSpiceLevel ??
+          0,
+      ),
+      calories: nutritionText(itemNutrition?.calories),
+      protein: nutritionText(
+        itemNutrition?.proteinGrams ?? itemNutrition?.protein,
+      ),
+      carbohydrate: nutritionText(
+        itemNutrition?.carbohydrateGrams ??
+          itemNutrition?.carbsGrams ??
+          itemNutrition?.carbs,
+      ),
+      fat: nutritionText(itemNutrition?.fatGrams ?? itemNutrition?.fat),
+      fiber: nutritionText(itemNutrition?.fiberGrams ?? itemNutrition?.fiber),
     });
 
     setIngredientRows(
@@ -417,15 +471,12 @@ export default function PublishMenuItemModal({
     const storedMenuItem = currentMenuItemUuid ? readMenuItemRelationsStorage(String(currentMenuItemUuid)) : null;
 
     const targetFood = foundFood || (matchedFoodUuid ? foods.find((f) => String(f.uuid || f.id) === matchedFoodUuid) : undefined);
-    const storedFood = targetFood?.uuid ? readFoodRelationsStorage(targetFood.uuid) : null;
 
     const rawDietary =
       storedMenuItem?.dietaryTypes !== undefined && Array.isArray(storedMenuItem.dietaryTypes)
         ? storedMenuItem.dietaryTypes
         : activeItem.dietaryTypes !== undefined && Array.isArray(activeItem.dietaryTypes)
         ? activeItem.dietaryTypes
-        : storedFood?.dietaryTypes !== undefined && Array.isArray(storedFood.dietaryTypes)
-        ? storedFood.dietaryTypes
         : targetFood?.dietaryTypes !== undefined && Array.isArray(targetFood.dietaryTypes)
         ? targetFood.dietaryTypes
         : Array.isArray(activeItem.food?.dietaryTypes)
@@ -463,8 +514,6 @@ export default function PublishMenuItemModal({
         ? storedMenuItem.allergenDeclarations
         : Array.isArray((activeItem as any).allergenDeclarations) && (activeItem as any).allergenDeclarations.length > 0
         ? (activeItem as any).allergenDeclarations
-        : Array.isArray(storedFood?.allergens) && storedFood.allergens.length > 0
-        ? storedFood.allergens
         : Array.isArray(activeItem.food?.allergens)
         ? (activeItem.food as any).allergens
         : [];
@@ -641,20 +690,46 @@ export default function PublishMenuItemModal({
       const isAutoName = !current.name || (selectedFood && foods.some((f) => f.canonicalName === current.name || f.localName === current.name));
       const isAutoDesc = !current.description || (selectedFood && foods.some((f) => f.description === current.description));
 
+      // Picking a food fills the form with that food's attributes. They are
+      // editable from here on and are saved onto the menu item, not back
+      // onto the canonical food.
+      const foodNutrition =
+        (selectedFood?.nutritionData ??
+          (selectedFood as any)?.nutrition) as any;
+
       return {
         ...current,
         foodUuid: selectedUuid,
         name: isAutoName && selectedFood ? (selectedFood.localName || selectedFood.canonicalName) : current.name,
         description: isAutoDesc && selectedFood?.description ? selectedFood.description : current.description,
+        spiceLevel: selectedFood
+          ? String(selectedFood.defaultSpiceLevel ?? 0)
+          : current.spiceLevel,
+        calories: selectedFood
+          ? nutritionText(foodNutrition?.calories)
+          : current.calories,
+        protein: selectedFood
+          ? nutritionText(foodNutrition?.proteinGrams ?? foodNutrition?.protein)
+          : current.protein,
+        carbohydrate: selectedFood
+          ? nutritionText(
+              foodNutrition?.carbohydrateGrams ??
+                foodNutrition?.carbsGrams ??
+                foodNutrition?.carbs,
+            )
+          : current.carbohydrate,
+        fat: selectedFood
+          ? nutritionText(foodNutrition?.fatGrams ?? foodNutrition?.fat)
+          : current.fat,
+        fiber: selectedFood
+          ? nutritionText(foodNutrition?.fiberGrams ?? foodNutrition?.fiber)
+          : current.fiber,
       };
     });
     setFieldErrors((current) => ({ ...current, foodUuid: undefined }));
 
-    const storedFood = selectedUuid ? readFoodRelationsStorage(selectedUuid) : null;
     const foodDietary =
-      Array.isArray(storedFood?.dietaryTypes) && storedFood.dietaryTypes.length > 0
-        ? storedFood.dietaryTypes
-        : Array.isArray(selectedFood?.dietaryTypes) && selectedFood.dietaryTypes.length > 0
+      Array.isArray(selectedFood?.dietaryTypes) && selectedFood.dietaryTypes.length > 0
         ? selectedFood.dietaryTypes
         : [];
 
@@ -817,6 +892,17 @@ export default function PublishMenuItemModal({
           ingredientDataStatus: item?.ingredientDataStatus || "VERIFIED",
           isFeatured: values.isFeatured,
           source: values.source || "MANUAL",
+
+          // Stored on the menu item itself. The server seeds anything left
+          // out from the selected food.
+          spiceLevel: numberOrNull(values.spiceLevel) ?? 0,
+          nutritionData: {
+            calories: numberOrNull(values.calories) ?? 0,
+            proteinGrams: numberOrNull(values.protein) ?? 0,
+            carbohydrateGrams: numberOrNull(values.carbohydrate) ?? 0,
+            fatGrams: numberOrNull(values.fat) ?? 0,
+            fiberGrams: numberOrNull(values.fiber) ?? 0,
+          },
         },
         primaryMediaUuids: [],
         thumbnailMediaUuid: thumbnailFile ? null : (existingThumbnail || null),
@@ -852,8 +938,6 @@ export default function PublishMenuItemModal({
               verificationStatus: r.verificationStatus || "VERIFIED",
               notes: r.notes || null,
             })),
-          ingredients: ingredientPayload,
-          medicalConditions: medicalConditionRows,
         });
       }
 
@@ -1024,6 +1108,96 @@ export default function PublishMenuItemModal({
                   }))
                 }
               />
+
+              {/*
+                Seeded from the selected food and saved onto this menu item,
+                so this store's version can differ from the canonical food.
+              */}
+              <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+                <p className="text-lg font-medium text-gray-700">
+                  អាហារូបត្ថម្ភ &amp; កម្រិតហឹរ
+                </p>
+                <p className="mt-1 text-base font-normal text-gray-400">
+                  តម្លៃទាំងនេះត្រូវបានយកមកពីមុខម្ហូបដើម
+                  ហើយអ្នកអាចកែវាសម្រាប់ហាងនេះដោយឡែក។
+                </p>
+
+                <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field
+                    label="កម្រិតហឹរ (0-10)"
+                    type="number"
+                    min={0}
+                    max={10}
+                    step={1}
+                    value={values.spiceLevel}
+                    placeholder="0"
+                    onChange={(value) =>
+                      setValues((current) => ({ ...current, spiceLevel: value }))
+                    }
+                  />
+                  <Field
+                    label="កាឡូរី (kcal)"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={values.calories}
+                    placeholder="0"
+                    onChange={(value) =>
+                      setValues((current) => ({ ...current, calories: value }))
+                    }
+                  />
+                </div>
+
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <Field
+                    label="ប្រូតេអ៊ីន (g)"
+                    type="number"
+                    min={0}
+                    step="0.1"
+                    value={values.protein}
+                    placeholder="0"
+                    onChange={(value) =>
+                      setValues((current) => ({ ...current, protein: value }))
+                    }
+                  />
+                  <Field
+                    label="កាបូអ៊ីដ្រាត (g)"
+                    type="number"
+                    min={0}
+                    step="0.1"
+                    value={values.carbohydrate}
+                    placeholder="0"
+                    onChange={(value) =>
+                      setValues((current) => ({
+                        ...current,
+                        carbohydrate: value,
+                      }))
+                    }
+                  />
+                  <Field
+                    label="ខ្លាញ់ (g)"
+                    type="number"
+                    min={0}
+                    step="0.1"
+                    value={values.fat}
+                    placeholder="0"
+                    onChange={(value) =>
+                      setValues((current) => ({ ...current, fat: value }))
+                    }
+                  />
+                  <Field
+                    label="ជាតិសរសៃ (g)"
+                    type="number"
+                    min={0}
+                    step="0.1"
+                    value={values.fiber}
+                    placeholder="0"
+                    onChange={(value) =>
+                      setValues((current) => ({ ...current, fiber: value }))
+                    }
+                  />
+                </div>
+              </div>
 
               <div>
                 <Label>ស្ថានភាព</Label>
@@ -1591,6 +1765,7 @@ function Field({
   onChange,
   type = "text",
   min,
+  max,
   step,
   required = false,
   invalid = false,
@@ -1602,6 +1777,7 @@ function Field({
   onChange: (value: string) => void;
   type?: string;
   min?: number | string;
+  max?: number | string;
   step?: number | string;
   required?: boolean;
   invalid?: boolean;
@@ -1613,6 +1789,7 @@ function Field({
       <input
         type={type}
         min={min}
+        max={max}
         step={step}
         value={value}
         placeholder={placeholder}

@@ -26,7 +26,6 @@ import {
 } from "@/src/app/store/menuManagementApi";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
-import { readFoodRelationsStorage } from "@/src/lib/filterCatalogStorage";
 
 const SPICE_SHORT_LABELS: Record<number, string> = {
   0: "មិនហឹរ",
@@ -59,25 +58,12 @@ export default function FoodDetailModal({
 
   if (!uuid) return null;
 
-  const stored = uuid ? readFoodRelationsStorage(uuid) : null;
-
-  const srvNut = rawData
+  // Everything here comes from the API. Falling back to a browser-local copy
+  // made the same food show different values in different browsers and hid
+  // the fact that the server was not persisting these fields.
+  const nutrition = rawData
     ? rawData.nutritionData ?? (rawData as any).nutrition
     : null;
-  const storedNut = stored?.nutritionData ?? stored?.nutrition;
-  const srvHasNutrition = !!(
-    srvNut &&
-    ((srvNut as any).calories ||
-      (srvNut as any).proteinGrams ||
-      (srvNut as any).protein ||
-      (srvNut as any).carbohydrateGrams ||
-      (srvNut as any).carbs ||
-      (srvNut as any).fatGrams ||
-      (srvNut as any).fat ||
-      (srvNut as any).fiberGrams ||
-      (srvNut as any).fiber)
-  );
-  const mergedNutrition = srvHasNutrition ? srvNut : (storedNut ?? srvNut);
 
   const categoryName =
     rawData?.categoryName ||
@@ -102,42 +88,18 @@ export default function FoodDetailModal({
         ...rawData,
         categoryName,
         cuisineName,
-        nutritionData: mergedNutrition,
-        mealTypes:
-          (stored?.mealTypes !== undefined
-            ? stored.mealTypes
-            : (rawData as any)?.mealTypes) ?? [],
-        seasons:
-          (stored?.seasons !== undefined ? stored.seasons : rawData.seasons) ??
-          [],
-        events:
-          (stored?.events !== undefined ? stored.events : rawData.events) ?? [],
-        suitableWeather:
-          (stored?.suitableWeather !== undefined
-            ? stored.suitableWeather
-            : (stored?.weatherConditions ?? rawData.suitableWeather)) ?? [],
-        ageRules:
-          (stored?.ageRules !== undefined
-            ? stored.ageRules
-            : (stored?.ageGroups ?? rawData.ageRules)) ?? [],
-        dietaryTypes:
-          (stored?.dietaryTypes !== undefined
-            ? stored.dietaryTypes
-            : rawData.dietaryTypes) ?? [],
-        allergens:
-          (stored?.allergens !== undefined
-            ? stored.allergens
-            : rawData.allergens) ?? [],
-        preparationTimes:
-          (stored?.preparationTimes !== undefined
-            ? stored.preparationTimes
-            : (rawData as any)?.preparationTimes) ?? [],
-        distances:
-          (stored?.distances !== undefined
-            ? stored.distances
-            : (rawData as any)?.distances) ?? [],
+        nutritionData: nutrition,
+        mealTypes: (rawData as any)?.mealTypes ?? [],
+        seasons: rawData.seasons ?? [],
+        events: rawData.events ?? [],
+        suitableWeather: rawData.suitableWeather ?? [],
+        ageRules: rawData.ageRules ?? [],
+        dietaryTypes: rawData.dietaryTypes ?? [],
+        allergens: rawData.allergens ?? [],
+        preparationTimes: (rawData as any)?.preparationTimes ?? [],
+        distances: (rawData as any)?.distances ?? [],
       }
-    : (stored as any);
+    : null;
 
   const images = (
     data?.images?.length

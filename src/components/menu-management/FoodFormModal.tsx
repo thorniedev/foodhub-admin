@@ -51,10 +51,6 @@ import type { DietaryType } from "@/src/types/dietaryType";
 import type { Allergen } from "@/src/types/allergen";
 import type { FilterCatalogOption } from "@/src/types/filterCatalog";
 import { useGetManagedFoodQuery } from "@/src/app/store/menuManagementApi";
-import {
-  readFoodRelationsStorage,
-  saveFoodRelationsStorage,
-} from "@/src/lib/filterCatalogStorage";
 
 type FormState = {
   canonicalName: string;
@@ -205,29 +201,10 @@ export default function FoodFormModal({
       )?.uuid ??
       "";
 
-    const stored =
-      (activeItem?.uuid ? readFoodRelationsStorage(activeItem.uuid) : null) ??
-      (item?.uuid ? readFoodRelationsStorage(item.uuid) : null);
-
-    // Server often returns nutritionData with all 0s/nulls when not persisted.
-    // Only trust server nutrition when at least one field has a real non-zero value.
-    const serverNut = activeItem.nutritionData ?? (activeItem as any).nutrition;
-    const storedNut = stored?.nutritionData ?? stored?.nutrition;
-    const serverHasRealData = !!(
-      serverNut &&
-      (
-        (serverNut as any).calories ||
-        (serverNut as any).proteinGrams ||
-        (serverNut as any).protein ||
-        (serverNut as any).carbohydrateGrams ||
-        (serverNut as any).carbs ||
-        (serverNut as any).fatGrams ||
-        (serverNut as any).fat ||
-        (serverNut as any).fiberGrams ||
-        (serverNut as any).fiber
-      )
-    );
-    const nutrition = serverHasRealData ? serverNut : (storedNut ?? serverNut);
+    // Nutrition is edited against whatever the API actually holds, so a save
+    // that did not persist is visible instead of being masked by a
+    // browser-local copy of the last thing typed here.
+    const nutrition = activeItem.nutritionData ?? (activeItem as any).nutrition;
 
     setValues({
       canonicalName: activeItem.canonicalName ?? "",
@@ -236,15 +213,11 @@ export default function FoodFormModal({
       categoryUuid: matchedCategoryUuid,
       cuisineUuid: matchedCuisineUuid,
       defaultSpiceLevel: String(
-        stored?.defaultSpiceLevel != null
-          ? stored.defaultSpiceLevel
-          : (stored as any)?.spiceLevel != null
-            ? (stored as any).spiceLevel
-            : activeItem.defaultSpiceLevel != null
-              ? activeItem.defaultSpiceLevel
-              : (activeItem as any)?.spiceLevel != null
-                ? (activeItem as any).spiceLevel
-                : 0,
+        activeItem.defaultSpiceLevel != null
+          ? activeItem.defaultSpiceLevel
+          : (activeItem as any)?.spiceLevel != null
+            ? (activeItem as any).spiceLevel
+            : 0,
       ),
       calories:
         nutrition?.calories != null
@@ -289,11 +262,9 @@ export default function FoodFormModal({
       isActive: activeItem.isActive !== false,
     });
 
-    // Populate metadata relations if editing - prioritize stored relations saved by the user
+    // Populate metadata relations from the API response.
     const rawSeasons =
-      stored?.seasons !== undefined && Array.isArray(stored.seasons)
-        ? stored.seasons
-        : Array.isArray(activeItem.seasons) && activeItem.seasons.length > 0
+      Array.isArray(activeItem.seasons) && activeItem.seasons.length > 0
           ? activeItem.seasons
           : Array.isArray((activeItem as any).seasonRelations) && (activeItem as any).seasonRelations.length > 0
             ? (activeItem as any).seasonRelations
@@ -337,9 +308,7 @@ export default function FoodFormModal({
     );
 
     const rawEvents =
-      stored?.events !== undefined && Array.isArray(stored.events)
-        ? stored.events
-        : Array.isArray(activeItem.events) && activeItem.events.length > 0
+      Array.isArray(activeItem.events) && activeItem.events.length > 0
           ? activeItem.events
           : Array.isArray((activeItem as any).eventRelations) && (activeItem as any).eventRelations.length > 0
             ? (activeItem as any).eventRelations
@@ -383,11 +352,7 @@ export default function FoodFormModal({
     );
 
     const rawWeather =
-      stored?.suitableWeather !== undefined && Array.isArray(stored.suitableWeather)
-        ? stored.suitableWeather
-        : stored?.weatherConditions !== undefined && Array.isArray(stored.weatherConditions)
-          ? stored.weatherConditions
-          : Array.isArray(activeItem.suitableWeather) && activeItem.suitableWeather.length > 0
+      Array.isArray(activeItem.suitableWeather) && activeItem.suitableWeather.length > 0
             ? activeItem.suitableWeather
             : Array.isArray((activeItem as any).weatherConditions) && (activeItem as any).weatherConditions.length > 0
               ? (activeItem as any).weatherConditions
@@ -437,9 +402,7 @@ export default function FoodFormModal({
     );
 
     const rawMealTypes =
-      stored?.mealTypes !== undefined && Array.isArray(stored.mealTypes)
-        ? stored.mealTypes
-        : Array.isArray(activeItem.mealTypes) && activeItem.mealTypes.length > 0
+      Array.isArray(activeItem.mealTypes) && activeItem.mealTypes.length > 0
           ? activeItem.mealTypes
           : Array.isArray((activeItem as any).mealTypeRelations) && (activeItem as any).mealTypeRelations.length > 0
             ? (activeItem as any).mealTypeRelations
@@ -482,11 +445,7 @@ export default function FoodFormModal({
     );
 
     const rawAgeRules =
-      stored?.ageRules !== undefined && Array.isArray(stored.ageRules)
-        ? stored.ageRules
-        : stored?.ageGroups !== undefined && Array.isArray(stored.ageGroups)
-          ? stored.ageGroups
-          : Array.isArray(activeItem.ageRules) && activeItem.ageRules.length > 0
+      Array.isArray(activeItem.ageRules) && activeItem.ageRules.length > 0
             ? activeItem.ageRules
             : Array.isArray((activeItem as any).ageGroups) && (activeItem as any).ageGroups.length > 0
               ? (activeItem as any).ageGroups
@@ -529,9 +488,7 @@ export default function FoodFormModal({
     );
 
     const rawDietary =
-      stored?.dietaryTypes !== undefined && Array.isArray(stored.dietaryTypes)
-        ? stored.dietaryTypes
-        : Array.isArray(activeItem.dietaryTypes) && activeItem.dietaryTypes.length > 0
+      Array.isArray(activeItem.dietaryTypes) && activeItem.dietaryTypes.length > 0
           ? activeItem.dietaryTypes
           : [];
     setDietaryTypeRows(
@@ -553,9 +510,7 @@ export default function FoodFormModal({
     );
 
     const rawAllergens =
-      stored?.allergens !== undefined && Array.isArray(stored.allergens)
-        ? stored.allergens
-        : Array.isArray(activeItem.allergens) && activeItem.allergens.length > 0
+      Array.isArray(activeItem.allergens) && activeItem.allergens.length > 0
           ? activeItem.allergens
           : Array.isArray((activeItem as any).allergenDeclarations) && (activeItem as any).allergenDeclarations.length > 0
             ? (activeItem as any).allergenDeclarations
@@ -586,9 +541,7 @@ export default function FoodFormModal({
     );
 
     const rawPrepTimes =
-      stored?.preparationTimes !== undefined && Array.isArray(stored.preparationTimes)
-        ? stored.preparationTimes
-        : Array.isArray((activeItem as any)?.preparationTimes)
+      Array.isArray((activeItem as any)?.preparationTimes)
           ? (activeItem as any).preparationTimes
           : [];
     setPreparationTimeRows(
@@ -601,9 +554,7 @@ export default function FoodFormModal({
     );
 
     const rawDistances =
-      stored?.distances !== undefined && Array.isArray(stored.distances)
-        ? stored.distances
-        : Array.isArray((activeItem as any)?.distances)
+      Array.isArray((activeItem as any)?.distances)
           ? (activeItem as any).distances
           : [];
     setDistanceRows(
@@ -1044,24 +995,6 @@ export default function FoodFormModal({
       };
 
       await onSubmit(payload, images);
-
-      if (item?.uuid) {
-        saveFoodRelationsStorage(item.uuid, {
-          nutritionData: payload.nutritionData,
-          nutrition: payload.nutritionData,
-          seasons: payload.seasons,
-          events: payload.events,
-          suitableWeather: payload.suitableWeather,
-          weatherConditions: payload.suitableWeather,
-          mealTypes: payload.mealTypes,
-          ageRules: payload.ageRules,
-          dietaryTypes: payload.dietaryTypes,
-          allergens: (payload as any).allergens,
-          preparationTimes: payload.preparationTimes,
-          distances: payload.distances,
-          defaultSpiceLevel: payload.defaultSpiceLevel,
-        });
-      }
     } catch (submitError) {
       setError(
         submitError instanceof Error

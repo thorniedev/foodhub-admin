@@ -46,7 +46,7 @@ import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
 import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
 import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionApi";
 import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
-import { readFilterCatalog, saveFoodRelationsStorage } from "@/src/lib/filterCatalogStorage";
+import { readFilterCatalog } from "@/src/lib/filterCatalogStorage";
 import { useUpdateFoodCategoryMutation } from "@/src/app/store/foodCategoryApi";
 import CustomSelect from "../ui/CustomSelect";
 
@@ -996,51 +996,15 @@ export default function MenuItemsManager({
           images,
         }).unwrap();
 
-        if (editingFood.uuid) {
-          saveFoodRelationsStorage(editingFood.uuid, {
-            nutritionData: payload.nutritionData,
-            nutrition: payload.nutritionData,
-            seasons: payload.seasons,
-            events: payload.events,
-            suitableWeather: payload.suitableWeather,
-            weatherConditions: payload.suitableWeather,
-            mealTypes: payload.mealTypes,
-            ageRules: payload.ageRules,
-            dietaryTypes: payload.dietaryTypes,
-            allergens: (payload as any).allergens,
-            preparationTimes: payload.preparationTimes,
-            distances: payload.distances,
-            defaultSpiceLevel: payload.defaultSpiceLevel,
-          });
-        }
-
         setNotice({
           type: "success",
           text: "បានកែប្រែ Food Catalog ដោយជោគជ័យ។",
         });
       } else {
-        const created = await createFood({
+        await createFood({
           payload,
           images,
         }).unwrap();
-
-        if (created?.uuid) {
-          saveFoodRelationsStorage(created.uuid, {
-            nutritionData: payload.nutritionData,
-            nutrition: payload.nutritionData,
-            seasons: payload.seasons,
-            events: payload.events,
-            suitableWeather: payload.suitableWeather,
-            weatherConditions: payload.suitableWeather,
-            mealTypes: payload.mealTypes,
-            ageRules: payload.ageRules,
-            dietaryTypes: payload.dietaryTypes,
-            allergens: (payload as any).allergens,
-            preparationTimes: payload.preparationTimes,
-            distances: payload.distances,
-            defaultSpiceLevel: payload.defaultSpiceLevel,
-          });
-        }
 
         setNotice({
           type: "success",
