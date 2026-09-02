@@ -145,7 +145,7 @@ export default function MenuItemsManager({
 
   const foodsQuery = useGetManagedFoodsQuery({
     page: 0,
-    size: 100,
+    size: 500,
     sort: "createdAt,desc",
   });
 
@@ -683,67 +683,110 @@ export default function MenuItemsManager({
     // Helper to resolve full FoodRecord metadata from catalog foods array if menu item's nested food object is partially populated
     const getResolvedFood = (item: MenuItemRecord) => {
       const foodUuid = item.foodUuid || item.food?.uuid;
-      const matchedCatalogFood = foodUuid ? foods.find((f) => f.uuid === foodUuid) : undefined;
+      let matchedCatalogFood = foodUuid ? foods.find((f) => f.uuid === foodUuid) : undefined;
+      if (!matchedCatalogFood && (item.name || item.food?.canonicalName || item.food?.localName)) {
+        matchedCatalogFood = foods.find(
+          (f) =>
+            (item.name && (f.canonicalName === item.name || f.localName === item.name || f.name === item.name)) ||
+            (item.food?.canonicalName && f.canonicalName === item.food.canonicalName) ||
+            (item.food?.localName && f.localName === item.food.localName),
+        );
+      }
+
       const itemFood = item.food as any;
       const catFood = matchedCatalogFood as any;
 
       const events =
-        Array.isArray(itemFood?.events) && itemFood.events.length > 0
-          ? itemFood.events
-          : Array.isArray(catFood?.events) && catFood.events.length > 0
-            ? catFood.events
-            : [];
+        Array.isArray((item as any)?.events) && (item as any).events.length > 0
+          ? (item as any).events
+          : Array.isArray(itemFood?.events) && itemFood.events.length > 0
+            ? itemFood.events
+            : Array.isArray(catFood?.events) && catFood.events.length > 0
+              ? catFood.events
+              : [];
 
       const seasons =
-        Array.isArray(itemFood?.seasons) && itemFood.seasons.length > 0
-          ? itemFood.seasons
-          : Array.isArray(catFood?.seasons) && catFood.seasons.length > 0
-            ? catFood.seasons
-            : [];
+        Array.isArray((item as any)?.seasons) && (item as any).seasons.length > 0
+          ? (item as any).seasons
+          : Array.isArray(itemFood?.seasons) && itemFood.seasons.length > 0
+            ? itemFood.seasons
+            : Array.isArray(catFood?.seasons) && catFood.seasons.length > 0
+              ? catFood.seasons
+              : [];
 
       const suitableWeather =
-        Array.isArray(itemFood?.suitableWeather) && itemFood.suitableWeather.length > 0
-          ? itemFood.suitableWeather
-          : Array.isArray(itemFood?.weatherConditions) && itemFood.weatherConditions.length > 0
-            ? itemFood.weatherConditions
-            : Array.isArray(catFood?.suitableWeather) && catFood.suitableWeather.length > 0
-              ? catFood.suitableWeather
-              : Array.isArray(catFood?.weatherConditions) && catFood.weatherConditions.length > 0
-                ? catFood.weatherConditions
-                : [];
+        Array.isArray((item as any)?.suitableWeather) && (item as any).suitableWeather.length > 0
+          ? (item as any).suitableWeather
+          : Array.isArray(itemFood?.suitableWeather) && itemFood.suitableWeather.length > 0
+            ? itemFood.suitableWeather
+            : Array.isArray(itemFood?.weatherConditions) && itemFood.weatherConditions.length > 0
+              ? itemFood.weatherConditions
+              : Array.isArray(catFood?.suitableWeather) && catFood.suitableWeather.length > 0
+                ? catFood.suitableWeather
+                : Array.isArray(catFood?.weatherConditions) && catFood.weatherConditions.length > 0
+                  ? catFood.weatherConditions
+                  : [];
 
       const ageRules =
-        Array.isArray(itemFood?.ageRules) && itemFood.ageRules.length > 0
-          ? itemFood.ageRules
-          : Array.isArray(itemFood?.ageGroups) && itemFood.ageGroups.length > 0
-            ? itemFood.ageGroups
-            : Array.isArray(catFood?.ageRules) && catFood.ageRules.length > 0
-              ? catFood.ageRules
-              : Array.isArray(catFood?.ageGroups) && catFood.ageGroups.length > 0
-                ? catFood.ageGroups
-                : [];
+        Array.isArray((item as any)?.ageRules) && (item as any).ageRules.length > 0
+          ? (item as any).ageRules
+          : Array.isArray(itemFood?.ageRules) && itemFood.ageRules.length > 0
+            ? itemFood.ageRules
+            : Array.isArray(itemFood?.ageGroups) && itemFood.ageGroups.length > 0
+              ? itemFood.ageGroups
+              : Array.isArray(catFood?.ageRules) && catFood.ageRules.length > 0
+                ? catFood.ageRules
+                : Array.isArray(catFood?.ageGroups) && catFood.ageGroups.length > 0
+                  ? catFood.ageGroups
+                  : [];
 
       const mealTypes =
-        Array.isArray(itemFood?.mealTypes) && itemFood.mealTypes.length > 0
-          ? itemFood.mealTypes
-          : Array.isArray(catFood?.mealTypes) && catFood.mealTypes.length > 0
-            ? catFood.mealTypes
-            : [];
+        Array.isArray((item as any)?.mealTypes) && (item as any).mealTypes.length > 0
+          ? (item as any).mealTypes
+          : Array.isArray(itemFood?.mealTypes) && itemFood.mealTypes.length > 0
+            ? itemFood.mealTypes
+            : Array.isArray(catFood?.mealTypes) && catFood.mealTypes.length > 0
+              ? catFood.mealTypes
+              : [];
 
       const dietaryTypes =
-        Array.isArray(itemFood?.dietaryTypes) && itemFood.dietaryTypes.length > 0
-          ? itemFood.dietaryTypes
-          : Array.isArray(catFood?.dietaryTypes) && catFood.dietaryTypes.length > 0
-            ? catFood.dietaryTypes
-            : [];
+        Array.isArray((item as any)?.dietaryTypes) && (item as any).dietaryTypes.length > 0
+          ? (item as any).dietaryTypes
+          : Array.isArray(itemFood?.dietaryTypes) && itemFood.dietaryTypes.length > 0
+            ? itemFood.dietaryTypes
+            : Array.isArray(catFood?.dietaryTypes) && catFood.dietaryTypes.length > 0
+              ? catFood.dietaryTypes
+              : [];
+
+      const category =
+        (item as any)?.category ||
+        matchedCatalogFood?.category ||
+        item.food?.category;
+      const categoryUuid =
+        (item as any)?.categoryUuid ||
+        (item as any)?.category?.uuid ||
+        matchedCatalogFood?.categoryUuid ||
+        item.food?.categoryUuid ||
+        matchedCatalogFood?.category?.uuid;
+
+      const cuisine =
+        (item as any)?.cuisine ||
+        matchedCatalogFood?.cuisine ||
+        item.food?.cuisine;
+      const cuisineUuid =
+        (item as any)?.cuisineUuid ||
+        (item as any)?.cuisine?.uuid ||
+        matchedCatalogFood?.cuisineUuid ||
+        item.food?.cuisineUuid ||
+        matchedCatalogFood?.cuisine?.uuid;
 
       return {
         ...matchedCatalogFood,
         ...item.food,
-        category: matchedCatalogFood?.category || item.food?.category,
-        categoryUuid: matchedCatalogFood?.categoryUuid || item.food?.categoryUuid,
-        cuisine: matchedCatalogFood?.cuisine || item.food?.cuisine,
-        cuisineUuid: matchedCatalogFood?.cuisineUuid || item.food?.cuisineUuid,
+        category,
+        categoryUuid,
+        cuisine,
+        cuisineUuid,
         seasons,
         events,
         suitableWeather,

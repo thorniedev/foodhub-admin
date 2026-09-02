@@ -21,23 +21,30 @@ function normalizeSearchItem(item: unknown): AdminSearchResultItem | null {
   if (!isObject(item)) return null;
 
   const uuid = String(
-    item.uuid || item.id || item.storeUuid || item.foodUuid || item.userUuid || "",
+    item.uuid ||
+      item.id ||
+      item.storeUuid ||
+      item.menuItemUuid ||
+      item.foodUuid ||
+      item.userUuid ||
+      "",
   );
   const rawType = String(
     item.type || item.entityType || item.targetType || "",
   ).toUpperCase();
 
   let type: AdminEntityType = "FOOD";
-  if (rawType.includes("STORE") || rawType.includes("SHOP")) type = "STORE";
-  else if (rawType.includes("USER") || rawType.includes("PROFILE")) type = "USER";
-  else if (rawType.includes("MENU") || rawType.includes("ITEM")) type = "MENU_ITEM";
-  else if (rawType.includes("FOOD")) type = "FOOD";
+  if (rawType.includes("STORE") || rawType.includes("SHOP") || item.storeUuid) type = "STORE";
+  else if (rawType.includes("USER") || rawType.includes("PROFILE") || item.userUuid) type = "USER";
+  else if (rawType.includes("MENU") || rawType.includes("ITEM") || item.menuItemUuid) type = "MENU_ITEM";
+  else if (rawType.includes("FOOD") || item.foodUuid) type = "FOOD";
 
   const title = String(
     item.title ||
       item.name ||
       item.storeName ||
       item.canonicalName ||
+      item.localName ||
       item.username ||
       item.fullName ||
       item.email ||
@@ -50,6 +57,7 @@ function normalizeSearchItem(item: unknown): AdminSearchResultItem | null {
       item.localName ||
       item.email ||
       item.addressLine ||
+      [item.city, item.province].filter(Boolean).join(", ") ||
       "",
   );
 
@@ -58,7 +66,9 @@ function normalizeSearchItem(item: unknown): AdminSearchResultItem | null {
       ? item.imageUrl
       : typeof item.logoUrl === "string"
         ? item.logoUrl
-        : null;
+        : typeof item.primaryMediaUrl === "string"
+          ? item.primaryMediaUrl
+          : null;
 
   const status =
     typeof item.status === "string"
@@ -69,14 +79,33 @@ function normalizeSearchItem(item: unknown): AdminSearchResultItem | null {
           ? item.accountStatus
           : undefined;
 
+  let targetUrl: string | undefined =
+    typeof item.targetUrl === "string" ? item.targetUrl : undefined;
+  if (!targetUrl && uuid) {
+    switch (type) {
+      case "STORE":
+        targetUrl = `/shops/${uuid}`;
+        break;
+      case "FOOD":
+        targetUrl = `/food-catalog/foods`;
+        break;
+      case "USER":
+        targetUrl = `/users/${uuid}`;
+        break;
+      case "MENU_ITEM":
+        targetUrl = `/menu-items/${uuid}`;
+        break;
+    }
+  }
+
   return {
     uuid,
     type,
     title,
-    subtitle,
+    subtitle: subtitle || undefined,
     imageUrl,
     status,
-    targetUrl: typeof item.targetUrl === "string" ? item.targetUrl : undefined,
+    targetUrl,
   };
 }
 
@@ -106,6 +135,7 @@ function normalizeSearchResponse(response: unknown): AdminSearchResponse {
 
   let rawList: unknown[] = [];
 
+  // 1. Direct result arrays
   if (Array.isArray(raw.results)) {
     rawList = raw.results;
   } else if (Array.isArray(raw.contents)) {
@@ -114,11 +144,46 @@ function normalizeSearchResponse(response: unknown): AdminSearchResponse {
     rawList = raw.content;
   } else if (Array.isArray(raw.items)) {
     rawList = raw.items;
-  } else {
-    for (const key of ["stores", "shops", "foods", "users", "menuItems", "items", "data"]) {
-      if (Array.isArray(raw[key])) {
-        rawList.push(...(raw[key] as unknown[]));
-      }
+  }
+
+  // 2. GlobalSearchResponse nested groups: stores, foods, menuItems, users
+  if (isObject(raw.stores)) {
+    const storeItems = Array.isArray(raw.stores)
+      ? raw.stores
+      : Array.isArray((raw.stores as any).items)
+        ? (raw.stores as any).items
+        : [];
+    storeItems.forEach((s: any) => rawList.push({ ...s, type: "STORE" }));
+  }
+  if (isObject(raw.foods)) {
+    const foodItems = Array.isArray(raw.foods)
+      ? raw.foods
+      : Array.isArray((raw.foods as any).items)
+        ? (raw.foods as any).items
+        : [];
+    foodItems.forEach((f: any) => rawList.push({ ...f, type: "FOOD" }));
+  }
+  if (isObject(raw.menuItems)) {
+    const menuItemList = Array.isArray(raw.menuItems)
+      ? raw.menuItems
+      : Array.isArray((raw.menuItems as any).items)
+        ? (raw.menuItems as any).items
+        : [];
+    menuItemList.forEach((m: any) => rawList.push({ ...m, type: "MENU_ITEM" }));
+  }
+  if (isObject(raw.users)) {
+    const userItems = Array.isArray(raw.users)
+      ? raw.users
+      : Array.isArray((raw.users as any).items)
+        ? (raw.users as any).items
+        : [];
+    userItems.forEach((u: any) => rawList.push({ ...u, type: "USER" }));
+  }
+
+  // 3. Fallback collection keys
+  for (const key of ["shops", "items", "data"]) {
+    if (Array.isArray(raw[key])) {
+      rawList.push(...(raw[key] as unknown[]));
     }
   }
 

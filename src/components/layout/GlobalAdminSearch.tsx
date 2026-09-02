@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Store,
@@ -24,6 +25,7 @@ import { useGetAdminUsersQuery } from "@/src/app/store/userProfileApi";
 import { useGetManagedFoodsQuery } from "@/src/app/store/menuManagementApi";
 
 export default function GlobalAdminSearch() {
+  const router = useRouter();
   const [inputQuery, setInputQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -201,13 +203,27 @@ export default function GlobalAdminSearch() {
       case "STORE":
         return `/shops/${item.uuid}`;
       case "FOOD":
-        return `/menu-items`;
+        return `/food-catalog/foods`;
       case "USER":
         return `/users/${item.uuid}`;
       case "MENU_ITEM":
-        return `/menu-items`;
+        return `/menu-items/${item.uuid}`;
       default:
         return "#";
+    }
+  };
+
+  const handleNavigate = (item: AdminSearchResultItem, event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const route = getEntityRoute(item);
+    setIsOpen(false);
+    setInputQuery("");
+    setDebouncedQuery("");
+    if (route && route !== "#") {
+      router.push(route);
     }
   };
 
@@ -283,8 +299,8 @@ export default function GlobalAdminSearch() {
                   <Link
                     key={`${item.type}-${item.uuid}`}
                     href={getEntityRoute(item)}
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center justify-between rounded-xl p-2.5 transition hover:bg-emerald-50/70 group"
+                    onClick={(e) => handleNavigate(item, e)}
+                    className="flex items-center justify-between rounded-xl p-2.5 transition hover:bg-emerald-50/70 group cursor-pointer"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100 group-hover:bg-white group-hover:shadow-xs">
