@@ -684,6 +684,59 @@ export default function MenuItemsManager({
     const getResolvedFood = (item: MenuItemRecord) => {
       const foodUuid = item.foodUuid || item.food?.uuid;
       const matchedCatalogFood = foodUuid ? foods.find((f) => f.uuid === foodUuid) : undefined;
+      const itemFood = item.food as any;
+      const catFood = matchedCatalogFood as any;
+
+      const events =
+        Array.isArray(itemFood?.events) && itemFood.events.length > 0
+          ? itemFood.events
+          : Array.isArray(catFood?.events) && catFood.events.length > 0
+            ? catFood.events
+            : [];
+
+      const seasons =
+        Array.isArray(itemFood?.seasons) && itemFood.seasons.length > 0
+          ? itemFood.seasons
+          : Array.isArray(catFood?.seasons) && catFood.seasons.length > 0
+            ? catFood.seasons
+            : [];
+
+      const suitableWeather =
+        Array.isArray(itemFood?.suitableWeather) && itemFood.suitableWeather.length > 0
+          ? itemFood.suitableWeather
+          : Array.isArray(itemFood?.weatherConditions) && itemFood.weatherConditions.length > 0
+            ? itemFood.weatherConditions
+            : Array.isArray(catFood?.suitableWeather) && catFood.suitableWeather.length > 0
+              ? catFood.suitableWeather
+              : Array.isArray(catFood?.weatherConditions) && catFood.weatherConditions.length > 0
+                ? catFood.weatherConditions
+                : [];
+
+      const ageRules =
+        Array.isArray(itemFood?.ageRules) && itemFood.ageRules.length > 0
+          ? itemFood.ageRules
+          : Array.isArray(itemFood?.ageGroups) && itemFood.ageGroups.length > 0
+            ? itemFood.ageGroups
+            : Array.isArray(catFood?.ageRules) && catFood.ageRules.length > 0
+              ? catFood.ageRules
+              : Array.isArray(catFood?.ageGroups) && catFood.ageGroups.length > 0
+                ? catFood.ageGroups
+                : [];
+
+      const mealTypes =
+        Array.isArray(itemFood?.mealTypes) && itemFood.mealTypes.length > 0
+          ? itemFood.mealTypes
+          : Array.isArray(catFood?.mealTypes) && catFood.mealTypes.length > 0
+            ? catFood.mealTypes
+            : [];
+
+      const dietaryTypes =
+        Array.isArray(itemFood?.dietaryTypes) && itemFood.dietaryTypes.length > 0
+          ? itemFood.dietaryTypes
+          : Array.isArray(catFood?.dietaryTypes) && catFood.dietaryTypes.length > 0
+            ? catFood.dietaryTypes
+            : [];
+
       return {
         ...matchedCatalogFood,
         ...item.food,
@@ -691,10 +744,12 @@ export default function MenuItemsManager({
         categoryUuid: matchedCatalogFood?.categoryUuid || item.food?.categoryUuid,
         cuisine: matchedCatalogFood?.cuisine || item.food?.cuisine,
         cuisineUuid: matchedCatalogFood?.cuisineUuid || item.food?.cuisineUuid,
-        seasons: matchedCatalogFood?.seasons ?? item.food?.seasons ?? [],
-        events: matchedCatalogFood?.events ?? item.food?.events ?? [],
-        suitableWeather: matchedCatalogFood?.suitableWeather ?? item.food?.suitableWeather ?? [],
-        ageRules: matchedCatalogFood?.ageRules ?? item.food?.ageRules ?? [],
+        seasons,
+        events,
+        suitableWeather,
+        ageRules,
+        mealTypes,
+        dietaryTypes,
       };
     };
 
