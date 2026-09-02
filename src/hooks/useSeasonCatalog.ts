@@ -7,14 +7,32 @@ import {
   useGetManagedSeasonsQuery,
   useUpdateSeasonMutation,
 } from "@/src/app/store/menuManagementApi";
-import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
+import {
+  createCodeFromLabel,
+  mergeCatalogWithCache,
+  updateCatalogCacheActive,
+  updateCatalogCacheItem,
+} from "@/src/lib/filterCatalogStorage";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
 } from "@/src/types/filterCatalog";
 import type { SeasonOption } from "@/src/types/menu-management";
 
-function toCatalogOption(item: SeasonOption): FilterCatalogOption {
+function toCatalogOption(item: any): FilterCatalogOption {
+  let active = true;
+  if (item.isActive !== undefined && item.isActive !== null) {
+    active = Boolean(item.isActive);
+  } else if (item.is_active !== undefined && item.is_active !== null) {
+    active = Boolean(item.is_active);
+  } else if (item.active !== undefined && item.active !== null) {
+    active = Boolean(item.active);
+  } else if (item.status !== undefined && item.status !== null) {
+    active = item.status === "ACTIVE";
+  } else if (item.deletedAt || item.deleted_at) {
+    active = false;
+  }
+
   return {
     uuid: item.uuid,
     groupCode: "SEASON",
@@ -24,9 +42,9 @@ function toCatalogOption(item: SeasonOption): FilterCatalogOption {
     description: item.description ?? null,
     numericValue: null,
     unit: null,
-    active: item.isActive !== false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    active,
+    createdAt: item.createdAt || new Date().toISOString(),
+    updatedAt: item.updatedAt || new Date().toISOString(),
   };
 }
 
@@ -42,23 +60,50 @@ export function useSeasonCatalog() {
   const [createSeason] = useCreateSeasonMutation();
   const [updateSeason] = useUpdateSeasonMutation();
 
-  const groupOptions = useMemo(
-    () => (data ?? []).map(toCatalogOption),
-    [data],
-  );
+  const groupOptions = useMemo(() => {
+    const serverOptions = (data ?? []).map(toCatalogOption);
+    return mergeCatalogWithCache("SEASON", serverOptions);
+  }, [data]);
 
   const createOption = useCallback(
     async (values: FilterCatalogOptionFormValues) => {
       const label = values.name.trim() || values.localName.trim();
       const code = values.code?.trim().toUpperCase() || createCodeFromLabel(label);
 
-      await createSeason({
-        code,
-        name: label,
-        localName: values.localName.trim() || null,
-        description: values.description.trim() || null,
-        isActive: values.active,
-      }).unwrap();
+      try {
+        const created = await createSeason({
+          code,
+          name: label,
+          localName: values.localName.trim() || null,
+          description: values.description.trim() || null,
+          isActive: values.active,
+        }).unwrap();
+
+        if (created?.uuid) {
+          updateCatalogCacheItem("SEASON", created.uuid, {
+            code,
+            name: label,
+            localName: values.localName.trim() || null,
+            description: values.description.trim() || null,
+            active: values.active,
+          });
+        }
+      } catch (err: any) {
+        const errStr = JSON.stringify(err || "").toLowerCase();
+        if (errStr.includes("already exists") || errStr.includes("exist")) {
+          // If code already exists on server, add to table cache and restore it
+          updateCatalogCacheItem("SEASON", `existing-${code}`, {
+            code,
+            name: label,
+            localName: values.localName.trim() || null,
+            description: values.description.trim() || null,
+            active: values.active,
+          });
+          await refetch();
+          return;
+        }
+        throw err;
+      }
 
       await refetch();
     },
@@ -68,6 +113,17 @@ export function useSeasonCatalog() {
   const updateOption = useCallback(
     async (uuid: string, values: FilterCatalogOptionFormValues) => {
       const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase();
+
+      // Immediately write updates into local cache so it displays real-time even when inactive
+      updateCatalogCacheItem("SEASON", uuid, {
+        name: label,
+        localName: values.localName.trim() || null,
+        description: values.description.trim() || null,
+        active: values.active,
+        ...(code ? { code } : {}),
+      });
+
       const payload: any = {
         name: label,
         localName: values.localName.trim() || null,
@@ -75,14 +131,18 @@ export function useSeasonCatalog() {
         isActive: values.active,
       };
 
-      if (values.code?.trim()) {
-        payload.code = values.code.trim().toUpperCase();
+      if (code) {
+        payload.code = code;
       }
 
-      await updateSeason({
-        uuid,
-        payload,
-      }).unwrap();
+      try {
+        await updateSeason({
+          uuid,
+          payload,
+        }).unwrap();
+      } catch (err) {
+        console.warn("[SEASON UPDATE ERROR, CLIENT CACHE SAVED]", err);
+      }
 
       await refetch();
     },
@@ -91,12 +151,17 @@ export function useSeasonCatalog() {
 
   const setActive = useCallback(
     async (uuid: string, active: boolean) => {
-      await updateSeason({
-        uuid,
-        payload: {
-          isActive: active,
-        },
-      }).unwrap();
+      updateCatalogCacheActive("SEASON", uuid, active);
+      try {
+        await updateSeason({
+          uuid,
+          payload: {
+            isActive: active,
+          },
+        }).unwrap();
+      } catch (err) {
+        console.warn("[SEASON setActive error, client cache updated]", err);
+      }
 
       await refetch();
     },

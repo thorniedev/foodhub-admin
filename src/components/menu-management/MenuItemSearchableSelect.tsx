@@ -160,7 +160,7 @@ export default function MenuItemSearchableSelect({
             )}
           </div>
 
-          <div className="max-h-64 space-y-1 overflow-y-auto pr-1">
+          <div className="max-h-64 space-y-1 overflow-y-auto pr-1 no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {filtered.length === 0 && (
               <p className="px-4 py-5 text-center text-lg font-normal text-gray-400">
                 {emptyLabel}

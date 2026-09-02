@@ -25,7 +25,7 @@ export default function DeleteSubCategoryConfirmModal({
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
       />
 
       {/* Modal Card */}

@@ -259,7 +259,7 @@ export default function AuditLogDiffViewer({
                 )}
               </button>
             </div>
-            <div className="p-4 bg-zinc-950 text-zinc-100 font-mono text-xs overflow-x-auto max-h-[380px] [scrollbar-width:thin]">
+            <div className="p-4 bg-zinc-950 text-zinc-100 font-mono text-xs overflow-x-auto max-h-[380px] no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               <pre className="leading-relaxed">
                 <code>{prettyBefore}</code>
               </pre>
@@ -298,7 +298,7 @@ export default function AuditLogDiffViewer({
                 )}
               </button>
             </div>
-            <div className="p-4 bg-zinc-950 text-zinc-100 font-mono text-xs overflow-x-auto max-h-[380px] [scrollbar-width:thin]">
+            <div className="p-4 bg-zinc-950 text-zinc-100 font-mono text-xs overflow-x-auto max-h-[380px] no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               <pre className="leading-relaxed">
                 <code>{prettyAfter}</code>
               </pre>

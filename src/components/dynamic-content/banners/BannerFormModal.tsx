@@ -157,9 +157,9 @@ export default function BannerFormModal({
   return (
     <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-[150] bg-black/40 backdrop-blur-[2px]" />
+        <Dialog.Backdrop className="fixed inset-0 z-[150] bg-slate-900/40 backdrop-blur-[2px]" />
         <Dialog.Popup className="fixed inset-0 z-[150] flex items-center justify-center p-4 outline-none">
-          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] bg-white shadow-2xl">
+          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto no-scrollbar rounded-[28px] bg-white shadow-2xl">
             <div className="sticky top-0 z-10 flex items-start justify-between border-b border-gray-100 bg-white px-6 py-5">
               <Dialog.Title className="text-3xl font-bold text-[#136C34]">
                 {editing ? "កែសម្រួលបែនណឺ" : "បន្ថែមបែនណឺថ្មី"}

@@ -114,7 +114,7 @@ export default function SubCategoryFormModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[3px]">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-[3px]">
       <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl">
         {/* HEADER */}
         <div className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-5 sm:px-8">

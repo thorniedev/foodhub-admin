@@ -855,8 +855,11 @@ export default function GooglePlacesImportModal({
                       className="
                         max-h-[360px]
                         overflow-y-auto
+                        no-scrollbar
+                        [scrollbar-width:none]
+                        [-ms-overflow-style:none]
+                        [&::-webkit-scrollbar]:hidden
                         py-2
-                        [scrollbar-width:thin]
                       "
                     >
                       {results.map((result, index) => {

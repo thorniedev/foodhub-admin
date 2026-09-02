@@ -141,28 +141,57 @@ export function mergeCatalogWithCache(
   serverItems: FilterCatalogOption[],
 ): FilterCatalogOption[] {
   const localCache = readCatalogCache(groupCode);
-  const map = new Map<string, FilterCatalogOption>();
+  const cacheMap = new Map<string, FilterCatalogOption>();
 
-  // 1. Add all from local cache first (keyed strictly by UUID)
+  // Filter out any stale seed items from local cache
   localCache.forEach((item) => {
-    if (item.uuid) {
-      map.set(item.uuid, item);
+    if (item.uuid && !item.uuid.startsWith("seed-")) {
+      cacheMap.set(item.uuid, item);
     }
   });
 
-  // 2. Overlay server items (keyed strictly by UUID)
+  const resultMap = new Map<string, FilterCatalogOption>();
+
+  // 1. Overlay server items (primary source of truth for items on server)
   serverItems.forEach((serverItem) => {
     if (serverItem.uuid) {
-      const existing = map.get(serverItem.uuid);
-      map.set(serverItem.uuid, {
-        ...existing,
+      const cached = cacheMap.get(serverItem.uuid);
+      // Determine active status: respect serverItem.active, unless client cache has a local toggle override
+      const active =
+        cached && cached.updatedAt && (!serverItem.updatedAt || new Date(cached.updatedAt) > new Date(serverItem.updatedAt))
+          ? cached.active
+          : serverItem.active;
+
+      // If client cache has more recent field modifications (e.g. while inactive), keep them
+      const isCacheNewer =
+        cached && cached.updatedAt && (!serverItem.updatedAt || new Date(cached.updatedAt) > new Date(serverItem.updatedAt));
+
+      resultMap.set(serverItem.uuid, {
         ...serverItem,
-        active: existing && existing.active === false ? false : (serverItem.active !== false),
+        ...(isCacheNewer
+          ? {
+              name: cached.name || serverItem.name,
+              localName: cached.localName || serverItem.localName,
+              description: cached.description !== undefined ? cached.description : serverItem.description,
+              code: cached.code || serverItem.code,
+            }
+          : {}),
+        active,
       });
     }
   });
 
-  const unique = Array.from(map.values());
+  // 2. Retain any item previously known but omitted by server GET (e.g. backend filtered soft-deleted item)
+  cacheMap.forEach((cachedItem, uuid) => {
+    if (!resultMap.has(uuid)) {
+      resultMap.set(uuid, {
+        ...cachedItem,
+        active: cachedItem.active !== undefined ? cachedItem.active : false,
+      });
+    }
+  });
+
+  const unique = Array.from(resultMap.values());
   writeCatalogCache(groupCode, unique);
   return unique;
 }
@@ -173,11 +202,61 @@ export function updateCatalogCacheActive(
   active: boolean,
 ) {
   const items = readCatalogCache(groupCode);
-  const updated = items.map((item) =>
-    item.uuid === uuid
-      ? { ...item, active, updatedAt: new Date().toISOString() }
-      : item,
-  );
+  let matched = false;
+  const updated = items.map((item) => {
+    if (item.uuid === uuid) {
+      matched = true;
+      return { ...item, active, updatedAt: new Date().toISOString() };
+    }
+    return item;
+  });
+
+  if (!matched) {
+    const seedItem = INITIAL_FILTER_OPTIONS.find((x) => x.uuid === uuid || x.groupCode === groupCode);
+    if (seedItem) {
+      updated.push({ ...seedItem, uuid, active, updatedAt: new Date().toISOString() });
+    }
+  }
+
+  writeCatalogCache(groupCode, updated);
+}
+
+export function updateCatalogCacheItem(
+  groupCode: string,
+  uuid: string,
+  changes: Partial<FilterCatalogOption>,
+) {
+  const items = readCatalogCache(groupCode);
+  let matched = false;
+  const updated = items.map((item) => {
+    if (item.uuid === uuid || (changes.code && item.code === changes.code)) {
+      matched = true;
+      return {
+        ...item,
+        ...changes,
+        updatedAt: new Date().toISOString(),
+      };
+    }
+    return item;
+  });
+
+  if (!matched && changes.name) {
+    updated.push({
+      uuid: uuid || `local-${Date.now()}`,
+      groupCode,
+      code: changes.code || "",
+      name: changes.name || "",
+      localName: changes.localName || changes.name || "",
+      description: changes.description ?? null,
+      numericValue: changes.numericValue ?? null,
+      unit: changes.unit ?? null,
+      active: changes.active ?? true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...changes,
+    });
+  }
+
   writeCatalogCache(groupCode, updated);
 }
 

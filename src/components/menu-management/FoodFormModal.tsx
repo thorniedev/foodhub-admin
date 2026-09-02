@@ -1073,7 +1073,7 @@ export default function FoodFormModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[140] overflow-y-auto bg-black/45 p-4 backdrop-blur-xs">
+    <div className="fixed inset-0 z-[140] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-slate-900/40 p-4 backdrop-blur-xs">
       <div className="mx-auto my-6 w-full max-w-4xl rounded-[30px] bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-7 py-6">
           <div className="flex items-center gap-3.5">

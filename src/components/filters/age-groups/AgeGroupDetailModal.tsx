@@ -127,7 +127,7 @@ export default function AgeGroupDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-[160] flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-[3px] animate-in fade-in duration-200"
+      className="fixed inset-0 z-[160] flex items-center justify-center overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-slate-900/40 p-4 backdrop-blur-[3px] animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -292,7 +292,7 @@ export default function AgeGroupDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="min-h-12 rounded-full bg-gray-900 px-7 text-lg font-normal text-white transition hover:bg-black focus:outline-none focus:ring-4 focus:ring-gray-200 cursor-pointer"
+            className="min-h-12 rounded-full bg-gray-900 px-7 text-lg font-normal text-white transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-gray-200 cursor-pointer"
           >
             បិទ
           </button>

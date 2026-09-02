@@ -519,56 +519,71 @@ export default function AgeGroupManager() {
      DELETE
   ========================================================= */
 
-  const handleDelete =
-    async () => {
-      if (
-        !deleting
-      ) {
-        return;
-      }
+  const handleDelete = async () => {
+    if (!deleting) {
+      return;
+    }
 
+    try {
       try {
-        await deleteItem(
-          deleting.uuid,
-        ).unwrap();
-
-        setDeleting(
-          null,
-        );
-
-        setNotice({
-          type:
-            "success",
-
-          text:
-            "បានលុបក្រុមអាយុដោយជោគជ័យ។",
-        });
-
-        if (
-          items.length ===
-            1 &&
-          page > 0
-        ) {
-          setPage(
-            page - 1,
-          );
-        } else {
-          await refetch();
-        }
-      } catch (
-        requestError
-      ) {
-        setNotice({
-          type:
-            "error",
-
-          text:
-            getAgeGroupApiErrorMessage(
-              requestError,
-            ),
-        });
+        await updateItem({
+          uuid: deleting.uuid,
+          body: {
+            code: deleting.code,
+            name: deleting.name,
+            minAge: deleting.minAge,
+            maxAge: deleting.maxAge,
+            description: deleting.description,
+            isActive: false,
+          } as any,
+        }).unwrap();
+      } catch {
+        await deleteItem(deleting.uuid).unwrap();
       }
-    };
+
+      setDeleting(null);
+
+      setNotice({
+        type: "success",
+        text: "បានបិទដំណើរការក្រុមអាយុដោយជោគជ័យ។",
+      });
+
+      await refetch();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAgeGroupApiErrorMessage(requestError),
+      });
+    }
+  };
+
+  const handleRestore = async (item: AgeGroup) => {
+    try {
+      await updateItem({
+        uuid: item.uuid,
+        body: {
+          code: item.code,
+          name: item.name,
+          minAge: item.minAge,
+          maxAge: item.maxAge,
+          description: item.description,
+          isActive: true,
+        } as any,
+      }).unwrap();
+
+      setNotice({
+        type: "success",
+        text: "បានស្ដារក្រុមអាយុដោយជោគជ័យ។",
+      });
+
+      await refetch();
+    } catch (requestError) {
+      setNotice({
+        type: "error",
+        text: getAgeGroupApiErrorMessage(requestError),
+      });
+    }
+  };
 
   return (
     <div className="w-full min-w-0 max-w-full space-y-5">
@@ -1043,6 +1058,9 @@ export default function AgeGroupManager() {
             }}
             onDelete={
               setDeleting
+            }
+            onRestore={
+              handleRestore
             }
           />
         )}

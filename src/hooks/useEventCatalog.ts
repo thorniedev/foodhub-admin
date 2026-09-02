@@ -7,14 +7,32 @@ import {
   useGetManagedEventsQuery,
   useUpdateEventMutation,
 } from "@/src/app/store/menuManagementApi";
-import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
+import {
+  createCodeFromLabel,
+  mergeCatalogWithCache,
+  updateCatalogCacheActive,
+  updateCatalogCacheItem,
+} from "@/src/lib/filterCatalogStorage";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
 } from "@/src/types/filterCatalog";
 import type { EventOption } from "@/src/types/menu-management";
 
-function toCatalogOption(item: EventOption): FilterCatalogOption {
+function toCatalogOption(item: any): FilterCatalogOption {
+  let active = true;
+  if (item.isActive !== undefined && item.isActive !== null) {
+    active = Boolean(item.isActive);
+  } else if (item.is_active !== undefined && item.is_active !== null) {
+    active = Boolean(item.is_active);
+  } else if (item.active !== undefined && item.active !== null) {
+    active = Boolean(item.active);
+  } else if (item.status !== undefined && item.status !== null) {
+    active = item.status === "ACTIVE";
+  } else if (item.deletedAt || item.deleted_at) {
+    active = false;
+  }
+
   return {
     uuid: item.uuid,
     groupCode: "EVENT",
@@ -24,9 +42,9 @@ function toCatalogOption(item: EventOption): FilterCatalogOption {
     description: item.description ?? null,
     numericValue: null,
     unit: null,
-    active: item.isActive !== false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    active,
+    createdAt: item.createdAt || new Date().toISOString(),
+    updatedAt: item.updatedAt || new Date().toISOString(),
   };
 }
 
@@ -42,23 +60,49 @@ export function useEventCatalog() {
   const [createEvent] = useCreateEventMutation();
   const [updateEvent] = useUpdateEventMutation();
 
-  const groupOptions = useMemo(
-    () => (data ?? []).map(toCatalogOption),
-    [data],
-  );
+  const groupOptions = useMemo(() => {
+    const serverOptions = (data ?? []).map(toCatalogOption);
+    return mergeCatalogWithCache("EVENT", serverOptions);
+  }, [data]);
 
   const createOption = useCallback(
     async (values: FilterCatalogOptionFormValues) => {
       const label = values.name.trim() || values.localName.trim();
       const code = values.code?.trim().toUpperCase() || createCodeFromLabel(label);
 
-      await createEvent({
-        code,
-        name: label,
-        localName: values.localName.trim() || null,
-        description: values.description.trim() || null,
-        isActive: values.active,
-      }).unwrap();
+      try {
+        const created = await createEvent({
+          code,
+          name: label,
+          localName: values.localName.trim() || null,
+          description: values.description.trim() || null,
+          isActive: values.active,
+        }).unwrap();
+
+        if (created?.uuid) {
+          updateCatalogCacheItem("EVENT", created.uuid, {
+            code,
+            name: label,
+            localName: values.localName.trim() || null,
+            description: values.description.trim() || null,
+            active: values.active,
+          });
+        }
+      } catch (err: any) {
+        const errStr = JSON.stringify(err || "").toLowerCase();
+        if (errStr.includes("already exists") || errStr.includes("exist")) {
+          updateCatalogCacheItem("EVENT", `existing-${code}`, {
+            code,
+            name: label,
+            localName: values.localName.trim() || null,
+            description: values.description.trim() || null,
+            active: values.active,
+          });
+          await refetch();
+          return;
+        }
+        throw err;
+      }
 
       await refetch();
     },
@@ -68,6 +112,16 @@ export function useEventCatalog() {
   const updateOption = useCallback(
     async (uuid: string, values: FilterCatalogOptionFormValues) => {
       const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase();
+
+      updateCatalogCacheItem("EVENT", uuid, {
+        name: label,
+        localName: values.localName.trim() || null,
+        description: values.description.trim() || null,
+        active: values.active,
+        ...(code ? { code } : {}),
+      });
+
       const payload: any = {
         name: label,
         localName: values.localName.trim() || null,
@@ -75,14 +129,18 @@ export function useEventCatalog() {
         isActive: values.active,
       };
 
-      if (values.code?.trim()) {
-        payload.code = values.code.trim().toUpperCase();
+      if (code) {
+        payload.code = code;
       }
 
-      await updateEvent({
-        uuid,
-        payload,
-      }).unwrap();
+      try {
+        await updateEvent({
+          uuid,
+          payload,
+        }).unwrap();
+      } catch (err) {
+        console.warn("[EVENT UPDATE ERROR, CLIENT CACHE SAVED]", err);
+      }
 
       await refetch();
     },
@@ -91,12 +149,17 @@ export function useEventCatalog() {
 
   const setActive = useCallback(
     async (uuid: string, active: boolean) => {
-      await updateEvent({
-        uuid,
-        payload: {
-          isActive: active,
-        },
-      }).unwrap();
+      updateCatalogCacheActive("EVENT", uuid, active);
+      try {
+        await updateEvent({
+          uuid,
+          payload: {
+            isActive: active,
+          },
+        }).unwrap();
+      } catch (err) {
+        console.warn("[EVENT setActive error, client cache updated]", err);
+      }
 
       await refetch();
     },

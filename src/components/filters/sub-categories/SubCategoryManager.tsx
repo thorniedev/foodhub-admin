@@ -380,7 +380,7 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
           <button
             type="button"
             onClick={() => setNotice(null)}
-            className="rounded-full p-1 text-gray-400 hover:bg-black/5 hover:text-gray-600"
+            className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
           >
             <X size={16} />
           </button>

@@ -1821,7 +1821,7 @@ export default function MenuItemsManager({
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold leading-relaxed">
+              <p className="text-lg font-medium leading-relaxed">
                 {notice.text}
               </p>
             </div>

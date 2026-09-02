@@ -1005,7 +1005,7 @@ export const menuManagementApi =
         builder.query<SeasonOption[], void>({
           async queryFn() {
             const result = await browserRequest<unknown>(
-              "/api/catalog/seasons?page=0&size=100",
+              "/api/catalog/seasons?includeInactive=true&page=0&size=100",
             );
 
             if ("error" in result) {
@@ -1025,7 +1025,7 @@ export const menuManagementApi =
         builder.query<EventOption[], void>({
           async queryFn() {
             const result = await browserRequest<unknown>(
-              "/api/catalog/events?page=0&size=100",
+              "/api/catalog/events?includeInactive=true&page=0&size=100",
             );
 
             if ("error" in result) {
@@ -1045,7 +1045,7 @@ export const menuManagementApi =
         builder.query<WeatherConditionOption[], void>({
           async queryFn() {
             const result = await browserRequest<unknown>(
-              "/api/catalog/weather-conditions?page=0&size=100",
+              "/api/catalog/weather-conditions?includeInactive=true&page=0&size=100",
             );
 
             if ("error" in result) {

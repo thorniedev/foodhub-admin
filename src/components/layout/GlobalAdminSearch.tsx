@@ -329,7 +329,7 @@ export default function GlobalAdminSearch() {
           </div>
 
           {/* RESULTS CONTENT */}
-          <div className="max-h-[380px] overflow-y-auto p-2">
+          <div className="max-h-[380px] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden p-2">
             {isSearchLoading ? (
               <div className="flex items-center justify-center gap-2 py-8 text-xs font-medium text-emerald-700">
                 <Loader2 size={18} className="animate-spin text-emerald-600" />

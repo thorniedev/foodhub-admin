@@ -228,8 +228,8 @@ export default function MenuItemDetailModal({
       : "";
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-[4px] animate-in fade-in duration-200">
-      <div className="relative my-6 max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[32px] bg-white p-6 shadow-[0_32px_80px_rgba(0,0,0,0.25)] sm:p-8 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-slate-900/40 p-4 backdrop-blur-[4px] animate-in fade-in duration-200">
+      <div className="relative my-6 max-h-[92vh] w-full max-w-5xl overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden rounded-[32px] bg-white p-6 shadow-[0_32px_80px_rgba(0,0,0,0.25)] sm:p-8 animate-in zoom-in-95 duration-200">
         {/* Close Button */}
         <button
           type="button"

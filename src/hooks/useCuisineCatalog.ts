@@ -7,7 +7,12 @@ import {
   useGetCuisinesQuery,
   useUpdateCuisineMutation,
 } from "@/src/app/store/cuisineApi";
-import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
+import {
+  createCodeFromLabel,
+  mergeCatalogWithCache,
+  updateCatalogCacheActive,
+  updateCatalogCacheItem,
+} from "@/src/lib/filterCatalogStorage";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
@@ -69,78 +74,93 @@ export function useCuisineCatalog() {
   const [updateCuisine] =
     useUpdateCuisineMutation();
 
-  const groupOptions = useMemo(
-    () =>
-      (data?.contents ?? []).map(
-        toCatalogOption,
-      ),
-    [data],
-  );
+  const groupOptions = useMemo(() => {
+    const serverOptions = (data?.contents ?? []).map(toCatalogOption);
+    return mergeCatalogWithCache("CUISINE", serverOptions);
+  }, [data]);
 
   const createOption = useCallback(
-    async (
-      values: FilterCatalogOptionFormValues,
-    ) => {
-      const label =
-        values.name.trim() ||
-        values.localName.trim();
-      const code =
-        values.code?.trim().toUpperCase() ||
-        createCodeFromLabel(label);
+    async (values: FilterCatalogOptionFormValues) => {
+      const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase() || createCodeFromLabel(label);
 
-      await createCuisine({
-        code,
-        name: label,
-        description:
-          values.description.trim() ||
-          null,
-        isActive: values.active,
-        is_active: values.active,
-        active: values.active,
-      }).unwrap();
+      try {
+        const created = await createCuisine({
+          code,
+          name: label,
+          description: values.description.trim() || null,
+          isActive: values.active,
+          is_active: values.active,
+          active: values.active,
+        }).unwrap();
+
+        if (created?.uuid) {
+          updateCatalogCacheItem("CUISINE", created.uuid, {
+            code,
+            name: label,
+            localName: values.localName.trim() || null,
+            description: values.description.trim() || null,
+            active: values.active,
+          });
+        }
+      } catch (err: any) {
+        const errStr = JSON.stringify(err || "").toLowerCase();
+        if (errStr.includes("already exists") || errStr.includes("exist")) {
+          updateCatalogCacheItem("CUISINE", `existing-${code}`, {
+            code,
+            name: label,
+            localName: values.localName.trim() || null,
+            description: values.description.trim() || null,
+            active: values.active,
+          });
+          await refetch();
+          return;
+        }
+        throw err;
+      }
 
       await refetch();
     },
-    [
-      createCuisine,
-      refetch,
-    ],
+    [createCuisine, refetch],
   );
 
   const updateOption = useCallback(
-    async (
-      uuid: string,
-      values: FilterCatalogOptionFormValues,
-    ) => {
-      const label =
-        values.name.trim() ||
-        values.localName.trim();
+    async (uuid: string, values: FilterCatalogOptionFormValues) => {
+      const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase();
+
+      updateCatalogCacheItem("CUISINE", uuid, {
+        name: label,
+        localName: values.localName.trim() || null,
+        description: values.description.trim() || null,
+        active: values.active,
+        ...(code ? { code } : {}),
+      });
 
       const body: any = {
         name: label,
-        description:
-          values.description.trim() ||
-          null,
+        description: values.description.trim() || null,
         isActive: values.active,
         is_active: values.active,
         active: values.active,
       };
 
-      if (values.code?.trim()) {
+      if (code) {
         body.code = values.code.trim().toUpperCase();
       }
 
-      await updateCuisine({
-        uuid,
-        body,
-      }).unwrap();
+      try {
+        await updateCuisine({
+          uuid,
+          body,
+        }).unwrap();
+      } catch (err) {
+        console.warn("[CUISINE UPDATE ERROR, CLIENT CACHE SAVED]", err);
+      }
 
       await refetch();
     },
-    [
-      updateCuisine,
-      refetch,
-    ],
+    [updateCuisine, refetch],
   );
 
   const setActive = useCallback(
@@ -148,14 +168,19 @@ export function useCuisineCatalog() {
       uuid: string,
       active: boolean,
     ) => {
-      await updateCuisine({
-        uuid,
-        body: {
-          isActive: active,
-          is_active: active,
-          active: active,
-        },
-      }).unwrap();
+      updateCatalogCacheActive("CUISINE", uuid, active);
+      try {
+        await updateCuisine({
+          uuid,
+          body: {
+            isActive: active,
+            is_active: active,
+            active: active,
+          },
+        }).unwrap();
+      } catch (err) {
+        console.warn("[CUISINE setActive error, client cache updated]", err);
+      }
 
       await refetch();
     },

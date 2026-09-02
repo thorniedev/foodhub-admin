@@ -25,7 +25,7 @@ export default function DeleteBannerConfirmModal({
       onOpenChange={(next) => !next && !loading && onClose()}
     >
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-[160] bg-black/45 backdrop-blur-xs" />
+        <Dialog.Backdrop className="fixed inset-0 z-[160] bg-slate-900/40 backdrop-blur-xs" />
         <Dialog.Popup className="fixed inset-0 z-[160] flex items-center justify-center p-4 outline-none">
           {banner && (
             <div className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">

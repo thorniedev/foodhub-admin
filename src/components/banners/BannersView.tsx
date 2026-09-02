@@ -268,11 +268,11 @@ export default function BannersView() {
   return (
     <div className="space-y-5">
       {/* Toast notifications container */}
-      <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
+      <div className="fixed top-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-5 py-3.5 shadow-xl backdrop-blur-md transition-all animate-in slide-in-from-bottom-5 duration-200 ${
+            className={`pointer-events-auto flex items-center gap-3.5 rounded-2xl border px-5 py-4 shadow-2xl backdrop-blur-md transition-all animate-in fade-in slide-in-from-top-5 duration-200 ${
               toast.type === "success"
                 ? "border-emerald-200 bg-emerald-50/95 text-emerald-900 shadow-emerald-500/10"
                 : toast.type === "error"
@@ -281,15 +281,15 @@ export default function BannersView() {
             }`}
           >
             {toast.type === "success" && (
-              <CheckCircle2 size={20} className="text-emerald-600 shrink-0" />
+              <CheckCircle2 size={24} className="text-emerald-600 shrink-0" />
             )}
             {toast.type === "error" && (
-              <AlertCircle size={20} className="text-red-600 shrink-0" />
+              <AlertCircle size={24} className="text-red-600 shrink-0" />
             )}
             {toast.type === "info" && (
-              <Info size={20} className="text-blue-600 shrink-0" />
+              <Info size={24} className="text-blue-600 shrink-0" />
             )}
-            <p className="text-sm font-bold">{toast.message}</p>
+            <p className="text-lg font-medium leading-relaxed">{toast.message}</p>
             <button
               type="button"
               onClick={() => removeToast(toast.id)}
@@ -400,19 +400,17 @@ export default function BannersView() {
                       setPublishedFilter(tab.id as any);
                       setCurrentPage(0);
                     }}
-                    className={`group relative flex w-full h-12 cursor-pointer items-center justify-between gap-2 rounded-full px-4 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
-                      active
+                    className={`group relative flex w-full h-12 cursor-pointer items-center justify-between gap-2 rounded-full px-4 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${active
                         ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
                         : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
-                    }`}
+                      }`}
                   >
                     <span className="truncate">{tab.label}</span>
                     <span
-                      className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2 text-base font-normal transition-colors duration-200 ${
-                        active
+                      className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2 text-base font-normal transition-colors duration-200 ${active
                           ? "bg-white/20 text-white backdrop-blur-xs"
                           : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
-                      }`}
+                        }`}
                     >
                       {tab.count}
                     </span>
@@ -430,19 +428,17 @@ export default function BannersView() {
                   setPublishedFilter("DRAFT");
                   setCurrentPage(0);
                 }}
-                className={`group relative flex h-12 shrink-0 cursor-pointer items-center justify-between gap-2 rounded-full px-4 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
-                  publishedFilter === "DRAFT"
+                className={`group relative flex h-12 shrink-0 cursor-pointer items-center justify-between gap-2 rounded-full px-4 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${publishedFilter === "DRAFT"
                     ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
                     : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
-                }`}
+                  }`}
               >
                 <span>ព្រាង</span>
                 <span
-                  className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2 text-base font-normal transition-colors duration-200 ${
-                    publishedFilter === "DRAFT"
+                  className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2 text-base font-normal transition-colors duration-200 ${publishedFilter === "DRAFT"
                       ? "bg-white/20 text-white backdrop-blur-xs"
                       : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
-                  }`}
+                    }`}
                 >
                   {draftCount}
                 </span>
@@ -453,11 +449,10 @@ export default function BannersView() {
                 <button
                   type="button"
                   onClick={() => setCategoryOpen((prev) => !prev)}
-                  className={`flex h-12 w-full cursor-pointer items-center justify-between gap-1.5 rounded-full border bg-white px-3.5 text-lg font-normal transition outline-none ${
-                    categoryOpen
+                  className={`flex h-12 w-full cursor-pointer items-center justify-between gap-1.5 rounded-full border bg-white px-3.5 text-lg font-normal transition outline-none ${categoryOpen
                       ? "border-primary-600 ring-2 ring-primary-100"
                       : "border-gray-200 hover:border-gray-300"
-                  }`}
+                    }`}
                 >
                   <span className="truncate text-gray-700">
                     {selectedCategory === "ALL"
@@ -466,9 +461,8 @@ export default function BannersView() {
                   </span>
                   <ChevronDown
                     size={18}
-                    className={`shrink-0 text-gray-400 transition-transform duration-200 ${
-                      categoryOpen ? "rotate-180 text-primary-700" : ""
-                    }`}
+                    className={`shrink-0 text-gray-400 transition-transform duration-200 ${categoryOpen ? "rotate-180 text-primary-700" : ""
+                      }`}
                   />
                 </button>
 
@@ -484,11 +478,10 @@ export default function BannersView() {
                         setCurrentPage(0);
                         setCategoryOpen(false);
                       }}
-                      className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
-                        selectedCategory === "ALL"
+                      className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selectedCategory === "ALL"
                           ? "bg-primary-50 text-primary-800"
                           : "text-gray-700 hover:bg-gray-50"
-                      }`}
+                        }`}
                     >
                       <span>ប្រភេទទាំងអស់</span>
                       {selectedCategory === "ALL" && (
@@ -506,11 +499,10 @@ export default function BannersView() {
                             setCurrentPage(0);
                             setCategoryOpen(false);
                           }}
-                          className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
-                            selected
+                          className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected
                               ? "bg-primary-50 text-primary-800"
                               : "text-gray-700 hover:bg-gray-50"
-                          }`}
+                            }`}
                         >
                           <span>{BANNER_CATEGORY_LABELS[cat] || cat}</span>
                           {selected && (
@@ -555,19 +547,17 @@ export default function BannersView() {
                     setPublishedFilter(tab.id as any);
                     setCurrentPage(0);
                   }}
-                  className={`group relative flex h-12 cursor-pointer items-center gap-2.5 rounded-full px-5 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${
-                    active
+                  className={`group relative flex h-12 cursor-pointer items-center gap-2.5 rounded-full px-5 text-lg font-normal transition-all duration-200 ease-out active:scale-95 ${active
                       ? "border border-primary-800 bg-primary-800 text-white shadow-md shadow-primary-900/15"
                       : "border border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:bg-gray-50/80 hover:text-gray-900"
-                  }`}
+                    }`}
                 >
                   <span>{tab.label}</span>
                   <span
-                    className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2.5 text-lg font-normal transition-colors duration-200 ${
-                      active
+                    className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2.5 text-lg font-normal transition-colors duration-200 ${active
                         ? "bg-white/20 text-white backdrop-blur-xs"
                         : "bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-800"
-                    }`}
+                      }`}
                   >
                     {tab.count}
                   </span>
@@ -609,11 +599,10 @@ export default function BannersView() {
                   setCategoryOpen((prev) => !prev);
                   setPageSizeOpen(false);
                 }}
-                className={`flex h-12 min-w-[150px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition outline-none ${
-                  categoryOpen
+                className={`flex h-12 min-w-[150px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition outline-none ${categoryOpen
                     ? "border-primary-600 ring-2 ring-primary-100"
                     : "border-gray-200 hover:border-gray-300"
-                }`}
+                  }`}
               >
                 <span className="truncate text-gray-700">
                   {selectedCategory === "ALL"
@@ -622,9 +611,8 @@ export default function BannersView() {
                 </span>
                 <ChevronDown
                   size={18}
-                  className={`shrink-0 text-gray-400 transition-transform duration-200 ${
-                    categoryOpen ? "rotate-180 text-primary-700" : ""
-                  }`}
+                  className={`shrink-0 text-gray-400 transition-transform duration-200 ${categoryOpen ? "rotate-180 text-primary-700" : ""
+                    }`}
                 />
               </button>
 
@@ -640,11 +628,10 @@ export default function BannersView() {
                       setCurrentPage(0);
                       setCategoryOpen(false);
                     }}
-                    className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
-                      selectedCategory === "ALL"
+                    className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selectedCategory === "ALL"
                         ? "bg-primary-50 text-primary-800"
                         : "text-gray-700 hover:bg-gray-50"
-                    }`}
+                      }`}
                   >
                     <span>ប្រភេទទាំងអស់</span>
                     {selectedCategory === "ALL" && (
@@ -662,11 +649,10 @@ export default function BannersView() {
                           setCurrentPage(0);
                           setCategoryOpen(false);
                         }}
-                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
-                          selected
+                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected
                             ? "bg-primary-50 text-primary-800"
                             : "text-gray-700 hover:bg-gray-50"
-                        }`}
+                          }`}
                       >
                         <span>{BANNER_CATEGORY_LABELS[cat] || cat}</span>
                         {selected && (
@@ -687,18 +673,16 @@ export default function BannersView() {
                   setPageSizeOpen((prev) => !prev);
                   setCategoryOpen(false);
                 }}
-                className={`flex h-12 min-w-[130px] items-center justify-between gap-2 rounded-full border bg-white px-4 text-lg font-normal transition ${
-                  pageSizeOpen
+                className={`flex h-12 min-w-[130px] items-center justify-between gap-2 rounded-full border bg-white px-4 text-lg font-normal transition ${pageSizeOpen
                     ? "border-primary-600 ring-2 ring-primary-100"
                     : "border-gray-200 hover:border-gray-300"
-                }`}
+                  }`}
               >
                 <span className="text-gray-700">{pageSize} / ទំព័រ</span>
                 <ChevronDown
                   size={18}
-                  className={`text-gray-400 transition-transform duration-200 ${
-                    pageSizeOpen ? "rotate-180" : ""
-                  }`}
+                  className={`text-gray-400 transition-transform duration-200 ${pageSizeOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
@@ -716,11 +700,10 @@ export default function BannersView() {
                         setCurrentPage(0);
                         setPageSizeOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${
-                        pageSize === size
+                      className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${pageSize === size
                           ? "bg-primary-50 text-primary-800"
                           : "text-gray-700 hover:bg-gray-50"
-                      }`}
+                        }`}
                     >
                       <span>{size} / ទំព័រ</span>
                       {pageSize === size && (
@@ -874,7 +857,7 @@ export default function BannersView() {
                                   className="h-full w-full object-cover"
                                   fallbackIcon={<ImageIcon size={22} className="text-primary-800 shrink-0" />}
                                 />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition group-hover:opacity-100">
+                                <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40 opacity-0 transition group-hover:opacity-100">
                                   <Maximize2 size={14} className="text-white" />
                                 </div>
                               </div>
@@ -923,16 +906,14 @@ export default function BannersView() {
                                 type="button"
                                 disabled={isToggling}
                                 onClick={() => void handleToggleStatus(banner)}
-                                className={`group/toggle relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50 ${
-                                  banner.isPublished ? "bg-[#137A3D]" : "bg-gray-300 hover:bg-gray-400"
-                                }`}
+                                className={`group/toggle relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50 ${banner.isPublished ? "bg-[#137A3D]" : "bg-gray-300 hover:bg-gray-400"
+                                  }`}
                                 title={banner.isPublished ? "ចុចដើម្បីបិទមិនបង្ហាញ (Hide / Draft)" : "ចុចដើម្បីបង្ហាញផ្សាយ (Show / Publish)"}
                                 aria-label="Toggle banner status"
                               >
                                 <span
-                                  className={`inline-flex h-4 w-4 transform items-center justify-center rounded-full bg-white shadow-md transition-transform duration-200 ${
-                                    banner.isPublished ? "translate-x-6" : "translate-x-1"
-                                  }`}
+                                  className={`inline-flex h-4 w-4 transform items-center justify-center rounded-full bg-white shadow-md transition-transform duration-200 ${banner.isPublished ? "translate-x-6" : "translate-x-1"
+                                    }`}
                                 >
                                   {isToggling && (
                                     <Loader2 size={10} className="animate-spin text-gray-600" />
@@ -940,11 +921,10 @@ export default function BannersView() {
                                 </span>
                               </button>
                               <span
-                                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${
-                                  banner.isPublished
+                                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${banner.isPublished
                                     ? "border-emerald-100 bg-emerald-50 text-emerald-700"
                                     : "border-gray-200 bg-gray-50 text-gray-600"
-                                }`}
+                                  }`}
                               >
                                 <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${banner.isPublished ? "bg-emerald-500" : "bg-gray-400"}`} />
                                 {banner.isPublished ? "បានផ្សាយ" : "ព្រាង"}
@@ -1036,7 +1016,7 @@ export default function BannersView() {
       {previewImage && (
         <div
           onClick={() => setPreviewImage(null)}
-          className="fixed inset-0 z-[160] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in duration-150"
+          className="fixed inset-0 z-[160] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm animate-in fade-in duration-150"
         >
           <div
             onClick={(e) => e.stopPropagation()}

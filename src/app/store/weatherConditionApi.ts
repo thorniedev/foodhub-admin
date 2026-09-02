@@ -45,13 +45,27 @@ function unwrapResponse<T>(response: T | ApiResponse<T>): T {
   return response as T;
 }
 
-function normalizeWeatherCondition(item: WeatherCondition): WeatherCondition {
-  const active = item.isActive ?? item.active ?? true;
+function normalizeWeatherCondition(item: any): WeatherCondition {
+  if (!item || typeof item !== "object") return item;
+
+  let active = true;
+  if (item.isActive !== undefined && item.isActive !== null) {
+    active = Boolean(item.isActive);
+  } else if (item.is_active !== undefined && item.is_active !== null) {
+    active = Boolean(item.is_active);
+  } else if (item.active !== undefined && item.active !== null) {
+    active = Boolean(item.active);
+  } else if (item.status !== undefined && item.status !== null) {
+    active = item.status === "ACTIVE";
+  } else if (item.deletedAt || item.deleted_at) {
+    active = false;
+  }
+
   return {
     ...item,
     isActive: active,
     active: active,
-    localName: item.localName ?? null,
+    localName: item.localName ?? item.name ?? null,
     description: item.description ?? null,
   };
 }

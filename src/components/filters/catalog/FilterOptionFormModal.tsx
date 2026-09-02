@@ -241,7 +241,7 @@ export default function FilterOptionFormModal({
         flex
         items-center
         justify-center
-        bg-black/40
+        bg-slate-900/40
         p-4
         backdrop-blur-[3px]
       "

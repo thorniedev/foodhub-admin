@@ -1,7 +1,14 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
-import { Check, ChevronDown, Image as ImageIcon, Loader2, UploadCloud, X } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Image as ImageIcon,
+  Loader2,
+  UploadCloud,
+  X,
+} from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import type {
   AdminBannerResponse,
@@ -134,7 +141,8 @@ export default function BannerFormModal({
     if (!ACCEPTED_MIME_TYPES.includes(file.type)) {
       setFieldErrors((prev) => ({
         ...prev,
-        image: "សូមជ្រើសរើសរូបភាពប្រភេទ JPEG, PNG ឬ WebP (Valid image types only).",
+        image:
+          "សូមជ្រើសរើសរូបភាពប្រភេទ JPEG, PNG ឬ WebP (Valid image types only).",
       }));
       return;
     }
@@ -142,7 +150,8 @@ export default function BannerFormModal({
     if (file.size > MAX_FILE_SIZE_BYTES) {
       setFieldErrors((prev) => ({
         ...prev,
-        image: "ទំហំរូបភាពត្រូវតែតូចជាង 5MB (Image size must be less than 5MB).",
+        image:
+          "ទំហំរូបភាពត្រូវតែតូចជាង 5MB (Image size must be less than 5MB).",
       }));
       return;
     }
@@ -184,8 +193,7 @@ export default function BannerFormModal({
         errors.location =
           "សូមបញ្ជាក់ទីតាំងសម្រាប់ Category LOCATION (Location is required).";
       } else if (location.trim().length > 100) {
-        errors.location =
-          "ទីតាំងមិនអាចលើសពី ១០០ តួអក្សរឡើយ (Max 100 chars).";
+        errors.location = "ទីតាំងមិនអាចលើសពី ១០០ តួអក្សរឡើយ (Max 100 chars).";
       }
     }
 
@@ -217,7 +225,8 @@ export default function BannerFormModal({
         if (result && onSaved) onSaved(result);
       } else {
         // Fallback directly to adminBannerApi service
-        const { adminBannerApi } = await import("../../services/adminBannerApi");
+        const { adminBannerApi } =
+          await import("../../services/adminBannerApi");
         let result: AdminBannerResponse;
         if (isEditing && editing) {
           result = await adminBannerApi.updateBanner(
@@ -247,20 +256,24 @@ export default function BannerFormModal({
   };
 
   const activeDisplayUrl =
-    imagePreview || (existingImageUrl ? resolveImageUrl(existingImageUrl) : null);
+    imagePreview ||
+    (existingImageUrl ? resolveImageUrl(existingImageUrl) : null);
 
   if (!open) return null;
 
   return (
-    <Dialog.Root open onOpenChange={(isOpen) => !isOpen && !isSubmitting && onClose()}>
+    <Dialog.Root
+      open
+      onOpenChange={(isOpen) => !isOpen && !isSubmitting && onClose()}
+    >
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-[150] bg-black/40 backdrop-blur-[2px] transition-opacity" />
+        <Dialog.Backdrop className="fixed inset-0 z-[150] bg-slate-900/40 backdrop-blur-[2px] transition-opacity" />
         <Dialog.Popup className="fixed inset-0 z-[150] flex items-center justify-center p-4 outline-none">
-          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white shadow-2xl transition-all">
+          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto no-scrollbar rounded-3xl bg-white shadow-2xl transition-all">
             {/* Header */}
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white/95 px-7 py-6 backdrop-blur-xs">
               <div>
-                <p className="text-2xl sm:text-3xl font-medium text-gray-800">
+                <p className="text-2xl sm:text-3xl font-medium text-[#137A3D]">
                   {isEditing
                     ? "កែសម្រួលផ្ទាំងបែនណឺ (Edit Banner)"
                     : "បន្ថែមផ្ទាំងបែនណឺថ្មី (Create Banner)"}
@@ -284,8 +297,8 @@ export default function BannerFormModal({
             <form onSubmit={handleSubmit} className="space-y-6 p-7" noValidate>
               {/* Image Uploader */}
               <div>
-                <label className="mb-2 block text-lg font-normal text-gray-700">
-                  រូបភាពបែនណឺ (Banner Image)
+                <label className="mb-2 block text-2xl font-normal text-[#137A3D]">
+                  រូបភាពបែនណឺ
                   {!isEditing && <span className="text-red-500"> *</span>}
                 </label>
 
@@ -317,8 +330,10 @@ export default function BannerFormModal({
                           className="h-full w-full object-cover"
                         />
                       )}
-                      <span className="absolute left-2.5 top-2.5 rounded-full bg-black/60 px-3.5 py-1 text-lg font-normal text-white backdrop-blur-xs">
-                        {imagePreview ? "រូបភាពថ្មី (New)" : "បច្ចុប្បន្ន (Current)"}
+                      <span className="absolute left-2.5 top-2.5 rounded-full bg-emerald-950/75 px-3.5 py-1 text-lg font-normal text-white backdrop-blur-xs">
+                        {imagePreview
+                          ? "រូបភាពថ្មី (New)"
+                          : "បច្ចុប្បន្ន (Current)"}
                       </span>
                     </div>
 
@@ -389,18 +404,22 @@ export default function BannerFormModal({
               {/* Category & Conditional Location */}
               <div className="grid gap-5 sm:grid-cols-2">
                 <div ref={categoryDropdownRef} className="relative">
-                  <label className="mb-2 block text-lg font-normal text-gray-700">
-                    ប្រភេទ (Category) <span className="text-red-500">*</span>
+                  <label className="mb-2 block text-2xl font-normal text-[#137A3D]">
+                    ប្រភេទ <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setCategoryOpen((prev) => !prev)}
                       className={`flex h-12 w-full cursor-pointer items-center justify-between rounded-full border border-gray-200 bg-gray-50 px-5 text-left text-lg font-normal text-gray-800 outline-none transition hover:border-emerald-500 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600/10 ${
-                        categoryOpen ? "border-emerald-600 bg-white ring-2 ring-emerald-600/10" : ""
+                        categoryOpen
+                          ? "border-emerald-600 bg-white ring-2 ring-emerald-600/10"
+                          : ""
                       }`}
                     >
-                      <span>{BANNER_CATEGORY_LABELS[category] || category}</span>
+                      <span>
+                        {BANNER_CATEGORY_LABELS[category] || category}
+                      </span>
                       <ChevronDown
                         size={18}
                         className={`text-gray-400 transition-transform duration-200 ${
@@ -477,8 +496,8 @@ export default function BannerFormModal({
 
               {/* Title */}
               <div>
-                <label className="mb-2 block text-lg font-normal text-gray-700">
-                  ចំណងជើង (Title) <span className="text-red-500">*</span>
+                <label className="mb-2 block text-2xl font-normal text-[#137A3D]">
+                  ចំណងជើង <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -504,8 +523,8 @@ export default function BannerFormModal({
 
               {/* Description */}
               <div>
-                <label className="mb-2 block text-lg font-normal text-gray-700">
-                  ការពិពណ៌នា (Description - Optional)
+                <label className="mb-2 block text-2xl font-normal text-[#137A3D]">
+                  ការពិពណ៌នា
                 </label>
                 <textarea
                   rows={3}
@@ -524,8 +543,8 @@ export default function BannerFormModal({
               {/* Notice */}
               {!isEditing && (
                 <p className="text-lg font-normal text-gray-500">
-                  ផ្ទាំងបែនណឺដែលបានបង្កើតថ្មី នឹងស្ថិតក្នុងស្ថានភាព Draft (មិនទាន់ផ្សាយ) ជាលំនាំដើម។ 
-                  អ្នកអាចបើកប៊ូតុងផ្សាយនៅពេលក្រោយ។
+                  ផ្ទាំងបែនណឺដែលបានបង្កើតថ្មី នឹងស្ថិតក្នុងស្ថានភាព Draft
+                  (មិនទាន់ផ្សាយ) ជាលំនាំដើម។ អ្នកអាចបើកប៊ូតុងផ្សាយនៅពេលក្រោយ។
                 </p>
               )}
 
