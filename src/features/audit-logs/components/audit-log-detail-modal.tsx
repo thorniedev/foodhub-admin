@@ -161,7 +161,7 @@ export default function AuditLogDetailModal({
         </div>
 
         {/* Drawer Body */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-6 [scrollbar-width:thin]">
+        <div className="flex-1 overflow-y-auto p-5 space-y-6 no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {loading && !logDetail ? (
             <div className="flex flex-col items-center justify-center py-24 text-zinc-400 gap-3">
               <RefreshCw className="w-8 h-8 animate-spin text-emerald-500" />

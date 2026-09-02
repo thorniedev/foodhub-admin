@@ -32,13 +32,13 @@ export default function WeatherConditionTable({
     <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full min-w-[700px] table-auto border-collapse text-left">
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/70">
-            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">ឈ្មោះស្ថានភាពអាកាសធាតុ</th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">កូដ</th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-xl font-normal text-primary-800">ការពិពណ៌នា</th>
-            <th className="whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800">ស្ថានភាព</th>
-       
-            <th className="min-w-[120px] whitespace-nowrap px-4 py-3.5 text-center text-xl font-normal text-primary-800">សកម្មភាព</th>
+          <tr className="border-b border-gray-100 bg-gray-50/80 text-left text-xl font-medium text-primary-900">
+            <th className="whitespace-nowrap px-4 py-4 font-medium">ឈ្មោះស្ថានភាពអាកាសធាតុ</th>
+            <th className="whitespace-nowrap px-4 py-4 font-medium">កូដ</th>
+            <th className="whitespace-nowrap px-4 py-4 font-medium">ការពិពណ៌នា</th>
+            <th className="whitespace-nowrap px-4 py-4 text-center font-medium">ស្ថានភាព</th>
+
+            <th className="min-w-[120px] whitespace-nowrap px-4 py-4 text-center font-medium">សកម្មភាព</th>
           </tr>
         </thead>
 

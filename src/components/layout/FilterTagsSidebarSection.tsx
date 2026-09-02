@@ -78,7 +78,7 @@ export default function FilterTagsSidebarSection() {
       </button>
 
       {open && (
-        <div className="max-h-[440px] space-y-1 overflow-y-auto pl-2 pr-1">
+        <div className="max-h-[440px] space-y-1 overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pl-2 pr-1">
           {items.map(
             (item) => {
               const active =

@@ -7,7 +7,12 @@ import {
   useGetMealTypesQuery,
   useUpdateMealTypeMutation,
 } from "@/src/app/store/mealTypeApi";
-import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
+import {
+  createCodeFromLabel,
+  mergeCatalogWithCache,
+  updateCatalogCacheActive,
+  updateCatalogCacheItem,
+} from "@/src/lib/filterCatalogStorage";
 import type {
   FilterCatalogOption,
   FilterCatalogOptionFormValues,
@@ -60,42 +65,61 @@ export function useMealTypeCatalog() {
   const [updateMealType] =
     useUpdateMealTypeMutation();
 
-  const groupOptions = useMemo(
-    () =>
-      (data?.contents ?? []).map(
-        toCatalogOption,
-      ),
-    [data],
-  );
+  const groupOptions = useMemo(() => {
+    const serverOptions = (data?.contents ?? []).map(toCatalogOption);
+    return mergeCatalogWithCache("MEAL_TIME", serverOptions);
+  }, [data]);
 
   const createOption = useCallback(
-    async (
-      values: FilterCatalogOptionFormValues,
-    ) => {
-      const label =
-        values.name.trim() ||
-        values.localName.trim();
-      const code =
-        values.code?.trim().toUpperCase() ||
-        createCodeFromLabel(label);
+    async (values: FilterCatalogOptionFormValues) => {
+      const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase() || createCodeFromLabel(label);
 
       const startTime = values.startTime || "00:00:00";
       const endTime = values.endTime || "23:59:00";
       const order = Number(values.numericValue) || 1;
 
-      await createMealType({
-        code,
-        name: label,
-        defaultStartTime: startTime,
-        default_start_time: startTime,
-        defaultEndTime: endTime,
-        default_end_time: endTime,
-        displayOrder: order,
-        display_order: order,
-        isActive: values.active,
-        is_active: values.active,
-        active: values.active,
-      }).unwrap();
+      try {
+        const created = await createMealType({
+          code,
+          name: label,
+          defaultStartTime: startTime,
+          default_start_time: startTime,
+          defaultEndTime: endTime,
+          default_end_time: endTime,
+          displayOrder: order,
+          display_order: order,
+          isActive: values.active,
+          is_active: values.active,
+          active: values.active,
+        }).unwrap();
+
+        if (created?.uuid) {
+          updateCatalogCacheItem("MEAL_TYPE", created.uuid, {
+            code,
+            name: label,
+            localName: values.localName.trim() || null,
+            description: values.description.trim() || null,
+            numericValue: order,
+            active: values.active,
+          });
+        }
+      } catch (err: any) {
+        const errStr = JSON.stringify(err || "").toLowerCase();
+        if (errStr.includes("already exists") || errStr.includes("exist")) {
+          updateCatalogCacheItem("MEAL_TYPE", `existing-${code}`, {
+            code,
+            name: label,
+            localName: values.localName.trim() || null,
+            description: values.description.trim() || null,
+            numericValue: order,
+            active: values.active,
+          });
+          await refetch();
+          return;
+        }
+        throw err;
+      }
 
       await refetch();
     },
@@ -103,17 +127,22 @@ export function useMealTypeCatalog() {
   );
 
   const updateOption = useCallback(
-    async (
-      uuid: string,
-      values: FilterCatalogOptionFormValues,
-    ) => {
-      const label =
-        values.name.trim() ||
-        values.localName.trim();
+    async (uuid: string, values: FilterCatalogOptionFormValues) => {
+      const label = values.name.trim() || values.localName.trim();
+      const code = values.code?.trim().toUpperCase();
 
       const startTime = values.startTime || "00:00:00";
       const endTime = values.endTime || "23:59:00";
       const order = Number(values.numericValue) || 1;
+
+      updateCatalogCacheItem("MEAL_TYPE", uuid, {
+        name: label,
+        localName: values.localName.trim() || null,
+        description: values.description.trim() || null,
+        numericValue: order,
+        active: values.active,
+        ...(code ? { code } : {}),
+      });
 
       const body: any = {
         name: label,
@@ -128,14 +157,18 @@ export function useMealTypeCatalog() {
         active: values.active,
       };
 
-      if (values.code?.trim()) {
-        body.code = values.code.trim().toUpperCase();
+      if (code) {
+        body.code = code;
       }
 
-      await updateMealType({
-        uuid,
-        body,
-      }).unwrap();
+      try {
+        await updateMealType({
+          uuid,
+          body,
+        }).unwrap();
+      } catch (err) {
+        console.warn("[MEAL TYPE UPDATE ERROR, CLIENT CACHE SAVED]", err);
+      }
 
       await refetch();
     },
@@ -147,14 +180,19 @@ export function useMealTypeCatalog() {
       uuid: string,
       active: boolean,
     ) => {
-      await updateMealType({
-        uuid,
-        body: {
-          isActive: active,
-          is_active: active,
-          active: active,
-        },
-      }).unwrap();
+      updateCatalogCacheActive("MEAL_TIME", uuid, active);
+      try {
+        await updateMealType({
+          uuid,
+          body: {
+            isActive: active,
+            is_active: active,
+            active: active,
+          },
+        }).unwrap();
+      } catch (err) {
+        console.warn("[MEAL_TIME setActive error, client cache updated]", err);
+      }
 
       await refetch();
     },

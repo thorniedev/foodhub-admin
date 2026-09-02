@@ -119,11 +119,11 @@ export const dashboardNav: NavItem[] = [
     icon: SlidersHorizontal,
     children: [
       {
-        label: "អនុប្រភេទម្ហូប",
+        label: "ប្រភេទម្ហូប",
         href: "/filter/food-categories",
       },
       {
-        label: "អនុប្រភេទភេសជ្ជៈ",
+        label: "ប្រភេទភេសជ្ជៈ",
         href: "/filter/drink-categories",
       },
       {
@@ -150,18 +150,7 @@ export const dashboardNav: NavItem[] = [
         label: "ស្ថានភាពសុខភាព",
         href: "/filter/medical-conditions",
       },
-      {
-        label: "ពេលចម្អិន",
-        href: "/filter/preparation-times",
-      },
-      {
-        label: "ចម្ងាយ",
-        href: "/filter/distances",
-      },
-      {
-        label: "តំបន់",
-        href: "/filter/regions",
-      },
+
       {
         label: "គ្រឿងផ្សំ",
         href: "/filter/ingredients",

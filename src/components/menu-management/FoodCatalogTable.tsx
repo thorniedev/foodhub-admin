@@ -168,28 +168,28 @@ export default function FoodCatalogTable({
         <table className="w-full table-auto border-collapse text-left">
           {/* ================= HEADER ================= */}
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-normal text-primary-800">
-              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[150px]">
+            <tr className="border-b border-gray-100 bg-gray-50/80 text-left text-xl font-medium text-primary-900">
+              <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[150px]">
                 {catalogType === "FOOD" ? "មុខម្ហូប" : catalogType === "DRINK" ? "ភេសជ្ជៈ" : "មុខម្ហូប / ភេសជ្ជៈ"}
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[150px]">
+              <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[150px]">
                 ឈ្មោះអង់គ្លេស
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[130px]">
+              <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[130px]">
                 ប្រភេទ
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3.5 font-normal min-w-[130px]">
+              <th className="whitespace-nowrap px-4 py-4 font-medium min-w-[130px]">
                 ម្ហូបតាមប្រទេស
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3.5 text-center font-normal min-w-[95px]">
+              <th className="whitespace-nowrap px-4 py-4 text-center font-medium min-w-[95px]">
                 ស្ថានភាព
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3.5 text-center font-normal min-w-[110px]">
+              <th className="whitespace-nowrap px-4 py-4 text-center font-medium min-w-[110px]">
                 សកម្មភាព
               </th>
             </tr>
@@ -248,16 +248,14 @@ export default function FoodCatalogTable({
                   {/* Status Badge */}
                   <td className="px-4 py-3.5 text-center">
                     <span
-                      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${
-                        active
+                      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1 text-lg font-normal border ${active
                           ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                           : "bg-gray-50 text-gray-600 border-gray-150"
-                      }`}
+                        }`}
                     >
                       <span
-                        className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-                          active ? "bg-emerald-500" : "bg-gray-400"
-                        }`}
+                        className={`h-2.5 w-2.5 shrink-0 rounded-full ${active ? "bg-emerald-500" : "bg-gray-400"
+                          }`}
                       />
                       {active ? "សកម្ម" : "អសកម្ម"}
                     </span>

@@ -33,7 +33,7 @@ export default function HardDeleteAllergenConfirmModal({
 
   return (
     <div
-      className="fixed inset-0 z-[140] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[3px] animate-in fade-in duration-200"
+      className="fixed inset-0 z-[140] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-[3px] animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget && !deleting) onClose();
       }}

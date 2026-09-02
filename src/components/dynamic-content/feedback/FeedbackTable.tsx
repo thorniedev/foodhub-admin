@@ -59,13 +59,13 @@ export default function FeedbackTable({
     <div className="bg-white border border-gray-100 rounded-3xl overflow-x-auto">
       <table className="w-full text-lg font-normal min-w-[800px]">
         <thead>
-          <tr className="border-b border-gray-100 text-left text-lg font-normal text-primary-800 bg-gray-50/70">
-            <th className="py-3.5 px-4 font-normal">អតិថិជន</th>
-            <th className="py-3.5 px-4 font-normal">សារ</th>
-            <th className="py-3.5 px-4 font-normal">ការវាយតម្លៃ</th>
-            <th className="py-3.5 px-4 font-normal">ប្រភេទ</th>
-            <th className="py-3.5 px-4 font-normal">ស្ថានភាព</th>
-            <th className="py-3.5 px-4 font-normal text-right">សកម្មភាព</th>
+          <tr className="border-b border-gray-100 text-left text-xl font-medium text-primary-900 bg-gray-50/80">
+            <th className="py-4 px-4 font-medium">អតិថិជន</th>
+            <th className="py-4 px-4 font-medium">សារ</th>
+            <th className="py-4 px-4 font-medium">ការវាយតម្លៃ</th>
+            <th className="py-4 px-4 font-medium">ប្រភេទ</th>
+            <th className="py-4 px-4 font-medium">ស្ថានភាព</th>
+            <th className="py-4 px-4 font-medium text-right">សកម្មភាព</th>
           </tr>
         </thead>
         <tbody>
@@ -108,9 +108,8 @@ export default function FeedbackTable({
               </td>
               <td className="py-3.5 px-4">
                 <span
-                  className={`text-lg font-normal px-3.5 py-1 rounded-full border border-gray-100 ${
-                    STATUS_BADGE[item.status]
-                  }`}
+                  className={`text-lg font-normal px-3.5 py-1 rounded-full border border-gray-100 ${STATUS_BADGE[item.status]
+                    }`}
                 >
                   {STATUS_LABEL[item.status]}
                 </span>

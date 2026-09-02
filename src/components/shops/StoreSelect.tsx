@@ -75,7 +75,7 @@ export default function StoreSelect({
 
       {open && (
         <div
-          className={`absolute left-0 right-0 top-[54px] z-[250] max-h-64 overflow-y-auto rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.18)] ${menuClassName}`}
+          className={`absolute left-0 right-0 top-[54px] z-[250] max-h-64 overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.18)] ${menuClassName}`}
         >
           {options.map((option) => {
             const isSelected = option.value === value;

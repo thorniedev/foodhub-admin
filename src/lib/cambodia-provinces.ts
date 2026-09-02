@@ -91,3 +91,108 @@ export const POPULAR_GEO_HUBS: PopularGeoHub[] = [
     city: "Battambang",
   },
 ];
+
+/**
+ * Normalizes text for lenient location matching (removes spaces, punctuation, lowercase).
+ */
+export function normalizeLocationKey(val?: string | null): string {
+  if (!val) return "";
+  return String(val)
+    .toLowerCase()
+    .replace(/[\s\-_,./]+/g, "")
+    .trim();
+}
+
+/**
+ * Returns all searchable alias tokens for a given province (English, Khmer with/without prefixes, code).
+ */
+export function getProvinceSearchAliases(province: CambodiaProvince): string[] {
+  const cleanKh = province.nameKh
+    .replace(/^រាជធានី\s*/, "")
+    .replace(/^ខេត្ត\s*/, "")
+    .replace(/^ក្រុង\s*/, "")
+    .trim();
+
+  const aliases: string[] = [
+    province.code.toLowerCase(),
+    province.nameEn.toLowerCase(),
+    normalizeLocationKey(province.nameEn),
+    province.nameKh,
+    cleanKh,
+    `ខេត្ត${cleanKh}`,
+    `ខេត្ត ${cleanKh}`,
+    `ក្រុង${cleanKh}`,
+    `ក្រុង ${cleanKh}`,
+    `រាជធានី${cleanKh}`,
+    `រាជធានី ${cleanKh}`,
+    `${province.nameEn.toLowerCase()} province`,
+    `${province.nameEn.toLowerCase()} city`,
+    `${province.nameEn.toLowerCase()} municipality`,
+    `krong ${province.nameEn.toLowerCase()}`,
+  ];
+  return Array.from(new Set(aliases.filter(Boolean)));
+}
+
+/**
+ * Checks if a store's location fields (province, city, district, commune, addressLine)
+ * match the selected province or city filter.
+ */
+export function isStoreInProvinceOrCity(
+  store: {
+    province?: string | null;
+    city?: string | null;
+    district?: string | null;
+    commune?: string | null;
+    addressLine?: string | null;
+  },
+  filterValue: string,
+): boolean {
+  if (!filterValue || filterValue === "ALL") return true;
+
+  const rawFilter = filterValue.trim();
+  const normalizedFilter = normalizeLocationKey(rawFilter);
+
+  // Find if filterValue corresponds to a known CambodiaProvince
+  const matchedProvince = CAMBODIA_PROVINCES.find((p) => {
+    const aliases = getProvinceSearchAliases(p);
+    return (
+      p.code.toLowerCase() === rawFilter.toLowerCase() ||
+      p.nameEn.toLowerCase() === rawFilter.toLowerCase() ||
+      normalizeLocationKey(p.nameEn) === normalizedFilter ||
+      p.nameKh === rawFilter ||
+      aliases.some(
+        (alias) =>
+          alias === rawFilter.toLowerCase() ||
+          normalizeLocationKey(alias) === normalizedFilter,
+      )
+    );
+  });
+
+  const targetAliases = matchedProvince
+    ? getProvinceSearchAliases(matchedProvince)
+    : [rawFilter.toLowerCase(), normalizedFilter];
+
+  // Extract all store location text
+  const locationFields = [
+    store.province,
+    store.city,
+    store.district,
+    store.commune,
+    store.addressLine,
+  ].filter(Boolean) as string[];
+
+  if (locationFields.length === 0) return false;
+
+  const combinedRaw = locationFields.join(" ").toLowerCase();
+  const combinedNormalized = normalizeLocationKey(locationFields.join(" "));
+
+  return targetAliases.some((alias) => {
+    const normAlias = normalizeLocationKey(alias);
+    if (!alias && !normAlias) return false;
+    return (
+      combinedRaw.includes(alias) ||
+      (normAlias.length >= 3 && combinedNormalized.includes(normAlias))
+    );
+  });
+}
+

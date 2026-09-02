@@ -36,16 +36,16 @@ export default function FoodTypesTabs({
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm sm:text-base font-medium transition-colors whitespace-nowrap shrink-0 ${activeTab === tab.key
-                ? "bg-[#136C34] text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            className={`flex items-center gap-2 px-4 h-12 rounded-full text-lg font-normal transition-all whitespace-nowrap shrink-0 ${activeTab === tab.key
+                ? "bg-[#136C34] text-white shadow-md shadow-primary-900/15"
+                : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
               }`}
           >
-            {tab.label}
+            <span>{tab.label}</span>
             <span
-              className={`text-xs rounded-full px-1.5 py-0.5 ${activeTab === tab.key
+              className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-2 text-base font-normal ${activeTab === tab.key
                   ? "bg-white/20 text-white"
-                  : "bg-white text-gray-500"
+                  : "bg-gray-100 text-gray-600"
                 }`}
             >
               {countFor(tab.key)}
@@ -54,17 +54,17 @@ export default function FoodTypesTabs({
         ))}
       </div>
 
-      <div className="relative w-full lg:w-64">
+      <div className="relative w-full lg:w-72">
         <Search
-          size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          size={18}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
         />
         <input
           type="text"
           value={tabSearch}
           onChange={(e) => onTabSearchChange(e.target.value)}
           placeholder="ស្វែងរកប្រភេទចំណីអាហារ..."
-          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="w-full h-12 pl-11 pr-4 text-lg border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-600"
         />
       </div>
     </div>

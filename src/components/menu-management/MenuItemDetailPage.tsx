@@ -290,12 +290,7 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
       </div>
 
       {isLoading ? (
-        <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 rounded-3xl border border-gray-100 bg-white py-20 shadow-sm">
-          <Loader2 size={44} className="animate-spin text-[#14833E]" />
-          <p className="text-xl font-normal text-gray-500">
-            កំពុងទាញយកព័ត៌មានលម្អិតម៉ឺនុយ...
-          </p>
-        </div>
+        <MenuItemDetailSkeleton />
       ) : isError || !data ? (
         <div className="rounded-3xl border border-red-100 bg-red-50 p-8 text-center text-xl font-normal text-red-600 shadow-sm">
           មិនអាចទាញយកព័ត៌មានលម្អិតរបស់ម៉ឺនុយនេះបានទេ។
@@ -327,10 +322,10 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
               {images.length > 1 && (
                 <div
                   className={`grid w-full gap-3 ${images.length === 2
-                      ? "grid-cols-2"
-                      : images.length === 3
-                        ? "grid-cols-3"
-                        : "grid-cols-4"
+                    ? "grid-cols-2"
+                    : images.length === 3
+                      ? "grid-cols-3"
+                      : "grid-cols-4"
                     }`}
                 >
                   {images.map((img, idx) => (
@@ -339,8 +334,8 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
                       type="button"
                       onClick={() => setSelectedImageIndex(idx)}
                       className={`relative aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-2xl border-2 transition ${selectedImageIndex === idx
-                          ? "border-[#14833E] ring-2 ring-[#14833E]/20 shadow-xs"
-                          : "border-gray-200 hover:border-gray-400"
+                        ? "border-[#14833E] ring-2 ring-[#14833E]/20 shadow-xs"
+                        : "border-gray-200 hover:border-gray-400"
                         }`}
                     >
                       <img
@@ -380,8 +375,8 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
                 <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={`inline-flex items-center gap-2 rounded-full border px-4 py-1 text-lg font-normal ${!isAvailable
-                        ? "border-gray-200 bg-gray-100 text-gray-600"
-                        : "border-emerald-100 bg-emerald-50 text-emerald-700"
+                      ? "border-gray-200 bg-gray-100 text-gray-600"
+                      : "border-emerald-100 bg-emerald-50 text-emerald-700"
                       }`}
                   >
                     <span

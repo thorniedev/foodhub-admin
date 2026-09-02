@@ -19,6 +19,7 @@ import {
 import {
   shopApi,
   useDeleteShopMutation,
+  useGetAllShopsQuery,
   useGetShopByUuidQuery,
   useGetShopsQuery,
   useUpdateShopMutation,
@@ -31,46 +32,35 @@ import type {
 } from "@/src/types/shop";
 import { getShopApiErrorMessage } from "@/src/lib/shopApiError";
 import { getStoreLiveStatus, storeLogoCandidate } from "@/src/lib/shopFormat";
-import CustomSelect from "../ui/CustomSelect";
+import {
+  CAMBODIA_PROVINCES,
+  isStoreInProvinceOrCity,
+} from "@/src/lib/cambodia-provinces";
+import CustomSelect, { type CustomSelectOption } from "../ui/CustomSelect";
 
 import StoreMediaImage from "./detail/StoreMediaImage";
-import DeleteShopConfirmModal from "./DeleteShopConfirmModal";
-import ShopEditModal from "./ShopEditModal";
+import dynamic from "next/dynamic";
+
+// Lazy load modals for better performance
+const DeleteShopConfirmModal = dynamic(() => import("./DeleteShopConfirmModal"));
+const ShopEditModal = dynamic(() => import("./ShopEditModal"));
+const ShopStatusModal = dynamic(() => import("./ShopStatusModal"));
+
 import ShopsHeader from "./ShopsHeader";
 import ShopsPagination from "./ShopsPagination";
-import ShopStatusModal from "./ShopStatusModal";
 import ShopsTable from "./ShopsTable";
+import ShopsTableSkeleton from "./ShopsTableSkeleton";
 import ShopsTabs from "./ShopsTabs";
 
 type StoreSort = "NAME_ASC" | "NAME_DESC" | "NEWEST" | "OLDEST";
 
-const CITY_OPTIONS = [
-  { value: "ALL", label: "រាជធានី-ខេត្តទាំងអស់" },
-  { value: "Phnom Penh", label: "ភ្នំពេញ" },
-  { value: "Banteay Meanchey", label: "បន្ទាយមានជ័យ" },
-  { value: "Battambang", label: "បាត់ដំបង" },
-  { value: "Kampong Cham", label: "កំពង់ចាម" },
-  { value: "Kampong Chhnang", label: "កំពង់ឆ្នាំង" },
-  { value: "Kampong Speu", label: "កំពង់ស្ពឺ" },
-  { value: "Kampong Thom", label: "កំពង់ធំ" },
-  { value: "Kampot", label: "កំពត" },
-  { value: "Kandal", label: "កណ្ដាល" },
-  { value: "Kep", label: "កែប" },
-  { value: "Koh Kong", label: "កោះកុង" },
-  { value: "Kratie", label: "ក្រចេះ" },
-  { value: "Mondulkiri", label: "មណ្ឌលគិរី" },
-  { value: "Oddar Meanchey", label: "ឧត្តរមានជ័យ" },
-  { value: "Pailin", label: "ប៉ៃលិន" },
-  { value: "Preah Sihanouk", label: "ព្រះសីហនុ" },
-  { value: "Preah Vihear", label: "ព្រះវិហារ" },
-  { value: "Prey Veng", label: "ព្រៃវែង" },
-  { value: "Pursat", label: "ពោធិ៍សាត់" },
-  { value: "Ratanakiri", label: "រតនគិរី" },
-  { value: "Siem Reap", label: "សៀមរាប" },
-  { value: "Stung Treng", label: "ស្ទឹងត្រែង" },
-  { value: "Svay Rieng", label: "ស្វាយរៀង" },
-  { value: "Takeo", label: "តាកែវ" },
-  { value: "Tboung Khmum", label: "ត្បូងឃ្មុំ" },
+const CITY_OPTIONS: CustomSelectOption[] = [
+  { value: "ALL", label: "រាជធានី-ខេត្តទាំងអស់", description: "All Capital & Provinces" },
+  ...CAMBODIA_PROVINCES.map((p) => ({
+    value: p.nameEn,
+    label: p.nameKh,
+    description: p.nameEn,
+  })),
 ];
 
 const OPEN_OPTIONS = [
@@ -125,16 +115,46 @@ export default function ShopsManager() {
     return () => clearTimeout(timer);
   }, [notice]);
 
-  /* Main paginated list filtered by the active tab */
-  const { data, error, isLoading, isFetching, refetch } = useGetShopsQuery({
+  const hasActiveFilters = cityFilter !== "ALL" || openFilter !== "ALL";
+
+  const effectiveQuery = useMemo(() => {
+    const parts: string[] = [];
+    if (serverQuery.trim()) {
+      parts.push(serverQuery.trim());
+    } else if (cityFilter !== "ALL") {
+      parts.push(cityFilter);
+    }
+    return parts.join(" ");
+  }, [serverQuery, cityFilter]);
+
+  const apiSort = useMemo(() => {
+    switch (sortBy) {
+      case "OLDEST":
+        return "createdAt,asc";
+      case "NAME_ASC":
+        return "storeName,asc";
+      case "NAME_DESC":
+        return "storeName,desc";
+      case "NEWEST":
+      default:
+        return "createdAt,desc";
+    }
+  }, [sortBy]);
+
+  /* Fetch all stores for the active tab across all pages */
+  const {
+    data: allStoresData,
+    error,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useGetAllShopsQuery({
     query: serverQuery || undefined,
     reviewStatus:
       filter === "APPROVED" || filter === "PENDING" || filter === "REJECTED"
         ? filter
         : undefined,
     accountStatus: filter === "APPROVED" ? "ACTIVE" : undefined,
-    page,
-    size,
   });
 
   const isSearching = Boolean(serverQuery);
@@ -295,7 +315,7 @@ export default function ShopsManager() {
     return set;
   }, [archivedData]);
 
-  const rawStores = data?.contents ?? [];
+  const rawStores = allStoresData ?? [];
   const stores = useMemo(() => {
     return rawStores.map((store) => {
       let reviewStatus = store.reviewStatus;
@@ -330,17 +350,16 @@ export default function ShopsManager() {
 
   /* Dynamic counts: Uses main query total for active tab and skips duplicate requests */
   const counts = {
-    all: filter === "ALL" ? (data?.totalElements ?? 0) : (allData?.totalElements ?? 0),
-    approved: filter === "APPROVED" ? (data?.totalElements ?? 0) : (approvedData?.totalElements ?? 0),
-    pending: filter === "PENDING" ? (data?.totalElements ?? 0) : (pendingData?.totalElements ?? 0),
-    rejected: filter === "REJECTED" ? (data?.totalElements ?? 0) : (rejectedData?.totalElements ?? 0),
+    all: filter === "ALL" ? (allStoresData?.length ?? 0) : (allData?.totalElements ?? 0),
+    approved: filter === "APPROVED" ? (allStoresData?.length ?? 0) : (approvedData?.totalElements ?? 0),
+    pending: filter === "PENDING" ? (allStoresData?.length ?? 0) : (pendingData?.totalElements ?? 0),
+    rejected: filter === "REJECTED" ? (allStoresData?.length ?? 0) : (rejectedData?.totalElements ?? 0),
   };
 
   const filteredStores = stores.filter((store) => {
-    // City filter
+    // City / Province filter (matching province, city, district, commune, and addressLine across Khmer and English)
     if (cityFilter !== "ALL") {
-      const locationText = [store.city, store.province, store.addressLine].filter(Boolean).join(" ").toLowerCase();
-      if (!locationText.includes(cityFilter.toLowerCase())) {
+      if (!isStoreInProvinceOrCity(store, cityFilter)) {
         return false;
       }
     }
@@ -371,54 +390,83 @@ export default function ShopsManager() {
   const sortedStores = useMemo(() => {
     const list = [...filteredStores];
 
+    const compareStoreId = (a: StoreType, b: StoreType): number => {
+      const idA = a.id !== undefined && a.id !== null ? a.id : "";
+      const idB = b.id !== undefined && b.id !== null ? b.id : "";
+
+      const numA = typeof idA === "number" ? idA : Number(idA);
+      const numB = typeof idB === "number" ? idB : Number(idB);
+
+      if (!isNaN(numA) && !isNaN(numB) && idA !== "" && idB !== "") {
+        return numA - numB;
+      }
+
+      const strA = String(idA || a.uuid || "");
+      const strB = String(idB || b.uuid || "");
+      return strA.localeCompare(strB, undefined, { numeric: true, sensitivity: "base" });
+    };
+
     switch (sortBy) {
       case "NAME_ASC":
-        return list.sort((a, b) =>
-          (a.storeName ?? "").localeCompare(b.storeName ?? "", undefined, {
+        return list.sort((a, b) => {
+          const cmp = (a.storeName ?? "").localeCompare(b.storeName ?? "", undefined, {
             sensitivity: "base",
             numeric: true,
-          }),
-        );
-      case "NAME_DESC":
-        return list.sort((a, b) =>
-          (b.storeName ?? "").localeCompare(a.storeName ?? "", undefined, {
-            sensitivity: "base",
-            numeric: true,
-          }),
-        );
-      case "OLDEST": {
-        const hasTimestamps = list.some((item) => Boolean(item.createdAt));
-        if (hasTimestamps) {
-          return list.sort((a, b) => {
-            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-            return timeA - timeB;
           });
-        }
-        return list.reverse();
+          if (cmp !== 0) return cmp;
+          return compareStoreId(a, b);
+        });
+
+      case "NAME_DESC":
+        return list.sort((a, b) => {
+          const cmp = (b.storeName ?? "").localeCompare(a.storeName ?? "", undefined, {
+            sensitivity: "base",
+            numeric: true,
+          });
+          if (cmp !== 0) return cmp;
+          return compareStoreId(b, a);
+        });
+
+      case "OLDEST": {
+        return list.sort((a, b) => {
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          if (timeA && timeB && timeA !== timeB) {
+            return timeA - timeB;
+          }
+          return compareStoreId(a, b);
+        });
       }
+
       case "NEWEST":
       default: {
-        const hasTimestamps = list.some((item) => Boolean(item.createdAt));
-        if (hasTimestamps) {
-          return list.sort((a, b) => {
-            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return list.sort((a, b) => {
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          if (timeA && timeB && timeA !== timeB) {
             return timeB - timeA;
-          });
-        }
-        // Backend API returns sort: "createdAt,desc" by default, keep exact API order
-        return list;
+          }
+          return compareStoreId(b, a);
+        });
       }
     }
   }, [filteredStores, sortBy]);
 
-  const hasActiveFilters = cityFilter !== "ALL" || openFilter !== "ALL";
+  const displayedStores = useMemo(() => {
+    const start = page * size;
+    return sortedStores.slice(start, start + size);
+  }, [sortedStores, page, size]);
+
+  const paginationTotalElements = filteredStores.length;
+  const paginationTotalPages =
+    Math.ceil(filteredStores.length / size) || (filteredStores.length > 0 ? 1 : 0);
+  const paginationPage = page;
 
   const handleResetFilters = () => {
     setCityFilter("ALL");
     setOpenFilter("ALL");
     setSortBy("NEWEST");
+    setPage(0);
   };
 
   const handleSearch = () => {
@@ -472,7 +520,7 @@ export default function ShopsManager() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="w-full space-y-6">
       <ShopsHeader
         total={counts.all}
         approved={counts.approved}
@@ -480,11 +528,9 @@ export default function ShopsManager() {
         rejected={counts.rejected}
       />
 
-      {/* 2-ROW TOOLBAR */}
-      <div className="space-y-3">
-        {/* ROW 1: Status Tabs (Left) + Search Input (Middle) + Page Size (Right) */}
-        <div className="flex w-full flex-wrap items-center justify-between gap-3">
-          <div className="shrink-0">
+      <div className="space-y-4 rounded-3xl border border-gray-100 bg-white p-5 shadow-xs">
+        <div className="flex w-full flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="w-full sm:w-auto min-w-0">
             <ShopsTabs
               value={filter}
               counts={counts}
@@ -493,153 +539,113 @@ export default function ShopsManager() {
             />
           </div>
 
-          <div className="flex min-w-[320px] flex-1 flex-wrap items-center justify-end gap-2.5">
-            {/* Search Input */}
-            <div className="relative min-w-[240px] max-w-[420px] flex-1">
-              <Search
-                size={18}
-                className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                value={searchInput}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  setSearchInput(value);
-                  setSuggestionSelected(false);
-                  setPage(0);
-                  setShowSuggestions(value.trim().length >= 2);
-                }}
-                onFocus={() => {
-                  if (searchInput.trim().length >= 2 && !suggestionSelected) {
-                    setShowSuggestions(true);
-                  }
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") handleSearch();
-                  if (event.key === "Escape") setShowSuggestions(false);
-                }}
-                placeholder="ស្វែងរកហាង (ឈ្មោះ, ទីតាំង)..."
-                className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
-              />
-              {searchInput && (
-                <button
-                  type="button"
-                  onClick={handleClearSearch}
-                  className="absolute right-3.5 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700 cursor-pointer"
-                  aria-label="Clear search"
-                >
-                  <X size={18} />
-                </button>
-              )}
-
-              {showSuggestions && searchInput.trim().length >= 2 && (
-                <div className="absolute left-0 top-[52px] z-[100] w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
-                  {suggestionsLoading ? (
-                    <div className="flex items-center justify-center gap-2 px-5 py-6 text-lg font-normal text-gray-500">
-                      <Loader2 size={20} className="animate-spin text-primary-800" />
-                      កំពុងស្វែងរក...
-                    </div>
-                  ) : suggestions.length === 0 ? (
-                    <div className="px-5 py-6 text-center">
-                      <Store size={32} className="mx-auto text-amber-500" />
-                      <p className="mt-1 text-lg font-normal text-amber-600">មិនមានហាងដែលត្រូវគ្នា</p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="border-b border-gray-100 px-4 py-2.5 bg-gray-50">
-                        <p className="text-base font-normal text-gray-500 uppercase">លទ្ធផលស្វែងរក</p>
-                      </div>
-                      <div className="max-h-[300px] overflow-y-auto p-1.5">
-                        {suggestions.map((store) => {
-                          const logoCandidate = storeLogoCandidate(store);
-
-                          return (
-                            <button
-                              key={store.uuid}
-                              type="button"
-                              onMouseDown={(event) => event.preventDefault()}
-                              onClick={() => handleSelectSuggestion(store)}
-                              className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-emerald-50"
-                            >
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-primary-800">
-                                {logoCandidate ? (
-                                  <StoreMediaImage
-                                    mediaUuid={logoCandidate}
-                                    alt={`${store.storeName} logo`}
-                                    className="h-full w-full object-cover"
-                                    fallbackIcon={<Store size={20} />}
-                                  />
-                                ) : (
-                                  <Store size={20} />
-                                )}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className="truncate text-lg font-normal text-gray-800">{store.storeName}</p>
-                                <p className="truncate text-base font-normal text-gray-400">
-                                  {[store.addressLine, store.city].filter(Boolean).join(", ") || "No address"}
-                                </p>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Page Size Select */}
-            <div className="relative shrink-0">
+          <div className="relative w-full sm:flex-1 sm:min-w-[280px]">
+            <Search
+              size={18}
+              className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-gray-400"
+            />
+            <input
+              value={searchInput}
+              onChange={(event) => {
+                const value = event.target.value;
+                setSearchInput(value);
+                setSuggestionSelected(false);
+                setPage(0);
+                setShowSuggestions(value.trim().length >= 2);
+              }}
+              onFocus={() => {
+                if (searchInput.trim().length >= 2 && !suggestionSelected) {
+                  setShowSuggestions(true);
+                }
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") handleSearch();
+                if (event.key === "Escape") setShowSuggestions(false);
+              }}
+              placeholder="ស្វែងរកហាង (ឈ្មោះ, ទីតាំង)..."
+              className="h-12 w-full rounded-full border border-gray-200 bg-white py-2 pl-11 pr-10 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100"
+            />
+            {searchInput && (
               <button
                 type="button"
-                onClick={() => setSizeOpen((c) => !c)}
-                className={`flex h-12 min-w-[140px] cursor-pointer items-center justify-between gap-2.5 rounded-full border bg-white px-4 text-lg font-normal transition ${
-                  sizeOpen ? "border-primary-600 ring-2 ring-primary-100" : "border-gray-200 hover:border-gray-300"
-                }`}
+                onClick={handleClearSearch}
+                className="absolute right-3.5 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition hover:text-gray-700 cursor-pointer"
+                aria-label="Clear search"
               >
-                <span className="text-gray-700">{size} / ទំព័រ</span>
-                <ChevronDown size={18} className={`text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""}`} />
+                <X size={18} />
               </button>
-              {sizeOpen && (
-                <div className="absolute right-0 top-[52px] z-[110] w-[180px] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl">
-                  <p className="px-3 py-1.5 text-base font-normal text-gray-400">ចំនួនក្នុងទំព័រ</p>
-                  {[10, 20, 50].map((value) => {
-                    const selected = size === value;
-                    return (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => { setSize(value); setPage(0); setSizeOpen(false); }}
-                        className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected ? "bg-primary-50 text-primary-800" : "text-gray-700 hover:bg-gray-50"
-                          }`}
-                      >
-                        <span>{value} / ទំព័រ</span>
-                        {selected && <Check size={18} className="text-primary-800" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            )}
+
+            {showSuggestions && searchInput.trim().length >= 2 && (
+              <div className="absolute left-0 sm:left-auto sm:right-0 top-[52px] z-[100] w-full sm:w-[420px] max-w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
+                {suggestionsLoading ? (
+                  <div className="flex items-center justify-center gap-2 px-5 py-6 text-lg font-normal text-gray-500">
+                    <Loader2 size={20} className="animate-spin text-primary-800" />
+                    កំពុងស្វែងរក...
+                  </div>
+                ) : suggestions.length === 0 ? (
+                  <div className="px-5 py-6 text-center">
+                    <Store size={32} className="mx-auto text-amber-500" />
+                    <p className="mt-1 text-lg font-normal text-amber-600">មិនមានហាងដែលត្រូវគ្នា</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="border-b border-gray-100 px-4 py-2.5 bg-gray-50">
+                      <p className="text-base sm:text-lg font-normal text-gray-500 uppercase">លទ្ធផលស្វែងរក</p>
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto p-1.5">
+                      {suggestions.map((store) => {
+                        const logoCandidate = storeLogoCandidate(store);
+
+                        return (
+                          <button
+                            key={store.uuid}
+                            type="button"
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={() => handleSelectSuggestion(store)}
+                            className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-emerald-50"
+                          >
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 text-primary-800">
+                              {logoCandidate ? (
+                                <StoreMediaImage
+                                  mediaUuid={logoCandidate}
+                                  alt={`${store.storeName} logo`}
+                                  className="h-full w-full object-cover"
+                                  fallbackIcon={<Store size={20} />}
+                                />
+                              ) : (
+                                <Store size={20} />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-lg font-normal text-gray-800">{store.storeName}</p>
+                              <p className="truncate text-base font-normal text-gray-400">
+                                {[store.addressLine, store.city].filter(Boolean).join(", ") || "No address"}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* ROW 2: Filter Controls (City, Open/Close, Sort, Reset) - Transparent / Pill Style */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* City Filter */}
-          <div className="min-w-[180px] max-w-[220px] flex-1 shrink-0">
+        <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2.5">
+          <div className="w-full sm:w-[190px] lg:w-[220px]">
             <CustomSelect
               value={cityFilter}
               onChange={(val) => { setCityFilter(val); setPage(0); }}
               options={CITY_OPTIONS}
-              placeholder="ក្រុង/ខេត្ត"
+              placeholder="រាជធានី-ខេត្ត"
               pill
             />
           </div>
 
-          {/* Open/Close Filter */}
-          <div className="min-w-[180px] max-w-[220px] flex-1 shrink-0">
+          <div className="w-full sm:w-[180px] lg:w-[210px]">
             <CustomSelect
               value={openFilter}
               onChange={(val) => { setOpenFilter(val); setPage(0); }}
@@ -649,15 +655,51 @@ export default function ShopsManager() {
             />
           </div>
 
-          {/* Sort By Filter */}
-          <div className="min-w-[160px] max-w-[200px] flex-1 shrink-0">
+          <div className="w-full sm:w-[160px] lg:w-[190px]">
             <CustomSelect
               value={sortBy}
-              onChange={(val) => setSortBy(val as StoreSort)}
+              onChange={(val) => {
+                setSortBy(val as StoreSort);
+                setPage(0);
+              }}
               options={SORT_OPTIONS}
               placeholder="តម្រៀបតាម"
               pill
             />
+          </div>
+
+          {/* 4. Page Size Select (Row 4, Col 2 on Mobile) */}
+          <div className="relative w-full sm:w-[130px] lg:w-[150px]">
+            <button
+              type="button"
+              onClick={() => setSizeOpen((c) => !c)}
+              className={`flex h-12 w-full cursor-pointer items-center justify-between gap-2 rounded-full border bg-white px-3 sm:px-4 text-lg font-normal transition ${
+                sizeOpen ? "border-primary-600 ring-2 ring-primary-100" : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <span className="text-gray-700 truncate">{size} / ទំព័រ</span>
+              <ChevronDown size={18} className={`shrink-0 text-gray-400 transition-transform duration-200 ${sizeOpen ? "rotate-180" : ""}`} />
+            </button>
+            {sizeOpen && (
+              <div className="absolute right-0 top-[52px] z-[110] w-[180px] rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl">
+                <p className="px-3 py-1.5 text-base font-normal text-gray-400">ចំនួនក្នុងទំព័រ</p>
+                {[10, 20, 50].map((value) => {
+                  const selected = size === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => { setSize(value); setPage(0); setSizeOpen(false); }}
+                      className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected ? "bg-primary-50 text-primary-800" : "text-gray-700 hover:bg-gray-50"
+                        }`}
+                    >
+                      <span>{value} / ទំព័រ</span>
+                      {selected && <Check size={18} className="text-primary-800" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Reset Filters Button */}
@@ -665,7 +707,7 @@ export default function ShopsManager() {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full border border-red-200 bg-white px-5 text-lg font-normal text-red-600 transition hover:bg-red-50 active:scale-95"
+              className="col-span-2 flex h-12 w-full sm:w-auto shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full border border-red-200 bg-white px-5 text-lg font-normal text-red-600 transition hover:bg-red-50 active:scale-95"
               title="សម្អាតតម្រងទាំងអស់"
             >
               <RotateCcw size={18} />
@@ -726,9 +768,7 @@ export default function ShopsManager() {
         )}
 
         {isLoading ? (
-          <div className="flex min-h-[360px] items-center justify-center">
-            <Loader2 size={30} className="animate-spin text-[#137A3D]" />
-          </div>
+          <ShopsTableSkeleton rows={size === 10 ? 5 : 7} />
         ) : error ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
             <AlertTriangle size={38} className="text-red-400" />
@@ -742,7 +782,7 @@ export default function ShopsManager() {
               សាកល្បងម្តងទៀត
             </button>
           </div>
-        ) : sortedStores.length === 0 ? (
+        ) : displayedStores.length === 0 ? (
           <div className="flex min-h-[340px] flex-col items-center justify-center">
             <Store size={60} className="text-[#F97316]" />
             <p className="mt-3 text-2xl text-[#F97316]">មិនមាន Store</p>
@@ -750,7 +790,7 @@ export default function ShopsManager() {
         ) : (
           <div className={`transition-opacity duration-200 ${isPending || isFetching ? "opacity-75" : "opacity-100"}`}>
             <ShopsTable
-              stores={sortedStores}
+              stores={displayedStores}
               disabled={updating || deleting || isFetching}
               onEdit={(store) => setEditingUuid(store.uuid)}
               onStatus={(store, action) => { setStatusStore(store); setStatusAction(action); }}
@@ -761,9 +801,9 @@ export default function ShopsManager() {
 
         {!isLoading && !error && (
           <ShopsPagination
-            page={data?.pageNumber ?? page}
-            totalPages={data?.totalPages ?? 0}
-            totalElements={data?.totalElements ?? 0}
+            page={paginationPage}
+            totalPages={paginationTotalPages}
+            totalElements={paginationTotalElements}
             disabled={isFetching || isPending}
             onPageChange={setPage}
           />

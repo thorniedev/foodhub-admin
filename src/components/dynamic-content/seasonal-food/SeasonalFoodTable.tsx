@@ -31,12 +31,12 @@ export default function SeasonalFoodTable({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px] border-collapse text-left">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/50 text-left text-lg font-normal text-primary-800">
-              <th className="px-5 py-4 font-normal">រូបភាព</th>
-              <th className="px-5 py-4 font-normal">ចំណងជើង</th>
-              <th className="px-5 py-4 font-normal">លំដាប់</th>
-              <th className="px-5 py-4 text-center font-normal">បង្ហាញ</th>
-              <th className="px-5 py-4 text-right font-normal">សកម្មភាព</th>
+            <tr className="border-b border-gray-100 bg-gray-50/80 text-left text-xl font-medium text-primary-900">
+              <th className="px-5 py-4 font-medium">រូបភាព</th>
+              <th className="px-5 py-4 font-medium">ចំណងជើង</th>
+              <th className="px-5 py-4 font-medium">លំដាប់</th>
+              <th className="px-5 py-4 text-center font-medium">បង្ហាញ</th>
+              <th className="px-5 py-4 text-right font-medium">សកម្មភាព</th>
             </tr>
           </thead>
           <tbody>

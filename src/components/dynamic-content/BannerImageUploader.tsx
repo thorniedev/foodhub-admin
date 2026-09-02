@@ -82,14 +82,14 @@ export default function BannerImageUploader({
               onChange(null);
               setError(null);
             }}
-            className="absolute right-3 top-3 rounded-full bg-black/50 p-1.5 text-white transition hover:bg-black/70"
+            className="absolute right-3 top-3 rounded-full bg-slate-900/60 p-1.5 text-white transition hover:bg-slate-900/80"
           >
             <X size={16} />
           </button>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="absolute bottom-3 right-3 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-black/70"
+            className="absolute bottom-3 right-3 rounded-full bg-slate-900/60 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-900/80"
           >
             ប្តូររូបភាព
           </button>

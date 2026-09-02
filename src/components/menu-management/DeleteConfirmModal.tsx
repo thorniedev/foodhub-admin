@@ -28,11 +28,10 @@ export default function DeleteConfirmModal({
       <div className="w-full max-w-lg rounded-[30px] bg-white p-7 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
         <div className="flex items-start justify-between">
           <div
-            className={`flex h-16 w-16 items-center justify-center rounded-2xl ${
-              isHard
+            className={`flex h-16 w-16 items-center justify-center rounded-2xl ${isHard
                 ? "bg-red-50 text-red-600"
                 : "bg-amber-50 text-amber-600"
-            }`}
+              }`}
           >
             {isHard ? <Trash2 size={30} /> : <MinusCircle size={30} />}
           </div>
@@ -69,11 +68,10 @@ export default function DeleteConfirmModal({
             type="button"
             disabled={deleting}
             onClick={onConfirm}
-            className={`inline-flex items-center gap-2 rounded-full px-6 py-3 text-lg font-normal text-white disabled:opacity-60 transition active:scale-95 ${
-              isHard
+            className={`inline-flex items-center gap-2 rounded-full px-6 py-3 text-lg font-normal text-white disabled:opacity-60 transition active:scale-95 ${isHard
                 ? "bg-red-600 hover:bg-red-700"
                 : "bg-amber-600 hover:bg-amber-700"
-            }`}
+              }`}
           >
             {deleting && (
               <Loader2 size={20} className="animate-spin" />

@@ -287,24 +287,7 @@ export default function Sidebar() {
             {dashboardNav.map((item) => renderItem(item))}
           </nav> */}
           <nav
-            className="
-    min-h-0
-    flex-1
-    space-y-1
-    overflow-y-auto
-    overscroll-contain
-    px-3
-    pb-6
-    pt-2
-
-    [scrollbar-width:thin]
-    [scrollbar-color:#e5e7eb_transparent]
-    [&::-webkit-scrollbar]:w-1.5
-    [&::-webkit-scrollbar-track]:bg-transparent
-    [&::-webkit-scrollbar-thumb]:rounded-full
-    [&::-webkit-scrollbar-thumb]:bg-gray-200
-    hover:[&::-webkit-scrollbar-thumb]:bg-gray-300
-  "
+            className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 pb-6 pt-2 no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
             {dashboardNav.map((item) => renderItem(item))}
           </nav>

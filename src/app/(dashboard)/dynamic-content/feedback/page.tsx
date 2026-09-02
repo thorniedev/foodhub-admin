@@ -11,6 +11,7 @@ import {
 import FeedbackBanner from "@/src/components/feedback/FeedbackBanner";
 import FeedbackTabs from "@/src/components/feedback/FeedbackTabs";
 import FeedbackTable from "@/src/components/feedback/FeedbackTable";
+import FeedbackTableSkeleton from "@/src/components/dynamic-content/feedback/FeedbackTableSkeleton";
 import FeedbackPagination from "@/src/components/feedback/FeedbackPagination";
 import {
   useAddFeedbackMutation,
@@ -92,7 +93,18 @@ export default function FeedbackPage() {
   };
 
   if (isLoading) {
-    return <div className="p-6 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>;
+    return (
+      <div className="p-6 space-y-6">
+        <FeedbackBanner
+          total={0}
+          newCount={0}
+          resolvedCount={0}
+          averageRating={0}
+          onAddNew={handleAddNew}
+        />
+        <FeedbackTableSkeleton rows={5} />
+      </div>
+    );
   }
 
   if (isError) {

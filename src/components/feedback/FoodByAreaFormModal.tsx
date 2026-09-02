@@ -59,8 +59,8 @@ export default function FoodByAreaFormModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
-      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] bg-white shadow-2xl">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-[2px]">
+      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto no-scrollbar rounded-[28px] bg-white shadow-2xl">
         <div className="sticky top-0 z-10 flex items-start justify-between border-b border-gray-100 bg-white px-6 py-5">
           <div>
             <p className="text-3xl font-bold text-[#136C34]">
@@ -144,14 +144,12 @@ export default function FoodByAreaFormModal({
             <button
               type="button"
               onClick={() => setForm((prev) => ({ ...prev, isdisplay: !prev.isdisplay }))}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                form.isdisplay ? "bg-[#136C34]" : "bg-gray-300"
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isdisplay ? "bg-[#136C34]" : "bg-gray-300"
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  form.isdisplay ? "translate-x-6" : "translate-x-1"
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.isdisplay ? "translate-x-6" : "translate-x-1"
+                  }`}
               />
             </button>
           </div>

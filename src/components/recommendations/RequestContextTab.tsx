@@ -130,7 +130,7 @@ export default function RequestContextTab({ sessionDetail }: RequestContextTabPr
           </button>
         </div>
 
-        <div className="bg-zinc-950 p-6 max-h-96 overflow-y-auto font-mono text-lg text-emerald-400 leading-relaxed [scrollbar-width:thin]">
+        <div className="bg-zinc-950 p-6 max-h-96 overflow-y-auto font-mono text-lg text-emerald-400 leading-relaxed no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <pre>{JSON.stringify(sessionDetail, null, 2)}</pre>
         </div>
       </div>

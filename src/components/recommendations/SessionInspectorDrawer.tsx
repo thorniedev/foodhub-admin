@@ -187,7 +187,7 @@ export default function SessionInspectorDrawer({
         </div>
 
         {/* Tab Body */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4 [scrollbar-width:thin]">
+        <div className="flex-1 overflow-y-auto p-5 space-y-4 no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-24 text-zinc-400 gap-3">
               <RefreshCw className="w-6 h-6 animate-spin text-amber-500" />

@@ -7,7 +7,6 @@ import {
   CupSoda,
   Leaf,
   Loader2,
-  MapPin,
   Plus,
   Save,
   ShieldAlert,
@@ -276,22 +275,22 @@ export default function FoodFormModal({
             typeof s === "string"
               ? s
               : s.seasonUuid ||
-                s.uuid ||
-                s.id ||
-                s.season?.uuid ||
-                s.season?.id ||
-                s.code ||
-                s.seasonCode ||
-                s.season?.code ||
-                "";
+              s.uuid ||
+              s.id ||
+              s.season?.uuid ||
+              s.season?.id ||
+              s.code ||
+              s.seasonCode ||
+              s.season?.code ||
+              "";
           const sName =
             typeof s === "string"
               ? s
               : s.name ||
-                s.season?.name ||
-                s.localName ||
-                s.season?.localName ||
-                "";
+              s.season?.name ||
+              s.localName ||
+              s.season?.localName ||
+              "";
           const found = seasons.find(
             (opt) =>
               (sId && (opt.uuid === sId || opt.code === sId || (opt as any).id === sId)) ||
@@ -320,22 +319,22 @@ export default function FoodFormModal({
             typeof e === "string"
               ? e
               : e.eventUuid ||
-                e.uuid ||
-                e.id ||
-                e.event?.uuid ||
-                e.event?.id ||
-                e.code ||
-                e.eventCode ||
-                e.event?.code ||
-                "";
+              e.uuid ||
+              e.id ||
+              e.event?.uuid ||
+              e.event?.id ||
+              e.code ||
+              e.eventCode ||
+              e.event?.code ||
+              "";
           const eName =
             typeof e === "string"
               ? e
               : e.name ||
-                e.event?.name ||
-                e.localName ||
-                e.event?.localName ||
-                "";
+              e.event?.name ||
+              e.localName ||
+              e.event?.localName ||
+              "";
           const found = events.find(
             (opt) =>
               (eId && (opt.uuid === eId || opt.code === eId || (opt as any).id === eId)) ||
@@ -368,24 +367,24 @@ export default function FoodFormModal({
             typeof w === "string"
               ? w
               : w.weatherConditionUuid ||
-                w.weatherUuid ||
-                w.conditionUuid ||
-                w.uuid ||
-                w.id ||
-                w.weatherCondition?.uuid ||
-                w.weatherCondition?.id ||
-                w.code ||
-                w.weatherCode ||
-                w.weatherCondition?.code ||
-                "";
+              w.weatherUuid ||
+              w.conditionUuid ||
+              w.uuid ||
+              w.id ||
+              w.weatherCondition?.uuid ||
+              w.weatherCondition?.id ||
+              w.code ||
+              w.weatherCode ||
+              w.weatherCondition?.code ||
+              "";
           const wName =
             typeof w === "string"
               ? w
               : w.name ||
-                w.weatherCondition?.name ||
-                w.localName ||
-                w.weatherCondition?.localName ||
-                "";
+              w.weatherCondition?.name ||
+              w.localName ||
+              w.weatherCondition?.localName ||
+              "";
           const found = weatherConditions.find(
             (opt) =>
               (wId && (opt.uuid === wId || opt.code === wId || (opt as any).id === wId)) ||
@@ -414,22 +413,22 @@ export default function FoodFormModal({
             typeof m === "string"
               ? m
               : m.mealTypeUuid ||
-                m.uuid ||
-                m.id ||
-                m.mealType?.uuid ||
-                m.mealType?.id ||
-                m.code ||
-                m.mealTypeCode ||
-                m.mealType?.code ||
-                "";
+              m.uuid ||
+              m.id ||
+              m.mealType?.uuid ||
+              m.mealType?.id ||
+              m.code ||
+              m.mealTypeCode ||
+              m.mealType?.code ||
+              "";
           const mName =
             typeof m === "string"
               ? m
               : m.name ||
-                m.mealType?.name ||
-                m.localName ||
-                m.mealType?.localName ||
-                "";
+              m.mealType?.name ||
+              m.localName ||
+              m.mealType?.localName ||
+              "";
           const found = mealTypes.find(
             (opt) =>
               (mId && (opt.uuid === mId || opt.code === mId || (opt as any).id === mId)) ||
@@ -457,22 +456,22 @@ export default function FoodFormModal({
             typeof a === "string"
               ? a
               : a.ageGroupUuid ||
-                a.uuid ||
-                a.id ||
-                a.ageGroup?.uuid ||
-                a.ageGroup?.id ||
-                a.code ||
-                a.ageGroupCode ||
-                a.ageGroup?.code ||
-                "";
+              a.uuid ||
+              a.id ||
+              a.ageGroup?.uuid ||
+              a.ageGroup?.id ||
+              a.code ||
+              a.ageGroupCode ||
+              a.ageGroup?.code ||
+              "";
           const aName =
             typeof a === "string"
               ? a
               : a.name ||
-                a.ageGroup?.name ||
-                a.localName ||
-                a.ageGroup?.localName ||
-                "";
+              a.ageGroup?.name ||
+              a.localName ||
+              a.ageGroup?.localName ||
+              "";
           const found = ageGroups.find(
             (opt) =>
               (aId && (opt.uuid === aId || opt.code === aId || (opt as any).id === aId)) ||
@@ -1007,7 +1006,7 @@ export default function FoodFormModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[140] overflow-y-auto bg-black/45 p-4 backdrop-blur-xs">
+    <div className="fixed inset-0 z-[140] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-slate-900/40 p-4 backdrop-blur-xs">
       <div className="mx-auto my-6 w-full max-w-4xl rounded-[30px] bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-7 py-6">
           <div className="flex items-center gap-3.5">
@@ -1122,24 +1121,21 @@ export default function FoodFormModal({
                     isActive: !current.isActive,
                   }))
                 }
-                className={`flex h-12 w-full items-center justify-between rounded-full border px-5 transition cursor-pointer ${
-                  values.isActive
+                className={`flex h-12 w-full items-center justify-between rounded-full border px-5 transition cursor-pointer ${values.isActive
                     ? "border-emerald-200 bg-emerald-50/60 text-emerald-800"
                     : "border-gray-200 bg-gray-50 text-gray-500"
-                }`}
+                  }`}
               >
                 <span className="text-lg font-normal">
                   {values.isActive ? "សកម្ម (Active)" : "អសកម្ម (Inactive)"}
                 </span>
                 <div
-                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-                    values.isActive ? "bg-[#137A3D]" : "bg-gray-300"
-                  }`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${values.isActive ? "bg-[#137A3D]" : "bg-gray-300"
+                    }`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
-                      values.isActive ? "translate-x-6" : "translate-x-1"
-                    }`}
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${values.isActive ? "translate-x-6" : "translate-x-1"
+                      }`}
                   />
                 </div>
               </button>
@@ -1758,75 +1754,7 @@ export default function FoodFormModal({
             )}
           </div>
 
-          {/* Distances Section */}
-          <div className="rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50/40 to-white p-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
-                  <MapPin size={20} />
-                </div>
-                <div>
-                  <p className="text-2xl font-normal text-gray-800">ចម្ងាយដឹកជញ្ជូន <span className="text-lg font-normal text-gray-400">(Distances)</span></p>
-                  <p className="mt-0.5 text-lg font-normal text-gray-500">កំណត់កម្រិតចម្ងាយសមស្របសម្រាប់ការដឹកជញ្ជូន</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setDistanceRows((current) => [...current, { optionUuid: "", notes: "" }])}
-                className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm transition hover:bg-indigo-700 active:scale-95 cursor-pointer"
-              >
-                <Plus size={18} />
-                បន្ថែមចម្ងាយ
-              </button>
-            </div>
 
-            {distanceRows.length === 0 ? (
-              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-indigo-200 bg-white/70 px-5 py-4">
-                <MapPin size={18} className="shrink-0 text-indigo-400" />
-                <p className="text-lg font-normal text-gray-400">មិនទាន់បានជ្រើសចម្ងាយ</p>
-              </div>
-            ) : (
-              <div className="mt-4 space-y-2.5">
-                {distanceRows.map((row, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-indigo-100 hover:shadow">
-                    <div className="flex-1 min-w-[220px]">
-                      <CustomSelect
-                        value={row.optionUuid}
-                        onChange={(val) => {
-                          setDistanceRows((prev) =>
-                            prev.map((r, i) => (i === idx ? { ...r, optionUuid: val } : r)),
-                          );
-                        }}
-                        options={distanceSelectOptions}
-                        placeholder="ជ្រើសកម្រិតចម្ងាយ..."
-                        searchable
-                        pill
-                      />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="កំណត់ចំណាំ (Notes)..."
-                      value={row.notes ?? ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setDistanceRows((prev) =>
-                          prev.map((r, i) => (i === idx ? { ...r, notes: val } : r)),
-                        );
-                      }}
-                      className="h-12 flex-1 min-w-[180px] rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 outline-none placeholder:font-normal placeholder:text-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setDistanceRows((prev) => prev.filter((_, i) => i !== idx))}
-                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500 cursor-pointer"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
 
 

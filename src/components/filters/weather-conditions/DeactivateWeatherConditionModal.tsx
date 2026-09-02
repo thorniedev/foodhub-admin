@@ -23,7 +23,7 @@ export default function DeactivateWeatherConditionModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[170] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-[170] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-[2px]">
       <div className="w-full max-w-md rounded-[30px] bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 text-amber-600">

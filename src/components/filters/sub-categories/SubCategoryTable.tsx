@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import {
   Apple,
   Beef,
   Cake,
+  CheckCircle2,
   Coffee,
   CupSoda,
   Egg,
@@ -12,6 +14,7 @@ import {
   GlassWater,
   Milk,
   MinusCircle,
+  MoreVertical,
   Pencil,
   Pizza,
   Salad,
@@ -132,6 +135,33 @@ export default function SubCategoryTable({
   onToggleActive,
   onDelete,
 }: Props) {
+  const [openMenuUuid, setOpenMenuUuid] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click or escape
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenuUuid(null);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpenMenuUuid(null);
+      }
+    }
+
+    if (openMenuUuid) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [openMenuUuid]);
+
   const emptyText =
     mode === "DRINK"
       ? "មិនទាន់មានអនុប្រភេទភេសជ្ជៈនៅឡើយទេ។"
@@ -152,21 +182,21 @@ export default function SubCategoryTable({
     <div className="w-full min-w-0 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full min-w-[600px] table-auto border-collapse text-left">
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/70 text-left text-lg font-normal text-primary-800">
-            <th className="py-4 pl-6 pr-4 font-normal">
+          <tr className="border-b border-gray-100 bg-gray-50/80 text-left text-xl font-medium text-primary-900">
+            <th className="py-4 pl-6 pr-4 font-medium">
               ឈ្មោះអនុប្រភេទ
             </th>
-            <th className="px-4 py-4 font-normal">
+            <th className="px-4 py-4 font-medium">
               កូដ
             </th>
-            <th className="px-4 py-4 font-normal">
+            <th className="px-4 py-4 font-medium">
               ការពិពណ៌នា
             </th>
-            <th className="px-4 py-4 text-center font-normal">
+            <th className="px-4 py-4 text-center font-medium">
               ស្ថានភាព
             </th>
            
-            <th className="min-w-[130px] py-4 pl-4 pr-6 text-center font-normal">
+            <th className="min-w-[130px] py-4 pl-4 pr-6 text-center font-medium">
               សកម្មភាព
             </th>
           </tr>
@@ -175,6 +205,7 @@ export default function SubCategoryTable({
         <tbody>
           {items.map((item) => {
             const active = item.isActive !== false;
+            const isMenuOpen = openMenuUuid === item.uuid;
 
             return (
               <tr
@@ -226,14 +257,14 @@ export default function SubCategoryTable({
                 {/* Actions */}
                 <td className="py-3.5 pl-4 pr-6">
                   <div className="flex items-center justify-center gap-2">
-                    {/* 1. View */}
+                    {/* 1. View Detail */}
                     <button
                       type="button"
                       onClick={() => onView(item)}
                       title="មើលព័ត៌មានលម្អិត"
-                      className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none"
+                      className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-100"
                     >
-                      <Eye size={17} />
+                      <Eye size={18} />
                     </button>
 
                     {/* 2. Edit */}
@@ -241,36 +272,84 @@ export default function SubCategoryTable({
                       type="button"
                       onClick={() => onEdit(item)}
                       title="កែប្រែ"
-                      className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none"
+                      className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-blue-50 text-blue-500 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-100"
                     >
-                      <Pencil size={17} />
+                      <Pencil size={18} />
                     </button>
 
-                    {/* 3. Toggle Active (Circle Minus) */}
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => onToggleActive(item)}
-                      title={active ? "បិទដំណើរការ" : "បើកដំណើរការ"}
-                      className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition focus:outline-none disabled:opacity-50 ${
-                        active
-                          ? "bg-amber-50 text-amber-600 hover:bg-amber-100"
-                          : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
-                      }`}
-                    >
-                      <MinusCircle size={17} />
-                    </button>
+                    {/* 3. Three-Dots Menu for More Actions */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuUuid((prev) =>
+                            prev === item.uuid ? null : item.uuid,
+                          );
+                        }}
+                        title="ជម្រើសបន្ថែម"
+                        className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition focus:outline-none focus:ring-2 focus:ring-gray-200 ${
+                          isMenuOpen
+                            ? "bg-gray-200 text-gray-900 shadow-xs"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
+                        }`}
+                      >
+                        <MoreVertical size={18} />
+                      </button>
 
-                    {/* 4. Delete (Trash) */}
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => onDelete(item)}
-                      title="លុប"
-                      className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-100 focus:outline-none disabled:opacity-50"
-                    >
-                      <Trash2 size={17} />
-                    </button>
+                      {/* Dropdown Menu Popup */}
+                      {isMenuOpen && (
+                        <div
+                          ref={menuRef}
+                          className="absolute right-0 top-12 z-50 min-w-[190px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-150"
+                        >
+                          {/* Option 1: Toggle Active / Deactivate */}
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuUuid(null);
+                              onToggleActive(item);
+                            }}
+                            className={`flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                              active
+                                ? "text-amber-700 hover:bg-amber-50"
+                                : "text-emerald-700 hover:bg-emerald-50"
+                            }`}
+                          >
+                            {active ? (
+                              <>
+                                <MinusCircle size={18} className="text-amber-600 shrink-0" />
+                                <span>បិទដំណើរការ</span>
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+                                <span>បើកដំណើរការ</span>
+                              </>
+                            )}
+                          </button>
+
+                          <div className="my-1 border-t border-gray-100" />
+
+                          {/* Option 2: Hard Delete */}
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuUuid(null);
+                              onDelete(item);
+                            }}
+                            className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left text-lg font-normal text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <Trash2 size={18} className="text-red-500 shrink-0" />
+                            <span>លុបចេញពីប្រព័ន្ធ</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -281,3 +360,4 @@ export default function SubCategoryTable({
     </div>
   );
 }
+

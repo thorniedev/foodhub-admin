@@ -18,6 +18,7 @@ import CanonicalFoodsTable from "./CanonicalFoodsTable";
 import MenuItemsHeader from "./MenuItemsHeader";
 import MenuItemsPagination from "./MenuItemsPagination";
 import MenuItemsTable from "./MenuItemsTable";
+import MenuItemsTableSkeleton from "./MenuItemsTableSkeleton";
 import MenuItemsTabs from "./MenuItemsTabs";
 import CreateCanonicalFoodModal from "./create/CreateCanonicalFoodModal";
 import CreateStoreMenuItemModal from "./create/CreateStoreMenuItemModal";
@@ -193,10 +194,7 @@ export default function MenuItemsManager() {
 
       <section className="overflow-hidden rounded-[26px] border border-gray-100 bg-white shadow-sm">
         {currentLoading ? (
-          <div className="flex min-h-[360px] flex-col items-center justify-center">
-            <Loader2 size={32} className="animate-spin text-[#137A3D]" />
-            <p className="mt-3 text-sm font-semibold text-gray-400">កំពុងទាញយកទិន្នន័យ...</p>
-          </div>
+          <MenuItemsTableSkeleton rows={5} />
         ) : currentError ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center px-5 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500">
