@@ -1,51 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { MenuItemRecord } from "@/src/types/menu-management";
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function extractFirstMedia(item: MenuItemRecord): { directUrl: string | null; mediaUuid: string | null } {
-  // 1. Check direct remote / relative URLs
-  const candidateUrls = [
-    item.primaryMediaUrls?.[0],
+function getMenuItemImageSource(item: MenuItemRecord): {
+  url: string | null;
+  uuid: string | null;
+} {
+  const candidateList = [
     item.thumbnail,
     item.imageUrl,
+    item.primaryMediaUrls?.[0],
     item.images?.[0],
     item.gallery?.[0],
     (item as any)?.media?.[0]?.url,
     (item as any)?.media?.[0]?.accessUrl,
-    item.food?.primaryMediaUrls?.[0],
+    (item as any)?.media?.[0]?.fileUrl,
     item.food?.thumbnail,
     item.food?.imageUrl,
+    item.food?.primaryMediaUrls?.[0],
     item.food?.images?.[0],
     item.food?.gallery?.[0],
     (item.food as any)?.media?.[0]?.url,
     (item.food as any)?.media?.[0]?.accessUrl,
-  ];
-
-  for (const candidate of candidateUrls) {
-    if (typeof candidate === "string" && candidate.trim()) {
-      const trimmed = candidate.trim();
-      if (UUID_REGEX.test(trimmed)) {
-        return { directUrl: null, mediaUuid: trimmed };
-      }
-      if (
-        trimmed.startsWith("http://") ||
-        trimmed.startsWith("https://") ||
-        trimmed.startsWith("blob:") ||
-        trimmed.startsWith("data:") ||
-        trimmed.startsWith("/Image/") ||
-        trimmed.startsWith("/images/")
-      ) {
-        return { directUrl: trimmed, mediaUuid: null };
-      }
-    }
-  }
-
-  // 2. Check Media UUIDs
-  const candidateUuids = [
+    (item.food as any)?.media?.[0]?.fileUrl,
     item.primaryMediaUuid,
     item.thumbnailMediaUuid,
     item.primaryMediaUuids?.[0],
@@ -61,19 +43,32 @@ function extractFirstMedia(item: MenuItemRecord): { directUrl: string | null; me
     (item.food as any)?.media?.[0]?.uuid,
   ];
 
-  for (const candidate of candidateUuids) {
-    if (typeof candidate === "string" && candidate.trim() && UUID_REGEX.test(candidate.trim())) {
-      return { directUrl: null, mediaUuid: candidate.trim() };
+  for (const candidate of candidateList) {
+    if (typeof candidate === "string" && candidate.trim()) {
+      const trimmed = candidate.trim();
+
+      // If it is a raw UUID
+      if (UUID_REGEX.test(trimmed)) {
+        return {
+          url: resolveFoodHubCatalogImageUrl(trimmed),
+          uuid: trimmed,
+        };
+      }
+
+      const resolved = resolveFoodHubCatalogImageUrl(trimmed);
+      if (resolved) {
+        return { url: resolved, uuid: null };
+      }
     }
   }
 
-  return { directUrl: null, mediaUuid: null };
+  return { url: null, uuid: null };
 }
 
 export default function MenuItemAvatar({
   item,
   alt,
-  fallbackEmoji = "🍜",
+  fallbackEmoji = "🍲",
   className = "h-full w-full object-cover",
 }: {
   item: MenuItemRecord;
@@ -81,67 +76,53 @@ export default function MenuItemAvatar({
   fallbackEmoji?: string;
   className?: string;
 }) {
-  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+  const { url: initialUrl, uuid: rawUuid } = useMemo(
+    () => getMenuItemImageSource(item),
+    [item],
+  );
+
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(initialUrl);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    const { directUrl, mediaUuid } = extractFirstMedia(item);
+    const { url, uuid } = getMenuItemImageSource(item);
+    setResolvedUrl(url);
+    setHasError(false);
 
-    if (directUrl) {
-      setResolvedUrl(directUrl);
-      setHasError(false);
-      return;
+    // If we only have a media UUID, also attempt to resolve access-url as backup if direct /file fails
+    if (uuid) {
+      let cancelled = false;
+      fetch(`/api/media/${encodeURIComponent(uuid)}/access-url`, {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (cancelled) return;
+          const accessUrl =
+            data?.url ||
+            data?.payload?.url ||
+            data?.data?.url ||
+            data?.accessUrl ||
+            data?.payload?.accessUrl;
+          if (typeof accessUrl === "string" && accessUrl.trim()) {
+            setResolvedUrl(accessUrl.trim());
+          }
+        })
+        .catch(() => {
+          // Keep the direct /file URL
+        });
+
+      return () => {
+        cancelled = true;
+      };
     }
-
-    if (!mediaUuid) {
-      setResolvedUrl(null);
-      setHasError(false);
-      return;
-    }
-
-    async function fetchAccessUrl(uuid: string) {
-      try {
-        const response = await fetch(
-          `/api/media/${encodeURIComponent(uuid)}/access-url`,
-          {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error(`Media fetch status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const accessUrl = data?.url || data?.payload?.url || data?.data?.url;
-
-        if (!cancelled && typeof accessUrl === "string" && accessUrl.trim()) {
-          setResolvedUrl(accessUrl);
-          setHasError(false);
-        } else if (!cancelled) {
-          setResolvedUrl(null);
-        }
-      } catch (_err) {
-        if (!cancelled) {
-          setResolvedUrl(null);
-          setHasError(true);
-        }
-      }
-    }
-
-    void fetchAccessUrl(mediaUuid);
-
-    return () => {
-      cancelled = true;
-    };
   }, [item]);
 
   if (!resolvedUrl || hasError) {
     return (
-      <div className="flex h-full w-full items-center justify-center text-lg text-gray-300">
+      <div className="flex h-full w-full items-center justify-center text-lg text-gray-400">
         {fallbackEmoji}
       </div>
     );
