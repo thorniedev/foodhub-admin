@@ -172,6 +172,15 @@ export interface FoodReferenceValue {
   localName?: string | null;
 }
 
+export interface FoodDietaryTypeRef {
+  uuid: string;
+  code: string;
+  name: string;
+  category?: string | null;
+  verificationStatus?: string | null;
+  notes?: string | null;
+}
+
 export interface CatalogFood {
   uuid: string;
   canonicalName: string;
@@ -189,7 +198,8 @@ export interface CatalogFood {
   spiceLevel?: number | null;
   nutritionData?: NutritionData | null;
   nutrition?: NutritionData | null;
-  dietaryTypes?: Array<Record<string, unknown>>;
+  /** Normalized food_dietary_types rows returned by the catalog API. */
+  dietaryTypes?: FoodDietaryTypeRef[];
   seasons?: Array<Record<string, unknown>>;
   events?: Array<Record<string, unknown>>;
   suitableWeather?: Array<Record<string, unknown>>;
@@ -220,7 +230,12 @@ export interface CreateCatalogFoodPayload {
     fatGrams?: number;
     fiberGrams?: number;
   };
-  dietaryTypes: Array<Record<string, unknown>>;
+  dietaryTypes: Array<{
+    dietaryTypeUuid?: string;
+    code?: string;
+    verificationStatus?: string;
+    notes?: string | null;
+  }>;
   seasons: Array<Record<string, unknown>>;
   events: Array<Record<string, unknown>>;
   suitableWeather: Array<Record<string, unknown>>;
@@ -300,6 +315,20 @@ export interface CreateStoreMenuItemIngredient {
   notes?: string | null;
 }
 
+/**
+ * One dietary label declared for a store's menu item.
+ *
+ * The label is the store's own statement about the dish it serves. It starts
+ * as a copy of the food's classification and the admin may add to or remove
+ * from it, which is why the menu item carries its own list instead of reading
+ * the food's.
+ */
+export interface MenuItemDietaryTypeInput {
+  dietaryTypeUuid: string;
+  verificationStatus: "UNVERIFIED" | "VERIFIED" | "REJECTED";
+  notes?: string | null;
+}
+
 export interface CreateStoreMenuItemPayload {
   foodUuid: string;
   menuItem: {
@@ -315,7 +344,11 @@ export interface CreateStoreMenuItemPayload {
   };
   primaryMediaUuids: string[];
   ingredients: CreateStoreMenuItemIngredient[];
-  dietaryTypes: Array<Record<string, unknown>>;
+  /**
+   * Omit to seed the item from the selected food's dietary types. Send a list
+   * -- including an empty one -- to state the item's labels explicitly.
+   */
+  dietaryTypes?: MenuItemDietaryTypeInput[];
   allergenDeclarations: Array<Record<string, unknown>>;
 }
 

@@ -587,9 +587,27 @@ export interface FoodAgeRuleRelation {
   reasonText?: string | null;
 }
 
+/** A dietary type as displayed in the food form. */
 export interface FoodDietaryTypeRelation {
+  /** Present once the master list matched; the code identifies it otherwise. */
+  dietaryTypeUuid?: string;
   code: string;
   name: string;
+  verificationStatus?: "UNVERIFIED" | "VERIFIED" | "REJECTED";
+  notes?: string | null;
+}
+
+/**
+ * One food_dietary_types assignment as the API accepts it.
+ *
+ * The backend resolves the type by UUID and falls back to the stable code,
+ * so display-only fields are not sent.
+ */
+export interface FoodDietaryTypeInput {
+  dietaryTypeUuid?: string;
+  code?: string;
+  verificationStatus?: "UNVERIFIED" | "VERIFIED" | "REJECTED";
+  notes?: string | null;
 }
 
 export interface StoreOption {
@@ -796,7 +814,7 @@ export interface FoodWritePayload {
   nutritionData?: NutritionData | null;
   mealTypes: FoodMealTypeRelation[];
   ageRules: FoodAgeRuleRelation[];
-  dietaryTypes: FoodDietaryTypeRelation[];
+  dietaryTypes: FoodDietaryTypeInput[];
   allergens?: unknown[];
   seasons: FoodSeasonRelation[];
   events: FoodEventRelation[];

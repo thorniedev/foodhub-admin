@@ -496,11 +496,17 @@ export default function FoodFormModal({
               (typeof d === "object" && (opt.uuid === d.uuid || opt.uuid === d.dietaryTypeUuid || opt.code === d.code)),
           );
           return {
+            dietaryTypeUuid: found?.uuid,
             code: found?.code || (typeof d === "object" ? d.code || d.dietaryTypeCode : code) || code,
             name: found?.name || (typeof d === "object" ? d.name || d.localName : code) || code,
+            verificationStatus:
+              typeof d === "object" && d.verificationStatus
+                ? d.verificationStatus
+                : "UNVERIFIED",
+            notes: typeof d === "object" ? (d.notes ?? null) : null,
           };
         })
-        .filter((d) => Boolean(d.code)),
+        .filter((d) => Boolean(d.dietaryTypeUuid || d.code)),
     );
 
     const rawPrepTimes =
@@ -827,11 +833,15 @@ export default function FoodFormModal({
               reasonText: r.reasonText?.trim() || null,
             };
           }),
+        // food_dietary_types resolves by UUID when the master list matched,
+        // and falls back to the stable code otherwise.
         dietaryTypes: dietaryTypeRows
-          .filter((r) => Boolean(r.code))
+          .filter((r) => Boolean(r.dietaryTypeUuid || r.code))
           .map((r) => ({
+            dietaryTypeUuid: r.dietaryTypeUuid,
             code: r.code,
-            name: r.name || r.code,
+            verificationStatus: r.verificationStatus ?? "UNVERIFIED",
+            notes: r.notes?.trim() ? r.notes.trim() : null,
           })),
         events: eventRows
           .filter((r) => Boolean(r.eventUuid))
@@ -1156,7 +1166,14 @@ export default function FoodFormModal({
                           const found = dietaryTypes.find((d) => d.code === val);
                           setDietaryTypeRows((prev) =>
                             prev.map((r, i) =>
-                              i === idx ? { ...r, code: val, name: found?.name ?? val } : r,
+                              i === idx
+                                ? {
+                                    ...r,
+                                    dietaryTypeUuid: found?.uuid,
+                                    code: val,
+                                    name: found?.name ?? val,
+                                  }
+                                : r,
                             ),
                           );
                         }}

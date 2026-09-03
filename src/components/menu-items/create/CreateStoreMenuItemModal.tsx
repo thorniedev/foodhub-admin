@@ -3,6 +3,7 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ExternalLink, Loader2, Save, X } from "lucide-react";
 
+import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
 import { useGetIngredientsQuery } from "@/src/app/store/ingredientApi";
 import {
   useCreateStoreMenuItemMutation,
@@ -14,9 +15,11 @@ import type {
   CatalogFood,
   CreateStoreMenuItemIngredient,
   CreateStoreMenuItemPayload,
+  MenuItemDietaryTypeInput,
 } from "@/src/types/menuItem";
 
 import IngredientRowsEditor from "./IngredientRowsEditor";
+import MenuItemDietaryTypesEditor from "./MenuItemDietaryTypesEditor";
 import MenuItemImageUploadGrid from "./MenuItemImageUploadGrid";
 
 interface FormState {
@@ -31,8 +34,6 @@ interface FormState {
   ingredientDataStatus: string;
   isFeatured: boolean;
   source: string;
-  dietaryTypes: string;
-  allergenDeclarations: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -47,27 +48,7 @@ const EMPTY_FORM: FormState = {
   ingredientDataStatus: "VERIFIED",
   isFeatured: false,
   source: "ADMIN",
-  dietaryTypes: "[]",
-  allergenDeclarations: "[]",
 };
-
-function parseArray(value: string, label: string): Array<Record<string, unknown>> {
-  const trimmed = value.trim();
-  if (!trimmed) return [];
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(trimmed);
-  } catch {
-    throw new Error(`${label} ត្រូវតែជា JSON ត្រឹមត្រូវ។`);
-  }
-
-  if (!Array.isArray(parsed)) {
-    throw new Error(`${label} ត្រូវតែជា JSON array []។`);
-  }
-
-  return parsed as Array<Record<string, unknown>>;
-}
 
 export default function CreateStoreMenuItemModal({
   open,
@@ -83,6 +64,16 @@ export default function CreateStoreMenuItemModal({
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [mediaUuids, setMediaUuids] = useState<string[]>([]);
   const [ingredients, setIngredients] = useState<CreateStoreMenuItemIngredient[]>([]);
+  /**
+   * The admin's edits, or null while the list still follows the food.
+   *
+   * Holding "not edited yet" as null lets the shown list be derived from the
+   * selected food instead of copied into state by an effect, so switching food
+   * re-seeds without a render pass and an edited list is never overwritten.
+   */
+  const [dietaryEdits, setDietaryEdits] = useState<MenuItemDietaryTypeInput[] | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
 
   const { data: shopData, isLoading: shopsLoading } = useGetShopsQuery({
@@ -96,6 +87,8 @@ export default function CreateStoreMenuItemModal({
   });
   const { data: ingredientData, isLoading: ingredientsLoading } =
     useGetIngredientsQuery({ page: 0, size: 100, sort: "name,asc" });
+  const { data: dietaryTypeData, isLoading: dietaryTypesLoading } =
+    useGetDietaryTypesQuery({ page: 0, size: 100 });
 
   const [createStoreMenuItem, { isLoading: saving }] =
     useCreateStoreMenuItemMutation();
@@ -120,6 +113,54 @@ export default function CreateStoreMenuItemModal({
         })),
     [ingredientData?.contents],
   );
+  const dietaryTypeOptions = useMemo(
+    () =>
+      (dietaryTypeData?.contents ?? [])
+        .filter((type) => type.active ?? true)
+        .map((type) => ({ uuid: type.uuid, code: type.code, name: type.name })),
+    [dietaryTypeData?.contents],
+  );
+
+  const selectedFood = useMemo(
+    () =>
+      form.foodUuid === initialFood?.uuid
+        ? initialFood
+        : foods.find((item) => item.uuid === form.foodUuid),
+    [foods, form.foodUuid, initialFood],
+  );
+
+  /**
+   * The food's dietary classification, as the rows a new menu item starts
+   * with. Only types the admin can actually pick are kept, so a label the
+   * catalog has since deactivated cannot be resubmitted.
+   */
+  const foodDietarySeed = useMemo<MenuItemDietaryTypeInput[]>(
+    () =>
+      (selectedFood?.dietaryTypes ?? [])
+        .map((entry): MenuItemDietaryTypeInput | null => {
+          const match = dietaryTypeOptions.find(
+            (option) =>
+              option.uuid === entry.uuid ||
+              (entry.code != null && option.code === entry.code),
+          );
+          return match
+            ? {
+                dietaryTypeUuid: match.uuid,
+                // The food says what the dish is; only this store can say the
+                // plate it serves was checked, so a copied label starts
+                // unverified.
+                verificationStatus: "UNVERIFIED",
+                notes: "",
+              }
+            : null;
+        })
+        .filter((entry): entry is MenuItemDietaryTypeInput => entry !== null),
+    [dietaryTypeOptions, selectedFood],
+  );
+
+  // Shown and submitted: the admin's edits once they have made any, the food's
+  // classification until then.
+  const dietaryTypes = dietaryEdits ?? foodDietarySeed;
 
   useEffect(() => {
     if (!open) return;
@@ -132,6 +173,7 @@ export default function CreateStoreMenuItemModal({
     });
     setMediaUuids([]);
     setIngredients([]);
+    setDietaryEdits(null);
     setError(null);
   }, [initialFood, open]);
 
@@ -206,7 +248,11 @@ export default function CreateStoreMenuItemModal({
             unit: item.unit.trim(),
             notes: item.notes?.trim() || null,
           })),
-        dietaryTypes: parseArray(form.dietaryTypes, "Dietary Types"),
+        dietaryTypes: dietaryTypes.map((row) => ({
+          dietaryTypeUuid: row.dietaryTypeUuid,
+          verificationStatus: row.verificationStatus,
+          notes: row.notes?.trim() ? row.notes.trim() : null,
+        })),
         allergenDeclarations: [],
       };
 
@@ -222,7 +268,8 @@ export default function CreateStoreMenuItemModal({
     }
   };
 
-  const loadingReferences = shopsLoading || foodsLoading || ingredientsLoading;
+  const loadingReferences =
+    shopsLoading || foodsLoading || ingredientsLoading || dietaryTypesLoading;
 
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/50 p-3 backdrop-blur-sm sm:p-5">
@@ -431,20 +478,13 @@ export default function CreateStoreMenuItemModal({
             onChange={setIngredients}
           />
 
-          <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
-            <h3 className="text-xl font-bold text-gray-900">Safety / classification JSON</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              ទុកជា [] បើមិនមាន។ Fields ទាំងពីរនេះត្រូវបានផ្ញើតាម Store Menu Item endpoint។
-            </p>
-
-            <div className="mt-4">
-              <JsonField
-                label="Dietary Types"
-                value={form.dietaryTypes}
-                onChange={(value) => set("dietaryTypes", value)}
-              />
-            </div>
-          </section>
+          <MenuItemDietaryTypesEditor
+            options={dietaryTypeOptions}
+            value={dietaryTypes}
+            onChange={setDietaryEdits}
+            onReseed={() => setDietaryEdits(null)}
+            seedCount={foodDietarySeed.length}
+          />
 
           {error && (
             <div className="flex gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -504,25 +544,3 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function JsonField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label>
-      <span className="mb-2 block text-sm font-bold text-[#F97316]">{label}</span>
-      <textarea
-        rows={5}
-        spellCheck={false}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-2xl border border-gray-200 bg-slate-950 p-3 font-mono text-xs leading-5 text-emerald-200 outline-none focus:border-emerald-500"
-      />
-    </label>
-  );
-}
