@@ -266,6 +266,7 @@ export default function Sidebar() {
                 height={80}
                 className="h-14 w-auto object-contain"
                 priority
+                unoptimized
               />
             </Link>
 

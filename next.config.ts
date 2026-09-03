@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   
   // Image optimization
   images: {
+    unoptimized: true, // Prevents Vercel 402 PAYMENT REQUIRED on image optimization
     formats: ['image/avif', 'image/webp'], // Modern image formats
     remotePatterns: [
       {
