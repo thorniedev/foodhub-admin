@@ -45,6 +45,7 @@ import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionAp
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 import PublishMenuItemModal from "./PublishMenuItemModal";
+import MenuItemDetailSkeleton from "./MenuItemDetailSkeleton";
 import type { MenuItemWritePayload, FoodRecord } from "@/src/types/menu-management";
 
 const SPICE_SHORT_LABELS: Record<number, string> = {

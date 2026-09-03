@@ -26,7 +26,6 @@ import {
   useGetManagedFoodsQuery,
   useGetPublishedMenuItemsQuery,
 } from "@/src/app/store/menuManagementApi";
-import { readLocalMenuItems } from "@/src/lib/filterCatalogStorage";
 
 export default function GlobalAdminSearch() {
   const router = useRouter();
@@ -174,10 +173,9 @@ export default function GlobalAdminSearch() {
       });
     }
 
-    // Published Store Menu Items (Server + LocalStorage)
+    // Published Store Menu Items
     const combinedMenuItems = [
       ...(fallbackMenuItemsData?.content ?? []),
-      ...readLocalMenuItems(),
     ];
     const seenMenuUuids = new Set<string>();
 

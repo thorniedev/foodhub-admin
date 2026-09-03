@@ -396,6 +396,43 @@ async function forwardRequest(
     });
 
     if (!backendResponse.ok) {
+      if (
+        backendResponse.status >= 500 &&
+        forwardedMethod === "GET" &&
+        normalizedPath.length === 2 &&
+        normalizedPath[0] === "catalog" &&
+        normalizedPath[1] === "foods"
+      ) {
+        console.warn("[ADMIN PROXY] Backend /api/catalog/foods threw 500, attempting resilient fallback...");
+        try {
+          const fallbackUrl = new URL(targetUrl.toString());
+          fallbackUrl.searchParams.set("sort", "createdAt,asc");
+          fallbackUrl.searchParams.set("page", "0");
+          fallbackUrl.searchParams.set("size", "100");
+
+          const rescueRes = await fetch(fallbackUrl, {
+            method: "GET",
+            headers: requestHeaders,
+            cache: "no-store",
+            redirect: "manual",
+            signal: controller.signal,
+          });
+
+          if (rescueRes.ok) {
+            const rescueJson = await rescueRes.json();
+            if (rescueJson?.payload?.contents && Array.isArray(rescueJson.payload.contents)) {
+              rescueJson.payload.contents.reverse();
+              return NextResponse.json(rescueJson, {
+                status: 200,
+                headers: responseHeaders,
+              });
+            }
+          }
+        } catch (rescueErr) {
+          console.error("[ADMIN PROXY RESCUE FAILED]", rescueErr);
+        }
+      }
+
       try {
         const errorText = new TextDecoder().decode(responseBody);
         console.error("[FOODHUB BACKEND ERROR]", {

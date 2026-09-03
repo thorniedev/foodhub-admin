@@ -539,97 +539,131 @@ export default function MenuItemsManager({
     }
 
     if (selectedSeasonUuid) {
-      const selectedSeason = activeSeasons.find((s) => s.uuid === selectedSeasonUuid || (s as any).id === selectedSeasonUuid || s.code === selectedSeasonUuid);
-      const selName = (selectedSeason?.name || (selectedSeason as any)?.localName || "").toLowerCase();
-      const selCode = (selectedSeason?.code || "").toLowerCase();
+      const selectedSeason = activeSeasons.find(
+        (s) =>
+          s.uuid === selectedSeasonUuid ||
+          (s as any).id === selectedSeasonUuid ||
+          s.code === selectedSeasonUuid,
+      );
+      const selName = (selectedSeason?.name || "").trim().toLowerCase();
+      const selLocalName = ((selectedSeason as any)?.localName || "").trim().toLowerCase();
+      const selCode = (selectedSeason?.code || "").trim().toUpperCase();
 
       result = result.filter((item) => {
-        const localRel = item.uuid ? readFoodRelationsStorage(item.uuid) : null;
-        const list = Array.isArray(item.seasons) && item.seasons.length > 0 ? item.seasons : (localRel?.seasons ?? []);
+        const list = Array.isArray(item.seasons) ? item.seasons : [];
         if (list.length === 0) return false;
         return list.some((s: any) => {
           const sUuid = typeof s === "string" ? s : s?.uuid || s?.seasonUuid;
-          const sCode = (s?.code || s?.seasonCode || "").toLowerCase();
-          const sName = (s?.name || s?.localName || (typeof s === "string" ? s : "")).toLowerCase();
+          const sCode = (s?.code || s?.seasonCode || "").trim().toUpperCase();
+          const sName = (s?.name || "").trim().toLowerCase();
+          const sLocalName = (s?.localName || "").trim().toLowerCase();
 
-          return Boolean(
-            (sUuid && (sUuid === selectedSeasonUuid || (selectedSeason && sUuid === selectedSeason.uuid))) ||
-            (selCode && sCode && sCode === selCode) ||
-            (selName && sName && (sName.includes(selName) || selName.includes(sName)))
-          );
+          if (sUuid && (sUuid === selectedSeasonUuid || (selectedSeason && sUuid === selectedSeason.uuid))) return true;
+          if (selCode && sCode && sCode === selCode) return true;
+          if (selName && sName && sName === selName) return true;
+          if (selLocalName && sLocalName && sLocalName === selLocalName) return true;
+          if (selLocalName && sName && sName === selLocalName) return true;
+          if (selName && sLocalName && sLocalName === selName) return true;
+          return false;
         });
       });
     }
 
     if (selectedEventUuid) {
-      const selectedEvent = activeEvents.find((e) => e.uuid === selectedEventUuid || (e as any).id === selectedEventUuid || e.code === selectedEventUuid);
-      const selName = (selectedEvent?.name || (selectedEvent as any)?.localName || "").toLowerCase();
-      const selCode = (selectedEvent?.code || "").toLowerCase();
+      const selectedEvent = activeEvents.find(
+        (e) =>
+          e.uuid === selectedEventUuid ||
+          (e as any).id === selectedEventUuid ||
+          e.code === selectedEventUuid,
+      );
+      const selName = (selectedEvent?.name || "").trim().toLowerCase();
+      const selLocalName = ((selectedEvent as any)?.localName || "").trim().toLowerCase();
+      const selCode = (selectedEvent?.code || "").trim().toUpperCase();
 
       result = result.filter((item) => {
-        const localRel = item.uuid ? readFoodRelationsStorage(item.uuid) : null;
-        const list = Array.isArray(item.events) && item.events.length > 0 ? item.events : (localRel?.events ?? []);
+        const list = Array.isArray(item.events) ? item.events : [];
         if (list.length === 0) return false;
         return list.some((e: any) => {
           const eUuid = typeof e === "string" ? e : e?.uuid || e?.eventUuid;
-          const eCode = (e?.code || e?.eventCode || "").toLowerCase();
-          const eName = (e?.name || e?.localName || (typeof e === "string" ? e : "")).toLowerCase();
+          const eCode = (e?.code || e?.eventCode || "").trim().toUpperCase();
+          const eName = (e?.name || "").trim().toLowerCase();
+          const eLocalName = (e?.localName || "").trim().toLowerCase();
 
-          return Boolean(
-            (eUuid && (eUuid === selectedEventUuid || (selectedEvent && eUuid === selectedEvent.uuid))) ||
-            (selCode && eCode && eCode === selCode) ||
-            (selName && eName && (eName.includes(selName) || selName.includes(eName)))
-          );
+          if (eUuid && (eUuid === selectedEventUuid || (selectedEvent && eUuid === selectedEvent.uuid))) return true;
+          if (selCode && eCode && eCode === selCode) return true;
+          if (selName && eName && eName === selName) return true;
+          if (selLocalName && eLocalName && eLocalName === selLocalName) return true;
+          if (selLocalName && eName && eName === selLocalName) return true;
+          if (selName && eLocalName && eLocalName === selName) return true;
+          return false;
         });
       });
     }
 
     if (selectedWeatherUuid) {
-      const selectedWeather = activeWeatherConditions.find((w) => (w.uuid || w.code) === selectedWeatherUuid || (w as any).id === selectedWeatherUuid);
-      const selName = (selectedWeather?.name || (selectedWeather as any)?.localName || "").toLowerCase();
-      const selCode = (selectedWeather?.code || "").toLowerCase();
+      const selectedWeather = activeWeatherConditions.find(
+        (w) =>
+          (w.uuid || w.code) === selectedWeatherUuid ||
+          (w as any).id === selectedWeatherUuid,
+      );
+      const selName = (selectedWeather?.name || "").trim().toLowerCase();
+      const selLocalName = ((selectedWeather as any)?.localName || "").trim().toLowerCase();
+      const selCode = (selectedWeather?.code || "").trim().toUpperCase();
 
       result = result.filter((item) => {
-        const localRel = item.uuid ? readFoodRelationsStorage(item.uuid) : null;
-        const list = Array.isArray(item.suitableWeather) && item.suitableWeather.length > 0 ? item.suitableWeather : (localRel?.suitableWeather ?? localRel?.weatherConditions ?? []);
+        const list = Array.isArray(item.suitableWeather)
+          ? item.suitableWeather
+          : Array.isArray((item as any).weatherConditions)
+            ? (item as any).weatherConditions
+            : [];
         if (list.length === 0) return false;
         return list.some((w: any) => {
           const wUuid = typeof w === "string" ? w : w?.uuid || w?.weatherUuid || w?.weatherConditionUuid;
-          const wCode = (w?.code || w?.weatherCode || "").toLowerCase();
-          const wName = (w?.name || w?.localName || (typeof w === "string" ? w : "")).toLowerCase();
+          const wCode = (w?.code || w?.weatherCode || "").trim().toUpperCase();
+          const wName = (w?.name || "").trim().toLowerCase();
+          const wLocalName = (w?.localName || "").trim().toLowerCase();
 
-          return Boolean(
-            (wUuid && (wUuid === selectedWeatherUuid || (selectedWeather && wUuid === selectedWeather.uuid))) ||
-            (selCode && wCode && wCode === selCode) ||
-            (selName && wName && (wName.includes(selName) || selName.includes(wName)))
-          );
+          if (wUuid && (wUuid === selectedWeatherUuid || (selectedWeather && wUuid === selectedWeather.uuid))) return true;
+          if (selCode && wCode && wCode === selCode) return true;
+          if (selName && wName && wName === selName) return true;
+          if (selLocalName && wLocalName && wLocalName === selLocalName) return true;
+          if (selLocalName && wName && wName === selLocalName) return true;
+          if (selName && wLocalName && wLocalName === selName) return true;
+          return false;
         });
       });
     }
 
     if (selectedAgeGroupUuid) {
-      const selectedAge = activeAgeGroups.find((a) => (a.uuid || a.code) === selectedAgeGroupUuid || (a as any).id === selectedAgeGroupUuid);
-      const selName = (selectedAge?.name || (selectedAge as any)?.localName || "").toLowerCase();
-      const selCode = (selectedAge?.code || "").toLowerCase();
+      const selectedAge = activeAgeGroups.find(
+        (a) =>
+          (a.uuid || a.code) === selectedAgeGroupUuid ||
+          (a as any).id === selectedAgeGroupUuid,
+      );
+      const selName = (selectedAge?.name || "").trim().toLowerCase();
+      const selLocalName = ((selectedAge as any)?.localName || "").trim().toLowerCase();
+      const selCode = (selectedAge?.code || "").trim().toUpperCase();
 
       result = result.filter((item) => {
-        const localRel = item.uuid ? readFoodRelationsStorage(item.uuid) : null;
-        const list = Array.isArray(item.ageRules) && item.ageRules.length > 0
+        const list = Array.isArray(item.ageRules)
           ? item.ageRules
-          : (Array.isArray((item as any).ageGroups) && (item as any).ageGroups.length > 0
+          : Array.isArray((item as any).ageGroups)
             ? (item as any).ageGroups
-            : (localRel?.ageRules ?? localRel?.ageGroups ?? []));
+            : [];
         if (list.length === 0) return false;
         return list.some((a: any) => {
           const aUuid = typeof a === "string" ? a : a?.uuid || a?.ageGroupUuid;
-          const aCode = (a?.code || a?.ageGroupCode || "").toLowerCase();
-          const aName = (a?.name || a?.localName || (typeof a === "string" ? a : "")).toLowerCase();
+          const aCode = (a?.code || a?.ageGroupCode || "").trim().toUpperCase();
+          const aName = (a?.name || "").trim().toLowerCase();
+          const aLocalName = (a?.localName || "").trim().toLowerCase();
 
-          return Boolean(
-            (aUuid && (aUuid === selectedAgeGroupUuid || (selectedAge && aUuid === selectedAge.uuid))) ||
-            (selCode && aCode && aCode === selCode) ||
-            (selName && aName && (aName.includes(selName) || selName.includes(aName)))
-          );
+          if (aUuid && (aUuid === selectedAgeGroupUuid || (selectedAge && aUuid === selectedAge.uuid))) return true;
+          if (selCode && aCode && aCode === selCode) return true;
+          if (selName && aName && aName === selName) return true;
+          if (selLocalName && aLocalName && aLocalName === selLocalName) return true;
+          if (selLocalName && aName && aName === selLocalName) return true;
+          if (selName && aLocalName && aLocalName === selName) return true;
+          return false;
         });
       });
     }
@@ -1369,10 +1403,8 @@ export default function MenuItemsManager({
           images: [],
         }).unwrap();
       } catch (updateErr) {
-        console.warn("[SERVER UPDATE FAILED, UPDATING LOCAL]", updateErr);
+        console.warn("[SERVER UPDATE FAILED]", updateErr);
       }
-
-      updateLocalMenuItemStatus(String(targetUuid), "UNAVAILABLE");
 
       setNotice({
         type: "success",
@@ -1419,10 +1451,8 @@ export default function MenuItemsManager({
           images: [],
         }).unwrap();
       } catch (updateErr) {
-        console.warn("[SERVER UPDATE FAILED, UPDATING LOCAL]", updateErr);
+        console.warn("[SERVER UPDATE FAILED]", updateErr);
       }
-
-      updateLocalMenuItemStatus(String(targetUuid), "AVAILABLE");
 
       setNotice({
         type: "success",
@@ -1449,10 +1479,8 @@ export default function MenuItemsManager({
       try {
         await deleteMenuItem(String(targetUuid)).unwrap();
       } catch (err) {
-        // If it's a local/mock item that server doesn't know, we still remove it locally
-        console.warn("[SERVER DELETE MENU ITEM FAILED, REMOVING LOCAL ITEM]", err);
+        console.warn("[SERVER DELETE MENU ITEM FAILED]", err);
       }
-      deleteLocalMenuItem(String(targetUuid));
 
       setNotice({
         type: "success",

@@ -543,7 +543,6 @@ export default function FoodFormModal({
     mealTypes,
     ageGroups,
     dietaryTypes,
-    allergens,
     preparationTimes,
     distances,
   ]);
