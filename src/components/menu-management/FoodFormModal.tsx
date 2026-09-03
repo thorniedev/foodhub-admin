@@ -758,11 +758,14 @@ export default function FoodFormModal({
   const allergenSelectOptions = useMemo(
     () => [
       { value: "", label: "ជ្រើសសារធាតុបង្កអាឡែស៊ី..." },
-      ...activeAllergens.map((a) => ({
-        value: a.uuid,
-        label: (a as any).localName || a.name || a.code,
-        description: a.code,
-      })),
+      ...activeAllergens.map((a) => {
+        const name = (a as any).localName || a.name || a.code;
+        return {
+          value: a.uuid,
+          label: a.code && name !== a.code ? `${name} (${a.code})` : name,
+          description: a.code,
+        };
+      }),
     ],
     [activeAllergens],
   );

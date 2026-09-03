@@ -953,7 +953,7 @@ export const menuManagementApi =
         builder.query<IngredientOption[], void>({
           async queryFn() {
             const result = await browserRequest<unknown>(
-              "/api/admin/catalog/ingredients?page=0&size=100&sort=name%2Casc",
+              "/api/admin/catalog/ingredients?page=0&size=1500&sort=name%2Casc",
             );
 
             if ("error" in result) {

@@ -63,8 +63,6 @@ export default function FilterOptionFormModal({
       EMPTY_FORM,
     );
 
-  const [isCodeCustom, setIsCodeCustom] = useState(false);
-
   const [
     validationError,
     setValidationError,
@@ -105,10 +103,8 @@ export default function FilterOptionFormModal({
         active:
           item.active,
       });
-      setIsCodeCustom(true);
     } else {
       setForm(EMPTY_FORM);
-      setIsCodeCustom(false);
     }
 
     setValidationError("");
@@ -228,7 +224,6 @@ export default function FilterOptionFormModal({
       ...prev,
       name: val,
       localName: val,
-      code: !isCodeCustom && !item ? createCodeFromLabel(val) : prev.code,
     }));
   };
 
@@ -377,7 +372,6 @@ export default function FilterOptionFormModal({
               label="កូដ (Code)"
               value={form.code || ""}
               onChange={(value) => {
-                setIsCodeCustom(true);
                 setForm((prev) => ({
                   ...prev,
                   code: value.toUpperCase(),

@@ -54,7 +54,6 @@ export default function SubCategoryFormModal({
   const [code, setCode] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
-  const [isCodeCustom, setIsCodeCustom] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -65,23 +64,18 @@ export default function SubCategoryFormModal({
       setCode(item.code || "");
       setDescription(item.description || "");
       setIsActive(item.isActive !== false);
-      setIsCodeCustom(true);
       setError("");
     } else {
       setName("");
       setCode("");
       setDescription("");
       setIsActive(true);
-      setIsCodeCustom(false);
       setError("");
     }
   }, [open, item]);
 
   const handleNameChange = (val: string) => {
     setName(val);
-    if (!item && !isCodeCustom) {
-      setCode(generateCode(val, prefix));
-    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -170,7 +164,6 @@ export default function SubCategoryFormModal({
               value={code}
               onChange={(value) => {
                 setCode(value.toUpperCase());
-                setIsCodeCustom(true);
               }}
               placeholder={isDrink ? "ឧ. DRINK_MILK_TEA" : "ឧ. FOOD_SOUP"}
               required

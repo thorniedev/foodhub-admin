@@ -191,7 +191,6 @@ export default function AllergenFormModal({
                   (previous) => ({
                     ...previous,
                     name: value,
-                    code: !allergen && !previous.code ? value.toUpperCase().replace(/\s+/g, "_") : previous.code,
                   }),
                 )
               }
