@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { z } from "zod";
 import {
   AlertTriangle,
   CupSoda,
@@ -21,6 +22,12 @@ type Props = {
   onClose: () => void;
   onSubmit: (payload: FoodCategoryPayload) => Promise<void>;
 };
+
+const subCategorySchema = z.object({
+  name: z.string().trim().min(1, "សូមបញ្ចូលឈ្មោះអនុប្រភេទ"),
+  code: z.string().trim().min(1, "សូមបញ្ចូលកូដ"),
+  description: z.string().optional(),
+});
 
 function generateCode(name: string, prefix: string): string {
   if (!name.trim()) return "";
@@ -54,7 +61,18 @@ export default function SubCategoryFormModal({
   const [code, setCode] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [serverError, setServerError] = useState("");
+
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -64,31 +82,49 @@ export default function SubCategoryFormModal({
       setCode(item.code || "");
       setDescription(item.description || "");
       setIsActive(item.isActive !== false);
-      setError("");
+      setFieldErrors({});
+      setServerError("");
     } else {
       setName("");
       setCode("");
       setDescription("");
       setIsActive(true);
-      setError("");
+      setFieldErrors({});
+      setServerError("");
     }
   }, [open, item]);
 
   const handleNameChange = (val: string) => {
     setName(val);
+    clearFieldError("name");
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
+    setServerError("");
 
     const trimmedName = name.trim();
-    if (!trimmedName) {
-      setError("សូមបញ្ចូលឈ្មោះអនុប្រភេទ។");
+    const finalCode = code.trim() || generateCode(trimmedName, prefix);
+
+    const result = subCategorySchema.safeParse({
+      name: trimmedName,
+      code: finalCode,
+      description,
+    });
+
+    if (!result.success) {
+      const errMap: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        const fieldName = issue.path[0] as string;
+        if (fieldName && !errMap[fieldName]) {
+          errMap[fieldName] = issue.message;
+        }
+      });
+      setFieldErrors(errMap);
       return;
     }
 
-    const finalCode = code.trim() || generateCode(trimmedName, prefix);
+    setFieldErrors({});
 
     try {
       await onSubmit({
@@ -99,7 +135,7 @@ export default function SubCategoryFormModal({
         isActive,
       });
     } catch (err) {
-      setError(
+      setServerError(
         err instanceof Error ? err.message : "មានបញ្ហាក្នុងការរក្សាទុកទិន្នន័យ។",
       );
     }
@@ -146,7 +182,7 @@ export default function SubCategoryFormModal({
         </div>
 
         {/* FORM */}
-        <form onSubmit={handleSubmit} className="space-y-4 p-6 sm:p-7">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4 p-6 sm:p-7">
           {/* Name & Code */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field
@@ -157,6 +193,7 @@ export default function SubCategoryFormModal({
                 isDrink ? "ឧ. កាហ្វេបុរាណ, តែទឹកដោះគោ" : "ឧ. សម្ល និងស៊ុប, ម្ហូបឆា"
               }
               required
+              error={fieldErrors.name}
             />
 
             <Field
@@ -164,9 +201,11 @@ export default function SubCategoryFormModal({
               value={code}
               onChange={(value) => {
                 setCode(value.toUpperCase());
+                clearFieldError("code");
               }}
               placeholder={isDrink ? "ឧ. DRINK_MILK_TEA" : "ឧ. FOOD_SOUP"}
               required
+              error={fieldErrors.code}
             />
           </div>
 
@@ -212,11 +251,11 @@ export default function SubCategoryFormModal({
             </button>
           </div>
 
-          {/* Validation error */}
-          {error && (
+          {/* Server error */}
+          {serverError && (
             <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-lg leading-7 text-red-600">
               <AlertTriangle size={18} className="mt-0.5 shrink-0" />
-              <span>{error}</span>
+              <span>{serverError}</span>
             </div>
           )}
 
@@ -273,12 +312,14 @@ function Field({
   onChange,
   placeholder,
   required = false,
+  error,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   required?: boolean;
+  error?: string;
 }) {
   return (
     <label className="block">
@@ -286,11 +327,15 @@ function Field({
 
       <input
         value={value}
-        required={required}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="h-[52px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+        className={`h-[52px] w-full rounded-xl border px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 ${
+          error
+            ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-4 focus:ring-red-100"
+            : "border-gray-200 bg-gray-50 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+        }`}
       />
+      {error && <p className="mt-1 text-sm font-normal text-red-500">{error}</p>}
     </label>
   );
 }

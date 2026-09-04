@@ -1,10 +1,41 @@
 "use client";
 
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
-
 import { AlertTriangle, Loader2, Users, X } from "lucide-react";
+import { z } from "zod";
 
 import type { AgeGroup, AgeGroupFormValues } from "@/src/types/ageGroup";
+
+const ageGroupSchema = z
+  .object({
+    name: z.string().trim().min(1, "សូមបំពេញឈ្មោះក្រុមអាយុ។"),
+    code: z.string().trim().min(1, "សូមបំពេញកូដក្រុមអាយុ។"),
+    minAge: z
+      .string()
+      .trim()
+      .min(1, "សូមបំពេញអាយុអប្បបរមា។")
+      .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0, {
+        message: "អាយុត្រូវតែជាចំនួនគត់ និងមិនតិចជាង 0។",
+      }),
+    maxAge: z
+      .string()
+      .trim()
+      .min(1, "សូមបំពេញអាយុអតិបរមា។")
+      .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0, {
+        message: "អាយុត្រូវតែជាចំនួនគត់ និងមិនតិចជាង 0។",
+      }),
+  })
+  .refine(
+    (data) => {
+      const min = Number(data.minAge);
+      const max = Number(data.maxAge);
+      return !Number.isFinite(min) || !Number.isFinite(max) || max >= min;
+    },
+    {
+      message: "អាយុអតិបរមាត្រូវធំជាង ឬស្មើអាយុអប្បបរមា។",
+      path: ["maxAge"],
+    },
+  );
 
 const EMPTY_FORM: AgeGroupFormValues = {
   code: "",
@@ -31,7 +62,18 @@ export default function AgeGroupFormModal({
   onSubmit,
 }: Props) {
   const [form, setForm] = useState<AgeGroupFormValues>(EMPTY_FORM);
-  const [validationError, setValidationError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const clearFieldError = (key: string) => {
+    if (fieldErrors[key]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  };
 
   useEffect(() => {
     if (!open) {
@@ -51,7 +93,8 @@ export default function AgeGroupFormModal({
       setForm(EMPTY_FORM);
     }
 
-    setValidationError("");
+    setFieldErrors({});
+    setServerError(null);
   }, [open, item]);
 
   useEffect(() => {
@@ -73,52 +116,50 @@ export default function AgeGroupFormModal({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setServerError(null);
+
+    const result = ageGroupSchema.safeParse({
+      name: form.name,
+      code: form.code,
+      minAge: form.minAge,
+      maxAge: form.maxAge,
+    });
+
+    if (!result.success) {
+      const errs: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const key = String(issue.path[0]);
+        if (!errs[key]) {
+          errs[key] = issue.message;
+        }
+      }
+      setFieldErrors(errs);
+      return;
+    }
+
+    setFieldErrors({});
 
     const code = form.code.trim().toUpperCase();
     const name = form.name.trim();
     const minAge = Number(form.minAge);
     const maxAge = Number(form.maxAge);
 
-    if (!name) {
-      setValidationError("សូមបំពេញឈ្មោះក្រុមអាយុ។");
-      return;
+    try {
+      await onSubmit({
+        ...form,
+        code,
+        name,
+        minAge: String(minAge),
+        maxAge: String(maxAge),
+        description: form.description.trim(),
+      });
+    } catch (err: any) {
+      const errorMsg =
+        err?.data?.message ||
+        err?.message ||
+        (typeof err === "string" ? err : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។");
+      setServerError(errorMsg);
     }
-
-    if (!code) {
-      setValidationError("សូមបំពេញកូដក្រុមអាយុ។");
-      return;
-    }
-
-    if (!form.minAge.trim() || !form.maxAge.trim()) {
-      setValidationError("សូមបំពេញអាយុអប្បបរមា និងអាយុអតិបរមា។");
-      return;
-    }
-
-    if (
-      !Number.isInteger(minAge) ||
-      !Number.isInteger(maxAge) ||
-      minAge < 0 ||
-      maxAge < 0
-    ) {
-      setValidationError("អាយុត្រូវតែជាចំនួនគត់ និងមិនតិចជាង 0។");
-      return;
-    }
-
-    if (maxAge < minAge) {
-      setValidationError("អាយុអតិបរមាត្រូវធំជាង ឬស្មើអាយុអប្បបរមា។");
-      return;
-    }
-
-    setValidationError("");
-
-    await onSubmit({
-      ...form,
-      code,
-      name,
-      minAge: String(minAge),
-      maxAge: String(maxAge),
-      description: form.description.trim(),
-    });
   };
 
   return (
@@ -160,27 +201,31 @@ export default function AgeGroupFormModal({
             <Field
               label="ឈ្មោះ ក្រុមអាយុ"
               value={form.name}
-              onChange={(value) =>
+              onChange={(value) => {
                 setForm((prev) => ({
                   ...prev,
                   name: value,
-                }))
-              }
+                }));
+                clearFieldError("name");
+              }}
               placeholder="ឧ. កុមារ, មនុស្សពេញវ័យ"
               required
+              error={fieldErrors.name}
             />
 
             <Field
               label="កូដ (Code)"
               value={form.code}
-              onChange={(value) =>
+              onChange={(value) => {
                 setForm((prev) => ({
                   ...prev,
                   code: value.toUpperCase(),
-                }))
-              }
+                }));
+                clearFieldError("code");
+              }}
               placeholder="ឧ. CHILD, ADULT"
               required
+              error={fieldErrors.code}
             />
           </div>
 
@@ -190,28 +235,32 @@ export default function AgeGroupFormModal({
               label="អាយុអប្បបរមា (Min Age)"
               type="number"
               value={form.minAge}
-              onChange={(value) =>
+              onChange={(value) => {
                 setForm((prev) => ({
                   ...prev,
                   minAge: value,
-                }))
-              }
+                }));
+                clearFieldError("minAge");
+              }}
               placeholder="ឧ. 0"
               required
+              error={fieldErrors.minAge}
             />
 
             <Field
               label="អាយុអតិបរមា (Max Age)"
               type="number"
               value={form.maxAge}
-              onChange={(value) =>
+              onChange={(value) => {
                 setForm((prev) => ({
                   ...prev,
                   maxAge: value,
-                }))
-              }
+                }));
+                clearFieldError("maxAge");
+              }}
               placeholder="ឧ. 12"
               required
+              error={fieldErrors.maxAge}
             />
           </div>
 
@@ -265,11 +314,11 @@ export default function AgeGroupFormModal({
             </button>
           </div>
 
-          {/* Validation error */}
-          {validationError && (
+          {/* Server error */}
+          {serverError && (
             <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-lg leading-7 text-red-600">
               <AlertTriangle size={18} className="mt-0.5 shrink-0" />
-              <span>{validationError}</span>
+              <span>{serverError}</span>
             </div>
           )}
 
@@ -325,6 +374,7 @@ function Field({
   placeholder,
   required = false,
   type = "text",
+  error,
 }: {
   label: string;
   value: string;
@@ -332,6 +382,7 @@ function Field({
   placeholder?: string;
   required?: boolean;
   type?: string;
+  error?: string;
 }) {
   return (
     <label className="block">
@@ -343,8 +394,15 @@ function Field({
         required={required}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="h-[52px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+        className={`h-[52px] w-full rounded-xl border px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 focus:bg-white focus:ring-4 ${
+          error
+            ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-100"
+            : "border-gray-200 bg-gray-50 hover:border-gray-300 focus:border-primary-600 focus:ring-primary-100"
+        }`}
       />
+      {error && (
+        <p className="mt-1 text-sm font-normal text-red-500">{error}</p>
+      )}
     </label>
   );
 }

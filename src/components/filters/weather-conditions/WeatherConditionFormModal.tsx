@@ -18,6 +18,13 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
+import { z } from "zod";
+
+const weatherConditionSchema = z.object({
+  name: z.string().trim().min(1, "សូមបញ្ចូលឈ្មោះស្ថានភាពអាកាសធាតុ"),
+  code: z.string().trim().min(1, "សូមបញ្ចូលកូដ"),
+  description: z.string().optional(),
+});
 
 type FormState = {
   code: string;
@@ -53,14 +60,26 @@ export default function WeatherConditionFormModal({
   ) => Promise<void>;
 }) {
   const [values, setValues] = useState<FormState>(EMPTY);
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
 
     if (!item) {
       setValues(EMPTY);
-      setError(null);
+      setFieldErrors({});
+      setServerError(null);
       return;
     }
 
@@ -72,7 +91,8 @@ export default function WeatherConditionFormModal({
       isActive: item.isActive ?? item.active ?? true,
     });
 
-    setError(null);
+    setFieldErrors({});
+    setServerError(null);
   }, [item, open]);
 
   /* Lock background scroll while modal is open */
@@ -93,20 +113,35 @@ export default function WeatherConditionFormModal({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setServerError(null);
+
+    const enteredName = values.name.trim() || values.localName.trim();
+    const code =
+      item?.code?.trim() ||
+      values.code.trim().toUpperCase().replace(/\s+/g, "_") ||
+      createCodeFromLabel(enteredName);
+
+    const result = weatherConditionSchema.safeParse({
+      name: enteredName,
+      code,
+      description: values.description,
+    });
+
+    if (!result.success) {
+      const errMap: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        const fieldName = issue.path[0] as string;
+        if (fieldName && !errMap[fieldName]) {
+          errMap[fieldName] = issue.message;
+        }
+      });
+      setFieldErrors(errMap);
+      return;
+    }
+
+    setFieldErrors({});
+
     try {
-      setError(null);
-
-      const enteredName = values.name.trim() || values.localName.trim();
-
-      if (!enteredName) {
-        throw new Error("សូមបញ្ចូលឈ្មោះស្ថានភាពអាកាសធាតុ។");
-      }
-
-      const code =
-        item?.code?.trim() ||
-        values.code.trim().toUpperCase().replace(/\s+/g, "_") ||
-        createCodeFromLabel(enteredName);
-
       await onSubmit({
         code,
         name: enteredName,
@@ -115,7 +150,7 @@ export default function WeatherConditionFormModal({
         isActive: values.isActive,
       });
     } catch (submitError) {
-      setError(
+      setServerError(
         submitError instanceof Error
           ? submitError.message
           : "មិនអាចរក្សាទុកស្ថានភាពអាកាសធាតុបានទេ។",
@@ -238,6 +273,7 @@ export default function WeatherConditionFormModal({
         {/* ================= FORM ================= */}
         <form
           onSubmit={handleSubmit}
+          noValidate
           className="
             space-y-4
             p-6
@@ -250,25 +286,29 @@ export default function WeatherConditionFormModal({
               label="ឈ្មោះស្ថានភាពអាកាសធាតុ"
               value={values.localName || values.name}
               required
-              onChange={(value) =>
+              error={fieldErrors.name}
+              onChange={(value) => {
                 setValues((previous) => ({
                   ...previous,
                   name: value,
                   localName: value,
-                }))
-              }
+                }));
+                clearFieldError("name");
+              }}
               placeholder="ឧ. ភ្លៀង / មានពពក"
             />
 
             <Field
               label="កូដ (Code)"
               value={values.code}
-              onChange={(value) =>
+              error={fieldErrors.code}
+              onChange={(value) => {
                 setValues((previous) => ({
                   ...previous,
                   code: value.toUpperCase(),
-                }))
-              }
+                }));
+                clearFieldError("code");
+              }}
               placeholder="ឧ. RAIN / SUNNY"
             />
           </div>
@@ -393,8 +433,8 @@ export default function WeatherConditionFormModal({
             </button>
           </div>
 
-          {/* Validation Error */}
-          {error && (
+          {/* Server Error */}
+          {serverError && (
             <div
               className="
                 flex
@@ -419,7 +459,7 @@ export default function WeatherConditionFormModal({
                 "
               />
 
-              <span>{error}</span>
+              <span>{serverError}</span>
             </div>
           )}
 
@@ -519,6 +559,7 @@ function Field({
   type = "text",
   placeholder,
   required,
+  error,
 }: {
   label: string;
   value: string;
@@ -526,6 +567,7 @@ function Field({
   type?: string;
   placeholder?: string;
   required?: boolean;
+  error?: string;
 }) {
   return (
     <label className="block">
@@ -537,29 +579,27 @@ function Field({
       <input
         type={type}
         value={value}
-        required={required}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
-        className="
+        className={`
           h-[50px]
           w-full
           rounded-xl
           border
-          border-gray-200
-          bg-gray-50
           px-4
           text-lg
           text-gray-800
           outline-none
           transition
           placeholder:text-gray-400
-          hover:border-gray-300
-          focus:border-primary-600
-          focus:bg-white
-          focus:ring-4
-          focus:ring-primary-100
-        "
+          ${
+            error
+              ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-4 focus:ring-red-100"
+              : "border-gray-200 bg-gray-50 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+          }
+        `}
       />
+      {error && <p className="mt-1 text-sm font-normal text-red-500">{error}</p>}
     </label>
   );
 }

@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { z } from "zod";
 
 import ThumbnailImagePicker from "./ThumbnailImagePicker";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
@@ -708,6 +709,20 @@ export default function PublishMenuItemModal({
     );
   };
 
+const publishMenuItemSchema = z.object({
+  storeUuid: z.string().trim().min(1, "សូមជ្រើសរើសហាង"),
+  foodUuid: z.string().trim().min(1, "សូមរើសមុខម៉ឺនុយ"),
+  name: z.string().trim().min(1, "សូមបញ្ចូលឈ្មោះ ម៉ឺនុយ"),
+  price: z
+    .string()
+    .trim()
+    .min(1, "សូមបញ្ចូលតម្លៃ")
+    .refine((val) => {
+      const p = Number(val);
+      return Number.isFinite(p) && p > 0;
+    }, "តម្លៃត្រូវតែធំជាង ០"),
+});
+
   const validateBasics = (): FieldErrors => {
     const nextErrors: FieldErrors = {};
     const targetStoreUuid = (
@@ -718,19 +733,22 @@ export default function PublishMenuItemModal({
       ""
     ).trim();
 
-    if (!item && !targetStoreUuid) {
-      nextErrors.storeUuid = "សូមជ្រើសរើសហាង";
+    const result = publishMenuItemSchema.safeParse({
+      storeUuid: item ? "already-set" : targetStoreUuid,
+      foodUuid: values.foodUuid,
+      name: values.name,
+      price: values.price,
+    });
+
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        const key = issue.path[0] as keyof FieldErrors;
+        if (key && !nextErrors[key]) {
+          nextErrors[key] = issue.message;
+        }
+      });
     }
-    if (!values.foodUuid) {
-      nextErrors.foodUuid = "សូមរើសមុខម៉ឺនុយ";
-    }
-    if (!values.name.trim()) {
-      nextErrors.name = "សូមបញ្ចូលឈ្មោះ ម៉ឺនុយ";
-    }
-    const price = Number(values.price);
-    if (!values.price.trim() || !Number.isFinite(price) || price <= 0) {
-      nextErrors.price = "តម្លៃត្រូវតែធំជាង ០";
-    }
+
     if (!item && !thumbnailFile && !existingThumbnail) {
       nextErrors.thumbnail = "សូមបង្ហោះរូបភាព Thumbnail ចាំបាច់";
     }
@@ -744,7 +762,6 @@ export default function PublishMenuItemModal({
       const nextFieldErrors = validateBasics();
       if (Object.keys(nextFieldErrors).length > 0) {
         setFieldErrors(nextFieldErrors);
-        setError("សូមពិនិត្យ និងបំពេញព័ត៌មានចាំបាច់ដែលបានសម្គាល់ខាងក្រោម។");
         bodyRef.current?.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
@@ -1496,6 +1513,7 @@ export default function PublishMenuItemModal({
                 }}
                 existingUrl={existingThumbnail}
                 onExistingChange={(newUrl) => {
+                  setFieldErrors((current) => ({ ...current, thumbnail: undefined }));
                   if (!newUrl && existingGallery.length > 0) {
                     setExistingThumbnail(existingGallery[0]);
                     setExistingGallery((curr) => curr.slice(1));

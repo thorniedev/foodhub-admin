@@ -2,8 +2,17 @@
 
 import { useState } from "react";
 import { X, Loader2 } from "lucide-react";
+import { z } from "zod";
 import { Season, SeasonalFoodImage } from "../../../types/seasonalFood";
 import BannerImageUploader from "../BannerImageUploader";
+
+const seasonalFoodSchema = z.object({
+  name: z.string().trim().min(1, "សូមបញ្ចូលចំណងជើង"),
+  image_url: z.string().trim().min(1, "សូមបញ្ចូលផ្លូវរូបភាព"),
+  season: z.string().trim().min(1, "សូមបញ្ចូលរដូវកាល"),
+  order: z.number().min(1, "លំដាប់ត្រូវតែធំជាង ឬស្មើ ១"),
+});
+
 interface SeasonalFoodFormModalProps {
   open: boolean;
   initialData?: SeasonalFoodImage | null;
@@ -71,10 +80,41 @@ function SeasonalFoodFormContent({
   saving,
 }: Omit<SeasonalFoodFormModalProps, "open">) {
   const [form, setForm] = useState(() => getInitialForm(initialData));
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!form.name.trim()) return;
+
+    const result = seasonalFoodSchema.safeParse({
+      name: form.name,
+      image_url: form.image_url,
+      season: form.season,
+      order: form.order,
+    });
+
+    if (!result.success) {
+      const errMap: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        const fieldName = issue.path[0] as string;
+        if (fieldName && !errMap[fieldName]) {
+          errMap[fieldName] = issue.message;
+        }
+      });
+      setFieldErrors(errMap);
+      return;
+    }
+
+    setFieldErrors({});
     onSubmit(form);
   };
 
@@ -97,61 +137,81 @@ function SeasonalFoodFormContent({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5 p-6">
+        <form onSubmit={handleSubmit} noValidate className="space-y-5 p-6">
           <div>
             <label className="mb-2 block text-xl font-semibold text-[#F97316]">
-              ចំណងជើង
+              ចំណងជើង <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              required
               value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+              onChange={(e) => {
+                setForm({ ...form, name: e.target.value });
+                clearFieldError("name");
+              }}
+              className={`h-12 w-full rounded-xl border px-4 text-base text-gray-800 outline-none transition ${
+                fieldErrors.name
+                  ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                  : "border-gray-200 bg-gray-50 focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+              }`}
             />
+            {fieldErrors.name && (
+              <p className="mt-1 text-sm text-red-500">{fieldErrors.name}</p>
+            )}
           </div>
 
           <div>
             <label className="mb-2 block text-xl font-semibold text-[#F97316]">
-              ផ្លូវរូបភាព
+              ផ្លូវរូបភាព <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              required
               value={form.image_url}
-              onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, image_url: e.target.value });
+                clearFieldError("image_url");
+              }}
               placeholder="/Image/seasonal/xxx.jpg"
-              className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+              className={`h-12 w-full rounded-xl border px-4 text-base text-gray-800 outline-none transition ${
+                fieldErrors.image_url
+                  ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                  : "border-gray-200 bg-gray-50 focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+              }`}
             />
-            {/* <BannerImageUploader
-              value={form.image_url}
-              onChange={(url) => setForm({ ...form, image_url: url })}
-            /> */}
+            {fieldErrors.image_url && (
+              <p className="mt-1 text-sm text-red-500">{fieldErrors.image_url}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="mb-2 block text-xl font-semibold text-[#F97316]">
-                រដូវកាល
+                រដូវកាល <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                required
                 value={form.season}
-                onChange={(e) =>
-                  setForm({ ...form, season: e.target.value as Season })
-                }
-                className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+                onChange={(e) => {
+                  setForm({ ...form, season: e.target.value as Season });
+                  clearFieldError("season");
+                }}
+                className={`h-12 w-full rounded-xl border px-4 text-base text-gray-800 outline-none transition ${
+                  fieldErrors.season
+                    ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                    : "border-gray-200 bg-gray-50 focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+                }`}
               />
+              {fieldErrors.season && (
+                <p className="mt-1 text-sm text-red-500">{fieldErrors.season}</p>
+              )}
             </div>
             <div>
               <label className="mb-2 block text-xl font-semibold text-[#F97316]">
-                លំដាប់
+                លំដាប់ <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 min={1}
-                required
                 value={form.order}
                 onKeyDown={(e) => {
                   if (e.key === "-" || e.key === "e") {
@@ -160,11 +220,18 @@ function SeasonalFoodFormContent({
                 }}
                 onChange={(e) => {
                   const val = Number(e.target.value);
-                  if (val < 0) return;
                   setForm({ ...form, order: val });
+                  clearFieldError("order");
                 }}
-                className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+                className={`h-12 w-full rounded-xl border px-4 text-base text-gray-800 outline-none transition ${
+                  fieldErrors.order
+                    ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                    : "border-gray-200 bg-gray-50 focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+                }`}
               />
+              {fieldErrors.order && (
+                <p className="mt-1 text-sm text-red-500">{fieldErrors.order}</p>
+              )}
             </div>
           </div>
 

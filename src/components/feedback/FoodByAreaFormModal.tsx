@@ -2,11 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { X, Loader2 } from "lucide-react";
+import { z } from "zod";
 import {
   Area,
   FoodByAreaImage,
 } from "@/src/types/foodByArea";
 import BannerImageUploader from "../dynamic-content/BannerImageUploader";
+
+const foodByAreaSchema = z.object({
+  name: z.string().trim().min(1, "សូមបញ្ចូលចំណងជើង"),
+  location: z.string().trim().min(1, "សូមបញ្ចូលតំបន់ ឬខេត្ត"),
+  image_url: z.string().trim().min(1, "សូមបញ្ចូលផ្លូវរូបភាព"),
+  description: z.string().optional(),
+});
 
 interface FoodByAreaFormModalProps {
   open: boolean;
@@ -40,6 +48,17 @@ export default function FoodByAreaFormModal({
   saving = false,
 }: FoodByAreaFormModalProps) {
   const [form, setForm] = useState(emptyForm);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
 
   useEffect(() => {
     if (initialData) {
@@ -48,13 +67,34 @@ export default function FoodByAreaFormModal({
     } else {
       setForm(emptyForm);
     }
+    setFieldErrors({});
   }, [initialData, open]);
 
   if (!open) return null;
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!form.name.trim()) return;
+
+    const result = foodByAreaSchema.safeParse({
+      name: form.name,
+      location: form.location,
+      image_url: form.image_url,
+      description: form.description,
+    });
+
+    if (!result.success) {
+      const errMap: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        const fieldName = issue.path[0] as string;
+        if (fieldName && !errMap[fieldName]) {
+          errMap[fieldName] = issue.message;
+        }
+      });
+      setFieldErrors(errMap);
+      return;
+    }
+
+    setFieldErrors({});
     onSubmit(form);
   };
 
@@ -77,49 +117,74 @@ export default function FoodByAreaFormModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5 p-6">
+        <form onSubmit={handleSubmit} noValidate className="space-y-5 p-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block text-xl font-semibold text-[#F97316]">ចំណងជើង</label>
+              <label className="mb-2 block text-xl font-semibold text-[#F97316]">
+                ចំណងជើង <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                required
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+                onChange={(e) => {
+                  setForm({ ...form, name: e.target.value });
+                  clearFieldError("name");
+                }}
+                className={`h-12 w-full rounded-xl border px-4 text-base text-gray-800 outline-none transition ${
+                  fieldErrors.name
+                    ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                    : "border-gray-200 bg-gray-50 focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+                }`}
               />
+              {fieldErrors.name && (
+                <p className="mt-1 text-sm text-red-500">{fieldErrors.name}</p>
+              )}
             </div>
 
             <div>
               <label className="mb-2 block text-xl font-semibold text-[#F97316]">
-                តំបន់/ខេត្ត
+                តំបន់/ខេត្ត <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                required
                 value={form.location}
-                onChange={(e) => setForm({ ...form, location: e.target.value as Area })}
-                className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+                onChange={(e) => {
+                  setForm({ ...form, location: e.target.value as Area });
+                  clearFieldError("location");
+                }}
+                className={`h-12 w-full rounded-xl border px-4 text-base text-gray-800 outline-none transition ${
+                  fieldErrors.location
+                    ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                    : "border-gray-200 bg-gray-50 focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+                }`}
               />
+              {fieldErrors.location && (
+                <p className="mt-1 text-sm text-red-500">{fieldErrors.location}</p>
+              )}
             </div>
           </div>
 
           <div>
             <label className="mb-2 block text-xl font-semibold text-[#F97316]">
-              ផ្លូវរូបភាព
+              ផ្លូវរូបភាព <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              required
               value={form.image_url}
-              onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, image_url: e.target.value });
+                clearFieldError("image_url");
+              }}
               placeholder="/Image/area/xxx.jpg"
-              className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-base text-gray-800 outline-none transition focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+              className={`h-12 w-full rounded-xl border px-4 text-base text-gray-800 outline-none transition ${
+                fieldErrors.image_url
+                  ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                  : "border-gray-200 bg-gray-50 focus:border-[#136C34] focus:bg-white focus:ring-2 focus:ring-[#136C34]/10"
+              }`}
             />
-            {/* <BannerImageUploader
-              value={form.image_url}
-              onChange={(url) => setForm({ ...form, image_url: url })}
-            /> */}
+            {fieldErrors.image_url && (
+              <p className="mt-1 text-sm text-red-500">{fieldErrors.image_url}</p>
+            )}
           </div>
 
           <div>

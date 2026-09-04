@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
 
 import ImagePicker from "./ImagePicker";
 import CustomSelect from "../ui/CustomSelect";
@@ -54,6 +55,13 @@ import {
   readFoodRelationsStorage,
   saveFoodRelationsStorage,
 } from "@/src/lib/filterCatalogStorage";
+
+const foodFormSchema = z.object({
+  canonicalName: z.string().trim().min(1, "សូមបញ្ចូលឈ្មោះជាភាសាអង់គ្លេស (English name)"),
+  localName: z.string().trim().min(1, "សូមបញ្ចូលឈ្មោះជាភាសាខ្មែរ (Khmer name)"),
+  categoryUuid: z.string().min(1, "សូមជ្រើសរើសប្រភេទ (Category is required)"),
+  cuisineUuid: z.string().min(1, "សូមជ្រើសរើសម្ហូបតាមប្រទេស (Cuisine is required)"),
+});
 
 type FormState = {
   canonicalName: string;
@@ -135,7 +143,18 @@ export default function FoodFormModal({
 }) {
   const [values, setValues] = useState<FormState>(EMPTY);
   const [images, setImages] = useState<File[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
 
   // Metadata relations state (all filters in ចម្រោះទិន្នន័យ)
   const [seasonRows, setSeasonRows] = useState<FoodSeasonRelation[]>([]);
@@ -169,7 +188,8 @@ export default function FoodFormModal({
       setAllergenRows([]);
       setPreparationTimeRows([]);
       setDistanceRows([]);
-      setError(null);
+      setFieldErrors({});
+      setServerError(null);
       return;
     }
 
@@ -615,7 +635,8 @@ export default function FoodFormModal({
     );
 
     setImages([]);
-    setError(null);
+    setFieldErrors({});
+    setServerError(null);
   }, [
     item,
     detailedFood,
@@ -884,19 +905,28 @@ export default function FoodFormModal({
 
   const submit = async () => {
     try {
-      setError(null);
+      setServerError(null);
 
-      if (!values.canonicalName.trim()) {
-        throw new Error("សូមបញ្ចូលឈ្មោះជាភាសាអង់គ្លេស (English name)");
+      const result = foodFormSchema.safeParse({
+        canonicalName: values.canonicalName,
+        localName: values.localName,
+        categoryUuid: values.categoryUuid,
+        cuisineUuid: values.cuisineUuid,
+      });
+
+      if (!result.success) {
+        const errMap: Record<string, string> = {};
+        result.error.issues.forEach((issue) => {
+          const fieldName = issue.path[0] as string;
+          if (fieldName && !errMap[fieldName]) {
+            errMap[fieldName] = issue.message;
+          }
+        });
+        setFieldErrors(errMap);
+        return;
       }
 
-      if (!values.categoryUuid) {
-        throw new Error("Category (ប្រភេទម្ហូប) is required.");
-      }
-
-      if (!values.cuisineUuid) {
-        throw new Error("Cuisine (ម្ហូបតាមប្រទេស) is required.");
-      }
+      setFieldErrors({});
 
       const nutritionData: NutritionData = {
         calories: numberOrNull(values.calories) ?? 0,
@@ -1065,7 +1095,7 @@ export default function FoodFormModal({
         });
       }
     } catch (submitError) {
-      setError(
+      setServerError(
         submitError instanceof Error
           ? submitError.message
           : "Could not save Food.",
@@ -1112,55 +1142,67 @@ export default function FoodFormModal({
             <Field
               label="ឈ្មោះអង់គ្លេស *"
               value={values.canonicalName}
-              onChange={(value) =>
+              error={fieldErrors.canonicalName}
+              onChange={(value) => {
                 setValues((current) => ({
                   ...current,
                   canonicalName: value,
-                }))
-              }
+                }));
+                clearFieldError("canonicalName");
+              }}
             />
 
             <Field
               label="ឈ្មោះខ្មែរ *"
               value={values.localName}
-              onChange={(value) =>
+              error={fieldErrors.localName}
+              onChange={(value) => {
                 setValues((current) => ({
                   ...current,
                   localName: value,
-                }))
-              }
+                }));
+                clearFieldError("localName");
+              }}
             />
 
             <div>
               <Label>{catalogType === "DRINK" ? "ប្រភេទភេសជ្ជៈ *" : "ប្រភេទម្ហូប *"}</Label>
               <CustomSelect
                 value={values.categoryUuid}
-                onChange={(val) =>
+                onChange={(val) => {
                   setValues((current) => ({
                     ...current,
                     categoryUuid: val,
-                  }))
-                }
+                  }));
+                  clearFieldError("categoryUuid");
+                }}
                 options={categorySelectOptions}
                 placeholder={catalogType === "DRINK" ? "ជ្រើសប្រភេទភេសជ្ជៈ..." : "ជ្រើសប្រភេទម្ហូប..."}
                 pill
               />
+              {fieldErrors.categoryUuid && (
+                <p className="mt-1 text-sm font-normal text-red-500">{fieldErrors.categoryUuid}</p>
+              )}
             </div>
 
             <div>
               <Label>ម្ហូបតាមប្រទេស *</Label>
               <CustomSelect
                 value={values.cuisineUuid}
-                onChange={(val) =>
+                onChange={(val) => {
                   setValues((current) => ({
                     ...current,
                     cuisineUuid: val,
-                  }))
-                }
+                  }));
+                  clearFieldError("cuisineUuid");
+                }}
                 options={cuisineSelectOptions}
                 placeholder="ជ្រើសម្ហូបតាមប្រទេស..."
                 pill
               />
+              {fieldErrors.cuisineUuid && (
+                <p className="mt-1 text-sm font-normal text-red-500">{fieldErrors.cuisineUuid}</p>
+              )}
             </div>
 
             {catalogType !== "DRINK" && (
@@ -1840,9 +1882,9 @@ export default function FoodFormModal({
             }
           />
 
-          {error && (
+          {serverError && (
             <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg font-normal text-red-600">
-              {error}
+              {serverError}
             </div>
           )}
 
@@ -1875,9 +1917,6 @@ export default function FoodFormModal({
     </div>
   );
 }
-
-const inputClass =
-  "h-12 w-full rounded-full border border-gray-200 bg-white px-5 text-lg font-normal text-gray-700 outline-none transition focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100 placeholder:text-gray-400 placeholder:font-normal";
 
 function Label({
   children,
@@ -1917,6 +1956,7 @@ function Field({
   type = "text",
   min = 0,
   step,
+  error,
 }: {
   label: string;
   value: string;
@@ -1924,6 +1964,7 @@ function Field({
   type?: string;
   min?: number | string;
   step?: number | string;
+  error?: string;
 }) {
   return (
     <div>
@@ -1943,8 +1984,13 @@ function Field({
           if (type === "number" && Number(val) < 0) return;
           onChange(val);
         }}
-        className={inputClass}
+        className={`h-12 w-full rounded-full border px-5 text-lg font-normal text-gray-700 outline-none transition placeholder:text-gray-400 placeholder:font-normal ${
+          error
+            ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+            : "border-gray-200 bg-white focus:border-[#137A3D] focus:ring-2 focus:ring-emerald-100"
+        }`}
       />
+      {error && <p className="mt-1 text-sm font-normal text-red-500">{error}</p>}
     </div>
   );
 }
