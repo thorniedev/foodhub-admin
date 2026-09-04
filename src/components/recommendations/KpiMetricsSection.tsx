@@ -9,11 +9,76 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react";
+
+import { cn } from "@/src/lib/utils";
+import { Card } from "@/src/components/ui/card";
+import { Skeleton } from "@/src/components/ui/skeleton";
 import { AdminKpiMetrics } from "@/src/types/adminRecommendation";
 
 interface KpiMetricsSectionProps {
   kpis: AdminKpiMetrics;
   loading?: boolean;
+}
+
+/**
+ * Shared shell for the five audit KPIs.
+ *
+ * Every card previously repeated the same twenty classes inline at `text-lg`
+ * for the label and `text-3xl` for the value, which made a four-word label like
+ * "Allergen Block Rate" wrap to two lines inside a card 200px wide.
+ */
+function KpiCard({
+  label,
+  icon,
+  iconClassName,
+  value,
+  valueClassName,
+  loading,
+  children,
+  className,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  iconClassName: string;
+  value: string;
+  valueClassName?: string;
+  loading?: boolean;
+  children?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <Card className={cn("gap-0 p-4 transition-colors", className)}>
+      <div className="flex items-start justify-between gap-2">
+        <span className="min-w-0 text-xs font-medium text-muted-foreground">
+          {label}
+        </span>
+        <span
+          aria-hidden="true"
+          className={cn(
+            "flex size-8 shrink-0 items-center justify-center rounded-lg",
+            iconClassName,
+          )}
+        >
+          {icon}
+        </span>
+      </div>
+
+      {loading ? (
+        <Skeleton className="mt-2.5 h-7 w-24" />
+      ) : (
+        <p
+          className={cn(
+            "mt-2.5 text-2xl leading-8 font-bold tracking-tight tabular-nums",
+            valueClassName ?? "text-foreground",
+          )}
+        >
+          {value}
+        </p>
+      )}
+
+      {children && <div className="mt-2">{children}</div>}
+    </Card>
+  );
 }
 
 export default function KpiMetricsSection({
@@ -27,141 +92,109 @@ export default function KpiMetricsSection({
   const soloPercent = totalModes > 0 ? Math.round((soloCount / totalModes) * 100) : 0;
   const groupPercent = totalModes > 0 ? 100 - soloPercent : 0;
 
+  const blockRate = Math.min(100, Math.max(0, kpis.safetyBlockRate ?? 0));
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-      {/* 1. Total Sessions */}
-      <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2.5 hover:border-blue-300 dark:hover:border-blue-800/60 transition duration-200">
-        <div className="flex items-center justify-between text-zinc-500">
-          <span className="text-lg font-normal uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            Total Sessions
-          </span>
-          <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
-            <Layers className="w-5 h-5" />
-          </div>
-        </div>
-        <div>
-          <p className="text-3xl font-medium text-zinc-800 dark:text-zinc-100">
-            {loading ? (
-              <span className="inline-block w-20 h-8 bg-zinc-200 dark:bg-zinc-800 animate-pulse rounded-full" />
-            ) : (
-              total.toLocaleString()
-            )}
-          </p>
-          <p className="text-lg font-normal text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1.5">
-            <TrendingUp className="w-4 h-4 text-blue-500" />
-            <span>Recorded recommendation runs</span>
-          </p>
-        </div>
-      </div>
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <KpiCard
+        label="Total Sessions"
+        icon={<Layers size={16} aria-hidden="true" />}
+        iconClassName="bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
+        value={total.toLocaleString()}
+        loading={loading}
+      >
+        <p className="flex items-center gap-1.5 text-[0.6875rem] text-muted-foreground">
+          <TrendingUp size={12} aria-hidden="true" className="text-blue-500" />
+          <span>Recorded recommendation runs</span>
+        </p>
+      </KpiCard>
 
-      {/* 2. Avg Response Time / Latency */}
-      <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2.5 hover:border-emerald-300 dark:hover:border-emerald-800/60 transition duration-200">
-        <div className="flex items-center justify-between text-zinc-500">
-          <span className="text-lg font-normal uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            Avg Latency
-          </span>
-          <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
-            <Clock className="w-5 h-5" />
-          </div>
-        </div>
-        <div>
-          <p className="text-3xl font-medium text-zinc-800 dark:text-zinc-100">
-            {loading ? (
-              <span className="inline-block w-24 h-8 bg-zinc-200 dark:bg-zinc-800 animate-pulse rounded-full" />
-            ) : (
-              `${kpis.avgLatencyMs || 0} ms`
-            )}
-          </p>
-          <p className="text-lg font-normal text-emerald-700 dark:text-emerald-400 mt-1">
-            Deterministic AI & filter pipeline
-          </p>
-        </div>
-      </div>
+      <KpiCard
+        label="Avg Latency"
+        icon={<Clock size={16} aria-hidden="true" />}
+        iconClassName="bg-primary-50 text-primary-700 dark:bg-primary-950/60 dark:text-primary-400"
+        value={`${kpis.avgLatencyMs || 0} ms`}
+        loading={loading}
+      >
+        <p className="text-[0.6875rem] text-muted-foreground">
+          Deterministic AI &amp; filter pipeline
+        </p>
+      </KpiCard>
 
-      {/* 3. Allergen Block Rate */}
-      <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2.5 hover:border-rose-300 dark:hover:border-rose-800/60 transition duration-200">
-        <div className="flex items-center justify-between text-zinc-500">
-          <span className="text-lg font-normal uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            Allergen Block Rate
-          </span>
-          <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400">
-            <ShieldAlert className="w-5 h-5" />
+      <KpiCard
+        label="Allergen Block Rate"
+        icon={<ShieldAlert size={16} aria-hidden="true" />}
+        iconClassName="bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400"
+        value={`${kpis.safetyBlockRate ?? 0}%`}
+        valueClassName="text-rose-600 dark:text-rose-400"
+        loading={loading}
+      >
+        <div className="space-y-1.5">
+          <div
+            role="meter"
+            aria-valuenow={Math.round(blockRate)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Allergen block rate"
+            className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+          >
+            <div
+              className="h-full rounded-full bg-rose-500 transition-all duration-500"
+              style={{ width: `${blockRate}%` }}
+            />
           </div>
-        </div>
-        <div>
-          <p className="text-3xl font-medium text-rose-600 dark:text-rose-400">
-            {loading ? (
-              <span className="inline-block w-20 h-8 bg-zinc-200 dark:bg-zinc-800 animate-pulse rounded-full" />
-            ) : (
-              `${kpis.safetyBlockRate}%`
-            )}
+          <p className="text-[0.6875rem] text-muted-foreground">
+            Zero-tolerance allergen filter
           </p>
-          <div className="mt-2 space-y-1">
-            <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-rose-500 h-full rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(100, Math.max(0, kpis.safetyBlockRate))}%` }}
+        </div>
+      </KpiCard>
+
+      <KpiCard
+        label="Mode Distribution"
+        icon={<Users size={16} aria-hidden="true" />}
+        iconClassName="bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400"
+        value={`${soloPercent}% / ${groupPercent}%`}
+        loading={loading}
+      >
+        {/* One stacked bar says the same thing as the two swatches below it and
+            makes the split readable without doing the arithmetic. */}
+        <div className="space-y-1.5">
+          <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div className="bg-blue-500" style={{ width: `${soloPercent}%` }} />
+            <div className="bg-purple-500" style={{ width: `${groupPercent}%` }} />
+          </div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem]">
+            <span className="inline-flex items-center gap-1 text-blue-700 dark:text-blue-400">
+              <span
+                aria-hidden="true"
+                className="size-1.5 rounded-full bg-blue-500"
               />
-            </div>
-            <p className="text-lg font-normal text-zinc-400 dark:text-zinc-500">
-              Zero-tolerance allergen filter
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Mode Distribution */}
-      <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2.5 hover:border-purple-300 dark:hover:border-purple-800/60 transition duration-200">
-        <div className="flex items-center justify-between text-zinc-500">
-          <span className="text-lg font-normal uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            Mode Distribution
-          </span>
-          <div className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
-            <Users className="w-5 h-5" />
-          </div>
-        </div>
-        <div>
-          <p className="text-3xl font-medium text-zinc-800 dark:text-zinc-100">
-            {loading ? (
-              <span className="inline-block w-28 h-8 bg-zinc-200 dark:bg-zinc-800 animate-pulse rounded-full" />
-            ) : (
-              `${soloPercent}% / ${groupPercent}%`
-            )}
-          </p>
-          <div className="mt-2 flex items-center gap-3 text-lg font-normal">
-            <span className="inline-flex items-center gap-1.5 text-blue-700 dark:text-blue-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block" /> Solo {soloPercent}%
+              Solo {soloPercent}%
             </span>
-            <span className="inline-flex items-center gap-1.5 text-purple-700 dark:text-purple-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block" /> Group {groupPercent}%
+            <span className="inline-flex items-center gap-1 text-purple-700 dark:text-purple-400">
+              <span
+                aria-hidden="true"
+                className="size-1.5 rounded-full bg-purple-500"
+              />
+              Group {groupPercent}%
             </span>
           </div>
         </div>
-      </div>
+      </KpiCard>
 
-      {/* 5. AI Strategy Health */}
-      <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2.5 hover:border-amber-300 dark:hover:border-amber-800/60 transition duration-200 sm:col-span-2 lg:col-span-1">
-        <div className="flex items-center justify-between text-zinc-500">
-          <span className="text-lg font-normal uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            AI Strategy Health
-          </span>
-          <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
-            <Sparkles className="w-5 h-5" />
-          </div>
-        </div>
-        <div>
-          <p className="text-3xl font-medium text-amber-600 dark:text-amber-400">
-            {loading ? (
-              <span className="inline-block w-20 h-8 bg-zinc-200 dark:bg-zinc-800 animate-pulse rounded-full" />
-            ) : (
-              `${kpis.aiStrategyHealthRate ?? 0}%`
-            )}
-          </p>
-          <p className="text-lg font-normal text-zinc-400 dark:text-zinc-500 mt-1">
-            Active multi-strategy scoring
-          </p>
-        </div>
-      </div>
+      <KpiCard
+        label="AI Strategy Health"
+        icon={<Sparkles size={16} aria-hidden="true" />}
+        iconClassName="bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400"
+        value={`${kpis.aiStrategyHealthRate ?? 0}%`}
+        valueClassName="text-amber-600 dark:text-amber-400"
+        loading={loading}
+        className="sm:col-span-2 lg:col-span-1"
+      >
+        <p className="text-[0.6875rem] text-muted-foreground">
+          Active multi-strategy scoring
+        </p>
+      </KpiCard>
     </div>
   );
 }

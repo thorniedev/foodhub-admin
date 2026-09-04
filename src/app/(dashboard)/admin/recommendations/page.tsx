@@ -4,28 +4,19 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
-  Sparkles,
   Search,
   RefreshCw,
   Eye,
-  Copy,
-  Check,
-  User,
   Users,
-  Clock,
   Zap,
-  Filter,
   ChevronLeft,
   ChevronRight,
-  AlertTriangle,
   Info,
-  ShieldCheck,
   Utensils,
   Layers,
 } from "lucide-react";
 import {
   AdminSessionSummary,
-  AdminSessionDetail,
   AdminKpiMetrics,
 } from "@/src/types/adminRecommendation";
 import {
@@ -42,6 +33,13 @@ import {
   TableHead,
   TableCell,
 } from "@/src/components/ui/table";
+import { Button } from "@/src/components/ui/button";
+import { Badge } from "@/src/components/ui/badge";
+import { cn } from "@/src/lib/utils";
+
+/** Shared select styling for the two filter dropdowns. */
+const selectClassName =
+  "h-9 cursor-pointer rounded-lg border bg-background px-2.5 text-xs text-foreground outline-none transition hover:border-primary/40 focus:border-primary focus:ring-2 focus:ring-ring/25";
 
 /**
  * Format user identity nicely with username, full name, or smart fallback
@@ -114,7 +112,6 @@ export default function AdminRecommendationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [copiedUuid, setCopiedUuid] = useState<string | null>(null);
 
   // 1. Fetch sessions from API
   const loadSessions = useCallback(async () => {
@@ -168,62 +165,58 @@ export default function AdminRecommendationsPage() {
     router.push(`/admin/recommendations/${session.uuid}`);
   };
 
-  // 1-click UUID copy helper
-  const handleCopyUuid = (uuid: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(uuid);
-    setCopiedUuid(uuid);
-    setTimeout(() => setCopiedUuid(null), 2000);
-  };
-
   return (
-    <div className="space-y-5 pb-8 w-full">
+    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-4 pb-8">
       {/* Header Section */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-zinc-200/80 dark:border-zinc-800">
-        <div>
-          <h1 className="text-3xl font-medium flex items-center gap-3 text-zinc-800 dark:text-zinc-100">
-            <div className="p-2.5 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 shadow-sm flex items-center justify-center">
-              <Image
-                src="/Image/ai-recommendation.png"
-                alt="AI Recommendation & Safety Audit"
-                width={28}
-                height={28}
-                className="w-7 h-7 object-contain dark:invert"
-                priority
-              />
-            </div>
-            AI Recommendation & Safety Audit
-          </h1>
-          <p className="text-lg font-normal text-zinc-500 dark:text-zinc-400 mt-1">
-            Real-time audit log of AI recommendations, multi-strategy score breakdowns, and zero-tolerance allergen safety decisions.
-          </p>
+      <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 border-b pb-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <span
+            aria-hidden="true"
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400"
+          >
+            <Image
+              src="/Image/ai-recommendation.png"
+              alt=""
+              width={20}
+              height={20}
+              className="size-5 object-contain dark:invert"
+              priority
+            />
+          </span>
+
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+              AI Recommendation &amp; Safety Audit
+            </h1>
+            <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+              Real-time audit log of AI recommendations, multi-strategy score
+              breakdowns, and zero-tolerance allergen safety decisions.
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={loadSessions}
-            disabled={loading}
-            className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-zinc-800 hover:bg-zinc-700 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 px-6 text-lg font-normal transition shadow-sm disabled:opacity-50"
-          >
-            <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
-            <span>Refresh</span>
-          </button>
-        </div>
-      </div>
+        <Button type="button" variant="outline" size="sm" onClick={loadSessions} disabled={loading}>
+          <RefreshCw size={14} className={loading ? "animate-spin" : undefined} aria-hidden="true" />
+          <span>Refresh</span>
+        </Button>
+      </header>
 
       {fetchError && (
-        <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 rounded-3xl flex items-center justify-between text-lg font-normal text-amber-800 dark:text-amber-300">
-          <div className="flex items-center gap-2.5">
-            <Info className="w-5 h-5 text-amber-600 flex-shrink-0" />
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300"
+        >
+          <div className="flex min-w-0 items-center gap-2">
+            <Info size={15} aria-hidden="true" className="shrink-0 text-amber-600 dark:text-amber-400" />
             <span>
-              <strong>Live backend unavailable:</strong> No mock recommendation sessions are shown in production mode.
+              <strong className="font-semibold">Live backend unavailable:</strong>{" "}
+              No mock recommendation sessions are shown in production mode.
             </span>
           </div>
           <button
             type="button"
             onClick={loadSessions}
-            className="font-medium underline hover:text-amber-900 ml-4 flex-shrink-0 cursor-pointer text-lg"
+            className="shrink-0 cursor-pointer font-medium underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-200"
           >
             Retry Connection
           </button>
@@ -234,57 +227,52 @@ export default function AdminRecommendationsPage() {
       <KpiMetricsSection kpis={kpis} loading={loading} />
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white dark:bg-zinc-900 p-5 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl shadow-sm">
-        {/* Search */}
-        <div className="flex items-center gap-3 flex-1 min-w-[280px]">
-          <div className="relative w-full max-w-md">
-            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
-            <input
-              type="text"
-              placeholder="Search by Username, User ID, or UUID..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(0);
-              }}
-              className="w-full h-12 pl-11 pr-5 border border-zinc-200 dark:border-zinc-700 bg-zinc-50/70 dark:bg-zinc-800 rounded-full text-lg font-normal text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
-            />
-          </div>
+      <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl border bg-card p-3 shadow-card">
+        <div className="relative min-w-[16rem] flex-1 sm:max-w-sm">
+          <Search
+            size={15}
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
+          />
+          <input
+            type="search"
+            aria-label="Search sessions"
+            placeholder="Search by username, user ID, or UUID..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(0);
+            }}
+            className="h-9 w-full rounded-lg border bg-background pr-3 pl-9 text-xs text-foreground outline-none transition placeholder:text-muted-foreground/70 hover:border-primary/40 focus:border-primary focus:ring-2 focus:ring-ring/25"
+          />
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Mode Filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-normal text-zinc-500 uppercase tracking-wider hidden sm:inline">
-              Mode:
-            </span>
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-[0.6875rem] font-medium text-muted-foreground">Mode</span>
             <select
               value={modeFilter}
               onChange={(e) => {
                 setModeFilter(e.target.value);
                 setPage(0);
               }}
-              className="h-12 px-4 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-full text-lg font-normal text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+              className={selectClassName}
             >
               <option value="ALL">All Modes</option>
-              <option value="SINGLE">🍽️ Solo Rec (Single)</option>
-              <option value="GROUP">👥 Group Dining</option>
+              <option value="SINGLE">Solo Rec (Single)</option>
+              <option value="GROUP">Group Dining</option>
             </select>
-          </div>
+          </label>
 
-          {/* Status Filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-normal text-zinc-500 uppercase tracking-wider hidden sm:inline">
-              Status:
-            </span>
+          <label className="flex flex-col gap-1">
+            <span className="text-[0.6875rem] font-medium text-muted-foreground">Status</span>
             <select
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
                 setPage(0);
               }}
-              className="h-12 px-4 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-full text-lg font-normal text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+              className={selectClassName}
             >
               <option value="ALL">All Statuses</option>
               <option value="READY">Ready</option>
@@ -293,34 +281,37 @@ export default function AdminRecommendationsPage() {
               <option value="PENDING">Pending</option>
               <option value="FAILED">Failed</option>
             </select>
-          </div>
+          </label>
         </div>
       </div>
 
       {/* ShadCN Sessions Explorer Table */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl shadow-xs overflow-hidden">
-        <Table>
-          <TableHeader className="bg-zinc-50/80 dark:bg-zinc-800/60 border-b border-zinc-200/80 dark:border-zinc-800">
+      <div className="overflow-hidden rounded-xl border bg-card shadow-card">
+        {/* The Action column used to be clipped off the right edge on anything
+            narrower than ~1500px because the wrapper hid its overflow. */}
+        <div className="overflow-x-auto">
+        <Table className="min-w-[1020px]">
+          <TableHeader className="border-b bg-muted/60">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="py-3.5 px-5 font-normal text-lg text-primary-800 dark:text-zinc-400">
+              <TableHead className="px-4 py-2.5 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground">
                 Session Type & Info
               </TableHead>
-              <TableHead className="py-3.5 px-5 font-normal text-lg text-primary-800 dark:text-zinc-400">
+              <TableHead className="px-4 py-2.5 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground">
                 User / Requester
               </TableHead>
-              <TableHead className="py-3.5 px-5 font-normal text-lg text-primary-800 dark:text-zinc-400">
+              <TableHead className="px-4 py-2.5 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground">
                 Safety Filter Rate
               </TableHead>
-              <TableHead className="py-3.5 px-5 font-normal text-lg text-primary-800 dark:text-zinc-400">
+              <TableHead className="px-4 py-2.5 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground">
                 Latency
               </TableHead>
-              <TableHead className="py-3.5 px-5 font-normal text-lg text-primary-800 dark:text-zinc-400">
+              <TableHead className="px-4 py-2.5 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground">
                 Status
               </TableHead>
-              <TableHead className="py-3.5 px-5 font-normal text-lg text-primary-800 dark:text-zinc-400">
+              <TableHead className="px-4 py-2.5 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground">
                 Date & Time
               </TableHead>
-              <TableHead className="py-3.5 px-5 text-right font-normal text-lg text-primary-800 dark:text-zinc-400">
+              <TableHead className="px-4 py-2.5 text-right text-[0.6875rem] font-semibold tracking-wide text-muted-foreground">
                 Action
               </TableHead>
             </TableRow>
@@ -340,7 +331,6 @@ export default function AdminRecommendationsPage() {
                 const latency = getSessionLatency(session);
 
                 const userDisplay = getUserDisplay(session);
-                const shortUuid = `${session.uuid.substring(0, 8)}...${session.uuid.substring(session.uuid.length - 4)}`;
 
                 // Format timestamp
                 const rawTimestamp = session.createdAt || session.startedAt;
@@ -364,20 +354,21 @@ export default function AdminRecommendationsPage() {
                   <TableRow
                     key={session.uuid}
                     onClick={() => handleInspect(session)}
-                    className="cursor-pointer group hover:bg-gray-50/70 dark:hover:bg-amber-950/20 transition duration-150"
+                    className="group cursor-pointer transition-colors hover:bg-muted/50"
                   >
                     {/* Session Type & UUID Subtitle */}
-                    <TableCell className="px-5 py-4">
+                    <TableCell className="px-4 py-2.5">
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`inline-flex items-center gap-2 text-lg font-normal px-4 py-1 rounded-full border shadow-xs ${
+                            className={cn(
+                              "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[0.6875rem] font-medium whitespace-nowrap",
                               isGroup
-                                ? "bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800"
-                                : "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800"
-                            }`}
+                                ? "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-950/60 dark:text-purple-300"
+                                : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300",
+                            )}
                           >
-                            {isGroup ? <Users className="w-5 h-5" /> : <Utensils className="w-5 h-5" />}
+                            {isGroup ? <Users size={12} aria-hidden="true" /> : <Utensils size={12} aria-hidden="true" />}
                             <span>{isGroup ? "Group Dining" : "Solo Recommendation"}</span>
                           </span>
                         </div>
@@ -386,18 +377,21 @@ export default function AdminRecommendationsPage() {
                     </TableCell>
 
                     {/* User / Requester */}
-                    <TableCell className="px-5 py-4">
-                      <div className="flex items-center gap-3.5">
+                    <TableCell className="px-4 py-2.5">
+                      <div className="flex items-center gap-2.5">
                         <div
-                          className={`w-12 h-12 rounded-full flex items-center justify-center font-normal text-lg border shrink-0 ${userDisplay.colorTheme.bg}`}
+                          className={cn(
+                            "flex size-8 shrink-0 items-center justify-center rounded-full border text-[0.6875rem] font-semibold",
+                            userDisplay.colorTheme.bg,
+                          )}
                         >
                           {userDisplay.initial}
                         </div>
-                        <div className="space-y-0.5 min-w-0">
-                          <p className="text-xl font-medium text-zinc-800 dark:text-zinc-100 truncate">
+                        <div className="min-w-0">
+                          <p className="truncate text-[0.8125rem] font-medium text-foreground" title={userDisplay.primary}>
                             {userDisplay.primary}
                           </p>
-                          <p className="text-lg font-normal text-zinc-400 dark:text-zinc-500 truncate">
+                          <p className="truncate text-[0.6875rem] text-muted-foreground" title={userDisplay.secondary}>
                             {userDisplay.secondary}
                           </p>
                         </div>
@@ -405,27 +399,32 @@ export default function AdminRecommendationsPage() {
                     </TableCell>
 
                     {/* Safety Filter Rate */}
-                    <TableCell className="px-5 py-4">
-                      <div className="space-y-2 min-w-[170px]">
-                        <div className="flex items-center justify-between text-lg font-normal">
-                          <span className="text-emerald-700 dark:text-emerald-400">
-                            {safeCandidates} <span className="text-zinc-400 font-normal">/ {totalCandidates} Safe</span>
+                    <TableCell className="px-4 py-2.5">
+                      <div className="min-w-[9rem] space-y-1.5">
+                        <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
+                          <span className="font-semibold text-primary-700 tabular-nums dark:text-primary-400">
+                            {safeCandidates}
+                            <span className="font-normal text-muted-foreground">
+                              {" "}/ {totalCandidates} Safe
+                            </span>
                           </span>
-                          <span
-                            className={`text-lg font-normal px-2.5 py-0.5 rounded-full ${
-                              safeRate === 100
-                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                                : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
-                            }`}
-                          >
+                          <Badge tone={safeRate === 100 ? "green" : "amber"} size="sm">
                             {safeRate}%
-                          </span>
+                          </Badge>
                         </div>
-                        <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
+                        <div
+                          role="meter"
+                          aria-valuenow={safeRate}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-label="Safety filter rate"
+                          className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+                        >
                           <div
-                            className={`h-full rounded-full transition-all duration-300 ${
-                              safeRate === 100 ? "bg-emerald-500" : "bg-amber-500"
-                            }`}
+                            className={cn(
+                              "h-full rounded-full transition-all duration-300",
+                              safeRate === 100 ? "bg-primary-500" : "bg-amber-500",
+                            )}
                             style={{ width: `${Math.min(100, Math.max(0, safeRate))}%` }}
                           />
                         </div>
@@ -433,136 +432,149 @@ export default function AdminRecommendationsPage() {
                     </TableCell>
 
                     {/* Latency with Zap badge */}
-                    <TableCell className="px-5 py-4">
-                      <span className="inline-flex items-center gap-1.5 font-normal text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800/60 px-4 py-1 rounded-full text-lg font-mono">
-                        <Zap className="w-4 h-4 text-emerald-500 fill-emerald-500" />
+                    <TableCell className="px-4 py-2.5">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-primary-200 bg-primary-50 px-2 py-0.5 text-[0.6875rem] font-medium whitespace-nowrap text-primary-800 tabular-nums dark:border-primary-800/60 dark:bg-primary-950/50 dark:text-primary-300">
+                        <Zap size={11} aria-hidden="true" className="fill-primary-500 text-primary-500" />
                         <span>{latency} ms</span>
                       </span>
                     </TableCell>
 
                     {/* Status */}
-                    <TableCell className="px-5 py-4">
+                    <TableCell className="px-4 py-2.5">
                       <span
-                        className={`inline-flex items-center gap-2 text-lg font-normal px-4 py-1 rounded-full border shadow-xs ${
+                        className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[0.6875rem] font-medium whitespace-nowrap",
                           isReady
-                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                            ? "border-primary-200 bg-primary-50 text-primary-800 dark:border-primary-800 dark:bg-primary-950/60 dark:text-primary-300"
                             : isFailed
-                            ? "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800"
-                            : isProcessing
-                            ? "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800"
-                            : "bg-zinc-50 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700"
-                        }`}
+                              ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
+                              : isProcessing
+                                ? "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                                : "border-border bg-muted text-muted-foreground",
+                        )}
                       >
                         <span
-                          className={`w-2.5 h-2.5 rounded-full ${
+                          aria-hidden="true"
+                          className={cn(
+                            "size-1.5 rounded-full",
                             isReady
-                              ? "bg-emerald-500 animate-pulse"
+                              ? "bg-primary-500"
                               : isFailed
-                              ? "bg-rose-500"
-                              : "bg-amber-500 animate-pulse"
-                          }`}
+                                ? "bg-rose-500"
+                                : "animate-pulse bg-amber-500",
+                          )}
                         />
                         <span>{session.status}</span>
                       </span>
                     </TableCell>
 
                     {/* Date & Time */}
-                    <TableCell className="px-5 py-4">
-                      <div className="space-y-0.5">
-                        <p className="text-lg font-normal text-zinc-800 dark:text-zinc-100">
+                    <TableCell className="px-4 py-2.5">
+                      <div className="whitespace-nowrap">
+                        <p className="text-[0.8125rem] text-foreground tabular-nums">
                           {formattedDate}
                         </p>
-                        <p className="text-lg font-normal text-zinc-400 dark:text-zinc-500">
+                        <p className="text-[0.6875rem] text-muted-foreground tabular-nums">
                           {formattedTime}
                         </p>
                       </div>
                     </TableCell>
 
                     {/* Action */}
-                    <TableCell className="px-5 py-4 text-right">
-                      <button
+                    <TableCell className="px-4 py-2.5 text-right">
+                      <Button
                         type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleInspect(session);
                         }}
-                        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-5 text-lg font-normal text-amber-700 shadow-xs transition hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-400 dark:hover:bg-amber-900/60"
                       >
-                        <Eye className="w-5 h-5" />
+                        <Eye size={13} aria-hidden="true" />
                         <span>Inspect</span>
-                      </button>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="h-48 text-center">
-                  <div className="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 gap-2">
-                    <Layers className="w-8 h-8 opacity-40" />
-                    <p className="text-xl font-medium">No recommendation sessions found</p>
-                    <p className="text-lg font-normal">Try adjusting your filters or search keywords</p>
+                <TableCell colSpan={7} className="h-40 text-center">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <span className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                      <Layers size={18} aria-hidden="true" />
+                    </span>
+                    <p className="text-sm font-semibold text-foreground">
+                      No recommendation sessions found
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Try adjusting your filters or search keywords
+                    </p>
                   </div>
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
+        </div>
 
         {/* Pagination Bar */}
         {totalElements > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-t border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 text-lg font-normal text-zinc-500 dark:text-zinc-400">
-            <div className="flex items-center gap-2">
-              <span>Showing</span>
-              <span className="font-medium text-zinc-800 dark:text-zinc-100">
-                {page * pageSize + 1} - {Math.min(totalElements, (page + 1) * pageSize)}
-              </span>
-              <span>of</span>
-              <span className="font-medium text-zinc-800 dark:text-zinc-100">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/40 px-4 py-2.5 text-[0.6875rem] text-muted-foreground">
+            <p className="tabular-nums" aria-live="polite">
+              Showing{" "}
+              <span className="font-semibold text-foreground">
+                {page * pageSize + 1}–{Math.min(totalElements, (page + 1) * pageSize)}
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-foreground">
                 {totalElements.toLocaleString()}
-              </span>
-              <span>sessions</span>
-            </div>
+              </span>{" "}
+              sessions
+            </p>
 
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-3">
               {/* Page size selector */}
-              <div className="flex items-center gap-2">
-                <span>Per page:</span>
+              <label className="flex items-center gap-1.5">
+                <span>Per page</span>
                 <select
                   value={pageSize}
                   onChange={(e) => {
                     setPageSize(Number(e.target.value));
                     setPage(0);
                   }}
-                  className="h-10 px-3.5 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-full text-lg font-normal text-zinc-800 dark:text-zinc-200 focus:outline-none cursor-pointer"
+                  className="h-8 cursor-pointer rounded-lg border bg-background px-2 text-xs text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-ring/25"
                 >
                   <option value={10}>10</option>
                   <option value={15}>15</option>
                   <option value={25}>25</option>
                   <option value={50}>50</option>
                 </select>
-              </div>
+              </label>
 
               {/* Page navigation */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
+                  aria-label="Previous page"
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0 || loading}
-                  className="h-10 w-10 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                  className="flex size-8 cursor-pointer items-center justify-center rounded-lg border text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft size={15} aria-hidden="true" />
                 </button>
-                <span className="px-3 py-1 font-medium text-zinc-800 dark:text-zinc-200">
+                <span className="px-2 font-medium text-foreground tabular-nums">
                   {page + 1} / {Math.max(1, totalPages)}
                 </span>
                 <button
                   type="button"
+                  aria-label="Next page"
                   onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                   disabled={page >= totalPages - 1 || loading}
-                  className="h-10 w-10 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                  className="flex size-8 cursor-pointer items-center justify-center rounded-lg border text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight size={15} aria-hidden="true" />
                 </button>
               </div>
             </div>

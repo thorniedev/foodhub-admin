@@ -9,11 +9,16 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <div className="h-screen w-full overflow-hidden bg-gray-50 flex">
+      {/* `bg-canvas` sits one step below `bg-card`, so the cards inside read as
+          raised. It was `bg-gray-50`, which pinned the shell to a light value
+          regardless of theme. */}
+      <div className="flex h-screen w-full overflow-hidden bg-canvas">
         <Sidebar />
-        <div className="flex-1 h-screen flex flex-col overflow-hidden min-w-0">
+        <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
           <Topbar />
-          <main className="flex-1 overflow-y-auto no-scrollbar p-4">{children}</main>
+          {/* The scrollbar is visible here now: this column can run several
+              screens deep and the hidden bar removed the only cue for how far. */}
+          <main className="flex-1 overflow-y-auto p-4">{children}</main>
         </div>
       </div>
     </SidebarProvider>

@@ -2,11 +2,8 @@
 
 import React, { useMemo } from "react";
 import {
-  Search,
-  Filter,
   RotateCcw,
   RefreshCw,
-  Calendar,
   Layers,
   User,
   Hash,
@@ -18,6 +15,18 @@ import {
   ENTITY_TYPE_CONFIGS,
   getActionsForEntityType,
 } from "../constants/audit-log-dictionary";
+import ActorUserPicker from "./actor-user-picker";
+import CatalogEntityPicker from "./catalog-entity-picker";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import { useGetFoodCategoriesQuery } from "@/src/app/store/foodCategoryApi";
+import { useGetCuisinesQuery } from "@/src/app/store/cuisineApi";
+
+/** Large enough to hold the full directory in one page; see catalog-entity-picker.tsx. */
+const CATALOG_PAGE_SIZE = 500;
+
+const controlClassName =
+  "h-9 w-full rounded-lg border bg-background px-2.5 text-xs text-foreground outline-none transition hover:border-primary/40 focus:border-primary focus:ring-2 focus:ring-ring/25";
 
 interface AuditLogFiltersProps {
   filters: AuditLogFilterParams;
@@ -42,6 +51,21 @@ export default function AuditLogFilters({
   const availableActions = useMemo(() => {
     return getActionsForEntityType(filters.entityType);
   }, [filters.entityType]);
+
+  // Fed to CatalogEntityPicker below. Fetched unconditionally — hooks can't
+  // be called only when their entity type is selected — but both catalogs are
+  // small, so this is one lightweight request each, not a scaling concern.
+  const { data: foodCategoriesPage, isFetching: categoriesLoading } =
+    useGetFoodCategoriesQuery({ page: 0, size: CATALOG_PAGE_SIZE });
+  const { data: cuisinesPage, isFetching: cuisinesLoading } = useGetCuisinesQuery({
+    page: 0,
+    size: CATALOG_PAGE_SIZE,
+  });
+  const foodCategories = useMemo(
+    () => foodCategoriesPage?.contents ?? [],
+    [foodCategoriesPage],
+  );
+  const cuisines = useMemo(() => cuisinesPage?.contents ?? [], [cuisinesPage]);
 
   // Count active non-default filters
   const activeFilterCount = useMemo(() => {
@@ -108,13 +132,13 @@ export default function AuditLogFilters({
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-900 p-5 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl shadow-xs space-y-4">
+    <div className="space-y-3 rounded-xl border bg-card p-4 shadow-card">
       {/* Top row: Primary Filters (Entity Type, Action Code, Actor UUID, Entity ID) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {/* 1. Entity Type Dropdown */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5 text-zinc-400" />
+          <label className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-muted-foreground">
+            <Layers size={12} aria-hidden="true" />
             <span>Entity Type</span>
           </label>
           <select
@@ -125,9 +149,15 @@ export default function AuditLogFilters({
                 entityType: val,
                 // Reset action code if not in chosen entity type
                 actionCode: "ALL",
+                // An id is only meaningful within the entity type it was
+                // picked for — #55 is a Food Category in one type and an
+                // unrelated Cuisine (or nothing) in another. Carrying it
+                // across a type change would silently filter by the wrong
+                // target instead of visibly resetting.
+                entityId: undefined,
               });
             }}
-            className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            className={`${controlClassName} cursor-pointer`}
           >
             <option value="ALL">All Entity Types</option>
             {Object.keys(ENTITY_TYPE_CONFIGS).map((type) => {
@@ -143,14 +173,14 @@ export default function AuditLogFilters({
 
         {/* 2. Action Code Dropdown */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 flex items-center gap-1.5">
-            <Activity className="w-3.5 h-3.5 text-zinc-400" />
+          <label className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-muted-foreground">
+            <Activity size={12} aria-hidden="true" />
             <span>Action Code</span>
           </label>
           <select
             value={filters.actionCode || "ALL"}
             onChange={(e) => onFilterChange({ actionCode: e.target.value })}
-            className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            className={`${controlClassName} cursor-pointer`}
           >
             <option value="ALL">All Action Codes</option>
             {availableActions.map((action) => (
@@ -161,70 +191,79 @@ export default function AuditLogFilters({
           </select>
         </div>
 
-        {/* 3. Actor UUID Input */}
+        {/* 3. Actor — searched by name, submitted as a UUID */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 flex items-center gap-1.5">
-            <User className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Actor User UUID</span>
+          <label className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-muted-foreground">
+            <User size={12} aria-hidden="true" />
+            <span>Actor (user)</span>
           </label>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="e.g. 7b6f72c0-8d5f..."
-              value={filters.actorUuid || ""}
-              onChange={(e) => onFilterChange({ actorUuid: e.target.value })}
-              className="w-full pl-3 pr-8 py-2 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs font-mono text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
-            />
-            {filters.actorUuid && (
-              <button
-                type="button"
-                onClick={() => onFilterChange({ actorUuid: "" })}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+          <ActorUserPicker
+            value={filters.actorUuid || ""}
+            onChange={(actorUuid) => onFilterChange({ actorUuid })}
+          />
         </div>
 
-        {/* 4. Entity ID Input */}
+        {/* 4. Entity Target — a name picker for the two catalog types whose
+               list endpoint actually returns a numeric id (verified against
+               the live API), a plain numeric field for every other type. */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 flex items-center gap-1.5">
-            <Hash className="w-3.5 h-3.5 text-zinc-400" />
+          <label className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-muted-foreground">
+            <Hash size={12} aria-hidden="true" />
             <span>Entity Target ID</span>
           </label>
-          <div className="relative">
-            <input
-              type="number"
-              min="1"
-              placeholder="e.g. 42"
-              value={filters.entityId !== undefined && filters.entityId !== null ? filters.entityId : ""}
-              onChange={(e) => {
-                const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
-                onFilterChange({ entityId: val });
-              }}
-              className="w-full pl-3 pr-8 py-2 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs font-medium text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+          {filters.entityType === "FOOD_CATEGORY" ? (
+            <CatalogEntityPicker
+              value={filters.entityId ?? undefined}
+              onChange={(entityId) => onFilterChange({ entityId })}
+              entities={foodCategories}
+              isLoading={categoriesLoading}
+              placeholder="Search food category…"
+              emptyLabel="No matching food categories."
             />
-            {filters.entityId !== undefined && (
-              <button
-                type="button"
-                onClick={() => onFilterChange({ entityId: undefined })}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+          ) : filters.entityType === "CUISINE" ? (
+            <CatalogEntityPicker
+              value={filters.entityId ?? undefined}
+              onChange={(entityId) => onFilterChange({ entityId })}
+              entities={cuisines}
+              isLoading={cuisinesLoading}
+              placeholder="Search cuisine…"
+              emptyLabel="No matching cuisines."
+            />
+          ) : (
+            <div className="relative">
+              <input
+                type="number"
+                min="1"
+                placeholder="e.g. 42"
+                value={filters.entityId !== undefined && filters.entityId !== null ? filters.entityId : ""}
+                onChange={(e) => {
+                  const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
+                  onFilterChange({ entityId: val });
+                }}
+                className={`${controlClassName} pr-7`}
+              />
+              {filters.entityId !== undefined && (
+                <button
+                  type="button"
+                  aria-label="Clear entity ID"
+                  onClick={() => onFilterChange({ entityId: undefined })}
+                  className="absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer rounded p-0.5 text-muted-foreground transition hover:text-foreground"
+                >
+                  <X size={13} aria-hidden="true" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Bottom row: Date Range & Action Buttons */}
-      <div className="flex flex-wrap items-end justify-between gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-t pt-3">
         {/* Date Range Fields & Presets */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="space-y-1">
-              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block">
+              <span className="block text-[0.6875rem] font-medium text-muted-foreground">
                 From Date
               </span>
               <div className="relative">
@@ -232,15 +271,15 @@ export default function AuditLogFilters({
                   type="datetime-local"
                   value={formatForInput(filters.from)}
                   onChange={(e) => handleDateInput("from", e.target.value)}
-                  className="px-2.5 py-1.5 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className={controlClassName}
                 />
               </div>
             </div>
 
-            <span className="text-zinc-400 text-xs mt-5">to</span>
+            <span className="mt-5 text-xs text-muted-foreground">to</span>
 
             <div className="space-y-1">
-              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block">
+              <span className="block text-[0.6875rem] font-medium text-muted-foreground">
                 To Date
               </span>
               <div className="relative">
@@ -248,7 +287,7 @@ export default function AuditLogFilters({
                   type="datetime-local"
                   value={formatForInput(filters.to)}
                   onChange={(e) => handleDateInput("to", e.target.value)}
-                  className="px-2.5 py-1.5 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className={controlClassName}
                 />
               </div>
             </div>
@@ -259,28 +298,28 @@ export default function AuditLogFilters({
             <button
               type="button"
               onClick={() => applyDatePreset("TODAY")}
-              className="px-2 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium transition cursor-pointer"
+              className="cursor-pointer rounded-md bg-muted px-2 py-1 text-[0.6875rem] font-medium text-muted-foreground transition hover:bg-muted/70 hover:text-foreground"
             >
               Today
             </button>
             <button
               type="button"
               onClick={() => applyDatePreset("LAST_24H")}
-              className="px-2 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium transition cursor-pointer"
+              className="cursor-pointer rounded-md bg-muted px-2 py-1 text-[0.6875rem] font-medium text-muted-foreground transition hover:bg-muted/70 hover:text-foreground"
             >
               Last 24h
             </button>
             <button
               type="button"
               onClick={() => applyDatePreset("LAST_7D")}
-              className="px-2 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium transition cursor-pointer"
+              className="cursor-pointer rounded-md bg-muted px-2 py-1 text-[0.6875rem] font-medium text-muted-foreground transition hover:bg-muted/70 hover:text-foreground"
             >
               Last 7 Days
             </button>
             <button
               type="button"
               onClick={() => applyDatePreset("LAST_30D")}
-              className="px-2 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium transition cursor-pointer"
+              className="cursor-pointer rounded-md bg-muted px-2 py-1 text-[0.6875rem] font-medium text-muted-foreground transition hover:bg-muted/70 hover:text-foreground"
             >
               Last 30 Days
             </button>
@@ -288,7 +327,7 @@ export default function AuditLogFilters({
               <button
                 type="button"
                 onClick={() => onFilterChange({ from: "", to: "" })}
-                className="px-2 py-1 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-[11px] font-medium transition cursor-pointer"
+                className="cursor-pointer rounded-md px-2 py-1 text-[0.6875rem] font-medium text-destructive transition hover:bg-red-50 dark:hover:bg-red-950/40"
               >
                 Clear Dates
               </button>
@@ -299,26 +338,17 @@ export default function AuditLogFilters({
         {/* Action Buttons (Reset & Refresh) */}
         <div className="flex items-center gap-2">
           {activeFilterCount > 0 && (
-            <button
-              type="button"
-              onClick={onReset}
-              disabled={loading}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5 text-zinc-500" />
-              <span>Reset ({activeFilterCount})</span>
-            </button>
+            <Button type="button" variant="outline" size="sm" onClick={onReset} disabled={loading}>
+              <RotateCcw size={13} aria-hidden="true" />
+              <span>Reset</span>
+              <Badge tone="neutral" size="sm">{activeFilterCount}</Badge>
+            </Button>
           )}
 
-          <button
-            type="button"
-            onClick={onRefresh}
-            disabled={loading}
-            className="flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-xs font-semibold transition shadow-xs disabled:opacity-50 cursor-pointer"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            <span>Apply & Refresh</span>
-          </button>
+          <Button type="button" size="sm" onClick={onRefresh} disabled={loading}>
+            <RefreshCw size={13} aria-hidden="true" className={loading ? "animate-spin" : undefined} />
+            <span>Apply &amp; Refresh</span>
+          </Button>
         </div>
       </div>
     </div>
