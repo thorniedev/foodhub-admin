@@ -49,16 +49,23 @@ export default function TopStoresTable({
       {
         id: "store",
         header: "ហាង",
+        // Capped so the name column stops absorbing the table's spare width
+        // and squeezing every numeric column to its right.
+        meta: { width: "26%" },
         cell: ({ row }) => (
-          <div className="min-w-0">
+          <div className="min-w-0 max-w-[22rem]">
             <Link
               href={`/shops/${row.original.storeUuid}`}
-              className="truncate text-sm font-medium text-primary-700 underline-offset-2 hover:underline hover:text-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              title={row.original.storeName}
+              className="block truncate font-medium text-primary underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
               {row.original.storeName}
             </Link>
             {row.original.address && (
-              <p className="truncate text-xs text-muted-foreground">
+              <p
+                className="truncate text-[0.6875rem] text-muted-foreground"
+                title={row.original.address}
+              >
                 {row.original.address}
               </p>
             )}
@@ -68,16 +75,28 @@ export default function TopStoresTable({
       {
         id: "city",
         header: "ក្រុង",
-        meta: { hideOnMobile: true },
-        cell: ({ row }) => row.original.city ?? "—",
+        meta: { hideOnMobile: true, width: "11%" },
+        cell: ({ row }) => (
+          <span className="block truncate" title={row.original.city ?? undefined}>
+            {row.original.city ?? "—"}
+          </span>
+        ),
       },
       {
         id: "rating",
         header: "វាយតម្លៃ",
-        meta: { align: "right" },
+        meta: { align: "right", width: "8%" },
         cell: ({ row }) => (
           <span className="inline-flex items-center justify-end gap-1">
-            <Star size={14} aria-hidden="true" className="text-amber-500" />
+            <Star
+              size={12}
+              aria-hidden="true"
+              className={
+                row.original.rating > 0
+                  ? "fill-amber-400 text-amber-500"
+                  : "text-muted-foreground/40"
+              }
+            />
             {formatDecimal(row.original.rating)}
           </span>
         ),
@@ -85,38 +104,40 @@ export default function TopStoresTable({
       {
         id: "storeViews",
         header: "ការមើល",
-        meta: { align: "right" },
+        meta: { align: "right", width: "8%" },
         cell: ({ row }) => formatCount(row.original.storeViews),
       },
       {
         id: "clickThroughRate",
         header: "CTR",
-        meta: { align: "right" },
+        meta: { align: "right", width: "7%" },
         cell: ({ row }) => formatRatio(row.original.clickThroughRate),
       },
       {
         id: "bookmarks",
         header: "រក្សាទុក",
-        meta: { align: "right", hideOnMobile: true },
+        meta: { align: "right", hideOnMobile: true, width: "7%" },
         cell: ({ row }) => formatCount(row.original.bookmarks),
       },
       {
         id: "totalMenuItems",
         header: "មុខម្ហូប",
-        meta: { align: "right", hideOnMobile: true },
+        meta: { align: "right", hideOnMobile: true, width: "7%" },
         cell: ({ row }) => formatCount(row.original.totalMenuItems),
       },
       {
         id: "incompleteMenuItems",
         header: "ខ្វះព័ត៌មាន",
-        meta: { align: "right" },
+        meta: { align: "right", width: "8%" },
         cell: ({ row }) => {
           const value = row.original.incompleteMenuItems;
 
           return (
             <span
               className={
-                value > 0 ? "font-semibold text-amber-700" : "text-gray-500"
+                value > 0
+                  ? "font-semibold text-amber-700 dark:text-amber-400"
+                  : "text-muted-foreground"
               }
             >
               {formatCount(value)}
@@ -127,14 +148,15 @@ export default function TopStoresTable({
       {
         id: "performanceScore",
         header: "ពិន្ទុសមិទ្ធកម្ម",
-        meta: { align: "right" },
+        meta: { align: "right", width: "10%" },
         cell: ({ row }) => <ScoreMeter value={row.original.performanceScore} />,
       },
       {
         id: "status",
         header: "ស្ថានភាព",
+        meta: { width: "8%" },
         cell: ({ row }) => (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-col items-start gap-1">
             <StatusBadge tone={reviewStatusTone(row.original.reviewStatus)}>
               {labelFor(REVIEW_STATUS_LABELS, row.original.reviewStatus)}
             </StatusBadge>
@@ -152,9 +174,8 @@ export default function TopStoresTable({
     <SectionCard
       title="សមិទ្ធកម្មហាង"
       description="តម្រៀបតាមពិន្ទុសមិទ្ធកម្ម ក្នុងចន្លោះកាលបរិច្ឆេទ និងតម្រងទីតាំងបច្ចុប្បន្ន"
-      icon={<Store size={18} aria-hidden="true" />}
+      icon={<Store size={16} aria-hidden="true" />}
       hint="ពិន្ទុសមិទ្ធកម្ម = ៣០% អ្នកមើលផ្សេងគ្នា + ២៥% ការចុច + ២០% ការរក្សាទុក + ១៥% ការវាយតម្លៃ + ១០% ភាពពេញលេញនៃមុខម្ហូប។"
-      bodyClassName="px-5 py-4"
     >
       <DataTable<StorePerformance>
         caption="តារាងសមិទ្ធកម្មហាង"

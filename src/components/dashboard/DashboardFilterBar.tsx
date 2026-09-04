@@ -6,9 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CalendarDays,
   ChevronDown,
-  ChevronUp,
   Compass,
-  Filter,
   MapPin,
   RotateCcw,
   Search,
@@ -20,6 +18,9 @@ import {
 import CustomSelect, {
   type CustomSelectOption,
 } from "@/src/components/ui/CustomSelect";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import { Segmented } from "@/src/components/ui/segmented";
 import { cn } from "@/src/lib/utils";
 import {
   CAMBODIA_PROVINCES,
@@ -40,12 +41,13 @@ import type {
   DashboardFilters,
 } from "@/src/types/adminDashboard";
 
-const PRESETS: { value: DashboardDatePreset; label: string; shortLabel: string }[] = [
-  { value: "7d", label: "៧ ថ្ងៃ", shortLabel: "7 ថ្ងៃ" },
-  { value: "30d", label: "៣០ ថ្ងៃ", shortLabel: "30 ថ្ងៃ" },
-  { value: "90d", label: "៩០ ថ្ងៃ", shortLabel: "90 ថ្ងៃ" },
-  { value: "custom", label: "ជ្រើសកាលបរិច្ឆេទ", shortLabel: "ផ្ទាល់ខ្លួន" },
-];
+const PRESETS: { value: DashboardDatePreset; label: string; shortLabel: string }[] =
+  [
+    { value: "7d", label: "៧ ថ្ងៃ", shortLabel: "៧ថ" },
+    { value: "30d", label: "៣០ ថ្ងៃ", shortLabel: "៣០ថ" },
+    { value: "90d", label: "៩០ ថ្ងៃ", shortLabel: "៩០ថ" },
+    { value: "custom", label: "ជ្រើសកាលបរិច្ឆេទ", shortLabel: "ផ្ទាល់ខ្លួន" },
+  ];
 
 export interface DashboardFilterBarProps {
   filters: DashboardFilters;
@@ -64,7 +66,6 @@ export default function DashboardFilterBar({
   onApply,
   onReset,
   categoryOptions,
-  cityOptions = [],
   provinceOptions = [],
   isFetching = false,
   actions,
@@ -131,7 +132,7 @@ export default function DashboardFilterBar({
   const provinceSelectOptions = useMemo<CustomSelectOption[]>(() => {
     const defaultOption: CustomSelectOption = {
       value: "",
-      label: "រាជធានី / ខេត្តទាំងអស់ (All Provinces)",
+      label: "រាជធានី / ខេត្តទាំងអស់",
     };
 
     const predefined: CustomSelectOption[] = CAMBODIA_PROVINCES.map((p) => ({
@@ -143,30 +144,21 @@ export default function DashboardFilterBar({
     const existing = new Set(predefined.map((p) => p.value.toLowerCase()));
     const extra: CustomSelectOption[] = provinceOptions
       .filter((p) => p && !existing.has(p.toLowerCase()))
-      .map((p) => ({
-        value: p,
-        label: p,
-      }));
+      .map((p) => ({ value: p, label: p }));
 
     return [defaultOption, ...predefined, ...extra];
   }, [provinceOptions]);
 
-  // Category Options
   const categorySelectOptions = useMemo<CustomSelectOption[]>(
-    () => [{ value: "", label: "ប្រភេទទាំងអស់ (All Categories)" }, ...categoryOptions],
+    () => [{ value: "", label: "ប្រភេទទាំងអស់" }, ...categoryOptions],
     [categoryOptions],
   );
 
-  // Apply Popular Hub preset
   const applyGeoHub = (hub: (typeof POPULAR_GEO_HUBS)[number]) => {
     setValue("latitude", String(hub.lat), { shouldDirty: true });
     setValue("longitude", String(hub.lng), { shouldDirty: true });
-    if (!radiusKm) {
-      setValue("radiusKm", "5", { shouldDirty: true });
-    }
-    if (hub.city) {
-      setValue("city", hub.city, { shouldDirty: true });
-    }
+    if (!radiusKm) setValue("radiusKm", "5", { shouldDirty: true });
+    if (hub.city) setValue("city", hub.city, { shouldDirty: true });
   };
 
   const clearGeoCoordinates = () => {
@@ -175,7 +167,6 @@ export default function DashboardFilterBar({
     setValue("radiusKm", "", { shouldDirty: true });
   };
 
-  // Active filters count
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (selectedProvince) count++;
@@ -186,234 +177,279 @@ export default function DashboardFilterBar({
     return count;
   }, [selectedProvince, selectedCity, selectedCategory, latitude, longitude, preset]);
 
+  const hasChips = Boolean(
+    selectedProvince || selectedCategory || selectedCity || (latitude && longitude),
+  );
+
   return (
     <form
       onSubmit={submit}
       noValidate
       aria-label="តម្រងទិន្នន័យវិភាគ"
-      className="rounded-xl border border-border/70 bg-card p-4 sm:p-5 shadow-none transition-all"
+      className="flex flex-col rounded-xl border bg-card text-card-foreground shadow-card"
     >
-      {/* Top Header: Filter Title & Date Presets */}
-      <div className="flex flex-col gap-3 border-b border-border/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary-800 dark:bg-emerald-950/60 dark:text-emerald-400">
-            <SlidersHorizontal size={16} aria-hidden="true" />
-          </span>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <span>កម្រងទិន្នន័យ (Filters)</span>
-              {activeFiltersCount > 0 && (
-                <span className="inline-flex items-center rounded-full bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-800 dark:bg-emerald-950 dark:text-emerald-300">
-                  {activeFiltersCount} សកម្ម
-                </span>
+      <>
+        {/* Row 1 — identity + date range. The four filter controls used to sit
+            in their own block under a full-width header, which pushed the KPIs
+            below the fold on a laptop; the bar is one toolbar now. */}
+        <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal
+              size={15}
+              aria-hidden="true"
+              className="text-muted-foreground"
+            />
+            <span className="text-xs font-semibold text-foreground">តម្រង</span>
+            {activeFiltersCount > 0 && (
+              <Badge tone="green" size="sm">
+                {activeFiltersCount}
+              </Badge>
+            )}
+          </div>
+
+          <Segmented
+            label="ចន្លោះកាលបរិច្ឆេទ"
+            options={PRESETS}
+            value={preset}
+            onChange={selectPreset}
+            size="sm"
+          />
+        </div>
+
+        {/* Row 2 — the filter controls themselves. */}
+        <div className="grid grid-cols-1 gap-3 border-t px-4 py-3 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto] lg:items-end">
+          <div className="min-w-0 space-y-1">
+            <label className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-muted-foreground">
+              <MapPin size={12} aria-hidden="true" />
+              <span>រាជធានី / ខេត្ត</span>
+            </label>
+            <Controller
+              control={control}
+              name="province"
+              render={({ field }) => (
+                <CustomSelect
+                  value={selectedProvince}
+                  onChange={field.onChange}
+                  options={provinceSelectOptions}
+                  placeholder="រាជធានី / ខេត្តទាំងអស់"
+                  className="[&>button]:h-9 [&>button]:rounded-lg [&>button]:text-xs"
+                />
               )}
-            </h3>
+            />
+          </div>
+
+          <div className="min-w-0 space-y-1">
+            <label className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-muted-foreground">
+              <Utensils size={12} aria-hidden="true" />
+              <span>ប្រភេទម្ហូប</span>
+            </label>
+            <Controller
+              control={control}
+              name="categoryCode"
+              render={({ field }) => (
+                <CustomSelect
+                  value={selectedCategory}
+                  onChange={field.onChange}
+                  options={categorySelectOptions}
+                  placeholder="ប្រភេទទាំងអស់"
+                  className="[&>button]:h-9 [&>button]:rounded-lg [&>button]:text-xs"
+                />
+              )}
+            />
+          </div>
+
+          <label className="block min-w-0 space-y-1">
+            <span className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-muted-foreground">
+              <Compass size={12} aria-hidden="true" />
+              <span>ក្រុង / ខណ្ឌ</span>
+            </span>
+            <input
+              type="text"
+              placeholder="ឧ. Daun Penh, Toul Kork"
+              autoComplete="off"
+              {...register("city")}
+              className={inputClassName(Boolean(errors.city))}
+            />
+            {errors.city?.message && (
+              <span className="block text-[0.6875rem] text-destructive">
+                {errors.city.message}
+              </span>
+            )}
+          </label>
+
+          <div className="flex items-center gap-2 sm:col-span-2 lg:col-span-1">
+            <Button type="submit" disabled={isFetching} className="flex-1 lg:flex-none">
+              <Search size={14} aria-hidden="true" />
+              <span>អនុវត្ត</span>
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              title="កំណត់តម្រងឡើងវិញ"
+              aria-label="កំណត់តម្រងឡើងវិញ"
+              onClick={() => {
+                reset(filtersToFormValues(DEFAULT_DASHBOARD_FILTERS, today));
+                setShowAdvancedGeo(false);
+                onReset();
+              }}
+            >
+              <RotateCcw size={14} aria-hidden="true" />
+            </Button>
+
+            {actions}
           </div>
         </div>
 
-        {/* Date Range Preset Selector */}
-        <div
-          role="group"
-          aria-label="ចន្លោះកាលបរិច្ឆេទ"
-          className="flex flex-wrap items-center gap-1 rounded-full bg-muted/60 p-1"
-        >
-          {PRESETS.map((option) => {
-            const active = preset === option.value;
+        {/* Custom date range — only rendered for the custom preset. */}
+        {isCustom && (
+          <div className="grid grid-cols-1 gap-3 border-t bg-muted/40 px-4 py-3 sm:grid-cols-2">
+            <label className="block space-y-1">
+              <span className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-muted-foreground">
+                <CalendarDays size={12} aria-hidden="true" />
+                <span>កាលបរិច្ឆេទចាប់ផ្ដើម</span>
+              </span>
+              <input
+                type="date"
+                max={today}
+                {...register("from")}
+                className={inputClassName(Boolean(errors.from))}
+              />
+              {errors.from?.message && (
+                <span className="block text-[0.6875rem] text-destructive">
+                  {errors.from.message}
+                </span>
+              )}
+            </label>
 
-            return (
-              <button
-                key={option.value}
-                type="button"
-                aria-pressed={active}
-                onClick={() => selectPreset(option.value)}
-                className={cn(
-                  "h-7 rounded-full px-3 text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 cursor-pointer",
-                  active
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground",
+            <label className="block space-y-1">
+              <span className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-muted-foreground">
+                <CalendarDays size={12} aria-hidden="true" />
+                <span>កាលបរិច្ឆេទបញ្ចប់</span>
+              </span>
+              <input
+                type="date"
+                max={today}
+                {...register("to")}
+                className={inputClassName(Boolean(errors.to))}
+              />
+              {errors.to?.message && (
+                <span className="block text-[0.6875rem] text-destructive">
+                  {errors.to.message}
+                </span>
+              )}
+            </label>
+          </div>
+        )}
+
+        {/* Row 3 — active chips and the geo disclosure share one line. */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t px-4 py-2.5">
+          <button
+            type="button"
+            onClick={() => setShowAdvancedGeo((previous) => !previous)}
+            aria-expanded={showAdvancedGeo}
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-md text-[0.6875rem] font-medium text-muted-foreground transition hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          >
+            <Compass size={12} aria-hidden="true" />
+            <span>កាំភូមិសាស្ត្រ</span>
+            <ChevronDown
+              size={12}
+              aria-hidden="true"
+              className={cn("transition-transform", showAdvancedGeo && "rotate-180")}
+            />
+          </button>
+
+          {hasChips && (
+            <>
+              <span aria-hidden="true" className="h-4 w-px bg-border" />
+
+              <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                {selectedProvince && (
+                  <FilterChip
+                    tone="green"
+                    icon={<MapPin size={11} aria-hidden="true" />}
+                    label={selectedProvince}
+                    onClear={() => setValue("province", "", { shouldDirty: true })}
+                  />
                 )}
-              >
-                {option.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Custom Date Range Inputs (Only revealed when "ជ្រើសកាលបរិច្ឆេទ" is active) */}
-      {isCustom && (
-        <div className="mt-4 grid grid-cols-1 gap-3 rounded-xl border border-primary-100 bg-primary-50/40 p-4 sm:grid-cols-2 dark:border-slate-800 dark:bg-slate-950/40 animate-in fade-in duration-200">
-          <label className="block space-y-1.5">
-            <span className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-              <CalendarDays size={14} className="text-primary-700 dark:text-emerald-400" />
-              <span>កាលបរិច្ឆេទចាប់ផ្ដើម</span>
-            </span>
-            <input
-              type="date"
-              max={today}
-              {...register("from")}
-              className={inputClassName(Boolean(errors.from))}
-            />
-            {errors.from?.message && (
-              <span className="block text-xs font-normal text-red-600">{errors.from.message}</span>
-            )}
-          </label>
+                {selectedCategory && (
+                  <FilterChip
+                    tone="orange"
+                    icon={<Utensils size={11} aria-hidden="true" />}
+                    label={selectedCategory}
+                    onClear={() =>
+                      setValue("categoryCode", "", { shouldDirty: true })
+                    }
+                  />
+                )}
 
-          <label className="block space-y-1.5">
-            <span className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-              <CalendarDays size={14} className="text-primary-700 dark:text-emerald-400" />
-              <span>កាលបរិច្ឆេទបញ្ចប់</span>
-            </span>
-            <input
-              type="date"
-              max={today}
-              {...register("to")}
-              className={inputClassName(Boolean(errors.to))}
-            />
-            {errors.to?.message && (
-              <span className="block text-xs font-normal text-red-600">{errors.to.message}</span>
-            )}
-          </label>
-        </div>
-      )}
+                {selectedCity && (
+                  <FilterChip
+                    tone="amber"
+                    icon={<Compass size={11} aria-hidden="true" />}
+                    label={selectedCity}
+                    onClear={() => setValue("city", "", { shouldDirty: true })}
+                  />
+                )}
 
-      {/* Main Standard Filter Row: Province/Region + Food Category */}
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Province / Region Dropdown */}
-        <div className="space-y-1.5">
-          <label className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-            <MapPin size={14} className="text-primary-700 dark:text-emerald-400" />
-            <span>រាជធានី / ខេត្ត</span>
-          </label>
-          <Controller
-            control={control}
-            name="province"
-            render={({ field }) => (
-              <CustomSelect
-                value={selectedProvince}
-                onChange={(val) => {
-                  field.onChange(val);
-                }}
-                options={provinceSelectOptions}
-                placeholder="រាជធានី / ខេត្តទាំងអស់"
-                className="[&>button]:h-9 [&>button]:rounded-lg [&>button]:text-xs [&>button]:font-medium"
-              />
-            )}
-          />
-          {errors.province?.message && (
-            <p className="text-xs font-normal text-red-600">{errors.province.message}</p>
+                {latitude && longitude && (
+                  <FilterChip
+                    tone="teal"
+                    icon={<MapPin size={11} aria-hidden="true" />}
+                    label={`${radiusKm || 5} km ជុំវិញទីតាំង`}
+                    onClear={clearGeoCoordinates}
+                  />
+                )}
+              </div>
+            </>
           )}
         </div>
 
-        {/* Food Category Dropdown */}
-        <div className="space-y-1.5">
-          <label className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-            <Utensils size={14} className="text-primary-700 dark:text-emerald-400" />
-            <span>ប្រភេទម្ហូប</span>
-          </label>
-          <Controller
-            control={control}
-            name="categoryCode"
-            render={({ field }) => (
-              <CustomSelect
-                value={selectedCategory}
-                onChange={field.onChange}
-                options={categorySelectOptions}
-                placeholder="ប្រភេទទាំងអស់"
-                className="[&>button]:h-9 [&>button]:rounded-lg [&>button]:text-xs [&>button]:font-medium"
-              />
-            )}
-          />
-          {errors.categoryCode?.message && (
-            <p className="text-xs font-normal text-red-600">{errors.categoryCode.message}</p>
-          )}
-        </div>
-
-        {/* City / District Filter (Optional quick search) */}
-        <label className="block space-y-1.5">
-          <span className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-            <Compass size={14} className="text-primary-700 dark:text-emerald-400" />
-            <span>ក្រុង / ខណ្ឌ</span>
-          </span>
-          <input
-            type="text"
-            placeholder="ឧ. Daun Penh, Toul Kork, BKK"
-            autoComplete="off"
-            {...register("city")}
-            className={inputClassName(Boolean(errors.city))}
-          />
-          {errors.city?.message && (
-            <span className="block text-xs font-normal text-red-600">{errors.city.message}</span>
-          )}
-        </label>
-      </div>
-
-      {/* Advanced Geo-Radius Accordion Toggle */}
-      <div className="mt-4 pt-3 border-t border-border/50">
-        <button
-          type="button"
-          onClick={() => setShowAdvancedGeo((prev) => !prev)}
-          className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition cursor-pointer"
-        >
-          <Compass size={14} className="text-primary-700 dark:text-emerald-400" />
-          <span>
-            {showAdvancedGeo ? "លាក់តម្រងកាំភូមិសាស្ត្រ" : "បង្ហាញតម្រងកាំភូមិសាស្ត្រកម្រិតខ្ពស់ (Geo Radius)"}
-          </span>
-          {showAdvancedGeo ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          {latitude && longitude && (
-            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-              📍 ទីតាំងជាក់លាក់
-            </span>
-          )}
-        </button>
-
-        {/* Collapsible Advanced Geo-Radius Section */}
         {showAdvancedGeo && (
-          <div className="mt-3 rounded-xl border border-border/70 bg-muted/40 p-4 animate-in fade-in duration-150 space-y-3">
-            {/* Quick Popular Hubs Presets */}
+          <div className="space-y-3 border-t bg-muted/40 px-4 py-3">
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-foreground">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[0.6875rem] font-medium text-muted-foreground">
                   ទីតាំងពេញនិយម
                 </span>
                 {latitude && longitude && (
                   <button
                     type="button"
                     onClick={clearGeoCoordinates}
-                    className="text-xs font-normal text-rose-600 hover:underline cursor-pointer"
+                    className="cursor-pointer text-[0.6875rem] font-medium text-destructive hover:underline"
                   >
                     សម្អាតកូអរដោនេ
                   </button>
                 )}
               </div>
+
               <div className="flex flex-wrap gap-1.5">
                 {POPULAR_GEO_HUBS.map((hub) => {
                   const isSelected =
                     latitude === String(hub.lat) && longitude === String(hub.lng);
 
                   return (
-                    <button
+                    <Button
                       key={hub.nameEn}
                       type="button"
+                      size="sm"
+                      variant={isSelected ? "default" : "outline"}
                       onClick={() => applyGeoHub(hub)}
-                      className={cn(
-                        "rounded-lg px-2.5 py-1 text-xs font-medium transition cursor-pointer shadow-xs",
-                        isSelected
-                          ? "bg-primary-800 text-white dark:bg-emerald-600"
-                          : "border border-border/80 bg-background text-foreground hover:bg-muted",
-                      )}
+                      className="h-7 text-[0.6875rem]"
                     >
-                      📍 {hub.nameKh}
-                    </button>
+                      <MapPin size={11} aria-hidden="true" />
+                      {hub.nameKh}
+                    </Button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Custom Coordinates & Radius Slider */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 pt-3 border-t border-border/50">
+            <div className="grid grid-cols-1 gap-3 border-t pt-3 sm:grid-cols-3">
               <label className="block space-y-1">
-                <span className="block text-xs font-medium text-muted-foreground">
+                <span className="block text-[0.6875rem] font-medium text-muted-foreground">
                   រយៈទទឹង
                 </span>
                 <input
@@ -425,14 +461,14 @@ export default function DashboardFilterBar({
                   className={inputClassName(Boolean(errors.latitude))}
                 />
                 {errors.latitude?.message && (
-                  <span className="block text-xs font-normal text-red-600">
+                  <span className="block text-[0.6875rem] text-destructive">
                     {errors.latitude.message}
                   </span>
                 )}
               </label>
 
               <label className="block space-y-1">
-                <span className="block text-xs font-medium text-muted-foreground">
+                <span className="block text-[0.6875rem] font-medium text-muted-foreground">
                   រយៈបណ្ដោយ
                 </span>
                 <input
@@ -444,16 +480,16 @@ export default function DashboardFilterBar({
                   className={inputClassName(Boolean(errors.longitude))}
                 />
                 {errors.longitude?.message && (
-                  <span className="block text-xs font-normal text-red-600">
+                  <span className="block text-[0.6875rem] text-destructive">
                     {errors.longitude.message}
                   </span>
                 )}
               </label>
 
               <div className="space-y-1">
-                <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
+                <div className="flex items-center justify-between text-[0.6875rem] font-medium text-muted-foreground">
                   <span>កាំស្វែងរក</span>
-                  <span className="font-semibold text-primary-800 dark:text-emerald-400">
+                  <span className="font-semibold text-primary tabular-nums">
                     {radiusKm ? `${radiusKm} km` : "5 km"}
                   </span>
                 </div>
@@ -463,22 +499,25 @@ export default function DashboardFilterBar({
                     min={1}
                     max={DASHBOARD_MAX_RADIUS_KM}
                     step={1}
+                    aria-label="កាំស្វែងរក (គ.ម)"
                     value={radiusKm ? Number(radiusKm) : 5}
-                    onChange={(e) => setValue("radiusKm", e.target.value, { shouldDirty: true })}
-                    className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary-800 dark:bg-slate-700"
+                    onChange={(event) =>
+                      setValue("radiusKm", event.target.value, { shouldDirty: true })
+                    }
+                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border accent-primary"
                   />
                   <input
                     type="number"
                     min={1}
                     max={DASHBOARD_MAX_RADIUS_KM}
                     placeholder="5"
-                    aria-label="កាំស្វែងរក (គ.ម)"
+                    aria-label="កាំស្វែងរក ជាលេខ (គ.ម)"
                     {...register("radiusKm")}
-                    className="w-16 h-9 rounded-lg border border-border/80 text-center text-xs font-medium text-foreground bg-background"
+                    className="h-9 w-14 shrink-0 rounded-lg border bg-background text-center text-xs tabular-nums"
                   />
                 </div>
                 {errors.radiusKm?.message && (
-                  <p className="text-xs font-normal text-red-600">
+                  <p className="text-[0.6875rem] text-destructive">
                     {errors.radiusKm.message}
                   </p>
                 )}
@@ -486,101 +525,45 @@ export default function DashboardFilterBar({
             </div>
           </div>
         )}
-      </div>
-
-      {/* Action Buttons Toolbar & Active Badges */}
-      <div className="mt-4 flex flex-col gap-3 pt-3 border-t border-border/50 sm:flex-row sm:items-center sm:justify-between">
-        {/* Active Filter Chips */}
-        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-          {selectedProvince && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-              📍 {selectedProvince}
-              <button
-                type="button"
-                onClick={() => setValue("province", "", { shouldDirty: true })}
-                className="hover:text-red-500 cursor-pointer"
-              >
-                <X size={13} />
-              </button>
-            </span>
-          )}
-
-          {selectedCategory && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-secondary-50 px-2.5 py-0.5 text-xs font-medium text-secondary-800 dark:bg-secondary-950/60 dark:text-secondary-300">
-              🍲 {selectedCategory}
-              <button
-                type="button"
-                onClick={() => setValue("categoryCode", "", { shouldDirty: true })}
-                className="hover:text-red-500 cursor-pointer"
-              >
-                <X size={13} />
-              </button>
-            </span>
-          )}
-
-          {selectedCity && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
-              🧭 {selectedCity}
-              <button
-                type="button"
-                onClick={() => setValue("city", "", { shouldDirty: true })}
-                className="hover:text-red-500 cursor-pointer"
-              >
-                <X size={13} />
-              </button>
-            </span>
-          )}
-
-          {latitude && longitude && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-              🎯 {radiusKm || 5} km ជុំវិញទីតាំង
-              <button
-                type="button"
-                onClick={clearGeoCoordinates}
-                className="hover:text-red-500 cursor-pointer"
-              >
-                <X size={13} />
-              </button>
-            </span>
-          )}
-        </div>
-
-        {/* Actions: Reset, Apply, Export */}
-        <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              reset(filtersToFormValues(DEFAULT_DASHBOARD_FILTERS, today));
-              setShowAdvancedGeo(false);
-              onReset();
-            }}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border/80 bg-background px-3.5 text-xs font-medium text-foreground shadow-xs transition hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 cursor-pointer"
-          >
-            <RotateCcw size={14} aria-hidden="true" />
-            <span>កំណត់ឡើងវិញ</span>
-          </button>
-
-          <button
-            type="submit"
-            disabled={isFetching}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary-800 px-4 text-xs font-medium text-white shadow-xs transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-emerald-600 dark:hover:bg-emerald-700 cursor-pointer"
-          >
-            <Search size={14} aria-hidden="true" />
-            <span>អនុវត្តតម្រង</span>
-          </button>
-
-          {actions}
-        </div>
-      </div>
+      </>
     </form>
+  );
+}
+
+function FilterChip({
+  tone,
+  icon,
+  label,
+  onClear,
+}: {
+  tone: "green" | "orange" | "amber" | "teal";
+  icon: React.ReactNode;
+  label: string;
+  onClear: () => void;
+}) {
+  return (
+    <Badge tone={tone} className="max-w-[16rem] gap-1 pr-1">
+      {icon}
+      <span className="truncate" title={label}>
+        {label}
+      </span>
+      <button
+        type="button"
+        onClick={onClear}
+        aria-label={`ដកតម្រង ${label}`}
+        className="cursor-pointer rounded-full p-0.5 transition hover:bg-black/10 dark:hover:bg-white/10"
+      >
+        <X size={11} aria-hidden="true" />
+      </button>
+    </Badge>
   );
 }
 
 function inputClassName(hasError: boolean): string {
   return cn(
-    "h-9 w-full rounded-lg border bg-background px-3 text-xs text-foreground transition outline-none placeholder:text-muted-foreground",
+    "h-9 w-full rounded-lg border bg-background px-3 text-xs text-foreground outline-none transition placeholder:text-muted-foreground/70",
     hasError
-      ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
-      : "border-border/80 hover:border-border focus:border-primary-600 focus:ring-2 focus:ring-primary-100 dark:focus:border-emerald-500",
+      ? "border-destructive focus:ring-2 focus:ring-destructive/25"
+      : "hover:border-primary/40 focus:border-primary focus:ring-2 focus:ring-ring/25",
   );
 }

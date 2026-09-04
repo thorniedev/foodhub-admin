@@ -89,9 +89,9 @@ export default function DashboardExportMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((previous) => !previous)}
-        className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-3.5 text-xs font-medium text-primary-800 transition hover:bg-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+        className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border bg-background px-3 text-xs font-medium text-foreground shadow-card transition hover:border-primary/40 hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-55"
       >
-        <Download size={15} aria-hidden="true" />
+        <Download size={14} aria-hidden="true" />
         <span>នាំចេញ</span>
         <ChevronDown
           size={14}
@@ -104,7 +104,7 @@ export default function DashboardExportMenu({
         <div
           role="menu"
           aria-label="ជម្រើសនាំចេញរបាយការណ៍"
-          className="absolute right-0 top-full z-50 mt-1.5 w-72 rounded-xl border border-border/80 bg-card p-3 shadow-lg"
+          className="absolute right-0 top-full z-50 mt-1.5 w-64 rounded-xl border bg-popover p-2.5 text-popover-foreground shadow-overlay"
         >
           <p className="px-1 pb-1.5 text-xs font-semibold text-foreground">
             របាយការណ៍
@@ -122,9 +122,9 @@ export default function DashboardExportMenu({
                   aria-checked={selected}
                   onClick={() => setReport(option.value)}
                   className={cn(
-                    "flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+                    "flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
                     selected
-                      ? "bg-primary-50 text-primary-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                      ? "bg-primary-50 text-primary-800 dark:bg-primary-950/60 dark:text-primary-300"
                       : "text-foreground hover:bg-muted",
                   )}
                 >
@@ -147,7 +147,7 @@ export default function DashboardExportMenu({
                 role="menuitem"
                 disabled={busyFormat !== null}
                 onClick={() => void handleDownload(option.value)}
-                className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border/80 px-2.5 text-xs font-medium text-foreground transition hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border/80 px-2.5 text-xs font-medium text-foreground transition hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {busyFormat === option.value ? (
                   <Loader2 size={14} aria-hidden="true" className="animate-spin" />
@@ -159,7 +159,7 @@ export default function DashboardExportMenu({
             ))}
           </div>
 
-          <p className="mt-2.5 px-1 text-2xs leading-relaxed text-muted-foreground">
+          <p className="mt-2.5 px-1 text-[0.6875rem] leading-4 text-muted-foreground">
             របាយការណ៍ប្រើតម្រងដូចនឹងផ្ទាំងនេះ។
           </p>
         </div>
@@ -170,7 +170,7 @@ export default function DashboardExportMenu({
       </p>
 
       {errorMessage && (
-        <p role="alert" className="absolute right-0 top-full mt-1 w-72 rounded-lg bg-red-50 p-2 text-xs font-normal text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p role="alert" className="absolute right-0 top-full z-50 mt-1 w-64 rounded-lg border border-red-200 bg-red-50 p-2 text-[0.6875rem] text-red-700 shadow-overlay dark:border-red-900 dark:bg-red-950 dark:text-red-300">
           {errorMessage}
         </p>
       )}

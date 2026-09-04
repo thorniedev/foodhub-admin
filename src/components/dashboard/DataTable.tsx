@@ -28,6 +28,12 @@ declare module "@tanstack/react-table" {
     /** Hidden below the md breakpoint to keep phones readable. */
     hideOnMobile?: boolean;
     headerLabel?: string;
+    /**
+     * Column width hint. Without one the browser hands almost all the spare
+     * width to the widest text column, which squeezed short values like a
+     * city name into a two-line wrap while the name column sat half empty.
+     */
+    width?: string;
   }
   /* eslint-enable @typescript-eslint/no-unused-vars */
 }
@@ -124,7 +130,7 @@ export default function DataTable<TData>({
         <table className="w-full min-w-[860px] border-collapse text-left">
           <caption className="sr-only">{caption}</caption>
 
-          <thead className="sticky top-0 z-10 bg-gray-50/80">
+          <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -134,8 +140,11 @@ export default function DataTable<TData>({
                     <th
                       key={header.id}
                       scope="col"
+                      style={meta?.width ? { width: meta.width } : undefined}
                       className={cn(
-                        "border-b border-gray-100 px-4 py-3.5 text-lg font-normal whitespace-nowrap text-gray-600",
+                        // Was `text-lg`: an 18px header in a dense data table
+                        // pushed every numeric column past its content width.
+                        "border-b px-3 py-2.5 text-[0.6875rem] font-semibold tracking-wide whitespace-nowrap text-muted-foreground",
                         meta?.align === "right" && "text-right",
                         meta?.hideOnMobile && "hidden md:table-cell",
                       )}
@@ -157,7 +166,7 @@ export default function DataTable<TData>({
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className="border-b border-gray-100 transition-colors last:border-0 hover:bg-primary-50/40"
+                className="border-b transition-colors last:border-0 hover:bg-muted/50"
               >
                 {row.getVisibleCells().map((cell) => {
                   const meta = cell.column.columnDef.meta;
@@ -166,7 +175,7 @@ export default function DataTable<TData>({
                     <td
                       key={cell.id}
                       className={cn(
-                        "px-4 py-3.5 align-middle text-lg font-normal text-gray-800",
+                        "px-3 py-2.5 align-middle text-[0.8125rem] text-foreground",
                         meta?.align === "right" && "text-right tabular-nums",
                         meta?.hideOnMobile && "hidden md:table-cell",
                       )}
@@ -181,18 +190,18 @@ export default function DataTable<TData>({
         </table>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">
-        <p className="text-lg font-normal text-gray-600 tabular-nums" aria-live="polite">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
+        <p className="text-[0.6875rem] text-muted-foreground tabular-nums" aria-live="polite">
           បង្ហាញ {firstRow}–{lastRow} ក្នុងចំណោម {totalElements}
         </p>
 
         <div className="flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 text-lg font-normal text-gray-600">
+          <label className="flex items-center gap-2 text-[0.6875rem] text-muted-foreground">
             <span>ជួរក្នុងមួយទំព័រ</span>
             <select
               value={size}
               onChange={(event) => onSizeChange(Number(event.target.value))}
-              className="h-11 rounded-full border border-gray-200 bg-white px-3 text-lg font-normal text-gray-800 focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-100"
+              className="h-8 cursor-pointer rounded-lg border bg-background px-2 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25"
             >
               {PAGE_SIZES.map((option) => (
                 <option key={option} value={option}>
@@ -202,13 +211,13 @@ export default function DataTable<TData>({
             </select>
           </label>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <PagerButton
               label="ទំព័រដំបូង"
               disabled={page <= 0}
               onClick={() => onPageChange(0)}
             >
-              <ChevronsLeft size={20} aria-hidden="true" />
+              <ChevronsLeft size={15} aria-hidden="true" />
             </PagerButton>
 
             <PagerButton
@@ -216,10 +225,10 @@ export default function DataTable<TData>({
               disabled={page <= 0}
               onClick={() => onPageChange(page - 1)}
             >
-              <ChevronLeft size={20} aria-hidden="true" />
+              <ChevronLeft size={15} aria-hidden="true" />
             </PagerButton>
 
-            <span className="px-3 text-lg font-normal text-gray-700 tabular-nums">
+            <span className="px-2 text-[0.6875rem] font-medium text-foreground tabular-nums">
               {page + 1} / {Math.max(totalPages, 1)}
             </span>
 
@@ -228,7 +237,7 @@ export default function DataTable<TData>({
               disabled={page >= lastPage}
               onClick={() => onPageChange(page + 1)}
             >
-              <ChevronRight size={20} aria-hidden="true" />
+              <ChevronRight size={15} aria-hidden="true" />
             </PagerButton>
 
             <PagerButton
@@ -236,7 +245,7 @@ export default function DataTable<TData>({
               disabled={page >= lastPage}
               onClick={() => onPageChange(lastPage)}
             >
-              <ChevronsRight size={20} aria-hidden="true" />
+              <ChevronsRight size={15} aria-hidden="true" />
             </PagerButton>
           </div>
         </div>
@@ -263,7 +272,7 @@ function PagerButton({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-40"
+      className="flex size-8 cursor-pointer items-center justify-center rounded-lg border text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-40"
     >
       {children}
     </button>

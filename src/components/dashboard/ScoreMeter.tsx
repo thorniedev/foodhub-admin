@@ -12,7 +12,7 @@ export default function ScoreMeter({ value }: { value: number }) {
 
   return (
     <span className="flex items-center justify-end gap-2">
-      <span className="text-lg font-normal text-gray-800 tabular-nums">
+      <span className="text-[0.8125rem] font-semibold text-foreground tabular-nums">
         {formatDecimal(safe)}
       </span>
 
@@ -22,7 +22,7 @@ export default function ScoreMeter({ value }: { value: number }) {
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label="ពិន្ទុ"
-        className="hidden h-1.5 w-16 overflow-hidden rounded-full bg-gray-200 md:block"
+        className="hidden h-1.5 w-14 overflow-hidden rounded-full bg-muted md:block"
       >
         <span
           className={`block h-full rounded-full ${barColor}`}

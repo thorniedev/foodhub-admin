@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Inbox } from "lucide-react";
 
+import { cn } from "@/src/lib/utils";
+
 interface DashboardEmptyStateProps {
   title?: string;
   description?: string;
@@ -18,18 +20,23 @@ export default function DashboardEmptyState({
 }: DashboardEmptyStateProps) {
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-2 text-center ${
-        compact ? "py-8" : "py-14"
-      }`}
+      className={cn(
+        "flex flex-col items-center justify-center gap-2 text-center",
+        compact ? "py-8" : "py-14",
+      )}
     >
-      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-gray-400">
-        {icon ?? <Inbox size={22} aria-hidden="true" />}
+      <span className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+        {icon ?? <Inbox size={18} aria-hidden="true" />}
       </span>
 
-      <p className="text-2xl font-medium text-gray-800">{title}</p>
-      <p className="max-w-md text-lg font-normal text-gray-500">{description}</p>
+      {/* These titles used to render at `text-2xl` inside a card whose own
+          title is 15px, so the empty state outshouted the section it sat in. */}
+      <p className="text-sm font-semibold text-foreground">{title}</p>
+      <p className="max-w-md text-xs leading-5 text-muted-foreground">
+        {description}
+      </p>
 
-      {action && <div className="mt-2">{action}</div>}
+      {action && <div className="mt-1">{action}</div>}
     </div>
   );
 }

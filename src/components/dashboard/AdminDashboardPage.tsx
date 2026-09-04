@@ -262,7 +262,7 @@ export default function AdminDashboardPage() {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 pb-12">
+    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-4 pb-12">
       {/* 1. Page Header */}
       <DashboardHeader
         period={overview.data?.period ?? null}
@@ -273,47 +273,41 @@ export default function AdminDashboardPage() {
       />
 
       {/* 2. Interactive Filter & Export Toolbar */}
-      <div>
-        <DashboardFilterBar
-          filters={filters}
-          onApply={writeFilters}
-          onReset={() => writeFilters(DEFAULT_DASHBOARD_FILTERS)}
-          categoryOptions={categoryOptions}
-          cityOptions={cityOptions}
-          provinceOptions={provinceOptions}
-          isFetching={isFetchingAny}
-          actions={exportMenu}
-        />
-      </div>
+      <DashboardFilterBar
+        filters={filters}
+        onApply={writeFilters}
+        onReset={() => writeFilters(DEFAULT_DASHBOARD_FILTERS)}
+        categoryOptions={categoryOptions}
+        cityOptions={cityOptions}
+        provinceOptions={provinceOptions}
+        isFetching={isFetchingAny}
+        actions={exportMenu}
+      />
 
       {/* 3. Key Performance Indicators (Totals & Rates) */}
-      <div>
-        {overview.isError ? (
-          <DashboardErrorState
-            error={overview.error}
-            onRetry={() => void overview.refetch()}
-          />
-        ) : overview.isLoading ? (
-          <KpiGridSkeleton />
-        ) : (
-          <DashboardKpiGrid kpis={overview.data?.kpis ?? {}} />
-        )}
-      </div>
+      {overview.isError ? (
+        <DashboardErrorState
+          error={overview.error}
+          onRetry={() => void overview.refetch()}
+        />
+      ) : overview.isLoading ? (
+        <KpiGridSkeleton />
+      ) : (
+        <DashboardKpiGrid kpis={overview.data?.kpis ?? {}} />
+      )}
 
       {/* 4. Primary Visual Analytics: Activity & Usage Trends */}
-      <div>
-        <ActivityTrendChart
-          data={overview.data?.activityTrend ?? []}
-          isLoading={overview.isLoading}
-        />
-      </div>
+      <ActivityTrendChart
+        data={overview.data?.activityTrend ?? []}
+        isLoading={overview.isLoading}
+      />
 
       {/* 5. Geographic & Category Performance Charts */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {locationUnavailable ? (
           <SectionCard
             title="សមិទ្ធកម្មតាមទីតាំង"
-            icon={<MapPin size={18} aria-hidden="true" />}
+            icon={<MapPin size={16} aria-hidden="true" />}
             tone="amber"
           >
             <DashboardUnavailableState
@@ -341,7 +335,7 @@ export default function AdminDashboardPage() {
         {categoryUnavailable ? (
           <SectionCard
             title="សមិទ្ធកម្មតាមប្រភេទម្ហូប"
-            icon={<Layers size={18} aria-hidden="true" />}
+            icon={<Layers size={16} aria-hidden="true" />}
             tone="amber"
           >
             <DashboardUnavailableState

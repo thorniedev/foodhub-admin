@@ -6,7 +6,6 @@ import {
   CircleDollarSign,
   Clock3,
   Heart,
-  HeartPulse,
   ImagePlus,
   Loader2,
   Plus,
@@ -34,7 +33,6 @@ import {
 import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
 
 import type { DietaryType } from "@/src/types/dietaryType";
-import type { MedicalCondition } from "@/src/types/medicalCondition";
 import type {
   FoodRecord,
   IngredientOption,
@@ -94,19 +92,6 @@ type AgeRuleRow = {
   ageGroupUuid: string;
   ruleResult: "ALLOWED" | "NOT_RECOMMENDED" | "RESTRICTED" | "BLOCKED" | string;
   reasonText: string;
-};
-
-/** The food's classification tags (e.g. HALAL, VEGETARIAN), distinct from
- *  the verified per-item declarations in dietaryTypeRows below. */
-type DietaryTagRow = {
-  code: string;
-  name: string;
-};
-
-type MedicalConditionRow = {
-  medicalConditionUuid: string;
-  suitabilityStatus: "ALLOWED" | "NOT_RECOMMENDED" | "RESTRICTED" | string;
-  notes: string;
 };
 
 type FormState = {
@@ -274,7 +259,6 @@ export default function PublishMenuItemModal({
   seasons = [],
   weatherConditions = [],
   events = [],
-  medicalConditions = [],
   saving,
   fixedStoreUuid,
   defaultStoreUuid,
@@ -294,7 +278,6 @@ export default function PublishMenuItemModal({
   seasons?: any[];
   weatherConditions?: any[];
   events?: any[];
-  medicalConditions?: MedicalCondition[];
   saving: boolean;
   fixedStoreUuid?: string;
   defaultStoreUuid?: string;
@@ -326,7 +309,6 @@ export default function PublishMenuItemModal({
   const [values, setValues] = useState<FormState>(EMPTY);
   const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>([]);
   const [dietaryTypeRows, setDietaryTypeRows] = useState<DietaryTypeRow[]>([]);
-  const [medicalConditionRows, setMedicalConditionRows] = useState<MedicalConditionRow[]>([]);
   const [seasonRows, setSeasonRows] = useState<SeasonRow[]>([]);
   const [eventRows, setEventRows] = useState<EventRow[]>([]);
   const [weatherRows, setWeatherRows] = useState<WeatherRow[]>([]);
@@ -334,7 +316,6 @@ export default function PublishMenuItemModal({
     MealTypeSuitabilityRow[]
   >([]);
   const [ageRuleRows, setAgeRuleRows] = useState<AgeRuleRow[]>([]);
-  const [dietaryTagRows, setDietaryTagRows] = useState<DietaryTagRow[]>([]);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [existingThumbnail, setExistingThumbnail] = useState<string | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
@@ -424,13 +405,11 @@ export default function PublishMenuItemModal({
       });
       setIngredientRows([]);
       setDietaryTypeRows([]);
-      setMedicalConditionRows([]);
       setSeasonRows([]);
       setEventRows([]);
       setWeatherRows([]);
       setMealTypeSuitabilityRows([]);
       setAgeRuleRows([]);
-      setDietaryTagRows([]);
       setThumbnailFile(null);
       setExistingThumbnail(null);
       setGalleryFiles([]);
@@ -738,18 +717,6 @@ export default function PublishMenuItemModal({
         .filter((r) => Boolean(r.ageGroupUuid)),
     );
 
-    setDietaryTagRows(
-      safeList(
-        snapshot?.foodDietaryTypes ?? itemFood?.dietaryTypes ?? targetFood?.dietaryTypes,
-      )
-        .map((d: any) => ({
-          code: typeof d === "string" ? d : d.code || d.dietaryTypeCode || "",
-          name:
-            typeof d === "string" ? d : d.name || d.localName || d.code || "",
-        }))
-        .filter((r) => Boolean(r.code)),
-    );
-
     setError(null);
     setFieldErrors({});
   }, [
@@ -865,48 +832,10 @@ export default function PublishMenuItemModal({
     [activeDietaryTypes],
   );
 
-  // Keyed by code, not uuid: dietaryTagRows stores the food's classification
-  // tags the same way foods.dietary_types does (code + name), not a uuid
-  // reference — distinct from dietaryTypeOptions above (used for the
-  // verified per-item declarations, which do key by uuid).
-  const dietaryTagOptions: SearchableOption[] = useMemo(
-    () =>
-      activeDietaryTypes.map((d) => ({
-        value: d.code,
-        label: d.name,
-        sublabel: d.code,
-      })),
-    [activeDietaryTypes],
-  );
-
-  const activeMedicalConditions = useMemo(
-    () => (medicalConditions ?? []).filter((m) => m.active !== false),
-    [medicalConditions],
-  );
-
-  const medicalConditionOptions: SearchableOption[] = useMemo(
-    () =>
-      activeMedicalConditions.map((m) => ({
-        value: m.uuid,
-        label: m.name,
-        sublabel: m.code,
-      })),
-    [activeMedicalConditions],
-  );
-
   const verificationStatusOptions: SearchableOption[] = useMemo(
     () => [
       { value: "UNVERIFIED", label: "មិនទាន់ផ្ទៀងផ្ទាត់" },
       { value: "VERIFIED", label: "បានផ្ទៀងផ្ទាត់" },
-    ],
-    [],
-  );
-
-  const suitabilityStatusOptions: SearchableOption[] = useMemo(
-    () => [
-      { value: "ALLOWED", label: "សមរម្យ" },
-      { value: "NOT_RECOMMENDED", label: "មិនណែនាំ" },
-      { value: "RESTRICTED", label: "ហាមឃាត់" },
     ],
     [],
   );
@@ -1089,15 +1018,6 @@ export default function PublishMenuItemModal({
         .filter((r) => Boolean(r.ageGroupUuid)),
     );
 
-    setDietaryTagRows(
-      safeList(selectedFood?.dietaryTypes).map((d: any) => ({
-        code: typeof d === "string" ? d : d.code || d.dietaryTypeCode || "",
-        name:
-          typeof d === "string"
-            ? d
-            : d.name || d.localName || d.code || "",
-      })).filter((r) => Boolean(r.code)),
-    );
   };
 
   const updateIngredientRow = (
@@ -1159,17 +1079,6 @@ export default function PublishMenuItemModal({
 
   const updateAgeRuleRow = (index: number, changes: Partial<AgeRuleRow>) => {
     setAgeRuleRows((current) =>
-      current.map((row, rowIndex) =>
-        rowIndex === index ? { ...row, ...changes } : row,
-      ),
-    );
-  };
-
-  const updateDietaryTagRow = (
-    index: number,
-    changes: Partial<DietaryTagRow>,
-  ) => {
-    setDietaryTagRows((current) =>
       current.map((row, rowIndex) =>
         rowIndex === index ? { ...row, ...changes } : row,
       ),
@@ -1370,9 +1279,6 @@ export default function PublishMenuItemModal({
                 reasonText: r.reasonText.trim() || "Suitable as a normal serving.",
               };
             }),
-          dietaryTypes: dietaryTagRows
-            .filter((r) => Boolean(r.code))
-            .map((r) => ({ code: r.code, name: r.name || r.code })),
         },
         primaryMediaUuids: [],
         thumbnailMediaUuid: thumbnailFile ? null : (existingThumbnail || null),
@@ -2203,162 +2109,6 @@ export default function PublishMenuItemModal({
             ) : (
               <div className="mt-4">
                 <EmptyRowsHint text="មិនទាន់បានកំណត់ក្រុមអាយុទេ។" />
-              </div>
-            )}
-          </section>
-
-          {/* Food dietary classification tags (distinct from the verified
-              per-item declarations above, which target menu_item_dietary_types) */}
-          <section className="rounded-3xl border border-teal-100 bg-gradient-to-br from-teal-50/40 to-white p-6">
-            <TabIntro
-              icon={<Heart size={20} />}
-              title="ចំណាត់ថ្នាក់របបអាហារ"
-              description="ស្លាកចំណាត់ថ្នាក់ (ឧ. Halal, Vegetarian) សម្រាប់ម្ហូបនេះនៅហាងនេះ។"
-              onAdd={() =>
-                setDietaryTagRows((current) => [...current, { code: "", name: "" }])
-              }
-              addLabel="បន្ថែមចំណាត់ថ្នាក់"
-            />
-            {dietaryTagRows.length > 0 ? (
-              <div className="mt-4 space-y-2.5">
-                {dietaryTagRows.map((row, index) => (
-                  <div
-                    key={index}
-                    style={{ zIndex: dietaryTagRows.length - index + 20 }}
-                    className="flex flex-wrap items-center gap-2.5 rounded-full border border-gray-100 bg-white p-2 shadow-sm transition hover:border-teal-100 hover:shadow"
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-100 text-base font-normal text-teal-700">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1 min-w-[220px]">
-                      <MenuItemSearchableSelect
-                        value={row.code}
-                        options={dietaryTagOptions}
-                        onChange={(next) => {
-                          const found = activeDietaryTypes.find(
-                            (d: any) => d.code === next,
-                          );
-                          updateDietaryTagRow(index, {
-                            code: found?.code || next,
-                            name: found?.name || next,
-                          });
-                        }}
-                        placeholder="ជ្រើសចំណាត់ថ្នាក់..."
-                        ariaLabel="ជ្រើសចំណាត់ថ្នាក់របបអាហារ"
-                      />
-                    </div>
-                    <RemoveRowButton
-                      onClick={() =>
-                        setDietaryTagRows((current) =>
-                          current.filter((_, rowIndex) => rowIndex !== index),
-                        )
-                      }
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-4">
-                <EmptyRowsHint text="មិនទាន់បានកំណត់ចំណាត់ថ្នាក់របបអាហារទេ។" />
-              </div>
-            )}
-          </section>
-
-          {/* Medical conditions */}
-          <section className="rounded-3xl border border-violet-100 bg-gradient-to-br from-violet-50/40 to-white p-6">
-            <TabIntro
-              icon={<HeartPulse size={20} />}
-              title="ស្ថានភាពសុខភាព"
-              description="កំណត់ថាម៉ឺនុយនេះសមរម្យ គួរប្រុងប្រយ័ត្ន ឬហាមឃាត់សម្រាប់ស្ថានភាពសុខភាពណាមួយ។"
-              onAdd={() =>
-                setMedicalConditionRows((current) => [
-                  ...current,
-                  {
-                    medicalConditionUuid: "",
-                    suitabilityStatus: "ALLOWED",
-                    notes: "",
-                  },
-                ])
-              }
-              addLabel="បន្ថែមស្ថានភាពសុខភាព"
-            />
-
-            {medicalConditionRows.length > 0 ? (
-              <div className="mt-4 space-y-3">
-                {medicalConditionRows.map((row, index) => (
-                  <div
-                    key={index}
-                    style={{ zIndex: medicalConditionRows.length - index + 20 }}
-                    className="rounded-3xl border border-violet-100 bg-white p-3.5 shadow-sm transition hover:border-violet-200 hover:shadow"
-                  >
-                    <div className="flex flex-wrap items-center gap-3">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-violet-100 text-lg font-normal text-violet-800">
-                        {index + 1}
-                      </div>
-
-                      <div className="flex-1 min-w-[220px]">
-                        <MenuItemSearchableSelect
-                          value={row.medicalConditionUuid}
-                          options={medicalConditionOptions}
-                          onChange={(next) =>
-                            setMedicalConditionRows((current) =>
-                              current.map((r, i) =>
-                                i === index ? { ...r, medicalConditionUuid: next } : r,
-                              ),
-                            )
-                          }
-                          placeholder="ជ្រើសស្ថានភាពសុខភាព..."
-                          ariaLabel="ជ្រើសស្ថានភាពសុខភាព"
-                        />
-                      </div>
-
-                      <div className="w-52 min-w-[170px]">
-                        <MenuItemSearchableSelect
-                        value={row.suitabilityStatus}
-                        options={suitabilityStatusOptions}
-                        onChange={(next) =>
-                          setMedicalConditionRows((current) =>
-                            current.map((r, i) =>
-                              i === index
-                                ? { ...r, suitabilityStatus: next }
-                                : r,
-                            ),
-                          )
-                        }
-                        placeholder="ជ្រើសរើសសមរម្យភាព..."
-                        ariaLabel="ជ្រើសរើសសមរម្យភាព"
-                      />
-                    </div>
-
-                    <RemoveRowButton
-                      onClick={() =>
-                        setMedicalConditionRows((current) =>
-                          current.filter((_, rowIndex) => rowIndex !== index),
-                        )
-                      }
-                    />
-                  </div>
-
-                  <div className="mt-2.5 sm:pl-14">
-                    <input
-                      placeholder="កំណត់ចំណាំ (Notes)..."
-                      value={row.notes}
-                      onChange={(event) =>
-                        setMedicalConditionRows((current) =>
-                          current.map((r, i) =>
-                            i === index ? { ...r, notes: event.target.value } : r,
-                          ),
-                        )
-                      }
-                      className={inputClass}
-                    />
-                  </div>
-                </div>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-4">
-                <EmptyRowsHint text="មិនទាន់បានកំណត់ស្ថានភាពសុខភាពទេ។" />
               </div>
             )}
           </section>

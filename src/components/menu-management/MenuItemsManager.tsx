@@ -44,7 +44,6 @@ import { useGetMealTypesQuery } from "@/src/app/store/mealTypeApi";
 import { useGetAgeGroupsQuery } from "@/src/app/store/ageGroupApi";
 import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
 import { useGetAllergensQuery } from "@/src/app/store/allergenApi";
-import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionApi";
 import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
 import { readFilterCatalog } from "@/src/lib/filterCatalogStorage";
 import { useUpdateFoodCategoryMutation } from "@/src/app/store/foodCategoryApi";
@@ -199,7 +198,6 @@ export default function MenuItemsManager({
   const ageGroupsQuery = useGetAgeGroupsQuery({ page: 0, size: 100 });
   const dietaryTypesQuery = useGetDietaryTypesQuery({ page: 0, size: 100 }, { skip: !modalActive });
   const allergensQuery = useGetAllergensQuery({ page: 0, size: 100 }, { skip: !modalActive });
-  const medicalConditionsQuery = useGetMedicalConditionsQuery({ page: 0, size: 100 }, { skip: !modalActive });
 
   const activeWeatherConditions = useMemo(() => {
     const server = weatherQuery.data?.contents ?? [];
@@ -216,10 +214,6 @@ export default function MenuItemsManager({
     [allergensQuery.data],
   );
 
-  const activeMedicalConditions = useMemo(
-    () => (medicalConditionsQuery.data?.contents ?? []).filter((m) => m.active !== false),
-    [medicalConditionsQuery.data],
-  );
 
   const activeMealTypes = useMemo(
     () => (mealTypesQuery.data?.contents ?? []).filter((m) => m.isActive !== false),
@@ -2070,7 +2064,6 @@ export default function MenuItemsManager({
         seasons={activeSeasons}
         weatherConditions={activeWeatherConditions}
         events={activeEvents}
-        medicalConditions={activeMedicalConditions}
         saving={creatingMenuItem || updatingMenuItem}
         onClose={() => {
           if (creatingMenuItem || updatingMenuItem) {

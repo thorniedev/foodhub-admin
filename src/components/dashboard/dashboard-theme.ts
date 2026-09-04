@@ -13,6 +13,10 @@ export const DASHBOARD_SURFACE = "#ffffff";
  * (green primary, orange secondary, yellow accent) plus one analytics blue.
  * Each entry is >= 3:1 against the white card surface and stays separable
  * under deuteranopia/protanopia, so no chart should invent its own colour.
+ *
+ * These stay literal hex rather than `var(--chart-n)` because several call
+ * sites derive translucent variants from them with `withAlpha`, and colour
+ * arithmetic needs a resolved value.
  */
 export const CHART_SERIES = {
   /** FoodHub green (primary-700) — the "our people" series. */
@@ -29,53 +33,82 @@ export const CHART_SERIES = {
   bookmarks: "#ca8a04",
 } as const;
 
+/**
+ * Fill opacity for row `index` of a "top N" bar chart.
+ *
+ * A single flat colour across eight bars gives the eye nothing to rank by
+ * except length. Fading down the list restores that cue while keeping the
+ * series hue — which is what tells the reader *which* metric they are looking
+ * at — intact. Bottoms out at 0.5 so the last bar still clears 3:1.
+ */
+export function rankOpacity(index: number, total: number): number {
+  if (total <= 1) return 1;
+  return 1 - (index / (total - 1)) * 0.5;
+}
+
+/** Translucent variant of a series colour, for fills and legend chips. */
+export function withAlpha(color: string, percent: number): string {
+  return `color-mix(in oklab, ${color} ${percent}%, transparent)`;
+}
+
 /** Low-emphasis fill for context bars that sit behind a headline series. */
 export const CHART_CONTEXT_FILL_OPACITY = 0.22;
 
-export const CHART_GRID = "#e5e7eb";
-export const CHART_AXIS_TEXT = "#6b7280";
+export const CHART_GRID = "var(--border)";
+export const CHART_AXIS_TEXT = "var(--muted-foreground)";
 
 export type Tone = "green" | "blue" | "amber" | "red" | "orange" | "gray";
 
+/**
+ * Tone is carried by the icon and by small accents — never by a tinted card
+ * background. Eight pastel-filled cards in a row read as decoration; the same
+ * eight on a neutral surface read as data.
+ */
 export const TONE_STYLES: Record<
   Tone,
-  { surface: string; icon: string; text: string; border: string }
+  { surface: string; icon: string; text: string; border: string; bar: string }
 > = {
   green: {
-    surface: "bg-primary-50",
-    icon: "text-primary-700",
-    text: "text-primary-800",
-    border: "border-primary-100",
+    surface: "bg-primary-50 dark:bg-primary-950/50",
+    icon: "text-primary-700 dark:text-primary-400",
+    text: "text-primary-800 dark:text-primary-300",
+    border: "border-primary-100 dark:border-primary-900/60",
+    bar: "bg-primary-600",
   },
   blue: {
-    surface: "bg-blue-50",
-    icon: "text-blue-700",
-    text: "text-blue-800",
-    border: "border-blue-100",
+    surface: "bg-blue-50 dark:bg-blue-950/50",
+    icon: "text-blue-700 dark:text-blue-400",
+    text: "text-blue-800 dark:text-blue-300",
+    border: "border-blue-100 dark:border-blue-900/60",
+    bar: "bg-blue-600",
   },
   amber: {
-    surface: "bg-amber-50",
-    icon: "text-amber-700",
-    text: "text-amber-800",
-    border: "border-amber-100",
+    surface: "bg-amber-50 dark:bg-amber-950/50",
+    icon: "text-amber-700 dark:text-amber-400",
+    text: "text-amber-800 dark:text-amber-300",
+    border: "border-amber-100 dark:border-amber-900/60",
+    bar: "bg-amber-500",
   },
   red: {
-    surface: "bg-red-50",
-    icon: "text-red-700",
-    text: "text-red-800",
-    border: "border-red-100",
+    surface: "bg-red-50 dark:bg-red-950/50",
+    icon: "text-red-700 dark:text-red-400",
+    text: "text-red-800 dark:text-red-300",
+    border: "border-red-100 dark:border-red-900/60",
+    bar: "bg-red-600",
   },
   orange: {
-    surface: "bg-secondary-50",
-    icon: "text-secondary-700",
-    text: "text-secondary-800",
-    border: "border-secondary-100",
+    surface: "bg-secondary-50 dark:bg-secondary-950/50",
+    icon: "text-secondary-700 dark:text-secondary-400",
+    text: "text-secondary-800 dark:text-secondary-300",
+    border: "border-secondary-100 dark:border-secondary-900/60",
+    bar: "bg-secondary-500",
   },
   gray: {
-    surface: "bg-gray-100",
-    icon: "text-gray-600",
-    text: "text-gray-700",
-    border: "border-gray-200",
+    surface: "bg-muted",
+    icon: "text-muted-foreground",
+    text: "text-foreground",
+    border: "border-border",
+    bar: "bg-muted-foreground",
   },
 };
 
@@ -126,10 +159,44 @@ export function formatMilliseconds(value: number | null | undefined): string {
   return `${Math.round(value)}ms`;
 }
 
-export function formatChangePercent(value: number | null | undefined): string | null {
-  if (value === null || value === undefined || !Number.isFinite(value)) return null;
+/**
+ * Percentage changes off a near-zero base are arithmetically correct and
+ * visually meaningless — one active user growing to twelve reported as
+ * "+1,100.0%", fourteen sessions to 4,637 as "+33,021.4%". Past this
+ * threshold the exact figure tells the reader nothing the arrow does not.
+ */
+const CHANGE_CLAMP = 999;
+
+export interface ChangeDisplay {
+  text: string;
+  /** True when the real magnitude was too large to print. */
+  clamped: boolean;
+}
+
+export function formatChange(
+  value: number | null | undefined,
+): ChangeDisplay | null {
+  if (value === null || value === undefined || !Number.isFinite(value))
+    return null;
+
+  if (Math.abs(value) > CHANGE_CLAMP) {
+    return { text: value > 0 ? `>+${CHANGE_CLAMP}%` : `<−${CHANGE_CLAMP}%`, clamped: true };
+  }
+
+  // Whole percentages below 100 do not need a decimal place; above it the
+  // decimal is noise either way.
+  const magnitude = Math.abs(value);
+  const formatted =
+    magnitude >= 100
+      ? NUMBER_FORMAT.format(Math.round(value))
+      : DECIMAL_FORMAT.format(value);
+
   const sign = value > 0 ? "+" : "";
-  return `${sign}${DECIMAL_FORMAT.format(value)}%`;
+  return { text: `${sign}${formatted}%`, clamped: false };
+}
+
+export function formatChangePercent(value: number | null | undefined): string | null {
+  return formatChange(value)?.text ?? null;
 }
 
 /** Chart axis ticks: 2026-08-27 -> 27/08 */

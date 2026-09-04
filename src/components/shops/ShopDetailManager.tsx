@@ -44,7 +44,6 @@ import {
   useUpdateStoreMenuItemMutation,
 } from "@/src/app/store/menuManagementApi";
 import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
-import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionApi";
 import type { MenuItemWritePayload } from "@/src/types/menu-management";
 
 interface ShopDetailManagerProps {
@@ -175,10 +174,6 @@ export default function ShopDetailManager({
     skip: !isMenuModalOpen,
   });
   const dietaryTypesQuery = useGetDietaryTypesQuery(
-    { page: 0, size: 100 },
-    { skip: !isMenuModalOpen },
-  );
-  const medicalConditionsQuery = useGetMedicalConditionsQuery(
     { page: 0, size: 100 },
     { skip: !isMenuModalOpen },
   );
@@ -673,11 +668,6 @@ export default function ShopDetailManager({
           dietaryTypesQuery.data?.contents ??
           (dietaryTypesQuery.data as any)?.content ??
           (Array.isArray(dietaryTypesQuery.data) ? dietaryTypesQuery.data : [])
-        }
-        medicalConditions={
-          medicalConditionsQuery.data?.contents ??
-          (medicalConditionsQuery.data as any)?.content ??
-          (Array.isArray(medicalConditionsQuery.data) ? medicalConditionsQuery.data : [])
         }
         defaultStoreUuid={resolvedStoreUuid}
         saving={false}

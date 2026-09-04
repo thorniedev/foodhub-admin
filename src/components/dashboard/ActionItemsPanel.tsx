@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { ArrowUpRight, ClipboardCheck, ShieldCheck } from "lucide-react";
 
@@ -7,6 +8,7 @@ import type { DashboardActionItem } from "@/src/types/adminDashboard";
 import SectionCard from "./SectionCard";
 import DashboardEmptyState from "./DashboardEmptyState";
 import StatusBadge from "@/src/components/ui/StatusBadge";
+import { Badge } from "@/src/components/ui/badge";
 import { TableSkeleton } from "./DashboardLoadingSkeleton";
 import {
   ISSUE_TYPE_LABELS,
@@ -36,6 +38,13 @@ function actionHref(item: DashboardActionItem): string | null {
   }
 }
 
+interface ActionItemsGroup {
+  issueType: string;
+  severity: string;
+  recommendation: string;
+  items: DashboardActionItem[];
+}
+
 interface ActionItemsPanelProps {
   items: DashboardActionItem[];
   isLoading?: boolean;
@@ -45,76 +54,156 @@ export default function ActionItemsPanel({
   items,
   isLoading = false,
 }: ActionItemsPanelProps) {
+  /**
+   * The recommendation is a property of the issue *type*, not of the row —
+   * every pending store carries the identical sentence. Rendering it once per
+   * row turned ten entries into a wall of duplicated paragraphs, so it is
+   * hoisted to the group header and each row keeps only what is unique to it.
+   */
+  const groups = useMemo<ActionItemsGroup[]>(() => {
+    const byType = new Map<string, ActionItemsGroup>();
+
+    for (const item of items) {
+      const issueType = item.issueType?.toUpperCase() ?? "UNKNOWN";
+      const existing = byType.get(issueType);
+
+      if (existing) {
+        existing.items.push(item);
+        continue;
+      }
+
+      byType.set(issueType, {
+        issueType,
+        severity: item.severity,
+        recommendation: RECOMMENDATIONS[issueType] ?? item.recommendation,
+        items: [item],
+      });
+    }
+
+    return [...byType.values()].sort((a, b) => b.items.length - a.items.length);
+  }, [items]);
+
   return (
     <SectionCard
       title="សកម្មភាពត្រូវធ្វើ"
       description="បញ្ហាទិន្នន័យដែលកំពុងរារាំងគុណភាពនៃការណែនាំ"
-      icon={<ClipboardCheck size={18} aria-hidden="true" />}
+      icon={<ClipboardCheck size={16} aria-hidden="true" />}
       hint="បញ្ជីនេះមិនអាស្រ័យលើចន្លោះកាលបរិច្ឆេទទេ — វាបង្ហាញស្ថានភាពទិន្នន័យបច្ចុប្បន្ន។"
       tone="amber"
-      bodyClassName="px-5 py-3"
+      actions={
+        items.length > 0 ? (
+          <Badge tone="amber">{items.length} បញ្ហា</Badge>
+        ) : undefined
+      }
+      bodyClassName="pt-0"
     >
       {isLoading ? (
-        <TableSkeleton rows={4} />
+        <div className="pt-4">
+          <TableSkeleton rows={4} />
+        </div>
       ) : items.length === 0 ? (
-        <DashboardEmptyState
-          compact
-          icon={<ShieldCheck size={22} aria-hidden="true" />}
-          title="គ្មានបញ្ហាទិន្នន័យ"
-          description="មុខម្ហូបទាំងអស់មានព័ត៌មានពេញលេញ ហើយគ្មានហាងរង់ចាំអនុម័តទេ។"
-        />
+        <div className="pt-4">
+          <DashboardEmptyState
+            compact
+            icon={<ShieldCheck size={22} aria-hidden="true" />}
+            title="គ្មានបញ្ហាទិន្នន័យ"
+            description="មុខម្ហូបទាំងអស់មានព័ត៌មានពេញលេញ ហើយគ្មានហាងរង់ចាំអនុម័តទេ។"
+          />
+        </div>
       ) : (
-        <ul className="divide-y divide-border/50">
-          {items.map((item) => {
-            const href = actionHref(item);
-            const recommendation =
-              RECOMMENDATIONS[item.issueType?.toUpperCase()] ?? item.recommendation;
+        <div className="divide-y">
+          {groups.map((group) => (
+            <section key={group.issueType} className="py-4 first:pt-4 last:pb-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge tone={severityTone(group.severity)}>
+                  {labelFor(SEVERITY_LABELS, group.severity)}
+                </StatusBadge>
 
-            return (
-              <li
-                key={`${item.issueType}-${item.entityUuid}`}
-                className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-1 last:pb-1"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <StatusBadge tone={severityTone(item.severity)}>
-                      {labelFor(SEVERITY_LABELS, item.severity)}
-                    </StatusBadge>
+                <h3 className="text-xs font-semibold text-foreground">
+                  {labelFor(ISSUE_TYPE_LABELS, group.issueType)}
+                </h3>
 
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {labelFor(ISSUE_TYPE_LABELS, item.issueType)}
-                    </span>
-                  </div>
+                <span className="text-[0.6875rem] text-muted-foreground tabular-nums">
+                  {group.items.length}
+                </span>
+              </div>
 
-                  <p className="mt-1 truncate text-sm font-semibold text-foreground">
-                    {item.entityName}
-                  </p>
+              {group.recommendation && (
+                <p className="mt-1 text-[0.6875rem] leading-5 text-muted-foreground">
+                  {group.recommendation}
+                </p>
+              )}
 
-                  {item.relatedName && (
-                    <p className="truncate text-xs text-muted-foreground">
-                      {item.relatedName}
-                    </p>
-                  )}
+              <ul className="mt-2.5 grid grid-cols-1 gap-1.5 lg:grid-cols-2">
+                {group.items.map((item) => {
+                  const href = actionHref(item);
 
-                  <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                    {recommendation}
-                  </p>
-                </div>
-
-                {href && (
-                  <Link
-                    href={href}
-                    className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border border-border/80 bg-background px-3 text-xs font-medium text-foreground shadow-xs transition hover:border-primary/50 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
-                  >
-                    <span>ដោះស្រាយ</span>
-                    <ArrowUpRight size={14} aria-hidden="true" />
-                  </Link>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+                  return (
+                    <li key={`${item.issueType}-${item.entityUuid}`}>
+                      <ActionRow item={item} href={href} />
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
       )}
     </SectionCard>
+  );
+}
+
+function ActionRow({
+  item,
+  href,
+}: {
+  item: DashboardActionItem;
+  href: string | null;
+}) {
+  const body = (
+    <>
+      <span className="min-w-0 flex-1">
+        <span
+          className="block truncate text-xs font-medium text-foreground"
+          title={item.entityName}
+        >
+          {item.entityName}
+        </span>
+        {item.relatedName && (
+          <span
+            className="block truncate text-[0.6875rem] text-muted-foreground"
+            title={item.relatedName}
+          >
+            {item.relatedName}
+          </span>
+        )}
+      </span>
+
+      {href && (
+        <span className="inline-flex shrink-0 items-center gap-0.5 text-[0.6875rem] font-medium text-muted-foreground transition group-hover:text-primary">
+          ដោះស្រាយ
+          <ArrowUpRight size={13} aria-hidden="true" />
+        </span>
+      )}
+    </>
+  );
+
+  if (!href) {
+    return (
+      <div className="flex items-center gap-3 rounded-lg border border-transparent bg-muted/40 px-3 py-2">
+        {body}
+      </div>
+    );
+  }
+
+  // The whole row is the target rather than a small trailing button — the
+  // button was the only hit area and sat at the far right of a wide row.
+  return (
+    <Link
+      href={href}
+      className="group flex items-center gap-3 rounded-lg border border-transparent bg-muted/40 px-3 py-2 transition hover:border-primary/30 hover:bg-primary-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:hover:bg-primary-950/30"
+    >
+      {body}
+    </Link>
   );
 }

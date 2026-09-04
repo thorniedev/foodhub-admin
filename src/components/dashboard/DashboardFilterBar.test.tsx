@@ -40,7 +40,7 @@ describe("DashboardFilterBar", () => {
     fireEvent.change(screen.getByPlaceholderText(/Daun Penh/), {
       target: { value: "Phnom Penh" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /អនុវត្តតម្រង/ }));
+    fireEvent.click(screen.getByRole("button", { name: /អនុវត្ត/ }));
 
     await waitFor(() => expect(onApply).toHaveBeenCalledTimes(1));
     expect(onApply).toHaveBeenCalledWith(
@@ -73,12 +73,12 @@ describe("DashboardFilterBar", () => {
     const { onApply } = renderBar();
 
     // Expand advanced geo panel
-    fireEvent.click(screen.getByRole("button", { name: /បង្ហាញតម្រងកាំភូមិសាស្ត្រ/ }));
+    fireEvent.click(screen.getByRole("button", { name: /កាំភូមិសាស្ត្រ/ }));
 
     fireEvent.change(screen.getByPlaceholderText("11.5564"), {
       target: { value: "11.5564" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /អនុវត្តតម្រង/ }));
+    fireEvent.click(screen.getByRole("button", { name: /អនុវត្ត/ }));
 
     expect(
       await screen.findByText("ត្រូវបំពេញរយៈទទឹង និងរយៈបណ្ដោយជាមួយគ្នា"),
@@ -90,7 +90,7 @@ describe("DashboardFilterBar", () => {
     const { onApply } = renderBar();
 
     // Expand advanced geo panel
-    fireEvent.click(screen.getByRole("button", { name: /បង្ហាញតម្រងកាំភូមិសាស្ត្រ/ }));
+    fireEvent.click(screen.getByRole("button", { name: /កាំភូមិសាស្ត្រ/ }));
 
     fireEvent.change(screen.getByPlaceholderText("11.5564"), {
       target: { value: "11.5564" },
@@ -100,7 +100,7 @@ describe("DashboardFilterBar", () => {
     });
     const radiusInput = screen.getByPlaceholderText("5");
     fireEvent.change(radiusInput, { target: { value: "80" } });
-    fireEvent.click(screen.getByRole("button", { name: /អនុវត្តតម្រង/ }));
+    fireEvent.click(screen.getByRole("button", { name: /អនុវត្ត/ }));
 
     expect(
       await screen.findByText(/កាំត្រូវធំជាង 0 និងមិនលើស 50/),
@@ -116,7 +116,7 @@ describe("DashboardFilterBar", () => {
     const city = screen.getByPlaceholderText(/Daun Penh/) as HTMLInputElement;
     expect(city.value).toBe("Phnom Penh");
 
-    fireEvent.click(screen.getByRole("button", { name: /កំណត់ឡើងវិញ/ }));
+    fireEvent.click(screen.getByRole("button", { name: /កំណត់តម្រងឡើងវិញ/ }));
 
     expect(onReset).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(city.value).toBe(""));
@@ -126,7 +126,7 @@ describe("DashboardFilterBar", () => {
     renderBar();
 
     // Expand advanced geo panel
-    fireEvent.click(screen.getByRole("button", { name: /បង្ហាញតម្រងកាំភូមិសាស្ត្រ/ }));
+    fireEvent.click(screen.getByRole("button", { name: /កាំភូមិសាស្ត្រ/ }));
 
     const bkkBtn = screen.getByRole("button", { name: /បឹងកេងកង ១/ });
     expect(bkkBtn).toBeInTheDocument();

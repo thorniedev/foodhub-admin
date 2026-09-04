@@ -5,6 +5,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   LabelList,
   ResponsiveContainer,
   Tooltip,
@@ -14,6 +15,7 @@ import {
 import { Layers } from "lucide-react";
 
 import type { CategorySummary } from "@/src/types/adminDashboard";
+import { Segmented } from "@/src/components/ui/segmented";
 import SectionCard from "./SectionCard";
 import ChartTooltip from "./ChartTooltip";
 import DashboardEmptyState from "./DashboardEmptyState";
@@ -25,8 +27,8 @@ import {
   formatCompact,
   formatCount,
   formatRatio,
+  rankOpacity,
 } from "./dashboard-theme";
-import { cn } from "@/src/lib/utils";
 
 type CategoryMetric = "views" | "clicks" | "bookmarks";
 
@@ -53,12 +55,15 @@ export default function CategoryPerformanceChart({
   const rows = useMemo(
     () =>
       [...data]
+        // Categories with no activity are dropped rather than given an empty
+        // lane in the ranking. See LocationPerformanceChart for the reasoning.
+        .filter((row) => (row[metric] ?? 0) > 0)
         .sort((a, b) => (b[metric] ?? 0) - (a[metric] ?? 0))
         .slice(0, TOP_CATEGORIES),
     [data, metric],
   );
 
-  const hasSignal = rows.some((row) => (row[metric] ?? 0) > 0);
+  const hasSignal = rows.length > 0;
 
   return (
     <SectionCard
@@ -68,32 +73,13 @@ export default function CategoryPerformanceChart({
       tone="orange"
       hint="អ្នកមើលផ្សេងគ្នា ត្រូវបានរាប់ដាច់ដោយឡែកសម្រាប់ប្រភេទទាំងមូល មិនមែនបូកបញ្ចូលពីមុខម្ហូបនីមួយៗទេ។"
       actions={
-        <div
-          role="group"
-          aria-label="ជ្រើសរើសរង្វាស់ប្រភេទ"
-          className="flex items-center gap-1 rounded-full bg-muted/60 p-1"
-        >
-          {METRICS.map((option) => {
-            const active = option.value === metric;
-
-            return (
-              <button
-                key={option.value}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setMetric(option.value)}
-                className={cn(
-                  "h-7 cursor-pointer rounded-full px-3 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-                  active
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {option.label}
-              </button>
-            );
-          })}
-        </div>
+        <Segmented
+          label="ជ្រើសរើសរង្វាស់ប្រភេទ"
+          options={METRICS}
+          value={metric}
+          onChange={setMetric}
+          size="sm"
+        />
       }
     >
       {isLoading ? (
@@ -137,7 +123,7 @@ export default function CategoryPerformanceChart({
               />
 
               <Tooltip
-                cursor={{ fill: "rgba(17,24,39,0.04)" }}
+                cursor={{ fill: "var(--muted)", fillOpacity: 0.6 }}
                 content={({ active, payload }) => {
                   if (!active || !payload?.length) return null;
                   const row = payload[0].payload as CategorySummary;
@@ -161,18 +147,28 @@ export default function CategoryPerformanceChart({
                 isAnimationActive={false}
                 dataKey={metric}
                 name={activeMetric.label}
-                fill={activeMetric.color}
-                radius={[0, 6, 6, 0]}
-                maxBarSize={20}
-                background={{ fill: "var(--muted, #f1f5f9)", opacity: 0.5 }}
+                radius={[0, 4, 4, 0]}
+                maxBarSize={18}
+                background={{ fill: "var(--muted)", opacity: 0.55 }}
               >
                 <LabelList
                   dataKey={metric}
                   position="right"
                   offset={8}
                   formatter={(value: number) => formatCompact(value)}
-                  style={{ fill: CHART_AXIS_TEXT, fontSize: 11, fontWeight: 500 }}
+                  style={{ fill: CHART_AXIS_TEXT, fontSize: 11, fontWeight: 600 }}
                 />
+
+                {/* Rows are already sorted by the active metric, so fading
+                    down the list makes rank legible without reading the axis,
+                    while the hue keeps saying which metric this is. */}
+                {rows.map((row, index) => (
+                  <Cell
+                    key={row.categoryCode}
+                    fill={activeMetric.color}
+                    fillOpacity={rankOpacity(index, rows.length)}
+                  />
+                ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>

@@ -15,6 +15,7 @@ import {
 import { MapPin } from "lucide-react";
 
 import type { LocationSummary } from "@/src/types/adminDashboard";
+import { Segmented } from "@/src/components/ui/segmented";
 import SectionCard from "./SectionCard";
 import ChartTooltip from "./ChartTooltip";
 import DashboardEmptyState from "./DashboardEmptyState";
@@ -26,6 +27,7 @@ import {
   formatCompact,
   formatCount,
   formatRatio,
+  rankOpacity,
 } from "./dashboard-theme";
 import { cn } from "@/src/lib/utils";
 
@@ -58,12 +60,16 @@ export default function LocationPerformanceChart({
   const rows = useMemo(
     () =>
       [...data]
+        // A location with no activity is not part of a "top N" — including it
+        // reserved a labelled row and then drew nothing in it, so the chart
+        // ended on blank lanes that read as a rendering fault.
+        .filter((row) => (row[metric] ?? 0) > 0)
         .sort((a, b) => (b[metric] ?? 0) - (a[metric] ?? 0))
         .slice(0, TOP_LOCATIONS),
     [data, metric],
   );
 
-  const hasSignal = rows.some((row) => (row[metric] ?? 0) > 0);
+  const hasSignal = rows.length > 0;
 
   return (
     <SectionCard
@@ -73,32 +79,13 @@ export default function LocationPerformanceChart({
       tone="blue"
       hint="ដាក់ជាក្រុមតាមក្រុងមុន បន្ទាប់មកខេត្ត។ ហាងដែលគ្មានទាំងពីរនឹងបង្ហាញជា Unknown។"
       actions={
-        <div
-          role="group"
-          aria-label="ជ្រើសរើសរង្វាស់ទីតាំង"
-          className="flex items-center gap-1 rounded-full bg-muted/60 p-1"
-        >
-          {METRICS.map((option) => {
-            const active = option.value === metric;
-
-            return (
-              <button
-                key={option.value}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setMetric(option.value)}
-                className={cn(
-                  "h-7 cursor-pointer rounded-full px-3 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-                  active
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {option.label}
-              </button>
-            );
-          })}
-        </div>
+        <Segmented
+          label="ជ្រើសរើសរង្វាស់ទីតាំង"
+          options={METRICS}
+          value={metric}
+          onChange={setMetric}
+          size="sm"
+        />
       }
     >
       {isLoading ? (
@@ -143,7 +130,7 @@ export default function LocationPerformanceChart({
                 />
 
                 <Tooltip
-                  cursor={{ fill: "rgba(17,24,39,0.04)" }}
+                  cursor={{ fill: "var(--muted)", fillOpacity: 0.6 }}
                   content={({ active, payload }) => {
                     if (!active || !payload?.length) return null;
                     const row = payload[0].payload as LocationSummary;
@@ -181,26 +168,36 @@ export default function LocationPerformanceChart({
                   isAnimationActive={false}
                   dataKey={metric}
                   name={activeMetric.label}
-                  radius={[0, 6, 6, 0]}
-                  maxBarSize={20}
-                  background={{ fill: "var(--muted, #f1f5f9)", opacity: 0.5 }}
+                  radius={[0, 4, 4, 0]}
+                  maxBarSize={18}
+                  background={{ fill: "var(--muted)", opacity: 0.55 }}
+                  className={cn(onSelectLocation && "cursor-pointer")}
+                  onClick={(entry: unknown) => {
+                    const row = (entry as { payload?: LocationSummary })?.payload;
+                    if (row && onSelectLocation) onSelectLocation(row);
+                  }}
                 >
                   <LabelList
                     dataKey={metric}
                     position="right"
                     offset={8}
                     formatter={(value: number) => formatCompact(value)}
-                    style={{ fill: CHART_AXIS_TEXT, fontSize: 11, fontWeight: 500 }}
+                    style={{ fill: CHART_AXIS_TEXT, fontSize: 11, fontWeight: 600 }}
                   />
 
-                  {rows.map((row) => (
+                  {rows.map((row, index) => (
                     <Cell
                       key={row.location}
                       fill={activeMetric.color}
-                      opacity={
-                        activeLocationLabel && activeLocationLabel !== row.location
-                          ? 0.45
-                          : 1
+                      // A selected location holds full strength and everything
+                      // else drops back; with no selection, the fade just
+                      // tracks rank.
+                      fillOpacity={
+                        activeLocationLabel
+                          ? activeLocationLabel === row.location
+                            ? 1
+                            : 0.28
+                          : rankOpacity(index, rows.length)
                       }
                     />
                   ))}
@@ -209,33 +206,22 @@ export default function LocationPerformanceChart({
             </ResponsiveContainer>
           </div>
 
+          {/* This used to repeat all eight location names as buttons directly
+              under the axis that already lists them. The bars themselves are
+              the control now, and this line only reports state. */}
           {onSelectLocation && (
-            <div className="mt-3 flex flex-wrap gap-2 border-t border-border/50 pt-3">
-              <span className="w-full text-xs font-medium text-muted-foreground">
-                ចុចទីតាំង ដើម្បីត្រងផ្ទាំងទាំងមូលតាមទីតាំងនោះ:
-              </span>
-
-              {rows.map((row) => {
-                const active = activeLocationLabel === row.location;
-
-                return (
-                  <button
-                    key={row.location}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => onSelectLocation(row)}
-                    className={cn(
-                      "inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-                      active
-                        ? "border-primary/50 bg-primary-50 text-primary-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                        : "border-border/80 bg-background text-muted-foreground hover:border-primary/40 hover:bg-muted hover:text-foreground",
-                    )}
-                  >
-                    <MapPin size={13} aria-hidden="true" className="text-primary-700 dark:text-emerald-400" />
-                    <span>{row.location}</span>
-                  </button>
-                );
-              })}
+            <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3 text-[0.6875rem] text-muted-foreground">
+              {activeLocationLabel ? (
+                <>
+                  <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                    <MapPin size={12} aria-hidden="true" className="text-primary" />
+                    {activeLocationLabel}
+                  </span>
+                  <span>· ផ្ទាំងទាំងមូលកំពុងត្រងតាមទីតាំងនេះ</span>
+                </>
+              ) : (
+                <span>ចុចលើសសរណាមួយ ដើម្បីត្រងផ្ទាំងទាំងមូលតាមទីតាំងនោះ</span>
+              )}
             </div>
           )}
         </>

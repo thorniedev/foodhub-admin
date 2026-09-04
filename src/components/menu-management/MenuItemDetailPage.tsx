@@ -41,7 +41,6 @@ import { useGetAgeGroupsQuery } from "@/src/app/store/ageGroupApi";
 import { useGetManagedSeasonsQuery } from "@/src/app/store/menuManagementApi";
 import { useGetWeatherConditionsQuery } from "@/src/app/store/weatherConditionApi";
 import { useGetManagedEventsQuery } from "@/src/app/store/menuManagementApi";
-import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionApi";
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 import PublishMenuItemModal from "./PublishMenuItemModal";
@@ -78,7 +77,6 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
   const seasonsQuery = useGetManagedSeasonsQuery();
   const weatherConditionsQuery = useGetWeatherConditionsQuery({ size: 100 }, { skip: !uuid });
   const eventsQuery = useGetManagedEventsQuery();
-  const medicalConditionsQuery = useGetMedicalConditionsQuery({ size: 100 }, { skip: !uuid });
 
   const [updateMenuItem, { isLoading: updatingMenuItem }] =
     useUpdateStoreMenuItemMutation();
@@ -732,12 +730,6 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
             Array.isArray(eventsQuery.data)
               ? eventsQuery.data
               : (eventsQuery.data as any)?.contents ?? []
-          }
-          medicalConditions={
-            medicalConditionsQuery.data?.contents ??
-            (Array.isArray(medicalConditionsQuery.data)
-              ? medicalConditionsQuery.data
-              : [])
           }
           saving={updatingMenuItem}
           onClose={() => setEditModalOpen(false)}

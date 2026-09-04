@@ -2,6 +2,14 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/src/lib/utils";
 import InfoTooltip from "@/src/components/ui/InfoTooltip";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
 import { TONE_STYLES, type Tone } from "./dashboard-theme";
 
 interface SectionCardProps {
@@ -34,45 +42,47 @@ export default function SectionCard({
   const styles = TONE_STYLES[tone];
 
   return (
-    <section
-      className={cn(
-        "relative flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-none",
-        className,
-      )}
-    >
-      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-border/70 bg-transparent p-4 sm:p-5">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-3.5">
-            {icon && (
-              <span
-                className={cn(
-                  "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border",
-                  styles.surface,
-                  styles.border,
-                  styles.icon,
-                )}
-              >
-                {icon}
-              </span>
-            )}
-
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="text-base font-semibold tracking-tight text-foreground">{title}</p>
-                {hint && <InfoTooltip label={hint} />}
-              </div>
-
-              {description && (
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>
+    <Card className={cn("overflow-hidden", className)}>
+      <CardHeader className="border-b">
+        {/* `min-w-0` at every level of this row: without it a long Khmer
+            description forces the header wider than the card and pushes the
+            actions off the edge. */}
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+          {icon && (
+            <span
+              aria-hidden="true"
+              className={cn(
+                // Was 48px, which on mobile wrapped onto its own line and
+                // left the title stranded below it.
+                "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg",
+                styles.surface,
+                styles.icon,
               )}
+            >
+              {icon}
+            </span>
+          )}
+
+          <div className="min-w-0">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <CardTitle className="truncate" title={title}>
+                {title}
+              </CardTitle>
+              {hint && <InfoTooltip label={hint} />}
             </div>
+
+            {description && (
+              <CardDescription className="mt-0.5">
+                {description}
+              </CardDescription>
+            )}
           </div>
         </div>
 
-        {actions && <div className="flex items-center gap-2">{actions}</div>}
-      </header>
+        {actions && <CardAction>{actions}</CardAction>}
+      </CardHeader>
 
-      <div className={cn("flex-1 p-4 sm:p-5", bodyClassName)}>{children}</div>
-    </section>
+      <CardContent className={cn("pt-4", bodyClassName)}>{children}</CardContent>
+    </Card>
   );
 }

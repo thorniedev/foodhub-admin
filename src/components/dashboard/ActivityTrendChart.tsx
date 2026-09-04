@@ -15,6 +15,7 @@ import {
 import { Activity } from "lucide-react";
 
 import type { DashboardTrendPoint } from "@/src/types/adminDashboard";
+import { Segmented } from "@/src/components/ui/segmented";
 import SectionCard from "./SectionCard";
 import ChartTooltip, { type ChartTooltipRow } from "./ChartTooltip";
 import DashboardEmptyState from "./DashboardEmptyState";
@@ -28,8 +29,8 @@ import {
   formatCount,
   formatLongDate,
   formatShortDate,
+  withAlpha,
 } from "./dashboard-theme";
-import { cn } from "@/src/lib/utils";
 
 type BarMetric = "recommendationSessions" | "itemViews";
 
@@ -77,32 +78,13 @@ export default function ActivityTrendChart({
       tone="green"
       hint="ថ្ងៃដែលគ្មានសកម្មភាពត្រូវបានបំពេញដោយសូន្យ ដើម្បីកុំឱ្យក្រាហ្វិកលោតរំលងថ្ងៃ។"
       actions={
-        <div
-          role="group"
-          aria-label="ជ្រើសរើសរង្វាស់សម្រាប់សសរ"
-          className="flex items-center gap-1 rounded-full bg-muted/60 p-1"
-        >
-          {BAR_METRICS.map((metric) => {
-            const active = metric.value === barMetric;
-
-            return (
-              <button
-                key={metric.value}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setBarMetric(metric.value)}
-                className={cn(
-                  "h-7 cursor-pointer rounded-full px-3 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-                  active
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {metric.label}
-              </button>
-            );
-          })}
-        </div>
+        <Segmented
+          label="ជ្រើសរើសរង្វាស់សម្រាប់សសរ"
+          options={BAR_METRICS}
+          value={barMetric}
+          onChange={setBarMetric}
+          size="sm"
+        />
       }
     >
       {isLoading ? (
@@ -113,41 +95,14 @@ export default function ActivityTrendChart({
           description="មិនមានការមើល ការចុច ឬវគ្គណែនាំណាមួយត្រូវបានកត់ត្រាទេ។"
         />
       ) : (
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
-            <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: CHART_SERIES.activeUsers }}
-                aria-hidden="true"
-              />
-              អ្នកប្រើប្រាស់សកម្ម
-            </span>
-
-            <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300">
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: CHART_SERIES.newUsers }}
-                aria-hidden="true"
-              />
-              អ្នកប្រើប្រាស់ថ្មី
-            </span>
-
-            <span
-              className="inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5"
-              style={{
-                borderColor: `${activeBar.color}33`,
-                backgroundColor: `${activeBar.color}14`,
-                color: activeBar.color,
-              }}
-            >
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: activeBar.color }}
-                aria-hidden="true"
-              />
-              {activeBar.label}
-            </span>
+        <div className="flex flex-col gap-3">
+          {/* One legend style for all three series. Two of them used to be
+              hand-tinted chips and the third an inline-styled one, so the
+              same list carried three different visual weights. */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.6875rem] font-medium text-muted-foreground">
+            <LegendItem color={CHART_SERIES.activeUsers} label="អ្នកប្រើប្រាស់សកម្ម" />
+            <LegendItem color={CHART_SERIES.newUsers} label="អ្នកប្រើប្រាស់ថ្មី" />
+            <LegendItem color={activeBar.color} label={activeBar.label} muted />
           </div>
 
           <div className="h-[280px] w-full sm:h-[320px]">
@@ -204,7 +159,7 @@ export default function ActivityTrendChart({
                 />
 
                 <Tooltip
-                  cursor={{ fill: "rgba(17,24,39,0.04)" }}
+                  cursor={{ fill: "var(--muted)", fillOpacity: 0.6 }}
                   content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null;
 
@@ -234,9 +189,9 @@ export default function ActivityTrendChart({
                   fill={activeBar.color}
                   fillOpacity={CHART_CONTEXT_FILL_OPACITY}
                   stroke={activeBar.color}
-                  strokeOpacity={0.45}
-                  radius={[6, 6, 0, 0]}
-                  maxBarSize={22}
+                  strokeOpacity={0.4}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={18}
                 />
 
                 <Area
@@ -250,7 +205,7 @@ export default function ActivityTrendChart({
                   fill={`url(#${activeUsersFillId})`}
                   fillOpacity={1}
                   dot={false}
-                  activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff" }}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--card)" }}
                 />
 
                 <Line
@@ -262,7 +217,7 @@ export default function ActivityTrendChart({
                   stroke={CHART_SERIES.newUsers}
                   strokeWidth={2.25}
                   dot={false}
-                  activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff" }}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--card)" }}
                 />
               </ComposedChart>
             </ResponsiveContainer>
@@ -270,5 +225,31 @@ export default function ActivityTrendChart({
         </div>
       )}
     </SectionCard>
+  );
+}
+
+function LegendItem({
+  color,
+  label,
+  muted = false,
+}: {
+  color: string;
+  label: string;
+  /** Marks the series drawn as context bars rather than a headline line. */
+  muted?: boolean;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span
+        aria-hidden="true"
+        className="size-2 shrink-0 rounded-full"
+        style={{
+          backgroundColor: muted ? withAlpha(color, 35) : color,
+          outline: muted ? `1px solid ${color}` : undefined,
+          outlineOffset: muted ? "-1px" : undefined,
+        }}
+      />
+      {label}
+    </span>
   );
 }
