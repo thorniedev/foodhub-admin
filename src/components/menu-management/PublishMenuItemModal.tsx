@@ -853,7 +853,9 @@ export default function PublishMenuItemModal({
     const seen = new Set<string>();
 
     const add = (s: any) => {
-      if (!s || s.reviewStatus !== 'APPROVED') return;
+      if (!s) return;
+      const status = s.reviewStatus || s.accountStatus || s.operatingStatus;
+      if (status && status !== 'APPROVED' && status !== 'ACTIVE') return;
       const id = String(s.uuid || s.id || "");
       if (!id || seen.has(id)) return;
       seen.add(id);
