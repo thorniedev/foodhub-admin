@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 
 import { AlertTriangle, ArrowLeft, CheckCircle2, Loader2, X } from "lucide-react";
 
+const EMPTY_ARRAY: any[] = [];
+
 import {
   useDeleteShopMutation,
   useGetShopByUuidQuery,
@@ -666,18 +668,18 @@ export default function ShopDetailManager({
       <PublishMenuItemModal
         open={isMenuModalOpen}
         item={editingMenuItemRecord}
-        foods={foodsQuery.data?.content ?? []}
-        stores={storesQuery.data ?? []}
-        ingredients={ingredientsQuery.data ?? []}
+        foods={foodsQuery.data?.content ?? EMPTY_ARRAY}
+        stores={storesQuery.data ?? EMPTY_ARRAY}
+        ingredients={ingredientsQuery.data ?? EMPTY_ARRAY}
         dietaryTypes={
           dietaryTypesQuery.data?.contents ??
           (dietaryTypesQuery.data as any)?.content ??
-          (Array.isArray(dietaryTypesQuery.data) ? dietaryTypesQuery.data : [])
+          (Array.isArray(dietaryTypesQuery.data) ? dietaryTypesQuery.data : EMPTY_ARRAY)
         }
         medicalConditions={
           medicalConditionsQuery.data?.contents ??
           (medicalConditionsQuery.data as any)?.content ??
-          (Array.isArray(medicalConditionsQuery.data) ? medicalConditionsQuery.data : [])
+          (Array.isArray(medicalConditionsQuery.data) ? medicalConditionsQuery.data : EMPTY_ARRAY)
         }
         defaultStoreUuid={resolvedStoreUuid}
         saving={false}

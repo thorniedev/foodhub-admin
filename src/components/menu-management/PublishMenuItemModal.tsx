@@ -262,19 +262,21 @@ function extractAllMenuItemImages(item: MenuItemRecord): {
   return { thumbnail, gallery };
 }
 
+const EMPTY_ARRAY: any[] = [];
+
 export default function PublishMenuItemModal({
   open,
   item,
   foods,
   stores,
   ingredients,
-  dietaryTypes = [],
-  mealTypes = [],
-  ageGroups = [],
-  seasons = [],
-  weatherConditions = [],
-  events = [],
-  medicalConditions = [],
+  dietaryTypes = EMPTY_ARRAY,
+  mealTypes = EMPTY_ARRAY,
+  ageGroups = EMPTY_ARRAY,
+  seasons = EMPTY_ARRAY,
+  weatherConditions = EMPTY_ARRAY,
+  events = EMPTY_ARRAY,
+  medicalConditions = EMPTY_ARRAY,
   saving,
   fixedStoreUuid,
   defaultStoreUuid,
