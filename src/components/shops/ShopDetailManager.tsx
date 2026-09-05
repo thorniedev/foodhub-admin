@@ -67,6 +67,8 @@ function isValidUuid(value: string | null | undefined): value is string {
   return uuidRegex.test(cleanValue);
 }
 
+const EMPTY_LIST: any[] = [];
+
 /* =========================================================
    SHOP DETAIL MANAGER
 ========================================================= */
@@ -666,18 +668,18 @@ export default function ShopDetailManager({
       <PublishMenuItemModal
         open={isMenuModalOpen}
         item={editingMenuItemRecord}
-        foods={foodsQuery.data?.content ?? []}
-        stores={storesQuery.data ?? []}
-        ingredients={ingredientsQuery.data ?? []}
+        foods={foodsQuery.data?.content ?? EMPTY_LIST}
+        stores={storesQuery.data ?? EMPTY_LIST}
+        ingredients={ingredientsQuery.data ?? EMPTY_LIST}
         dietaryTypes={
           dietaryTypesQuery.data?.contents ??
           (dietaryTypesQuery.data as any)?.content ??
-          (Array.isArray(dietaryTypesQuery.data) ? dietaryTypesQuery.data : [])
+          (Array.isArray(dietaryTypesQuery.data) ? dietaryTypesQuery.data : EMPTY_LIST)
         }
         medicalConditions={
           medicalConditionsQuery.data?.contents ??
           (medicalConditionsQuery.data as any)?.content ??
-          (Array.isArray(medicalConditionsQuery.data) ? medicalConditionsQuery.data : [])
+          (Array.isArray(medicalConditionsQuery.data) ? medicalConditionsQuery.data : EMPTY_LIST)
         }
         defaultStoreUuid={resolvedStoreUuid}
         saving={false}

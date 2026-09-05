@@ -263,7 +263,7 @@
 //         builder.query<IngredientOption[], void>({
 //           async queryFn() {
 //             const result = await browserRequest<unknown>(
-//               "/api/admin/catalog/ingredients?page=0&size=100&sort=name%2Casc",
+//               "/api/admin/catalog/ingredients?page=0&size=2000&sort=name,asc",
 //             );
 
 //             if ("error" in result) {

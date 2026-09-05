@@ -260,6 +260,60 @@ export function updateCatalogCacheItem(
   writeCatalogCache(groupCode, updated);
 }
 
+export const FOOD_RELATIONS_STORAGE_PREFIX = "foodhub-food-relations-";
+
+export interface StoredFoodRelations {
+  seasons?: any[];
+  events?: any[];
+  suitableWeather?: any[];
+  weatherConditions?: any[];
+  mealTypes?: any[];
+  ageRules?: any[];
+  ageGroups?: any[];
+  dietaryTypes?: any[];
+  allergens?: any[];
+  nutritionData?: any;
+  nutrition?: any;
+  preparationTimes?: any[];
+  distances?: any[];
+  regions?: any[];
+  defaultSpiceLevel?: number | null;
+  updatedAt?: string;
+}
+
+export function saveFoodRelationsStorage(
+  foodUuid: string,
+  relations: StoredFoodRelations,
+) {
+  if (typeof window === "undefined" || !foodUuid) return;
+  try {
+    const key = `${FOOD_RELATIONS_STORAGE_PREFIX}${foodUuid}`;
+    window.localStorage.setItem(
+      key,
+      JSON.stringify({
+        ...relations,
+        updatedAt: new Date().toISOString(),
+      }),
+    );
+  } catch (err) {
+    console.warn("[FOOD RELATIONS STORAGE SAVE FAILED]", err);
+  }
+}
+
+export function readFoodRelationsStorage(
+  foodUuid: string,
+): StoredFoodRelations | null {
+  if (typeof window === "undefined" || !foodUuid) return null;
+  try {
+    const key = `${FOOD_RELATIONS_STORAGE_PREFIX}${foodUuid}`;
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw) as StoredFoodRelations;
+  } catch {
+    return null;
+  }
+}
+
 export const MENU_ITEM_RELATIONS_STORAGE_PREFIX = "foodhub-menu-item-relations-";
 
 /**

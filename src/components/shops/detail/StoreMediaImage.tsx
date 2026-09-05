@@ -7,6 +7,9 @@ import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl"
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+const mediaUrlCache = new Map<string, string>();
+const pendingMediaRequests = new Map<string, Promise<string | null>>();
+
 interface StoreMediaImageProps {
   mediaUuid?: string | null;
   alt: string;
@@ -22,7 +25,32 @@ export default function StoreMediaImage({
   fallbackClassName = "",
   fallbackIcon,
 }: StoreMediaImageProps) {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(() => {
+    if (!mediaUuid || !String(mediaUuid).trim()) return null;
+    const raw = String(mediaUuid).trim();
+    if (
+      raw.startsWith("http://") ||
+      raw.startsWith("https://") ||
+      raw.startsWith("blob:") ||
+      raw.startsWith("data:") ||
+      raw.startsWith("/Image/") ||
+      raw.startsWith("/images/")
+    ) {
+      return raw;
+    }
+    if (
+      raw.startsWith("/api/v1/") ||
+      raw.startsWith("/api/") ||
+      raw.startsWith("api/")
+    ) {
+      return resolveFoodHubCatalogImageUrl(raw) || raw;
+    }
+    const cleanUuid = raw
+      .replace(/^\/api\/(v1\/)?media\//, "")
+      .replace(/\/access-url$/, "")
+      .trim();
+    return mediaUrlCache.get(cleanUuid) ?? null;
+  });
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -73,46 +101,73 @@ export default function StoreMediaImage({
       .trim();
 
     if (UUID_REGEX.test(cleanUuid)) {
+      if (mediaUrlCache.has(cleanUuid)) {
+        setImageUrl(mediaUrlCache.get(cleanUuid)!);
+        setFailed(false);
+        setLoading(false);
+        return;
+      }
+
       async function fetchAccessUrl() {
         try {
           setLoading(true);
           setFailed(false);
 
-          const response = await fetch(
-            `/api/media/${encodeURIComponent(cleanUuid)}/access-url`,
-            {
-              method: "GET",
-              credentials: "include",
-              cache: "no-store",
-            },
-          );
-
-          if (response.ok) {
-            const data = await response.json();
-            const extracted =
-              data?.url ||
-              data?.payload?.url ||
-              data?.data?.url ||
-              data?.accessUrl ||
-              data?.payload?.accessUrl ||
-              data?.data?.accessUrl;
-
-            if (
-              !cancelled &&
-              typeof extracted === "string" &&
-              extracted.trim()
-            ) {
-              setImageUrl(extracted.trim());
+          if (pendingMediaRequests.has(cleanUuid)) {
+            const cachedUrl = await pendingMediaRequests.get(cleanUuid);
+            if (!cancelled && cachedUrl) {
+              setImageUrl(cachedUrl);
+              setLoading(false);
               return;
             }
           }
 
-          if (!cancelled) {
-            setImageUrl(`/api/media/${cleanUuid}/file`);
+          const fetchPromise = (async () => {
+            try {
+              const response = await fetch(
+                `/api/media/${encodeURIComponent(cleanUuid)}/access-url`,
+                {
+                  method: "GET",
+                  credentials: "include",
+                  cache: "no-store",
+                },
+              );
+
+              if (response.ok) {
+                const data = await response.json();
+                const extracted =
+                  data?.url ||
+                  data?.payload?.url ||
+                  data?.data?.url ||
+                  data?.accessUrl ||
+                  data?.payload?.accessUrl ||
+                  data?.data?.accessUrl;
+
+                if (typeof extracted === "string" && extracted.trim()) {
+                  return extracted.trim();
+                }
+              }
+            } catch {
+              // Ignore and fall through to proxy file
+            }
+            return `/api/media/${cleanUuid}/file`;
+          })();
+
+          pendingMediaRequests.set(cleanUuid, fetchPromise);
+          const finalUrl = await fetchPromise;
+          pendingMediaRequests.delete(cleanUuid);
+
+          if (finalUrl) {
+            mediaUrlCache.set(cleanUuid, finalUrl);
+            if (!cancelled) {
+              setImageUrl(finalUrl);
+            }
           }
         } catch (_err) {
           if (!cancelled) {
-            setImageUrl(`/api/media/${cleanUuid}/file`);
+            const fallbackFile = `/api/media/${cleanUuid}/file`;
+            mediaUrlCache.set(cleanUuid, fallbackFile);
+            setImageUrl(fallbackFile);
           }
         } finally {
           if (!cancelled) {
@@ -135,6 +190,9 @@ export default function StoreMediaImage({
   }, [mediaUuid]);
 
   if (loading) {
+    if (fallbackIcon) {
+      return <>{fallbackIcon}</>;
+    }
     return (
       <div
         className={`flex h-full w-full items-center justify-center bg-gray-50 ${fallbackClassName}`}

@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ExternalLink, Loader2, Save, X } from "lucide-react";
+import { z } from "zod";
 
 import { useGetDietaryTypesQuery } from "@/src/app/store/dietaryTypeApi";
 import { useGetIngredientsQuery } from "@/src/app/store/ingredientApi";
@@ -22,6 +23,20 @@ import IngredientRowsEditor from "./IngredientRowsEditor";
 import MenuItemDietaryTypesEditor from "./MenuItemDietaryTypesEditor";
 import MenuItemImageUploadGrid from "./MenuItemImageUploadGrid";
 
+const createStoreMenuItemSchema = z.object({
+  storeUuid: z.string().trim().min(1, "សូមជ្រើស Store"),
+  foodUuid: z.string().trim().min(1, "សូមជ្រើស Food ពី Food Catalog"),
+  name: z.string().trim().min(1, "សូមបញ្ចូលឈ្មោះ Menu Item"),
+  price: z
+    .string()
+    .trim()
+    .min(1, "តម្លៃត្រូវតែធំជាង ០")
+    .refine((val) => {
+      const p = Number(val);
+      return Number.isFinite(p) && p > 0;
+    }, "តម្លៃត្រូវតែធំជាង ០"),
+});
+
 interface FormState {
   storeUuid: string;
   foodUuid: string;
@@ -34,6 +49,8 @@ interface FormState {
   ingredientDataStatus: string;
   isFeatured: boolean;
   source: string;
+  dietaryTypes: string;
+  allergenDeclarations: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -48,6 +65,8 @@ const EMPTY_FORM: FormState = {
   ingredientDataStatus: "VERIFIED",
   isFeatured: false,
   source: "ADMIN",
+  dietaryTypes: "[]",
+  allergenDeclarations: "[]",
 };
 
 export default function CreateStoreMenuItemModal({
@@ -64,6 +83,18 @@ export default function CreateStoreMenuItemModal({
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [mediaUuids, setMediaUuids] = useState<string[]>([]);
   const [ingredients, setIngredients] = useState<CreateStoreMenuItemIngredient[]>([]);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const clearFieldError = (field: string) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
   /**
    * The admin's edits, or null while the list still follows the food.
    *
@@ -207,25 +238,45 @@ export default function CreateStoreMenuItemModal({
   };
 
   const submit = async () => {
+    setServerError(null);
+
+    const validationResult = createStoreMenuItemSchema.safeParse({
+      storeUuid: form.storeUuid,
+      foodUuid: form.foodUuid,
+      name: form.name,
+      price: form.price,
+    });
+
+    const nextErrors: Record<string, string> = {};
+    if (!validationResult.success) {
+      validationResult.error.issues.forEach((err) => {
+        const field = String(err.path[0]);
+        if (!nextErrors[field]) {
+          nextErrors[field] = err.message;
+        }
+      });
+    }
+
+    if (form.dietaryTypes.trim()) {
+      try {
+        const parsed = JSON.parse(form.dietaryTypes.trim());
+        if (!Array.isArray(parsed)) {
+          nextErrors.dietaryTypes = "Dietary Types ត្រូវតែជា JSON array []។";
+        }
+      } catch {
+        nextErrors.dietaryTypes = "Dietary Types ត្រូវតែជា JSON ត្រឹមត្រូវ។";
+      }
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
+      return;
+    }
+
+    setFieldErrors({});
+
     try {
-      setError(null);
-
-      if (!form.storeUuid) {
-        throw new Error("សូមជ្រើស Store។");
-      }
-
-      if (!form.foodUuid) {
-        throw new Error("សូមជ្រើស Food ពី Food Catalog។");
-      }
-
-      if (!form.name.trim()) {
-        throw new Error("សូមបញ្ចូល Menu Item name។");
-      }
-
       const price = Number(form.price);
-      if (!Number.isFinite(price) || price <= 0) {
-        throw new Error("តម្លៃ (Price) ត្រូវតែធំជាង ០។");
-      }
 
       const body: CreateStoreMenuItemPayload = {
         foodUuid: form.foodUuid,
@@ -264,7 +315,7 @@ export default function CreateStoreMenuItemModal({
       await onCreated();
       onClose();
     } catch (requestError) {
-      setError(getMenuItemApiErrorMessage(requestError));
+      setServerError(getMenuItemApiErrorMessage(requestError));
     }
   };
 
@@ -313,11 +364,18 @@ export default function CreateStoreMenuItemModal({
             </div>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <Field label="Store *">
+              <Field label="Store *" error={fieldErrors.storeUuid}>
                 <select
                   value={form.storeUuid}
-                  onChange={(event) => set("storeUuid", event.target.value)}
-                  className="field-input"
+                  onChange={(event) => {
+                    set("storeUuid", event.target.value);
+                    clearFieldError("storeUuid");
+                  }}
+                  className={`field-input ${
+                    fieldErrors.storeUuid
+                      ? "!border-red-400 !bg-red-50/40 focus:!border-red-500 focus:!ring-red-100"
+                      : ""
+                  }`}
                   disabled={shopsLoading}
                 >
                   <option value="">Select store</option>
@@ -329,11 +387,18 @@ export default function CreateStoreMenuItemModal({
                 </select>
               </Field>
 
-              <Field label="Food from Admin Catalog *">
+              <Field label="Food from Admin Catalog *" error={fieldErrors.foodUuid}>
                 <select
                   value={form.foodUuid}
-                  onChange={(event) => handleFoodChange(event.target.value)}
-                  className="field-input"
+                  onChange={(event) => {
+                    handleFoodChange(event.target.value);
+                    clearFieldError("foodUuid");
+                  }}
+                  className={`field-input ${
+                    fieldErrors.foodUuid
+                      ? "!border-red-400 !bg-red-50/40 focus:!border-red-500 focus:!ring-red-100"
+                      : ""
+                  }`}
                   disabled={foodsLoading}
                 >
                   <option value="">Select food</option>
@@ -351,15 +416,22 @@ export default function CreateStoreMenuItemModal({
             <h3 className="text-xl font-bold text-gray-900">Menu Item information</h3>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Field label="Menu item name *">
+              <Field label="Menu item name *" error={fieldErrors.name}>
                 <input
                   value={form.name}
-                  onChange={(event) => set("name", event.target.value)}
-                  className="field-input"
+                  onChange={(event) => {
+                    set("name", event.target.value);
+                    clearFieldError("name");
+                  }}
+                  className={`field-input ${
+                    fieldErrors.name
+                      ? "!border-red-400 !bg-red-50/40 focus:!border-red-500 focus:!ring-red-100"
+                      : ""
+                  }`}
                 />
               </Field>
 
-              <Field label="Price *">
+              <Field label="Price *" error={fieldErrors.price}>
                 <input
                   type="number"
                   min="0.01"
@@ -374,8 +446,13 @@ export default function CreateStoreMenuItemModal({
                     const val = event.target.value;
                     if (Number(val) < 0) return;
                     set("price", val);
+                    clearFieldError("price");
                   }}
-                  className="field-input"
+                  className={`field-input ${
+                    fieldErrors.price
+                      ? "!border-red-400 !bg-red-50/40 focus:!border-red-500 focus:!ring-red-100"
+                      : ""
+                  }`}
                 />
               </Field>
 
@@ -486,10 +563,10 @@ export default function CreateStoreMenuItemModal({
             seedCount={foodDietarySeed.length}
           />
 
-          {error && (
+          {serverError && (
             <div className="flex gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
               <AlertTriangle size={18} className="mt-0.5 shrink-0" />
-              <span>{error}</span>
+              <span>{serverError}</span>
             </div>
           )}
 
@@ -535,11 +612,20 @@ export default function CreateStoreMenuItemModal({
   );
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({
+  label,
+  children,
+  error,
+}: {
+  label: string;
+  children: ReactNode;
+  error?: string;
+}) {
   return (
-    <label>
+    <label className="block">
       <span className="mb-2 block text-sm font-bold text-gray-700">{label}</span>
       {children}
+      {error && <p className="mt-1 text-sm font-normal text-red-500">{error}</p>}
     </label>
   );
 }

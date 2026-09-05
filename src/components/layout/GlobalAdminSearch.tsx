@@ -26,6 +26,9 @@ import {
   useGetManagedFoodsQuery,
   useGetPublishedMenuItemsQuery,
 } from "@/src/app/store/menuManagementApi";
+import StoreMediaImage from "@/src/components/shops/detail/StoreMediaImage";
+import UserAvatar from "@/src/components/users/UserAvatar";
+import { storeLogoCandidate, storeCoverCandidate } from "@/src/lib/shopFormat";
 
 export default function GlobalAdminSearch() {
   const router = useRouter();
@@ -101,11 +104,21 @@ export default function GlobalAdminSearch() {
         const combinedText = `${storeName} ${address}`.toLowerCase();
 
         if (combinedText.includes(q)) {
+          const logoCandidate =
+            storeLogoCandidate(shop) ||
+            storeCoverCandidate(shop) ||
+            shop.logoUrl ||
+            shop.coverImageUrl ||
+            (shop as any).logo ||
+            (shop as any).cover ||
+            null;
+
           list.push({
             uuid: shop.uuid,
             type: "STORE",
             title: storeName || "Store",
             subtitle: address || undefined,
+            imageUrl: logoCandidate || null,
             status: shop.operatingStatus || shop.reviewStatus || undefined,
             targetUrl: `/shops/${shop.uuid}`,
           });
@@ -131,11 +144,28 @@ export default function GlobalAdminSearch() {
             (firstName || lastName ? `${firstName} ${lastName}`.trim() : email) ||
             "User";
 
+          const userImageCandidate =
+            (typeof u.avatarMediaUuid === "string" && u.avatarMediaUuid) ||
+            (typeof u.avatarUrl === "string" && u.avatarUrl) ||
+            (typeof u.profileImageUrl === "string" && u.profileImageUrl) ||
+            (typeof u.imageUrl === "string" && u.imageUrl) ||
+            (typeof u.avatar === "string" && u.avatar) ||
+            (typeof u.profilePicture === "string" && u.profilePicture) ||
+            (typeof u.photoUrl === "string" && u.photoUrl) ||
+            (typeof u.picture === "string" && u.picture) ||
+            (typeof u.image === "string" && u.image) ||
+            (typeof (u.defaultProfile as any)?.avatarMediaUuid === "string" && (u.defaultProfile as any).avatarMediaUuid) ||
+            (typeof (u.defaultProfile as any)?.avatarUrl === "string" && (u.defaultProfile as any).avatarUrl) ||
+            (typeof (u.profiles as any)?.[0]?.avatarMediaUuid === "string" && (u.profiles as any)[0].avatarMediaUuid) ||
+            (typeof (u.profiles as any)?.[0]?.avatarUrl === "string" && (u.profiles as any)[0].avatarUrl) ||
+            null;
+
           list.push({
             uuid: String(u.uuid || u.id || ""),
             type: "USER",
             title: displayTitle,
             subtitle: email !== displayTitle && email ? email : undefined,
+            imageUrl: userImageCandidate || null,
             status:
               typeof u.accountStatus === "string"
                 ? u.accountStatus
@@ -166,11 +196,25 @@ export default function GlobalAdminSearch() {
             categoryName ||
             (canonicalName !== displayTitle ? canonicalName : "");
 
+          const foodImageCandidate =
+            (Array.isArray(food.primaryMediaUrls) && typeof food.primaryMediaUrls[0] === "string" && food.primaryMediaUrls[0]) ||
+            (typeof food.thumbnail === "string" && food.thumbnail) ||
+            (typeof food.imageUrl === "string" && food.imageUrl) ||
+            (typeof food.primaryMediaUrl === "string" && food.primaryMediaUrl) ||
+            (Array.isArray(food.images) && typeof food.images[0] === "string" && food.images[0]) ||
+            (typeof food.primaryMediaUuid === "string" && food.primaryMediaUuid) ||
+            (typeof food.thumbnailMediaUuid === "string" && food.thumbnailMediaUuid) ||
+            (Array.isArray(food.primaryMediaUuids) && typeof food.primaryMediaUuids[0] === "string" && food.primaryMediaUuids[0]) ||
+            (typeof (food.media as any)?.[0]?.url === "string" && (food.media as any)[0].url) ||
+            (typeof (food.media as any)?.[0]?.accessUrl === "string" && (food.media as any)[0].accessUrl) ||
+            null;
+
           list.push({
             uuid: String(food.uuid || food.id || ""),
             type: "FOOD",
             title: displayTitle,
             subtitle: subtitle || undefined,
+            imageUrl: foodImageCandidate || null,
             targetUrl: `/menu-items?search=${encodeURIComponent(displayTitle)}`,
           });
         }
@@ -208,11 +252,27 @@ export default function GlobalAdminSearch() {
 
         const targetStoreUuid = menuItem.storeUuid || menuItem.store?.uuid;
 
+        const menuItemImageCandidate =
+          menuItem.thumbnail ||
+          menuItem.imageUrl ||
+          menuItem.primaryMediaUrls?.[0] ||
+          (menuItem as any).primaryMediaUrl ||
+          menuItem.images?.[0] ||
+          menuItem.primaryMediaUuid ||
+          menuItem.thumbnailMediaUuid ||
+          menuItem.food?.thumbnail ||
+          menuItem.food?.imageUrl ||
+          menuItem.food?.primaryMediaUrls?.[0] ||
+          (menuItem.food as any)?.primaryMediaUrl ||
+          menuItem.food?.primaryMediaUuid ||
+          null;
+
         list.push({
           uuid: itemUuid,
           type: "MENU_ITEM",
           title: name || foodLocal || foodCanonical || "Menu Item",
           subtitle,
+          imageUrl: menuItemImageCandidate || null,
           status: menuItem.availabilityStatus,
           targetUrl: targetStoreUuid
             ? `/shops/${targetStoreUuid}`
@@ -376,8 +436,26 @@ export default function GlobalAdminSearch() {
                       className="flex items-center justify-between rounded-xl sm:rounded-2xl p-2.5 sm:p-3 transition hover:bg-emerald-50/70 group cursor-pointer"
                     >
                       <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
-                        <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gray-100 group-hover:bg-white group-hover:shadow-xs">
-                          {getEntityIcon(item.type)}
+                        <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl sm:rounded-2xl border border-gray-100 bg-gray-100 group-hover:border-gray-200 group-hover:bg-white group-hover:shadow-xs">
+                          {item.type === "USER" && (item.imageUrl || item.uuid) ? (
+                            <UserAvatar
+                              name={item.title}
+                              userUuid={item.uuid}
+                              imageUrl={item.imageUrl}
+                              containerClassName="h-full w-full flex items-center justify-center text-sm font-semibold text-purple-700 bg-purple-50"
+                              textClassName="text-sm font-semibold text-purple-700"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : item.imageUrl ? (
+                            <StoreMediaImage
+                              mediaUuid={item.imageUrl}
+                              alt={item.title}
+                              className="h-full w-full object-cover"
+                              fallbackIcon={getEntityIcon(item.type)}
+                            />
+                          ) : (
+                            getEntityIcon(item.type)
+                          )}
                         </div>
                         <div className="min-w-0 flex-1 pr-1.5 sm:pr-2">
                           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">

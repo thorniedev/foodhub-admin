@@ -927,20 +927,52 @@ export default function AgeGroupManager() {
       </div>
 
       {/* NOTICE */}
-      {notice && (
-        <div
-          className={`rounded-2xl border px-4 py-3 text-lg ${
-            notice.type ===
-            "success"
-              ? "border-primary-100 bg-primary-50 text-primary-700"
-              : "border-red-100 bg-red-50 text-red-600"
-          }`}
-        >
-          {
-            notice.text
-          }
-        </div>
-      )}
+      {notice && (() => {
+        const duplicateCodeMatch =
+          notice.type === "error"
+            ? notice.text.match(/already exists:\s*([A-Za-z0-9_-]+)/i)
+            : null;
+        const duplicateCode = duplicateCodeMatch?.[1];
+        const duplicateInactiveItem = duplicateCode
+          ? items.find(
+              (it) =>
+                it.code.toUpperCase() === duplicateCode.toUpperCase() && !it.isActive,
+            )
+          : null;
+
+        return (
+          <div
+            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border px-5 py-3.5 text-lg ${
+              notice.type === "success"
+                ? "border-primary-100 bg-primary-50 text-primary-700"
+                : "border-red-100 bg-red-50 text-red-600"
+            }`}
+          >
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium">{notice.text}</span>
+              {duplicateInactiveItem && (
+                <span className="text-gray-600 text-base">
+                  (ទិន្នន័យនេះមានស្រាប់ក្នុងបញ្ជី <b>«អសកម្ម»</b>)
+                </span>
+              )}
+            </div>
+
+            {duplicateInactiveItem && (
+              <button
+                type="button"
+                onClick={async () => {
+                  await handleRestore(duplicateInactiveItem);
+                  setStatusFilter("ALL");
+                }}
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary-800 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-primary-900 active:scale-95 transition cursor-pointer"
+              >
+                <RotateCcw size={16} />
+                <span>ស្ដារឡើងវិញឥឡូវនេះ (Restore)</span>
+              </button>
+            )}
+          </div>
+        );
+      })()}
 
       {/* TABLE */}
       <section className="overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
