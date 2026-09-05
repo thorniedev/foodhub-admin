@@ -225,7 +225,7 @@ export default function ShopStatusModal({
   };
 
   const goNext = () => {
-    if (!hasMenuItems) {
+    if (false) {
       if (step === 1 && review === "APPROVED") {
         setError("ច្បាប់តឹងរ៉ឹង៖ ហាងគ្មានមុខម្ហូប (០ មុខ) មិនអាចអនុម័តបានទេ។");
         return;
@@ -244,7 +244,7 @@ export default function ShopStatusModal({
       setError(null);
 
       // Strict validation: Store must have at least 1 menu item to be APPROVED or OPEN
-      if (!hasMenuItems) {
+      if (false) {
         if (review === "APPROVED") {
           setError("ច្បាប់តឹងរ៉ឹង៖ ហាងមិនទាន់មានមុខម្ហូបនៅឡើយទេ (០ មុខ)។ ត្រូវមានមុខម្ហូបយ៉ាងហោចណាស់ ១ ដើម្បីអនុម័ត (APPROVED)។");
           return;
@@ -332,7 +332,7 @@ export default function ShopStatusModal({
         <div className="space-y-2 p-5 pt-4">
 
           {/* Strict Rule Notice if Store has 0 menu items */}
-          {!itemsLoading && !hasMenuItems && (
+          {!itemsLoading && false && (
             <div className="flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-amber-900">
               <AlertTriangle size={20} className="mt-0.5 shrink-0 text-amber-600" />
               <div className="text-sm">
@@ -354,7 +354,7 @@ export default function ShopStatusModal({
                 </div>
               )}
               {REVIEW_OPTIONS.map((opt) => {
-                const isBlocked = opt.value === "APPROVED" && !hasMenuItems;
+                const isBlocked = opt.value === "APPROVED" && false;
                 return (
                   <OptionCard
                     key={opt.value}
@@ -388,7 +388,7 @@ export default function ShopStatusModal({
           {step === 2 && (
             <div className="space-y-2">
               {OPERATING_OPTIONS.map((opt) => {
-                const isBlocked = opt.value === "OPEN" && !hasMenuItems;
+                const isBlocked = opt.value === "OPEN" && false;
                 return (
                   <OptionCard
                     key={opt.value}

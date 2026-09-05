@@ -348,6 +348,7 @@ export default function PublishMenuItemModal({
   const { data: searchedShops } = useGetShopsQuery(
     {
       query: storeSearchInput.trim() || undefined,
+      reviewStatus: 'APPROVED',
       size: 50,
     },
     { skip: !open || storeSearchInput.trim().length < 2 },
@@ -852,7 +853,7 @@ export default function PublishMenuItemModal({
     const seen = new Set<string>();
 
     const add = (s: any) => {
-      if (!s) return;
+      if (!s || s.reviewStatus !== 'APPROVED') return;
       const id = String(s.uuid || s.id || "");
       if (!id || seen.has(id)) return;
       seen.add(id);

@@ -107,7 +107,7 @@ export default function CreateStoreMenuItemModal({
   );
   const [error, setError] = useState<string | null>(null);
 
-  const { data: shopData, isLoading: shopsLoading } = useGetShopsQuery({
+  const { data: shopData, isLoading: shopsLoading } = useGetShopsQuery({ reviewStatus: 'APPROVED',
     page: 0,
     size: 100,
   });
