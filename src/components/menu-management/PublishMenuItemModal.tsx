@@ -351,7 +351,7 @@ export default function PublishMenuItemModal({
       reviewStatus: 'APPROVED',
       size: 50,
     },
-    { skip: !open || storeSearchInput.trim().length < 2 },
+    { skip: !open },
   );
   const bodyRef = useRef<HTMLDivElement | null>(null);
 
