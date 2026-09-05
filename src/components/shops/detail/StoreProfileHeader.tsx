@@ -1,5 +1,7 @@
+"use client";
+
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Clock3,
@@ -41,6 +43,16 @@ export default function StoreProfileHeader({
   onHours: () => void;
   onDelete?: () => void;
 }) {
+  const router = useRouter();
+
+  const handleBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/shops");
+    }
+  };
+
   const coverCandidate = storeCoverCandidate(store);
   const logoCandidate = storeLogoCandidate(store);
 
@@ -71,13 +83,16 @@ export default function StoreProfileHeader({
         )}
 
         {/* Top Control: Back Button */}
-        <Link
-          href="/shops"
-          className="absolute left-5 top-5 z-20 inline-flex items-center gap-2 rounded-full bg-black/40 px-5 py-2.5 text-lg font-normal text-white backdrop-blur-md transition hover:bg-black/60"
+        <button
+          type="button"
+          onClick={handleBack}
+          aria-label="ត្រឡប់ទៅបញ្ជីហាង"
+          title="ត្រឡប់ក្រោយ"
+          className="absolute left-5 top-5 z-30 inline-flex cursor-pointer items-center gap-2 rounded-full bg-black/40 px-5 py-2.5 text-lg font-normal text-white backdrop-blur-md transition hover:bg-black/60 active:scale-95"
         >
           <ArrowLeft size={20} />
           <span>ហាង</span>
-        </Link>
+        </button>
 
         {/* Store Logo & Title in Cover */}
         <div className="absolute inset-x-0 bottom-0 z-20 p-5 sm:p-7">

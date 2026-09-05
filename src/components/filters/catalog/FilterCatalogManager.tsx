@@ -215,29 +215,45 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
 
   const sorted = useMemo(() => {
     return [...filtered].sort((first, second) => {
-      const firstLabel = first.localName || first.name;
-
-      const secondLabel = second.localName || second.name;
+      const firstLabel = first.localName || first.name || first.code || "";
+      const secondLabel = second.localName || second.name || second.code || "";
 
       if (sortMode === "A_Z") {
-        return firstLabel.localeCompare(secondLabel, undefined, {
+        const cmp = firstLabel.localeCompare(secondLabel, "km", {
+          sensitivity: "base",
+          numeric: true,
+        });
+        if (cmp !== 0) return cmp;
+        return (first.code || "").localeCompare(second.code || "", undefined, {
           sensitivity: "base",
         });
       }
 
       if (sortMode === "Z_A") {
-        return secondLabel.localeCompare(firstLabel, undefined, {
+        const cmp = secondLabel.localeCompare(firstLabel, "km", {
+          sensitivity: "base",
+          numeric: true,
+        });
+        if (cmp !== 0) return cmp;
+        return (second.code || "").localeCompare(first.code || "", undefined, {
           sensitivity: "base",
         });
       }
 
-      const firstTime = new Date(first.createdAt).getTime();
+      const rawA = (first as any).updatedAt || first.createdAt;
+      const rawB = (second as any).updatedAt || second.createdAt;
+      const tA = rawA ? new Date(rawA).getTime() : 0;
+      const tB = rawB ? new Date(rawB).getTime() : 0;
+      const firstTime = isNaN(tA) ? 0 : tA;
+      const secondTime = isNaN(tB) ? 0 : tB;
 
-      const secondTime = new Date(second.createdAt).getTime();
+      if (firstTime !== secondTime) {
+        return sortMode === "NEWEST"
+          ? secondTime - firstTime
+          : firstTime - secondTime;
+      }
 
-      return sortMode === "NEWEST"
-        ? secondTime - firstTime
-        : firstTime - secondTime;
+      return (first.code || "").localeCompare(second.code || "");
     });
   }, [filtered, sortMode]);
 
@@ -337,6 +353,7 @@ function LocalCatalogManager({ groupSlug }: { groupSlug: string }) {
         onSortChange={(value) => {
           setSortMode(value);
           setSortOpen(false);
+          setPage(0);
         }}
         onSizeChange={(value) => {
           setSize(value);

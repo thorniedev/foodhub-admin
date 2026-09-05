@@ -871,7 +871,7 @@ function makeQuery(
 
     let finalValue = value;
     if (key === "size" && typeof value === "number") {
-      finalValue = Math.min(Math.max(1, value), 100);
+      finalValue = Math.min(Math.max(1, value), 2000);
     }
 
     search.set(key, String(finalValue));
@@ -1124,18 +1124,34 @@ export const menuManagementApi =
         builder.query<IngredientOption[], void>({
           async queryFn() {
             const result = await browserRequest<unknown>(
-              "/api/admin/catalog/ingredients?page=0&size=100&sort=name%2Casc",
+              "/api/admin/catalog/ingredients?page=0&size=2000&sort=name,asc",
             );
 
             if ("error" in result) {
               return result;
             }
 
+            const rawList = normalizePage<any>(
+              result.data as never,
+            ).content;
+
+            const normalized: IngredientOption[] = rawList.map((item: any) => {
+              const activeVal =
+                item.isActive ??
+                item.active ??
+                (typeof item.status === "string" ? item.status === "ACTIVE" : true);
+
+              return {
+                uuid: String(item.uuid || item.id || ""),
+                code: String(item.code || item.name || ""),
+                name: String(item.name || item.localName || item.code || ""),
+                description: item.description ? String(item.description) : null,
+                isActive: Boolean(activeVal),
+              };
+            });
+
             return {
-              data:
-                normalizePage<IngredientOption>(
-                  result.data as never,
-                ).content,
+              data: normalized,
             };
           },
         }),
@@ -1762,7 +1778,7 @@ export const menuManagementApi =
           async queryFn(params) {
             const p = (params ?? {}) as PublicMenuItemListParams;
 
-            const safeSize = Math.min(Math.max(1, p.size ?? 100), 100);
+            const safeSize = Math.min(Math.max(1, p.size ?? 100), 2000);
             const safePage = Math.max(0, p.page ?? 0);
 
             // 1. If storeUuid is provided, try admin and catalog store endpoints:

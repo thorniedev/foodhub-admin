@@ -42,6 +42,9 @@ import { useGetManagedSeasonsQuery } from "@/src/app/store/menuManagementApi";
 import { useGetWeatherConditionsQuery } from "@/src/app/store/weatherConditionApi";
 import { useGetManagedEventsQuery } from "@/src/app/store/menuManagementApi";
 import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionApi";
+import { useGetShopByUuidQuery } from "@/src/app/store/shop/shopApi";
+import { storeLogoCandidate } from "@/src/lib/shopFormat";
+import StoreMediaImage from "@/src/components/shops/detail/StoreMediaImage";
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 import PublishMenuItemModal from "./PublishMenuItemModal";
@@ -148,13 +151,19 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
     )?.name;
 
   const targetStoreUuid = data?.storeUuid || data?.store?.uuid;
+  const { data: storeDetail } = useGetShopByUuidQuery(targetStoreUuid ?? "", {
+    skip: !targetStoreUuid,
+  });
   const matchedStore = targetStoreUuid
     ? storesQuery.data?.find(
       (s) => String(s.uuid || s.id) === String(targetStoreUuid),
     )
     : null;
 
+  const effectiveStore = storeDetail || matchedStore || data?.store;
+
   const displayStoreName =
+    storeDetail?.storeName ||
     data?.store?.storeName ||
     (data?.store as any)?.name ||
     (data?.store as any)?.localName ||
@@ -162,6 +171,19 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
     matchedStore?.name ||
     matchedStore?.localName ||
     "—";
+
+  const storeLogo = effectiveStore ? storeLogoCandidate(effectiveStore as any) : null;
+
+  const displayStoreLocation =
+    (storeDetail as any)?.addressLine ||
+    (storeDetail as any)?.city ||
+    (storeDetail as any)?.province ||
+    (matchedStore as any)?.addressLine ||
+    (matchedStore as any)?.city ||
+    (matchedStore as any)?.province ||
+    (data?.store as any)?.city ||
+    (data?.store as any)?.province ||
+    "ហាងអាហារ";
 
   const foodEvents =
     Array.isArray(rawFood?.events) && rawFood.events.length > 0
@@ -545,8 +567,23 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
                       className="group flex items-center justify-between rounded-3xl border border-gray-100 bg-gray-50/80 p-4.5 transition hover:border-primary-300 hover:bg-primary-50/50"
                     >
                       <div className="flex items-center gap-3.5">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-100 text-primary-800 transition group-hover:bg-primary-200">
-                          <Store size={24} />
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-xs transition group-hover:border-primary-200">
+                          {storeLogo ? (
+                            <StoreMediaImage
+                              mediaUuid={storeLogo}
+                              alt={`${displayStoreName} logo`}
+                              className="h-full w-full object-cover"
+                              fallbackIcon={
+                                <div className="flex h-full w-full items-center justify-center bg-primary-100 text-primary-800">
+                                  <Store size={24} />
+                                </div>
+                              }
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-primary-100 text-primary-800 transition group-hover:bg-primary-200">
+                              <Store size={24} />
+                            </div>
+                          )}
                         </div>
                         <div>
                           <p className="text-xl font-medium text-gray-800 transition group-hover:text-primary-900">
@@ -554,11 +591,7 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
                           </p>
                           <p className="flex items-center gap-1 text-lg font-normal text-gray-500">
                             <MapPin size={16} className="text-primary-700 shrink-0" />
-                            <span>
-                              {(data.store as any)?.city ||
-                                (data.store as any)?.province ||
-                                "ហាងអាហារ"}
-                            </span>
+                            <span>{displayStoreLocation}</span>
                           </p>
                         </div>
                       </div>
@@ -569,15 +602,30 @@ export default function MenuItemDetailPage({ uuid }: { uuid: string }) {
                     </Link>
                   ) : (
                     <div className="flex items-center gap-3.5 rounded-3xl border border-gray-100 bg-gray-50/80 p-4.5">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-100 text-primary-800">
-                        <Store size={24} />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-xs">
+                        {storeLogo ? (
+                          <StoreMediaImage
+                            mediaUuid={storeLogo}
+                            alt={`${displayStoreName} logo`}
+                            className="h-full w-full object-cover"
+                            fallbackIcon={
+                              <div className="flex h-full w-full items-center justify-center bg-primary-100 text-primary-800">
+                                <Store size={24} />
+                              </div>
+                            }
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-primary-100 text-primary-800">
+                            <Store size={24} />
+                          </div>
+                        )}
                       </div>
                       <div>
                         <p className="text-xl font-medium text-gray-800">
                           {displayStoreName}
                         </p>
                         <p className="text-lg font-normal text-gray-500">
-                          ហាងអាហារ
+                          {displayStoreLocation}
                         </p>
                       </div>
                     </div>

@@ -145,25 +145,11 @@ export default function UsersManager() {
 
   const { data, error, isLoading, isFetching, refetch } = useGetAdminUsersQuery(
     {
-      page,
-      size,
+      page: 0,
+      size: 500,
       sort: "createdAt,desc",
     },
   );
-
-  /* =======================================================
-     SUGGESTION DATA
-
-     Current API usage has no search query argument here,
-     so this keeps the existing backend contract unchanged
-     and uses a larger client-side dataset for suggestions.
-  ======================================================= */
-
-  const { data: suggestionData } = useGetAdminUsersQuery({
-    page: 0,
-    size: 100,
-    sort: "createdAt,desc",
-  });
 
   /* =======================================================
      MUTATIONS
@@ -191,9 +177,7 @@ export default function UsersManager() {
      DATA
   ======================================================= */
 
-  const users = data?.contents ?? [];
-
-  const suggestionUsers = suggestionData?.contents ?? [];
+  const users = useMemo(() => data?.contents ?? [], [data?.contents]);
 
   /* =======================================================
      COUNTS
@@ -256,20 +240,13 @@ export default function UsersManager() {
       return [];
     }
 
-    return suggestionUsers
+    return users
       .filter((user) => matchesSearch(user, normalizedSearch))
       .slice(0, 8);
-  }, [normalizedSearch, suggestionUsers]);
-
-  /*
-   * When there is a search, use the larger
-   * suggestion dataset instead of only the
-   * current paginated page.
-   */
-  const searchSource = normalizedSearch ? suggestionUsers : users;
+  }, [normalizedSearch, users]);
 
   const filteredUsers = useMemo(() => {
-    return searchSource.filter((user) => {
+    return users.filter((user) => {
       const statusMatches =
         statusFilter === "ALL" || user.status === statusFilter;
 
@@ -290,10 +267,10 @@ export default function UsersManager() {
 
       return matchesSearch(user, normalizedSearch);
     });
-  }, [normalizedSearch, roleFilter, searchSource, statusFilter]);
+  }, [normalizedSearch, roleFilter, users, statusFilter]);
 
   /* =======================================================
-     SORT
+     SORT (Applies across full dataset)
   ======================================================= */
 
   const sortedUsers = useMemo(() => {
@@ -305,38 +282,50 @@ export default function UsersManager() {
         displayName(second.firstName, second.lastName, second.username) ?? "";
 
       switch (sortBy) {
-        case "A_Z":
-          return firstName.localeCompare(secondName, undefined, {
+        case "A_Z": {
+          const cmp = firstName.localeCompare(secondName, "km", {
+            sensitivity: "base",
+            numeric: true,
+          });
+          if (cmp !== 0) return cmp;
+          return (first.username || "").localeCompare(second.username || "", undefined, {
             sensitivity: "base",
           });
+        }
 
-        case "Z_A":
-          return secondName.localeCompare(firstName, undefined, {
+        case "Z_A": {
+          const cmp = secondName.localeCompare(firstName, "km", {
+            sensitivity: "base",
+            numeric: true,
+          });
+          if (cmp !== 0) return cmp;
+          return (second.username || "").localeCompare(first.username || "", undefined, {
             sensitivity: "base",
           });
+        }
 
         case "NEWEST": {
-          const firstTime = first.createdAt
-            ? new Date(first.createdAt).getTime()
-            : 0;
+          const tA = first.createdAt ? new Date(first.createdAt).getTime() : 0;
+          const tB = second.createdAt ? new Date(second.createdAt).getTime() : 0;
+          const timeA = isNaN(tA) ? 0 : tA;
+          const timeB = isNaN(tB) ? 0 : tB;
 
-          const secondTime = second.createdAt
-            ? new Date(second.createdAt).getTime()
-            : 0;
-
-          return secondTime - firstTime;
+          if (timeA !== timeB) {
+            return timeB - timeA;
+          }
+          return (second.username || "").localeCompare(first.username || "");
         }
 
         case "OLDEST": {
-          const firstTime = first.createdAt
-            ? new Date(first.createdAt).getTime()
-            : 0;
+          const tA = first.createdAt ? new Date(first.createdAt).getTime() : 0;
+          const tB = second.createdAt ? new Date(second.createdAt).getTime() : 0;
+          const timeA = isNaN(tA) ? 0 : tA;
+          const timeB = isNaN(tB) ? 0 : tB;
 
-          const secondTime = second.createdAt
-            ? new Date(second.createdAt).getTime()
-            : 0;
-
-          return firstTime - secondTime;
+          if (timeA !== timeB) {
+            return timeA - timeB;
+          }
+          return (first.username || "").localeCompare(second.username || "");
         }
 
         default:
@@ -344,6 +333,13 @@ export default function UsersManager() {
       }
     });
   }, [filteredUsers, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedUsers.length / size));
+  const safePage = Math.min(page, totalPages - 1);
+  const displayedUsers = useMemo(() => {
+    const start = safePage * size;
+    return sortedUsers.slice(start, start + size);
+  }, [sortedUsers, safePage, size]);
 
   const sortOptions: Array<{
     value: UserSort;
@@ -751,6 +747,7 @@ export default function UsersManager() {
                           onClick={() => {
                             setSortBy(option.value);
                             setSortOpen(false);
+                            setPage(0);
                           }}
                           className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected
                             ? "bg-primary-50 text-primary-700"
@@ -997,6 +994,7 @@ export default function UsersManager() {
                         onClick={() => {
                           setSortBy(option.value);
                           setSortOpen(false);
+                          setPage(0);
                         }}
                         className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-lg font-normal transition ${selected
                           ? "bg-primary-50 text-primary-700"
@@ -1224,7 +1222,7 @@ export default function UsersManager() {
           </div>
         ) : (
           <UsersTable
-            users={sortedUsers}
+            users={displayedUsers}
             currentAdminRole={currentAdminRole}
             disabled={busy}
             onProfileEdit={setProfileEditUser}
@@ -1235,12 +1233,11 @@ export default function UsersManager() {
         )}
 
         {!isLoading &&
-          !error &&
-          !normalizedSearch && (
+          !error && (
             <UsersPagination
-              page={data?.pageNumber ?? page}
-              totalPages={data?.totalPages ?? 0}
-              totalElements={data?.totalElements ?? 0}
+              page={safePage}
+              totalPages={totalPages}
+              totalElements={sortedUsers.length}
               disabled={isFetching}
               onPageChange={setPage}
             />

@@ -204,7 +204,7 @@ export default function WeatherConditionManager() {
   } =
     useGetWeatherConditionsQuery({
       page: 0,
-      size: 100,
+      size: 500,
       sort: "name,asc",
     });
 
@@ -280,27 +280,41 @@ export default function WeatherConditionManager() {
 
   const sortedItems = useMemo(() => {
     return [...filteredItems].sort((first, second) => {
-      const firstLabel = first.localName || first.name || "";
-      const secondLabel = second.localName || second.name || "";
+      const firstLabel = first.localName || first.name || first.code || "";
+      const secondLabel = second.localName || second.name || second.code || "";
 
       if (sortMode === "A_Z") {
-        return firstLabel.localeCompare(secondLabel, "km", {
+        const cmp = firstLabel.localeCompare(secondLabel, "km", {
+          sensitivity: "base",
+          numeric: true,
+        });
+        if (cmp !== 0) return cmp;
+        return (first.code || "").localeCompare(second.code || "", undefined, {
           sensitivity: "base",
         });
       }
 
       if (sortMode === "Z_A") {
-        return secondLabel.localeCompare(firstLabel, "km", {
+        const cmp = secondLabel.localeCompare(firstLabel, "km", {
+          sensitivity: "base",
+          numeric: true,
+        });
+        if (cmp !== 0) return cmp;
+        return (second.code || "").localeCompare(first.code || "", undefined, {
           sensitivity: "base",
         });
       }
 
-      const firstTime = getTime(first.createdAt);
-      const secondTime = getTime(second.createdAt);
+      const firstTime = getTime((first as any).updatedAt || first.createdAt);
+      const secondTime = getTime((second as any).updatedAt || second.createdAt);
 
-      return sortMode === "NEWEST"
-        ? secondTime - firstTime
-        : firstTime - secondTime;
+      if (firstTime !== secondTime) {
+        return sortMode === "NEWEST"
+          ? secondTime - firstTime
+          : firstTime - secondTime;
+      }
+
+      return (first.code || "").localeCompare(second.code || "");
     });
   }, [filteredItems, sortMode]);
 
@@ -506,6 +520,7 @@ export default function WeatherConditionManager() {
         }}
         onSortChange={(value) => {
           setSortMode(value);
+          setPage(0);
         }}
         onSizeChange={(value) => {
           setSize(value);

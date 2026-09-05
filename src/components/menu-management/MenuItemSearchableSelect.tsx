@@ -44,8 +44,8 @@ export default function MenuItemSearchableSelect({
     if (!term) return options;
     return options.filter(
       (option) =>
-        option.label.toLowerCase().includes(term) ||
-        option.sublabel?.toLowerCase().includes(term),
+        (option.label && String(option.label).toLowerCase().includes(term)) ||
+        (option.sublabel && String(option.sublabel).toLowerCase().includes(term)),
     );
   }, [options, query]);
 

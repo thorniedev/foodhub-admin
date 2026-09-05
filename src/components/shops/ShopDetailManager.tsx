@@ -161,14 +161,14 @@ export default function ShopDetailManager({
   const isMenuModalOpen = createMenuOpen || !!editingMenuItemRecord;
 
   const foodsQuery = useGetManagedFoodsQuery(
-    { page: 0, size: 100 },
+    { page: 0, size: 2000 },
     { skip: !isMenuModalOpen },
   );
   const storesQuery = useGetManagedStoresQuery(undefined, {
     skip: !isMenuModalOpen,
   });
   const publishedMenuItemsQuery = useGetPublishedMenuItemsQuery(
-    { storeUuid: resolvedStoreUuid, size: 100 },
+    { storeUuid: resolvedStoreUuid, size: 2000 },
     { skip: !resolvedStoreUuid, refetchOnMountOrArgChange: true },
   );
   const ingredientsQuery = useGetManagedIngredientsQuery(undefined, {

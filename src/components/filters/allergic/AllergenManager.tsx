@@ -91,20 +91,8 @@ export default function AllergenManager() {
   ======================================================= */
 
   const { data, isLoading, isFetching, error, refetch } = useGetAllergensQuery({
-    page,
-    size,
-  });
-
-  /* =======================================================
-     SUGGESTION DATA
-
-     Load more items so search suggestions are not limited
-     to the current 20 rows.
-  ======================================================= */
-
-  const { data: suggestionData } = useGetAllergensQuery({
     page: 0,
-    size: 100,
+    size: 500,
   });
 
   /* =======================================================
@@ -124,17 +112,21 @@ export default function AllergenManager() {
      DATA
   ======================================================= */
 
-  const items = data?.contents ?? [];
-
-  const suggestionItems = suggestionData?.contents ?? [];
+  const items = useMemo(() => data?.contents ?? [], [data]);
 
   /* =======================================================
      COUNTS
   ======================================================= */
 
-  const activeCount = items.filter((item) => item.active).length;
+  const activeCount = useMemo(
+    () => items.filter((item) => item.active).length,
+    [items],
+  );
 
-  const inactiveCount = items.length - activeCount;
+  const inactiveCount = useMemo(
+    () => items.length - activeCount,
+    [items.length, activeCount],
+  );
 
   /* =======================================================
      FILTER
@@ -172,74 +164,64 @@ export default function AllergenManager() {
   }, [items, search, statusFilter]);
 
   /* =======================================================
-     SORT
-
-     A-Z / Z-A:
-     sort by Allergen = item.code
-
-     Newest / Oldest:
-     sort by updatedAt
+     SORT (Applies across full dataset)
   ======================================================= */
 
   const sortedItems = useMemo(() => {
     return [...filteredItems].sort((first, second) => {
       switch (sortBy) {
-        /* ===========================================
-               A → Z
-            ============================================ */
-
-        case "A_Z":
-          return (first.code ?? "").localeCompare(
-            second.code ?? "",
-            undefined,
-            {
-              sensitivity: "base",
-            },
-          );
-
-        /* ===========================================
-               Z → A
-            ============================================ */
-
-        case "Z_A":
-          return (second.code ?? "").localeCompare(
-            first.code ?? "",
-            undefined,
-            {
-              sensitivity: "base",
-            },
-          );
-
-        /* ===========================================
-               NEWEST
-            ============================================ */
-
-        case "NEWEST": {
-          const firstTime = first.updatedAt
-            ? new Date(first.updatedAt).getTime()
-            : 0;
-
-          const secondTime = second.updatedAt
-            ? new Date(second.updatedAt).getTime()
-            : 0;
-
-          return secondTime - firstTime;
+        case "A_Z": {
+          const labelA = first.name || first.code || "";
+          const labelB = second.name || second.code || "";
+          const cmp = labelA.localeCompare(labelB, "km", {
+            sensitivity: "base",
+            numeric: true,
+          });
+          if (cmp !== 0) return cmp;
+          return (first.code || "").localeCompare(second.code || "", undefined, {
+            sensitivity: "base",
+          });
         }
 
-        /* ===========================================
-               OLDEST
-            ============================================ */
+        case "Z_A": {
+          const labelA = first.name || first.code || "";
+          const labelB = second.name || second.code || "";
+          const cmp = labelB.localeCompare(labelA, "km", {
+            sensitivity: "base",
+            numeric: true,
+          });
+          if (cmp !== 0) return cmp;
+          return (second.code || "").localeCompare(first.code || "", undefined, {
+            sensitivity: "base",
+          });
+        }
+
+        case "NEWEST": {
+          const rawA = (first as any).updatedAt || (first as any).createdAt;
+          const rawB = (second as any).updatedAt || (second as any).createdAt;
+          const tA = rawA ? new Date(rawA).getTime() : 0;
+          const tB = rawB ? new Date(rawB).getTime() : 0;
+          const timeA = isNaN(tA) ? 0 : tA;
+          const timeB = isNaN(tB) ? 0 : tB;
+
+          if (timeA !== timeB) {
+            return timeB - timeA;
+          }
+          return (second.code || "").localeCompare(first.code || "");
+        }
 
         case "OLDEST": {
-          const firstTime = first.updatedAt
-            ? new Date(first.updatedAt).getTime()
-            : 0;
+          const rawA = (first as any).updatedAt || (first as any).createdAt;
+          const rawB = (second as any).updatedAt || (second as any).createdAt;
+          const tA = rawA ? new Date(rawA).getTime() : 0;
+          const tB = rawB ? new Date(rawB).getTime() : 0;
+          const timeA = isNaN(tA) ? 0 : tA;
+          const timeB = isNaN(tB) ? 0 : tB;
 
-          const secondTime = second.updatedAt
-            ? new Date(second.updatedAt).getTime()
-            : 0;
-
-          return firstTime - secondTime;
+          if (timeA !== timeB) {
+            return timeA - timeB;
+          }
+          return (first.code || "").localeCompare(second.code || "");
         }
 
         default:
@@ -247,6 +229,13 @@ export default function AllergenManager() {
       }
     });
   }, [filteredItems, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedItems.length / size));
+  const safePage = Math.min(page, totalPages - 1);
+  const displayedItems = useMemo(() => {
+    const start = safePage * size;
+    return sortedItems.slice(start, start + size);
+  }, [sortedItems, safePage, size]);
 
   /* =======================================================
      BUSY
@@ -800,7 +789,7 @@ export default function AllergenManager() {
         ) : (
           <>
             <AllergensTable
-              allergens={sortedItems}
+              allergens={displayedItems}
               disabled={busy}
               onView={(item) => setViewing(item)}
               onEdit={(item) => {
@@ -814,9 +803,9 @@ export default function AllergenManager() {
 
             {!error && (
               <AllergensPagination
-                page={data?.pageNumber ?? page}
-                totalPages={data?.totalPages ?? 1}
-                totalElements={data?.totalElements ?? 0}
+                page={safePage}
+                totalPages={totalPages}
+                totalElements={sortedItems.length}
                 disabled={isFetching}
                 onPageChange={setPage}
               />

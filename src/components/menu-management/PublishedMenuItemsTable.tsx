@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from "react";
-import { Eye, MinusCircle, MoreVertical, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import { Eye, MinusCircle, MoreVertical, Pencil, RotateCcw, Store, Trash2 } from "lucide-react";
 import MenuItemAvatar from "./MenuItemAvatar";
 import Pagination from "@/src/components/ui/Pagination";
+import { storeLogoCandidate } from "@/src/lib/shopFormat";
+import StoreMediaImage from "@/src/components/shops/detail/StoreMediaImage";
 
 import type {
   FoodCategoryOption,
@@ -13,6 +15,28 @@ import type {
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
 
 const ITEMS_PER_PAGE = 6;
+
+function getStoreRecord(item: MenuItemRecord, stores: any[] = []): any {
+  const s = item.store as any;
+  if (
+    s &&
+    (s.logoMediaUuid ||
+      s.logoUrl ||
+      s.logo ||
+      s.thumbnailMediaUuid)
+  ) {
+    return s;
+  }
+  const targetId =
+    item.storeUuid || item.store?.uuid || (item.store as any)?.id;
+  if (targetId && Array.isArray(stores)) {
+    const matched = stores.find(
+      (s) => String(s.uuid || s.id || "") === String(targetId),
+    );
+    if (matched) return matched;
+  }
+  return item.store ?? null;
+}
 
 function storeName(item: MenuItemRecord, stores: any[] = []): string {
   const direct =
@@ -339,9 +363,36 @@ export default function PublishedMenuItemsTable({
 
                   {/* Store Name */}
                   <td className="px-4 py-3.5">
-                    <span className="line-clamp-1 text-lg font-normal text-gray-700">
-                      {storeName(item, stores)}
-                    </span>
+                    {(() => {
+                      const matched = getStoreRecord(item, stores);
+                      const sName = storeName(item, stores);
+                      const logo = matched ? storeLogoCandidate(matched) : null;
+                      return (
+                        <div className="flex items-center gap-2.5">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-white text-primary-800 shadow-xs">
+                            {logo ? (
+                              <StoreMediaImage
+                                mediaUuid={logo}
+                                alt={`${sName} logo`}
+                                className="h-full w-full object-cover"
+                                fallbackIcon={
+                                  <div className="flex h-full w-full items-center justify-center bg-primary-50 text-primary-800">
+                                    <Store size={16} />
+                                  </div>
+                                }
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center bg-primary-50 text-primary-800">
+                                <Store size={16} />
+                              </div>
+                            )}
+                          </div>
+                          <span className="line-clamp-1 text-lg font-normal text-gray-700">
+                            {sName}
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </td>
 
                   {/* Category */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   AlertTriangle,
@@ -107,18 +107,9 @@ export default function DietaryTypeManager() {
   ======================================================= */
   const { data, isLoading, isFetching, error, refetch } =
     useGetDietaryTypesQuery({
-      page,
-      size,
+      page: 0,
+      size: 500,
     });
-
-  /*
-   * Load a larger list for search suggestions/results so
-   * search is not limited to the current page.
-   */
-  const { data: suggestionData } = useGetDietaryTypesQuery({
-    page: 0,
-    size: 100,
-  });
 
   /* =======================================================
      MUTATIONS
@@ -144,86 +135,119 @@ export default function DietaryTypeManager() {
   /* =======================================================
      ITEMS + COUNTS
   ======================================================= */
-  const items = data?.contents ?? [];
+  const items = useMemo(() => data?.contents ?? [], [data]);
 
-  const suggestionItems = suggestionData?.contents ?? [];
+  const activeCount = useMemo(
+    () => items.filter((item) => item.active).length,
+    [items],
+  );
 
-  const activeCount = items.filter((item) => item.active).length;
-
-  const inactiveCount = items.length - activeCount;
+  const inactiveCount = useMemo(
+    () => items.length - activeCount,
+    [items.length, activeCount],
+  );
 
   /* =======================================================
      SEARCH
   ======================================================= */
   const normalizedSearch = search.trim().toLowerCase();
 
-  const searchSource = normalizedSearch ? suggestionItems : items;
-
   /* =======================================================
      FILTER
   ======================================================= */
-  const filteredItems = searchSource.filter((item) => {
-    const statusMatches =
-      statusFilter === "ALL" ||
-      (statusFilter === "ACTIVE" && item.active) ||
-      (statusFilter === "INACTIVE" && !item.active);
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const statusMatches =
+        statusFilter === "ALL" ||
+        (statusFilter === "ACTIVE" && item.active) ||
+        (statusFilter === "INACTIVE" && !item.active);
 
-    if (!statusMatches) {
-      return false;
-    }
+      if (!statusMatches) {
+        return false;
+      }
 
-    if (!normalizedSearch) {
-      return true;
-    }
+      if (!normalizedSearch) {
+        return true;
+      }
 
-    return [item.code, item.name, item.category, item.description ?? ""].some(
-      (value) => value.toLowerCase().includes(normalizedSearch),
-    );
-  });
+      return [item.code, item.name, item.category, item.description ?? ""].some(
+        (value) => String(value ?? "").toLowerCase().includes(normalizedSearch),
+      );
+    });
+  }, [items, normalizedSearch, statusFilter]);
 
   /* =======================================================
-     SORT
+     SORT (Applies across the full dataset)
   ======================================================= */
-  const sortedItems = [...filteredItems].sort((first, second) => {
-    switch (sortBy) {
-      case "A_Z":
-        return (first.name ?? "").localeCompare(second.name ?? "", undefined, {
-          sensitivity: "base",
-        });
+  const sortedItems = useMemo(() => {
+    return [...filteredItems].sort((first, second) => {
+      switch (sortBy) {
+        case "A_Z": {
+          const labelA = first.name || first.code || "";
+          const labelB = second.name || second.code || "";
+          const cmp = labelA.localeCompare(labelB, "km", {
+            sensitivity: "base",
+            numeric: true,
+          });
+          if (cmp !== 0) return cmp;
+          return (first.code || "").localeCompare(second.code || "", undefined, {
+            sensitivity: "base",
+          });
+        }
 
-      case "Z_A":
-        return (second.name ?? "").localeCompare(first.name ?? "", undefined, {
-          sensitivity: "base",
-        });
+        case "Z_A": {
+          const labelA = first.name || first.code || "";
+          const labelB = second.name || second.code || "";
+          const cmp = labelB.localeCompare(labelA, "km", {
+            sensitivity: "base",
+            numeric: true,
+          });
+          if (cmp !== 0) return cmp;
+          return (second.code || "").localeCompare(first.code || "", undefined, {
+            sensitivity: "base",
+          });
+        }
 
-      case "NEWEST": {
-        const firstTime = first.updatedAt
-          ? new Date(first.updatedAt).getTime()
-          : 0;
+        case "NEWEST": {
+          const rawA = (first as any).updatedAt || (first as any).createdAt;
+          const rawB = (second as any).updatedAt || (second as any).createdAt;
+          const tA = rawA ? new Date(rawA).getTime() : 0;
+          const tB = rawB ? new Date(rawB).getTime() : 0;
+          const timeA = isNaN(tA) ? 0 : tA;
+          const timeB = isNaN(tB) ? 0 : tB;
 
-        const secondTime = second.updatedAt
-          ? new Date(second.updatedAt).getTime()
-          : 0;
+          if (timeA !== timeB) {
+            return timeB - timeA;
+          }
+          return (second.code || "").localeCompare(first.code || "");
+        }
 
-        return secondTime - firstTime;
+        case "OLDEST": {
+          const rawA = (first as any).updatedAt || (first as any).createdAt;
+          const rawB = (second as any).updatedAt || (second as any).createdAt;
+          const tA = rawA ? new Date(rawA).getTime() : 0;
+          const tB = rawB ? new Date(rawB).getTime() : 0;
+          const timeA = isNaN(tA) ? 0 : tA;
+          const timeB = isNaN(tB) ? 0 : tB;
+
+          if (timeA !== timeB) {
+            return timeA - timeB;
+          }
+          return (first.code || "").localeCompare(second.code || "");
+        }
+
+        default:
+          return 0;
       }
+    });
+  }, [filteredItems, sortBy]);
 
-      case "OLDEST": {
-        const firstTime = first.updatedAt
-          ? new Date(first.updatedAt).getTime()
-          : 0;
-
-        const secondTime = second.updatedAt
-          ? new Date(second.updatedAt).getTime()
-          : 0;
-
-        return firstTime - secondTime;
-      }
-
-      default:
-        return 0;
-    }
-  });
+  const totalPages = Math.max(1, Math.ceil(sortedItems.length / size));
+  const safePage = Math.min(page, totalPages - 1);
+  const displayedItems = useMemo(() => {
+    const start = safePage * size;
+    return sortedItems.slice(start, start + size);
+  }, [sortedItems, safePage, size]);
 
   const sortOptions: {
     value: DietaryTypeSort;
@@ -791,7 +815,7 @@ export default function DietaryTypeManager() {
           </div>
         ) : (
           <DietaryTypesTable
-            items={sortedItems}
+            items={displayedItems}
             disabled={busy}
             onView={(item) =>
               setViewing(item)
@@ -819,11 +843,11 @@ export default function DietaryTypeManager() {
           />
         )}
 
-        {!isLoading && !error && !normalizedSearch && (
+        {!isLoading && !error && (
           <DietaryTypesPagination
-            page={data?.pageNumber ?? page}
-            totalPages={data?.totalPages ?? 1}
-            totalElements={data?.totalElements ?? 0}
+            page={safePage}
+            totalPages={totalPages}
+            totalElements={sortedItems.length}
             disabled={isFetching}
             onPageChange={setPage}
           />

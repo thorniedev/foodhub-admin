@@ -52,7 +52,7 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
     refetch,
   } = useGetFoodCategoriesQuery({
     page: 0,
-    size: 200,
+    size: 500,
     includeInactive: true,
   });
 
@@ -196,15 +196,43 @@ export default function SubCategoryManager({ mode = "FOOD" }: Props) {
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
+      const labelA = a.name || a.code || "";
+      const labelB = b.name || b.code || "";
+
       if (sortMode === "A_Z") {
-        return (a.name || "").localeCompare(b.name || "", "km");
+        const cmp = labelA.localeCompare(labelB, "km", {
+          sensitivity: "base",
+          numeric: true,
+        });
+        if (cmp !== 0) return cmp;
+        return (a.code || "").localeCompare(b.code || "", undefined, {
+          sensitivity: "base",
+        });
       }
+
       if (sortMode === "Z_A") {
-        return (b.name || "").localeCompare(a.name || "", "km");
+        const cmp = labelB.localeCompare(labelA, "km", {
+          sensitivity: "base",
+          numeric: true,
+        });
+        if (cmp !== 0) return cmp;
+        return (b.code || "").localeCompare(a.code || "", undefined, {
+          sensitivity: "base",
+        });
       }
-      const timeA = new Date(a.createdAt || 0).getTime();
-      const timeB = new Date(b.createdAt || 0).getTime();
-      return sortMode === "NEWEST" ? timeB - timeA : timeA - timeB;
+
+      const rawA = (a as any).updatedAt || a.createdAt;
+      const rawB = (b as any).updatedAt || b.createdAt;
+      const tA = rawA ? new Date(rawA).getTime() : 0;
+      const tB = rawB ? new Date(rawB).getTime() : 0;
+      const timeA = isNaN(tA) ? 0 : tA;
+      const timeB = isNaN(tB) ? 0 : tB;
+
+      if (timeA !== timeB) {
+        return sortMode === "NEWEST" ? timeB - timeA : timeA - timeB;
+      }
+
+      return (a.code || "").localeCompare(b.code || "");
     });
   }, [filtered, sortMode]);
 

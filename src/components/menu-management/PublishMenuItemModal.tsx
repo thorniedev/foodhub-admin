@@ -555,7 +555,7 @@ export default function PublishMenuItemModal({
     setIngredientRows(
       (activeItem.ingredients ?? []).map((raw: any) => {
         if (typeof raw === "string") {
-          const found = ingredients.find(
+          const found = safeIngredients.find(
             (i) => i.name === raw || i.code === raw || i.uuid === raw,
           );
           return {
@@ -566,7 +566,7 @@ export default function PublishMenuItemModal({
             notes: "",
           };
         }
-        const found = ingredients.find(
+        const found = safeIngredients.find(
           (i) =>
             i.uuid === raw.ingredientUuid ||
             i.uuid === raw.uuid ||
@@ -806,7 +806,14 @@ export default function PublishMenuItemModal({
   );
 
   const activeIngredients = useMemo(
-    () => safeIngredients.filter((ingredient) => ingredient.isActive !== false),
+    () =>
+      safeIngredients.filter((ingredient) => {
+        const active = ingredient.isActive ?? (ingredient as any).active;
+        if (active !== undefined) return Boolean(active);
+        const status = (ingredient as any).status;
+        if (status) return status === "ACTIVE";
+        return true;
+      }),
     [safeIngredients],
   );
 
@@ -847,11 +854,16 @@ export default function PublishMenuItemModal({
 
   const ingredientOptions: SearchableOption[] = useMemo(
     () =>
-      activeIngredients.map((i) => ({
-        value: i.uuid,
-        label: i.name,
-        sublabel: i.code,
-      })),
+      activeIngredients.map((i) => {
+        const val = String(i.uuid || (i as any).id || "");
+        const label = String(i.name || (i as any).localName || i.code || "គ្រឿងផ្សំ");
+        const code = i.code ? String(i.code) : undefined;
+        return {
+          value: val,
+          label,
+          sublabel: code && code !== label ? code : undefined,
+        };
+      }),
     [activeIngredients],
   );
 

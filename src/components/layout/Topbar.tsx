@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 
@@ -21,7 +22,7 @@ import UserAvatar from "../users/UserAvatar";
 export default function Topbar() {
   const pathname = usePathname();
 
-  const { title, parent } = getPageTitle(pathname);
+  const { title, parent, parentHref } = getPageTitle(pathname);
 
   const { toggle } = useSidebar();
 
@@ -49,7 +50,16 @@ export default function Topbar() {
         <div className="flex min-w-0 items-center gap-1.5 sm:gap-2.5 text-base sm:text-lg font-normal text-primary-800 md:text-2xl">
           {parent && (
             <>
-              <span className="hidden text-gray-400 sm:inline">{parent}</span>
+              {parentHref ? (
+                <Link
+                  href={parentHref}
+                  className="hidden text-gray-400 hover:text-primary-800 hover:underline transition sm:inline cursor-pointer"
+                >
+                  {parent}
+                </Link>
+              ) : (
+                <span className="hidden text-gray-400 sm:inline">{parent}</span>
+              )}
               <span className="hidden text-gray-300 sm:inline">›</span>
             </>
           )}
@@ -59,7 +69,7 @@ export default function Topbar() {
       </div>
 
       {/* CENTER: Global Search in the SAME top row */}
-      <div className="flex-1 min-w-0 max-w-full sm:max-w-xl md:max-w-2xl lg:min-w-[420px] xl:min-w-[560px]">
+      <div className="flex-1 min-w-0 max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl">
         <GlobalAdminSearch />
       </div>
 

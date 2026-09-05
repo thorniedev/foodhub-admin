@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   AlertTriangle,
@@ -135,19 +135,8 @@ export default function MedicalConditionManager() {
     error,
     refetch,
   } = useGetMedicalConditionsQuery({
-    page,
-    size,
-  });
-
-  /* =======================================================
-     SUGGESTION DATA
-  ======================================================= */
-
-  const {
-    data: suggestionData,
-  } = useGetMedicalConditionsQuery({
     page: 0,
-    size: 100,
+    size: 500,
   });
 
   /* =======================================================
@@ -182,179 +171,127 @@ export default function MedicalConditionManager() {
      DATA
   ======================================================= */
 
-  const items =
-    data?.contents ?? [];
-
-  const suggestionItems =
-    suggestionData?.contents ?? [];
+  const items = useMemo(() => data?.contents ?? [], [data?.contents]);
 
   /* =======================================================
      COUNTS
   ======================================================= */
 
-  const activeCount =
-    items.filter(
-      (item) => item.active,
-    ).length;
+  const activeCount = useMemo(
+    () => items.filter((item) => item.active).length,
+    [items]
+  );
 
-  const inactiveCount =
-    items.length -
-    activeCount;
+  const inactiveCount = items.length - activeCount;
 
   /* =======================================================
      SEARCH
   ======================================================= */
 
-  const normalizedSearch =
-    search
-      .trim()
-      .toLowerCase();
-
-  /*
-   * Keep existing search data:
-   *
-   * - code
-   * - name
-   * - description
-   */
-
-  const searchSource =
-    normalizedSearch
-      ? suggestionItems
-      : items;
+  const normalizedSearch = search.trim().toLowerCase();
 
   /* =======================================================
      FILTER
   ======================================================= */
 
-  const filteredItems =
-    searchSource.filter(
-      (item) => {
-        const statusMatches =
-          statusFilter ===
-          "ALL" ||
-          (statusFilter ===
-            "ACTIVE" &&
-            item.active) ||
-          (statusFilter ===
-            "INACTIVE" &&
-            !item.active);
+  const filteredItems = useMemo(() => {
+    const query = search.trim().toLowerCase();
 
-        if (!statusMatches) {
-          return false;
-        }
+    return items.filter((item) => {
+      const statusMatches =
+        statusFilter === "ALL" ||
+        (statusFilter === "ACTIVE" && item.active) ||
+        (statusFilter === "INACTIVE" && !item.active);
 
-        if (
-          !normalizedSearch
-        ) {
-          return true;
-        }
+      if (!statusMatches) {
+        return false;
+      }
 
-        return [
-          item.code,
-          item.name,
-          item.description ?? "",
-        ].some((value) =>
-          value
-            .toLowerCase()
-            .includes(
-              normalizedSearch,
-            ),
-        );
-      },
-    );
+      if (!query) {
+        return true;
+      }
+
+      const name = item.name?.toLowerCase() ?? "";
+      const code = item.code?.toLowerCase() ?? "";
+      const description = item.description?.toLowerCase() ?? "";
+
+      return name.includes(query) || code.includes(query) || description.includes(query);
+    });
+  }, [items, search, statusFilter]);
 
   /* =======================================================
-     SORT
+     SORT (Applies across full dataset)
   ======================================================= */
 
-  const sortedItems = [
-    ...filteredItems,
-  ].sort(
-    (
-      first,
-      second,
-    ) => {
+  const sortedItems = useMemo(() => {
+    return [...filteredItems].sort((first, second) => {
       switch (sortBy) {
-        /* A → Z */
-
-        case "A_Z":
-          return (
-            first.name ?? ""
-          ).localeCompare(
-            second.name ?? "",
-            undefined,
-            {
-              sensitivity:
-                "base",
-            },
-          );
-
-        /* Z → A */
-
-        case "Z_A":
-          return (
-            second.name ?? ""
-          ).localeCompare(
-            first.name ?? "",
-            undefined,
-            {
-              sensitivity:
-                "base",
-            },
-          );
-
-        /* NEWEST */
-
-        case "NEWEST": {
-          const firstTime =
-            first.updatedAt
-              ? new Date(
-                first.updatedAt,
-              ).getTime()
-              : 0;
-
-          const secondTime =
-            second.updatedAt
-              ? new Date(
-                second.updatedAt,
-              ).getTime()
-              : 0;
-
-          return (
-            secondTime -
-            firstTime
-          );
+        case "A_Z": {
+          const labelA = first.name || first.code || "";
+          const labelB = second.name || second.code || "";
+          const cmp = labelA.localeCompare(labelB, "km", {
+            sensitivity: "base",
+            numeric: true,
+          });
+          if (cmp !== 0) return cmp;
+          return (first.code || "").localeCompare(second.code || "", undefined, {
+            sensitivity: "base",
+          });
         }
 
-        /* OLDEST */
+        case "Z_A": {
+          const labelA = first.name || first.code || "";
+          const labelB = second.name || second.code || "";
+          const cmp = labelB.localeCompare(labelA, "km", {
+            sensitivity: "base",
+            numeric: true,
+          });
+          if (cmp !== 0) return cmp;
+          return (second.code || "").localeCompare(first.code || "", undefined, {
+            sensitivity: "base",
+          });
+        }
+
+        case "NEWEST": {
+          const rawA = (first as any).updatedAt || (first as any).createdAt;
+          const rawB = (second as any).updatedAt || (second as any).createdAt;
+          const tA = rawA ? new Date(rawA).getTime() : 0;
+          const tB = rawB ? new Date(rawB).getTime() : 0;
+          const timeA = isNaN(tA) ? 0 : tA;
+          const timeB = isNaN(tB) ? 0 : tB;
+
+          if (timeA !== timeB) {
+            return timeB - timeA;
+          }
+          return (second.code || "").localeCompare(first.code || "");
+        }
 
         case "OLDEST": {
-          const firstTime =
-            first.updatedAt
-              ? new Date(
-                first.updatedAt,
-              ).getTime()
-              : 0;
+          const rawA = (first as any).updatedAt || (first as any).createdAt;
+          const rawB = (second as any).updatedAt || (second as any).createdAt;
+          const tA = rawA ? new Date(rawA).getTime() : 0;
+          const tB = rawB ? new Date(rawB).getTime() : 0;
+          const timeA = isNaN(tA) ? 0 : tA;
+          const timeB = isNaN(tB) ? 0 : tB;
 
-          const secondTime =
-            second.updatedAt
-              ? new Date(
-                second.updatedAt,
-              ).getTime()
-              : 0;
-
-          return (
-            firstTime -
-            secondTime
-          );
+          if (timeA !== timeB) {
+            return timeA - timeB;
+          }
+          return (first.code || "").localeCompare(second.code || "");
         }
 
         default:
           return 0;
       }
-    },
-  );
+    });
+  }, [filteredItems, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedItems.length / size));
+  const safePage = Math.min(page, totalPages - 1);
+  const displayedItems = useMemo(() => {
+    const start = safePage * size;
+    return sortedItems.slice(start, start + size);
+  }, [sortedItems, safePage, size]);
 
   /* =======================================================
      SORT OPTIONS
@@ -973,7 +910,7 @@ export default function MedicalConditionManager() {
         ) : (
           <MedicalConditionsTable
             items={
-              sortedItems
+              displayedItems
             }
             disabled={
               isCreating ||
@@ -1013,20 +950,16 @@ export default function MedicalConditionManager() {
         )}
 
         {!isLoading &&
-          !error &&
-          !normalizedSearch && (
+          !error && (
             <MedicalConditionsPagination
               page={
-                data?.pageNumber ??
-                page
+                safePage
               }
               totalPages={
-                data?.totalPages ??
-                1
+                totalPages
               }
               totalElements={
-                data?.totalElements ??
-                0
+                sortedItems.length
               }
               disabled={
                 isFetching
