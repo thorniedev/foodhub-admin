@@ -181,7 +181,6 @@ export default function CreateShopForm() {
   const [socialLinks, setSocialLinks] = useState<StoreSocialLink[]>([]);
   const [googleOpen, setGoogleOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [validationFailed, setValidationFailed] = useState(false);
 
   const [createShop, { isLoading }] = useCreateShopMutation();
 
@@ -234,7 +233,6 @@ export default function CreateShopForm() {
       profileUrl: "https://www.facebook.com/sovannkhmerkitchen/",
       displayOrder: 1,
     }]);
-    setValidationFailed(false);
     setError(null);
   };
 
@@ -289,7 +287,6 @@ export default function CreateShopForm() {
     if (payload.logoMediaUuid)  setValue("logoMediaUuid",  payload.logoMediaUuid,  { shouldDirty: true });
     if (payload.coverMediaUuid) setValue("coverMediaUuid", payload.coverMediaUuid, { shouldDirty: true });
 
-    setValidationFailed(false);
     setError(null);
   };
 
@@ -299,7 +296,6 @@ export default function CreateShopForm() {
 
   const submit = handleSubmit(
     async (values) => {
-      setValidationFailed(false);
       setError(null);
 
       try {
@@ -346,11 +342,6 @@ export default function CreateShopForm() {
         console.error("[CreateShopForm] API error:", requestError);
         setError(getShopApiErrorMessage(requestError));
       }
-    },
-    /* onInvalid — fires when Zod validation fails */
-    (fieldErrors) => {
-      console.warn("[CreateShopForm] Validation errors:", fieldErrors);
-      setValidationFailed(true);
     },
   );
 
@@ -571,13 +562,6 @@ export default function CreateShopForm() {
 
         {/* HOURS */}
         <ShopHoursSection />
-
-        {/* VALIDATION BANNER — visible when Zod rejects the submit */}
-        {validationFailed && !error && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-lg font-normal leading-7 text-amber-800">
-            ⚠️ សូមបំពេញព័ត៌មានដែលចាំបាច់ (ចំណាំ: ឈ្មោះហាង, អាសយដ្ឋាន, Latitude, Longitude) មុននឹងបង្កើតហាង។
-          </div>
-        )}
 
         {/* API ERROR BANNER */}
         {error && (

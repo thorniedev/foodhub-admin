@@ -30,6 +30,9 @@ import {
   useGetManagedCuisinesQuery,
   useGetManagedStoresQuery,
 } from "@/src/app/store/menuManagementApi";
+import { useGetShopByUuidQuery } from "@/src/app/store/shop/shopApi";
+import { storeLogoCandidate } from "@/src/lib/shopFormat";
+import StoreMediaImage from "@/src/components/shops/detail/StoreMediaImage";
 import { resolveFoodHubCatalogImageUrl } from "@/src/lib/resolveFoodHubImageUrl";
 import {
   extractKhmerOnlyName,
@@ -134,13 +137,19 @@ export default function MenuItemDetailModal({
     )?.name;
 
   const targetStoreUuid = data?.storeUuid || data?.store?.uuid;
+  const { data: storeDetail } = useGetShopByUuidQuery(targetStoreUuid ?? "", {
+    skip: !targetStoreUuid || !uuid,
+  });
   const matchedStore = targetStoreUuid
     ? storesQuery.data?.find(
       (s) => String(s.uuid || s.id) === String(targetStoreUuid),
     )
     : null;
 
+  const effectiveStore = storeDetail || matchedStore || data?.store;
+
   const displayStoreName =
+    storeDetail?.storeName ||
     data?.store?.storeName ||
     (data?.store as any)?.name ||
     (data?.store as any)?.localName ||
@@ -148,6 +157,19 @@ export default function MenuItemDetailModal({
     matchedStore?.name ||
     matchedStore?.localName ||
     "—";
+
+  const storeLogo = effectiveStore ? storeLogoCandidate(effectiveStore as any) : null;
+
+  const displayStoreLocation =
+    (storeDetail as any)?.addressLine ||
+    (storeDetail as any)?.city ||
+    (storeDetail as any)?.province ||
+    (matchedStore as any)?.addressLine ||
+    (matchedStore as any)?.city ||
+    (matchedStore as any)?.province ||
+    (data?.store as any)?.city ||
+    (data?.store as any)?.province ||
+    "ហាងអាហារ";
 
   const foodEvents =
     Array.isArray(rawFood?.events) && rawFood.events.length > 0
@@ -315,17 +337,30 @@ export default function MenuItemDetailModal({
                 {/* Store Info Card */}
                 <div className="mt-1 flex items-center justify-between rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[#14833E]">
-                      <Store size={22} />
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-emerald-100 bg-white shadow-xs">
+                      {storeLogo ? (
+                        <StoreMediaImage
+                          mediaUuid={storeLogo}
+                          alt={`${displayStoreName} logo`}
+                          className="h-full w-full object-cover"
+                          fallbackIcon={
+                            <div className="flex h-full w-full items-center justify-center bg-emerald-50 text-[#14833E]">
+                              <Store size={22} />
+                            </div>
+                          }
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-emerald-50 text-[#14833E]">
+                          <Store size={22} />
+                        </div>
+                      )}
                     </div>
                     <div>
                       <p className="text-lg font-medium text-gray-800">
                         {displayStoreName}
                       </p>
                       <p className="text-lg font-normal text-gray-400">
-                        {(data.store as any)?.city ||
-                          (data.store as any)?.province ||
-                          "ហាងអាហារ"}
+                        {displayStoreLocation}
                       </p>
                     </div>
                   </div>

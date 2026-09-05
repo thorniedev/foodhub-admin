@@ -13,11 +13,17 @@ import {
   Loader2,
   X,
 } from "lucide-react";
+import { z } from "zod";
 
 import type {
   MedicalCondition,
   MedicalConditionFormValues,
 } from "@/src/types/medicalCondition";
+
+const medicalConditionSchema = z.object({
+  name: z.string().trim().min(1, "សូមបំពេញឈ្មោះស្ថានភាពសុខភាព។"),
+  code: z.string().trim().min(1, "សូមបំពេញកូដស្ថានភាពសុខភាព។"),
+});
 
 const EMPTY_FORM: MedicalConditionFormValues = {
   code: "",
@@ -48,10 +54,18 @@ export default function MedicalConditionFormModal({
       EMPTY_FORM,
     );
 
-  const [
-    validationError,
-    setValidationError,
-  ] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const clearFieldError = (key: string) => {
+    if (fieldErrors[key]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -68,7 +82,8 @@ export default function MedicalConditionFormModal({
         : EMPTY_FORM,
     );
 
-    setValidationError("");
+    setFieldErrors({});
+    setServerError(null);
   }, [open, item]);
 
   useEffect(() => {
@@ -96,6 +111,26 @@ export default function MedicalConditionFormModal({
         FormEvent<HTMLFormElement>,
     ) => {
       event.preventDefault();
+      setServerError(null);
+
+      const result = medicalConditionSchema.safeParse({
+        name: form.name,
+        code: form.code,
+      });
+
+      if (!result.success) {
+        const errs: Record<string, string> = {};
+        for (const issue of result.error.issues) {
+          const key = String(issue.path[0]);
+          if (!errs[key]) {
+            errs[key] = issue.message;
+          }
+        }
+        setFieldErrors(errs);
+        return;
+      }
+
+      setFieldErrors({});
 
       const code =
         form.code.trim().toUpperCase();
@@ -103,31 +138,21 @@ export default function MedicalConditionFormModal({
       const name =
         form.name.trim();
 
-      if (!name) {
-        setValidationError(
-          "សូមបំពេញឈ្មោះស្ថានភាពសុខភាព។",
-        );
-
-        return;
+      try {
+        await onSubmit({
+          ...form,
+          code,
+          name,
+          description:
+            form.description.trim(),
+        });
+      } catch (err: any) {
+        const errorMsg =
+          err?.data?.message ||
+          err?.message ||
+          (typeof err === "string" ? err : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។");
+        setServerError(errorMsg);
       }
-
-      if (!code) {
-        setValidationError(
-          "សូមបំពេញកូដស្ថានភាពសុខភាព។",
-        );
-
-        return;
-      }
-
-      setValidationError("");
-
-      await onSubmit({
-        ...form,
-        code,
-        name,
-        description:
-          form.description.trim(),
-      });
     };
 
   return (
@@ -174,31 +199,35 @@ export default function MedicalConditionFormModal({
             <Field
               label="ឈ្មោះ ស្ថានភាពសុខភាព"
               value={form.name}
-              onChange={(value) =>
+              onChange={(value) => {
                 setForm(
                   (previous) => ({
                     ...previous,
                     name: value,
                   }),
-                )
-              }
+                );
+                clearFieldError("name");
+              }}
               placeholder="ឧ. ទឹកនោមផ្អែម"
               required
+              error={fieldErrors.name}
             />
 
             <Field
               label="កូដ (Code)"
               value={form.code}
-              onChange={(value) =>
+              onChange={(value) => {
                 setForm(
                   (previous) => ({
                     ...previous,
                     code: value.toUpperCase(),
                   }),
-                )
-              }
+                );
+                clearFieldError("code");
+              }}
               placeholder="ឧ. DIABETES"
               required
+              error={fieldErrors.code}
             />
           </div>
 
@@ -268,8 +297,8 @@ export default function MedicalConditionFormModal({
             </button>
           </div>
 
-          {/* Validation error */}
-          {validationError && (
+          {/* Server error */}
+          {serverError && (
             <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-lg leading-7 text-red-600">
               <AlertTriangle
                 size={18}
@@ -277,7 +306,7 @@ export default function MedicalConditionFormModal({
               />
 
               <span>
-                {validationError}
+                {serverError}
               </span>
             </div>
           )}
@@ -344,6 +373,7 @@ function Field({
   onChange,
   placeholder,
   required = false,
+  error,
 }: {
   label: string;
   value: string;
@@ -352,6 +382,7 @@ function Field({
   ) => void;
   placeholder?: string;
   required?: boolean;
+  error?: string;
 }) {
   return (
     <label className="block">
@@ -370,8 +401,15 @@ function Field({
           )
         }
         placeholder={placeholder}
-        className="h-[52px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+        className={`h-[52px] w-full rounded-xl border px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 focus:bg-white focus:ring-4 ${
+          error
+            ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-100"
+            : "border-gray-200 bg-gray-50 hover:border-gray-300 focus:border-primary-600 focus:ring-primary-100"
+        }`}
       />
+      {error && (
+        <p className="mt-1 text-sm font-normal text-red-500">{error}</p>
+      )}
     </label>
   );
 }

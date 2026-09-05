@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Star, X } from "lucide-react";
+import { z } from "zod";
 import { Feedback, FeedbackCategory, FeedbackStatus } from "@/src/types/feedback";
+
+const feedbackSchema = z.object({
+  customerName: z.string().trim().min(1, "សូមបញ្ចូលឈ្មោះអតិថិជន"),
+  message: z.string().trim().min(1, "សូមបញ្ចូលសារមតិកែលម្អ"),
+  avatar: z.string().optional(),
+});
 
 interface FeedbackFormModalProps {
   open: boolean;
@@ -40,6 +47,17 @@ export default function FeedbackFormModal({
   onSubmit,
 }: FeedbackFormModalProps) {
   const [form, setForm] = useState(emptyForm);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
 
   useEffect(() => {
     if (initialData) {
@@ -48,12 +66,33 @@ export default function FeedbackFormModal({
     } else {
       setForm(emptyForm);
     }
+    setFieldErrors({});
   }, [initialData, open]);
 
   if (!open) return null;
 
-  const handleSubmit = () => {
-    if (!form.customerName.trim() || !form.message.trim()) return;
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    const result = feedbackSchema.safeParse({
+      customerName: form.customerName,
+      message: form.message,
+      avatar: form.avatar,
+    });
+
+    if (!result.success) {
+      const errMap: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        const fieldName = issue.path[0] as string;
+        if (fieldName && !errMap[fieldName]) {
+          errMap[fieldName] = issue.message;
+        }
+      });
+      setFieldErrors(errMap);
+      return;
+    }
+
+    setFieldErrors({});
     onSubmit(form);
   };
 
@@ -69,15 +108,27 @@ export default function FeedbackFormModal({
           </button>
         </div>
 
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">ឈ្មោះអតិថិជន</label>
+            <label className="text-sm text-gray-600 mb-1 block">
+              ឈ្មោះអតិថិជន <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={form.customerName}
-              onChange={(e) => setForm({ ...form, customerName: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              onChange={(e) => {
+                setForm({ ...form, customerName: e.target.value });
+                clearFieldError("customerName");
+              }}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none transition ${
+                fieldErrors.customerName
+                  ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                  : "border-gray-200 focus:ring-2 focus:ring-emerald-500"
+              }`}
             />
+            {fieldErrors.customerName && (
+              <p className="mt-1 text-xs text-red-500">{fieldErrors.customerName}</p>
+            )}
           </div>
 
           <div>
@@ -152,30 +203,43 @@ export default function FeedbackFormModal({
           </div>
 
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">សារមតិកែលម្អ</label>
+            <label className="text-sm text-gray-600 mb-1 block">
+              សារមតិកែលម្អ <span className="text-red-500">*</span>
+            </label>
             <textarea
               value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, message: e.target.value });
+                clearFieldError("message");
+              }}
               rows={3}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none transition ${
+                fieldErrors.message
+                  ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                  : "border-gray-200 focus:ring-2 focus:ring-emerald-500"
+              }`}
             />
+            {fieldErrors.message && (
+              <p className="mt-1 text-xs text-red-500">{fieldErrors.message}</p>
+            )}
           </div>
-        </div>
 
-        <div className="flex items-center justify-end gap-3 mt-6">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"
-          >
-            បោះបង់
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg"
-          >
-            រក្សាទុក
-          </button>
-        </div>
+          <div className="flex items-center justify-end gap-3 mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"
+            >
+              បោះបង់
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg"
+            >
+              រក្សាទុក
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

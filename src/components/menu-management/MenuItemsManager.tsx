@@ -48,6 +48,7 @@ import { useGetMedicalConditionsQuery } from "@/src/app/store/medicalConditionAp
 import { useGetShopsQuery } from "@/src/app/store/shop/shopApi";
 import { readFilterCatalog } from "@/src/lib/filterCatalogStorage";
 import { useUpdateFoodCategoryMutation } from "@/src/app/store/foodCategoryApi";
+import { useGetIngredientsQuery } from "@/src/app/store/ingredientApi";
 import CustomSelect from "../ui/CustomSelect";
 
 import { getMenuManagementApiError } from "@/src/lib/menuManagementApiError";
@@ -150,13 +151,13 @@ export default function MenuItemsManager({
 
   const foodsQuery = useGetManagedFoodsQuery({
     page: 0,
-    size: 500,
+    size: 2000,
     sort: "createdAt,desc",
   });
 
   const menuItemsQuery = useGetPublishedMenuItemsQuery({
     page: 0,
-    size: 100,
+    size: 2000,
     sort: "createdAt,desc",
   });
 
@@ -181,7 +182,7 @@ export default function MenuItemsManager({
   const cuisinesQuery = useGetManagedCuisinesQuery();
   const storesQuery = useGetManagedStoresQuery();
   const allShopsListQuery = useGetShopsQuery({
-    size: 100,
+    size: 2000,
   });
   const approvedStoresCountQuery = useGetShopsQuery({
     reviewStatus: "APPROVED",
@@ -191,7 +192,19 @@ export default function MenuItemsManager({
 
   // Metadata queries for filtering and form selection
   const modalActive = foodModalOpen || menuModalOpen;
-  const ingredientsQuery = useGetManagedIngredientsQuery(undefined, { skip: !modalActive });
+  const ingredientsQuery = useGetIngredientsQuery(
+    { page: 0, size: 2000, sort: "name,asc" },
+    { skip: !modalActive },
+  );
+  const managedIngredientsFallbackQuery = useGetManagedIngredientsQuery(undefined, { skip: !modalActive });
+
+  const effectiveIngredients = useMemo(() => {
+    const listA = ingredientsQuery.data?.contents;
+    if (Array.isArray(listA) && listA.length > 0) return listA;
+    const listB = managedIngredientsFallbackQuery.data;
+    if (Array.isArray(listB) && listB.length > 0) return listB;
+    return [];
+  }, [ingredientsQuery.data, managedIngredientsFallbackQuery.data]);
   const seasonsQuery = useGetManagedSeasonsQuery();
   const eventsQuery = useGetManagedEventsQuery();
   const weatherQuery = useGetWeatherConditionsQuery({ page: 0, size: 100 });
@@ -696,9 +709,15 @@ export default function MenuItemsManager({
         return 0;
       });
     } else if (sortOrder === "NAME_ASC") {
-      result = [...result].sort((a, b) => ((a as any).localName || a.canonicalName || a.name || "").localeCompare((b as any).localName || b.canonicalName || b.name || "", "km"));
+      result = [...result].sort((a, b) => ((a as any).localName || a.canonicalName || a.name || "").localeCompare((b as any).localName || b.canonicalName || b.name || "", "km", {
+        sensitivity: "base",
+        numeric: true,
+      }));
     } else if (sortOrder === "NAME_DESC") {
-      result = [...result].sort((a, b) => ((b as any).localName || b.canonicalName || b.name || "").localeCompare((a as any).localName || a.canonicalName || a.name || "", "km"));
+      result = [...result].sort((a, b) => ((b as any).localName || b.canonicalName || b.name || "").localeCompare((a as any).localName || a.canonicalName || a.name || "", "km", {
+        sensitivity: "base",
+        numeric: true,
+      }));
     }
 
     return result;
@@ -1099,9 +1118,15 @@ export default function MenuItemsManager({
         return 0;
       });
     } else if (sortOrder === "NAME_ASC") {
-      result = [...result].sort((a, b) => (a.name || "").localeCompare(b.name || "", "km"));
+      result = [...result].sort((a, b) => (a.name || "").localeCompare(b.name || "", "km", {
+        sensitivity: "base",
+        numeric: true,
+      }));
     } else if (sortOrder === "NAME_DESC") {
-      result = [...result].sort((a, b) => (b.name || "").localeCompare(a.name || "", "km"));
+      result = [...result].sort((a, b) => (b.name || "").localeCompare(a.name || "", "km", {
+        sensitivity: "base",
+        numeric: true,
+      }));
     } else if (sortOrder === "PRICE_ASC") {
       result = [...result].sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
     } else if (sortOrder === "PRICE_DESC") {
@@ -2063,7 +2088,7 @@ export default function MenuItemsManager({
         item={editingMenu}
         foods={foods}
         stores={allCombinedStores}
-        ingredients={ingredientsQuery.data ?? []}
+        ingredients={effectiveIngredients}
         dietaryTypes={activeDietaryTypes}
         mealTypes={activeMealTypes}
         ageGroups={activeAgeGroups}

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
 import AuthLayout from "@/src/components/auth/AuthLayout";
 import {
   EyeIcon,
@@ -10,6 +11,28 @@ import {
   GitHubIcon,
   GoogleIcon,
 } from "@/src/components/auth/icons";
+
+const registerSchema = z
+  .object({
+    firstName: z.string().trim().min(1, "សូមបញ្ចូលនាមខ្លួន (First Name is required)"),
+    lastName: z.string().trim().min(1, "សូមបញ្ចូលនាមត្រកូល (Last Name is required)"),
+    email: z
+      .string()
+      .trim()
+      .min(1, "សូមបញ្ចូលអ៊ីមែល (Email is required)")
+      .email("ទម្រង់អ៊ីមែលមិនត្រឹមត្រូវ (Invalid email format)"),
+    password: z
+      .string()
+      .min(1, "សូមបញ្ចូលពាក្យសម្ងាត់ (Password is required)")
+      .min(8, "ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច ៨ តួអក្សរ (Min 8 characters)"),
+    confirmPassword: z
+      .string()
+      .min(1, "សូមបញ្ជាក់ពាក្យសម្ងាត់ (Confirm password is required)"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "ពាក្យសម្ងាត់មិនត្រូវគ្នាទេ (Passwords do not match)",
+    path: ["confirmPassword"],
+  });
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -43,32 +66,20 @@ export default function RegisterPage() {
   };
 
   const validate = () => {
-    const errors: Record<string, string> = {};
-
-    if (!formData.firstName.trim()) {
-      errors.firstName = "សូមបញ្ចូលនាមខ្លួន (First Name is required)";
+    const result = registerSchema.safeParse(formData);
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        const field = String(issue.path[0]);
+        if (!errors[field]) {
+          errors[field] = issue.message;
+        }
+      });
+      setFieldErrors(errors);
+      return false;
     }
-    if (!formData.lastName.trim()) {
-      errors.lastName = "សូមបញ្ចូលនាមត្រកូល (Last Name is required)";
-    }
-    if (!formData.email.trim()) {
-      errors.email = "សូមបញ្ចូលអ៊ីមែល (Email is required)";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      errors.email = "ទម្រង់អ៊ីមែលមិនត្រឹមត្រូវ (Invalid email format)";
-    }
-    if (!formData.password) {
-      errors.password = "សូមបញ្ចូលពាក្យសម្ងាត់ (Password is required)";
-    } else if (formData.password.length < 8) {
-      errors.password = "ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច ៨ តួអក្សរ (Min 8 characters)";
-    }
-    if (!formData.confirmPassword) {
-      errors.confirmPassword = "សូមបញ្ជាក់ពាក្យសម្ងាត់ (Confirm password is required)";
-    } else if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = "ពាក្យសម្ងាត់មិនត្រូវគ្នាទេ (Passwords do not match)";
-    }
-
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
+    setFieldErrors({});
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -173,7 +184,11 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 placeholder="First Name / នាមខ្លួន"
                 disabled={loading}
-                className="w-full rounded-[14px] border-[1.5px] border-transparent bg-[#e9e3d7] px-[22px] py-[15px] text-[16px] text-[#111827] placeholder-[#a39c8d] transition-all outline-none focus:border-[#84cc16] focus:bg-white focus:shadow-[0_0_0_4px_rgba(132,204,22,0.16)] dark:bg-[#1f2937] dark:text-white dark:placeholder-[#9ca3af] dark:focus:bg-[#111827]"
+                className={`w-full rounded-[14px] border-[1.5px] px-[22px] py-[15px] text-[16px] transition-all outline-none ${
+                  fieldErrors.firstName
+                    ? "border-red-500 bg-red-50/40 text-red-900 focus:border-red-500 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.16)] dark:border-red-500 dark:bg-red-950/30 dark:text-white"
+                    : "border-transparent bg-[#e9e3d7] text-[#111827] placeholder-[#a39c8d] focus:border-[#84cc16] focus:bg-white focus:shadow-[0_0_0_4px_rgba(132,204,22,0.16)] dark:bg-[#1f2937] dark:text-white dark:placeholder-[#9ca3af] dark:focus:bg-[#111827]"
+                }`}
               />
               {fieldErrors.firstName && (
                 <p className="mt-1.5 text-[13px] font-medium text-[#dc2626]">
@@ -197,7 +212,11 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 placeholder="Last Name / នាមត្រកូល"
                 disabled={loading}
-                className="w-full rounded-[14px] border-[1.5px] border-transparent bg-[#e9e3d7] px-[22px] py-[15px] text-[16px] text-[#111827] placeholder-[#a39c8d] transition-all outline-none focus:border-[#84cc16] focus:bg-white focus:shadow-[0_0_0_4px_rgba(132,204,22,0.16)] dark:bg-[#1f2937] dark:text-white dark:placeholder-[#9ca3af] dark:focus:bg-[#111827]"
+                className={`w-full rounded-[14px] border-[1.5px] px-[22px] py-[15px] text-[16px] transition-all outline-none ${
+                  fieldErrors.lastName
+                    ? "border-red-500 bg-red-50/40 text-red-900 focus:border-red-500 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.16)] dark:border-red-500 dark:bg-red-950/30 dark:text-white"
+                    : "border-transparent bg-[#e9e3d7] text-[#111827] placeholder-[#a39c8d] focus:border-[#84cc16] focus:bg-white focus:shadow-[0_0_0_4px_rgba(132,204,22,0.16)] dark:bg-[#1f2937] dark:text-white dark:placeholder-[#9ca3af] dark:focus:bg-[#111827]"
+                }`}
               />
               {fieldErrors.lastName && (
                 <p className="mt-1.5 text-[13px] font-medium text-[#dc2626]">
@@ -224,7 +243,11 @@ export default function RegisterPage() {
               onChange={handleChange}
               placeholder="E-mail / អ៊ីមែល"
               disabled={loading}
-              className="w-full rounded-[14px] border-[1.5px] border-transparent bg-[#e9e3d7] px-[22px] py-[15px] text-[16px] text-[#111827] placeholder-[#a39c8d] transition-all outline-none focus:border-[#84cc16] focus:bg-white focus:shadow-[0_0_0_4px_rgba(132,204,22,0.16)] dark:bg-[#1f2937] dark:text-white dark:placeholder-[#9ca3af] dark:focus:bg-[#111827]"
+              className={`w-full rounded-[14px] border-[1.5px] px-[22px] py-[15px] text-[16px] transition-all outline-none ${
+                fieldErrors.email
+                  ? "border-red-500 bg-red-50/40 text-red-900 focus:border-red-500 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.16)] dark:border-red-500 dark:bg-red-950/30 dark:text-white"
+                  : "border-transparent bg-[#e9e3d7] text-[#111827] placeholder-[#a39c8d] focus:border-[#84cc16] focus:bg-white focus:shadow-[0_0_0_4px_rgba(132,204,22,0.16)] dark:bg-[#1f2937] dark:text-white dark:placeholder-[#9ca3af] dark:focus:bg-[#111827]"
+              }`}
             />
             {fieldErrors.email && (
               <p className="mt-1.5 text-[13px] font-medium text-[#dc2626]">
@@ -251,7 +274,11 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 placeholder="Password / ពាក្យសម្ងាត់"
                 disabled={loading}
-                className="w-full rounded-[14px] border-[1.5px] border-transparent bg-[#e9e3d7] px-[22px] py-[15px] pr-12 text-[16px] text-[#111827] placeholder-[#a39c8d] transition-all outline-none focus:border-[#84cc16] focus:bg-white focus:shadow-[0_0_0_4px_rgba(132,204,22,0.16)] dark:bg-[#1f2937] dark:text-white dark:placeholder-[#9ca3af] dark:focus:bg-[#111827]"
+                className={`w-full rounded-[14px] border-[1.5px] px-[22px] py-[15px] pr-12 text-[16px] transition-all outline-none ${
+                  fieldErrors.password
+                    ? "border-red-500 bg-red-50/40 text-red-900 focus:border-red-500 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.16)] dark:border-red-500 dark:bg-red-950/30 dark:text-white"
+                    : "border-transparent bg-[#e9e3d7] text-[#111827] placeholder-[#a39c8d] focus:border-[#84cc16] focus:bg-white focus:shadow-[0_0_0_4px_rgba(132,204,22,0.16)] dark:bg-[#1f2937] dark:text-white dark:placeholder-[#9ca3af] dark:focus:bg-[#111827]"
+                }`}
               />
               <button
                 type="button"
@@ -287,7 +314,11 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 placeholder="Confirm Password / បញ្ជាក់ពាក្យសម្ងាត់"
                 disabled={loading}
-                className="w-full rounded-[14px] border-[1.5px] border-transparent bg-[#e9e3d7] px-[22px] py-[15px] pr-12 text-[16px] text-[#111827] placeholder-[#a39c8d] transition-all outline-none focus:border-[#84cc16] focus:bg-white focus:shadow-[0_0_0_4px_rgba(132,204,22,0.16)] dark:bg-[#1f2937] dark:text-white dark:placeholder-[#9ca3af] dark:focus:bg-[#111827]"
+                className={`w-full rounded-[14px] border-[1.5px] px-[22px] py-[15px] pr-12 text-[16px] transition-all outline-none ${
+                  fieldErrors.confirmPassword
+                    ? "border-red-500 bg-red-50/40 text-red-900 focus:border-red-500 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.16)] dark:border-red-500 dark:bg-red-950/30 dark:text-white"
+                    : "border-transparent bg-[#e9e3d7] text-[#111827] placeholder-[#a39c8d] focus:border-[#84cc16] focus:bg-white focus:shadow-[0_0_0_4px_rgba(132,204,22,0.16)] dark:bg-[#1f2937] dark:text-white dark:placeholder-[#9ca3af] dark:focus:bg-[#111827]"
+                }`}
               />
               <button
                 type="button"

@@ -17,6 +17,80 @@ const unwrapData = (v: unknown): unknown =>
       ? v.payload
       : v;
 
+function extractSearchItemImage(item: Record<string, unknown>): string | null {
+  const directFields = [
+    item.imageUrl,
+    item.logoUrl,
+    item.logo,
+    item.logoMediaUuid,
+    item.coverImageUrl,
+    item.coverMediaUuid,
+    item.primaryMediaUrl,
+    item.primaryMediaUuid,
+    item.thumbnailUrl,
+    item.thumbnail,
+    item.thumbnailMediaUuid,
+    item.avatarUrl,
+    item.avatarMediaUuid,
+    item.profileImageUrl,
+    item.profileImage,
+    item.avatar,
+    item.profilePicture,
+    item.photoUrl,
+    item.picture,
+    item.image,
+    item.mediaUrl,
+    item.mediaUuid,
+  ];
+
+  for (const field of directFields) {
+    if (typeof field === "string" && field.trim()) {
+      return field.trim();
+    }
+  }
+
+  // Check array fields (primaryMediaUrls, images, gallery, media)
+  const arrayFields = [
+    item.primaryMediaUrls,
+    item.primaryMediaUuids,
+    item.images,
+    item.gallery,
+    item.media,
+  ];
+
+  for (const arr of arrayFields) {
+    if (Array.isArray(arr) && arr.length > 0) {
+      const first = arr[0];
+      if (typeof first === "string" && first.trim()) return first.trim();
+      if (isObject(first)) {
+        const nestedUrl =
+          first.url || first.accessUrl || first.fileUrl || first.imageUrl || first.mediaUrl || first.uuid;
+        if (typeof nestedUrl === "string" && nestedUrl.trim()) return nestedUrl.trim();
+      }
+    }
+  }
+
+  // Check nested objects
+  if (isObject(item.food)) {
+    const nested = extractSearchItemImage(item.food);
+    if (nested) return nested;
+  }
+  if (isObject(item.store)) {
+    const nested = extractSearchItemImage(item.store);
+    if (nested) return nested;
+  }
+  if (isObject(item.user)) {
+    const nested = extractSearchItemImage(item.user);
+    if (nested) return nested;
+  }
+  if (isObject(item.defaultProfile)) {
+    const nested = extractSearchItemImage(item.defaultProfile);
+    if (nested) return nested;
+  }
+
+  return null;
+}
+
 function normalizeSearchItem(item: unknown): AdminSearchResultItem | null {
   if (!isObject(item)) return null;
 
@@ -61,14 +135,7 @@ function normalizeSearchItem(item: unknown): AdminSearchResultItem | null {
       "",
   );
 
-  const imageUrl =
-    typeof item.imageUrl === "string"
-      ? item.imageUrl
-      : typeof item.logoUrl === "string"
-        ? item.logoUrl
-        : typeof item.primaryMediaUrl === "string"
-          ? item.primaryMediaUrl
-          : null;
+  const imageUrl = extractSearchItemImage(item);
 
   const status =
     typeof item.status === "string"

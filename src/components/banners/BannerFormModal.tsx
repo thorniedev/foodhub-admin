@@ -20,6 +20,18 @@ import { BANNER_CATEGORIES, BANNER_CATEGORY_LABELS } from "../../types/banner";
 import { resolveImageUrl } from "../../services/adminBannerApi";
 import { compressImage } from "../../utils/imageCompression";
 import BannerMediaImage from "./BannerMediaImage";
+import { z } from "zod";
+
+const bannerFormSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(1, "សូមបញ្ចូលចំណងជើងបែនណឺ (Title is required).")
+    .max(255, "ចំណងជើងមិនអាចលើសពី ២៥៥ តួអក្សរឡើយ (Max 255 chars)."),
+  category: z.string().min(1, "សូមជ្រើសរើសប្រភេទ"),
+  location: z.string().max(100, "ទីតាំងមិនអាចលើសពី ១០០ តួអក្សរឡើយ (Max 100 chars).").optional(),
+  description: z.string().optional(),
+});
 
 const ACCEPTED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
@@ -182,19 +194,25 @@ export default function BannerFormModal({
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
-    if (!title.trim()) {
-      errors.title = "សូមបញ្ចូលចំណងជើងបែនណឺ (Title is required).";
-    } else if (title.trim().length > 255) {
-      errors.title = "ចំណងជើងមិនអាចលើសពី ២៥៥ តួអក្សរឡើយ (Max 255 chars).";
+    const result = bannerFormSchema.safeParse({
+      title,
+      category,
+      location,
+      description,
+    });
+
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        const fieldName = issue.path[0] as string;
+        if (fieldName && !errors[fieldName]) {
+          errors[fieldName] = issue.message;
+        }
+      });
     }
 
-    if (category === "LOCATION") {
-      if (!location.trim()) {
-        errors.location =
-          "សូមបញ្ជាក់ទីតាំងសម្រាប់ Category LOCATION (Location is required).";
-      } else if (location.trim().length > 100) {
-        errors.location = "ទីតាំងមិនអាចលើសពី ១០០ តួអក្សរឡើយ (Max 100 chars).";
-      }
+    if (category === "LOCATION" && !location.trim()) {
+      errors.location =
+        "សូមបញ្ជាក់ទីតាំងសម្រាប់ Category LOCATION (Location is required).";
     }
 
     if (!isEditing && !imageFile) {
@@ -483,7 +501,11 @@ export default function BannerFormModal({
                         });
                       }}
                       placeholder="ឧ. Siem Reap, Phnom Penh..."
-                      className="h-12 w-full rounded-full border border-gray-200 bg-gray-50 px-5 text-lg font-normal text-gray-800 outline-none transition focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600/10"
+                      className={`h-12 w-full rounded-full border px-5 text-lg font-normal text-gray-800 outline-none transition ${
+                        fieldErrors.location
+                          ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                          : "border-gray-200 bg-gray-50 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600/10"
+                      }`}
                     />
                     {fieldErrors.location && (
                       <p className="mt-2 text-lg font-normal text-red-500">
@@ -512,7 +534,11 @@ export default function BannerFormModal({
                     });
                   }}
                   placeholder="ឧ. ពិធីបុណ្យអុំទូក ឬ មុខម្ហូបពិសេសប្រចាំខែ"
-                  className="h-12 w-full rounded-full border border-gray-200 bg-gray-50 px-5 text-lg font-normal text-gray-800 outline-none transition focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600/10"
+                  className={`h-12 w-full rounded-full border px-5 text-lg font-normal text-gray-800 outline-none transition ${
+                    fieldErrors.title
+                      ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                      : "border-gray-200 bg-gray-50 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600/10"
+                  }`}
                 />
                 {fieldErrors.title && (
                   <p className="mt-2 text-lg font-normal text-red-500">

@@ -151,7 +151,7 @@ export default function CustomSelect({
           )}
 
           {/* Options List */}
-          <div className="overflow-y-auto max-h-64 space-y-0.5 pr-0.5 no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="overflow-y-auto max-h-64 space-y-0.5 pr-1.5 scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300">
             {filteredOptions.length === 0 ? (
               <div className="px-3.5 py-4 text-center text-base font-normal text-gray-400">
                 មិនរកឃើញទិន្នន័យ
@@ -175,7 +175,9 @@ export default function CustomSelect({
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate">{opt.label}</p>
-                  
+                      {opt.description && opt.description !== opt.label && (
+                        <p className="text-sm text-gray-400 truncate">{opt.description}</p>
+                      )}
                     </div>
 
                     {isSelected && (

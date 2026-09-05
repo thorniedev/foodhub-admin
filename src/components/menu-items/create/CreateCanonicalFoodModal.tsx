@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Loader2, Save, X } from "lucide-react";
+import { z } from "zod";
 
 import {
   useCreateFoodMutation,
@@ -12,6 +13,13 @@ import { getMenuItemApiErrorMessage } from "@/src/lib/menuItemApiError";
 import type { CreateCatalogFoodPayload } from "@/src/types/menuItem";
 
 import FoodImageUploadGrid from "./FoodImageUploadGrid";
+
+const createCanonicalFoodSchema = z.object({
+  canonicalName: z.string().trim().min(1, "សូមបញ្ចូលឈ្មោះជាភាសាអង់គ្លេស"),
+  localName: z.string().trim().min(1, "សូមបញ្ចូលឈ្មោះខ្មែរ"),
+  categoryUuid: z.string().trim().min(1, "សូមជ្រើស Food category"),
+  cuisineUuid: z.string().trim().min(1, "សូមជ្រើស Cuisine"),
+});
 
 interface FormState {
   canonicalName: string;
@@ -85,7 +93,17 @@ export default function CreateCanonicalFoodModal({
 }) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [mediaUuids, setMediaUuids] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const clearFieldError = (field: string) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   const { data: categoryData, isLoading: categoriesLoading } =
     useGetFoodCategoriesQuery({ page: 0, size: 100 });
@@ -120,7 +138,8 @@ export default function CreateCanonicalFoodModal({
 
     setForm(EMPTY_FORM);
     setMediaUuids([]);
-    setError(null);
+    setServerError(null);
+    setFieldErrors({});
   }, [open]);
 
   useEffect(() => {
@@ -144,21 +163,53 @@ export default function CreateCanonicalFoodModal({
   };
 
   const submit = async () => {
+    setServerError(null);
+
+    const validationResult = createCanonicalFoodSchema.safeParse({
+      canonicalName: form.canonicalName,
+      localName: form.localName,
+      categoryUuid: form.categoryUuid,
+      cuisineUuid: form.cuisineUuid,
+    });
+
+    const nextErrors: Record<string, string> = {};
+    if (!validationResult.success) {
+      validationResult.error.issues.forEach((err) => {
+        const field = String(err.path[0]);
+        if (!nextErrors[field]) {
+          nextErrors[field] = err.message;
+        }
+      });
+    }
+
+    const checkJson = (field: string, val: string, label: string) => {
+      const trimmed = val.trim();
+      if (!trimmed) return;
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (!Array.isArray(parsed)) {
+          nextErrors[field] = `${label} ត្រូវតែជា JSON array []។`;
+        }
+      } catch {
+        nextErrors[field] = `${label} ត្រូវតែជា JSON ត្រឹមត្រូវ។`;
+      }
+    };
+
+    checkJson("dietaryTypes", form.dietaryTypes, "Dietary Types");
+    checkJson("seasons", form.seasons, "Seasons");
+    checkJson("events", form.events, "Events");
+    checkJson("suitableWeather", form.suitableWeather, "Suitable Weather");
+    checkJson("mealTypes", form.mealTypes, "Meal Types");
+    checkJson("ageRules", form.ageRules, "Age Rules");
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
+      return;
+    }
+
+    setFieldErrors({});
+
     try {
-      setError(null);
-
-      if (!form.canonicalName.trim()) {
-        throw new Error("សូមបញ្ចូលឈ្មោះជាភាសាអង់គ្លេស។");
-      }
-
-      if (!form.categoryUuid) {
-        throw new Error("សូមជ្រើស Food category។");
-      }
-
-      if (!form.cuisineUuid) {
-        throw new Error("សូមជ្រើស Cuisine។");
-      }
-
       const payload: CreateCatalogFoodPayload = {
         canonicalName: form.canonicalName.trim(),
         localName: form.localName.trim() || null,
@@ -188,7 +239,7 @@ export default function CreateCanonicalFoodModal({
       await onCreated();
       onClose();
     } catch (requestError) {
-      setError(getMenuItemApiErrorMessage(requestError));
+      setServerError(getMenuItemApiErrorMessage(requestError));
     }
   };
 
@@ -220,30 +271,51 @@ export default function CreateCanonicalFoodModal({
             <h3 className="text-xl font-bold text-gray-900">ព័ត៌មាន Food</h3>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <Field label="ឈ្មោះជាអង់គ្លេស *">
+              <Field label="ឈ្មោះជាអង់គ្លេស *" error={fieldErrors.canonicalName}>
                 <input
                   value={form.canonicalName}
-                  onChange={(event) => set("canonicalName", event.target.value)}
+                  onChange={(event) => {
+                    set("canonicalName", event.target.value);
+                    clearFieldError("canonicalName");
+                  }}
                   placeholder="Kuy Teav"
-                  className="field-input"
+                  className={`field-input ${
+                    fieldErrors.canonicalName
+                      ? "!border-red-400 !bg-red-50/40 focus:!border-red-500 focus:!ring-red-100"
+                      : ""
+                  }`}
                 />
               </Field>
 
-              <Field label="ឈ្មោះខ្មែរ *">
+              <Field label="ឈ្មោះខ្មែរ *" error={fieldErrors.localName}>
                 <input
                   value={form.localName}
-                  onChange={(event) => set("localName", event.target.value)}
+                  onChange={(event) => {
+                    set("localName", event.target.value);
+                    clearFieldError("localName");
+                  }}
                   placeholder="គុយទាវ"
-                  className="field-input"
+                  className={`field-input ${
+                    fieldErrors.localName
+                      ? "!border-red-400 !bg-red-50/40 focus:!border-red-500 focus:!ring-red-100"
+                      : ""
+                  }`}
                 />
               </Field>
 
-              <Field label="Food category *">
+              <Field label="Food category *" error={fieldErrors.categoryUuid}>
                 <select
                   value={form.categoryUuid}
-                  onChange={(event) => set("categoryUuid", event.target.value)}
+                  onChange={(event) => {
+                    set("categoryUuid", event.target.value);
+                    clearFieldError("categoryUuid");
+                  }}
                   disabled={categoriesLoading}
-                  className="field-input"
+                  className={`field-input ${
+                    fieldErrors.categoryUuid
+                      ? "!border-red-400 !bg-red-50/40 focus:!border-red-500 focus:!ring-red-100"
+                      : ""
+                  }`}
                 >
                   <option value="">Select category</option>
                   {categories.map((category) => (
@@ -254,12 +326,19 @@ export default function CreateCanonicalFoodModal({
                 </select>
               </Field>
 
-              <Field label="Cuisine *">
+              <Field label="Cuisine *" error={fieldErrors.cuisineUuid}>
                 <select
                   value={form.cuisineUuid}
-                  onChange={(event) => set("cuisineUuid", event.target.value)}
+                  onChange={(event) => {
+                    set("cuisineUuid", event.target.value);
+                    clearFieldError("cuisineUuid");
+                  }}
                   disabled={cuisinesLoading}
-                  className="field-input"
+                  className={`field-input ${
+                    fieldErrors.cuisineUuid
+                      ? "!border-red-400 !bg-red-50/40 focus:!border-red-500 focus:!ring-red-100"
+                      : ""
+                  }`}
                 >
                   <option value="">Select cuisine</option>
                   {cuisines.map((cuisine) => (
@@ -332,19 +411,67 @@ export default function CreateCanonicalFoodModal({
             </div>
 
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              <JsonField label="Dietary Types" value={form.dietaryTypes} onChange={(value) => set("dietaryTypes", value)} />
-              <JsonField label="Seasons" value={form.seasons} onChange={(value) => set("seasons", value)} />
-              <JsonField label="Events" value={form.events} onChange={(value) => set("events", value)} />
-              <JsonField label="Suitable Weather" value={form.suitableWeather} onChange={(value) => set("suitableWeather", value)} />
-              <JsonField label="Meal Types" value={form.mealTypes} onChange={(value) => set("mealTypes", value)} />
-              <JsonField label="Age Rules" value={form.ageRules} onChange={(value) => set("ageRules", value)} />
+              <JsonField
+                label="Dietary Types"
+                value={form.dietaryTypes}
+                error={fieldErrors.dietaryTypes}
+                onChange={(value) => {
+                  set("dietaryTypes", value);
+                  clearFieldError("dietaryTypes");
+                }}
+              />
+              <JsonField
+                label="Seasons"
+                value={form.seasons}
+                error={fieldErrors.seasons}
+                onChange={(value) => {
+                  set("seasons", value);
+                  clearFieldError("seasons");
+                }}
+              />
+              <JsonField
+                label="Events"
+                value={form.events}
+                error={fieldErrors.events}
+                onChange={(value) => {
+                  set("events", value);
+                  clearFieldError("events");
+                }}
+              />
+              <JsonField
+                label="Suitable Weather"
+                value={form.suitableWeather}
+                error={fieldErrors.suitableWeather}
+                onChange={(value) => {
+                  set("suitableWeather", value);
+                  clearFieldError("suitableWeather");
+                }}
+              />
+              <JsonField
+                label="Meal Types"
+                value={form.mealTypes}
+                error={fieldErrors.mealTypes}
+                onChange={(value) => {
+                  set("mealTypes", value);
+                  clearFieldError("mealTypes");
+                }}
+              />
+              <JsonField
+                label="Age Rules"
+                value={form.ageRules}
+                error={fieldErrors.ageRules}
+                onChange={(value) => {
+                  set("ageRules", value);
+                  clearFieldError("ageRules");
+                }}
+              />
             </div>
           </section>
 
-          {error && (
+          {serverError && (
             <div className="flex gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
               <AlertTriangle size={18} className="mt-0.5 shrink-0" />
-              <span>{error}</span>
+              <span>{serverError}</span>
             </div>
           )}
 
@@ -390,11 +517,20 @@ export default function CreateCanonicalFoodModal({
   );
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({
+  label,
+  children,
+  error,
+}: {
+  label: string;
+  children: ReactNode;
+  error?: string;
+}) {
   return (
-    <label>
+    <label className="block">
       <span className="mb-2 block text-sm font-bold text-gray-700">{label}</span>
       {children}
+      {error && <p className="mt-1 text-sm font-normal text-red-500">{error}</p>}
     </label>
   );
 }
@@ -435,21 +571,26 @@ function JsonField({
   label,
   value,
   onChange,
+  error,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  error?: string;
 }) {
   return (
-    <label>
+    <label className="block">
       <span className="mb-2 block text-sm font-bold text-[#F97316]">{label}</span>
       <textarea
         rows={5}
         spellCheck={false}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-2xl border border-gray-200 bg-slate-950 p-3 font-mono text-xs leading-5 text-emerald-200 outline-none focus:border-emerald-500"
+        className={`w-full rounded-2xl border bg-slate-950 p-3 font-mono text-xs leading-5 text-emerald-200 outline-none focus:border-emerald-500 ${
+          error ? "border-red-500 ring-1 ring-red-500" : "border-gray-200"
+        }`}
       />
+      {error && <p className="mt-1 text-sm font-normal text-red-500">{error}</p>}
     </label>
   );
 }

@@ -26,6 +26,9 @@ import {
   useGetManagedFoodsQuery,
   useGetPublishedMenuItemsQuery,
 } from "@/src/app/store/menuManagementApi";
+import StoreMediaImage from "@/src/components/shops/detail/StoreMediaImage";
+import UserAvatar from "@/src/components/users/UserAvatar";
+import { storeLogoCandidate, storeCoverCandidate } from "@/src/lib/shopFormat";
 
 export default function GlobalAdminSearch() {
   const router = useRouter();
@@ -46,13 +49,17 @@ export default function GlobalAdminSearch() {
 
   // Click outside listener
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    function handleClickOutside(event: MouseEvent | TouchEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
   const typesFilter = selectedType !== "ALL" ? [selectedType] : undefined;
@@ -97,11 +104,21 @@ export default function GlobalAdminSearch() {
         const combinedText = `${storeName} ${address}`.toLowerCase();
 
         if (combinedText.includes(q)) {
+          const logoCandidate =
+            storeLogoCandidate(shop) ||
+            storeCoverCandidate(shop) ||
+            shop.logoUrl ||
+            shop.coverImageUrl ||
+            (shop as any).logo ||
+            (shop as any).cover ||
+            null;
+
           list.push({
             uuid: shop.uuid,
             type: "STORE",
             title: storeName || "Store",
             subtitle: address || undefined,
+            imageUrl: logoCandidate || null,
             status: shop.operatingStatus || shop.reviewStatus || undefined,
             targetUrl: `/shops/${shop.uuid}`,
           });
@@ -127,11 +144,28 @@ export default function GlobalAdminSearch() {
             (firstName || lastName ? `${firstName} ${lastName}`.trim() : email) ||
             "User";
 
+          const userImageCandidate =
+            (typeof u.avatarMediaUuid === "string" && u.avatarMediaUuid) ||
+            (typeof u.avatarUrl === "string" && u.avatarUrl) ||
+            (typeof u.profileImageUrl === "string" && u.profileImageUrl) ||
+            (typeof u.imageUrl === "string" && u.imageUrl) ||
+            (typeof u.avatar === "string" && u.avatar) ||
+            (typeof u.profilePicture === "string" && u.profilePicture) ||
+            (typeof u.photoUrl === "string" && u.photoUrl) ||
+            (typeof u.picture === "string" && u.picture) ||
+            (typeof u.image === "string" && u.image) ||
+            (typeof (u.defaultProfile as any)?.avatarMediaUuid === "string" && (u.defaultProfile as any).avatarMediaUuid) ||
+            (typeof (u.defaultProfile as any)?.avatarUrl === "string" && (u.defaultProfile as any).avatarUrl) ||
+            (typeof (u.profiles as any)?.[0]?.avatarMediaUuid === "string" && (u.profiles as any)[0].avatarMediaUuid) ||
+            (typeof (u.profiles as any)?.[0]?.avatarUrl === "string" && (u.profiles as any)[0].avatarUrl) ||
+            null;
+
           list.push({
             uuid: String(u.uuid || u.id || ""),
             type: "USER",
             title: displayTitle,
             subtitle: email !== displayTitle && email ? email : undefined,
+            imageUrl: userImageCandidate || null,
             status:
               typeof u.accountStatus === "string"
                 ? u.accountStatus
@@ -162,11 +196,25 @@ export default function GlobalAdminSearch() {
             categoryName ||
             (canonicalName !== displayTitle ? canonicalName : "");
 
+          const foodImageCandidate =
+            (Array.isArray(food.primaryMediaUrls) && typeof food.primaryMediaUrls[0] === "string" && food.primaryMediaUrls[0]) ||
+            (typeof food.thumbnail === "string" && food.thumbnail) ||
+            (typeof food.imageUrl === "string" && food.imageUrl) ||
+            (typeof food.primaryMediaUrl === "string" && food.primaryMediaUrl) ||
+            (Array.isArray(food.images) && typeof food.images[0] === "string" && food.images[0]) ||
+            (typeof food.primaryMediaUuid === "string" && food.primaryMediaUuid) ||
+            (typeof food.thumbnailMediaUuid === "string" && food.thumbnailMediaUuid) ||
+            (Array.isArray(food.primaryMediaUuids) && typeof food.primaryMediaUuids[0] === "string" && food.primaryMediaUuids[0]) ||
+            (typeof (food.media as any)?.[0]?.url === "string" && (food.media as any)[0].url) ||
+            (typeof (food.media as any)?.[0]?.accessUrl === "string" && (food.media as any)[0].accessUrl) ||
+            null;
+
           list.push({
             uuid: String(food.uuid || food.id || ""),
             type: "FOOD",
             title: displayTitle,
             subtitle: subtitle || undefined,
+            imageUrl: foodImageCandidate || null,
             targetUrl: `/menu-items?search=${encodeURIComponent(displayTitle)}`,
           });
         }
@@ -204,11 +252,27 @@ export default function GlobalAdminSearch() {
 
         const targetStoreUuid = menuItem.storeUuid || menuItem.store?.uuid;
 
+        const menuItemImageCandidate =
+          menuItem.thumbnail ||
+          menuItem.imageUrl ||
+          menuItem.primaryMediaUrls?.[0] ||
+          (menuItem as any).primaryMediaUrl ||
+          menuItem.images?.[0] ||
+          menuItem.primaryMediaUuid ||
+          menuItem.thumbnailMediaUuid ||
+          menuItem.food?.thumbnail ||
+          menuItem.food?.imageUrl ||
+          menuItem.food?.primaryMediaUrls?.[0] ||
+          (menuItem.food as any)?.primaryMediaUrl ||
+          menuItem.food?.primaryMediaUuid ||
+          null;
+
         list.push({
           uuid: itemUuid,
           type: "MENU_ITEM",
           title: name || foodLocal || foodCanonical || "Menu Item",
           subtitle,
+          imageUrl: menuItemImageCandidate || null,
           status: menuItem.availabilityStatus,
           targetUrl: targetStoreUuid
             ? `/shops/${targetStoreUuid}`
@@ -246,15 +310,15 @@ export default function GlobalAdminSearch() {
   const getEntityIcon = (type: AdminEntityType) => {
     switch (type) {
       case "STORE":
-        return <Store size={16} className="text-blue-600" />;
+        return <Store size={22} className="text-blue-600" />;
       case "FOOD":
-        return <Utensils size={16} className="text-emerald-600" />;
+        return <Utensils size={22} className="text-emerald-600" />;
       case "USER":
-        return <User size={16} className="text-purple-600" />;
+        return <User size={22} className="text-purple-600" />;
       case "MENU_ITEM":
-        return <Package size={16} className="text-orange-600" />;
+        return <Package size={22} className="text-orange-600" />;
       default:
-        return <Search size={16} className="text-gray-500" />;
+        return <Search size={22} className="text-gray-500" />;
     }
   };
 
@@ -292,7 +356,7 @@ export default function GlobalAdminSearch() {
     <div ref={containerRef} className="relative w-full max-w-3xl">
       <div className="relative">
         <Search
-          size={18}
+          size={20}
           className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
         />
 
@@ -305,7 +369,7 @@ export default function GlobalAdminSearch() {
             setInputQuery(e.target.value);
             setIsOpen(true);
           }}
-          className="h-11 sm:h-12 w-full rounded-full border border-gray-200 bg-gray-50/50 sm:bg-white py-2 pl-10 sm:pl-11 pr-9 sm:pr-10 text-base sm:text-lg outline-none transition focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
+          className="h-11 sm:h-12 w-full rounded-full border border-gray-200 bg-gray-50/50 sm:bg-white py-2 pl-10 sm:pl-12 pr-10 sm:pr-11 text-lg outline-none transition focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 placeholder:truncate"
         />
 
         {inputQuery && (
@@ -315,90 +379,118 @@ export default function GlobalAdminSearch() {
               setInputQuery("");
               setDebouncedQuery("");
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 cursor-pointer transition"
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         )}
       </div>
 
       {/* DROPDOWN OVERLAY RESULTS */}
       {isOpen && debouncedQuery.length >= 2 && (
-        <div className="absolute left-0 right-0 top-14 z-50 max-h-[480px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl animate-in fade-in duration-150">
-          {/* CATEGORY TABS */}
-          <div className="flex items-center gap-1 border-b border-gray-100 bg-gray-50 px-3 py-2 text-xs">
-            {(["ALL", "STORE", "FOOD", "USER", "MENU_ITEM"] as const).map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setSelectedType(type)}
-                className={`rounded-lg px-2.5 py-1 font-semibold transition ${selectedType === type
-                    ? "bg-emerald-700 text-white shadow-xs"
-                    : "text-gray-600 hover:bg-gray-200/70"
+        <>
+          {/* Mobile Backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] sm:hidden"
+            onClick={() => setIsOpen(false)}
+            aria-hidden="true"
+          />
+
+          <div className="fixed inset-x-2.5 top-[70px] sm:absolute sm:inset-x-0 sm:top-14 z-50 max-h-[calc(100vh-85px)] sm:max-h-[580px] overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-100 bg-white shadow-2xl animate-in fade-in duration-150">
+            {/* CATEGORY TABS */}
+            <div className="flex items-center gap-1.5 border-b border-gray-100 bg-gray-50 px-3 sm:px-4 py-2 sm:py-2.5 overflow-x-auto no-scrollbar scroll-smooth">
+              {(["ALL", "STORE", "FOOD", "USER", "MENU_ITEM"] as const).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setSelectedType(type)}
+                  className={`shrink-0 rounded-xl px-3 sm:px-3.5 py-1.5 text-lg font-medium transition cursor-pointer ${
+                    selectedType === type
+                      ? "bg-emerald-700 text-white shadow-xs"
+                      : "text-gray-600 hover:bg-gray-200/70"
                   }`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
 
-          {/* RESULTS CONTENT */}
-          <div className="max-h-[380px] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden p-2">
-            {isSearchLoading ? (
-              <div className="flex items-center justify-center gap-2 py-8 text-xs font-medium text-emerald-700">
-                <Loader2 size={18} className="animate-spin text-emerald-600" />
-                កំពុងស្វែងរកក្នុងប្រព័ន្ធ...
-              </div>
-            ) : filteredResults.length === 0 ? (
-              <div className="py-8 text-center text-xs font-medium text-gray-500">
-                រកមិនឃើញលទ្ធផល &quot;{debouncedQuery}&quot; ឡើយ។
-              </div>
-            ) : (
-              <div className="space-y-1">
-                {filteredResults.map((item) => (
-                  <Link
-                    key={`${item.type}-${item.uuid}`}
-                    href={getEntityRoute(item)}
-                    onClick={(e) => handleNavigate(item, e)}
-                    className="flex items-center justify-between rounded-xl p-2.5 transition hover:bg-emerald-50/70 group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100 group-hover:bg-white group-hover:shadow-xs">
-                        {getEntityIcon(item.type)}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="truncate text-xs font-bold text-gray-800 group-hover:text-emerald-800">
-                            {item.title}
-                          </p>
-                          <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-600 uppercase">
-                            {item.type}
-                          </span>
+            {/* RESULTS CONTENT */}
+            <div className="max-h-[calc(100vh-220px)] sm:max-h-[460px] overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden p-2 sm:p-3">
+              {isSearchLoading ? (
+                <div className="flex items-center justify-center gap-3 py-10 text-lg font-normal text-emerald-700">
+                  <Loader2 size={24} className="animate-spin text-emerald-600" />
+                  <span>កំពុងស្វែងរកក្នុងប្រព័ន្ធ...</span>
+                </div>
+              ) : filteredResults.length === 0 ? (
+                <div className="py-10 text-center text-lg font-normal text-gray-500">
+                  រកមិនឃើញលទ្ធផល &quot;{debouncedQuery}&quot; ឡើយ។
+                </div>
+              ) : (
+                <div className="space-y-1 sm:space-y-1.5">
+                  {filteredResults.map((item) => (
+                    <Link
+                      key={`${item.type}-${item.uuid}`}
+                      href={getEntityRoute(item)}
+                      onClick={(e) => handleNavigate(item, e)}
+                      className="flex items-center justify-between rounded-xl sm:rounded-2xl p-2.5 sm:p-3 transition hover:bg-emerald-50/70 group cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                        <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl sm:rounded-2xl border border-gray-100 bg-gray-100 group-hover:border-gray-200 group-hover:bg-white group-hover:shadow-xs">
+                          {item.type === "USER" && (item.imageUrl || item.uuid) ? (
+                            <UserAvatar
+                              name={item.title}
+                              userUuid={item.uuid}
+                              imageUrl={item.imageUrl}
+                              containerClassName="h-full w-full flex items-center justify-center text-sm font-semibold text-purple-700 bg-purple-50"
+                              textClassName="text-sm font-semibold text-purple-700"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : item.imageUrl ? (
+                            <StoreMediaImage
+                              mediaUuid={item.imageUrl}
+                              alt={item.title}
+                              className="h-full w-full object-cover"
+                              fallbackIcon={getEntityIcon(item.type)}
+                            />
+                          ) : (
+                            getEntityIcon(item.type)
+                          )}
                         </div>
-                        {item.subtitle && (
-                          <p className="truncate text-[11px] text-gray-500">
-                            {item.subtitle}
-                          </p>
-                        )}
+                        <div className="min-w-0 flex-1 pr-1.5 sm:pr-2">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
+                            <p className="truncate text-xl font-medium text-gray-800 group-hover:text-emerald-800 max-w-full">
+                              {item.title}
+                            </p>
+                            <span className="rounded-lg bg-gray-100 px-2 sm:px-2.5 py-0.5 text-lg font-normal text-gray-600 uppercase shrink-0">
+                              {item.type}
+                            </span>
+                          </div>
+                          {item.subtitle && (
+                            <p className="mt-0.5 truncate text-lg font-normal text-gray-500">
+                              {item.subtitle}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    <ExternalLink
-                      size={14}
-                      className="text-gray-400 opacity-0 transition group-hover:opacity-100 group-hover:text-emerald-700 shrink-0 ml-2"
-                    />
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+                      <ExternalLink
+                        size={20}
+                        className="text-gray-400 opacity-50 sm:opacity-0 transition sm:group-hover:opacity-100 sm:group-hover:text-emerald-700 shrink-0 ml-1.5 sm:ml-3"
+                      />
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          {/* FOOTER */}
-          <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-4 py-2 text-[11px] text-gray-500">
-            <span>បានរកឃើញលទ្ធផល: {filteredResults.length}</span>
-            <span className="font-medium text-emerald-800">Admin Global Index Search</span>
+            {/* FOOTER */}
+            <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-1 sm:gap-2 border-t border-gray-100 bg-gray-50 px-4 sm:px-5 py-2.5 sm:py-3 text-lg font-normal text-gray-600">
+              <span>បានរកឃើញលទ្ធផល: {filteredResults.length}</span>
+              <span className="font-medium text-emerald-800 hidden xs:inline">Admin Global Index Search</span>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

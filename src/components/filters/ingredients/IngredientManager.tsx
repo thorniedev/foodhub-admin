@@ -369,56 +369,64 @@ export default function IngredientManager() {
           first,
           second,
         ) => {
+          const labelA = first.name || first.code || "";
+          const labelB = second.name || second.code || "";
+
           if (
             sortMode ===
             "A_Z"
           ) {
-            return first.name.localeCompare(
-              second.name,
-              undefined,
+            const cmp = labelA.localeCompare(
+              labelB,
+              "km",
               {
                 sensitivity:
                   "base",
+                numeric: true,
               },
             );
+            if (cmp !== 0) return cmp;
+            return (first.code || "").localeCompare(second.code || "", undefined, {
+              sensitivity: "base",
+            });
           }
 
           if (
             sortMode ===
             "Z_A"
           ) {
-            return second.name.localeCompare(
-              first.name,
-              undefined,
+            const cmp = labelB.localeCompare(
+              labelA,
+              "km",
               {
                 sensitivity:
                   "base",
+                numeric: true,
               },
             );
+            if (cmp !== 0) return cmp;
+            return (second.code || "").localeCompare(first.code || "", undefined, {
+              sensitivity: "base",
+            });
           }
+
+          const rawA = (first as any).updatedAt || first.createdAt;
+          const rawB = (second as any).updatedAt || second.createdAt;
 
           if (
             sortMode ===
             "NEWEST"
           ) {
-            return (
-              getTime(
-                second.createdAt,
-              ) -
-              getTime(
-                first.createdAt,
-              )
-            );
+            const timeA = getTime(rawA);
+            const timeB = getTime(rawB);
+            if (timeA !== timeB) return timeB - timeA;
+            return (first.code || "").localeCompare(second.code || "");
           }
 
-          return (
-            getTime(
-              first.createdAt,
-            ) -
-            getTime(
-              second.createdAt,
-            )
-          );
+          const timeA = getTime(rawA);
+          const timeB = getTime(rawB);
+          if (timeA !== timeB) return timeA - timeB;
+          return (first.code || "").localeCompare(second.code || "");
         },
       );
     }, [

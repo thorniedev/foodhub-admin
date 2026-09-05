@@ -209,45 +209,14 @@ export default function AgeGroupManager() {
 
   const {
     data,
-
     error,
-
     isLoading,
-
     isFetching,
-
     refetch,
-  } =
-    useGetAgeGroupsQuery({
-      page,
-
-      size,
-
-      sort:
-        sortMap[
-          sortMode
-        ],
-    });
-
-  /* =========================================================
-     SEARCH SUGGESTIONS
-
-     GET list currently has no search query parameter.
-     Load more records and search locally.
-  ========================================================= */
-
-  const {
-    data:
-      suggestionData,
-  } =
-    useGetAgeGroupsQuery({
-      page: 0,
-
-      size: 100,
-
-      sort:
-        "minAge,asc",
-    });
+  } = useGetAgeGroupsQuery({
+    page: 0,
+    size: 500,
+  });
 
   /* =========================================================
      MUTATIONS
@@ -284,13 +253,7 @@ export default function AgeGroupManager() {
      DATA
   ========================================================= */
 
-  const items =
-    data?.contents ??
-    [];
-
-  const allSearchItems =
-    suggestionData?.contents ??
-    [];
+  const items = useMemo(() => data?.contents ?? [], [data?.contents]);
 
   const normalizedSearch =
     search
@@ -299,112 +262,118 @@ export default function AgeGroupManager() {
 
   const matchesSearch = (
     item: AgeGroup,
-
     query: string,
   ) =>
     [
       item.code,
-
       item.name,
-
-      item.description ??
-        "",
-
-      String(
-        item.minAge,
-      ),
-
-      String(
-        item.maxAge,
-      ),
-    ].some(
-      (value) =>
-        String(
-          value ??
-            "",
-        )
-          .toLowerCase()
-          .includes(
-            query,
-          ),
+      item.description ?? "",
+      String(item.minAge),
+      String(item.maxAge),
+    ].some((value) =>
+      String(value ?? "")
+        .toLowerCase()
+        .includes(query),
     );
 
+  const activeCount = useMemo(() => {
+    return items.filter((item) => item.isActive).length;
+  }, [items]);
 
-
-  const activeCount =
-    useMemo(() => {
-      return (
-        allSearchItems.filter(
-          (item) =>
-            item.isActive,
-        ).length ||
-        items.filter(
-          (item) =>
-            item.isActive,
-        ).length
-      );
-    }, [
-      allSearchItems,
-      items,
-    ]);
-
-  const inactiveCount =
-    (allSearchItems.length ||
-      items.length) -
-    activeCount;
+  const inactiveCount = items.length - activeCount;
 
   /* =========================================================
-     SEARCH RESULTS
+     FILTER
   ========================================================= */
 
-  const displayedItems =
-    useMemo(() => {
-      const sourceList =
-        normalizedSearch ||
-        statusFilter !==
-          "ALL"
-          ? allSearchItems.length >
-            0
-            ? allSearchItems
-            : items
-          : items;
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const statusMatches =
+        statusFilter === "ALL" ||
+        (statusFilter === "ACTIVE" && item.isActive) ||
+        (statusFilter === "INACTIVE" && !item.isActive);
 
-      return sourceList.filter(
-        (item) => {
-          const statusMatches =
-            statusFilter ===
-              "ALL" ||
-            (statusFilter ===
-              "ACTIVE" &&
-              item.isActive) ||
-            (statusFilter ===
-              "INACTIVE" &&
-              !item.isActive);
+      if (!statusMatches) {
+        return false;
+      }
 
-          if (
-            !statusMatches
-          ) {
-            return false;
+      if (!normalizedSearch) {
+        return true;
+      }
+
+      return matchesSearch(item, normalizedSearch);
+    });
+  }, [items, normalizedSearch, statusFilter]);
+
+  /* =========================================================
+     SORT (Applies across full dataset)
+  ========================================================= */
+
+  const sortedItems = useMemo(() => {
+    return [...filteredItems].sort((first, second) => {
+      switch (sortMode) {
+        case "A_Z": {
+          const labelA = first.name || first.code || "";
+          const labelB = second.name || second.code || "";
+          const cmp = labelA.localeCompare(labelB, "km", {
+            sensitivity: "base",
+            numeric: true,
+          });
+          if (cmp !== 0) return cmp;
+          return first.minAge - second.minAge;
+        }
+
+        case "Z_A": {
+          const labelA = first.name || first.code || "";
+          const labelB = second.name || second.code || "";
+          const cmp = labelB.localeCompare(labelA, "km", {
+            sensitivity: "base",
+            numeric: true,
+          });
+          if (cmp !== 0) return cmp;
+          return second.minAge - first.minAge;
+        }
+
+        case "NEWEST": {
+          const rawA = (first as any).updatedAt || (first as any).createdAt;
+          const rawB = (second as any).updatedAt || (second as any).createdAt;
+          const tA = rawA ? new Date(rawA).getTime() : 0;
+          const tB = rawB ? new Date(rawB).getTime() : 0;
+          const timeA = isNaN(tA) ? 0 : tA;
+          const timeB = isNaN(tB) ? 0 : tB;
+
+          if (timeA !== timeB) {
+            return timeB - timeA;
           }
+          return second.minAge - first.minAge;
+        }
 
-          if (
-            !normalizedSearch
-          ) {
-            return true;
+        case "OLDEST": {
+          const rawA = (first as any).updatedAt || (first as any).createdAt;
+          const rawB = (second as any).updatedAt || (second as any).createdAt;
+          const tA = rawA ? new Date(rawA).getTime() : 0;
+          const tB = rawB ? new Date(rawB).getTime() : 0;
+          const timeA = isNaN(tA) ? 0 : tA;
+          const timeB = isNaN(tB) ? 0 : tB;
+
+          if (timeA !== timeB) {
+            return timeA - timeB;
           }
+          return first.minAge - second.minAge;
+        }
 
-          return matchesSearch(
-            item,
-            normalizedSearch,
-          );
-        },
-      );
-    }, [
-      allSearchItems,
-      items,
-      normalizedSearch,
-      statusFilter,
-    ]);
+        default:
+          return 0;
+      }
+    });
+  }, [filteredItems, sortMode]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedItems.length / size));
+  const safePage = Math.min(page, totalPages - 1);
+  const displayedItems = useMemo(() => {
+    const start = safePage * size;
+    return sortedItems.slice(start, start + size);
+  }, [sortedItems, safePage, size]);
 
   const busy =
     isCreating ||
@@ -622,8 +591,7 @@ export default function AgeGroupManager() {
             <AgeGroupsTabs
               value={statusFilter}
               allCount={
-                allSearchItems.length ||
-                (data?.totalElements ?? items.length)
+                data?.totalElements ?? items.length
               }
               activeCount={activeCount}
               inactiveCount={inactiveCount}
@@ -959,20 +927,52 @@ export default function AgeGroupManager() {
       </div>
 
       {/* NOTICE */}
-      {notice && (
-        <div
-          className={`rounded-2xl border px-4 py-3 text-lg ${
-            notice.type ===
-            "success"
-              ? "border-primary-100 bg-primary-50 text-primary-700"
-              : "border-red-100 bg-red-50 text-red-600"
-          }`}
-        >
-          {
-            notice.text
-          }
-        </div>
-      )}
+      {notice && (() => {
+        const duplicateCodeMatch =
+          notice.type === "error"
+            ? notice.text.match(/already exists:\s*([A-Za-z0-9_-]+)/i)
+            : null;
+        const duplicateCode = duplicateCodeMatch?.[1];
+        const duplicateInactiveItem = duplicateCode
+          ? items.find(
+              (it) =>
+                it.code.toUpperCase() === duplicateCode.toUpperCase() && !it.isActive,
+            )
+          : null;
+
+        return (
+          <div
+            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border px-5 py-3.5 text-lg ${
+              notice.type === "success"
+                ? "border-primary-100 bg-primary-50 text-primary-700"
+                : "border-red-100 bg-red-50 text-red-600"
+            }`}
+          >
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium">{notice.text}</span>
+              {duplicateInactiveItem && (
+                <span className="text-gray-600 text-base">
+                  (ទិន្នន័យនេះមានស្រាប់ក្នុងបញ្ជី <b>«អសកម្ម»</b>)
+                </span>
+              )}
+            </div>
+
+            {duplicateInactiveItem && (
+              <button
+                type="button"
+                onClick={async () => {
+                  await handleRestore(duplicateInactiveItem);
+                  setStatusFilter("ALL");
+                }}
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary-800 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-primary-900 active:scale-95 transition cursor-pointer"
+              >
+                <RotateCcw size={16} />
+                <span>ស្ដារឡើងវិញឥឡូវនេះ (Restore)</span>
+              </button>
+            )}
+          </div>
+        );
+      })()}
 
       {/* TABLE */}
       <section className="overflow-hidden rounded-[24px] border border-gray-100 bg-white shadow-sm">
@@ -1066,20 +1066,16 @@ export default function AgeGroupManager() {
         )}
 
         {!isLoading &&
-          !error &&
-          !normalizedSearch && (
+          !error && (
             <AgeGroupsPagination
               page={
-                data?.pageNumber ??
-                page
+                safePage
               }
               totalPages={
-                data?.totalPages ??
-                1
+                totalPages
               }
               totalElements={
-                data?.totalElements ??
-                0
+                sortedItems.length
               }
               disabled={
                 isFetching

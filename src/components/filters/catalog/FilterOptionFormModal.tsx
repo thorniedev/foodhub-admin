@@ -13,6 +13,7 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
+import { z } from "zod";
 
 import { createCodeFromLabel } from "@/src/lib/filterCatalogStorage";
 
@@ -39,6 +40,29 @@ const EMPTY_FORM: FilterCatalogOptionFormValues = {
   active: true,
 };
 
+const createFilterOptionSchema = (isMealType: boolean) =>
+  z.object({
+    localName: z.string().trim().min(1, "សូមបំពេញឈ្មោះស្លាកត្រង។"),
+    code: z.string().optional(),
+    numericValue: z
+      .string()
+      .refine((val) => !val.trim() || Number.isFinite(Number(val)), {
+        message: "តម្លៃលេខមិនត្រឹមត្រូវ។",
+      }),
+    startTime: isMealType
+      ? z
+          .string()
+          .trim()
+          .min(1, "សូមបញ្ចូលម៉ោងចាប់ផ្តើម។ (Start time is required)")
+      : z.string().optional(),
+    endTime: isMealType
+      ? z
+          .string()
+          .trim()
+          .min(1, "សូមបញ្ចូលម៉ោងបញ្ចប់។ (End time is required)")
+      : z.string().optional(),
+  });
+
 export default function FilterOptionFormModal({
   open,
   group,
@@ -63,12 +87,18 @@ export default function FilterOptionFormModal({
       EMPTY_FORM,
     );
 
-  const [isCodeCustom, setIsCodeCustom] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const [
-    validationError,
-    setValidationError,
-  ] = useState("");
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
 
   /* =======================================================
      LOAD FORM VALUES
@@ -105,13 +135,12 @@ export default function FilterOptionFormModal({
         active:
           item.active,
       });
-      setIsCodeCustom(true);
     } else {
       setForm(EMPTY_FORM);
-      setIsCodeCustom(false);
     }
 
-    setValidationError("");
+    setFieldErrors({});
+    setServerError(null);
   }, [open, item]);
 
   /* =======================================================
@@ -139,6 +168,9 @@ export default function FilterOptionFormModal({
     return null;
   }
 
+  const isMealType = group.source === "MEAL_TYPE_API";
+  const hasValueFields = ["PREPARATION_TIME", "DISTANCE", "SPICE_LEVEL"].includes(group.code);
+
   /* =======================================================
      SUBMIT + VALIDATION
   ======================================================= */
@@ -149,60 +181,33 @@ export default function FilterOptionFormModal({
         FormEvent<HTMLFormElement>,
     ) => {
       event.preventDefault();
+      setServerError(null);
 
       const label = form.localName.trim() || form.name.trim();
+      const schema = createFilterOptionSchema(isMealType);
+      const result = schema.safeParse({
+        localName: label,
+        code: form.code,
+        numericValue: form.numericValue,
+        startTime: form.startTime,
+        endTime: form.endTime,
+      });
 
-      if (!label) {
-        setValidationError(
-          "សូមបំពេញឈ្មោះស្លាកត្រង។",
-        );
-
+      if (!result.success) {
+        const errMap: Record<string, string> = {};
+        for (const issue of result.error.issues) {
+          const field = String(issue.path[0]);
+          if (!errMap[field]) {
+            errMap[field] = issue.message;
+          }
+        }
+        setFieldErrors(errMap);
         return;
       }
+
+      setFieldErrors({});
 
       const code = form.code?.trim().toUpperCase() || createCodeFromLabel(label);
-
-      if (
-        form.numericValue.trim() &&
-        !Number.isFinite(
-          Number(
-            form.numericValue,
-          ),
-        )
-      ) {
-        setValidationError(
-          "តម្លៃលេខមិនត្រឹមត្រូវ។",
-        );
-
-        return;
-      }
-
-      if (
-        group.source ===
-        "MEAL_TYPE_API"
-      ) {
-        if (
-          !form.startTime?.trim()
-        ) {
-          setValidationError(
-            "សូមបញ្ចូលម៉ោងចាប់ផ្តើម។ (Start time is required)",
-          );
-
-          return;
-        }
-
-        if (
-          !form.endTime?.trim()
-        ) {
-          setValidationError(
-            "សូមបញ្ចូលម៉ោងបញ្ចប់។ (End time is required)",
-          );
-
-          return;
-        }
-      }
-
-      setValidationError("");
 
       try {
         await onSubmit({
@@ -216,20 +221,17 @@ export default function FilterOptionFormModal({
           err?.data?.message ||
           err?.message ||
           (typeof err === "string" ? err : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។");
-        setValidationError(errorMsg);
+        setServerError(errorMsg);
       }
     };
-
-  const isMealType = group.source === "MEAL_TYPE_API";
-  const hasValueFields = ["PREPARATION_TIME", "DISTANCE", "SPICE_LEVEL"].includes(group.code);
 
   const handleNameChange = (val: string) => {
     setForm((prev) => ({
       ...prev,
       name: val,
       localName: val,
-      code: !isCodeCustom && !item ? createCodeFromLabel(val) : prev.code,
     }));
+    clearFieldError("localName");
   };
 
   return (
@@ -371,19 +373,21 @@ export default function FilterOptionFormModal({
               onChange={handleNameChange}
               placeholder={`ឧ. បញ្ចូលឈ្មោះ ${group.labelKm}`}
               required
+              error={fieldErrors.localName}
             />
 
             <Field
               label="កូដ (Code)"
               value={form.code || ""}
               onChange={(value) => {
-                setIsCodeCustom(true);
                 setForm((prev) => ({
                   ...prev,
                   code: value.toUpperCase(),
                 }));
+                clearFieldError("code");
               }}
               placeholder="ឧ. CODE_NAME"
+              error={fieldErrors.code}
             />
           </div>
 
@@ -394,13 +398,15 @@ export default function FilterOptionFormModal({
                 label="តម្លៃលេខ (Value)"
                 type="number"
                 value={form.numericValue}
-                onChange={(value) =>
+                onChange={(value) => {
                   setForm((prev) => ({
                     ...prev,
                     numericValue: value,
-                  }))
-                }
+                  }));
+                  clearFieldError("numericValue");
+                }}
                 placeholder="ឧ. 10"
+                error={fieldErrors.numericValue}
               />
 
               <Field
@@ -562,35 +568,21 @@ export default function FilterOptionFormModal({
 
           {/* Meal start/end time */}
           {isMealType && (
-            <div
-              className="
-                grid
-                gap-4
-                sm:grid-cols-2
-              "
-            >
+            <div className="grid gap-4 sm:grid-cols-2">
               <Field
                 label="ម៉ោងចាប់ផ្តើម"
                 type="time"
                 step="1"
                 required
-                value={
-                  form.startTime ||
-                  ""
-                }
-                onChange={(
-                  value,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      startTime:
-                        value,
-                    }),
-                  )
-                }
+                value={form.startTime || ""}
+                onChange={(value) => {
+                  setForm((previous) => ({
+                    ...previous,
+                    startTime: value,
+                  }));
+                  clearFieldError("startTime");
+                }}
+                error={fieldErrors.startTime}
               />
 
               <Field
@@ -598,23 +590,15 @@ export default function FilterOptionFormModal({
                 type="time"
                 step="1"
                 required
-                value={
-                  form.endTime ||
-                  ""
-                }
-                onChange={(
-                  value,
-                ) =>
-                  setForm(
-                    (
-                      previous,
-                    ) => ({
-                      ...previous,
-                      endTime:
-                        value,
-                    }),
-                  )
-                }
+                value={form.endTime || ""}
+                onChange={(value) => {
+                  setForm((previous) => ({
+                    ...previous,
+                    endTime: value,
+                  }));
+                  clearFieldError("endTime");
+                }}
+                error={fieldErrors.endTime}
               />
             </div>
           )}
@@ -709,8 +693,8 @@ export default function FilterOptionFormModal({
             </button>
           </div>
 
-          {/* Validation error */}
-          {validationError && (
+          {/* Server error (e.g. network/backend failure) */}
+          {serverError && (
             <div
               className="
                 flex
@@ -736,7 +720,7 @@ export default function FilterOptionFormModal({
               />
 
               <span>
-                {validationError}
+                {serverError}
               </span>
             </div>
           )}
@@ -842,6 +826,7 @@ function Field({
   placeholder,
   required,
   step,
+  error,
 }: {
   label: string;
   value: string;
@@ -852,6 +837,7 @@ function Field({
   placeholder?: string;
   required?: boolean;
   step?: string;
+  error?: string;
 }) {
   return (
     <label className="block">
@@ -876,26 +862,31 @@ function Field({
               .value,
           )
         }
-        className="
+        className={`
           h-[50px]
           w-full
           rounded-xl
           border
-          border-gray-200
-          bg-gray-50
           px-4
           text-lg
           text-gray-800
           outline-none
           transition
           placeholder:text-gray-400
-          hover:border-gray-300
-          focus:border-primary-600
           focus:bg-white
           focus:ring-4
-          focus:ring-primary-100
-        "
+          ${
+            error
+              ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-100"
+              : "border-gray-200 bg-gray-50 hover:border-gray-300 focus:border-primary-600 focus:ring-primary-100"
+          }
+        `}
       />
+      {error && (
+        <p className="mt-1 text-sm font-normal text-red-500">
+          {error}
+        </p>
+      )}
     </label>
   );
 }

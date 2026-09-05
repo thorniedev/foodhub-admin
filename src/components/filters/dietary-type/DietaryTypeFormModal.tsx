@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-
 import { AlertTriangle, ChevronDown, Loader2, Salad, X } from "lucide-react";
+import { z } from "zod";
 
 import type {
   DietaryType,
@@ -10,6 +10,12 @@ import type {
 } from "@/src/types/dietaryType";
 
 import { DIETARY_TYPE_CATEGORIES } from "@/src/types/dietaryType";
+
+const dietaryTypeSchema = z.object({
+  code: z.string().trim().min(1, "សូមបញ្ចូលកូដរបបអាហារ។"),
+  name: z.string().trim().min(1, "សូមបញ្ចូលឈ្មោះរបបអាហារ។"),
+  category: z.string().trim().min(1, "សូមជ្រើសរើសប្រភេទរបបអាហារ។"),
+});
 
 const initialValues: DietaryTypeFormValues = {
   code: "",
@@ -35,8 +41,18 @@ export default function DietaryTypeFormModal({
   onSubmit,
 }: DietaryTypeFormModalProps) {
   const [values, setValues] = useState<DietaryTypeFormValues>(initialValues);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const [localError, setLocalError] = useState<string | null>(null);
+  const clearFieldError = (key: string) => {
+    if (fieldErrors[key]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  };
 
   /* =========================================================
      RESET FORM WHEN MODAL OPENS
@@ -57,7 +73,8 @@ export default function DietaryTypeFormModal({
         : initialValues,
     );
 
-    setLocalError(null);
+    setFieldErrors({});
+    setServerError(null);
   }, [open, item]);
 
   /* =========================================================
@@ -84,28 +101,31 @@ export default function DietaryTypeFormModal({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLocalError(null);
+    setServerError(null);
+
+    const result = dietaryTypeSchema.safeParse({
+      code: values.code,
+      name: values.name,
+      category: values.category,
+    });
+
+    if (!result.success) {
+      const errs: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const key = String(issue.path[0]);
+        if (!errs[key]) {
+          errs[key] = issue.message;
+        }
+      }
+      setFieldErrors(errs);
+      return;
+    }
+
+    setFieldErrors({});
 
     const code = values.code.trim();
-
     const name = values.name.trim();
-
     const category = values.category.trim();
-
-    if (!code) {
-      setLocalError("សូមបញ្ចូលកូដរបបអាហារ។");
-      return;
-    }
-
-    if (!name) {
-      setLocalError("សូមបញ្ចូលឈ្មោះរបបអាហារ។");
-      return;
-    }
-
-    if (!category) {
-      setLocalError("សូមជ្រើសរើសប្រភេទរបបអាហារ។");
-      return;
-    }
 
     try {
       await onSubmit({
@@ -120,7 +140,7 @@ export default function DietaryTypeFormModal({
         err?.data?.message ||
         err?.message ||
         (typeof err === "string" ? err : "មិនអាចរក្សាទុកទិន្នន័យបានទេ។");
-      setLocalError(errorMsg);
+      setServerError(errorMsg);
     }
   };
 
@@ -170,27 +190,31 @@ export default function DietaryTypeFormModal({
             <Field
               label="កូដ"
               value={values.code}
-              onChange={(value) =>
+              onChange={(value) => {
                 setValues((previous) => ({
                   ...previous,
                   code: value,
-                }))
-              }
+                }));
+                clearFieldError("code");
+              }}
               placeholder="VEGAN"
               required
+              error={fieldErrors.code}
             />
 
             <Field
               label="ឈ្មោះ"
               value={values.name}
-              onChange={(value) =>
+              onChange={(value) => {
                 setValues((previous) => ({
                   ...previous,
                   name: value,
-                }))
-              }
+                }));
+                clearFieldError("name");
+              }}
               placeholder="Vegan"
               required
+              error={fieldErrors.name}
             />
           </div>
 
@@ -204,13 +228,18 @@ export default function DietaryTypeFormModal({
               <div className="relative">
                 <select
                   value={values.category}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     setValues((previous) => ({
                       ...previous,
                       category: event.target.value,
-                    }))
-                  }
-                  className="h-[52px] w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 pr-12 text-lg text-gray-800 outline-none transition hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+                    }));
+                    clearFieldError("category");
+                  }}
+                  className={`h-[52px] w-full appearance-none rounded-xl border px-4 pr-12 text-lg text-gray-800 outline-none transition focus:bg-white focus:ring-4 ${
+                    fieldErrors.category
+                      ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-100"
+                      : "border-gray-200 bg-gray-50 hover:border-gray-300 focus:border-primary-600 focus:ring-primary-100"
+                  }`}
                 >
                   {DIETARY_TYPE_CATEGORIES.map((category) => (
                     <option key={category} value={category}>
@@ -224,6 +253,11 @@ export default function DietaryTypeFormModal({
                   className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
                 />
               </div>
+              {fieldErrors.category && (
+                <p className="mt-1 text-sm font-normal text-red-500">
+                  {fieldErrors.category}
+                </p>
+              )}
             </label>
           </div>
 
@@ -281,12 +315,12 @@ export default function DietaryTypeFormModal({
             </button>
           </div>
 
-          {/* Validation error */}
-          {localError && (
+          {/* Server error */}
+          {serverError && (
             <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-lg leading-7 text-red-600">
               <AlertTriangle size={21} className="mt-0.5 shrink-0" />
 
-              <span>{localError}</span>
+              <span>{serverError}</span>
             </div>
           )}
 
@@ -336,6 +370,7 @@ function Field({
   type = "text",
   placeholder,
   required,
+  error,
 }: {
   label: string;
   value: string;
@@ -343,6 +378,7 @@ function Field({
   type?: string;
   placeholder?: string;
   required?: boolean;
+  error?: string;
 }) {
   return (
     <label className="block">
@@ -357,8 +393,15 @@ function Field({
         required={required}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
-        className="h-[52px] w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-600 focus:bg-white focus:ring-4 focus:ring-primary-100"
+        className={`h-[52px] w-full rounded-xl border px-4 text-lg text-gray-800 outline-none transition placeholder:text-gray-400 focus:bg-white focus:ring-4 ${
+          error
+            ? "border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-100"
+            : "border-gray-200 bg-gray-50 hover:border-gray-300 focus:border-primary-600 focus:ring-primary-100"
+        }`}
       />
+      {error && (
+        <p className="mt-1 text-sm font-normal text-red-500">{error}</p>
+      )}
     </label>
   );
 }

@@ -69,6 +69,8 @@ function isValidUuid(value: string | null | undefined): value is string {
   return uuidRegex.test(cleanValue);
 }
 
+const EMPTY_LIST: any[] = [];
+
 /* =========================================================
    SHOP DETAIL MANAGER
 ========================================================= */
@@ -163,14 +165,14 @@ export default function ShopDetailManager({
   const isMenuModalOpen = createMenuOpen || !!editingMenuItemRecord;
 
   const foodsQuery = useGetManagedFoodsQuery(
-    { page: 0, size: 100 },
+    { page: 0, size: 2000 },
     { skip: !isMenuModalOpen },
   );
   const storesQuery = useGetManagedStoresQuery(undefined, {
     skip: !isMenuModalOpen,
   });
   const publishedMenuItemsQuery = useGetPublishedMenuItemsQuery(
-    { storeUuid: resolvedStoreUuid, size: 100 },
+    { storeUuid: resolvedStoreUuid, size: 2000 },
     { skip: !resolvedStoreUuid, refetchOnMountOrArgChange: true },
   );
   const ingredientsQuery = useGetManagedIngredientsQuery(undefined, {
@@ -668,18 +670,18 @@ export default function ShopDetailManager({
       <PublishMenuItemModal
         open={isMenuModalOpen}
         item={editingMenuItemRecord}
-        foods={foodsQuery.data?.content ?? EMPTY_ARRAY}
-        stores={storesQuery.data ?? EMPTY_ARRAY}
-        ingredients={ingredientsQuery.data ?? EMPTY_ARRAY}
+        foods={foodsQuery.data?.content ?? EMPTY_LIST}
+        stores={storesQuery.data ?? EMPTY_LIST}
+        ingredients={ingredientsQuery.data ?? EMPTY_LIST}
         dietaryTypes={
           dietaryTypesQuery.data?.contents ??
           (dietaryTypesQuery.data as any)?.content ??
-          (Array.isArray(dietaryTypesQuery.data) ? dietaryTypesQuery.data : EMPTY_ARRAY)
+          (Array.isArray(dietaryTypesQuery.data) ? dietaryTypesQuery.data : EMPTY_LIST)
         }
         medicalConditions={
           medicalConditionsQuery.data?.contents ??
           (medicalConditionsQuery.data as any)?.content ??
-          (Array.isArray(medicalConditionsQuery.data) ? medicalConditionsQuery.data : EMPTY_ARRAY)
+          (Array.isArray(medicalConditionsQuery.data) ? medicalConditionsQuery.data : EMPTY_LIST)
         }
         defaultStoreUuid={resolvedStoreUuid}
         saving={false}

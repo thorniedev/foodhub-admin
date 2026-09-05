@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { z } from "zod";
 
 import ThumbnailImagePicker from "./ThumbnailImagePicker";
 import { extractKhmerOnlyName } from "@/src/lib/catalogCategoryHelper";
@@ -262,7 +263,7 @@ function extractAllMenuItemImages(item: MenuItemRecord): {
   return { thumbnail, gallery };
 }
 
-const EMPTY_ARRAY: any[] = [];
+const EMPTY_LIST: any[] = [];
 
 export default function PublishMenuItemModal({
   open,
@@ -270,13 +271,13 @@ export default function PublishMenuItemModal({
   foods,
   stores,
   ingredients,
-  dietaryTypes = EMPTY_ARRAY,
-  mealTypes = EMPTY_ARRAY,
-  ageGroups = EMPTY_ARRAY,
-  seasons = EMPTY_ARRAY,
-  weatherConditions = EMPTY_ARRAY,
-  events = EMPTY_ARRAY,
-  medicalConditions = EMPTY_ARRAY,
+  dietaryTypes = EMPTY_LIST,
+  mealTypes = EMPTY_LIST,
+  ageGroups = EMPTY_LIST,
+  seasons = EMPTY_LIST,
+  weatherConditions = EMPTY_LIST,
+  events = EMPTY_LIST,
+  medicalConditions = EMPTY_LIST,
   saving,
   fixedStoreUuid,
   defaultStoreUuid,
@@ -418,29 +419,51 @@ export default function PublishMenuItemModal({
   );
 
 
+  const prevOpenRef = useRef(false);
+  const lastInitializedItemKeyRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (!open || !item || !activeItem) {
-      setValues({
-        ...EMPTY,
-        storeUuid: storeFixedId || "",
-      });
-      setIngredientRows([]);
-      setDietaryTypeRows([]);
-      setMedicalConditionRows([]);
-      setSeasonRows([]);
-      setEventRows([]);
-      setWeatherRows([]);
-      setMealTypeSuitabilityRows([]);
-      setAgeRuleRows([]);
-      setDietaryTagRows([]);
-      setThumbnailFile(null);
-      setExistingThumbnail(null);
-      setGalleryFiles([]);
-      setExistingGallery([]);
-      setError(null);
-      setFieldErrors({});
+    if (!open) {
+      prevOpenRef.current = false;
+      lastInitializedItemKeyRef.current = null;
       return;
     }
+
+    const justOpened = !prevOpenRef.current;
+    prevOpenRef.current = true;
+
+    if (!item) {
+      if (justOpened) {
+        setValues({
+          ...EMPTY,
+          storeUuid: storeFixedId || "",
+        });
+        setIngredientRows([]);
+        setDietaryTypeRows([]);
+        setMedicalConditionRows([]);
+        setSeasonRows([]);
+        setEventRows([]);
+        setWeatherRows([]);
+        setMealTypeSuitabilityRows([]);
+        setAgeRuleRows([]);
+        setDietaryTagRows([]);
+        setThumbnailFile(null);
+        setExistingThumbnail(null);
+        setGalleryFiles([]);
+        setExistingGallery([]);
+        setError(null);
+        setFieldErrors({});
+      }
+      return;
+    }
+
+    if (!activeItem) return;
+
+    const itemKey = `${activeItem.uuid || (activeItem as any).id || ""}-${Boolean(detailedItem)}-${Boolean(managedItem)}`;
+    if (!justOpened && lastInitializedItemKeyRef.current === itemKey) {
+      return;
+    }
+    lastInitializedItemKeyRef.current = itemKey;
 
     const { thumbnail, gallery } = extractAllMenuItemImages(activeItem);
     setExistingThumbnail(thumbnail);
@@ -557,7 +580,7 @@ export default function PublishMenuItemModal({
     setIngredientRows(
       (activeItem.ingredients ?? []).map((raw: any) => {
         if (typeof raw === "string") {
-          const found = ingredients.find(
+          const found = safeIngredients.find(
             (i) => i.name === raw || i.code === raw || i.uuid === raw,
           );
           return {
@@ -568,7 +591,7 @@ export default function PublishMenuItemModal({
             notes: "",
           };
         }
-        const found = ingredients.find(
+        const found = safeIngredients.find(
           (i) =>
             i.uuid === raw.ingredientUuid ||
             i.uuid === raw.uuid ||
@@ -808,7 +831,14 @@ export default function PublishMenuItemModal({
   );
 
   const activeIngredients = useMemo(
-    () => safeIngredients.filter((ingredient) => ingredient.isActive !== false),
+    () =>
+      safeIngredients.filter((ingredient) => {
+        const active = ingredient.isActive ?? (ingredient as any).active;
+        if (active !== undefined) return Boolean(active);
+        const status = (ingredient as any).status;
+        if (status) return status === "ACTIVE";
+        return true;
+      }),
     [safeIngredients],
   );
 
@@ -849,11 +879,16 @@ export default function PublishMenuItemModal({
 
   const ingredientOptions: SearchableOption[] = useMemo(
     () =>
-      activeIngredients.map((i) => ({
-        value: i.uuid,
-        label: i.name,
-        sublabel: i.code,
-      })),
+      activeIngredients.map((i) => {
+        const val = String(i.uuid || (i as any).id || "");
+        const label = String(i.name || (i as any).localName || i.code || "គ្រឿងផ្សំ");
+        const code = i.code ? String(i.code) : undefined;
+        return {
+          value: val,
+          label,
+          sublabel: code && code !== label ? code : undefined,
+        };
+      }),
     [activeIngredients],
   );
 
@@ -1178,6 +1213,20 @@ export default function PublishMenuItemModal({
     );
   };
 
+const publishMenuItemSchema = z.object({
+  storeUuid: z.string().trim().min(1, "សូមជ្រើសរើសហាង"),
+  foodUuid: z.string().trim().min(1, "សូមរើសមុខម៉ឺនុយ"),
+  name: z.string().trim().min(1, "សូមបញ្ចូលឈ្មោះ ម៉ឺនុយ"),
+  price: z
+    .string()
+    .trim()
+    .min(1, "សូមបញ្ចូលតម្លៃ")
+    .refine((val) => {
+      const p = Number(val);
+      return Number.isFinite(p) && p > 0;
+    }, "តម្លៃត្រូវតែធំជាង ០"),
+});
+
   const validateBasics = (): FieldErrors => {
     const nextErrors: FieldErrors = {};
     const targetStoreUuid = (
@@ -1188,19 +1237,22 @@ export default function PublishMenuItemModal({
       ""
     ).trim();
 
-    if (!item && !targetStoreUuid) {
-      nextErrors.storeUuid = "សូមជ្រើសរើសហាង";
+    const result = publishMenuItemSchema.safeParse({
+      storeUuid: item ? "already-set" : targetStoreUuid,
+      foodUuid: values.foodUuid,
+      name: values.name,
+      price: values.price,
+    });
+
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        const key = issue.path[0] as keyof FieldErrors;
+        if (key && !nextErrors[key]) {
+          nextErrors[key] = issue.message;
+        }
+      });
     }
-    if (!values.foodUuid) {
-      nextErrors.foodUuid = "សូមរើសមុខម៉ឺនុយ";
-    }
-    if (!values.name.trim()) {
-      nextErrors.name = "សូមបញ្ចូលឈ្មោះ ម៉ឺនុយ";
-    }
-    const price = Number(values.price);
-    if (!values.price.trim() || !Number.isFinite(price) || price <= 0) {
-      nextErrors.price = "តម្លៃត្រូវតែធំជាង ០";
-    }
+
     if (!item && !thumbnailFile && !existingThumbnail) {
       nextErrors.thumbnail = "សូមបង្ហោះរូបភាព Thumbnail ចាំបាច់";
     }
@@ -1214,7 +1266,6 @@ export default function PublishMenuItemModal({
       const nextFieldErrors = validateBasics();
       if (Object.keys(nextFieldErrors).length > 0) {
         setFieldErrors(nextFieldErrors);
-        setError("សូមពិនិត្យ និងបំពេញព័ត៌មានចាំបាច់ដែលបានសម្គាល់ខាងក្រោម។");
         bodyRef.current?.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
@@ -2388,6 +2439,7 @@ export default function PublishMenuItemModal({
                 }}
                 existingUrl={existingThumbnail}
                 onExistingChange={(newUrl) => {
+                  setFieldErrors((current) => ({ ...current, thumbnail: undefined }));
                   if (!newUrl && existingGallery.length > 0) {
                     setExistingThumbnail(existingGallery[0]);
                     setExistingGallery((curr) => curr.slice(1));
