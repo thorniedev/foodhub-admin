@@ -25,7 +25,10 @@ const isObject = (v: unknown): v is UnknownRecord =>
 const unwrapData = (v: unknown): unknown =>
   isObject(v) && "data" in v && v.data !== undefined && v.data !== null
     ? v.data
-    : isObject(v) && "payload" in v && v.payload !== undefined && v.payload !== null
+    : isObject(v) &&
+        "payload" in v &&
+        v.payload !== undefined &&
+        v.payload !== null
       ? v.payload
       : v;
 
@@ -58,9 +61,11 @@ function extractReviewStatus(r: Record<string, any>): StoreReviewStatus {
   for (const raw of candidates) {
     const u = parseEnumString(raw);
     if (u) {
-      if (u === "APPROVED" || u === "APPROVE" || u === "VERIFIED") return "APPROVED";
+      if (u === "APPROVED" || u === "APPROVE" || u === "VERIFIED")
+        return "APPROVED";
       if (u === "REJECTED" || u === "REJECT") return "REJECTED";
-      if (u === "PENDING" || u === "IN_REVIEW" || u === "WAITING") return "PENDING";
+      if (u === "PENDING" || u === "IN_REVIEW" || u === "WAITING")
+        return "PENDING";
       return u;
     }
   }
@@ -96,7 +101,8 @@ function extractAccountStatus(r: Record<string, any>): StoreAccountStatus {
     if (u) {
       if (u === "ACTIVE" || u === "ACTIVATED") return "ACTIVE";
       if (u === "SUSPENDED" || u === "SUSPEND") return "SUSPENDED";
-      if (u === "ARCHIVED" || u === "ARCHIVE" || u === "INACTIVE") return "ARCHIVED";
+      if (u === "ARCHIVED" || u === "ARCHIVE" || u === "INACTIVE")
+        return "ARCHIVED";
       return u;
     }
   }
@@ -127,8 +133,10 @@ function extractOperatingStatus(r: Record<string, any>): StoreOperatingStatus {
   for (const raw of candidates) {
     const u = parseEnumString(raw);
     if (u) {
-      if (u === "PERMANENTLY_CLOSED" || u.includes("PERMANENT")) return "PERMANENTLY_CLOSED";
-      if (u === "TEMPORARILY_CLOSED" || u.includes("TEMP")) return "TEMPORARILY_CLOSED";
+      if (u === "PERMANENTLY_CLOSED" || u.includes("PERMANENT"))
+        return "PERMANENTLY_CLOSED";
+      if (u === "TEMPORARILY_CLOSED" || u.includes("TEMP"))
+        return "TEMPORARILY_CLOSED";
       if (u === "CLOSED") return "CLOSED";
       if (u === "OPEN") return "OPEN";
       return u;
@@ -141,7 +149,11 @@ function extractOperatingStatus(r: Record<string, any>): StoreOperatingStatus {
   if (statusStr === "CLOSED") return "CLOSED";
   if (statusStr === "OPEN") return "OPEN";
 
-  if (typeof r.isOpenNow === "boolean" || typeof r.is_open_now === "boolean" || typeof r.isOpen === "boolean") {
+  if (
+    typeof r.isOpenNow === "boolean" ||
+    typeof r.is_open_now === "boolean" ||
+    typeof r.isOpen === "boolean"
+  ) {
     return "OPEN";
   }
 
@@ -168,8 +180,10 @@ export function normalizeStore(raw: unknown): Store {
     longitude: Number(r.longitude ?? 0),
     phoneNumber: r.phoneNumber ?? r.phone_number ?? r.phone ?? null,
     email: r.email ?? null,
-    logoMediaUuid: r.logoMediaUuid ?? r.logo_media_uuid ?? r.logoMedia ?? r.logo ?? null,
-    coverMediaUuid: r.coverMediaUuid ?? r.cover_media_uuid ?? r.coverMedia ?? r.cover ?? null,
+    logoMediaUuid:
+      r.logoMediaUuid ?? r.logo_media_uuid ?? r.logoMedia ?? r.logo ?? null,
+    coverMediaUuid:
+      r.coverMediaUuid ?? r.cover_media_uuid ?? r.coverMedia ?? r.cover ?? null,
     logoUrl: r.logoUrl ?? r.logo_url ?? null,
     coverImageUrl: r.coverImageUrl ?? r.cover_image_url ?? r.coverUrl ?? null,
     priceLevel: r.priceLevel ?? r.price_level ?? null,
@@ -264,8 +278,18 @@ function normalizeStorePage(response: unknown): StorePage {
         : contents.length
           ? 1
           : 0,
-    first: typeof raw.isFirst === "boolean" ? raw.isFirst : typeof raw.first === "boolean" ? raw.first : true,
-    last: typeof raw.isLast === "boolean" ? raw.isLast : typeof raw.last === "boolean" ? raw.last : true,
+    first:
+      typeof raw.isFirst === "boolean"
+        ? raw.isFirst
+        : typeof raw.first === "boolean"
+          ? raw.first
+          : true,
+    last:
+      typeof raw.isLast === "boolean"
+        ? raw.isLast
+        : typeof raw.last === "boolean"
+          ? raw.last
+          : true,
   };
 }
 const normalizeOne = <T>(response: unknown): T => {
@@ -314,13 +338,20 @@ export const shopApi = adminBaseApi.injectEndpoints({
           },
         };
       },
-      transformResponse: (response: unknown, _meta, arg: GetAdminStoresParams | void) => {
+      transformResponse: (
+        response: unknown,
+        _meta,
+        arg: GetAdminStoresParams | void,
+      ) => {
         const page = normalizeStorePage(response);
         const p = (arg ?? {}) as GetAdminStoresParams;
         const requestedReview =
-          p.reviewStatus && p.reviewStatus !== "ALL" ? p.reviewStatus : undefined;
+          p.reviewStatus && p.reviewStatus !== "ALL"
+            ? p.reviewStatus
+            : undefined;
         const requestedAccount =
-          p.accountStatus || (requestedReview === "APPROVED" ? "ACTIVE" : undefined);
+          p.accountStatus ||
+          (requestedReview === "APPROVED" ? "ACTIVE" : undefined);
         const requestedOperating = p.operatingStatus;
 
         page.contents = page.contents.map((store) => ({
@@ -336,7 +367,12 @@ export const shopApi = adminBaseApi.injectEndpoints({
           operatingStatus:
             store.operatingStatus && store.operatingStatus !== "UNKNOWN"
               ? store.operatingStatus
-              : requestedOperating || (store.isOpenNow !== null ? (store.isOpenNow ? "OPEN" : "CLOSED") : "OPEN"),
+              : requestedOperating ||
+                (store.isOpenNow !== null
+                  ? store.isOpenNow
+                    ? "OPEN"
+                    : "CLOSED"
+                  : "OPEN"),
         }));
 
         return page;
@@ -346,7 +382,11 @@ export const shopApi = adminBaseApi.injectEndpoints({
     }),
     getAllShops: builder.query<
       Store[],
-      { reviewStatus?: StoreReviewStatus | "ALL"; accountStatus?: StoreAccountStatus; query?: string } | void
+      {
+        reviewStatus?: StoreReviewStatus | "ALL";
+        accountStatus?: StoreAccountStatus;
+        query?: string;
+      } | void
     >({
       queryFn: async (arg, _api, _extraOptions, baseQuery) => {
         try {
@@ -357,9 +397,12 @@ export const shopApi = adminBaseApi.injectEndpoints({
             query?: string;
           };
           const requestedReview =
-            p.reviewStatus && p.reviewStatus !== "ALL" ? p.reviewStatus : undefined;
+            p.reviewStatus && p.reviewStatus !== "ALL"
+              ? p.reviewStatus
+              : undefined;
           const requestedAccount =
-            p.accountStatus || (requestedReview === "APPROVED" ? "ACTIVE" : undefined);
+            p.accountStatus ||
+            (requestedReview === "APPROVED" ? "ACTIVE" : undefined);
           const requestedQuery = p.query?.trim() || undefined;
 
           const firstRes = await baseQuery({
@@ -544,12 +587,36 @@ export const shopApi = adminBaseApi.injectEndpoints({
       }),
       transformResponse: normalizeObjects,
     }),
+    // getGooglePlacePreview: builder.query<GooglePlacePreview, string>({
+    //   query: (placeId) => ({
+    //     url: `/google-places/${encodeURIComponent(placeId)}/preview`,
+    //     method: "GET",
+    //   }),
+    //   transformResponse: (r) => normalizeOne<GooglePlacePreview>(r),
+    // }),
     getGooglePlacePreview: builder.query<GooglePlacePreview, string>({
       query: (placeId) => ({
         url: `/google-places/${encodeURIComponent(placeId)}/preview`,
         method: "GET",
       }),
-      transformResponse: (r) => normalizeOne<GooglePlacePreview>(r),
+      transformResponse: (response: unknown): GooglePlacePreview => {
+        const unwrapped = unwrapData(response) as Record<string, unknown>;
+        
+        // addressComponents are added at the root level of the response by the Next.js API route.
+        // We need to merge them back into the unwrapped payload so the UI can use them.
+        if (
+          isObject(response) &&
+          "addressComponents" in response &&
+          isObject(unwrapped)
+        ) {
+          return {
+            ...unwrapped,
+            addressComponents: response.addressComponents,
+          } as GooglePlacePreview;
+        }
+        
+        return unwrapped as GooglePlacePreview;
+      },
     }),
     createStoreFromGoogle: builder.mutation<
       Store,
