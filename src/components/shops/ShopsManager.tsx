@@ -24,6 +24,7 @@ import {
   useGetShopsQuery,
   useUpdateShopMutation,
 } from "@/src/app/store/shop/shopApi";
+import { useGetPublishedMenuItemsQuery } from "@/src/app/store/menuManagementApi";
 import type {
   Store as StoreType,
   StoreReviewFilter,
@@ -72,6 +73,13 @@ const OPEN_OPTIONS = [
   { value: "PERMANENTLY_CLOSED", label: "បិទជាអចិន្ត្រៃយ៍" },
 ];
 
+
+const MENU_FILTER_OPTIONS = [
+  { value: "ALL", label: "ស្ថានភាពមុខម្ហូបទាំងអស់" },
+  { value: "HAS_MENU", label: "មានមុខម្ហូប" },
+  { value: "NO_MENU", label: "គ្មានមុខម្ហូប" },
+];
+
 const SORT_OPTIONS: Array<{ value: StoreSort; label: string }> = [
   { value: "NEWEST", label: "ថ្មីបំផុត" },
   { value: "OLDEST", label: "ចាស់បំផុត" },
@@ -114,6 +122,7 @@ export default function ShopsManager() {
   const [filter, setFilter] = useState<StoreReviewFilter>("ALL");
   const [cityFilter, setCityFilter] = useState<string>("ALL");
   const [openFilter, setOpenFilter] = useState<string>("ALL");
+  const [menuFilter, setMenuFilter] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<StoreSort>("NEWEST");
 
   const [isPending, startTransition] = useTransition();
@@ -136,7 +145,7 @@ export default function ShopsManager() {
     return () => clearTimeout(timer);
   }, [notice]);
 
-  const hasActiveFilters = cityFilter !== "ALL" || openFilter !== "ALL";
+  const hasActiveFilters = cityFilter !== "ALL" || openFilter !== "ALL" || menuFilter !== "ALL";
 
   const effectiveQuery = useMemo(() => {
     const parts: string[] = [];
@@ -259,6 +268,21 @@ export default function ShopsManager() {
     { skip: isSearching },
   );
 
+  
+  const menuItemsQuery = useGetPublishedMenuItemsQuery({
+    page: 0,
+    size: 5000,
+  });
+
+  const storesWithMenu = useMemo(() => {
+    const s = new Set<string>();
+    (menuItemsQuery.data?.content || []).forEach(m => {
+       if (m.storeUuid) s.add(m.storeUuid);
+       else if (m.store?.uuid) s.add(m.store.uuid);
+    });
+    return s;
+  }, [menuItemsQuery.data]);
+
   const { data: allData } = useGetShopsQuery(
     {
       page: 0,
@@ -369,20 +393,22 @@ export default function ShopsManager() {
     });
   }, [rawStores, filter, rejectedUuids, pendingUuids, suspendedUuids, archivedUuids]);
 
-  /* Dynamic counts: Uses main query total for active tab and skips duplicate requests */
-  const counts = {
-    all: filter === "ALL" ? (allStoresData?.length ?? 0) : (allData?.totalElements ?? 0),
-    approved: filter === "APPROVED" ? (allStoresData?.length ?? 0) : (approvedData?.totalElements ?? 0),
-    pending: filter === "PENDING" ? (allStoresData?.length ?? 0) : (pendingData?.totalElements ?? 0),
-    rejected: filter === "REJECTED" ? (allStoresData?.length ?? 0) : (rejectedData?.totalElements ?? 0),
-  };
-
+  
   const filteredStores = stores.filter((store) => {
     // City / Province filter (matching province, city, district, commune, and addressLine across Khmer and English)
     if (cityFilter !== "ALL") {
       if (!isStoreInProvinceOrCity(store, cityFilter)) {
         return false;
       }
+    }
+
+    
+    
+    // Menu filter
+    if (menuFilter !== "ALL") {
+      const hasMenu = storesWithMenu.has(store.uuid);
+      if (menuFilter === "HAS_MENU" && !hasMenu) return false;
+      if (menuFilter === "NO_MENU" && hasMenu) return false;
     }
 
     // Open/Close filter
@@ -407,6 +433,15 @@ export default function ShopsManager() {
 
     return true;
   });
+
+  
+  /* Dynamic counts: Uses main query total for active tab and skips duplicate requests */
+  const counts = {
+    all: filter === "ALL" && hasActiveFilters ? filteredStores.length : filter === "ALL" ? (allStoresData?.length ?? 0) : (allData?.totalElements ?? 0),
+    approved: filter === "APPROVED" && hasActiveFilters ? filteredStores.length : filter === "APPROVED" ? (allStoresData?.length ?? 0) : (approvedData?.totalElements ?? 0),
+    pending: filter === "PENDING" && hasActiveFilters ? filteredStores.length : filter === "PENDING" ? (allStoresData?.length ?? 0) : (pendingData?.totalElements ?? 0),
+    rejected: filter === "REJECTED" && hasActiveFilters ? filteredStores.length : filter === "REJECTED" ? (allStoresData?.length ?? 0) : (rejectedData?.totalElements ?? 0),
+  };
 
   const sortedStores = useMemo(() => {
     const list = [...filteredStores];
@@ -494,6 +529,7 @@ export default function ShopsManager() {
   const handleResetFilters = () => {
     setCityFilter("ALL");
     setOpenFilter("ALL");
+    setMenuFilter("ALL");
     setSortBy("NEWEST");
     setPage(0);
   };
@@ -947,6 +983,17 @@ export default function ShopsManager() {
                 </div>
               )}
             </div>
+          </div>
+
+          
+          <div className="w-full sm:w-[180px] lg:w-[210px]">
+            <CustomSelect
+              value={menuFilter}
+              onChange={(val) => { setMenuFilter(val); setPage(0); }}
+              options={MENU_FILTER_OPTIONS}
+              placeholder="ស្ថានភាពមុខម្ហូប"
+              pill
+            />
           </div>
 
           {/* Reset Filters Button */}
