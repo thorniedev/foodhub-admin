@@ -19,6 +19,8 @@ import {
   AdminSessionSummary,
   AdminKpiMetrics,
 } from "@/src/types/adminRecommendation";
+import { useGetAdminUsersQuery } from "@/src/app/store/userProfileApi";
+import type { AdminUser } from "@/src/types/userProfile";
 import {
   fetchAdminSessions,
   calculateKpiMetrics,
@@ -41,48 +43,131 @@ import { cn } from "@/src/lib/utils";
 const selectClassName =
   "h-9 cursor-pointer rounded-lg border bg-background px-2.5 text-xs text-foreground outline-none transition hover:border-primary/40 focus:border-primary focus:ring-2 focus:ring-ring/25";
 
+type UsersLookup = {
+  usersById: Map<string, AdminUser>;
+  usersByUuid: Map<string, AdminUser>;
+  usersByProfileUuid: Map<string, { user: AdminUser; profileName: string }>;
+};
+
 /**
  * Format user identity nicely with username, full name, or smart fallback
  */
-function getUserDisplay(session: AdminSessionSummary) {
+function getUserDisplay(session: AdminSessionSummary, lookup?: UsersLookup) {
+  const rawSession = session as any;
+  const userObj =
+    session.user ||
+    rawSession.user ||
+    rawSession.requester ||
+    rawSession.userInfo ||
+    rawSession.creator ||
+    rawSession.account ||
+    {};
+
+  const contextData = (rawSession.contextData || {}) as Record<string, any>;
+  const rawPayload = (contextData.rawRequestPayload || {}) as Record<string, any>;
+
+  // Check all possible userId/uuid fields
+  const directId =
+    session.requestedByUserId ||
+    session.userId ||
+    session.userUuid ||
+    userObj.id ||
+    userObj.uuid ||
+    rawSession.requestedBy ||
+    rawSession.creatorId ||
+    contextData.userId ||
+    contextData.userUuid ||
+    rawPayload.userId ||
+    rawPayload.userUuid;
+
+  // Check all possible profile identifiers
+  const profileIdCandidate =
+    rawSession.profileId ||
+    rawSession.profileUuid ||
+    contextData.profileId ||
+    contextData.profileUuid ||
+    rawPayload.profileId ||
+    (Array.isArray(rawPayload.profiles) ? rawPayload.profiles[0]?.profileId : null) ||
+    (Array.isArray(rawSession.profiles)
+      ? rawSession.profiles[0]?.profileId || rawSession.profiles[0]?.uuid || rawSession.profiles[0]
+      : null);
+
+  // Attempt user lookup from active admin users
+  let matchedUser: AdminUser | undefined;
+  let matchedProfileName: string | undefined;
+
+  if (profileIdCandidate && lookup?.usersByProfileUuid) {
+    const prof = lookup.usersByProfileUuid.get(String(profileIdCandidate).toLowerCase());
+    if (prof) {
+      matchedUser = prof.user;
+      matchedProfileName = prof.profileName;
+    }
+  }
+
+  if (!matchedUser && directId && lookup) {
+    const cleanId = String(directId).toLowerCase();
+    matchedUser = lookup.usersByUuid.get(cleanId) || lookup.usersById.get(cleanId);
+  }
+
   const username =
     session.username ||
     session.requestedByUsername ||
-    session.user?.username;
+    userObj.username ||
+    userObj.preferred_username ||
+    matchedUser?.username ||
+    contextData.username;
 
   const fullName =
     session.requesterName ||
     session.userFullName ||
-    session.user?.fullName ||
-    session.user?.name;
+    userObj.fullName ||
+    userObj.name ||
+    (userObj.firstName || userObj.lastName ? `${userObj.firstName || ""} ${userObj.lastName || ""}`.trim() : null) ||
+    (matchedUser?.firstName || matchedUser?.lastName ? `${matchedUser.firstName || ""} ${matchedUser.lastName || ""}`.trim() : null) ||
+    matchedProfileName ||
+    rawSession.profileName ||
+    contextData.profileName;
 
-  const id =
-    session.requestedByUserId ||
-    session.userId ||
-    session.user?.id;
+  const email =
+    userObj.email ||
+    userObj.primaryEmail ||
+    matchedUser?.primaryEmail ||
+    rawSession.email ||
+    rawSession.userEmail ||
+    contextData.email;
 
   const isGroup = session.mode === "GROUP";
   const groupCount = session.totalGroupMembers || session.groupMembersCount || 0;
 
   let primary = "";
-  let secondary = session.requestSource ? session.requestSource.replace("_", " ") : "Unknown source";
+  let secondary = session.requestSource
+    ? session.requestSource.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
+    : "Web App";
 
   if (username) {
     primary = `@${username.replace(/^@/, "")}`;
     if (fullName) secondary = fullName;
-    else if (id) secondary = `ID: #${id}`;
+    else if (email) secondary = email;
+    else if (directId) secondary = `ID: #${directId}`;
   } else if (fullName) {
     primary = fullName;
-    if (id) secondary = `User #${id}`;
-  } else if (id && String(id) !== "0") {
-    primary = `User #${id}`;
-    secondary = isGroup && groupCount > 0 ? `Group Dining (${groupCount} Diners)` : "Solo Diner";
+    if (email) secondary = email;
+    else if (directId) secondary = `User #${directId}`;
+  } else if (email) {
+    primary = email;
+    if (directId) secondary = `ID: #${directId}`;
+  } else if (directId && String(directId) !== "0") {
+    primary = `User #${String(directId).slice(0, 8)}`;
+    secondary = isGroup && groupCount > 0 ? `Group Dining (${groupCount} Diners)` : "FoodHub Member";
   } else if (isGroup) {
     primary = groupCount > 0 ? `Group (${groupCount} Diners)` : "Group Session";
-    secondary = "Shared Session";
+    secondary = "Shared Dining Session";
   } else {
-    primary = "Customer (Guest)";
-    secondary = "Anonymous Request";
+    // Strictly NO "Customer (Guest)" or "Customer" or "Guest" or "Anonymous Request"
+    primary = `User (${session.uuid.slice(0, 8)})`;
+    secondary = session.requestSource
+      ? `${session.requestSource.replace(/_/g, " ")} Request`
+      : "FoodHub Member";
   }
 
   // Deterministic avatar color palette based on name
@@ -95,7 +180,7 @@ function getUserDisplay(session: AdminSessionSummary) {
   ];
   const charCode = (primary.charCodeAt(0) || 65) + (primary.charCodeAt(1) || 66);
   const colorTheme = colors[charCode % colors.length];
-  const initial = (primary.replace(/^@/, "")[0] || "U").toUpperCase();
+  const initial = (primary.replace(/^@/, "").trim()[0] || "U").toUpperCase();
 
   return { primary, secondary, initial, colorTheme };
 }
@@ -112,6 +197,41 @@ export default function AdminRecommendationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // Fetch registered admin users to correlate real identities with session requests
+  const { data: usersPage } = useGetAdminUsersQuery({ page: 0, size: 100 });
+  const users = usersPage?.contents || [];
+
+  const usersLookup: UsersLookup = useMemo(() => {
+    const byId = new Map<string, AdminUser>();
+    const byUuid = new Map<string, AdminUser>();
+    const byProfileUuid = new Map<string, { user: AdminUser; profileName: string }>();
+
+    users.forEach((u) => {
+      if (u.uuid) byUuid.set(u.uuid.toLowerCase(), u);
+      if ((u as any).id) byId.set(String((u as any).id), u);
+      if (u.username) byId.set(u.username.toLowerCase(), u);
+
+      if (Array.isArray(u.profiles)) {
+        u.profiles.forEach((p) => {
+          if (p.uuid) {
+            byProfileUuid.set(p.uuid.toLowerCase(), {
+              user: u,
+              profileName: p.profileName,
+            });
+          }
+        });
+      }
+      if (u.defaultProfile?.uuid) {
+        byProfileUuid.set(u.defaultProfile.uuid.toLowerCase(), {
+          user: u,
+          profileName: u.defaultProfile.profileName,
+        });
+      }
+    });
+
+    return { usersById: byId, usersByUuid: byUuid, usersByProfileUuid: byProfileUuid };
+  }, [users]);
 
   // 1. Fetch sessions from API
   const loadSessions = useCallback(async () => {
@@ -330,7 +450,7 @@ export default function AdminRecommendationsPage() {
                 const safeRate = totalCandidates > 0 ? Math.round((safeCandidates / totalCandidates) * 100) : 0;
                 const latency = getSessionLatency(session);
 
-                const userDisplay = getUserDisplay(session);
+                const userDisplay = getUserDisplay(session, usersLookup);
 
                 // Format timestamp
                 const rawTimestamp = session.createdAt || session.startedAt;

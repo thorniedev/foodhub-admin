@@ -7,8 +7,6 @@ import {
   CartesianGrid,
   Cell,
   LabelList,
-  ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
@@ -16,8 +14,13 @@ import { MapPin } from "lucide-react";
 
 import type { LocationSummary } from "@/src/types/adminDashboard";
 import { Segmented } from "@/src/components/ui/segmented";
+import {
+  ChartContainer,
+  ChartTooltip,
+  type ChartConfig,
+} from "@/src/components/ui/chart";
 import SectionCard from "./SectionCard";
-import ChartTooltip from "./ChartTooltip";
+import { ChartTooltipPanel, ChartTooltipRow } from "./ChartTooltipRow";
 import DashboardEmptyState from "./DashboardEmptyState";
 import { ChartSkeleton } from "./DashboardLoadingSkeleton";
 import {
@@ -37,6 +40,11 @@ const METRICS: { value: LocationMetric; label: string; color: string }[] = [
   { value: "views", label: "ការមើល", color: CHART_SERIES.views },
   { value: "clicks", label: "ការចុច", color: CHART_SERIES.clicks },
 ];
+
+const CHART_CONFIG: ChartConfig = {
+  views: { label: "ការមើល", color: CHART_SERIES.views },
+  clicks: { label: "ការចុច", color: CHART_SERIES.clicks },
+};
 
 const TOP_LOCATIONS = 8;
 
@@ -97,114 +105,107 @@ export default function LocationPerformanceChart({
         />
       ) : (
         <>
-          <div className="h-[340px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={rows}
-                layout="vertical"
-                margin={{ top: 4, right: 30, bottom: 0, left: 0 }}
-                barCategoryGap={6}
-              >
-                <CartesianGrid
-                  stroke={CHART_GRID}
-                  strokeDasharray="3 3"
-                  horizontal={false}
-                />
+          <ChartContainer config={CHART_CONFIG} className="aspect-auto h-[340px] w-full">
+            <BarChart
+              data={rows}
+              layout="vertical"
+              margin={{ top: 4, right: 30, bottom: 0, left: 0 }}
+              barCategoryGap={6}
+            >
+              <CartesianGrid
+                stroke={CHART_GRID}
+                strokeDasharray="3 3"
+                horizontal={false}
+              />
 
-                <XAxis
-                  type="number"
-                  tickFormatter={formatCompact}
-                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
-                  tickLine={false}
-                  axisLine={{ stroke: CHART_GRID }}
-                  allowDecimals={false}
-                />
+              <XAxis
+                type="number"
+                tickFormatter={formatCompact}
+                tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
+                tickLine={false}
+                axisLine={{ stroke: CHART_GRID }}
+                allowDecimals={false}
+              />
 
-                <YAxis
-                  type="category"
-                  dataKey="location"
-                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
-                  tickLine={false}
-                  axisLine={false}
-                  width={140}
-                />
+              <YAxis
+                type="category"
+                dataKey="location"
+                tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
+                tickLine={false}
+                axisLine={false}
+                width={140}
+              />
 
-                <Tooltip
-                  cursor={{ fill: "var(--muted)", fillOpacity: 0.6 }}
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const row = payload[0].payload as LocationSummary;
+              {/* A plain <ChartTooltipContent> only ever sees the one series
+                  actually plotted (whichever metric is toggled on). This
+                  deliberately shows more than that — views, clicks, and
+                  unique viewers together, plus CTR — so it stays a custom
+                  renderer built on the same tooltip shell rather than the
+                  default one-series-per-row content. */}
+              <ChartTooltip
+                cursor={{ fill: "var(--muted)", fillOpacity: 0.6 }}
+                content={({ active, payload }) => {
+                  if (!active || !payload?.length) return null;
+                  const row = payload[0]?.payload as LocationSummary | undefined;
+                  if (!row) return null;
 
-                    return (
-                      <ChartTooltip
-                        title={row.location}
-                        rows={[
-                          {
-                            key: "views",
-                            color: CHART_SERIES.views,
-                            label: "ការមើល",
-                            value: formatCount(row.views),
-                          },
-                          {
-                            key: "clicks",
-                            color: CHART_SERIES.clicks,
-                            label: "ការចុច",
-                            value: formatCount(row.clicks),
-                          },
-                          {
-                            key: "uniqueViewers",
-                            color: CHART_SERIES.activeUsers,
-                            label: "អ្នកមើលផ្សេងគ្នា",
-                            value: formatCount(row.uniqueViewers),
-                          },
-                        ]}
-                        footer={`CTR ${formatRatio(row.clickThroughRate)} · ហាងសកម្ម ${formatCount(row.activeStores)}`}
+                  return (
+                    <ChartTooltipPanel
+                      title={row.location}
+                      footer={`CTR ${formatRatio(row.clickThroughRate)} · ហាងសកម្ម ${formatCount(row.activeStores)}`}
+                    >
+                      <ChartTooltipRow color={CHART_SERIES.views} label="ការមើល" value={formatCount(row.views)} />
+                      <ChartTooltipRow color={CHART_SERIES.clicks} label="ការចុច" value={formatCount(row.clicks)} />
+                      <ChartTooltipRow
+                        color={CHART_SERIES.activeUsers}
+                        label="អ្នកមើលផ្សេងគ្នា"
+                        value={formatCount(row.uniqueViewers)}
                       />
-                    );
-                  }}
+                    </ChartTooltipPanel>
+                  );
+                }}
+              />
+
+              <Bar
+                isAnimationActive={false}
+                dataKey={metric}
+                name={activeMetric.label}
+                radius={[0, 4, 4, 0]}
+                maxBarSize={18}
+                background={{ fill: "var(--muted)", opacity: 0.55 }}
+                className={cn(onSelectLocation && "cursor-pointer")}
+                onClick={(entry: unknown) => {
+                  const row = (entry as { payload?: LocationSummary })?.payload;
+                  if (row && onSelectLocation) onSelectLocation(row);
+                }}
+              >
+                <LabelList
+                  dataKey={metric}
+                  position="right"
+                  offset={8}
+                  formatter={(value: number) => formatCompact(value)}
+                  style={{ fill: CHART_AXIS_TEXT, fontSize: 11, fontWeight: 600 }}
                 />
 
-                <Bar
-                  isAnimationActive={false}
-                  dataKey={metric}
-                  name={activeMetric.label}
-                  radius={[0, 4, 4, 0]}
-                  maxBarSize={18}
-                  background={{ fill: "var(--muted)", opacity: 0.55 }}
-                  className={cn(onSelectLocation && "cursor-pointer")}
-                  onClick={(entry: unknown) => {
-                    const row = (entry as { payload?: LocationSummary })?.payload;
-                    if (row && onSelectLocation) onSelectLocation(row);
-                  }}
-                >
-                  <LabelList
-                    dataKey={metric}
-                    position="right"
-                    offset={8}
-                    formatter={(value: number) => formatCompact(value)}
-                    style={{ fill: CHART_AXIS_TEXT, fontSize: 11, fontWeight: 600 }}
+                {rows.map((row, index) => (
+                  <Cell
+                    key={row.location}
+                    fill={activeMetric.color}
+                    // A selected location holds full strength and everything
+                    // else drops back; with no selection, the fade just
+                    // tracks rank.
+                    fillOpacity={
+                      activeLocationLabel
+                        ? activeLocationLabel === row.location
+                          ? 1
+                          : 0.28
+                        : rankOpacity(index, rows.length)
+                    }
                   />
-
-                  {rows.map((row, index) => (
-                    <Cell
-                      key={row.location}
-                      fill={activeMetric.color}
-                      // A selected location holds full strength and everything
-                      // else drops back; with no selection, the fade just
-                      // tracks rank.
-                      fillOpacity={
-                        activeLocationLabel
-                          ? activeLocationLabel === row.location
-                            ? 1
-                            : 0.28
-                          : rankOpacity(index, rows.length)
-                      }
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+                ))}
+              </Bar>
+            </BarChart>
+          </ChartContainer>
 
           {/* This used to repeat all eight location names as buttons directly
               under the axis that already lists them. The bars themselves are

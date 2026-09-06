@@ -2,8 +2,12 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import fs from "node:fs";
 
+import { fetchWithTimeout } from "@/src/lib/fetchWithTimeout";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const UPSTREAM_TIMEOUT_MS = 15_000;
 
 interface KeycloakTokenResponse {
   access_token: string;
@@ -86,15 +90,19 @@ async function refreshAccessToken(
     "/protocol/openid-connect/token";
 
   try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/x-www-form-urlencoded",
+    const response = await fetchWithTimeout(
+      endpoint,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body,
+        cache: "no-store",
       },
-      body,
-      cache: "no-store",
-    });
+      UPSTREAM_TIMEOUT_MS,
+    );
 
     if (!response.ok) {
       console.error("[ADMIN PROXY] Token refresh rejected", {
@@ -159,12 +167,16 @@ async function callBackend(
     headers.set("Content-Type", contentType);
   }
 
-  return fetch(target, {
-    method: request.method,
-    headers,
-    body,
-    cache: "no-store",
-  });
+  return fetchWithTimeout(
+    target,
+    {
+      method: request.method,
+      headers,
+      body,
+      cache: "no-store",
+    },
+    UPSTREAM_TIMEOUT_MS,
+  );
 }
 
 /**
@@ -322,6 +334,19 @@ async function proxyAdminRequest(
 
     return response;
   } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      console.error("[ADMIN PROXY] Backend request timed out", {
+        target: target.toString(),
+      });
+
+      return NextResponse.json(
+        {
+          message: "The FoodHub backend timed out.",
+        },
+        { status: 504 },
+      );
+    }
+
     console.error("[ADMIN PROXY] Backend connection failed", {
       target: target.toString(),
       error,

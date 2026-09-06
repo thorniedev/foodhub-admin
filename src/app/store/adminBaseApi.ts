@@ -16,6 +16,10 @@ import { redirectToAdminLogin } from "@/src/lib/redirectToAdminLogin";
 const rawAdminBaseQuery = fetchBaseQuery({
   baseUrl: "/api/admin",
   credentials: "include",
+  // The proxy route can take a while to refresh a token and retry the
+  // backend call. Without a client-side cap, a wedged upstream leaves the
+  // query on isLoading forever instead of surfacing a retryable error.
+  timeout: 20_000,
   prepareHeaders: (headers) => {
     headers.set("Accept", "application/json");
     return headers;

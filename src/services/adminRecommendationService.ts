@@ -8,7 +8,6 @@ import {
   FetchAdminSessionsParams,
   AdminSessionPageResponse,
 } from "@/src/types/adminRecommendation";
-import { getAuthAccessToken } from "@/src/lib/authSession";
 import {
   normalizePayload,
   normalizeArrayPayload,
@@ -30,11 +29,10 @@ function getBaseApiUrl(): string {
 }
 
 function getHeaders(token?: string): HeadersInit {
-  const activeToken = token || (typeof window !== "undefined" ? getAuthAccessToken() : null);
   return {
     "Content-Type": "application/json",
     Accept: "application/json",
-    ...(activeToken ? { Authorization: `Bearer ${activeToken}` } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
 

@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   Bookmark,
   CircleCheckBig,
+  Hourglass,
   Sparkles,
   Store,
   UserPlus,
@@ -88,6 +89,20 @@ const KPI_DEFINITIONS: KpiDefinition[] = [
     hint: "ហាងដែលបានអនុម័ត និងគណនីនៅសកម្ម។",
   },
   {
+    // Previously invisible on the dashboard — the only place a real pending
+    // count existed was folded, unlabelled, into `openDataIssues`, and the
+    // Action Items panel below shows only a short preview list, which read as
+    // the full count. This is the actual total.
+    key: "pendingStores",
+    label: "ហាងរង់ចាំអនុម័ត",
+    icon: <Hourglass size={16} aria-hidden="true" />,
+    tone: "amber",
+    format: formatCount,
+    higherIsBetter: false,
+    tier: "secondary",
+    hint: "ចំនួនហាងសរុបដែលកំពុងរង់ចាំការត្រួតពិនិត្យ និងអនុម័ត។",
+  },
+  {
     key: "liveMenuItems",
     label: "មុខម្ហូបកំពុងលក់",
     icon: <Utensils size={16} aria-hidden="true" />,
@@ -164,7 +179,7 @@ export default function DashboardKpiGrid({ kpis }: DashboardKpiGridProps) {
         {primary.map((definition) => renderCard(definition, "primary"))}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
         {secondary.map((definition) => renderCard(definition, "compact"))}
       </div>
     </div>

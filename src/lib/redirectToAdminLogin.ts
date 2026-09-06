@@ -52,9 +52,14 @@ export function redirectToAdminLogin(): void {
   const returnTo = getSafeAuthReturnPath(
     `${window.location.pathname}${window.location.search}`,
   );
+  // Route through /login instead of straight to /api/auth/login so the user
+  // sees why they were bounced instead of silently landing back on the
+  // Keycloak form with no explanation.
   const loginParams = new URLSearchParams({
     returnTo,
+    error: "session_expired",
+    error_description: "Your session has expired. Please sign in again.",
   });
 
-  window.location.replace(`/api/auth/login?${loginParams.toString()}`);
+  window.location.replace(`/login?${loginParams.toString()}`);
 }

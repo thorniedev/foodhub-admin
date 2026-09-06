@@ -7,8 +7,6 @@ import {
   CartesianGrid,
   ComposedChart,
   Line,
-  ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
@@ -16,8 +14,13 @@ import { Activity } from "lucide-react";
 
 import type { DashboardTrendPoint } from "@/src/types/adminDashboard";
 import { Segmented } from "@/src/components/ui/segmented";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/src/components/ui/chart";
 import SectionCard from "./SectionCard";
-import ChartTooltip, { type ChartTooltipRow } from "./ChartTooltip";
 import DashboardEmptyState from "./DashboardEmptyState";
 import { ChartSkeleton } from "./DashboardLoadingSkeleton";
 import {
@@ -26,7 +29,6 @@ import {
   CHART_GRID,
   CHART_SERIES,
   formatCompact,
-  formatCount,
   formatLongDate,
   formatShortDate,
   withAlpha,
@@ -44,6 +46,15 @@ const BAR_METRICS: { value: BarMetric; label: string; color: string }[] = [
   // behind a green active-users area and must stay separable from it.
   { value: "itemViews", label: "ការមើលមុខម្ហូប", color: CHART_SERIES.clicks },
 ];
+
+/** Both bar metrics are declared even though only one plots at a time, so the
+ * standard tooltip can label whichever one is active from the same config. */
+const CHART_CONFIG: ChartConfig = {
+  activeUsers: { label: "អ្នកប្រើប្រាស់សកម្ម", color: CHART_SERIES.activeUsers },
+  newUsers: { label: "អ្នកប្រើប្រាស់ថ្មី", color: CHART_SERIES.newUsers },
+  recommendationSessions: { label: "វគ្គណែនាំ", color: CHART_SERIES.sessions },
+  itemViews: { label: "ការមើលមុខម្ហូប", color: CHART_SERIES.clicks },
+};
 
 interface ActivityTrendChartProps {
   data: DashboardTrendPoint[];
@@ -96,132 +107,122 @@ export default function ActivityTrendChart({
         />
       ) : (
         <div className="flex flex-col gap-3">
-          {/* One legend style for all three series. Two of them used to be
-              hand-tinted chips and the third an inline-styled one, so the
-              same list carried three different visual weights. */}
+          {/* A custom legend rather than <ChartLegendContent>: it needs to show
+              a "muted" swatch style for the context bar that a plain series
+              swatch can't express, and Recharts would otherwise auto-generate
+              an entry for whichever bar metric isn't currently selected. */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.6875rem] font-medium text-muted-foreground">
             <LegendItem color={CHART_SERIES.activeUsers} label="អ្នកប្រើប្រាស់សកម្ម" />
             <LegendItem color={CHART_SERIES.newUsers} label="អ្នកប្រើប្រាស់ថ្មី" />
             <LegendItem color={activeBar.color} label={activeBar.label} muted />
           </div>
 
-          <div className="h-[280px] w-full sm:h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart
-                data={data}
-                margin={{ top: 12, right: 12, bottom: 4, left: 0 }}
-              >
-                <defs>
-                  <linearGradient id={activeUsersFillId} x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="5%" stopColor={CHART_SERIES.activeUsers} stopOpacity={0.28} />
-                    <stop offset="95%" stopColor={CHART_SERIES.activeUsers} stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
+          <ChartContainer
+            config={CHART_CONFIG}
+            className="aspect-auto h-[280px] w-full sm:h-[320px]"
+          >
+            <ComposedChart
+              data={data}
+              margin={{ top: 12, right: 12, bottom: 4, left: 0 }}
+            >
+              <defs>
+                <linearGradient id={activeUsersFillId} x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="5%" stopColor={CHART_SERIES.activeUsers} stopOpacity={0.28} />
+                  <stop offset="95%" stopColor={CHART_SERIES.activeUsers} stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
 
-                <CartesianGrid
-                  stroke={CHART_GRID}
-                  strokeDasharray="3 3"
-                  vertical={false}
-                />
+              <CartesianGrid
+                stroke={CHART_GRID}
+                strokeDasharray="3 3"
+                vertical={false}
+              />
 
-                <XAxis
-                  dataKey="date"
-                  tickFormatter={formatShortDate}
-                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
-                  tickLine={false}
-                  axisLine={{ stroke: CHART_GRID }}
-                  minTickGap={24}
-                />
+              <XAxis
+                dataKey="date"
+                tickFormatter={formatShortDate}
+                tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
+                tickLine={false}
+                axisLine={{ stroke: CHART_GRID }}
+                minTickGap={24}
+              />
 
-                {/* Both people series share the left axis because they are the
-                    same unit and are meant to be compared. Event volume is a
-                    different unit, so it gets its own right axis instead of
-                    flattening the user lines against a much larger scale. */}
-                <YAxis
-                  yAxisId="people"
-                  tickFormatter={formatCompact}
-                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
-                  tickLine={false}
-                  axisLine={false}
-                  width={48}
-                  allowDecimals={false}
-                />
+              {/* Both people series share the left axis because they are the
+                  same unit and are meant to be compared. Event volume is a
+                  different unit, so it gets its own right axis instead of
+                  flattening the user lines against a much larger scale. */}
+              <YAxis
+                yAxisId="people"
+                tickFormatter={formatCompact}
+                tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }}
+                tickLine={false}
+                axisLine={false}
+                width={48}
+                allowDecimals={false}
+              />
 
-                <YAxis
-                  yAxisId="volume"
-                  orientation="right"
-                  tickFormatter={formatCompact}
-                  tick={{ fill: activeBar.color, fontSize: 12 }}
-                  tickLine={false}
-                  axisLine={false}
-                  width={48}
-                  allowDecimals={false}
-                />
+              <YAxis
+                yAxisId="volume"
+                orientation="right"
+                tickFormatter={formatCompact}
+                tick={{ fill: activeBar.color, fontSize: 12 }}
+                tickLine={false}
+                axisLine={false}
+                width={48}
+                allowDecimals={false}
+              />
 
-                <Tooltip
-                  cursor={{ fill: "var(--muted)", fillOpacity: 0.6 }}
-                  content={({ active, payload, label }) => {
-                    if (!active || !payload?.length) return null;
+              <ChartTooltip
+                cursor={{ fill: "var(--muted)", fillOpacity: 0.6 }}
+                content={
+                  <ChartTooltipContent
+                    labelFormatter={(label) => formatLongDate(String(label))}
+                  />
+                }
+              />
 
-                    const rows: ChartTooltipRow[] = payload.map((entry) => ({
-                      key: String(entry.dataKey),
-                      color: String(entry.color ?? entry.stroke ?? "#9ca3af"),
-                      label: String(entry.name ?? entry.dataKey),
-                      value: formatCount(Number(entry.value ?? 0)),
-                    }));
+              {/* Declared first so Recharts paints the volume bars behind the
+                  two user series rather than burying them. */}
+              <Bar
+                isAnimationActive={false}
+                yAxisId="volume"
+                dataKey={barMetric}
+                name={activeBar.label}
+                fill={activeBar.color}
+                fillOpacity={CHART_CONTEXT_FILL_OPACITY}
+                stroke={activeBar.color}
+                strokeOpacity={0.4}
+                radius={[4, 4, 0, 0]}
+                maxBarSize={18}
+              />
 
-                    return (
-                      <ChartTooltip
-                        title={formatLongDate(String(label))}
-                        rows={rows}
-                      />
-                    );
-                  }}
-                />
+              <Area
+                isAnimationActive={false}
+                yAxisId="people"
+                type="monotone"
+                dataKey="activeUsers"
+                name="អ្នកប្រើប្រាស់សកម្ម"
+                stroke={CHART_SERIES.activeUsers}
+                strokeWidth={2.5}
+                fill={`url(#${activeUsersFillId})`}
+                fillOpacity={1}
+                dot={false}
+                activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--card)" }}
+              />
 
-                {/* Declared first so Recharts paints the volume bars behind the
-                    two user series rather than burying them. */}
-                <Bar
-                  isAnimationActive={false}
-                  yAxisId="volume"
-                  dataKey={barMetric}
-                  name={activeBar.label}
-                  fill={activeBar.color}
-                  fillOpacity={CHART_CONTEXT_FILL_OPACITY}
-                  stroke={activeBar.color}
-                  strokeOpacity={0.4}
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={18}
-                />
-
-                <Area
-                  isAnimationActive={false}
-                  yAxisId="people"
-                  type="monotone"
-                  dataKey="activeUsers"
-                  name="អ្នកប្រើប្រាស់សកម្ម"
-                  stroke={CHART_SERIES.activeUsers}
-                  strokeWidth={2.5}
-                  fill={`url(#${activeUsersFillId})`}
-                  fillOpacity={1}
-                  dot={false}
-                  activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--card)" }}
-                />
-
-                <Line
-                  isAnimationActive={false}
-                  yAxisId="people"
-                  type="monotone"
-                  dataKey="newUsers"
-                  name="អ្នកប្រើប្រាស់ថ្មី"
-                  stroke={CHART_SERIES.newUsers}
-                  strokeWidth={2.25}
-                  dot={false}
-                  activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--card)" }}
-                />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
+              <Line
+                isAnimationActive={false}
+                yAxisId="people"
+                type="monotone"
+                dataKey="newUsers"
+                name="អ្នកប្រើប្រាស់ថ្មី"
+                stroke={CHART_SERIES.newUsers}
+                strokeWidth={2.25}
+                dot={false}
+                activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--card)" }}
+              />
+            </ComposedChart>
+          </ChartContainer>
         </div>
       )}
     </SectionCard>

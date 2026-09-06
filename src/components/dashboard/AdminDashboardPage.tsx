@@ -363,6 +363,7 @@ export default function AdminDashboardPage() {
       <ActionItemsPanel
         items={overview.data?.actionItems ?? []}
         isLoading={overview.isLoading}
+        knownTotals={{ PENDING_STORE: overview.data?.totalPendingStores }}
       />
 
       {/* 7. Store Performance Table */}

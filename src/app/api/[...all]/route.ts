@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { fetchWithTimeout } from "@/src/lib/fetchWithTimeout";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const KEYCLOAK_REFRESH_TIMEOUT_MS = 10_000;
 
 /*
  * Your env may be:
@@ -146,15 +150,19 @@ async function refreshAccessToken(
   const endpoint = `${keycloakUrl}/realms/${encodeURIComponent(realm)}/protocol/openid-connect/token`;
 
   try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/x-www-form-urlencoded",
+    const response = await fetchWithTimeout(
+      endpoint,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body,
+        cache: "no-store",
       },
-      body,
-      cache: "no-store",
-    });
+      KEYCLOAK_REFRESH_TIMEOUT_MS,
+    );
 
     if (!response.ok) {
       return null;
@@ -372,6 +380,7 @@ async function forwardRequest(
           body: requestBody && requestBody.byteLength > 0 ? requestBody : undefined,
           cache: "no-store",
           redirect: "manual",
+          signal: controller.signal,
         });
       }
     }

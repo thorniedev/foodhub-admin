@@ -123,6 +123,28 @@ const EMPTY_OVERVIEW: DashboardOverview = {
   actionItems: [],
 };
 
+/** A metric with no `previousValue`/`changePercent` history behind it. */
+function bareMetric(value: number | null): Record<string, unknown> {
+  return { value, previousValue: null, changePercent: null };
+}
+
+/**
+ * Fills in a `kpis` entry from an equivalent top-level overview field when the
+ * backend's `kpis` object omits it — legacy responses report the same figure
+ * under a flatter name (`totalActiveStores` instead of `kpis.activeStores`).
+ *
+ * This intentionally does NOT invent a number for a KPI that has no real
+ * equivalent anywhere in the payload (`recommendationSuccessRate` most
+ * notably): a previous version of this function filled that gap with
+ * `totalRecommendations > 0 ? 100 : null`, which reported a perfect safety
+ * score for a session that had simply run at all, regardless of whether
+ * anything was actually blocked. An honest "—" beats a fabricated 100%.
+ */
+function fallbackMetric(raw: unknown, source: number | undefined): unknown {
+  if (raw !== undefined) return raw;
+  return bareMetric(typeof source === "number" ? source : null);
+}
+
 export function normalizeOverview(response: unknown): DashboardOverview {
   const payload = unwrapAdminPayload<Partial<DashboardOverview> | null>(response, null);
 
@@ -132,81 +154,40 @@ export function normalizeOverview(response: unknown): DashboardOverview {
     payload.kpis && typeof payload.kpis === "object" ? payload.kpis : {}
   ) as Record<string, unknown>;
 
-  const totalUsers = typeof payload.totalUsers === "number" ? payload.totalUsers : 0;
-  const activeUsers =
-    typeof (payload as { activeUsers?: number }).activeUsers === "number"
-      ? (payload as { activeUsers?: number }).activeUsers!
-      : totalUsers;
-  const newUsers =
-    typeof (payload as { newUsers?: number }).newUsers === "number"
-      ? (payload as { newUsers?: number }).newUsers!
-      : 0;
-  const totalActiveStores =
-    typeof payload.totalActiveStores === "number" ? payload.totalActiveStores : 0;
-  const totalPendingStores =
-    typeof payload.totalPendingStores === "number" ? payload.totalPendingStores : 0;
-  const totalMenuItems =
-    typeof payload.totalMenuItems === "number" ? payload.totalMenuItems : 0;
+  const num = (value: unknown): number | undefined =>
+    typeof value === "number" ? value : undefined;
+
+  const totalActiveStores = num(payload.totalActiveStores);
+  const totalPendingStores = num(payload.totalPendingStores);
+  const totalMenuItems = num(payload.totalMenuItems);
   const totalRecommendations =
-    typeof payload.totalRecommendationsServed === "number"
-      ? payload.totalRecommendationsServed
-      : typeof (payload as { recommendationSessions?: number }).recommendationSessions === "number"
-        ? (payload as { recommendationSessions?: number }).recommendationSessions!
-        : 0;
+    num(payload.totalRecommendationsServed) ??
+    num((payload as { recommendationSessions?: number }).recommendationSessions);
   const totalBookmarks =
-    typeof payload.totalBookmarks === "number"
-      ? payload.totalBookmarks
-      : typeof (payload as { bookmarks?: number }).bookmarks === "number"
-        ? (payload as { bookmarks?: number }).bookmarks!
-        : 0;
-  const totalSafetyBlocks =
-    typeof payload.totalSafetyBlocks === "number"
-      ? payload.totalSafetyBlocks
-      : typeof (payload as { safetyBlocks?: number }).safetyBlocks === "number"
-        ? (payload as { safetyBlocks?: number }).safetyBlocks!
-        : 0;
+    num(payload.totalBookmarks) ?? num((payload as { bookmarks?: number }).bookmarks);
 
   const synthesizedKpis: Record<string, unknown> = {
-    activeUsers: rawKpis.activeUsers ?? {
-      value: activeUsers,
-      previousValue: null,
-      changePercent: null,
-    },
-    newUsers: rawKpis.newUsers ?? {
-      value: newUsers,
-      previousValue: null,
-      changePercent: null,
-    },
-    recommendationSessions: rawKpis.recommendationSessions ?? {
-      value: totalRecommendations,
-      previousValue: null,
-      changePercent: null,
-    },
-    recommendationSuccessRate: rawKpis.recommendationSuccessRate ?? {
-      value: totalRecommendations > 0 ? 100 : null,
-      previousValue: null,
-      changePercent: null,
-    },
-    activeStores: rawKpis.activeStores ?? {
-      value: totalActiveStores,
-      previousValue: null,
-      changePercent: null,
-    },
-    liveMenuItems: rawKpis.liveMenuItems ?? {
-      value: totalMenuItems,
-      previousValue: null,
-      changePercent: null,
-    },
-    bookmarks: rawKpis.bookmarks ?? {
-      value: totalBookmarks,
-      previousValue: null,
-      changePercent: null,
-    },
-    openDataIssues: rawKpis.openDataIssues ?? {
-      value: totalPendingStores + totalSafetyBlocks,
-      previousValue: null,
-      changePercent: null,
-    },
+    // No top-level equivalent exists for these three — an admin count of
+    // *all* registered users is not the same fact as "active this period",
+    // so unlike the others below this does not fall back to a nearby field.
+    activeUsers: fallbackMetric(rawKpis.activeUsers, undefined),
+    newUsers: fallbackMetric(rawKpis.newUsers, undefined),
+    recommendationSuccessRate: fallbackMetric(rawKpis.recommendationSuccessRate, undefined),
+
+    recommendationSessions: fallbackMetric(rawKpis.recommendationSessions, totalRecommendations),
+    activeStores: fallbackMetric(rawKpis.activeStores, totalActiveStores),
+    pendingStores: fallbackMetric(rawKpis.pendingStores, totalPendingStores),
+    liveMenuItems: fallbackMetric(rawKpis.liveMenuItems, totalMenuItems),
+    bookmarks: fallbackMetric(rawKpis.bookmarks, totalBookmarks),
+
+    // `openDataIssues` used to default to `totalPendingStores + totalSafetyBlocks`
+    // when absent — safety blocks are the allergen filter doing its job, not a
+    // data-quality problem, so that sum overcounted "issues" by orders of
+    // magnitude (48,686 safety blocks is a normal filtering volume, not 48,686
+    // broken records). There is no correct substitute among the top-level
+    // fields, so this stays unknown rather than guessing.
+    openDataIssues: fallbackMetric(rawKpis.openDataIssues, undefined),
+
     ...rawKpis,
   };
 

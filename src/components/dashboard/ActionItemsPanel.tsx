@@ -48,11 +48,20 @@ interface ActionItemsGroup {
 interface ActionItemsPanelProps {
   items: DashboardActionItem[];
   isLoading?: boolean;
+  /**
+   * The real total for an issue type, when the overview payload happens to
+   * expose one — today only `PENDING_STORE` does, via `totalPendingStores`.
+   * `items` is a short preview list capped server-side, so without this a
+   * group of e.g. 10 pending stores read as "10 pending stores exist" when
+   * the real count could be in the hundreds.
+   */
+  knownTotals?: Partial<Record<string, number>>;
 }
 
 export default function ActionItemsPanel({
   items,
   isLoading = false,
+  knownTotals,
 }: ActionItemsPanelProps) {
   /**
    * The recommendation is a property of the issue *type*, not of the row —
@@ -123,9 +132,18 @@ export default function ActionItemsPanel({
                   {labelFor(ISSUE_TYPE_LABELS, group.issueType)}
                 </h3>
 
-                <span className="text-[0.6875rem] text-muted-foreground tabular-nums">
-                  {group.items.length}
-                </span>
+                {(() => {
+                  const total = knownTotals?.[group.issueType];
+                  const truncated = typeof total === "number" && total > group.items.length;
+
+                  return (
+                    <span className="text-[0.6875rem] text-muted-foreground tabular-nums">
+                      {truncated
+                        ? `${group.items.length} / ${total.toLocaleString("en-US")}`
+                        : group.items.length}
+                    </span>
+                  );
+                })()}
               </div>
 
               {group.recommendation && (
