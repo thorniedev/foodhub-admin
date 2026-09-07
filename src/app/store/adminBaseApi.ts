@@ -70,6 +70,7 @@ export const adminBaseApi = createApi({
     "SeasonalFood",
     "FoodByArea",
     "DynamicContent",
+    "AiProviderKey",
   ],
   endpoints: () => ({}),
 });

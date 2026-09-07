@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import {
   ClipboardList,
+  KeyRound,
   LayoutGrid,
   Store,
   Users,
@@ -51,6 +52,11 @@ export const dashboardNav: NavItem[] = [
     icon: ClipboardList,
     href: "/audit-logs",
     requiredRole: "SUPER_ADMIN",
+  },
+  {
+    label: "កូនសោ API របស់ AI",
+    icon: KeyRound,
+    href: "/settings/ai-keys",
   },
 
   {
