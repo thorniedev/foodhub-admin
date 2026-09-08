@@ -11,6 +11,7 @@ import {
   SlidersHorizontal,
   Utensils,
   Bot,
+  Settings,
   type LucideIcon,
 } from "lucide-react";
 
@@ -57,6 +58,11 @@ export const dashboardNav: NavItem[] = [
     label: "កូនសោ API របស់ AI",
     icon: KeyRound,
     href: "/settings/ai-keys",
+  },
+  {
+    label: "ការកំណត់ប្រព័ន្ធ",
+    icon: Settings,
+    href: "/settings/system",
   },
 
   {
