@@ -340,14 +340,19 @@ export default function AiProviderKeyManager() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-800">
-          កូនសោ API របស់ AI
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          គ្រប់គ្រងកូនសោ API សម្រាប់ការណែនាំដោយ AI។ កូនសោដែល &quot;កំពុងប្រើ&quot;
-          ត្រូវបានប្រើភ្លាមៗ ដោយមិនចាំបាច់ដាក់ម៉ាស៊ីនមេឱ្យដំណើរការឡើងវិញឡើយ។
-        </p>
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-[#136C34]">
+          <KeyRound size={18} />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800">
+            កូនសោ API របស់ AI
+          </h2>
+          <p className="text-sm text-gray-500">
+            គ្រប់គ្រងកូនសោ API សម្រាប់ការណែនាំដោយ AI។ កូនសោដែល &quot;កំពុងប្រើ&quot;
+            ត្រូវបានប្រើភ្លាមៗ ដោយមិនចាំបាច់ដាក់ម៉ាស៊ីនមេឱ្យដំណើរការឡើងវិញឡើយ។
+          </p>
+        </div>
       </div>
 
       {message && (

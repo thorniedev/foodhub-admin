@@ -7,13 +7,23 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
  * verification available here: the component rendered against mocked RTK
  * Query hooks, covering category grouping, the overridden badge/reset
  * affordance, the save/reset payloads sent to the backend, and error surfacing.
+ *
+ * AiProviderKeyManager now renders inline as part of this page (see
+ * AiProviderKeyManager.test.tsx for its own dedicated coverage), so its API
+ * hooks are mocked here too -- otherwise the real RTK Query hooks would run
+ * with no Redux Provider in this test tree.
  */
-const { getSystemSettingsQueryMock, updateSystemSettingMock, resetSystemSettingMock } =
-  vi.hoisted(() => ({
-    getSystemSettingsQueryMock: vi.fn(),
-    updateSystemSettingMock: vi.fn(),
-    resetSystemSettingMock: vi.fn(),
-  }));
+const {
+  getSystemSettingsQueryMock,
+  updateSystemSettingMock,
+  resetSystemSettingMock,
+  getAiProviderKeysQueryMock,
+} = vi.hoisted(() => ({
+  getSystemSettingsQueryMock: vi.fn(),
+  updateSystemSettingMock: vi.fn(),
+  resetSystemSettingMock: vi.fn(),
+  getAiProviderKeysQueryMock: vi.fn(),
+}));
 
 vi.mock("@/src/app/store/systemSettingApi", () => ({
   useGetSystemSettingsQuery: getSystemSettingsQueryMock,
@@ -25,6 +35,14 @@ vi.mock("@/src/app/store/systemSettingApi", () => ({
     resetSystemSettingMock,
     { isLoading: false },
   ],
+}));
+
+vi.mock("@/src/app/store/aiProviderKeyApi", () => ({
+  useGetAiProviderKeysQuery: getAiProviderKeysQueryMock,
+  useCreateAiProviderKeyMutation: () => [vi.fn(), { isLoading: false }],
+  useActivateAiProviderKeyMutation: () => [vi.fn(), { isLoading: false }],
+  useUpdateAiProviderKeyMutation: () => [vi.fn(), { isLoading: false }],
+  useDeleteAiProviderKeyMutation: () => [vi.fn(), { isLoading: false }],
 }));
 
 import SystemSettingsManager from "./SystemSettingsManager";
@@ -97,6 +115,11 @@ describe("SystemSettingsManager", () => {
       isLoading: false,
       error: undefined,
     });
+    getAiProviderKeysQueryMock.mockReturnValue({
+      data: [],
+      isLoading: false,
+      error: undefined,
+    });
   });
 
   it("groups settings under their category headers", () => {
@@ -107,6 +130,13 @@ describe("SystemSettingsManager", () => {
     expect(screen.getByText("Max Alert Radius (meters)")).toBeInTheDocument();
     expect(screen.getByText("Daily Alert Limit (per user)")).toBeInTheDocument();
     expect(screen.getByText("Web Push Enabled")).toBeInTheDocument();
+  });
+
+  it("includes the AI provider key manager as a section of this page", () => {
+    render(<SystemSettingsManager />);
+
+    expect(screen.getByText("កូនសោ API របស់ AI")).toBeInTheDocument();
+    expect(getAiProviderKeysQueryMock).toHaveBeenCalled();
   });
 
   it("shows the overridden badge and reset action only for a changed setting", () => {
@@ -120,7 +150,7 @@ describe("SystemSettingsManager", () => {
   it("keeps Save disabled until the value actually changes", () => {
     render(<SystemSettingsManager />);
 
-    const saveButtons = screen.getAllByRole("button", { name: /រក្សាទុក/ });
+    const saveButtons = screen.getAllByRole("button", { name: /^រក្សាទុក$/ });
     saveButtons.forEach((button) => expect(button).toBeDisabled());
   });
 
@@ -131,7 +161,7 @@ describe("SystemSettingsManager", () => {
     const radiusInput = screen.getByDisplayValue("50000");
     fireEvent.change(radiusInput, { target: { value: "40000" } });
 
-    const saveButtons = screen.getAllByRole("button", { name: /រក្សាទុក/ });
+    const saveButtons = screen.getAllByRole("button", { name: /^រក្សាទុក$/ });
     fireEvent.click(saveButtons[0]);
 
     await waitFor(() =>
@@ -146,9 +176,9 @@ describe("SystemSettingsManager", () => {
     updateSystemSettingMock.mockImplementation(unwrapMock(webPushSetting));
     render(<SystemSettingsManager />);
 
-    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Web Push Enabled" }));
 
-    const saveButtons = screen.getAllByRole("button", { name: /រក្សាទុក/ });
+    const saveButtons = screen.getAllByRole("button", { name: /^រក្សាទុក$/ });
     fireEvent.click(saveButtons[saveButtons.length - 1]);
 
     await waitFor(() =>
@@ -168,7 +198,7 @@ describe("SystemSettingsManager", () => {
 
     fireEvent.change(regionInput, { target: { value: "TH" } });
     fireEvent.click(
-      screen.getAllByRole("button", { name: /រក្សាទុក/ })[2],
+      screen.getAllByRole("button", { name: /^រក្សាទុក$/ })[2],
     );
 
     await waitFor(() =>
@@ -202,7 +232,7 @@ describe("SystemSettingsManager", () => {
 
     const radiusInput = screen.getByDisplayValue("50000");
     fireEvent.change(radiusInput, { target: { value: "1" } });
-    fireEvent.click(screen.getAllByRole("button", { name: /រក្សាទុក/ })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /^រក្សាទុក$/ })[0]);
 
     await waitFor(() =>
       expect(screen.getByText("Value must be at least 1000")).toBeInTheDocument(),

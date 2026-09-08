@@ -21,6 +21,8 @@ import {
 
 import { getApiErrorMessage, type ApiMessage } from "@/src/types/safetyResource";
 
+import AiProviderKeyManager from "./AiProviderKeyManager";
+
 import type {
   SystemSetting,
   SystemSettingCategory,
@@ -174,6 +176,7 @@ function SettingRow({
               type="checkbox"
               checked={draftValue === "true"}
               onChange={(event) => setDraftValue(event.target.checked ? "true" : "false")}
+              aria-label={label}
               className="h-4 w-4 rounded border-gray-300 text-[#136C34] focus:ring-[#136C34]"
             />
             {draftValue === "true" ? "បើក" : "បិទ"}
@@ -237,6 +240,8 @@ export default function SystemSettingsManager() {
           (លើកលែងតែមានចែងផ្សេងក្នុងការពិពណ៌នា)។
         </p>
       </div>
+
+      <AiProviderKeyManager />
 
       {message && (
         <div
