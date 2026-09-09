@@ -10,8 +10,22 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
+# testing & coverage
 /coverage
+*.test.ts
+*.test.tsx
+*.test.js
+*.test.jsx
+*.spec.ts
+*.spec.tsx
+*.spec.js
+*.spec.jsx
+vitest.config.ts
+vitest.setup.ts
+*.class
+__tests__/
+test/
+tests/
 
 # next.js
 /.next/
@@ -24,15 +38,25 @@
 .DS_Store
 *.pem
 
-# debug
+# debug & logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files
+.env
 .env*
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# AI & Editor files
+.claude/
+AGENTS.md
+CLAUDE.md
 
 # vercel
 .vercel
@@ -41,5 +65,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# unused files, scratch scripts & notes
+add_filter.js
+add_filter_fix.js
+move_counts.js
+scratch_check_menu.js
+structure.txt
+swagger_excerpt.txt
 note.git-Store-version.MD
 run.git.NOTE.MD
+scratch/
