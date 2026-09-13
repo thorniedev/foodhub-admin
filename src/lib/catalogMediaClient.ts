@@ -5,6 +5,8 @@ export type CatalogMediaPurpose =
   | "MENU_ITEM_PRIMARY"
   | "MENU_ITEM_GALLERY";
 
+import { convertToWebP } from "@/src/lib/image-utils";
+
 export interface UploadedMedia {
   uuid: string;
   originalFilename?: string | null;
@@ -58,12 +60,19 @@ export async function uploadCatalogMediaFile(
   file: File,
   purpose: CatalogMediaPurpose,
 ): Promise<UploadedMedia> {
+  let uploadFile = file;
+  try {
+    uploadFile = await convertToWebP(file);
+  } catch (e) {
+    console.warn("Failed to convert image to WebP client-side, uploading original.", e);
+  }
+
   const formData =
     new FormData();
 
   formData.append(
     "file",
-    file,
+    uploadFile,
   );
 
   formData.append(

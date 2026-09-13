@@ -38,3 +38,22 @@ export function createAuthReturnUrl(
 
   return returnUrl;
 }
+
+export function getEffectiveAppUrl(request: { nextUrl: URL }): string {
+  // If accessed via localhost or 127.0.0.1, always preserve localhost origin & port
+  if (
+    request.nextUrl.hostname === "localhost" ||
+    request.nextUrl.hostname === "127.0.0.1"
+  ) {
+    return request.nextUrl.origin;
+  }
+
+  const configured =
+    process.env.ADMIN_APP_URL || process.env.APP_URL;
+
+  if (configured && process.env.NODE_ENV !== "development") {
+    return configured;
+  }
+
+  return request.nextUrl.origin;
+}

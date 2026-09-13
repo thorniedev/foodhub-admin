@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { getEffectiveAppUrl } from "@/src/lib/authRedirect";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -17,11 +19,7 @@ export async function GET(request: NextRequest) {
     process.env.KEYCLOAK_CLIENT_ID ??
     process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID;
 
-  const configuredAppUrl = process.env.ADMIN_APP_URL ?? request.nextUrl.origin;
-  const appUrl =
-    process.env.NODE_ENV === "development"
-      ? request.nextUrl.origin
-      : configuredAppUrl;
+  const appUrl = getEffectiveAppUrl(request);
 
   const idToken = request.cookies.get("foodhub_id_token")?.value;
 

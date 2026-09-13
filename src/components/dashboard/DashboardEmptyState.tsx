@@ -22,12 +22,12 @@ export default function DashboardEmptyState({
         compact ? "py-8" : "py-14"
       }`}
     >
-      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-gray-400">
+      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
         {icon ?? <Inbox size={22} aria-hidden="true" />}
       </span>
 
-      <p className="text-2xl font-medium text-gray-800">{title}</p>
-      <p className="max-w-md text-lg font-normal text-gray-500">{description}</p>
+      <p className="text-sm font-semibold text-foreground">{title}</p>
+      <p className="max-w-md text-xs text-muted-foreground">{description}</p>
 
       {action && <div className="mt-2">{action}</div>}
     </div>

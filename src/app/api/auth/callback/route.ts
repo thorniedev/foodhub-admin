@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import {
   createAuthReturnUrl,
+  getEffectiveAppUrl,
   getSafeAuthReturnPath,
 } from "@/src/lib/authRedirect";
 
@@ -221,11 +222,7 @@ export async function GET(request: NextRequest) {
     process.env.KEYCLOAK_CLIENT_ID ??
     process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID;
   const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET;
-  const configuredAppUrl = process.env.ADMIN_APP_URL ?? request.nextUrl.origin;
-  const appUrl =
-    process.env.NODE_ENV === "development"
-      ? request.nextUrl.origin
-      : configuredAppUrl;
+  const appUrl = getEffectiveAppUrl(request);
 
   if (!keycloakUrl || !realm || !clientId || !clientSecret) {
     console.error("Missing callback configuration:", {

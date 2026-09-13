@@ -7,7 +7,9 @@ export function Skeleton({
   return (
     <div
       aria-hidden="true"
-      className={cn("animate-pulse rounded-xl bg-gray-200/80", className)}
+      // `bg-gray-200` was hardcoded, so every skeleton stayed light grey on a
+      // dark background. `bg-muted` follows the theme.
+      className={cn("animate-pulse rounded-lg bg-muted", className)}
       {...props}
     />
   );

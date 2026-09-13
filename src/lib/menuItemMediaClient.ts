@@ -3,6 +3,8 @@ export type MenuItemMediaPurpose =
   | "MENU_ITEM_PRIMARY"
   | "MENU_ITEM_GALLERY";
 
+import { convertToWebP } from "@/src/lib/image-utils";
+
 export interface UploadedMedia {
   uuid: string;
   [key: string]: unknown;
@@ -53,8 +55,15 @@ export async function uploadMenuItemMediaFile(
     throw new Error("Image must be 10 MB or smaller.");
   }
 
+  let uploadFile = file;
+  try {
+    uploadFile = await convertToWebP(file);
+  } catch (e) {
+    console.warn("Failed to convert image to WebP client-side, uploading original.", e);
+  }
+
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("file", uploadFile);
 
   const response = await fetch(
     `/api/media/upload?purpose=${encodeURIComponent(purpose)}`,

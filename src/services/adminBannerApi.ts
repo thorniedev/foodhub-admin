@@ -35,14 +35,16 @@ export function resolveImageUrl(
   return trimmed;
 }
 
+import { convertToWebP } from "@/src/lib/image-utils";
+
 /**
  * Spring Boot @RequestPart("request") requires the JSON part to be explicitly typed as application/json.
  * Construct FormData with JSON Blob and binary file part.
  */
-export function buildBannerFormData(
+export async function buildBannerFormData(
   payload: CreateBannerPayload | UpdateBannerPayload,
   imageFile?: File | null,
-): FormData {
+): Promise<FormData> {
   const formData = new FormData();
   const jsonBlob = new Blob([JSON.stringify(payload)], {
     type: "application/json",
@@ -50,7 +52,13 @@ export function buildBannerFormData(
   formData.append("request", jsonBlob, "request.json");
 
   if (imageFile) {
-    formData.append("image", imageFile);
+    let uploadFile = imageFile;
+    try {
+      uploadFile = await convertToWebP(imageFile);
+    } catch (e) {
+      console.warn("Failed to convert banner to WebP, uploading original", e);
+    }
+    formData.append("image", uploadFile);
   }
 
   return formData;
@@ -181,7 +189,7 @@ export const adminBannerApi = {
     imageFile: File,
     authToken?: string,
   ): Promise<AdminBannerResponse> {
-    const formData = buildBannerFormData(payload, imageFile);
+    const formData = await buildBannerFormData(payload, imageFile);
     const headers: HeadersInit = {};
     if (authToken) {
       headers["Authorization"] = `Bearer ${authToken}`;
@@ -207,7 +215,7 @@ export const adminBannerApi = {
     imageFile?: File | null,
     authToken?: string,
   ): Promise<AdminBannerResponse> {
-    const formData = buildBannerFormData(payload, imageFile);
+    const formData = await buildBannerFormData(payload, imageFile);
     const headers: HeadersInit = {};
     if (authToken) {
       headers["Authorization"] = `Bearer ${authToken}`;

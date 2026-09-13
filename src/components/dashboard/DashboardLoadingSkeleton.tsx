@@ -6,7 +6,7 @@ export function KpiGridSkeleton({ cards = 8 }: { cards?: number }) {
       {Array.from({ length: cards }).map((_, index) => (
         <div
           key={index}
-          className="rounded-2xl border border-gray-200 bg-white p-5"
+          className="rounded-xl border border-border/70 bg-card p-5"
         >
           <Skeleton className="h-5 w-28" />
           <Skeleton className="mt-4 h-8 w-24" />
@@ -37,23 +37,23 @@ export default function DashboardLoadingSkeleton() {
     <div className="space-y-5" aria-busy="true" aria-live="polite">
       <span className="sr-only">កំពុងផ្ទុកទិន្នន័យវិភាគ</span>
 
-      <Skeleton className="h-28 w-full rounded-3xl" />
-      <Skeleton className="h-32 w-full rounded-2xl" />
+      <Skeleton className="h-28 w-full rounded-xl" />
+      <Skeleton className="h-32 w-full rounded-xl" />
 
       <KpiGridSkeleton />
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 xl:col-span-2">
+        <div className="rounded-xl border border-border/70 bg-card p-5 xl:col-span-2">
           <Skeleton className="h-5 w-40" />
           <ChartSkeleton height={300} />
         </div>
-        <div className="rounded-2xl border border-gray-200 bg-white p-5">
+        <div className="rounded-xl border border-border/70 bg-card p-5">
           <Skeleton className="h-5 w-32" />
           <ChartSkeleton height={300} />
         </div>
       </div>
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-5">
+      <div className="rounded-xl border border-border/70 bg-card p-5">
         <TableSkeleton />
       </div>
     </div>

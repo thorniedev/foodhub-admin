@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
+    "dev:local-api": "BACKEND_API_URL=http://localhost:7070/api/v1 next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "eslint",

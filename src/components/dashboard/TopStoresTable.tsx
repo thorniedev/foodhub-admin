@@ -116,7 +116,7 @@ export default function TopStoresTable({
           return (
             <span
               className={
-                value > 0 ? "font-semibold text-amber-700" : "text-gray-500"
+                value > 0 ? "font-semibold text-amber-700" : "text-muted-foreground"
               }
             >
               {formatCount(value)}

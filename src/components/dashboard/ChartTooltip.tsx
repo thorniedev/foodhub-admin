@@ -25,31 +25,31 @@ export default function ChartTooltip({
   if (rows.length === 0) return null;
 
   return (
-    <div className="min-w-64 rounded-3xl border border-gray-100 bg-white/95 p-4 shadow-xl backdrop-blur-sm">
-      <p className="text-xl font-medium text-gray-800">{title}</p>
+    <div className="min-w-56 rounded-xl border border-border/70 bg-card/95 p-3 shadow-lg backdrop-blur-sm">
+      <p className="text-xs font-semibold text-foreground">{title}</p>
 
       <ul className="mt-2 space-y-1.5">
         {rows.map((row) => (
           <li
             key={row.key}
-            className="flex items-center justify-between gap-4 text-lg font-normal"
+            className="flex items-center justify-between gap-4 text-xs"
           >
-            <span className="flex items-center gap-2 text-gray-600">
+            <span className="flex items-center gap-2 text-muted-foreground">
               <span
                 aria-hidden="true"
-                className="h-3 w-3 shrink-0 rounded-full"
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ backgroundColor: row.color }}
               />
               {row.label}
             </span>
-            <span className="font-medium text-gray-800 tabular-nums">
+            <span className="font-medium text-foreground tabular-nums">
               {row.value}
             </span>
           </li>
         ))}
       </ul>
 
-      {footer && <div className="mt-2 text-lg font-normal text-gray-500">{footer}</div>}
+      {footer && <div className="mt-2 text-xs text-muted-foreground">{footer}</div>}
     </div>
   );
 }

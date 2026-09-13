@@ -9,8 +9,8 @@ import {
   MapPin,
   RotateCcw,
   Save,
+  Settings as SettingsIcon,
   Store,
-  X,
 } from "lucide-react";
 
 import {
@@ -19,9 +19,23 @@ import {
   useUpdateSystemSettingMutation,
 } from "@/src/app/store/systemSettingApi";
 
+import { Button } from "@/src/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import { Input } from "@/src/components/ui/input";
+import { Switch } from "@/src/components/ui/switch";
+import { Badge } from "@/src/components/ui/badge";
+import { Skeleton } from "@/src/components/ui/skeleton";
+
 import { getApiErrorMessage, type ApiMessage } from "@/src/types/safetyResource";
 
 import AiProviderKeyManager from "./AiProviderKeyManager";
+import SettingsMessageBanner from "./SettingsMessageBanner";
 
 import type {
   SystemSetting,
@@ -102,13 +116,6 @@ function formatDateTime(value: string | null): string {
   }
 }
 
-function formatDisplayValue(setting: Pick<SystemSetting, "valueType" | "value">, raw: string): string {
-  if (setting.valueType === "BOOLEAN") {
-    return raw === "true" ? "បើក (true)" : "បិទ (false)";
-  }
-  return raw;
-}
-
 /* =========================================================
    SETTING ROW
 ========================================================= */
@@ -147,21 +154,26 @@ function SettingRow({
   };
 
   return (
-    <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 py-3.5 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-medium text-gray-800">{label}</span>
+          <span className="text-[0.8125rem] font-medium text-foreground">{label}</span>
           {setting.overridden && (
-            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-600">
+            <Badge tone="amber" size="sm">
               កំពុងប្តូរពីលំនាំដើម
-            </span>
+            </Badge>
           )}
         </div>
-        <p className="mt-0.5 text-sm text-gray-500">{setting.description}</p>
-        <p className="mt-1 text-xs text-gray-400">
-          លំនាំដើម: {formatDisplayValue(setting, setting.defaultValue)}
+        <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+          {setting.description}
+        </p>
+        <p className="mt-1 text-[0.6875rem] text-muted-foreground/80 tabular-nums">
+          លំនាំដើម: {setting.defaultValue}
           {setting.minValue !== null && setting.maxValue !== null && (
-            <> &middot; ដែនកំណត់: {setting.minValue} – {setting.maxValue}</>
+            <>
+              {" "}
+              &middot; ដែនកំណត់: {setting.minValue}–{setting.maxValue}
+            </>
           )}
           {setting.overridden && (
             <> &middot; កែប្រែចុងក្រោយ: {formatDateTime(setting.updatedAt)}</>
@@ -171,53 +183,85 @@ function SettingRow({
 
       <div className="flex shrink-0 items-center gap-2">
         {setting.valueType === "BOOLEAN" ? (
-          <label className="flex items-center gap-2 text-sm text-gray-600">
-            <input
-              type="checkbox"
+          <label className="flex items-center gap-2 text-xs text-foreground">
+            <Switch
               checked={draftValue === "true"}
-              onChange={(event) => setDraftValue(event.target.checked ? "true" : "false")}
+              onCheckedChange={(checked) => setDraftValue(checked ? "true" : "false")}
               aria-label={label}
-              className="h-4 w-4 rounded border-gray-300 text-[#136C34] focus:ring-[#136C34]"
             />
-            {draftValue === "true" ? "បើក" : "បិទ"}
+            <span className="w-8 tabular-nums">{draftValue === "true" ? "បើក" : "បិទ"}</span>
           </label>
         ) : (
-          <input
+          <Input
             type={setting.valueType === "STRING" ? "text" : "number"}
             inputMode={setting.valueType === "DECIMAL" ? "decimal" : undefined}
-            step={setting.valueType === "DECIMAL" ? "any" : setting.valueType === "INTEGER" ? "1" : undefined}
+            step={
+              setting.valueType === "DECIMAL"
+                ? "any"
+                : setting.valueType === "INTEGER"
+                  ? "1"
+                  : undefined
+            }
             min={setting.minValue ?? undefined}
             max={setting.maxValue ?? undefined}
             value={draftValue}
             onChange={(event) => setDraftValue(event.target.value)}
-            className="w-36 rounded-xl border border-gray-200 px-3 py-1.5 text-sm focus:border-[#136C34] focus:outline-none"
+            className="w-36 tabular-nums"
           />
         )}
 
-        <button
-          type="button"
-          disabled={busy || !dirty}
-          onClick={handleSave}
-          title="រក្សាទុក"
-          className="flex items-center gap-1 rounded-full bg-[#136C34] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#0f5828] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Save size={13} />
+        <Button type="button" size="sm" disabled={busy || !dirty} onClick={handleSave}>
+          <Save size={13} aria-hidden="true" />
           {isSaving ? "កំពុងរក្សាទុក..." : "រក្សាទុក"}
-        </button>
+        </Button>
 
         {setting.overridden && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-sm"
             disabled={busy}
             onClick={handleReset}
             title="ត្រឡប់ទៅលំនាំដើម"
-            className="rounded-full border border-gray-200 p-1.5 text-gray-400 transition hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label={`ត្រឡប់ "${label}" ទៅលំនាំដើម`}
+            className="hover:text-amber-600"
           >
-            <RotateCcw size={14} />
-          </button>
+            <RotateCcw size={14} aria-hidden="true" />
+          </Button>
         )}
       </div>
     </div>
+  );
+}
+
+/* =========================================================
+   LOADING / ERROR
+========================================================= */
+
+function CategorySkeleton() {
+  return (
+    <Card className="gap-0">
+      <CardHeader className="border-b">
+        <div className="flex items-center gap-3">
+          <Skeleton className="size-9 rounded-lg" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-3 w-56" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="divide-y pt-4">
+        {[0, 1].map((row) => (
+          <div key={row} className="flex items-center justify-between gap-4 py-3.5 first:pt-0">
+            <div className="space-y-1.5">
+              <Skeleton className="h-3.5 w-44" />
+              <Skeleton className="h-3 w-64" />
+            </div>
+            <Skeleton className="h-9 w-36 rounded-lg" />
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -232,45 +276,52 @@ export default function SystemSettingsManager() {
   const settings = data ?? [];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-800">ការកំណត់ប្រព័ន្ធ</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          ប្តូរតម្លៃទាំងនេះមានប្រសិទ្ធភាពភ្លាមៗសម្រាប់ការកំណត់ភាគច្រើន ដោយមិនចាំបាច់ដាក់ម៉ាស៊ីនមេឱ្យដំណើរការឡើងវិញឡើយ
-          (លើកលែងតែមានចែងផ្សេងក្នុងការពិពណ៌នា)។
-        </p>
-      </div>
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 pb-12">
+      <header className="flex items-start gap-3">
+        <span
+          aria-hidden="true"
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700 dark:bg-primary-950/60 dark:text-primary-400"
+        >
+          <SettingsIcon size={18} />
+        </span>
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+            ការកំណត់ប្រព័ន្ធ
+          </h1>
+          <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+            ប្តូរតម្លៃទាំងនេះមានប្រសិទ្ធភាពភ្លាមៗសម្រាប់ការកំណត់ភាគច្រើន ដោយមិនចាំបាច់ដាក់ម៉ាស៊ីនមេឱ្យដំណើរការឡើងវិញឡើយ
+            (លើកលែងតែមានចែងផ្សេងក្នុងការពិពណ៌នា)។
+          </p>
+        </div>
+      </header>
 
       <AiProviderKeyManager />
 
       {message && (
-        <div
-          className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm ${
-            message.type === "success"
-              ? "bg-emerald-50 text-[#136C34]"
-              : "bg-red-50 text-red-600"
-          }`}
-        >
-          <span>{message.text}</span>
-          <button type="button" onClick={() => setMessage(null)}>
-            <X size={14} />
-          </button>
-        </div>
+        <SettingsMessageBanner message={message} onDismiss={() => setMessage(null)} />
       )}
 
       {isLoading && (
-        <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center text-sm text-gray-400 shadow-sm">
-          កំពុងផ្ទុកទិន្នន័យ...
+        <div className="flex flex-col gap-4">
+          {CATEGORY_ORDER.map((category) => (
+            <CategorySkeleton key={category} />
+          ))}
         </div>
       )}
 
       {!isLoading && error && (
-        <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center text-sm text-red-500 shadow-sm">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card className="items-center gap-2 border-red-200 bg-red-50/60 p-8 text-center dark:border-red-900/60 dark:bg-red-950/30">
+          <p className="text-sm font-semibold text-red-900 dark:text-red-200">
+            មិនអាចផ្ទុកការកំណត់ប្រព័ន្ធបានទេ
+          </p>
+          <p className="text-xs text-red-800/90 dark:text-red-300/90">
+            {getApiErrorMessage(error)}
+          </p>
+        </Card>
       )}
 
-      {!isLoading && !error &&
+      {!isLoading &&
+        !error &&
         CATEGORY_ORDER.map((category) => {
           const categorySettings = settings.filter((s) => s.category === category);
           if (categorySettings.length === 0) return null;
@@ -278,32 +329,30 @@ export default function SystemSettingsManager() {
           const Icon = CATEGORY_ICONS[category];
 
           return (
-            <div
-              key={category}
-              className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-[#136C34]">
-                  <Icon size={18} />
+            <Card key={category} className="gap-0 overflow-hidden">
+              <CardHeader className="border-b">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700 dark:bg-primary-950/60 dark:text-primary-400"
+                  >
+                    <Icon size={17} />
+                  </span>
+                  <div className="min-w-0">
+                    <CardTitle>{CATEGORY_LABELS[category]}</CardTitle>
+                    <CardDescription className="mt-0.5">
+                      {CATEGORY_SUBTITLES[category]}
+                    </CardDescription>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    {CATEGORY_LABELS[category]}
-                  </h2>
-                  <p className="text-sm text-gray-500">{CATEGORY_SUBTITLES[category]}</p>
-                </div>
-              </div>
+              </CardHeader>
 
-              <div className="mt-2 divide-y divide-gray-50">
+              <CardContent className="divide-y pt-1">
                 {categorySettings.map((setting) => (
-                  <SettingRow
-                    key={`${setting.key}|${setting.value}`}
-                    setting={setting}
-                    onMessage={setMessage}
-                  />
+                  <SettingRow key={`${setting.key}|${setting.value}`} setting={setting} onMessage={setMessage} />
                 ))}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           );
         })}
     </div>

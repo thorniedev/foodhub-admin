@@ -40,7 +40,7 @@ export default function InfoTooltip({
         onKeyDown={(event) => {
           if (event.key === "Escape") setOpen(false);
         }}
-        className="rounded-full p-0.5 text-gray-400 transition hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1"
+        className="rounded-full p-0.5 text-muted-foreground transition hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1"
       >
         <Info size={15} aria-hidden="true" />
       </button>

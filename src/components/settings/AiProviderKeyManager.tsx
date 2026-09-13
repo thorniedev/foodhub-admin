@@ -12,7 +12,14 @@ import {
   useUpdateAiProviderKeyMutation,
 } from "@/src/app/store/aiProviderKeyApi";
 
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { Input } from "@/src/components/ui/input";
+
 import { getApiErrorMessage, type ApiMessage } from "@/src/types/safetyResource";
+
+import SettingsMessageBanner from "./SettingsMessageBanner";
 
 import type { AiProvider, AiProviderKey } from "@/src/types/ai-provider-key";
 
@@ -26,6 +33,9 @@ const PROVIDER_LABELS: Record<AiProvider, string> = {
 };
 
 const PROVIDERS: AiProvider[] = ["GOOGLE_GENAI", "OPENAI"];
+
+const selectClassName =
+  "h-9 w-full cursor-pointer rounded-lg border bg-background px-3 text-xs text-foreground outline-none transition hover:border-primary/40 focus:border-primary focus:ring-2 focus:ring-ring/25";
 
 /* =========================================================
    HELPERS
@@ -90,29 +100,24 @@ function AddKeyForm({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="grid gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:grid-cols-2"
-    >
+    <form onSubmit={handleSubmit} className="grid gap-4 border-b p-5 sm:grid-cols-2">
       <div className="sm:col-span-2">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800">
-          <Plus size={18} className="text-[#136C34]" />
+        <h3 className="flex items-center gap-2 text-[0.8125rem] font-semibold text-foreground">
+          <Plus size={15} aria-hidden="true" className="text-primary" />
           បន្ថែមកូនសោ API ថ្មី
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">
+        </h3>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
           នៅពេលកូនសោបច្ចុប្បន្នអស់សិទ្ធិប្រើប្រាស់ (quota) សូមបន្ថែមកូនសោថ្មីនៅទីនេះ ហើយប្រព័ន្ធនឹងប្តូរទៅប្រើវាភ្លាមៗ
           ដោយមិនចាំបាច់ដាក់ឱ្យដំណើរការឡើងវិញទេ។
         </p>
       </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-600">
-          ក្រុមហ៊ុន AI
-        </label>
+      <label className="block space-y-1.5">
+        <span className="text-[0.6875rem] font-medium text-muted-foreground">ក្រុមហ៊ុន AI</span>
         <select
           value={provider}
           onChange={(event) => setProvider(event.target.value as AiProvider)}
-          className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-[#136C34] focus:outline-none"
+          className={selectClassName}
         >
           {PROVIDERS.map((value) => (
             <option key={value} value={value}>
@@ -120,54 +125,45 @@ function AddKeyForm({
             </option>
           ))}
         </select>
-      </div>
+      </label>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-600">
-          ឈ្មោះកូនសោ
-        </label>
-        <input
+      <label className="block space-y-1.5">
+        <span className="text-[0.6875rem] font-medium text-muted-foreground">ឈ្មោះកូនសោ</span>
+        <Input
           type="text"
           value={label}
           onChange={(event) => setLabel(event.target.value)}
           placeholder="ឧ. Gemini បម្រុងទុក #2"
-          className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-[#136C34] focus:outline-none"
         />
-      </div>
+      </label>
 
-      <div className="sm:col-span-2">
-        <label className="mb-1 block text-sm font-medium text-gray-600">
-          កូនសោ API
-        </label>
-        <input
+      <label className="block space-y-1.5 sm:col-span-2">
+        <span className="text-[0.6875rem] font-medium text-muted-foreground">កូនសោ API</span>
+        <Input
           type="password"
           autoComplete="off"
           value={apiKey}
           onChange={(event) => setApiKey(event.target.value)}
           placeholder="បិទភ្ជាប់កូនសោ API នៅទីនេះ"
-          className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-[#136C34] focus:outline-none"
+          className="font-mono"
         />
-      </div>
+      </label>
 
-      <label className="flex items-center gap-2 text-sm text-gray-600 sm:col-span-2">
+      <label className="flex items-center gap-2 text-xs text-muted-foreground sm:col-span-2">
         <input
           type="checkbox"
           checked={activateNow}
           onChange={(event) => setActivateNow(event.target.checked)}
-          className="h-4 w-4 rounded border-gray-300 text-[#136C34] focus:ring-[#136C34]"
+          className="size-3.5 rounded border-input accent-primary"
         />
         បើកប្រើកូនសោនេះភ្លាមៗ (ជំនួសកូនសោបច្ចុប្បន្នរបស់ {PROVIDER_LABELS[provider]})
       </label>
 
       <div className="sm:col-span-2">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="flex items-center gap-2 rounded-full bg-[#136C34] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0f5828] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <KeyRound size={16} />
+        <Button type="submit" disabled={isLoading}>
+          <KeyRound size={14} aria-hidden="true" />
           {isLoading ? "កំពុងរក្សាទុក..." : "រក្សាទុកកូនសោ"}
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -184,8 +180,7 @@ function KeyRow({
   aiKey: AiProviderKey;
   onMessage: (message: ApiMessage) => void;
 }) {
-  const [activateKey, { isLoading: isActivating }] =
-    useActivateAiProviderKeyMutation();
+  const [activateKey, { isLoading: isActivating }] = useActivateAiProviderKeyMutation();
   const [updateKey, { isLoading: isUpdating }] = useUpdateAiProviderKeyMutation();
   const [deleteKey, { isLoading: isDeleting }] = useDeleteAiProviderKeyMutation();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -203,15 +198,10 @@ function KeyRow({
 
   const handleToggleEnabled = async () => {
     try {
-      await updateKey({
-        uuid: aiKey.uuid,
-        body: { enabled: !aiKey.enabled },
-      }).unwrap();
+      await updateKey({ uuid: aiKey.uuid, body: { enabled: !aiKey.enabled } }).unwrap();
       onMessage({
         type: "success",
-        text: aiKey.enabled
-          ? `បានបិទកូនសោ "${aiKey.label}"`
-          : `បានបើកកូនសោ "${aiKey.label}"`,
+        text: aiKey.enabled ? `បានបិទកូនសោ "${aiKey.label}"` : `បានបើកកូនសោ "${aiKey.label}"`,
       });
     } catch (error) {
       onMessage({ type: "error", text: getApiErrorMessage(error) });
@@ -230,97 +220,98 @@ function KeyRow({
   };
 
   return (
-    <tr className="border-b border-gray-50 last:border-0">
+    <tr className="border-b last:border-0 hover:bg-muted/40">
       <td className="px-4 py-3">
-        <div className="font-medium text-gray-800">{aiKey.label}</div>
-        <div className="text-xs text-gray-400">{PROVIDER_LABELS[aiKey.provider]}</div>
+        <div className="font-medium text-foreground">{aiKey.label}</div>
+        <div className="text-[0.6875rem] text-muted-foreground">
+          {PROVIDER_LABELS[aiKey.provider]}
+        </div>
       </td>
-      <td className="px-4 py-3 font-mono text-sm text-gray-600">
-        {aiKey.maskedKey}
-      </td>
+      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{aiKey.maskedKey}</td>
       <td className="px-4 py-3">
         {aiKey.active ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-[#136C34]">
-            <Check size={12} /> កំពុងប្រើ
-          </span>
+          <Badge tone="green">
+            <Check size={11} aria-hidden="true" /> កំពុងប្រើ
+          </Badge>
         ) : aiKey.enabled ? (
-          <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">
-            ត្រៀមរួចរាល់
-          </span>
+          <Badge tone="neutral">ត្រៀមរួចរាល់</Badge>
         ) : (
-          <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-400">
+          <Badge tone="neutral" className="opacity-70">
             បានបិទ
-          </span>
+          </Badge>
         )}
       </td>
-      <td className="px-4 py-3 text-sm text-gray-500">
+      <td className="px-4 py-3 text-xs text-muted-foreground tabular-nums">
         {formatDateTime(aiKey.lastUsedAt)}
       </td>
-      <td className="px-4 py-3 text-sm">
+      <td className="px-4 py-3 text-xs">
         {aiKey.lastErrorAt ? (
           <span
-            className="inline-flex items-center gap-1 text-red-600"
+            className="inline-flex items-center gap-1 text-red-600 dark:text-red-400"
             title={aiKey.lastErrorMessage ?? undefined}
           >
-            <AlertTriangle size={14} />
-            {formatDateTime(aiKey.lastErrorAt)}
+            <AlertTriangle size={13} aria-hidden="true" />
+            <span className="tabular-nums">{formatDateTime(aiKey.lastErrorAt)}</span>
           </span>
         ) : (
-          <span className="text-gray-300">—</span>
+          <span className="text-muted-foreground/50">—</span>
         )}
       </td>
       <td className="px-4 py-3">
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-1.5">
           {!aiKey.active && (
-            <button
+            <Button
               type="button"
+              variant="subtle"
+              size="sm"
               disabled={busy || !aiKey.enabled}
               onClick={handleActivate}
               title={aiKey.enabled ? "បើកប្រើកូនសោនេះ" : "សូមបើកកូនសោសិន"}
-              className="rounded-full bg-[#136C34] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#0f5828] disabled:cursor-not-allowed disabled:opacity-50"
             >
               បើកប្រើ
-            </button>
+            </Button>
           )}
 
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="icon-sm"
             disabled={busy}
             onClick={handleToggleEnabled}
             title={aiKey.enabled ? "បិទកូនសោនេះ" : "បើកកូនសោនេះ"}
-            className="rounded-full border border-gray-200 p-1.5 text-gray-500 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label={aiKey.enabled ? `បិទកូនសោ ${aiKey.label}` : `បើកកូនសោ ${aiKey.label}`}
           >
-            <Power size={14} />
-          </button>
+            <Power size={13} aria-hidden="true" />
+          </Button>
 
           {confirmingDelete ? (
             <div className="flex items-center gap-1">
-              <button
-                type="button"
-                disabled={busy}
-                onClick={handleDelete}
-                className="rounded-full bg-red-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
-              >
+              <Button type="button" variant="destructive" size="sm" disabled={busy} onClick={handleDelete}>
                 លុបចោល
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="outline"
+                size="icon-sm"
                 onClick={() => setConfirmingDelete(false)}
-                className="rounded-full border border-gray-200 p-1.5 text-gray-400 hover:bg-gray-50"
+                aria-label="បោះបង់ការលុប"
               >
-                <X size={14} />
-              </button>
+                <X size={13} aria-hidden="true" />
+              </Button>
             </div>
           ) : (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon-sm"
               disabled={busy}
               onClick={() => setConfirmingDelete(true)}
               title="លុបកូនសោនេះ"
-              className="rounded-full border border-gray-200 p-1.5 text-gray-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label={`លុបកូនសោ ${aiKey.label}`}
+              className="hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-900 dark:hover:bg-red-950/40"
             >
-              <Trash2 size={14} />
-            </button>
+              <Trash2 size={13} aria-hidden="true" />
+            </Button>
           )}
         </div>
       </td>
@@ -339,34 +330,28 @@ export default function AiProviderKeyManager() {
   const keys = data ?? [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-[#136C34]">
-          <KeyRound size={18} />
+    <Card className="gap-0 overflow-hidden">
+      <CardHeader className="border-b">
+        <div className="flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700 dark:bg-primary-950/60 dark:text-primary-400"
+          >
+            <KeyRound size={17} />
+          </span>
+          <div>
+            <CardTitle>កូនសោ API របស់ AI</CardTitle>
+            <CardDescription className="mt-0.5">
+              គ្រប់គ្រងកូនសោ API សម្រាប់ការណែនាំដោយ AI។ កូនសោដែល &quot;កំពុងប្រើ&quot; ត្រូវបានប្រើភ្លាមៗ
+              ដោយមិនចាំបាច់ដាក់ម៉ាស៊ីនមេឱ្យដំណើរការឡើងវិញឡើយ។
+            </CardDescription>
+          </div>
         </div>
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800">
-            កូនសោ API របស់ AI
-          </h2>
-          <p className="text-sm text-gray-500">
-            គ្រប់គ្រងកូនសោ API សម្រាប់ការណែនាំដោយ AI។ កូនសោដែល &quot;កំពុងប្រើ&quot;
-            ត្រូវបានប្រើភ្លាមៗ ដោយមិនចាំបាច់ដាក់ម៉ាស៊ីនមេឱ្យដំណើរការឡើងវិញឡើយ។
-          </p>
-        </div>
-      </div>
+      </CardHeader>
 
       {message && (
-        <div
-          className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm ${
-            message.type === "success"
-              ? "bg-emerald-50 text-[#136C34]"
-              : "bg-red-50 text-red-600"
-          }`}
-        >
-          <span>{message.text}</span>
-          <button type="button" onClick={() => setMessage(null)}>
-            <X size={14} />
-          </button>
+        <div className="border-b p-4">
+          <SettingsMessageBanner message={message} onDismiss={() => setMessage(null)} />
         </div>
       )}
 
@@ -375,23 +360,33 @@ export default function AiProviderKeyManager() {
         onError={(text) => setMessage({ type: "error", text })}
       />
 
-      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-left">
-            <thead className="border-b border-gray-100 bg-gray-50/60 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <thead className="border-b bg-muted/60">
               <tr>
-                <th className="px-4 py-3">ឈ្មោះ</th>
-                <th className="px-4 py-3">កូនសោ</th>
-                <th className="px-4 py-3">ស្ថានភាព</th>
-                <th className="px-4 py-3">ប្រើចុងក្រោយ</th>
-                <th className="px-4 py-3">កំហុសចុងក្រោយ</th>
-                <th className="px-4 py-3" />
+                <th className="px-4 py-2.5 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground">
+                  ឈ្មោះ
+                </th>
+                <th className="px-4 py-2.5 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground">
+                  កូនសោ
+                </th>
+                <th className="px-4 py-2.5 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground">
+                  ស្ថានភាព
+                </th>
+                <th className="px-4 py-2.5 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground">
+                  ប្រើចុងក្រោយ
+                </th>
+                <th className="px-4 py-2.5 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground">
+                  កំហុសចុងក្រោយ
+                </th>
+                <th className="px-4 py-2.5" />
               </tr>
             </thead>
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-xs text-muted-foreground">
                     កំពុងផ្ទុកទិន្នន័យ...
                   </td>
                 </tr>
@@ -399,7 +394,7 @@ export default function AiProviderKeyManager() {
 
               {!isLoading && error && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-red-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-xs text-red-600 dark:text-red-400">
                     {getApiErrorMessage(error)}
                   </td>
                 </tr>
@@ -407,7 +402,7 @@ export default function AiProviderKeyManager() {
 
               {!isLoading && !error && keys.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-xs text-muted-foreground">
                     មិនទាន់មានកូនសោ API ត្រូវបានបន្ថែមនៅឡើយទេ។
                   </td>
                 </tr>
@@ -419,7 +414,7 @@ export default function AiProviderKeyManager() {
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -3,6 +3,7 @@ import type {
   MediaFileResponse,
   StoreMediaPurpose,
 } from "@/src/types/media";
+import { convertToWebP } from "@/src/lib/image-utils";
 
 async function readError(response: Response): Promise<string> {
   const text = await response.text();
@@ -57,9 +58,16 @@ export async function uploadStoreMediaFile(
   file: File,
   purpose: StoreMediaPurpose,
 ): Promise<MediaFileResponse> {
+  let uploadFile = file;
+  try {
+    uploadFile = await convertToWebP(file);
+  } catch (e) {
+    console.warn("Failed to convert image to WebP client-side, uploading original.", e);
+  }
+
   const formData = new FormData();
 
-  formData.append("file", file);
+  formData.append("file", uploadFile);
   formData.append("purpose", purpose);
 
   const response = await fetch("/api/media/upload", {
